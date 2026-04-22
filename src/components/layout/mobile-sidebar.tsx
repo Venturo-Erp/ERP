@@ -72,8 +72,6 @@ const menuItems: MenuItem[] = [
     icon: CheckSquare,
     requiredPermission: 'todos',
   },
-  // 行程管理已整合到旅遊團中，從團的視角操作
-  // { href: '/itinerary', label: '行程管理', icon: Flag, requiredPermission: 'itinerary' },
   { href: '/tours', label: COMP_LAYOUT_LABELS.旅遊團, icon: MapPin, requiredPermission: 'tours' },
   {
     href: '/orders',

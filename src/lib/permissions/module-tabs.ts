@@ -107,12 +107,6 @@ export const MODULES: ModuleDefinition[] = [
     ],
   },
   {
-    code: 'itinerary',
-    name: '行程管理',
-    description: '行程編輯與範本',
-    tabs: [],
-  },
-  {
     code: 'finance',
     name: '財務系統',
     description: '收款、請款、出納',

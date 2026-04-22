@@ -170,14 +170,6 @@ export const FEATURES: FeatureDefinition[] = [
     category: 'premium',
     routes: ['/customers', '/customers/companies', '/customer-groups'],
   },
-  // 行程管理已整合進 /tours/[code]?tab=itinerary、不再是獨立路由（2026-04-20）
-  // {
-  //   code: 'itinerary',
-  //   name: '行程管理',
-  //   description: '行程編輯器、行程範本',
-  //   category: 'premium',
-  //   routes: ['/itinerary', '/itinerary/new', '/itinerary/block-editor'],
-  // },
   // 報價單功能已整合到旅遊團管理中，不再獨立
   // {
   //   code: 'quotes',

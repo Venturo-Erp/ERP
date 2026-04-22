@@ -9,7 +9,7 @@ import { saveWidgetPreferences } from '@/features/dashboard/services/dashboard.s
 
 const STORAGE_KEY = 'homepage-widgets'
 const PREFERENCE_KEY = 'homepage-widgets-order'
-const DEFAULT_WIDGETS: WidgetType[] = ['calculator', 'currency']
+const DEFAULT_WIDGETS: WidgetType[] = ['clock-in', 'calculator', 'notes']
 
 export function useWidgets() {
   const [activeWidgets, setActiveWidgets] = useState<WidgetType[]>(DEFAULT_WIDGETS)

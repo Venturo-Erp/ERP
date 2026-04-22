@@ -1,0 +1,131 @@
+# 06 · Sprint Prioritizer
+
+## 身份宣告
+
+我是 Sprint Prioritizer。我不在意一個 pattern 有多優雅、我只問三件事：**不修會不會讓客戶資料炸、現在做會擋住幾條路、做完之後業務能不能一句話驗收**。看到架構師講「這是 SSOT 母 pattern」、我第一個反應不是鼓掌、是算：離 4/20 上線還有幾週、7 個紅 pattern 排進來這個是第幾個、William 只有週間白天做這件事、他能在哪個切點停下而不把產品弄成半殘。
+
+---
+
+## Pattern 清單（本次）
+
+- **P-ARCH-01**：FEATURES / MODULES 雙清單、無 SSOT registry 🔴
+- **P-ARCH-02**：權限雙層 AND（feature 閘 + JWT RBAC）散佈在消費端、無 `canAccess` 權威函式 🔴
+- **P-ARCH-03**：關 feature 不 cascade role 授權、重開自動復活 🟡
+- **P-ARCH-04**：JWT 是快照、permission 變更無失效機制 🟡
+- **P-ARCH-05**：Sidebar 裸路由導航、繞過 policy 🟢
+
+（依架構師分類、我後面只對 01/02/03 排程；04/05 屬於衍生補洞、跟層 1/2 綁。）
+
+---
+
+## 1. 分層判定
+
+| Pattern | Bucket | 理由 |
+|---|---|---|
+| P-ARCH-01（MODULE_REGISTRY） | **🟡 上線後短期（1 個月內）** | 不修**不會炸**客戶資料、admin 每次新模組只要記得兩本都改、產品能跑。但每次新路由都在累積雙本不同步的地雷、每一週債越深。上線**可接受帶著**、但必須寫進 1 個月內的修復承諾。 |
+| P-ARCH-02（policy.canAccessTab） | **🔴 上線前必改** | 雙邊 key 分隔符不一致（`.` vs `:`）已經是**潛在權限誤判 bug**、消費端任何一個忘記 AND 就是安全漏洞。上線後若發生「會計看到不該看的頁」、是客戶資料外洩等級。必改。 |
+| P-ARCH-03（DB cascade trigger） | **🟡 上線後短期** | 重開 feature 舊授權復活、William 在意、但不會炸資料、只會讓他一次性點一次「重勾」。可等 01 做完再補。 |
+
+**總結**：本次 pattern 的**實質紅色只有 P-ARCH-02**（決策函式缺失 + key 不一致）、其餘上線後可控。
+
+---
+
+## 2. 估時（層 1/2/3）
+
+| 層 | 時程 | 風險 | 依賴 | Revertable？ |
+|---|---|---|---|---|
+| **層 1** MODULE_REGISTRY + FEATURES/MODULES 降為 view | 1.5–2 人日（6–10h）| 中 | 無前置；但要先盤完所有消費端（hr/roles、sidebar、validate-login、所有 hooks 消費者）| ✅ 保留舊 API adapter、可 rollback commit |
+| **層 2** `canAccessTab` policy + key 統一 | 0.5–1 人日（3–5h）| 低 | 建議層 1 先做（否則 policy 內部還要 AND 兩本不同 shape）；**可不等**、直接用現有 FEATURES/MODULES 包一層也行 | ✅ 純新增函式、消費端逐一切換可分批 revert |
+| **層 3** DB trigger cascade + `features_owned_by()` SQL function | 0.5 人日（3–4h、含 safe-tenant-test）| 中 | **必須等層 1** 確定「feature 擁有哪些 module」的 registry 投影；否則 trigger 的語意沒有真相基礎 | ⚠️ DB migration、需要 down migration；會改真實 row 建議走 safe-tenant-test |
+
+**三層合計**：2.5–3.5 人日（含回歸測試、doc、ADR）。
+
+---
+
+## 3. 跟其他紅 pattern 的優先級排序
+
+既有 7 個紅 pattern（記憶檔列出）、加上本次新判紅的 P-ARCH-02，共 8 個。我的排序：
+
+| # | Pattern | 嚴重度理由 | 上線前必改？ |
+|---|---|---|---|
+| **1** | 🔴 admin 萬能通行證 | 權限模型根爛、不修 P-ARCH-02 的任何成果都被 admin bypass 繞過 | **必** |
+| **2** | 🔴 middleware 公開面太廣 | 未授權訪問、上線 day 1 就會被爬 | **必** |
+| **3** | 🔴 sync-employee 跨租戶綁帳號 | 跨租戶資料污染、最怕客戶抱怨「A 公司看到 B 公司員工」 | **必** |
+| **4** | 🔴 **P-ARCH-02**（本次、權限雙層散佈）| key 不一致 = 潛在誤判；但只要 admin 萬能先修（#1）、這個的爆炸面縮小 | **必**（緊跟 #1）|
+| **5** | 🔴 28 張 FORCE RLS 擋首頁 | 已知症狀明顯、修法明確（NO FORCE）、但工作量大 | **必** |
+| **6** | 🔴 delete-then-insert 破下游 | 資料完整性、但已發現的爆炸點可圈住；發生頻率中 | 盡量 |
+| **7** | 🟡 衍生狀態寫成 DB 欄位 | 結構債、不會炸、上線可帶 | 上線後 |
+| **8** | 🟡 單表 81 欄 | 結構債、慢性、上線可帶 | 上線後 |
+
+**P-ARCH-02 排第 4 的原因**：
+- 前置相依 #1 admin 萬能——admin 萬能沒修、你做 `canAccessTab` 也沒用（admin 繞過）
+- 前置相依 #2 middleware 公開面——middleware 沒收緊、前端 policy 擋不到後端 API
+- 不跟 #3 綁——sync-employee 是跨租戶資料污染、跟權限決策函式是兩條線
+
+**層 3 的前置**：本 pattern 內層 3 必須等層 1。跟其他 7 個紅 pattern **沒有**跨 pattern 的 DB trigger 前置關係。
+
+---
+
+## 4. 時程切分
+
+William 只剩不到 2 週到 4/20（已過、目前實際是 pre-launch cleanup 期間）、以「從今天起還有多少時間能投在這個 pattern」算：
+
+| 時間 | 能修到 |
+|---|---|
+| **1 週** | 層 2 only（3–5h）。Key 統一 `.`、建 `canAccessTab` policy、sidebar + hr/roles + auth-store 三個消費端切換。不動 registry、不動 DB。上線可接受的**最小安全切片**。 |
+| **2 週** | 層 2 + 層 1（合計 9–15h）。加 MODULE_REGISTRY、FEATURES/MODULES 降 view、保留 adapter。可進回歸。層 3 留著 |
+| **1 個月** | 層 1 + 層 2 + 層 3 + P-ARCH-04（JWT 失效機制 A 方案）。完整三層 + JWT 快照失效。P-ARCH-05 sidebar 清理一起帶過去。|
+| **不限時間** | 全套三層 + JWT B 方案（middleware 重查 + Redis 快取）+ 架構師建議的 Domain Modeler 幕僚介入、幫後續 AI 客服、OTA、會議助理這些新模組先畫 bounded context、避免孿生表再長。 |
+
+**我的推薦**：走 **2 週切點**。層 2 是安全紅線、層 1 是清債槓桿、層 3 可以上線後一個月內補（風險低、可獨立做）。
+
+---
+
+## 5. 業務話驗收準則
+
+候選評估：
+- 候選 A（關會計 5 分鐘）：太偏**運行時時序**、William 會不小心驗到快取、難驗
+- 候選 B（加新模組只改一個檔）：這是**層 1 SSOT 驗收**、但要等下次真的加模組、現在驗不了
+
+**我建議的驗收話術（2 句）**：
+
+1. **「我在租戶頁關掉『帳務』功能、我立刻重登、任何職務的會計頁面都看不到入口、也點不進去、不用動職務設定。」**
+   （驗層 2 policy 統一 + JWT 失效；重登破快照是今天能做到的最簡版、之後做 P-ARCH-04 就可以拿掉「立刻重登」四個字）
+
+2. **「我打開 MODULE_REGISTRY、只有這一份清單、租戶頁和職務頁的資料都從它長出來、找不到第二份 `features.ts` / `module-tabs.ts` 在平行維護。」**
+   （驗層 1 SSOT、他可以自己用搜尋驗、不用工程師示範）
+
+這兩句話同時答是、整個 pattern 收尾。
+
+---
+
+## 6. 跟 William 工作風格的對齊
+
+William：team 輪流不並行、日常一對一、慢慢做但不趕、單核心工作流（memory `feedback_empire_workflow.md`）。
+
+**建議：拆成 3 個 PR、分 3 次做、中間不強求連續**。
+
+| PR | 範圍 | 時長 | William 驗收點 |
+|---|---|---|---|
+| **PR-1** | 層 2：`canAccessTab` + key 統一 + 三消費端切換 | 半天 | 一句話驗：「關帳務、重登、會計頁進不去」 |
+| **PR-2** | 層 1：MODULE_REGISTRY + FEATURES/MODULES 降 view + adapter | 1 天 | 一句話驗：「搜尋只有一份 registry」 |
+| **PR-3** | 層 3：DB cascade trigger + `features_owned_by` + safe-tenant-test | 半天 | 一句話驗：「關 feature、role 授權自動清空、重開不復活」 |
+
+**不建議 bundled 一 PR 三層全做**，原因三個：
+1. **Revert 粒度壞**：DB trigger 跟代碼混在一個 PR、出事要回滾很痛
+2. **驗收時機錯**：William 一次看 3 張驗收清單、會失焦；分 3 次他能對每張說「對、這件事修好了」
+3. **前置依賴不同**：層 2 可獨立、層 1 要盤整個 codebase、層 3 要動 DB；三種「心智模式」強行同一個 session 切換、反而慢
+
+**混合建議**：PR-1 跟 PR-2 可以隔 2–3 天做（PR-1 先上、觀察一輪無異常再做 PR-2）。PR-3 放到層 1 穩定後、獨立開 safe-tenant-test session。
+
+---
+
+## 回傳摘要（< 200 字）
+
+本 pattern **只有 P-ARCH-02（權限雙層決策散佈 + key 不一致）是上線前紅線**、P-ARCH-01（MODULE_REGISTRY 缺失）是 1 個月內要還的債、P-ARCH-03（cascade trigger）可等層 1 做完再補。
+
+排序進 8 個紅 pattern：**第 4 位**、前置相依是 #1 admin 萬能 + #2 middleware 公開面（那兩個沒修、這個做了也被繞過）。
+
+時程建議走**2 週切點**：層 2 + 層 1 做完、層 3 留到上線後一個月內。**拆 3 個 PR 分 3 次做**、William 每 PR 一句話驗收、不 bundled。
+
+驗收話術兩句：「關帳務、重登、會計頁進不去」＋「只有一份 MODULE_REGISTRY、找不到第二份」。兩句都答是、整個 pattern 收尾。

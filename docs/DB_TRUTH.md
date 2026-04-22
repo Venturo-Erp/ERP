@@ -1,0 +1,16388 @@
+# Venturo DB 真相檔（DB_TRUTH.md）
+
+> **自動產生**：2026-04-22
+> **Supabase Project**：`wzvwmawpkapcmkfmkvav`
+> **產生方式**：`node scripts/generate-db-truth.mjs`（只讀 metadata、不碰 row）
+
+這份檔是 Venturo 所有 `venturo-route-context-verify` 驗證流程的 **DB 層 SSOT**。每次該 skill 執行時、主 Claude 先跑一次這個腳本、讓 DB 真相永遠最新。
+
+**給 William 看的白話摘要由 skill 翻譯。這份檔本身是機器讀的原始事實、不給業務主看。**
+
+---
+
+## 🚨 可疑清單（優先看這個）
+
+共 142 項：
+
+| 嚴重度 | Table | 問題 |
+|---|---|---|
+| 🔴 | `_migrations` | RLS 沒開（任何登入使用者可能都能看到這張表所有資料） |
+| 🟡 | `accounting_accounts` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `accounting_categories` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `accounting_entries` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `accounting_transactions` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `accounts` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `activities` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `advance_items` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `advance_lists` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `ai_messages` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `api_usage` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `api_usage_log` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `assigned_itineraries` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `attraction_licenses` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `badge_definitions` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `badges` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `bot_groups` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `brochure_versions` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `budgets` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `casual_trips` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `categories` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `channel_threads` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `cost_templates` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `cover_templates` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `cron_execution_logs` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `customer_badges` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `customer_group_members` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `customer_service_leads` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `customer_travel_cards` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `daily_templates` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `decisions_log` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `disbursement_requests` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `employee_payroll_config` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `employee_permission_overrides` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `employee_route_overrides` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `expense_categories` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `expense_monthly_stats` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `expense_streaks` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `features_templates` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `flight_templates` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `friends` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `hotel_templates` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `hotels` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `itinerary_permissions` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `itinerary_versions` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `journal_lines` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `leader_templates` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `luxury_hotels` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `magic_combo_items` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `manifestation_records` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `meeting_messages` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `meeting_participants` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `online_trip_members` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `personal_expenses` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `pnr_passengers` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `pnr_remarks` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `pnr_segments` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `pnr_ssr_elements` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `price_list_items` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `pricing_templates` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `private_messages` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `projects` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🔴 | `rate_limits` | RLS 沒開（任何登入使用者可能都能看到這張表所有資料） |
+| 🟡 | `ref_airlines` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `ref_airports` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `ref_booking_classes` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🔴 | `ref_cities` | RLS 沒開（任何登入使用者可能都能看到這張表所有資料） |
+| 🟡 | `ref_countries` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `ref_destinations` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `ref_ssr_codes` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `ref_status_codes` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `region_stats` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `request_responses` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `role_tab_permissions` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `selector_field_roles` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `shared_order_lists` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `social_group_members` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `social_group_tags` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `social_groups` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `supplier_categories` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `supplier_payment_accounts` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `supplier_price_list` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `supplier_request_responses` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `supplier_service_areas` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `supplier_users` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `syncqueue` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `tasks` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `templates` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `timebox_boxes` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `timebox_scheduled_boxes` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `timebox_weeks` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `timebox_workout_templates` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `tour_custom_cost_fields` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `tour_custom_cost_values` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `tour_departure_data` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `tour_destinations` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `tour_expenses` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `tour_leaders` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `tour_member_fields` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `tour_members` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `tour_refunds` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `tour_request_member_vouchers` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `tour_request_messages` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `tour_role_assignments` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `tour_room_assignments` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `tour_rooms` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `tour_table_assignments` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `tour_vehicle_assignments` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `tour_vehicles` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `transactions` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `travel_card_templates` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `traveler_badges` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `traveler_conversation_members` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `traveler_expense_splits` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `traveler_expenses` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `traveler_friends` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `traveler_messages` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `traveler_profiles` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `traveler_settlements` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `traveler_split_group_members` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `traveler_split_groups` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `traveler_tour_cache` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `traveler_trip_accommodations` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `traveler_trip_briefings` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `traveler_trip_flights` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `traveler_trip_invitations` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `traveler_trip_itinerary_items` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `traveler_trip_members` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `traveler_trips` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `trip_members` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `trip_members_v2` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `user_badges` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `user_points_transactions` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `user_preferences` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `user_roles` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `vendor_costs` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `website_day_activities` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `website_itinerary_days` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `website_spot_highlights` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `wishlist_template_items` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `workload_summary` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+| 🟡 | `workspace_items` | 沒有 workspace_id 欄位、但有 RLS policy（要確認隔離方式是什麼） |
+
+---
+
+## 📋 Tables 總覽（310 張）
+
+| Table | RLS | FORCE | Policy | Columns | workspace_id | created_by FK |
+|---|---|---|---|---|---|---|
+| `_migrations` | ✗ |  | 0 | 3 |  |  |
+| `accounting_accounts` | ✓ |  | 4 | 14 |  |  |
+| `accounting_categories` | ✓ |  | 1 | 7 |  |  |
+| `accounting_entries` | ✓ |  | 4 | 17 |  |  |
+| `accounting_events` | ✓ |  | 4 | 16 | ✓ |  |
+| `accounting_period_closings` | ✓ |  | 4 | 10 | ✓ |  |
+| `accounting_periods` | ✓ |  | 4 | 9 | ✓ |  |
+| `accounting_subjects` | ✓ |  | 4 | 12 | ✓ |  |
+| `accounting_transactions` | ✓ |  | 1 | 15 |  |  |
+| `accounts` | ✓ |  | 1 | 10 |  |  |
+| `activities` | ✓ |  | 4 | 19 |  |  |
+| `advance_items` | ✓ |  | 1 | 15 |  |  |
+| `advance_lists` | ✓ |  | 1 | 9 |  | public.employees |
+| `agent_registry` | ✓ |  | 4 | 14 | ✓ |  |
+| `ai_bots` | ✓ |  | 4 | 13 | ✓ |  |
+| `ai_conversations` | ✓ |  | 4 | 9 | ✓ |  |
+| `ai_memories` | ✓ |  | 4 | 15 | ✓ |  |
+| `ai_messages` | ✓ |  | 4 | 8 |  |  |
+| `ai_settings` | ✓ |  | 4 | 11 | ✓ |  |
+| `airport_images` | ✓ |  | 4 | 11 | ✓ |  |
+| `announcements` | ✓ |  | 4 | 11 | ✓ | public.employees |
+| `api_usage` | ✓ |  | 4 | 5 |  |  |
+| `api_usage_log` | ✓ |  | 4 | 4 |  |  |
+| `assigned_itineraries` | ✓ |  | 4 | 9 |  | public.employees |
+| `attendance_records` | ✓ |  | 4 | 15 | ✓ | public.employees |
+| `attraction_licenses` | ✓ |  | 2 | 10 |  | public.employees |
+| `attractions` | ✓ |  | 4 | 32 | ✓ | public.employees |
+| `background_tasks` | ✓ |  | 4 | 16 | ✓ | public.employees |
+| `badge_definitions` | ✓ |  | 4 | 11 |  |  |
+| `badges` | ✓ |  | 4 | 8 |  |  |
+| `bank_accounts` | ✓ |  | 4 | 11 | ✓ |  |
+| `body_measurements` | ✓ |  | 4 | 20 | ✓ |  |
+| `bot_groups` | ✓ |  | 2 | 8 |  |  |
+| `bot_registry` | ✓ |  | 5 | 11 | ✓ |  |
+| `brochure_documents` | ✓ |  | 4 | 17 | ✓ |  |
+| `brochure_versions` | ✓ |  | 4 | 8 |  |  |
+| `budgets` | ✓ |  | 1 | 9 |  |  |
+| `bulletins` | ✓ |  | 4 | 14 | ✓ | public.employees |
+| `calendar_events` | ✓ |  | 4 | 21 | ✓ | public.employees |
+| `casual_trips` | ✓ |  | 4 | 14 |  |  |
+| `categories` | ✓ |  | 1 | 9 |  |  |
+| `channel_groups` | ✓ |  | 4 | 12 | ✓ |  |
+| `channel_members` | ✓ |  | 4 | 8 | ✓ |  |
+| `channel_threads` | ✓ |  | 4 | 12 |  | public.employees |
+| `channels` | ✓ |  | 4 | 25 | ✓ | public.employees |
+| `chart_of_accounts` | ✓ |  | 4 | 14 | ✓ |  |
+| `checks` | ✓ |  | 4 | 11 | ✓ |  |
+| `cities` | ✓ |  | 4 | 20 | ✓ |  |
+| `companies` | ✓ |  | 4 | 30 | ✓ |  |
+| `company_announcements` | ✓ |  | 4 | 21 | ✓ |  |
+| `company_asset_folders` | ✓ |  | 5 | 11 | ✓ | public.employees |
+| `company_assets` | ✓ |  | 4 | 16 | ✓ | public.employees |
+| `company_contacts` | ✓ |  | 4 | 21 | ✓ |  |
+| `confirmations` | ✓ |  | 4 | 12 | ✓ | public.employees |
+| `contracts` | ✓ |  | 4 | 32 | ✓ |  |
+| `cost_templates` | ✓ |  | 1 | 34 |  | public.employees |
+| `countries` | ✓ |  | 4 | 13 | ✓ |  |
+| `cover_templates` | ✓ |  | 1 | 9 |  |  |
+| `cron_execution_logs` | ✓ |  | 4 | 6 |  |  |
+| `customer_assigned_itineraries` | ✓ |  | 4 | 14 | ✓ |  |
+| `customer_badges` | ✓ |  | 1 | 4 |  |  |
+| `customer_group_members` | ✓ |  | 4 | 6 |  |  |
+| `customer_groups` | ✓ |  | 4 | 9 | ✓ | public.employees |
+| `customer_inquiries` | ✓ |  | 6 | 20 | ✓ |  |
+| `customer_service_conversations` | ✓ |  | 2 | 15 | ✓ |  |
+| `customer_service_leads` | ✓ |  | 4 | 12 |  |  |
+| `customer_travel_cards` | ✓ |  | 1 | 10 |  |  |
+| `customers` | ✓ |  | 4 | 48 | ✓ |  |
+| `customization_requests` | ✓ |  | 4 | 11 | ✓ |  |
+| `daily_templates` | ✓ |  | 1 | 9 |  |  |
+| `decisions_log` | ✓ |  | 4 | 5 |  |  |
+| `departments` | ✓ |  | 4 | 11 | ✓ |  |
+| `design_templates` | ✓ |  | 4 | 16 | ✓ |  |
+| `designer_drafts` | ✓ |  | 4 | 18 | ✓ |  |
+| `disbursement_orders` | ✓ |  | 4 | 22 | ✓ |  |
+| `disbursement_requests` | ✓ |  | 1 | 4 |  |  |
+| `driver_tasks` | ✓ |  | 4 | 49 | ✓ |  |
+| `email_accounts` | ✓ |  | 4 | 15 | ✓ |  |
+| `email_attachments` | ✓ |  | 4 | 11 | ✓ |  |
+| `emails` | ✓ |  | 4 | 37 | ✓ | public.employees |
+| `employee_payroll_config` | ✓ |  | 2 | 7 |  |  |
+| `employee_permission_overrides` | ✓ |  | 4 | 7 |  |  |
+| `employee_route_overrides` | ✓ |  | 2 | 8 |  |  |
+| `employees` | ✓ |  | 4 | 42 | ✓ | public.employees |
+| `erp_bank_accounts` | ✓ |  | 4 | 9 | ✓ |  |
+| `esims` | ✓ |  | 4 | 16 | ✓ |  |
+| `expense_categories` | ✓ |  | 1 | 13 |  |  |
+| `expense_monthly_stats` | ✓ |  | 4 | 9 |  |  |
+| `expense_streaks` | ✓ |  | 4 | 11 |  |  |
+| `eyeline_submissions` | ✓ |  | 4 | 13 | ✓ |  |
+| `features_templates` | ✓ |  | 1 | 8 |  |  |
+| `file_audit_logs` | ✓ |  | 4 | 11 | ✓ |  |
+| `files` | ✓ |  | 4 | 34 | ✓ | public.employees |
+| `fleet_drivers` | ✓ |  | 5 | 20 | ✓ |  |
+| `fleet_schedules` | ✓ |  | 5 | 24 | ✓ |  |
+| `fleet_vehicle_logs` | ✓ |  | 5 | 16 | ✓ |  |
+| `fleet_vehicles` | ✓ |  | 5 | 28 | ✓ |  |
+| `flight_status_subscriptions` | ✓ |  | 4 | 16 | ✓ |  |
+| `flight_templates` | ✓ |  | 1 | 9 |  |  |
+| `folders` | ✓ |  | 4 | 18 | ✓ | public.employees |
+| `friends` | ✓ |  | 4 | 6 |  |  |
+| `game_office_rooms` | ✓ |  | 4 | 7 | ✓ |  |
+| `general_ledger` | ✓ |  | 4 | 11 | ✓ |  |
+| `hotel_templates` | ✓ |  | 1 | 8 |  |  |
+| `hotels` | ✓ |  | 1 | 57 |  | public.employees |
+| `image_library` | ✓ |  | 4 | 19 | ✓ | public.employees |
+| `invoice_orders` | ✓ |  | 4 | 7 | ✓ |  |
+| `itineraries` | ✓ |  | 5 | 69 | ✓ | public.employees |
+| `itinerary_documents` | ✓ |  | 4 | 9 | ✓ |  |
+| `itinerary_permissions` | ✓ |  | 2 | 5 |  |  |
+| `itinerary_versions` | ✓ |  | 3 | 8 |  |  |
+| `journal_lines` | ✓ |  | 2 | 10 |  |  |
+| `journal_vouchers` | ✓ |  | 4 | 17 | ✓ |  |
+| `knowledge_base` | ✓ |  | 4 | 9 | ✓ |  |
+| `leader_availability` | ✓ |  | 4 | 9 | ✓ |  |
+| `leader_schedules` | ✓ |  | 4 | 14 | ✓ |  |
+| `leader_templates` | ✓ |  | 1 | 8 |  |  |
+| `leave_balances` | ✓ |  | 4 | 12 | ✓ |  |
+| `leave_requests` | ✓ |  | 4 | 19 | ✓ | public.employees |
+| `leave_types` | ✓ |  | 4 | 12 | ✓ |  |
+| `line_conversations` | ✓ |  | 3 | 13 | ✓ |  |
+| `line_groups` | ✓ |  | 4 | 10 | ✓ |  |
+| `line_messages` | ✓ |  | 2 | 14 | ✓ |  |
+| `line_users` | ✓ |  | 4 | 12 | ✓ |  |
+| `linkpay_logs` | ✓ |  | 4 | 14 | ✓ | public.employees |
+| `luxury_hotels` | ✓ |  | 4 | 55 |  | public.employees |
+| `magic_combo_items` | ✓ |  | 4 | 6 |  |  |
+| `magic_combos` | ✓ |  | 4 | 8 | ✓ |  |
+| `magic_library` | ✓ |  | 5 | 16 | ✓ |  |
+| `manifestation_records` | ✓ |  | 4 | 6 |  |  |
+| `meeting_messages` | ✓ |  | 4 | 9 |  |  |
+| `meeting_participants` | ✓ |  | 4 | 10 |  |  |
+| `meeting_rooms` | ✓ |  | 4 | 9 | ✓ |  |
+| `members` | ✓ |  | 5 | 40 | ✓ | public.employees |
+| `messages` | ✓ |  | 6 | 21 | ✓ | public.employees |
+| `michelin_restaurants` | ✓ |  | 6 | 60 | ✓ | public.employees |
+| `missed_clock_requests` | ✓ |  | 3 | 13 | ✓ |  |
+| `notes` | ✓ |  | 4 | 11 | ✓ | public.employees |
+| `notifications` | ✓ |  | 4 | 14 | ✓ |  |
+| `office_documents` | ✓ |  | 4 | 10 | ✓ |  |
+| `online_trip_members` | ✓ |  | 1 | 21 |  |  |
+| `online_trips` | ✓ |  | 4 | 18 | ✓ |  |
+| `opening_balances` | ✓ |  | 4 | 10 | ✓ |  |
+| `order_members` | ✓ |  | 4 | 48 | ✓ |  |
+| `orders` | ✓ |  | 4 | 26 | ✓ | public.employees |
+| `overtime_requests` | ✓ |  | 3 | 14 | ✓ |  |
+| `payment_methods` | ✓ |  | 4 | 14 | ✓ |  |
+| `payment_request_items` | ✓ |  | 4 | 28 | ✓ |  |
+| `payment_requests` | ✓ |  | 4 | 34 | ✓ |  |
+| `payments` | ✓ |  | 4 | 18 | ✓ | public.employees |
+| `payroll_allowance_types` | ✓ |  | 2 | 10 | ✓ |  |
+| `payroll_deduction_types` | ✓ |  | 2 | 11 | ✓ |  |
+| `payroll_periods` | ✓ |  | 4 | 13 | ✓ |  |
+| `payroll_records` | ✓ |  | 4 | 29 | ✓ |  |
+| `personal_canvases` | ✓ |  | 4 | 10 | ✓ |  |
+| `personal_expenses` | ✓ |  | 4 | 26 |  |  |
+| `personal_records` | ✓ |  | 4 | 12 | ✓ |  |
+| `pnr_ai_queries` | ✓ |  | 4 | 9 | ✓ |  |
+| `pnr_fare_alerts` | ✓ |  | 4 | 13 | ✓ |  |
+| `pnr_fare_history` | ✓ |  | 4 | 13 | ✓ |  |
+| `pnr_flight_status_history` | ✓ |  | 4 | 17 | ✓ |  |
+| `pnr_passengers` | ✓ |  | 1 | 11 |  |  |
+| `pnr_queue_items` | ✓ |  | 4 | 18 | ✓ | public.employees |
+| `pnr_records` | ✓ |  | 4 | 20 | ✓ | public.employees |
+| `pnr_remarks` | ✓ |  | 1 | 5 |  |  |
+| `pnr_schedule_changes` | ✓ |  | 4 | 23 | ✓ |  |
+| `pnr_segments` | ✓ |  | 1 | 17 |  |  |
+| `pnr_ssr_elements` | ✓ |  | 1 | 9 |  |  |
+| `pnrs` | ✓ |  | 4 | 18 | ✓ | public.employees |
+| `posting_rules` | ✓ |  | 4 | 8 | ✓ |  |
+| `premium_experiences` | ✓ |  | 6 | 77 | ✓ | public.employees |
+| `price_list_items` | ✓ |  | 1 | 14 |  |  |
+| `pricing_templates` | ✓ |  | 1 | 8 |  |  |
+| `private_messages` | ✓ |  | 4 | 6 |  |  |
+| `profiles` | ✓ |  | 4 | 17 | ✓ |  |
+| `progress_photos` | ✓ |  | 4 | 10 | ✓ |  |
+| `projects` | ✓ |  | 4 | 11 |  |  |
+| `quote_confirmation_logs` | ✓ |  | 4 | 14 | ✓ |  |
+| `quotes` | ✓ |  | 4 | 79 | ✓ |  |
+| `rate_limits` | ✗ |  | 0 | 3 |  |  |
+| `receipts` | ✓ |  | 4 | 47 | ✓ |  |
+| `ref_airlines` | ✓ |  | 1 | 8 |  |  |
+| `ref_airports` | ✓ |  | 4 | 14 |  |  |
+| `ref_airports_backup` | ✓ |  | 4 | 15 | ✓ |  |
+| `ref_booking_classes` | ✓ |  | 1 | 5 |  |  |
+| `ref_cities` | ✗ |  | 0 | 12 |  |  |
+| `ref_countries` | ✓ |  | 4 | 7 |  |  |
+| `ref_destinations` | ✓ |  | 4 | 18 |  |  |
+| `ref_ssr_codes` | ✓ |  | 1 | 5 |  |  |
+| `ref_status_codes` | ✓ |  | 1 | 5 |  |  |
+| `refunds` | ✓ |  | 4 | 20 | ✓ | public.employees |
+| `region_stats` | ✓ |  | 4 | 6 |  |  |
+| `regions` | ✓ |  | 4 | 11 | ✓ |  |
+| `request_response_items` | ✓ |  | 4 | 16 | ✓ | public.employees |
+| `request_responses` | ✓ |  | 3 | 9 |  |  |
+| `restaurants` | ✓ |  | 4 | 59 |  | public.employees |
+| `rich_documents` | ✓ |  | 4 | 12 | ✓ | public.employees |
+| `role_tab_permissions` | ✓ |  | 4 | 8 |  |  |
+| `selector_field_roles` | ✓ |  | 4 | 2 |  |  |
+| `shared_order_lists` | ✓ |  | 1 | 11 |  |  |
+| `social_group_members` | ✓ |  | 3 | 7 |  |  |
+| `social_group_tags` | ✓ |  | 4 | 3 |  |  |
+| `social_groups` | ✓ |  | 3 | 22 |  | public.traveler_profiles |
+| `supplier_categories` | ✓ |  | 4 | 8 |  |  |
+| `supplier_employees` | ✓ |  | 4 | 16 | ✓ |  |
+| `supplier_payment_accounts` | ✓ |  | 1 | 18 |  |  |
+| `supplier_price_list` | ✓ |  | 1 | 14 |  |  |
+| `supplier_request_responses` | ✓ |  | 2 | 10 |  |  |
+| `supplier_service_areas` | ✓ |  | 1 | 6 |  |  |
+| `supplier_users` | ✓ |  | 3 | 11 |  |  |
+| `suppliers` | ✓ |  | 4 | 41 | ✓ | public.employees |
+| `syncqueue` | ✓ |  | 4 | 9 |  |  |
+| `system_settings` | ✓ |  | 5 | 8 | ✓ |  |
+| `tasks` | ✓ |  | 4 | 12 |  |  |
+| `templates` | ✓ |  | 1 | 9 |  |  |
+| `timebox_boxes` | ✓ |  | 4 | 9 |  |  |
+| `timebox_scheduled_boxes` | ✓ |  | 4 | 11 |  |  |
+| `timebox_weeks` | ✓ |  | 4 | 9 |  |  |
+| `timebox_workout_templates` | ✓ |  | 4 | 6 |  |  |
+| `todo_columns` | ✓ |  | 1 | 9 | ✓ |  |
+| `todos` | ✓ |  | 4 | 23 | ✓ | public.employees |
+| `tour_addons` | ✓ |  | 4 | 11 | ✓ | public.employees |
+| `tour_bonus_settings` | ✓ |  | 5 | 9 | ✓ |  |
+| `tour_confirmation_items` | ✓ |  | 4 | 38 | ✓ | public.employees |
+| `tour_confirmation_sheets` | ✓ |  | 4 | 26 | ✓ |  |
+| `tour_control_forms` | ✓ |  | 4 | 8 | ✓ | public.employees |
+| `tour_custom_cost_fields` | ✓ |  | 1 | 6 |  |  |
+| `tour_custom_cost_values` | ✓ |  | 1 | 6 |  |  |
+| `tour_departure_data` | ✓ |  | 1 | 12 |  |  |
+| `tour_destinations` | ✓ |  | 4 | 6 |  |  |
+| `tour_documents` | ✓ |  | 4 | 15 | ✓ | public.employees |
+| `tour_expenses` | ✓ |  | 2 | 6 |  |  |
+| `tour_folder_templates` | ✓ |  | 5 | 8 | ✓ |  |
+| `tour_itinerary_days` | ✓ |  | 4 | 17 | ✓ | public.employees |
+| `tour_itinerary_items` | ✓ |  | 4 | 79 | ✓ |  |
+| `tour_leaders` | ✓ |  | 4 | 21 |  |  |
+| `tour_meal_settings` | ✓ |  | 8 | 10 | ✓ |  |
+| `tour_member_fields` | ✓ |  | 1 | 8 |  |  |
+| `tour_members` | ✓ |  | 5 | 11 |  | public.employees |
+| `tour_refunds` | ✓ |  | 1 | 12 |  |  |
+| `tour_request_items` | ✓ |  | 5 | 24 | ✓ |  |
+| `tour_request_member_vouchers` | ✓ |  | 5 | 12 |  |  |
+| `tour_request_messages` | ✓ |  | 5 | 17 |  |  |
+| `tour_requests` | ✓ |  | 4 | 54 | ✓ |  |
+| `tour_role_assignments` | ✓ |  | 4 | 7 |  |  |
+| `tour_room_assignments` | ✓ |  | 4 | 6 |  |  |
+| `tour_rooms` | ✓ |  | 4 | 15 |  |  |
+| `tour_table_assignments` | ✓ |  | 3 | 4 |  |  |
+| `tour_tables` | ✓ |  | 8 | 9 | ✓ |  |
+| `tour_vehicle_assignments` | ✓ |  | 1 | 6 |  |  |
+| `tour_vehicles` | ✓ |  | 1 | 12 |  |  |
+| `tours` | ✓ |  | 4 | 72 | ✓ | public.employees |
+| `transactions` | ✓ |  | 1 | 11 |  |  |
+| `transportation_rates` | ✓ |  | 4 | 28 | ✓ | public.employees |
+| `travel_card_templates` | ✓ |  | 1 | 9 |  |  |
+| `travel_invoices` | ✓ |  | 4 | 34 | ✓ | public.employees |
+| `traveler_badges` | ✓ |  | 1 | 5 |  |  |
+| `traveler_conversation_members` | ✓ |  | 3 | 11 |  |  |
+| `traveler_conversations` | ✓ |  | 4 | 18 | ✓ |  |
+| `traveler_expense_splits` | ✓ |  | 1 | 6 |  |  |
+| `traveler_expenses` | ✓ |  | 1 | 13 |  |  |
+| `traveler_friends` | ✓ |  | 4 | 9 |  |  |
+| `traveler_messages` | ✓ |  | 4 | 12 |  |  |
+| `traveler_profiles` | ✓ |  | 2 | 22 |  |  |
+| `traveler_settlements` | ✓ |  | 1 | 11 |  |  |
+| `traveler_split_group_members` | ✓ |  | 1 | 8 |  |  |
+| `traveler_split_groups` | ✓ |  | 3 | 9 |  | public.traveler_profiles |
+| `traveler_tour_cache` | ✓ |  | 4 | 26 |  |  |
+| `traveler_trip_accommodations` | ✓ |  | 1 | 15 |  |  |
+| `traveler_trip_briefings` | ✓ |  | 1 | 8 |  |  |
+| `traveler_trip_flights` | ✓ |  | 1 | 20 |  |  |
+| `traveler_trip_invitations` | ✓ |  | 3 | 9 |  |  |
+| `traveler_trip_itinerary_items` | ✓ |  | 1 | 21 |  |  |
+| `traveler_trip_members` | ✓ |  | 3 | 6 |  |  |
+| `traveler_trips` | ✓ |  | 4 | 14 |  | public.traveler_profiles |
+| `trip_members` | ✓ |  | 4 | 12 |  |  |
+| `trip_members_v2` | ✓ |  | 4 | 25 |  |  |
+| `usa_esta` | ✓ |  | 4 | 100 | ✓ | public.employees |
+| `user_badges` | ✓ |  | 1 | 4 |  |  |
+| `user_points_transactions` | ✓ |  | 4 | 7 |  |  |
+| `user_preferences` | ✓ |  | 1 | 6 |  |  |
+| `user_roles` | ✓ |  | 1 | 6 |  |  |
+| `vendor_costs` | ✓ |  | 4 | 6 |  |  |
+| `visas` | ✓ |  | 4 | 30 | ✓ |  |
+| `website_day_activities` | ✓ |  | 4 | 8 |  |  |
+| `website_destinations` | ✓ |  | 4 | 9 | ✓ |  |
+| `website_footer_links` | ✓ |  | 4 | 7 | ✓ |  |
+| `website_hero_content` | ✓ |  | 4 | 12 | ✓ |  |
+| `website_hero_videos` | ✓ |  | 4 | 8 | ✓ |  |
+| `website_itineraries` | ✓ |  | 4 | 14 | ✓ |  |
+| `website_itinerary_days` | ✓ |  | 4 | 9 |  |  |
+| `website_settings` | ✓ |  | 4 | 5 | ✓ |  |
+| `website_spot_highlights` | ✓ |  | 4 | 7 |  |  |
+| `website_story_sections` | ✓ |  | 4 | 11 | ✓ |  |
+| `wishlist_template_items` | ✓ |  | 2 | 10 |  |  |
+| `wishlist_templates` | ✓ |  | 6 | 10 | ✓ | public.employees |
+| `workload_summary` | ✓ |  | 4 | 8 |  |  |
+| `workspace_attendance_settings` | ✓ |  | 3 | 15 | ✓ |  |
+| `workspace_bonus_defaults` | ✓ |  | 5 | 8 | ✓ |  |
+| `workspace_countries` | ✓ |  | 4 | 5 | ✓ |  |
+| `workspace_features` | ✓ |  | 4 | 7 | ✓ |  |
+| `workspace_items` | ✓ |  | 1 | 12 |  |  |
+| `workspace_job_roles` | ✓ |  | 4 | 5 | ✓ |  |
+| `workspace_line_config` | ✓ |  | 4 | 15 | ✓ |  |
+| `workspace_meta_config` | ✓ |  | 3 | 10 | ✓ |  |
+| `workspace_modules` | ✓ |  | 4 | 8 | ✓ |  |
+| `workspace_notification_settings` | ✓ |  | 2 | 11 | ✓ |  |
+| `workspace_roles` | ✓ |  | 4 | 8 | ✓ |  |
+| `workspace_selector_fields` | ✓ |  | 4 | 8 | ✓ |  |
+| `workspaces` | ✓ |  | 4 | 40 |  | public.employees |
+
+---
+
+## 📊 每張 Table 詳情
+
+### `_migrations`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | integer | NO | nextval('_migrations_id_seq'::regclass) |
+| `name` | text | NO | - |
+| `executed_at` | timestamp with time zone | YES | now() |
+
+**RLS**：`disabled`
+
+---
+
+### `accounting_accounts`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `user_id` | uuid | NO | - |
+| `name` | text | NO | - |
+| `type` | text | NO | - |
+| `balance` | numeric | NO | 0 |
+| `currency` | text | NO | 'TWD'::text |
+| `icon` | text | YES | - |
+| `color` | text | YES | - |
+| `is_active` | boolean | YES | true |
+| `description` | text | YES | - |
+| `credit_limit` | numeric | YES | - |
+| `available_credit` | numeric | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **accounting_accounts_delete** — `DELETE`（roles: {public}）
+    - USING: `(user_id = auth.uid())`
+- **accounting_accounts_insert** — `INSERT`（roles: {authenticated}）
+    - WITH CHECK: `(user_id = auth.uid())`
+- **accounting_accounts_select** — `SELECT`（roles: {public}）
+    - USING: `(user_id = auth.uid())`
+- **accounting_accounts_update** — `UPDATE`（roles: {public}）
+    - USING: `(user_id = auth.uid())`
+
+---
+
+### `accounting_categories`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `name` | text | NO | - |
+| `type` | text | NO | - |
+| `icon` | text | YES | - |
+| `color` | text | YES | - |
+| `is_system` | boolean | YES | false |
+| `created_at` | timestamp with time zone | YES | now() |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **accounting_categories_authenticated** — `ALL`（roles: {public}）
+    - USING: `(auth.role() = 'authenticated'::text)`
+
+---
+
+### `accounting_entries`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `entry_date` | date | NO | - |
+| `entry_number` | text | NO | - |
+| `category` | text | NO | - |
+| `subcategory` | text | YES | - |
+| `amount` | numeric | NO | - |
+| `entry_type` | text | NO | - |
+| `tour_id` | text | YES | - |
+| `supplier_id` | text | YES | - |
+| `payment_method` | text | YES | - |
+| `description` | text | NO | - |
+| `invoice_number` | text | YES | - |
+| `recorded_by` | text | NO | - |
+| `notes` | text | YES | - |
+| `deleted_at` | timestamp with time zone | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **accounting_entries_delete** — `DELETE`（roles: {public}）
+    - USING: `(((tour_id IS NOT NULL) AND (EXISTS ( SELECT 1
+   FROM tours t
+  WHERE ((t.id = accounting_entries.tour_id) AND (t.workspace_id = get_current_user_workspace()))))) OR ((tour_id IS NULL) AND ((recorded_by)::uuid = auth.uid())))`
+- **accounting_entries_insert** — `INSERT`（roles: {authenticated}）
+    - WITH CHECK: `(((tour_id IS NOT NULL) AND (EXISTS ( SELECT 1
+   FROM tours t
+  WHERE ((t.id = accounting_entries.tour_id) AND (t.workspace_id = get_current_user_workspace()))))) OR ((tour_id IS NULL) AND ((recorded_by)::uuid = auth.uid())))`
+- **accounting_entries_select** — `SELECT`（roles: {public}）
+    - USING: `(((tour_id IS NOT NULL) AND (EXISTS ( SELECT 1
+   FROM tours t
+  WHERE ((t.id = accounting_entries.tour_id) AND (t.workspace_id = get_current_user_workspace()))))) OR ((tour_id IS NULL) AND ((recorded_by)::uuid = auth.uid())))`
+- **accounting_entries_update** — `UPDATE`（roles: {public}）
+    - USING: `(((tour_id IS NOT NULL) AND (EXISTS ( SELECT 1
+   FROM tours t
+  WHERE ((t.id = accounting_entries.tour_id) AND (t.workspace_id = get_current_user_workspace()))))) OR ((tour_id IS NULL) AND ((recorded_by)::uuid = auth.uid())))`
+
+**Triggers**
+
+- `update_accounting_entries_updated_at` — BEFORE UPDATE
+
+---
+
+### `accounting_events`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | YES | - |
+| `event_type` | accounting_event_type (enum) | NO | - |
+| `source_type` | text | YES | - |
+| `source_id` | uuid | YES | - |
+| `group_id` | uuid | YES | - |
+| `tour_id` | text | YES | - |
+| `event_date` | date | NO | - |
+| `currency` | text | YES | 'TWD'::text |
+| `meta` | jsonb | YES | '{}'::jsonb |
+| `status` | accounting_event_status (enum) | YES | 'posted'::accounting_event_status |
+| `reversal_event_id` | uuid | YES | - |
+| `memo` | text | YES | - |
+| `created_by` | uuid | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `reversal_event_id` | `accounting_events.id` | NO ACTION | NO ACTION |
+| `tour_id` | `tours.id` | NO ACTION | NO ACTION |
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **accounting_events_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **accounting_events_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **accounting_events_select** — `SELECT`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **accounting_events_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+
+---
+
+### `accounting_period_closings`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | YES | - |
+| `period_type` | character varying | NO | - |
+| `period_start` | date | NO | - |
+| `period_end` | date | NO | - |
+| `closing_voucher_id` | uuid | YES | - |
+| `net_income` | numeric | NO | 0 |
+| `closed_by` | uuid | YES | - |
+| `closed_at` | timestamp with time zone | YES | now() |
+| `created_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `closed_by` | `employees.id` | NO ACTION | NO ACTION |
+| `closing_voucher_id` | `journal_vouchers.id` | NO ACTION | NO ACTION |
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **accounting_period_closings_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **accounting_period_closings_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(workspace_id = get_current_user_workspace())`
+- **accounting_period_closings_select** — `SELECT`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **accounting_period_closings_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+
+---
+
+### `accounting_periods`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | YES | - |
+| `period_name` | text | NO | - |
+| `start_date` | date | NO | - |
+| `end_date` | date | NO | - |
+| `is_closed` | boolean | YES | false |
+| `closed_at` | timestamp with time zone | YES | - |
+| `closed_by` | uuid | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **accounting_periods_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **accounting_periods_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **accounting_periods_select** — `SELECT`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **accounting_periods_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+
+---
+
+### `accounting_subjects`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | YES | - |
+| `code` | character varying | NO | - |
+| `name` | character varying | NO | - |
+| `type` | character varying | NO | - |
+| `parent_id` | uuid | YES | - |
+| `level` | integer | YES | 1 |
+| `is_system` | boolean | YES | false |
+| `is_active` | boolean | YES | true |
+| `description` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `parent_id` | `accounting_subjects.id` | SET NULL | NO ACTION |
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **accounting_subjects_delete** — `DELETE`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **accounting_subjects_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(workspace_id = get_current_user_workspace())`
+- **accounting_subjects_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id IS NULL) OR (workspace_id = get_current_user_workspace()))`
+- **accounting_subjects_update** — `UPDATE`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+- `update_accounting_subjects_updated_at` — BEFORE UPDATE
+
+---
+
+### `accounting_transactions`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `user_id` | uuid | NO | - |
+| `account_id` | uuid | NO | - |
+| `account_name` | text | YES | - |
+| `category_id` | uuid | YES | - |
+| `category_name` | text | YES | - |
+| `type` | text | NO | - |
+| `amount` | numeric | NO | - |
+| `currency` | text | NO | 'TWD'::text |
+| `description` | text | YES | - |
+| `date` | date | NO | CURRENT_DATE |
+| `to_account_id` | uuid | YES | - |
+| `to_account_name` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `account_id` | `accounting_accounts.id` | RESTRICT | NO ACTION |
+| `to_account_id` | `accounting_accounts.id` | SET NULL | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **accounting_transactions_authenticated** — `ALL`（roles: {public}）
+    - USING: `(auth.role() = 'authenticated'::text)`
+
+---
+
+### `accounts`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `account_code` | text | NO | - |
+| `account_name` | text | NO | - |
+| `account_type` | text | NO | - |
+| `parent_code` | text | YES | - |
+| `level` | integer | YES | 1 |
+| `is_active` | boolean | YES | true |
+| `details` | jsonb | YES | '{}'::jsonb |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **accounts_authenticated** — `ALL`（roles: {public}）
+    - USING: `(auth.role() = 'authenticated'::text)`
+
+**Triggers**
+
+- `update_accounts_updated_at` — BEFORE UPDATE
+
+---
+
+### `activities`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `activity_code` | text | NO | - |
+| `activity_name` | text | NO | - |
+| `activity_type` | text | NO | - |
+| `region_id` | uuid | YES | - |
+| `supplier_id` | text | YES | - |
+| `adult_price` | numeric | YES | 0 |
+| `child_price` | numeric | YES | 0 |
+| `infant_price` | numeric | YES | 0 |
+| `adult_cost` | numeric | YES | 0 |
+| `child_cost` | numeric | YES | 0 |
+| `infant_cost` | numeric | YES | 0 |
+| `description` | text | YES | - |
+| `inclusions` | ARRAY | YES | '{}'::text[] |
+| `notes` | text | YES | - |
+| `is_active` | boolean | YES | true |
+| `deleted_at` | timestamp with time zone | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **activities_delete** — `DELETE`（roles: {public}）
+    - USING: `true`
+- **activities_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `true`
+- **activities_select** — `SELECT`（roles: {public}）
+    - USING: `true`
+- **activities_update** — `UPDATE`（roles: {public}）
+    - USING: `true`
+
+**Triggers**
+
+- `update_activities_updated_at` — BEFORE UPDATE
+
+---
+
+### `advance_items`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `advance_list_id` | uuid | NO | - |
+| `name` | character varying | NO | - |
+| `description` | text | YES | - |
+| `amount` | numeric | NO | 0 |
+| `advance_person` | character varying | NO | - |
+| `status` | character varying | YES | 'pending'::character varying |
+| `payment_request_id` | text | YES | - |
+| `processed_at` | timestamp with time zone | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `_needs_sync` | boolean | YES | false |
+| `_synced_at` | timestamp with time zone | YES | - |
+| `_deleted` | boolean | YES | false |
+| `processed_by` | uuid | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `advance_list_id` | `advance_lists.id` | CASCADE | NO ACTION |
+| `processed_by` | `employees.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **advance_items_authenticated** — `ALL`（roles: {public}）
+    - USING: `(auth.role() = 'authenticated'::text)`
+
+**Triggers**
+
+- `advance_items_updated_at` — BEFORE UPDATE
+
+---
+
+### `advance_lists`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `channel_id` | uuid | NO | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `_needs_sync` | boolean | YES | false |
+| `_synced_at` | timestamp with time zone | YES | - |
+| `_deleted` | boolean | YES | false |
+| `created_by` | uuid | YES | - |
+| `created_by_legacy_author` | text | YES | ''::text |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `channel_id` | `channels.id` | RESTRICT | NO ACTION |
+| `created_by` | `employees.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **advance_lists_authenticated** — `ALL`（roles: {public}）
+    - USING: `(auth.role() = 'authenticated'::text)`
+
+**Triggers**
+
+- `advance_lists_updated_at` — BEFORE UPDATE
+
+---
+
+### `agent_registry`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `agent_name` | text | NO | - |
+| `agent_key` | text | YES | - |
+| `role` | text | YES | - |
+| `emoji` | text | YES | - |
+| `telegram_id` | text | YES | - |
+| `bot_id` | uuid | YES | - |
+| `is_deployed` | boolean | YES | false |
+| `status` | text | YES | 'inactive'::text |
+| `description` | text | YES | - |
+| `managed_by` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `bot_id` | `bot_registry.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **agent_registry_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **agent_registry_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **agent_registry_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **agent_registry_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+---
+
+### `ai_bots`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `bot_id` | text | NO | - |
+| `name` | text | NO | - |
+| `emoji` | text | YES | '🤖'::text |
+| `bot_type` | text | NO | - |
+| `personality` | text | YES | - |
+| `expertise` | ARRAY | YES | - |
+| `instance_url` | text | YES | - |
+| `location` | text | YES | - |
+| `workspace_id` | uuid | YES | - |
+| `is_active` | boolean | YES | true |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **ai_bots_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **ai_bots_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **ai_bots_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **ai_bots_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+---
+
+### `ai_conversations`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | YES | - |
+| `employee_id` | uuid | YES | - |
+| `messages` | jsonb | NO | '[]'::jsonb |
+| `summary` | text | YES | - |
+| `learned_memory_ids` | ARRAY | YES | - |
+| `status` | text | YES | 'active'::text |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `employee_id` | `employees.id` | NO ACTION | NO ACTION |
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **ai_conversations_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **ai_conversations_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **ai_conversations_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **ai_conversations_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_ai_conversations_updated_at` — BEFORE UPDATE
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+
+---
+
+### `ai_memories`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | YES | - |
+| `category` | text | NO | - |
+| `title` | text | YES | - |
+| `content` | text | NO | - |
+| `context` | text | YES | - |
+| `related_feature` | text | YES | - |
+| `source` | text | YES | 'manual'::text |
+| `source_date` | date | YES | - |
+| `tags` | ARRAY | YES | - |
+| `emotion` | text | YES | - |
+| `importance` | integer | YES | 5 |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `created_by` | uuid | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **ai_memories_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **ai_memories_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **ai_memories_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **ai_memories_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_ai_memories_updated_at` — BEFORE UPDATE
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+
+---
+
+### `ai_messages`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `from_agent` | text | NO | - |
+| `to_agent` | text | NO | - |
+| `message` | text | NO | - |
+| `message_type` | text | YES | 'chat'::text |
+| `metadata` | jsonb | YES | '{}'::jsonb |
+| `is_read` | boolean | YES | false |
+| `created_at` | timestamp with time zone | YES | now() |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **ai_messages_delete** — `DELETE`（roles: {public}）
+    - USING: `true`
+- **ai_messages_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `true`
+- **ai_messages_select** — `SELECT`（roles: {public}）
+    - USING: `true`
+- **ai_messages_update** — `UPDATE`（roles: {public}）
+    - USING: `true`
+
+**Triggers**
+
+- `on_ai_message_insert` — AFTER INSERT
+
+---
+
+### `ai_settings`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | YES | - |
+| `setting_category` | text | NO | - |
+| `setting_key` | text | NO | - |
+| `setting_value` | text | YES | - |
+| `description` | text | YES | - |
+| `created_at` | timestamp without time zone | YES | now() |
+| `updated_at` | timestamp without time zone | YES | now() |
+| `updated_by` | uuid | YES | - |
+| `data_sources` | jsonb | YES | '[]'::jsonb |
+| `response_mode` | character varying | YES | 'passive'::character varying |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `updated_by` | `employees.id` | NO ACTION | NO ACTION |
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **ai_settings_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id = get_current_user_workspace()) OR is_super_admin())`
+- **ai_settings_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(workspace_id = get_current_user_workspace())`
+- **ai_settings_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id = get_current_user_workspace()) OR is_super_admin())`
+- **ai_settings_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id = get_current_user_workspace()) OR is_super_admin())`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+
+---
+
+### `airport_images`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `airport_code` | text | NO | - |
+| `image_url` | text | NO | - |
+| `label` | text | YES | - |
+| `season` | text | YES | - |
+| `is_default` | boolean | YES | false |
+| `display_order` | integer | YES | 0 |
+| `uploaded_by` | uuid | YES | - |
+| `workspace_id` | uuid | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `airport_code` | `ref_airports.iata_code` | RESTRICT | NO ACTION |
+| `uploaded_by` | `employees.id` | SET NULL | NO ACTION |
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **airport_images_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **airport_images_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **airport_images_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **airport_images_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_airport_images_updated_at` — BEFORE UPDATE
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+
+---
+
+### `announcements`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `title` | character varying | NO | - |
+| `content` | text | YES | - |
+| `category` | character varying | YES | 'general'::character varying |
+| `is_pinned` | boolean | NO | false |
+| `published_at` | timestamp with time zone | YES | - |
+| `expires_at` | timestamp with time zone | YES | - |
+| `created_by` | uuid | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `created_by` | `employees.id` | NO ACTION | NO ACTION |
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **announcements_delete** — `DELETE`（roles: {public}）
+    - USING: `true`
+- **announcements_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `true`
+- **announcements_select** — `SELECT`（roles: {public}）
+    - USING: `true`
+- **announcements_update** — `UPDATE`（roles: {public}）
+    - USING: `true`
+
+---
+
+### `api_usage`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `api_name` | text | NO | - |
+| `month` | text | NO | - |
+| `usage_count` | integer | YES | 0 |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **api_usage_delete** — `DELETE`（roles: {public}）
+    - USING: `true`
+- **api_usage_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `true`
+- **api_usage_select** — `SELECT`（roles: {public}）
+    - USING: `true`
+- **api_usage_update** — `UPDATE`（roles: {public}）
+    - USING: `true`
+
+---
+
+### `api_usage_log`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | bigint | NO | nextval('api_usage_log_id_seq'::regclass) |
+| `created_at` | timestamp with time zone | NO | now() |
+| `api_service` | text | NO | - |
+| `notes` | text | YES | - |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **api_usage_log_delete** — `DELETE`（roles: {public}）
+    - USING: `true`
+- **api_usage_log_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `true`
+- **api_usage_log_select** — `SELECT`（roles: {public}）
+    - USING: `true`
+- **api_usage_log_update** — `UPDATE`（roles: {public}）
+    - USING: `true`
+
+---
+
+### `assigned_itineraries`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `itinerary_id` | text | NO | - |
+| `assigned_date` | date | NO | - |
+| `end_date` | date | NO | - |
+| `status` | text | NO | 'upcoming'::text |
+| `created_by` | uuid | YES | - |
+| `created_at` | timestamp with time zone | NO | now() |
+| `updated_at` | timestamp with time zone | NO | now() |
+| `updated_by` | uuid | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `created_by` | `employees.id` | SET NULL | NO ACTION |
+| `updated_by` | `employees.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **assigned_itineraries_delete** — `DELETE`（roles: {public}）
+    - USING: `true`
+- **assigned_itineraries_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `true`
+- **assigned_itineraries_select** — `SELECT`（roles: {public}）
+    - USING: `true`
+- **assigned_itineraries_update** — `UPDATE`（roles: {public}）
+    - USING: `true`
+
+**Triggers**
+
+- `update_assigned_itineraries_updated_at` — BEFORE UPDATE
+
+---
+
+### `attendance_records`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `employee_id` | uuid | NO | - |
+| `date` | date | NO | - |
+| `clock_in` | time without time zone | YES | - |
+| `clock_out` | time without time zone | YES | - |
+| `work_hours` | numeric | YES | - |
+| `overtime_hours` | numeric | YES | 0 |
+| `status` | character varying | NO | 'present'::character varying |
+| `leave_request_id` | uuid | YES | - |
+| `notes` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `created_by` | uuid | YES | - |
+| `updated_by` | uuid | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `created_by` | `employees.id` | NO ACTION | NO ACTION |
+| `employee_id` | `employees.id` | RESTRICT | NO ACTION |
+| `leave_request_id` | `leave_requests.id` | NO ACTION | NO ACTION |
+| `updated_by` | `employees.id` | NO ACTION | NO ACTION |
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **attendance_records_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **attendance_records_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **attendance_records_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **attendance_records_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_attendance_records_updated_at` — BEFORE UPDATE
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+- `trigger_calculate_work_hours` — BEFORE UPDATE
+- `trigger_calculate_work_hours` — BEFORE INSERT
+
+---
+
+### `attraction_licenses`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `licensee_workspace_id` | uuid | NO | - |
+| `source_workspace_id` | uuid | NO | - |
+| `covers_attractions` | boolean | NO | true |
+| `covers_michelin` | boolean | NO | false |
+| `covers_premium` | boolean | NO | false |
+| `expires_at` | timestamp with time zone | YES | - |
+| `notes` | text | YES | - |
+| `created_at` | timestamp with time zone | NO | now() |
+| `created_by` | uuid | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `created_by` | `employees.id` | NO ACTION | NO ACTION |
+| `licensee_workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+| `source_workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **attraction_licenses_admin** — `ALL`（roles: {authenticated}）
+    - USING: `is_super_admin()`
+    - WITH CHECK: `is_super_admin()`
+- **attraction_licenses_select** — `SELECT`（roles: {authenticated}）
+    - USING: `((licensee_workspace_id = get_current_user_workspace()) OR (source_workspace_id = get_current_user_workspace()) OR is_super_admin())`
+
+---
+
+### `attractions`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `name` | text | NO | - |
+| `english_name` | text | YES | - |
+| `description` | text | YES | - |
+| `country_id` | text | NO | - |
+| `region_id` | text | YES | - |
+| `city_id` | text | YES | - |
+| `category` | text | YES | - |
+| `tags` | ARRAY | YES | - |
+| `opening_hours` | jsonb | YES | - |
+| `duration_minutes` | integer | YES | - |
+| `address` | text | YES | - |
+| `phone` | text | YES | - |
+| `website` | text | YES | - |
+| `latitude` | numeric | YES | - |
+| `longitude` | numeric | YES | - |
+| `google_maps_url` | text | YES | - |
+| `images` | ARRAY | YES | - |
+| `is_active` | boolean | YES | true |
+| `display_order` | integer | YES | 0 |
+| `notes` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `workspace_id` | uuid | NO | - |
+| `type` | text | YES | 'attraction'::text |
+| `ticket_price` | text | YES | - |
+| `data_verified` | boolean | YES | false |
+| `created_by` | uuid | YES | - |
+| `updated_by` | uuid | YES | - |
+| `contact_name` | text | YES | - |
+| `fax` | text | YES | - |
+| `country_code` | text | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `city_id` | `cities.id` | RESTRICT | NO ACTION |
+| `country_code` | `ref_countries.code` | NO ACTION | NO ACTION |
+| `country_id` | `countries.id` | RESTRICT | NO ACTION |
+| `created_by` | `employees.id` | NO ACTION | NO ACTION |
+| `region_id` | `regions.id` | SET NULL | NO ACTION |
+| `updated_by` | `employees.id` | NO ACTION | NO ACTION |
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **attractions_delete** — `DELETE`（roles: {authenticated}）
+    - USING: `((workspace_id = get_current_user_workspace()) OR is_super_admin())`
+- **attractions_insert** — `INSERT`（roles: {authenticated}）
+    - WITH CHECK: `((workspace_id = get_current_user_workspace()) OR is_super_admin())`
+- **attractions_select** — `SELECT`（roles: {authenticated}）
+    - USING: `((workspace_id = get_current_user_workspace()) OR has_attraction_license(workspace_id, 'attractions'::text) OR is_super_admin())`
+- **attractions_update** — `UPDATE`（roles: {authenticated}）
+    - USING: `((workspace_id = get_current_user_workspace()) OR is_super_admin())`
+
+**Triggers**
+
+- `trg_attractions_sync_country_code` — BEFORE INSERT
+- `trg_attractions_sync_country_code` — BEFORE UPDATE
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+- `update_attractions_updated_at` — BEFORE UPDATE
+
+---
+
+### `background_tasks`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `type` | character varying | NO | - |
+| `payload` | jsonb | NO | '{}'::jsonb |
+| `status` | task_status (enum) | NO | 'pending'::task_status |
+| `priority` | task_priority (enum) | NO | 'normal'::task_priority |
+| `workspace_id` | uuid | NO | - |
+| `created_by` | uuid | YES | - |
+| `attempts` | integer | NO | 0 |
+| `max_attempts` | integer | NO | 3 |
+| `scheduled_at` | timestamp with time zone | NO | now() |
+| `started_at` | timestamp with time zone | YES | - |
+| `completed_at` | timestamp with time zone | YES | - |
+| `error` | text | YES | - |
+| `result` | jsonb | YES | - |
+| `created_at` | timestamp with time zone | NO | now() |
+| `updated_at` | timestamp with time zone | NO | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `created_by` | `employees.id` | NO ACTION | NO ACTION |
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **background_tasks_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **background_tasks_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **background_tasks_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **background_tasks_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+
+---
+
+### `badge_definitions`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | text | NO | - |
+| `name` | text | NO | - |
+| `description` | text | NO | - |
+| `icon_url` | text | YES | - |
+| `category` | text | YES | 'general'::text |
+| `points_reward` | integer | YES | 0 |
+| `requirements` | jsonb | YES | - |
+| `is_active` | boolean | YES | true |
+| `sort_order` | integer | YES | 0 |
+| `created_at` | timestamp with time zone | NO | now() |
+| `updated_at` | timestamp with time zone | NO | now() |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **badge_definitions_delete** — `DELETE`（roles: {public}）
+    - USING: `true`
+- **badge_definitions_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `true`
+- **badge_definitions_select** — `SELECT`（roles: {public}）
+    - USING: `true`
+- **badge_definitions_update** — `UPDATE`（roles: {public}）
+    - USING: `true`
+
+**Triggers**
+
+- `update_badge_definitions_updated_at` — BEFORE UPDATE
+
+---
+
+### `badges`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `code` | text | NO | - |
+| `name` | text | NO | - |
+| `description` | text | YES | - |
+| `icon` | text | YES | - |
+| `color` | text | YES | '#C9A961'::text |
+| `category` | text | YES | 'general'::text |
+| `created_at` | timestamp with time zone | YES | now() |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **badges_delete** — `DELETE`（roles: {public}）
+    - USING: `true`
+- **badges_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `true`
+- **badges_select** — `SELECT`（roles: {public}）
+    - USING: `true`
+- **badges_update** — `UPDATE`（roles: {public}）
+    - USING: `true`
+
+---
+
+### `bank_accounts`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `code` | character varying | NO | - |
+| `name` | character varying | NO | - |
+| `bank_name` | character varying | YES | - |
+| `account_number` | character varying | YES | - |
+| `account_id` | uuid | YES | - |
+| `is_default` | boolean | YES | false |
+| `is_active` | boolean | YES | true |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `account_id` | `chart_of_accounts.id` | NO ACTION | NO ACTION |
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **bank_accounts_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **bank_accounts_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **bank_accounts_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **bank_accounts_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+---
+
+### `body_measurements`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `user_id` | uuid | NO | - |
+| `workspace_id` | uuid | YES | - |
+| `date` | date | NO | CURRENT_DATE |
+| `weight` | numeric | YES | - |
+| `body_fat_percentage` | numeric | YES | - |
+| `muscle_mass` | numeric | YES | - |
+| `bmi` | numeric | YES | - |
+| `chest_cm` | numeric | YES | - |
+| `waist_cm` | numeric | YES | - |
+| `hip_cm` | numeric | YES | - |
+| `arm_left_cm` | numeric | YES | - |
+| `arm_right_cm` | numeric | YES | - |
+| `thigh_left_cm` | numeric | YES | - |
+| `thigh_right_cm` | numeric | YES | - |
+| `calf_left_cm` | numeric | YES | - |
+| `calf_right_cm` | numeric | YES | - |
+| `notes` | text | YES | - |
+| `created_at` | timestamp with time zone | NO | now() |
+| `updated_at` | timestamp with time zone | NO | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **body_measurements_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **body_measurements_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **body_measurements_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **body_measurements_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+- `update_body_measurements_updated_at` — BEFORE UPDATE
+
+---
+
+### `bot_groups`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `bot_id` | uuid | NO | - |
+| `group_id` | text | NO | - |
+| `group_name` | text | YES | - |
+| `group_type` | text | YES | - |
+| `joined_at` | timestamp with time zone | YES | now() |
+| `is_new` | boolean | YES | true |
+| `member_count` | integer | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `bot_id` | `bot_registry.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **bot_groups_all** — `ALL`（roles: {public}）
+    - USING: `true`
+- **bot_groups_select** — `SELECT`（roles: {public}）
+    - USING: `(EXISTS ( SELECT 1
+   FROM bot_registry
+  WHERE ((bot_registry.id = bot_groups.bot_id) AND (bot_registry.workspace_id = get_current_user_workspace()))))`
+
+---
+
+### `bot_registry`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `bot_name` | text | NO | - |
+| `bot_username` | text | YES | - |
+| `platform` | text | NO | - |
+| `status` | text | YES | 'inactive'::text |
+| `webhook_url` | text | YES | - |
+| `description` | text | YES | - |
+| `managed_by` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **bot_registry_all** — `ALL`（roles: {public}）
+    - USING: `true`
+- **bot_registry_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **bot_registry_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **bot_registry_select** — `SELECT`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **bot_registry_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+---
+
+### `brochure_documents`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `tour_id` | text | YES | - |
+| `workspace_id` | uuid | YES | - |
+| `name` | text | NO | '未命名手冊'::text |
+| `type` | text | NO | 'full'::text |
+| `current_version_id` | uuid | YES | - |
+| `created_at` | timestamp with time zone | NO | now() |
+| `updated_at` | timestamp with time zone | NO | now() |
+| `created_by` | text | YES | - |
+| `updated_by` | text | YES | - |
+| `package_id` | uuid | YES | - |
+| `itinerary_id` | uuid | YES | - |
+| `design_type` | text | YES | 'brochure_a4'::text |
+| `tour_code` | text | YES | - |
+| `tour_name` | text | YES | - |
+| `itinerary_name` | text | YES | - |
+| `status` | text | YES | 'draft'::text |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `current_version_id` | `brochure_versions.id` | SET NULL | NO ACTION |
+| `tour_id` | `tours.id` | SET NULL | NO ACTION |
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **brochure_documents_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **brochure_documents_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **brochure_documents_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **brochure_documents_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+- `trigger_brochure_documents_updated_at` — BEFORE UPDATE
+
+---
+
+### `brochure_versions`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `document_id` | uuid | NO | - |
+| `version_number` | integer | NO | 1 |
+| `data` | jsonb | NO | '{}'::jsonb |
+| `thumbnail_url` | text | YES | - |
+| `restored_from` | uuid | YES | - |
+| `created_at` | timestamp with time zone | NO | now() |
+| `created_by` | text | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `document_id` | `brochure_documents.id` | CASCADE | NO ACTION |
+| `restored_from` | `brochure_versions.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **brochure_versions_delete** — `DELETE`（roles: {public}）
+    - USING: `true`
+- **brochure_versions_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `true`
+- **brochure_versions_select** — `SELECT`（roles: {public}）
+    - USING: `true`
+- **brochure_versions_update** — `UPDATE`（roles: {public}）
+    - USING: `true`
+
+**Triggers**
+
+- `trigger_brochure_version_number` — BEFORE INSERT
+
+---
+
+### `budgets`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `category_id` | uuid | NO | - |
+| `period` | character varying | NO | - |
+| `amount` | numeric | NO | - |
+| `spent` | numeric | YES | 0 |
+| `notes` | text | YES | - |
+| `is_active` | boolean | YES | true |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `category_id` | `categories.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **budgets_authenticated** — `ALL`（roles: {public}）
+    - USING: `(auth.role() = 'authenticated'::text)`
+
+**Triggers**
+
+- `update_budgets_updated_at` — BEFORE UPDATE
+
+---
+
+### `bulletins`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `title` | text | NO | - |
+| `content` | text | NO | - |
+| `type` | text | YES | 'announcement'::text |
+| `priority` | integer | YES | 0 |
+| `is_pinned` | boolean | YES | false |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `_needs_sync` | boolean | YES | false |
+| `_synced_at` | timestamp with time zone | YES | - |
+| `_deleted` | boolean | YES | false |
+| `created_by` | uuid | YES | - |
+| `updated_by` | uuid | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `created_by` | `employees.id` | NO ACTION | NO ACTION |
+| `updated_by` | `employees.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **bulletins_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **bulletins_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **bulletins_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **bulletins_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `bulletins_updated_at` — BEFORE UPDATE
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+
+---
+
+### `calendar_events`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `title` | text | NO | - |
+| `description` | text | YES | - |
+| `start` | timestamp with time zone | NO | - |
+| `end` | timestamp with time zone | NO | - |
+| `all_day` | boolean | YES | false |
+| `type` | text | NO | 'other'::text |
+| `color` | text | YES | - |
+| `visibility` | text | NO | 'personal'::text |
+| `related_tour_id` | text | YES | - |
+| `related_order_id` | text | YES | - |
+| `attendees` | ARRAY | YES | '{}'::text[] |
+| `reminder_minutes` | integer | YES | - |
+| `recurring` | text | YES | - |
+| `recurring_until` | timestamp with time zone | YES | - |
+| `owner_id` | uuid | NO | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `created_by` | uuid | YES | - |
+| `updated_by` | uuid | YES | - |
+| `workspace_id` | uuid | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `created_by` | `employees.id` | NO ACTION | NO ACTION |
+| `owner_id` | `employees.id` | NO ACTION | NO ACTION |
+| `updated_by` | `employees.id` | NO ACTION | NO ACTION |
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **calendar_events_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **calendar_events_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **calendar_events_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **calendar_events_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+- `update_calendar_events_updated_at` — BEFORE UPDATE
+
+---
+
+### `casual_trips`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `user_id` | uuid | YES | - |
+| `title` | text | NO | - |
+| `description` | text | YES | - |
+| `destination` | text | YES | - |
+| `start_date` | date | YES | - |
+| `end_date` | date | YES | - |
+| `cover_image` | text | YES | - |
+| `latitude` | double precision | YES | - |
+| `longitude` | double precision | YES | - |
+| `status` | text | YES | 'draft'::text |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `visibility` | text | NO | 'public'::text |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **casual_trips_delete** — `DELETE`（roles: {public}）
+    - USING: `true`
+- **casual_trips_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `true`
+- **casual_trips_select** — `SELECT`（roles: {public}）
+    - USING: `true`
+- **casual_trips_update** — `UPDATE`（roles: {public}）
+    - USING: `true`
+
+---
+
+### `categories`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `name` | character varying | NO | - |
+| `type` | character varying | NO | - |
+| `parent_id` | uuid | YES | - |
+| `icon` | character varying | YES | - |
+| `color` | character varying | YES | - |
+| `is_active` | boolean | YES | true |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `parent_id` | `categories.id` | SET NULL | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **categories_authenticated_access** — `ALL`（roles: {public}）
+    - USING: `(auth.role() = 'authenticated'::text)`
+
+**Triggers**
+
+- `update_categories_updated_at` — BEFORE UPDATE
+
+---
+
+### `channel_groups`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `name` | character varying | NO | - |
+| `is_collapsed` | boolean | YES | false |
+| `order` | integer | YES | 0 |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `_needs_sync` | boolean | YES | false |
+| `_synced_at` | timestamp with time zone | YES | - |
+| `_deleted` | boolean | YES | false |
+| `is_system` | boolean | YES | false |
+| `system_type` | text | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **channel_groups_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **channel_groups_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **channel_groups_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **channel_groups_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `channel_groups_updated_at` — BEFORE UPDATE
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+
+---
+
+### `channel_members`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `channel_id` | uuid | NO | - |
+| `employee_id` | uuid | NO | - |
+| `role` | text | NO | 'member'::text |
+| `status` | text | NO | 'active'::text |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `channel_id` | `channels.id` | CASCADE | NO ACTION |
+| `employee_id` | `employees.id` | NO ACTION | NO ACTION |
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **channel_members_delete** — `DELETE`（roles: {public}）
+    - USING: `(EXISTS ( SELECT 1
+   FROM channels
+  WHERE ((channels.id = channel_members.channel_id) AND (channels.workspace_id = get_current_user_workspace()))))`
+- **channel_members_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(EXISTS ( SELECT 1
+   FROM channels
+  WHERE ((channels.id = channel_members.channel_id) AND (channels.workspace_id = get_current_user_workspace()))))`
+- **channel_members_select** — `SELECT`（roles: {public}）
+    - USING: `(EXISTS ( SELECT 1
+   FROM channels
+  WHERE ((channels.id = channel_members.channel_id) AND (channels.workspace_id = get_current_user_workspace()))))`
+- **channel_members_update** — `UPDATE`（roles: {public}）
+    - USING: `(EXISTS ( SELECT 1
+   FROM channels
+  WHERE ((channels.id = channel_members.channel_id) AND (channels.workspace_id = get_current_user_workspace()))))`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+
+---
+
+### `channel_threads`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `channel_id` | uuid | NO | - |
+| `name` | text | NO | - |
+| `created_by` | uuid | NO | - |
+| `is_archived` | boolean | YES | false |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `_deleted` | boolean | YES | false |
+| `_needs_sync` | boolean | YES | false |
+| `_synced_at` | timestamp with time zone | YES | - |
+| `reply_count` | integer | YES | 0 |
+| `last_reply_at` | timestamp with time zone | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `channel_id` | `channels.id` | CASCADE | NO ACTION |
+| `created_by` | `employees.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **channel_threads_delete** — `DELETE`（roles: {public}）
+    - USING: `true`
+- **channel_threads_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `true`
+- **channel_threads_select** — `SELECT`（roles: {public}）
+    - USING: `true`
+- **channel_threads_update** — `UPDATE`（roles: {public}）
+    - USING: `true`
+
+---
+
+### `channels`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `name` | text | NO | - |
+| `description` | text | YES | - |
+| `type` | text | YES | 'public'::text |
+| `created_at` | timestamp with time zone | YES | now() |
+| `group_id` | uuid | YES | - |
+| `tour_id` | text | YES | - |
+| `is_favorite` | boolean | YES | false |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `_needs_sync` | boolean | YES | false |
+| `_synced_at` | timestamp with time zone | YES | - |
+| `_deleted` | boolean | YES | false |
+| `created_by` | uuid | YES | - |
+| `order` | integer | YES | 0 |
+| `is_pinned` | boolean | YES | false |
+| `is_archived` | boolean | YES | false |
+| `archived_at` | timestamp with time zone | YES | - |
+| `updated_by` | uuid | YES | - |
+| `visibility` | channel_visibility (enum) | YES | 'private'::channel_visibility |
+| `is_company_wide` | boolean | YES | false |
+| `scope` | text | YES | 'workspace'::text |
+| `channel_type` | text | NO | 'PUBLIC'::text |
+| `is_announcement` | boolean | NO | false |
+| `dm_target_id` | uuid | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `created_by` | `employees.id` | SET NULL | NO ACTION |
+| `dm_target_id` | `employees.id` | NO ACTION | NO ACTION |
+| `group_id` | `channel_groups.id` | SET NULL | NO ACTION |
+| `tour_id` | `tours.id` | RESTRICT | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **channels_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **channels_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **channels_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **channels_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `channels_updated_at` — BEFORE UPDATE
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+
+---
+
+### `chart_of_accounts`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | YES | - |
+| `code` | text | NO | - |
+| `name` | text | NO | - |
+| `account_type` | text | NO | - |
+| `parent_id` | uuid | YES | - |
+| `is_system_locked` | boolean | YES | false |
+| `is_active` | boolean | YES | true |
+| `description` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `is_favorite` | boolean | YES | false |
+| `usage_count` | integer | YES | 0 |
+| `last_used_at` | timestamp with time zone | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `parent_id` | `chart_of_accounts.id` | NO ACTION | NO ACTION |
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **chart_of_accounts_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id = get_current_user_workspace()) AND (is_system_locked = false))`
+- **chart_of_accounts_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(workspace_id = get_current_user_workspace())`
+- **chart_of_accounts_select** — `SELECT`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **chart_of_accounts_update** — `UPDATE`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+
+---
+
+### `checks`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `check_number` | text | NO | - |
+| `check_date` | date | NO | - |
+| `due_date` | date | NO | - |
+| `amount` | numeric | NO | - |
+| `payee_name` | text | NO | - |
+| `status` | text | NO | 'pending'::text |
+| `memo` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **checks_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **checks_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(workspace_id = get_current_user_workspace())`
+- **checks_select** — `SELECT`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **checks_update** — `UPDATE`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+
+---
+
+### `cities`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | text | NO | - |
+| `country_id` | text | NO | - |
+| `region_id` | text | YES | - |
+| `name` | text | NO | - |
+| `name_en` | text | YES | - |
+| `description` | text | YES | - |
+| `timezone` | text | YES | - |
+| `display_order` | integer | YES | 0 |
+| `is_active` | boolean | YES | true |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `airport_code` | character varying | YES | - |
+| `background_image_url` | text | YES | - |
+| `background_image_url_2` | text | YES | - |
+| `primary_image` | integer | YES | 1 |
+| `is_major` | boolean | YES | false |
+| `parent_city_id` | text | YES | - |
+| `workspace_id` | uuid | YES | - |
+| `usage_count` | integer | YES | 0 |
+| `country_code` | text | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `country_code` | `ref_countries.code` | NO ACTION | NO ACTION |
+| `country_id` | `countries.id` | RESTRICT | NO ACTION |
+| `parent_city_id` | `cities.id` | NO ACTION | NO ACTION |
+| `region_id` | `regions.id` | SET NULL | NO ACTION |
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **cities_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **cities_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **cities_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **cities_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trg_cities_sync_country_code` — BEFORE INSERT
+- `trg_cities_sync_country_code` — BEFORE UPDATE
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+- `update_cities_updated_at_trigger` — BEFORE UPDATE
+
+---
+
+### `companies`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `code` | text | YES | - |
+| `workspace_id` | uuid | YES | - |
+| `name` | text | NO | - |
+| `english_name` | text | YES | - |
+| `tax_id` | text | YES | - |
+| `phone` | text | YES | - |
+| `fax` | text | YES | - |
+| `email` | text | YES | - |
+| `website` | text | YES | - |
+| `address` | text | YES | - |
+| `industry` | text | YES | - |
+| `employee_count` | integer | YES | - |
+| `annual_travel_budget` | numeric | YES | - |
+| `payment_terms` | text | YES | - |
+| `credit_limit` | numeric | YES | - |
+| `status` | text | YES | 'active'::text |
+| `is_vip` | boolean | YES | false |
+| `vip_level` | integer | YES | 0 |
+| `total_orders` | integer | YES | 0 |
+| `total_spent` | numeric | YES | 0 |
+| `last_order_date` | date | YES | - |
+| `notes` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `created_by` | uuid | YES | - |
+| `updated_by` | uuid | YES | - |
+| `_needs_sync` | boolean | YES | false |
+| `_synced_at` | timestamp with time zone | YES | - |
+| `_deleted` | boolean | YES | false |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **companies_delete** — `DELETE`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **companies_insert** — `INSERT`（roles: {authenticated}）
+    - WITH CHECK: `((workspace_id IS NULL) OR (workspace_id = get_current_user_workspace()))`
+- **companies_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id IS NULL) OR (workspace_id = get_current_user_workspace()))`
+- **companies_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id IS NULL) OR (workspace_id = get_current_user_workspace()))`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+
+---
+
+### `company_announcements`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | YES | - |
+| `title` | text | NO | - |
+| `content` | text | YES | - |
+| `type` | text | YES | 'general'::text |
+| `is_pinned` | boolean | YES | false |
+| `priority` | integer | YES | 0 |
+| `publish_date` | timestamp with time zone | YES | now() |
+| `expire_date` | timestamp with time zone | YES | - |
+| `visibility` | text | YES | 'all'::text |
+| `visible_to_roles` | ARRAY | YES | - |
+| `visible_to_employees` | ARRAY | YES | - |
+| `status` | text | YES | 'draft'::text |
+| `read_by` | ARRAY | YES | '{}'::uuid[] |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `created_by` | uuid | YES | - |
+| `updated_by` | uuid | YES | - |
+| `_needs_sync` | boolean | YES | false |
+| `_synced_at` | timestamp with time zone | YES | - |
+| `_deleted` | boolean | YES | false |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **company_announcements_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **company_announcements_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **company_announcements_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **company_announcements_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+
+---
+
+### `company_asset_folders`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `name` | text | NO | - |
+| `parent_id` | uuid | YES | - |
+| `icon` | text | YES | '📁'::text |
+| `color` | text | YES | - |
+| `sort_order` | integer | YES | 0 |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `created_by` | uuid | YES | - |
+| `updated_by` | uuid | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `created_by` | `employees.id` | NO ACTION | NO ACTION |
+| `parent_id` | `company_asset_folders.id` | CASCADE | NO ACTION |
+| `updated_by` | `employees.id` | NO ACTION | NO ACTION |
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **company_asset_folders_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **company_asset_folders_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **company_asset_folders_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **company_asset_folders_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **company_asset_folders_workspace_access** — `ALL`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+
+---
+
+### `company_assets`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `name` | text | NO | - |
+| `file_path` | text | NO | - |
+| `file_size` | integer | YES | - |
+| `mime_type` | text | YES | - |
+| `description` | text | YES | - |
+| `uploaded_by` | uuid | YES | - |
+| `uploaded_by_name` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `asset_type` | text | YES | 'image'::text |
+| `restricted` | boolean | YES | false |
+| `folder_id` | uuid | YES | - |
+| `workspace_id` | uuid | YES | - |
+| `created_by` | uuid | YES | - |
+| `updated_by` | uuid | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `created_by` | `employees.id` | NO ACTION | NO ACTION |
+| `folder_id` | `company_asset_folders.id` | SET NULL | NO ACTION |
+| `updated_by` | `employees.id` | NO ACTION | NO ACTION |
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **company_assets_delete** — `DELETE`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **company_assets_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(workspace_id = get_current_user_workspace())`
+- **company_assets_select** — `SELECT`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **company_assets_update** — `UPDATE`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+
+**Triggers**
+
+- `trg_update_company_assets_updated_at` — BEFORE UPDATE
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+
+---
+
+### `company_contacts`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | YES | - |
+| `company_id` | uuid | YES | - |
+| `name` | text | NO | - |
+| `english_name` | text | YES | - |
+| `title` | text | YES | - |
+| `department` | text | YES | - |
+| `phone` | text | YES | - |
+| `mobile` | text | YES | - |
+| `email` | text | YES | - |
+| `line_id` | text | YES | - |
+| `is_primary` | boolean | YES | false |
+| `is_active` | boolean | YES | true |
+| `notes` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `created_by` | uuid | YES | - |
+| `updated_by` | uuid | YES | - |
+| `_needs_sync` | boolean | YES | false |
+| `_synced_at` | timestamp with time zone | YES | - |
+| `_deleted` | boolean | YES | false |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `company_id` | `companies.id` | CASCADE | NO ACTION |
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **company_contacts_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **company_contacts_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **company_contacts_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **company_contacts_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+
+---
+
+### `confirmations`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `type` | confirmation_type (enum) | NO | - |
+| `booking_number` | text | NO | - |
+| `confirmation_number` | text | YES | - |
+| `data` | jsonb | NO | '{}'::jsonb |
+| `status` | text | YES | 'draft'::text |
+| `notes` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `created_by` | uuid | YES | - |
+| `updated_by` | uuid | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `created_by` | `employees.id` | SET NULL | NO ACTION |
+| `updated_by` | `employees.id` | SET NULL | NO ACTION |
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **confirmations_delete** — `DELETE`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **confirmations_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(workspace_id = get_current_user_workspace())`
+- **confirmations_select** — `SELECT`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **confirmations_update** — `UPDATE`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+
+**Triggers**
+
+- `confirmations_updated_at` — BEFORE UPDATE
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+
+---
+
+### `contracts`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `tour_id` | text | NO | - |
+| `code` | character varying | NO | - |
+| `template` | character varying | NO | - |
+| `signer_type` | character varying | YES | 'individual'::character varying |
+| `signer_name` | character varying | YES | - |
+| `signer_id_number` | character varying | YES | - |
+| `signer_phone` | character varying | YES | - |
+| `signer_address` | text | YES | - |
+| `company_name` | character varying | YES | - |
+| `company_tax_id` | character varying | YES | - |
+| `company_representative` | character varying | YES | - |
+| `company_address` | text | YES | - |
+| `emergency_contact_name` | character varying | YES | - |
+| `emergency_contact_relation` | character varying | YES | - |
+| `emergency_contact_phone` | character varying | YES | - |
+| `member_ids` | ARRAY | YES | '{}'::uuid[] |
+| `contract_data` | jsonb | YES | '{}'::jsonb |
+| `status` | character varying | YES | 'draft'::character varying |
+| `sent_via` | character varying | YES | - |
+| `sent_to` | character varying | YES | - |
+| `sent_at` | timestamp with time zone | YES | - |
+| `signature_image` | text | YES | - |
+| `signature_ip` | character varying | YES | - |
+| `signature_user_agent` | text | YES | - |
+| `signed_at` | timestamp with time zone | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `created_by` | uuid | YES | - |
+| `include_member_list` | boolean | YES | false |
+| `include_itinerary` | boolean | YES | false |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **contracts_delete** — `DELETE`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **contracts_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(workspace_id = get_current_user_workspace())`
+- **contracts_select** — `SELECT`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **contracts_update** — `UPDATE`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+
+---
+
+### `cost_templates`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `supplier_id` | text | NO | - |
+| `city_id` | text | NO | - |
+| `attraction_id` | uuid | YES | - |
+| `category` | text | NO | - |
+| `item_name` | text | NO | - |
+| `item_name_en` | text | YES | - |
+| `description` | text | YES | - |
+| `cost_price` | numeric | NO | - |
+| `selling_price` | numeric | YES | - |
+| `currency` | text | NO | 'TWD'::text |
+| `unit` | text | NO | - |
+| `min_quantity` | integer | YES | - |
+| `max_quantity` | integer | YES | - |
+| `valid_from` | date | YES | - |
+| `valid_until` | date | YES | - |
+| `season` | text | YES | - |
+| `duration_minutes` | integer | YES | - |
+| `capacity` | integer | YES | - |
+| `notes` | text | YES | - |
+| `is_active` | boolean | YES | true |
+| `display_order` | integer | YES | 0 |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `created_by` | uuid | YES | - |
+| `updated_by` | uuid | YES | - |
+| `vehicle_type` | text | YES | - |
+| `trip_type` | text | YES | - |
+| `route_origin` | text | YES | - |
+| `route_destination` | text | YES | - |
+| `base_distance_km` | integer | YES | - |
+| `base_hours` | integer | YES | - |
+| `overtime_rate` | numeric | YES | - |
+| `extra_km_rate` | numeric | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `attraction_id` | `attractions.id` | SET NULL | NO ACTION |
+| `city_id` | `cities.id` | RESTRICT | NO ACTION |
+| `created_by` | `employees.id` | SET NULL | NO ACTION |
+| `supplier_id` | `suppliers.id` | RESTRICT | NO ACTION |
+| `updated_by` | `employees.id` | SET NULL | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **cost_templates_authenticated** — `ALL`（roles: {public}）
+    - USING: `(auth.role() = 'authenticated'::text)`
+
+**Triggers**
+
+- `update_cost_templates_updated_at` — BEFORE UPDATE
+
+---
+
+### `countries`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | text | NO | - |
+| `name` | text | NO | - |
+| `name_en` | text | NO | - |
+| `emoji` | text | YES | - |
+| `code` | text | YES | - |
+| `has_regions` | boolean | YES | false |
+| `display_order` | integer | YES | 0 |
+| `is_active` | boolean | YES | true |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `region` | text | YES | - |
+| `workspace_id` | uuid | YES | - |
+| `usage_count` | integer | YES | 0 |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **countries_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **countries_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **countries_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **countries_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+- `update_countries_updated_at_trigger` — BEFORE UPDATE
+
+---
+
+### `cover_templates`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | text | NO | - |
+| `name` | text | NO | - |
+| `description` | text | YES | - |
+| `preview_image_url` | text | YES | - |
+| `component_name` | text | NO | - |
+| `sort_order` | integer | YES | 0 |
+| `is_active` | boolean | YES | true |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **cover_templates_authenticated_access** — `ALL`（roles: {public}）
+    - USING: `(auth.role() = 'authenticated'::text)`
+
+---
+
+### `cron_execution_logs`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `job_name` | text | NO | - |
+| `executed_at` | timestamp with time zone | YES | now() |
+| `result` | jsonb | YES | - |
+| `success` | boolean | YES | true |
+| `error_message` | text | YES | - |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **cron_execution_logs_delete** — `DELETE`（roles: {public}）
+    - USING: `true`
+- **cron_execution_logs_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `true`
+- **cron_execution_logs_select** — `SELECT`（roles: {public}）
+    - USING: `true`
+- **cron_execution_logs_update** — `UPDATE`（roles: {public}）
+    - USING: `true`
+
+---
+
+### `customer_assigned_itineraries`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | uuid_generate_v4() |
+| `customer_id` | text | NO | - |
+| `itinerary_id` | text | NO | - |
+| `order_id` | text | YES | - |
+| `assigned_date` | date | NO | - |
+| `status` | text | NO | 'assigned'::text |
+| `notes` | text | YES | - |
+| `workspace_id` | uuid | YES | - |
+| `created_at` | timestamp with time zone | NO | now() |
+| `updated_at` | timestamp with time zone | NO | now() |
+| `visa_status` | text | YES | - |
+| `esim_url` | text | YES | - |
+| `payment_details` | jsonb | YES | - |
+| `room_allocation` | jsonb | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `customer_id` | `customers.id` | RESTRICT | NO ACTION |
+| `itinerary_id` | `itineraries.id` | RESTRICT | NO ACTION |
+| `order_id` | `orders.id` | SET NULL | NO ACTION |
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **customer_assigned_itineraries_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **customer_assigned_itineraries_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **customer_assigned_itineraries_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **customer_assigned_itineraries_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+- `update_customer_assigned_itineraries_updated_at` — BEFORE UPDATE
+
+---
+
+### `customer_badges`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `customer_id` | text | NO | - |
+| `badge_id` | text | NO | - |
+| `earned_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `badge_id` | `badge_definitions.id` | CASCADE | NO ACTION |
+| `customer_id` | `customers.id` | RESTRICT | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **customer_badges_authenticated** — `ALL`（roles: {public}）
+    - USING: `(auth.role() = 'authenticated'::text)`
+
+---
+
+### `customer_group_members`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `group_id` | uuid | NO | - |
+| `customer_id` | text | NO | - |
+| `role` | text | YES | 'member'::text |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `customer_id` | `customers.id` | RESTRICT | NO ACTION |
+| `group_id` | `customer_groups.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **customer_group_members_delete** — `DELETE`（roles: {public}）
+    - USING: `true`
+- **customer_group_members_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `true`
+- **customer_group_members_select** — `SELECT`（roles: {public}）
+    - USING: `true`
+- **customer_group_members_update** — `UPDATE`（roles: {public}）
+    - USING: `true`
+
+---
+
+### `customer_groups`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `name` | text | NO | - |
+| `type` | text | NO | 'other'::text |
+| `notes` | text | YES | - |
+| `created_by` | uuid | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `updated_by` | uuid | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `created_by` | `employees.id` | SET NULL | NO ACTION |
+| `updated_by` | `employees.id` | NO ACTION | NO ACTION |
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **customer_groups_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **customer_groups_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **customer_groups_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **customer_groups_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+
+---
+
+### `customer_inquiries`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `template_id` | uuid | YES | - |
+| `code` | character varying | YES | - |
+| `customer_name` | character varying | NO | - |
+| `phone` | character varying | YES | - |
+| `email` | character varying | YES | - |
+| `travel_date` | date | YES | - |
+| `people_count` | integer | YES | 1 |
+| `notes` | text | YES | - |
+| `selected_items` | jsonb | YES | '[]'::jsonb |
+| `status` | character varying | YES | 'pending'::character varying |
+| `assigned_to` | uuid | YES | - |
+| `internal_notes` | text | YES | - |
+| `converted_to_quote_id` | text | YES | - |
+| `converted_to_tour_id` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `line_user_id` | text | YES | - |
+| `customer_id` | text | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `customer_id` | `customers.id` | NO ACTION | NO ACTION |
+| `template_id` | `wishlist_templates.id` | SET NULL | NO ACTION |
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **Public can create inquiries** — `INSERT`（roles: {public}）
+    - WITH CHECK: `true`
+- **Service role full access inquiries** — `ALL`（roles: {public}）
+    - USING: `true`
+    - WITH CHECK: `true`
+- **customer_inquiries_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **customer_inquiries_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **customer_inquiries_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **customer_inquiries_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `tr_customer_inquiry_code` — BEFORE INSERT
+
+---
+
+### `customer_service_conversations`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | uuid_generate_v4() |
+| `platform` | text | NO | - |
+| `platform_user_id` | text | NO | - |
+| `user_display_name` | text | YES | - |
+| `user_message` | text | NO | - |
+| `ai_response` | text | NO | - |
+| `intent` | text | YES | - |
+| `mentioned_tours` | ARRAY | YES | - |
+| `sentiment` | text | YES | - |
+| `is_potential_lead` | boolean | YES | false |
+| `lead_score` | integer | YES | 0 |
+| `created_at` | timestamp without time zone | YES | now() |
+| `workspace_id` | uuid | YES | - |
+| `follow_up_status` | text | YES | - |
+| `follow_up_note` | text | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **conversations_workspace_read** — `SELECT`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **conversations_workspace_update** — `UPDATE`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+
+**Triggers**
+
+- `auto_create_lead_trigger` — BEFORE INSERT
+
+---
+
+### `customer_service_leads`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | uuid_generate_v4() |
+| `platform` | text | NO | - |
+| `platform_user_id` | text | NO | - |
+| `user_display_name` | text | YES | - |
+| `interested_tours` | ARRAY | YES | - |
+| `last_contact` | timestamp without time zone | YES | - |
+| `total_messages` | integer | YES | 1 |
+| `status` | text | YES | 'pending'::text |
+| `assigned_to` | uuid | YES | - |
+| `notes` | text | YES | - |
+| `created_at` | timestamp without time zone | YES | now() |
+| `updated_at` | timestamp without time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `assigned_to` | `employees.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **customer_service_leads_delete** — `DELETE`（roles: {public}）
+    - USING: `true`
+- **customer_service_leads_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `true`
+- **customer_service_leads_select** — `SELECT`（roles: {public}）
+    - USING: `true`
+- **customer_service_leads_update** — `UPDATE`（roles: {public}）
+    - USING: `true`
+
+---
+
+### `customer_travel_cards`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `customer_id` | text | NO | - |
+| `template_id` | uuid | YES | - |
+| `icon` | text | YES | - |
+| `label_zh` | text | YES | - |
+| `translations` | jsonb | YES | '{}'::jsonb |
+| `is_active` | boolean | YES | true |
+| `sort_order` | integer | YES | 0 |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `customer_id` | `customers.id` | RESTRICT | NO ACTION |
+| `template_id` | `travel_card_templates.id` | SET NULL | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **customer_travel_cards_authenticated** — `ALL`（roles: {public}）
+    - USING: `(auth.role() = 'authenticated'::text)`
+
+---
+
+### `customers`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | text | NO | - |
+| `code` | text | NO | - |
+| `name` | text | NO | - |
+| `phone` | text | YES | - |
+| `email` | text | YES | - |
+| `address` | text | YES | - |
+| `national_id` | text | YES | - |
+| `emergency_contact` | jsonb | YES | '{}'::jsonb |
+| `total_orders` | integer | YES | 0 |
+| `total_spent` | numeric | YES | 0 |
+| `notes` | text | YES | - |
+| `is_active` | boolean | YES | true |
+| `created_at` | timestamp with time zone | NO | now() |
+| `updated_at` | timestamp with time zone | NO | now() |
+| `english_name` | text | YES | - |
+| `alternative_phone` | text | YES | - |
+| `city` | text | YES | - |
+| `country` | text | YES | '台灣'::text |
+| `passport_number` | text | YES | - |
+| `birth_date` | date | YES | - |
+| `gender` | text | YES | - |
+| `company` | text | YES | - |
+| `tax_id` | text | YES | - |
+| `is_vip` | boolean | YES | false |
+| `vip_level` | text | YES | - |
+| `source` | text | YES | - |
+| `referred_by` | text | YES | - |
+| `last_order_date` | timestamp with time zone | YES | - |
+| `passport_name` | character varying | YES | - |
+| `passport_expiry` | date | YES | - |
+| `workspace_id` | uuid | NO | - |
+| `created_by` | uuid | YES | - |
+| `updated_by` | uuid | YES | - |
+| `verification_status` | verification_status (enum) | NO | 'unverified'::verification_status |
+| `passport_image_url` | text | YES | - |
+| `nationality` | text | YES | - |
+| `sex` | text | YES | - |
+| `nickname` | text | YES | - |
+| `member_type` | text | NO | 'member'::text |
+| `avatar_url` | text | YES | - |
+| `total_points` | integer | YES | 0 |
+| `dietary_restrictions` | text | YES | - |
+| `linked_at` | timestamp with time zone | YES | - |
+| `linked_method` | text | YES | - |
+| `passport_name_print` | text | YES | - |
+| `online_user_id` | uuid | YES | - |
+| `line_user_id` | text | YES | - |
+| `line_linked_at` | timestamp with time zone | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **customers_delete** — `DELETE`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **customers_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(workspace_id = get_current_user_workspace())`
+- **customers_select** — `SELECT`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **customers_update** — `UPDATE`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+- `update_customers_updated_at` — BEFORE UPDATE
+
+---
+
+### `customization_requests`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | uuid_generate_v4() |
+| `customer_id` | text | NO | - |
+| `assigned_itinerary_id` | uuid | NO | - |
+| `request_text` | text | NO | - |
+| `status` | text | NO | 'new'::text |
+| `response_text` | text | YES | - |
+| `handled_by` | uuid | YES | - |
+| `handled_at` | timestamp with time zone | YES | - |
+| `workspace_id` | uuid | YES | - |
+| `created_at` | timestamp with time zone | NO | now() |
+| `updated_at` | timestamp with time zone | NO | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `assigned_itinerary_id` | `customer_assigned_itineraries.id` | RESTRICT | NO ACTION |
+| `customer_id` | `customers.id` | RESTRICT | NO ACTION |
+| `handled_by` | `employees.id` | NO ACTION | NO ACTION |
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **customization_requests_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **customization_requests_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **customization_requests_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **customization_requests_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+- `update_customization_requests_updated_at` — BEFORE UPDATE
+
+---
+
+### `daily_templates`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | text | NO | - |
+| `name` | text | NO | - |
+| `description` | text | YES | - |
+| `preview_image_url` | text | YES | - |
+| `component_name` | text | NO | - |
+| `sort_order` | integer | YES | 0 |
+| `is_active` | boolean | YES | true |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **daily_templates_authenticated_access** — `ALL`（roles: {public}）
+    - USING: `(auth.role() = 'authenticated'::text)`
+
+---
+
+### `decisions_log`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | integer | NO | nextval('decisions_log_id_seq'::regclass) |
+| `project_id` | integer | YES | - |
+| `decision_text` | text | NO | - |
+| `decided_by` | text | YES | - |
+| `decided_at` | timestamp without time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `project_id` | `projects.id` | RESTRICT | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **decisions_log_delete** — `DELETE`（roles: {public}）
+    - USING: `true`
+- **decisions_log_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `true`
+- **decisions_log_select** — `SELECT`（roles: {public}）
+    - USING: `true`
+- **decisions_log_update** — `UPDATE`（roles: {public}）
+    - USING: `true`
+
+---
+
+### `departments`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `name` | text | NO | - |
+| `code` | text | NO | - |
+| `description` | text | YES | - |
+| `is_active` | boolean | YES | true |
+| `display_order` | integer | YES | 0 |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `created_by` | uuid | YES | - |
+| `updated_by` | uuid | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **departments_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **departments_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **departments_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **departments_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+---
+
+### `design_templates`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | YES | - |
+| `name` | text | NO | - |
+| `description` | text | YES | - |
+| `type` | text | NO | - |
+| `category` | text | YES | - |
+| `tags` | ARRAY | YES | '{}'::text[] |
+| `data` | jsonb | NO | '{}'::jsonb |
+| `thumbnail_url` | text | YES | - |
+| `is_public` | boolean | YES | false |
+| `is_featured` | boolean | YES | false |
+| `use_count` | integer | YES | 0 |
+| `created_at` | timestamp with time zone | NO | now() |
+| `updated_at` | timestamp with time zone | NO | now() |
+| `created_by` | text | YES | - |
+| `updated_by` | uuid | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `updated_by` | `employees.id` | NO ACTION | NO ACTION |
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **design_templates_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **design_templates_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **design_templates_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **design_templates_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+- `trigger_design_templates_updated_at` — BEFORE UPDATE
+
+---
+
+### `designer_drafts`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `user_id` | uuid | NO | - |
+| `tour_id` | text | YES | - |
+| `proposal_id` | uuid | YES | - |
+| `itinerary_id` | text | YES | - |
+| `name` | text | NO | '未命名草稿'::text |
+| `style_id` | text | NO | - |
+| `template_data` | jsonb | NO | '{}'::jsonb |
+| `trip_days` | integer | NO | 3 |
+| `memo_settings` | jsonb | YES | - |
+| `hotels` | jsonb | YES | '[]'::jsonb |
+| `attractions` | jsonb | YES | '[]'::jsonb |
+| `country_code` | text | YES | 'JP'::text |
+| `edited_elements` | jsonb | YES | '{}'::jsonb |
+| `created_at` | timestamp with time zone | NO | now() |
+| `updated_at` | timestamp with time zone | NO | now() |
+| `package_id` | uuid | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `itinerary_id` | `itineraries.id` | RESTRICT | NO ACTION |
+| `tour_id` | `tours.id` | RESTRICT | NO ACTION |
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **designer_drafts_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **designer_drafts_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **designer_drafts_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **designer_drafts_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+- `trigger_designer_drafts_updated_at` — BEFORE UPDATE
+
+---
+
+### `disbursement_orders`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | text | NO | gen_random_uuid() |
+| `code` | text | YES | - |
+| `amount` | numeric | NO | - |
+| `payment_method` | text | YES | - |
+| `status` | text | NO | 'pending'::text |
+| `handled_by` | text | YES | - |
+| `handled_at` | timestamp with time zone | YES | - |
+| `notes` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `workspace_id` | uuid | NO | - |
+| `payment_request_ids` | ARRAY | YES | '{}'::uuid[] |
+| `updated_by` | uuid | YES | - |
+| `order_number` | text | YES | - |
+| `disbursement_date` | date | YES | - |
+| `confirmed_by` | uuid | YES | - |
+| `confirmed_at` | timestamp with time zone | YES | - |
+| `created_by` | uuid | YES | - |
+| `pdf_url` | text | YES | - |
+| `disbursement_type` | character varying | YES | 'payment_request'::character varying |
+| `refund_id` | uuid | YES | - |
+| `bank_account_id` | uuid | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `bank_account_id` | `bank_accounts.id` | NO ACTION | NO ACTION |
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **disbursement_orders_delete** — `DELETE`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **disbursement_orders_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(workspace_id = get_current_user_workspace())`
+- **disbursement_orders_select** — `SELECT`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **disbursement_orders_update** — `UPDATE`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+
+**Triggers**
+
+- `disbursement_orders_cascade_to_requests` — AFTER UPDATE
+- `disbursement_orders_enforce_lock` — BEFORE UPDATE
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+- `update_disbursement_orders_updated_at` — BEFORE UPDATE
+
+---
+
+### `disbursement_requests`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `disbursement_order_id` | text | NO | - |
+| `payment_request_id` | uuid | NO | - |
+| `created_at` | timestamp with time zone | YES | now() |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **disbursement_requests_authenticated** — `ALL`（roles: {public}）
+    - USING: `(auth.role() = 'authenticated'::text)`
+
+---
+
+### `driver_tasks`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `task_code` | character varying | NO | - |
+| `tour_request_id` | uuid | YES | - |
+| `tour_id` | text | YES | - |
+| `tour_code` | character varying | YES | - |
+| `tour_name` | character varying | YES | - |
+| `supplier_id` | text | NO | - |
+| `supplier_name` | character varying | YES | - |
+| `driver_id` | uuid | YES | - |
+| `driver_name` | character varying | YES | - |
+| `driver_phone` | character varying | YES | - |
+| `vehicle_info` | character varying | YES | - |
+| `service_date` | date | NO | - |
+| `pickup_time` | timestamp with time zone | NO | - |
+| `pickup_location` | character varying | NO | - |
+| `pickup_address` | text | YES | - |
+| `pickup_lat` | numeric | YES | - |
+| `pickup_lng` | numeric | YES | - |
+| `pickup_note` | text | YES | - |
+| `dropoff_location` | character varying | NO | - |
+| `dropoff_address` | text | YES | - |
+| `dropoff_lat` | numeric | YES | - |
+| `dropoff_lng` | numeric | YES | - |
+| `dropoff_note` | text | YES | - |
+| `stops` | jsonb | YES | '[]'::jsonb |
+| `passenger_name` | character varying | YES | - |
+| `passenger_phone` | character varying | YES | - |
+| `passenger_count` | integer | YES | - |
+| `passenger_note` | text | YES | - |
+| `agency_contact_name` | character varying | YES | - |
+| `agency_contact_phone` | character varying | YES | - |
+| `status` | character varying | YES | 'pending'::character varying |
+| `assigned_at` | timestamp with time zone | YES | - |
+| `accepted_at` | timestamp with time zone | YES | - |
+| `started_at` | timestamp with time zone | YES | - |
+| `picked_up_at` | timestamp with time zone | YES | - |
+| `completed_at` | timestamp with time zone | YES | - |
+| `cancelled_at` | timestamp with time zone | YES | - |
+| `internal_note` | text | YES | - |
+| `driver_note` | text | YES | - |
+| `estimated_cost` | numeric | YES | - |
+| `final_cost` | numeric | YES | - |
+| `currency` | character varying | YES | 'TWD'::character varying |
+| `workspace_id` | uuid | NO | - |
+| `source_workspace_id` | uuid | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `created_by` | uuid | YES | - |
+| `updated_by` | uuid | YES | - |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **driver_tasks_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **driver_tasks_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **driver_tasks_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **driver_tasks_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+- `trigger_driver_tasks_updated_at` — BEFORE UPDATE
+
+---
+
+### `email_accounts`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `email_address` | text | NO | - |
+| `display_name` | text | YES | - |
+| `account_type` | text | NO | 'shared'::text |
+| `owner_id` | uuid | YES | - |
+| `is_active` | boolean | NO | true |
+| `is_default` | boolean | NO | false |
+| `signature_html` | text | YES | - |
+| `signature_text` | text | YES | - |
+| `settings` | jsonb | YES | '{}'::jsonb |
+| `domain_verified` | boolean | YES | false |
+| `verified_at` | timestamp with time zone | YES | - |
+| `created_at` | timestamp with time zone | NO | now() |
+| `updated_at` | timestamp with time zone | NO | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `owner_id` | `employees.id` | NO ACTION | NO ACTION |
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **email_accounts_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **email_accounts_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **email_accounts_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **email_accounts_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+
+---
+
+### `email_attachments`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `email_id` | uuid | NO | - |
+| `workspace_id` | uuid | NO | - |
+| `filename` | text | NO | - |
+| `content_type` | text | YES | - |
+| `size_bytes` | bigint | YES | - |
+| `storage_path` | text | YES | - |
+| `external_url` | text | YES | - |
+| `content_id` | text | YES | - |
+| `is_inline` | boolean | YES | false |
+| `created_at` | timestamp with time zone | NO | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `email_id` | `emails.id` | CASCADE | NO ACTION |
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **email_attachments_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **email_attachments_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **email_attachments_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **email_attachments_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+
+---
+
+### `emails`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `message_id` | text | YES | - |
+| `thread_id` | text | YES | - |
+| `in_reply_to` | text | YES | - |
+| `direction` | text | NO | - |
+| `status` | text | NO | 'draft'::text |
+| `from_address` | text | NO | - |
+| `from_name` | text | YES | - |
+| `to_addresses` | jsonb | NO | '[]'::jsonb |
+| `cc_addresses` | jsonb | YES | '[]'::jsonb |
+| `bcc_addresses` | jsonb | YES | '[]'::jsonb |
+| `reply_to_address` | text | YES | - |
+| `subject` | text | YES | - |
+| `body_text` | text | YES | - |
+| `body_html` | text | YES | - |
+| `customer_id` | text | YES | - |
+| `supplier_id` | text | YES | - |
+| `tour_id` | text | YES | - |
+| `order_id` | text | YES | - |
+| `is_read` | boolean | NO | false |
+| `is_starred` | boolean | NO | false |
+| `is_archived` | boolean | NO | false |
+| `is_trash` | boolean | NO | false |
+| `labels` | ARRAY | YES | '{}'::text[] |
+| `scheduled_at` | timestamp with time zone | YES | - |
+| `sent_at` | timestamp with time zone | YES | - |
+| `delivered_at` | timestamp with time zone | YES | - |
+| `received_at` | timestamp with time zone | YES | - |
+| `error_message` | text | YES | - |
+| `retry_count` | integer | YES | 0 |
+| `external_id` | text | YES | - |
+| `notes` | text | YES | - |
+| `created_at` | timestamp with time zone | NO | now() |
+| `updated_at` | timestamp with time zone | NO | now() |
+| `created_by` | uuid | YES | - |
+| `updated_by` | uuid | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `created_by` | `employees.id` | SET NULL | NO ACTION |
+| `customer_id` | `customers.id` | SET NULL | NO ACTION |
+| `order_id` | `orders.id` | SET NULL | NO ACTION |
+| `supplier_id` | `suppliers.id` | SET NULL | NO ACTION |
+| `tour_id` | `tours.id` | SET NULL | NO ACTION |
+| `updated_by` | `employees.id` | SET NULL | NO ACTION |
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **emails_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **emails_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **emails_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **emails_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `tr_auto_link_email_contacts` — BEFORE INSERT
+- `tr_emails_updated_at` — BEFORE UPDATE
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+
+---
+
+### `employee_payroll_config`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `employee_id` | uuid | NO | - |
+| `insured_salary` | numeric | YES | - |
+| `health_dependents` | integer | NO | 0 |
+| `deduction_overrides` | jsonb | YES | '{}'::jsonb |
+| `allowance_overrides` | jsonb | YES | '{}'::jsonb |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `employee_id` | `employees.id` | RESTRICT | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **employee_payroll_config_all** — `ALL`（roles: {public}）
+    - USING: `true`
+- **employee_payroll_config_select** — `SELECT`（roles: {public}）
+    - USING: `true`
+
+---
+
+### `employee_permission_overrides`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `employee_id` | uuid | NO | - |
+| `module_code` | text | NO | - |
+| `tab_code` | text | YES | - |
+| `override_type` | text | NO | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `employee_id` | `employees.id` | RESTRICT | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **employee_permission_overrides_delete** — `DELETE`（roles: {public}）
+    - USING: `true`
+- **employee_permission_overrides_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `true`
+- **employee_permission_overrides_select** — `SELECT`（roles: {public}）
+    - USING: `true`
+- **employee_permission_overrides_update** — `UPDATE`（roles: {public}）
+    - USING: `true`
+
+---
+
+### `employee_route_overrides`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `employee_id` | uuid | NO | - |
+| `route` | text | NO | - |
+| `override_type` | text | NO | - |
+| `can_read` | boolean | YES | false |
+| `can_write` | boolean | YES | false |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `employee_id` | `employees.id` | RESTRICT | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **employees_read_own_overrides** — `SELECT`（roles: {public}）
+    - USING: `((employee_id = ( SELECT auth.uid() AS uid)) OR (EXISTS ( SELECT 1
+   FROM employees e
+  WHERE ((e.id = employee_route_overrides.employee_id) AND (e.workspace_id = ( SELECT employees.workspace_id
+           FROM employees
+          WHERE (employees.supabase_user_id = auth.uid())))))))`
+- **service_role_manage_overrides** — `ALL`（roles: {public}）
+    - USING: `(auth.role() = 'service_role'::text)`
+
+---
+
+### `employees`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `employee_number` | text | NO | - |
+| `english_name` | text | YES | - |
+| `chinese_name` | text | YES | - |
+| `password_hash` | text | YES | - |
+| `personal_info` | jsonb | YES | '{}'::jsonb |
+| `job_info` | jsonb | YES | '{}'::jsonb |
+| `salary_info` | jsonb | YES | '{}'::jsonb |
+| `permissions` | ARRAY | YES | ARRAY[]::text[] |
+| `attendance` | jsonb | YES | '{"leave_records": [], "overtime_records": []}'::jsonb |
+| `contracts` | jsonb | YES | '[]'::jsonb |
+| `status` | text | YES | 'active'::text |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `avatar` | text | YES | - |
+| `is_active` | boolean | YES | true |
+| `email` | text | YES | - |
+| `display_name` | text | YES | - |
+| `roles` | ARRAY | YES | ARRAY[]::text[] |
+| `id` | uuid | NO | gen_random_uuid() |
+| `avatar_url` | text | YES | - |
+| `workspace_id` | uuid | YES | - |
+| `hidden_menu_items` | ARRAY | YES | '{}'::text[] |
+| `user_id` | uuid | YES | - |
+| `monthly_salary` | numeric | YES | 30000 |
+| `preferred_features` | jsonb | YES | '[]'::jsonb |
+| `supabase_user_id` | uuid | YES | - |
+| `updated_by` | uuid | YES | - |
+| `must_change_password` | boolean | YES | false |
+| `employee_type` | text | YES | 'human'::text |
+| `id_number` | text | YES | - |
+| `birth_date` | date | YES | - |
+| `pinyin` | text | YES | - |
+| `created_by` | uuid | YES | - |
+| `line_user_id` | text | YES | - |
+| `role_id` | uuid | YES | - |
+| `job_title` | text | YES | - |
+| `birthday` | date | YES | - |
+| `is_bot` | boolean | YES | false |
+| `login_failed_count` | integer | NO | 0 |
+| `login_locked_until` | timestamp with time zone | YES | - |
+| `terminated_at` | timestamp with time zone | YES | - |
+| `terminated_by` | uuid | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `created_by` | `employees.id` | SET NULL | NO ACTION |
+| `role_id` | `workspace_roles.id` | NO ACTION | NO ACTION |
+| `terminated_by` | `employees.id` | SET NULL | NO ACTION |
+| `updated_by` | `employees.id` | NO ACTION | NO ACTION |
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **employees_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **employees_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **employees_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **employees_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+- `update_employees_updated_at` — BEFORE UPDATE
+
+---
+
+### `erp_bank_accounts`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | YES | - |
+| `name` | text | NO | - |
+| `bank_name` | text | YES | - |
+| `account_number` | text | YES | - |
+| `account_id` | uuid | YES | - |
+| `is_active` | boolean | YES | true |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `account_id` | `chart_of_accounts.id` | NO ACTION | NO ACTION |
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **erp_bank_accounts_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **erp_bank_accounts_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(workspace_id = get_current_user_workspace())`
+- **erp_bank_accounts_select** — `SELECT`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **erp_bank_accounts_update** — `UPDATE`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+
+---
+
+### `esims`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `esim_number` | text | NO | - |
+| `group_code` | text | NO | - |
+| `order_number` | text | YES | - |
+| `supplier_order_number` | text | YES | - |
+| `status` | integer | NO | 0 |
+| `product_id` | text | YES | - |
+| `quantity` | integer | NO | 1 |
+| `price` | numeric | YES | - |
+| `email` | text | YES | - |
+| `note` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `created_by` | uuid | YES | - |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `updated_by` | uuid | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **esims_delete** — `DELETE`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **esims_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(workspace_id = get_current_user_workspace())`
+- **esims_select** — `SELECT`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **esims_update** — `UPDATE`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+
+---
+
+### `expense_categories`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `user_id` | uuid | YES | - |
+| `name` | text | NO | - |
+| `icon` | text | NO | - |
+| `color` | text | NO | - |
+| `type` | text | NO | 'expense'::text |
+| `sort_order` | integer | YES | 0 |
+| `is_active` | boolean | YES | true |
+| `created_at` | timestamp with time zone | YES | now() |
+| `parent_id` | uuid | YES | - |
+| `is_system` | boolean | YES | false |
+| `debit_account_id` | uuid | YES | - |
+| `credit_account_id` | uuid | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `credit_account_id` | `chart_of_accounts.id` | NO ACTION | NO ACTION |
+| `debit_account_id` | `chart_of_accounts.id` | NO ACTION | NO ACTION |
+| `parent_id` | `expense_categories.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **expense_categories_authenticated_access** — `ALL`（roles: {public}）
+    - USING: `(auth.role() = 'authenticated'::text)`
+
+---
+
+### `expense_monthly_stats`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `user_id` | uuid | NO | - |
+| `year_month` | text | NO | - |
+| `total_expense` | numeric | YES | 0 |
+| `total_income` | numeric | YES | 0 |
+| `total_split_paid` | numeric | YES | 0 |
+| `total_split_owed` | numeric | YES | 0 |
+| `category_breakdown` | jsonb | YES | '{}'::jsonb |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **expense_monthly_stats_delete** — `DELETE`（roles: {public}）
+    - USING: `true`
+- **expense_monthly_stats_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `true`
+- **expense_monthly_stats_select** — `SELECT`（roles: {public}）
+    - USING: `true`
+- **expense_monthly_stats_update** — `UPDATE`（roles: {public}）
+    - USING: `true`
+
+---
+
+### `expense_streaks`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `user_id` | uuid | NO | - |
+| `current_streak` | integer | YES | 0 |
+| `longest_streak` | integer | YES | 0 |
+| `last_record_date` | date | YES | - |
+| `total_records` | integer | YES | 0 |
+| `total_expense_amount` | numeric | YES | 0 |
+| `total_income_amount` | numeric | YES | 0 |
+| `achievements` | jsonb | YES | '[]'::jsonb |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **expense_streaks_delete** — `DELETE`（roles: {public}）
+    - USING: `true`
+- **expense_streaks_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `true`
+- **expense_streaks_select** — `SELECT`（roles: {public}）
+    - USING: `true`
+- **expense_streaks_update** — `UPDATE`（roles: {public}）
+    - USING: `true`
+
+---
+
+### `eyeline_submissions`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | uuid_generate_v4() |
+| `user_id` | text | NO | - |
+| `submission_type` | text | NO | - |
+| `target_entity_info` | jsonb | NO | - |
+| `submission_content` | jsonb | NO | - |
+| `status` | text | NO | 'pending_review'::text |
+| `reviewed_by` | uuid | YES | - |
+| `reviewed_at` | timestamp with time zone | YES | - |
+| `rejection_reason` | text | YES | - |
+| `points_awarded` | integer | YES | 0 |
+| `workspace_id` | uuid | YES | - |
+| `created_at` | timestamp with time zone | NO | now() |
+| `updated_at` | timestamp with time zone | NO | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `reviewed_by` | `employees.id` | NO ACTION | NO ACTION |
+| `user_id` | `customers.id` | RESTRICT | NO ACTION |
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **eyeline_submissions_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **eyeline_submissions_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **eyeline_submissions_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **eyeline_submissions_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+- `update_eyeline_submissions_updated_at` — BEFORE UPDATE
+
+---
+
+### `features_templates`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | text | NO | - |
+| `name` | text | NO | - |
+| `description` | text | YES | - |
+| `preview_image_url` | text | YES | - |
+| `is_active` | boolean | YES | true |
+| `sort_order` | integer | YES | 0 |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **features_templates_authenticated_access** — `ALL`（roles: {public}）
+    - USING: `(auth.role() = 'authenticated'::text)`
+
+---
+
+### `file_audit_logs`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `file_id` | uuid | NO | - |
+| `workspace_id` | uuid | NO | - |
+| `action` | file_action (enum) | NO | - |
+| `action_label` | text | YES | - |
+| `performed_by` | uuid | YES | - |
+| `performed_by_name` | text | YES | - |
+| `old_values` | jsonb | YES | - |
+| `new_values` | jsonb | YES | - |
+| `metadata` | jsonb | YES | - |
+| `created_at` | timestamp with time zone | NO | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `file_id` | `files.id` | RESTRICT | NO ACTION |
+| `performed_by` | `employees.id` | SET NULL | NO ACTION |
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **file_audit_logs_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **file_audit_logs_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **file_audit_logs_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **file_audit_logs_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+---
+
+### `files`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `folder_id` | uuid | YES | - |
+| `filename` | text | NO | - |
+| `original_filename` | text | NO | - |
+| `content_type` | text | YES | - |
+| `size_bytes` | bigint | YES | - |
+| `extension` | text | YES | - |
+| `storage_path` | text | NO | - |
+| `storage_bucket` | text | NO | 'files'::text |
+| `thumbnail_path` | text | YES | - |
+| `category` | file_category (enum) | NO | 'other'::file_category |
+| `tags` | ARRAY | YES | '{}'::text[] |
+| `tour_id` | text | YES | - |
+| `order_id` | text | YES | - |
+| `customer_id` | text | YES | - |
+| `supplier_id` | text | YES | - |
+| `email_id` | uuid | YES | - |
+| `source` | text | YES | 'upload'::text |
+| `source_email_attachment_id` | uuid | YES | - |
+| `version` | integer | YES | 1 |
+| `previous_version_id` | uuid | YES | - |
+| `is_starred` | boolean | NO | false |
+| `is_archived` | boolean | NO | false |
+| `is_deleted` | boolean | NO | false |
+| `deleted_at` | timestamp with time zone | YES | - |
+| `download_count` | integer | YES | 0 |
+| `last_accessed_at` | timestamp with time zone | YES | - |
+| `description` | text | YES | - |
+| `notes` | text | YES | - |
+| `created_at` | timestamp with time zone | NO | now() |
+| `updated_at` | timestamp with time zone | NO | now() |
+| `created_by` | uuid | YES | - |
+| `updated_by` | uuid | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `created_by` | `employees.id` | SET NULL | NO ACTION |
+| `customer_id` | `customers.id` | SET NULL | NO ACTION |
+| `email_id` | `emails.id` | SET NULL | NO ACTION |
+| `folder_id` | `folders.id` | SET NULL | NO ACTION |
+| `order_id` | `orders.id` | SET NULL | NO ACTION |
+| `previous_version_id` | `files.id` | NO ACTION | NO ACTION |
+| `supplier_id` | `suppliers.id` | SET NULL | NO ACTION |
+| `tour_id` | `tours.id` | SET NULL | NO ACTION |
+| `updated_by` | `employees.id` | SET NULL | NO ACTION |
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **files_delete** — `DELETE`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **files_insert** — `INSERT`（roles: {authenticated}）
+    - WITH CHECK: `(workspace_id = get_current_user_workspace())`
+- **files_select** — `SELECT`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **files_update** — `UPDATE`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+
+**Triggers**
+
+- `tr_auto_categorize_file` — BEFORE INSERT
+- `tr_auto_move_file` — BEFORE INSERT
+- `tr_files_updated_at` — BEFORE UPDATE
+- `tr_log_file_changes` — AFTER INSERT
+- `tr_log_file_changes` — AFTER UPDATE
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+
+---
+
+### `fleet_drivers`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `employee_id` | uuid | YES | - |
+| `name` | character varying | NO | - |
+| `phone` | character varying | YES | - |
+| `id_number` | character varying | YES | - |
+| `license_number` | character varying | YES | - |
+| `license_type` | character varying | YES | 'professional'::character varying |
+| `license_expiry_date` | date | YES | - |
+| `license_image_url` | text | YES | - |
+| `professional_license_number` | character varying | YES | - |
+| `professional_license_expiry` | date | YES | - |
+| `professional_license_image_url` | text | YES | - |
+| `health_check_date` | date | YES | - |
+| `health_check_expiry` | date | YES | - |
+| `health_check_document_url` | text | YES | - |
+| `status` | character varying | YES | 'active'::character varying |
+| `notes` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **fleet_drivers_all** — `ALL`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **fleet_drivers_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **fleet_drivers_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **fleet_drivers_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **fleet_drivers_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+
+---
+
+### `fleet_schedules`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `vehicle_id` | uuid | NO | - |
+| `start_date` | date | NO | - |
+| `end_date` | date | NO | - |
+| `client_name` | character varying | YES | - |
+| `tour_name` | character varying | YES | - |
+| `tour_code` | character varying | YES | - |
+| `contact_person` | character varying | YES | - |
+| `contact_phone` | character varying | YES | - |
+| `driver_name` | character varying | YES | - |
+| `driver_phone` | character varying | YES | - |
+| `status` | character varying | NO | 'confirmed'::character varying |
+| `notes` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `created_by` | uuid | YES | - |
+| `driver_id` | uuid | YES | - |
+| `client_workspace_id` | uuid | YES | - |
+| `tour_id` | uuid | YES | - |
+| `pickup_location` | text | YES | - |
+| `destination` | text | YES | - |
+| `route_notes` | text | YES | - |
+| `rental_fee` | numeric | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `driver_id` | `fleet_drivers.id` | NO ACTION | NO ACTION |
+| `vehicle_id` | `fleet_vehicles.id` | RESTRICT | NO ACTION |
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **fleet_schedules_all** — `ALL`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **fleet_schedules_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **fleet_schedules_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **fleet_schedules_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **fleet_schedules_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+
+---
+
+### `fleet_vehicle_logs`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `vehicle_id` | uuid | NO | - |
+| `log_type` | character varying | NO | - |
+| `log_date` | date | NO | - |
+| `description` | text | YES | - |
+| `cost` | numeric | YES | - |
+| `mileage` | integer | YES | - |
+| `next_due_date` | date | YES | - |
+| `next_due_mileage` | integer | YES | - |
+| `vendor_name` | character varying | YES | - |
+| `documents` | jsonb | YES | '[]'::jsonb |
+| `created_at` | timestamp with time zone | YES | now() |
+| `created_by` | uuid | YES | - |
+| `notes` | text | YES | - |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `vehicle_id` | `fleet_vehicles.id` | RESTRICT | NO ACTION |
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **fleet_logs_all** — `ALL`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **fleet_vehicle_logs_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **fleet_vehicle_logs_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **fleet_vehicle_logs_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **fleet_vehicle_logs_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+
+---
+
+### `fleet_vehicles`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `license_plate` | character varying | NO | - |
+| `vehicle_name` | character varying | YES | - |
+| `vehicle_type` | character varying | NO | 'large_bus'::character varying |
+| `capacity` | integer | NO | 45 |
+| `driver_name` | character varying | YES | - |
+| `driver_phone` | character varying | YES | - |
+| `status` | character varying | NO | 'available'::character varying |
+| `notes` | text | YES | - |
+| `display_order` | integer | YES | 0 |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `brand` | character varying | YES | - |
+| `model` | character varying | YES | - |
+| `year` | integer | YES | - |
+| `vin` | character varying | YES | - |
+| `default_driver_id` | uuid | YES | - |
+| `registration_date` | date | YES | - |
+| `inspection_due_date` | date | YES | - |
+| `insurance_due_date` | date | YES | - |
+| `last_maintenance_date` | date | YES | - |
+| `next_maintenance_date` | date | YES | - |
+| `next_maintenance_km` | integer | YES | - |
+| `current_mileage` | integer | YES | 0 |
+| `documents` | jsonb | YES | '[]'::jsonb |
+| `created_by` | uuid | YES | - |
+| `updated_by` | uuid | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `default_driver_id` | `fleet_drivers.id` | NO ACTION | NO ACTION |
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **fleet_vehicles_all** — `ALL`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **fleet_vehicles_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **fleet_vehicles_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **fleet_vehicles_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **fleet_vehicles_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+
+---
+
+### `flight_status_subscriptions`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `pnr_id` | uuid | YES | - |
+| `segment_id` | uuid | YES | - |
+| `airline_code` | character varying | NO | - |
+| `flight_number` | character varying | NO | - |
+| `flight_date` | date | NO | - |
+| `notify_on` | ARRAY | YES | ARRAY['delay'::text, 'cancel'::text, 'gate_change'::text] |
+| `notify_channel_id` | uuid | YES | - |
+| `notify_employee_ids` | ARRAY | YES | - |
+| `external_provider` | text | YES | - |
+| `external_subscription_id` | text | YES | - |
+| `is_active` | boolean | YES | true |
+| `last_checked_at` | timestamp with time zone | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `notify_channel_id` | `channels.id` | NO ACTION | NO ACTION |
+| `pnr_id` | `pnr_records.id` | CASCADE | NO ACTION |
+| `segment_id` | `pnr_segments.id` | SET NULL | NO ACTION |
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **flight_status_subscriptions_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **flight_status_subscriptions_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **flight_status_subscriptions_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **flight_status_subscriptions_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+- `trigger_flight_status_subscriptions_updated_at` — BEFORE UPDATE
+
+---
+
+### `flight_templates`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | text | NO | - |
+| `name` | text | NO | - |
+| `description` | text | YES | - |
+| `preview_image_url` | text | YES | - |
+| `component_name` | text | NO | - |
+| `sort_order` | integer | YES | 0 |
+| `is_active` | boolean | YES | true |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **flight_templates_authenticated_access** — `ALL`（roles: {public}）
+    - USING: `(auth.role() = 'authenticated'::text)`
+
+---
+
+### `folders`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `name` | text | NO | - |
+| `folder_type` | folder_type (enum) | NO | 'custom'::folder_type |
+| `icon` | text | YES | - |
+| `color` | text | YES | - |
+| `parent_id` | uuid | YES | - |
+| `path` | text | NO | - |
+| `depth` | integer | NO | 0 |
+| `tour_id` | text | YES | - |
+| `customer_id` | text | YES | - |
+| `supplier_id` | text | YES | - |
+| `default_category` | file_category (enum) | YES | - |
+| `is_system` | boolean | NO | false |
+| `sort_order` | integer | YES | 0 |
+| `created_at` | timestamp with time zone | NO | now() |
+| `updated_at` | timestamp with time zone | NO | now() |
+| `created_by` | uuid | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `created_by` | `employees.id` | SET NULL | NO ACTION |
+| `customer_id` | `customers.id` | RESTRICT | NO ACTION |
+| `parent_id` | `folders.id` | CASCADE | NO ACTION |
+| `supplier_id` | `suppliers.id` | RESTRICT | NO ACTION |
+| `tour_id` | `tours.id` | RESTRICT | NO ACTION |
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **folders_delete** — `DELETE`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **folders_insert** — `INSERT`（roles: {authenticated}）
+    - WITH CHECK: `(workspace_id = get_current_user_workspace())`
+- **folders_select** — `SELECT`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **folders_update** — `UPDATE`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+
+**Triggers**
+
+- `tr_folders_updated_at` — BEFORE UPDATE
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+
+---
+
+### `friends`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `user_id` | uuid | NO | - |
+| `friend_id` | uuid | NO | - |
+| `status` | text | NO | 'pending'::text |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **friends_delete** — `DELETE`（roles: {public}）
+    - USING: `true`
+- **friends_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `true`
+- **friends_select** — `SELECT`（roles: {public}）
+    - USING: `true`
+- **friends_update** — `UPDATE`（roles: {public}）
+    - USING: `true`
+
+---
+
+### `game_office_rooms`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `room_data` | jsonb | NO | '{}'::jsonb |
+| `updated_by` | uuid | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `user_id` | uuid | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `updated_by` | `employees.id` | NO ACTION | NO ACTION |
+| `user_id` | `employees.id` | NO ACTION | NO ACTION |
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **game_office_rooms_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **game_office_rooms_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **game_office_rooms_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **game_office_rooms_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+---
+
+### `general_ledger`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `subject_id` | uuid | NO | - |
+| `year` | integer | NO | - |
+| `month` | integer | NO | - |
+| `opening_balance` | numeric | YES | 0 |
+| `total_debit` | numeric | YES | 0 |
+| `total_credit` | numeric | YES | 0 |
+| `closing_balance` | numeric | YES | 0 |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `subject_id` | `accounting_subjects.id` | NO ACTION | NO ACTION |
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **general_ledger_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **general_ledger_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **general_ledger_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **general_ledger_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+- `update_general_ledger_updated_at` — BEFORE UPDATE
+
+---
+
+### `hotel_templates`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | text | NO | - |
+| `name` | text | NO | - |
+| `description` | text | YES | - |
+| `preview_image_url` | text | YES | - |
+| `is_active` | boolean | YES | true |
+| `sort_order` | integer | YES | 0 |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **hotel_templates_authenticated_access** — `ALL`（roles: {public}）
+    - USING: `(auth.role() = 'authenticated'::text)`
+
+---
+
+### `hotels`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `name` | text | NO | - |
+| `english_name` | text | YES | - |
+| `name_local` | text | YES | - |
+| `brand` | text | YES | - |
+| `country_id` | text | NO | - |
+| `region_id` | text | YES | - |
+| `city_id` | text | YES | - |
+| `address` | text | YES | - |
+| `address_en` | text | YES | - |
+| `latitude` | numeric | YES | - |
+| `longitude` | numeric | YES | - |
+| `google_maps_url` | text | YES | - |
+| `star_rating` | integer | YES | - |
+| `hotel_class` | text | YES | - |
+| `category` | text | YES | - |
+| `description` | text | YES | - |
+| `description_en` | text | YES | - |
+| `highlights` | ARRAY | YES | - |
+| `room_types` | jsonb | YES | - |
+| `price_range` | text | YES | - |
+| `avg_price_per_night` | integer | YES | - |
+| `currency` | text | YES | 'USD'::text |
+| `facilities` | jsonb | YES | - |
+| `amenities` | ARRAY | YES | - |
+| `restaurants_count` | integer | YES | - |
+| `has_michelin_restaurant` | boolean | YES | false |
+| `dining_options` | ARRAY | YES | - |
+| `booking_contact` | text | YES | - |
+| `booking_email` | text | YES | - |
+| `booking_phone` | text | YES | - |
+| `website` | text | YES | - |
+| `group_friendly` | boolean | YES | true |
+| `min_rooms_for_group` | integer | YES | - |
+| `max_group_size` | integer | YES | - |
+| `group_rate_available` | boolean | YES | false |
+| `commission_rate` | numeric | YES | - |
+| `airport_transfer` | boolean | YES | false |
+| `concierge_service` | boolean | YES | true |
+| `butler_service` | boolean | YES | false |
+| `best_seasons` | ARRAY | YES | - |
+| `awards` | ARRAY | YES | - |
+| `certifications` | ARRAY | YES | - |
+| `images` | ARRAY | YES | - |
+| `notes` | text | YES | - |
+| `internal_notes` | text | YES | - |
+| `is_active` | boolean | YES | true |
+| `is_featured` | boolean | YES | false |
+| `display_order` | integer | YES | 0 |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `created_by` | uuid | YES | - |
+| `updated_by` | uuid | YES | - |
+| `data_verified` | boolean | YES | false |
+| `fax` | text | YES | - |
+| `phone` | text | YES | - |
+| `country_code` | text | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `city_id` | `cities.id` | NO ACTION | NO ACTION |
+| `country_code` | `ref_countries.code` | NO ACTION | NO ACTION |
+| `country_id` | `countries.id` | NO ACTION | NO ACTION |
+| `created_by` | `employees.id` | NO ACTION | NO ACTION |
+| `region_id` | `regions.id` | NO ACTION | NO ACTION |
+| `updated_by` | `employees.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **hotels_authenticated** — `ALL`（roles: {public}）
+    - USING: `(auth.role() = 'authenticated'::text)`
+
+**Triggers**
+
+- `trg_hotels_sync_country_code` — BEFORE UPDATE
+- `trg_hotels_sync_country_code` — BEFORE INSERT
+- `trigger_hotels_updated_at` — BEFORE UPDATE
+
+---
+
+### `image_library`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `name` | text | NO | - |
+| `description` | text | YES | - |
+| `file_path` | text | NO | - |
+| `public_url` | text | NO | - |
+| `category` | text | YES | 'general'::text |
+| `tags` | ARRAY | YES | '{}'::text[] |
+| `file_size` | integer | YES | - |
+| `width` | integer | YES | - |
+| `height` | integer | YES | - |
+| `mime_type` | text | YES | - |
+| `country_id` | text | YES | - |
+| `city_id` | text | YES | - |
+| `attraction_id` | uuid | YES | - |
+| `created_by` | uuid | YES | - |
+| `created_at` | timestamp with time zone | NO | now() |
+| `updated_at` | timestamp with time zone | NO | now() |
+| `country_code` | text | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `country_code` | `ref_countries.code` | NO ACTION | NO ACTION |
+| `created_by` | `employees.id` | SET NULL | NO ACTION |
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **image_library_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **image_library_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **image_library_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **image_library_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trg_image_library_sync_country_code` — BEFORE INSERT
+- `trg_image_library_sync_country_code` — BEFORE UPDATE
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+- `trigger_update_image_library_updated_at` — BEFORE UPDATE
+
+---
+
+### `invoice_orders`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `invoice_id` | uuid | NO | - |
+| `order_id` | text | NO | - |
+| `amount` | numeric | NO | - |
+| `workspace_id` | uuid | NO | - |
+| `created_at` | timestamp with time zone | NO | now() |
+| `created_by` | text | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `invoice_id` | `travel_invoices.id` | RESTRICT | NO ACTION |
+| `order_id` | `orders.id` | RESTRICT | NO ACTION |
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **invoice_orders_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **invoice_orders_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **invoice_orders_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **invoice_orders_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+
+---
+
+### `itineraries`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | text | NO | (gen_random_uuid())::text |
+| `tour_id` | text | YES | - |
+| `description` | text | YES | - |
+| `created_at` | timestamp with time zone | NO | now() |
+| `updated_at` | timestamp with time zone | NO | now() |
+| `_deleted` | boolean | YES | false |
+| `_needs_sync` | boolean | YES | false |
+| `_synced_at` | timestamp with time zone | YES | - |
+| `created_by` | uuid | YES | - |
+| `author_name` | text | YES | - |
+| `code` | text | YES | - |
+| `workspace_id` | uuid | NO | - |
+| `updated_by` | uuid | YES | - |
+| `tagline` | text | YES | - |
+| `title` | text | YES | - |
+| `subtitle` | text | YES | - |
+| `country` | text | YES | - |
+| `city` | text | YES | - |
+| `status` | text | YES | - |
+| `features` | jsonb | YES | - |
+| `leader` | jsonb | YES | - |
+| `departure_date` | text | YES | - |
+| `tour_code` | text | YES | - |
+| `cover_image` | text | YES | - |
+| `outbound_flight` | jsonb | YES | - |
+| `return_flight` | jsonb | YES | - |
+| `focus_cards` | jsonb | YES | - |
+| `meeting_info` | jsonb | YES | - |
+| `itinerary_subtitle` | text | YES | - |
+| `daily_itinerary` | jsonb | YES | - |
+| `show_features` | boolean | YES | false |
+| `hotels` | jsonb | YES | '[]'::jsonb |
+| `show_leader_meeting` | boolean | YES | false |
+| `show_hotels` | boolean | YES | false |
+| `version` | integer | YES | 1 |
+| `parent_id` | text | YES | - |
+| `is_latest` | boolean | YES | true |
+| `version_records` | jsonb | YES | '[]'::jsonb |
+| `archived_at` | timestamp with time zone | YES | - |
+| `is_template` | boolean | YES | false |
+| `closed_at` | timestamp with time zone | YES | - |
+| `cover_style` | text | YES | 'original'::text |
+| `price_note` | text | YES | - |
+| `show_pricing_details` | boolean | YES | false |
+| `show_price_tiers` | boolean | YES | false |
+| `faqs` | jsonb | YES | - |
+| `show_faqs` | boolean | YES | false |
+| `notices` | ARRAY | YES | - |
+| `show_notices` | boolean | YES | false |
+| `cancellation_policy` | ARRAY | YES | - |
+| `show_cancellation_policy` | boolean | YES | false |
+| `erp_itinerary_id` | text | YES | - |
+| `summary` | text | YES | - |
+| `duration_days` | integer | YES | - |
+| `flight_style` | text | YES | 'original'::text |
+| `itinerary_style` | text | YES | 'original'::text |
+| `cover_template_id` | text | YES | - |
+| `daily_template_id` | text | YES | - |
+| `flight_template_id` | text | YES | - |
+| `leader_style` | text | YES | 'original'::text |
+| `hotel_style` | text | YES | 'original'::text |
+| `pricing_style` | text | YES | 'original'::text |
+| `features_style` | text | YES | 'original'::text |
+| `template_id` | character varying | YES | - |
+| `template_code` | character varying | YES | - |
+| `template_name` | character varying | YES | - |
+| `hidden_items_for_web` | jsonb | YES | '[]'::jsonb |
+| `hidden_items_for_brochure` | jsonb | YES | '[]'::jsonb |
+| `price_tiers` | jsonb | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `cover_template_id` | `cover_templates.id` | SET NULL | NO ACTION |
+| `created_by` | `employees.id` | SET NULL | NO ACTION |
+| `daily_template_id` | `daily_templates.id` | SET NULL | NO ACTION |
+| `flight_template_id` | `flight_templates.id` | SET NULL | NO ACTION |
+| `parent_id` | `itineraries.id` | NO ACTION | NO ACTION |
+| `tour_id` | `tours.id` | SET NULL | NO ACTION |
+| `updated_by` | `employees.id` | NO ACTION | NO ACTION |
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+| `workspace_id` | `workspaces.id` | SET NULL | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **Authenticated users can insert itineraries** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(auth.uid() IS NOT NULL)`
+- **itineraries_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **itineraries_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **itineraries_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **itineraries_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `itinerary_handoff_check` — BEFORE UPDATE
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+- `trigger_set_itinerary_workspace` — BEFORE UPDATE
+- `trigger_set_itinerary_workspace` — BEFORE INSERT
+- `update_itineraries_updated_at` — BEFORE UPDATE
+
+---
+
+### `itinerary_documents`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `tour_id` | text | YES | - |
+| `workspace_id` | uuid | NO | - |
+| `name` | text | NO | '未命名行程表'::text |
+| `current_version_id` | uuid | YES | - |
+| `created_at` | timestamp with time zone | NO | now() |
+| `updated_at` | timestamp with time zone | NO | now() |
+| `created_by` | text | YES | - |
+| `updated_by` | text | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `current_version_id` | `itinerary_versions.id` | SET NULL | NO ACTION |
+| `tour_id` | `tours.id` | SET NULL | NO ACTION |
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **itinerary_documents_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **itinerary_documents_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **itinerary_documents_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **itinerary_documents_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+- `trigger_itinerary_documents_updated_at` — BEFORE UPDATE
+
+---
+
+### `itinerary_permissions`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | bigint | NO | - |
+| `itinerary_id` | text | NO | - |
+| `user_id` | uuid | NO | - |
+| `permission_level` | text | NO | - |
+| `created_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `itinerary_id` | `itineraries.id` | RESTRICT | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **itinerary_permissions_all** — `ALL`（roles: {public}）
+    - USING: `true`
+- **itinerary_permissions_select** — `SELECT`（roles: {public}）
+    - USING: `(auth.uid() = user_id)`
+
+---
+
+### `itinerary_versions`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `document_id` | uuid | NO | - |
+| `version_number` | integer | NO | 1 |
+| `data` | jsonb | NO | '{}'::jsonb |
+| `thumbnail_url` | text | YES | - |
+| `restored_from` | uuid | YES | - |
+| `created_at` | timestamp with time zone | NO | now() |
+| `created_by` | text | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `document_id` | `itinerary_documents.id` | CASCADE | NO ACTION |
+| `restored_from` | `itinerary_versions.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **itinerary_versions_delete** — `DELETE`（roles: {public}）
+    - USING: `(EXISTS ( SELECT 1
+   FROM itinerary_documents d
+  WHERE ((d.id = itinerary_versions.document_id) AND (d.workspace_id = get_current_user_workspace()))))`
+- **itinerary_versions_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(EXISTS ( SELECT 1
+   FROM itinerary_documents d
+  WHERE ((d.id = itinerary_versions.document_id) AND (d.workspace_id = get_current_user_workspace()))))`
+- **itinerary_versions_select** — `SELECT`（roles: {public}）
+    - USING: `(EXISTS ( SELECT 1
+   FROM itinerary_documents d
+  WHERE ((d.id = itinerary_versions.document_id) AND (d.workspace_id = get_current_user_workspace()))))`
+
+**Triggers**
+
+- `trigger_itinerary_version_number` — BEFORE INSERT
+
+---
+
+### `journal_lines`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `voucher_id` | uuid | YES | - |
+| `line_no` | integer | NO | - |
+| `account_id` | uuid | YES | - |
+| `subledger_type` | subledger_type (enum) | YES | - |
+| `subledger_id` | uuid | YES | - |
+| `description` | text | YES | - |
+| `debit_amount` | numeric | YES | 0 |
+| `credit_amount` | numeric | YES | 0 |
+| `created_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `account_id` | `chart_of_accounts.id` | NO ACTION | NO ACTION |
+| `voucher_id` | `journal_vouchers.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **journal_lines_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(EXISTS ( SELECT 1
+   FROM journal_vouchers jv
+  WHERE ((jv.id = journal_lines.voucher_id) AND (jv.workspace_id = get_current_user_workspace()))))`
+- **journal_lines_select** — `SELECT`（roles: {public}）
+    - USING: `(EXISTS ( SELECT 1
+   FROM journal_vouchers jv
+  WHERE ((jv.id = journal_lines.voucher_id) AND (jv.workspace_id = get_current_user_workspace()))))`
+
+---
+
+### `journal_vouchers`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | YES | - |
+| `voucher_no` | text | NO | - |
+| `voucher_date` | date | NO | - |
+| `memo` | text | YES | - |
+| `company_unit` | text | YES | 'DEFAULT'::text |
+| `event_id` | uuid | YES | - |
+| `status` | voucher_status (enum) | YES | 'posted'::voucher_status |
+| `total_debit` | numeric | YES | 0 |
+| `total_credit` | numeric | YES | 0 |
+| `created_by` | uuid | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `reversed_from_id` | uuid | YES | - |
+| `reversed_by_id` | uuid | YES | - |
+| `source_type` | character varying | YES | - |
+| `source_id` | uuid | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `event_id` | `accounting_events.id` | NO ACTION | NO ACTION |
+| `reversed_by_id` | `journal_vouchers.id` | NO ACTION | NO ACTION |
+| `reversed_from_id` | `journal_vouchers.id` | NO ACTION | NO ACTION |
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **journal_vouchers_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **journal_vouchers_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(workspace_id = get_current_user_workspace())`
+- **journal_vouchers_select** — `SELECT`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **journal_vouchers_update** — `UPDATE`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+
+---
+
+### `knowledge_base`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | YES | - |
+| `category` | text | NO | 'faq'::text |
+| `question` | text | YES | - |
+| `answer` | text | YES | - |
+| `keywords` | ARRAY | YES | - |
+| `is_active` | boolean | YES | true |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **Users can delete knowledge base in their workspace** — `DELETE`（roles: {public}）
+    - USING: `(workspace_id IN ( SELECT profiles.workspace_id
+   FROM profiles
+  WHERE (profiles.id = auth.uid())))`
+- **Users can insert knowledge base in their workspace** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(workspace_id IN ( SELECT profiles.workspace_id
+   FROM profiles
+  WHERE (profiles.id = auth.uid())))`
+- **Users can update knowledge base in their workspace** — `UPDATE`（roles: {public}）
+    - USING: `(workspace_id IN ( SELECT profiles.workspace_id
+   FROM profiles
+  WHERE (profiles.id = auth.uid())))`
+- **Users can view knowledge base in their workspace** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id IN ( SELECT profiles.workspace_id
+   FROM profiles
+  WHERE (profiles.id = auth.uid()))) OR (workspace_id IS NULL))`
+
+---
+
+### `leader_availability`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `leader_id` | uuid | NO | - |
+| `available_start_date` | date | NO | - |
+| `available_end_date` | date | NO | - |
+| `status` | text | YES | 'available'::text |
+| `notes` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `leader_id` | `tour_leaders.id` | RESTRICT | NO ACTION |
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **leader_availability_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **leader_availability_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **leader_availability_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **leader_availability_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+- `update_leader_availability_updated_at` — BEFORE UPDATE
+
+---
+
+### `leader_schedules`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `leader_id` | uuid | NO | - |
+| `start_date` | date | NO | - |
+| `end_date` | date | NO | - |
+| `tour_id` | text | YES | - |
+| `tour_name` | character varying | YES | - |
+| `tour_code` | character varying | YES | - |
+| `destination` | character varying | YES | - |
+| `status` | character varying | NO | 'confirmed'::character varying |
+| `notes` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `created_by` | uuid | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `leader_id` | `tour_leaders.id` | RESTRICT | NO ACTION |
+| `tour_id` | `tours.id` | SET NULL | NO ACTION |
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **leader_schedules_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **leader_schedules_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **leader_schedules_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **leader_schedules_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+
+---
+
+### `leader_templates`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | text | NO | - |
+| `name` | text | NO | - |
+| `description` | text | YES | - |
+| `preview_image_url` | text | YES | - |
+| `is_active` | boolean | YES | true |
+| `sort_order` | integer | YES | 0 |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **leader_templates_authenticated_access** — `ALL`（roles: {public}）
+    - USING: `(auth.role() = 'authenticated'::text)`
+
+---
+
+### `leave_balances`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `employee_id` | uuid | NO | - |
+| `leave_type_id` | uuid | NO | - |
+| `year` | integer | NO | - |
+| `entitled_days` | numeric | NO | 0 |
+| `used_days` | numeric | NO | 0 |
+| `remaining_days` | numeric | YES | - |
+| `carry_over_days` | numeric | YES | 0 |
+| `notes` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `employee_id` | `employees.id` | RESTRICT | NO ACTION |
+| `leave_type_id` | `leave_types.id` | CASCADE | NO ACTION |
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **leave_balances_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **leave_balances_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **leave_balances_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **leave_balances_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+- `trigger_leave_balances_updated_at` — BEFORE UPDATE
+
+---
+
+### `leave_requests`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `employee_id` | uuid | NO | - |
+| `leave_type_id` | uuid | NO | - |
+| `start_date` | date | NO | - |
+| `end_date` | date | NO | - |
+| `start_time` | time without time zone | YES | - |
+| `end_time` | time without time zone | YES | - |
+| `days` | numeric | NO | - |
+| `reason` | text | YES | - |
+| `proof_url` | text | YES | - |
+| `status` | character varying | NO | 'pending'::character varying |
+| `approved_by` | uuid | YES | - |
+| `approved_at` | timestamp with time zone | YES | - |
+| `reject_reason` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `created_by` | uuid | YES | - |
+| `updated_by` | uuid | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `approved_by` | `employees.id` | NO ACTION | NO ACTION |
+| `created_by` | `employees.id` | NO ACTION | NO ACTION |
+| `employee_id` | `employees.id` | RESTRICT | NO ACTION |
+| `leave_type_id` | `leave_types.id` | RESTRICT | NO ACTION |
+| `updated_by` | `employees.id` | NO ACTION | NO ACTION |
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **leave_requests_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **leave_requests_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **leave_requests_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **leave_requests_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+- `trigger_leave_balance_on_approval` — AFTER UPDATE
+- `trigger_leave_requests_updated_at` — BEFORE UPDATE
+
+---
+
+### `leave_types`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `name` | character varying | NO | - |
+| `code` | character varying | NO | - |
+| `days_per_year` | numeric | YES | - |
+| `is_paid` | boolean | YES | true |
+| `requires_proof` | boolean | YES | false |
+| `is_active` | boolean | YES | true |
+| `sort_order` | integer | YES | 0 |
+| `description` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **leave_types_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **leave_types_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **leave_types_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **leave_types_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+
+---
+
+### `line_conversations`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | YES | - |
+| `conversation_type` | text | NO | - |
+| `target_id` | text | NO | - |
+| `target_name` | text | YES | - |
+| `last_message_at` | timestamp with time zone | YES | - |
+| `last_message_preview` | text | YES | - |
+| `unread_count` | integer | YES | 0 |
+| `is_archived` | boolean | YES | false |
+| `tags` | ARRAY | YES | - |
+| `note` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **line_conversations_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `((workspace_id = get_current_user_workspace()) OR is_super_admin())`
+- **line_conversations_select** — `SELECT`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **line_conversations_update** — `UPDATE`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+
+---
+
+### `line_groups`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | YES | - |
+| `group_id` | text | NO | - |
+| `group_name` | text | YES | - |
+| `supplier_id` | text | YES | - |
+| `member_count` | integer | YES | - |
+| `joined_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `note` | text | YES | - |
+| `category` | text | YES | - |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **line_groups_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **line_groups_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `((workspace_id IS NULL) OR (workspace_id = get_current_user_workspace()) OR is_super_admin())`
+- **line_groups_select** — `SELECT`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **line_groups_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id IS NULL) OR (workspace_id = get_current_user_workspace()))`
+
+---
+
+### `line_messages`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | YES | - |
+| `conversation_id` | uuid | YES | - |
+| `message_id` | text | YES | - |
+| `message_type` | text | NO | - |
+| `sender_type` | text | NO | - |
+| `sender_id` | text | YES | - |
+| `content` | text | YES | - |
+| `media_url` | text | YES | - |
+| `reply_token` | text | YES | - |
+| `is_read` | boolean | YES | false |
+| `is_ai_reply` | boolean | YES | false |
+| `ai_model` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `conversation_id` | `line_conversations.id` | CASCADE | NO ACTION |
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **line_messages_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `((workspace_id = get_current_user_workspace()) OR is_super_admin())`
+- **line_messages_select** — `SELECT`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+
+**Triggers**
+
+- `trigger_update_conversation_timestamp` — AFTER INSERT
+
+---
+
+### `line_users`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | YES | - |
+| `user_id` | text | NO | - |
+| `display_name` | text | YES | - |
+| `picture_url` | text | YES | - |
+| `status_message` | text | YES | - |
+| `supplier_id` | text | YES | - |
+| `employee_id` | uuid | YES | - |
+| `note` | text | YES | - |
+| `followed_at` | timestamp with time zone | YES | now() |
+| `unfollowed_at` | timestamp with time zone | YES | - |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `employee_id` | `employees.id` | NO ACTION | NO ACTION |
+| `supplier_id` | `suppliers.id` | NO ACTION | NO ACTION |
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **line_users_delete** — `DELETE`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **line_users_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `((workspace_id = get_current_user_workspace()) OR is_super_admin())`
+- **line_users_select** — `SELECT`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **line_users_update** — `UPDATE`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+
+---
+
+### `linkpay_logs`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `receipt_number` | character varying | NO | - |
+| `workspace_id` | uuid | NO | - |
+| `linkpay_order_number` | character varying | YES | - |
+| `price` | numeric | NO | - |
+| `end_date` | date | YES | - |
+| `link` | text | YES | - |
+| `status` | integer | YES | 0 |
+| `payment_name` | character varying | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `created_by` | uuid | YES | - |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `updated_by` | uuid | YES | - |
+| `sync_status` | text | YES | 'synced'::text |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `created_by` | `employees.id` | SET NULL | NO ACTION |
+| `receipt_number` | `receipts.workspace_id` | RESTRICT | NO ACTION |
+| `receipt_number` | `receipts.receipt_number` | RESTRICT | NO ACTION |
+| `updated_by` | `employees.id` | SET NULL | NO ACTION |
+| `workspace_id` | `receipts.receipt_number` | RESTRICT | NO ACTION |
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+| `workspace_id` | `receipts.workspace_id` | RESTRICT | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **linkpay_logs_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **linkpay_logs_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **linkpay_logs_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **linkpay_logs_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+
+---
+
+### `luxury_hotels`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `name` | text | NO | - |
+| `name_en` | text | YES | - |
+| `name_local` | text | YES | - |
+| `brand` | text | YES | - |
+| `country_id` | text | NO | - |
+| `region_id` | text | YES | - |
+| `city_id` | text | NO | - |
+| `address` | text | YES | - |
+| `address_en` | text | YES | - |
+| `latitude` | numeric | YES | - |
+| `longitude` | numeric | YES | - |
+| `google_maps_url` | text | YES | - |
+| `star_rating` | integer | YES | - |
+| `hotel_class` | text | YES | - |
+| `category` | text | YES | - |
+| `description` | text | YES | - |
+| `description_en` | text | YES | - |
+| `highlights` | ARRAY | YES | - |
+| `room_types` | jsonb | YES | - |
+| `price_range` | text | YES | - |
+| `avg_price_per_night` | integer | YES | - |
+| `currency` | text | YES | 'USD'::text |
+| `facilities` | jsonb | YES | - |
+| `amenities` | ARRAY | YES | - |
+| `restaurants_count` | integer | YES | - |
+| `has_michelin_restaurant` | boolean | YES | false |
+| `dining_options` | ARRAY | YES | - |
+| `booking_contact` | text | YES | - |
+| `booking_email` | text | YES | - |
+| `booking_phone` | text | YES | - |
+| `website` | text | YES | - |
+| `group_friendly` | boolean | YES | true |
+| `min_rooms_for_group` | integer | YES | - |
+| `max_group_size` | integer | YES | - |
+| `group_rate_available` | boolean | YES | false |
+| `commission_rate` | numeric | YES | - |
+| `airport_transfer` | boolean | YES | false |
+| `concierge_service` | boolean | YES | true |
+| `butler_service` | boolean | YES | false |
+| `best_seasons` | ARRAY | YES | - |
+| `awards` | ARRAY | YES | - |
+| `certifications` | ARRAY | YES | - |
+| `thumbnail` | text | YES | - |
+| `images` | ARRAY | YES | - |
+| `notes` | text | YES | - |
+| `internal_notes` | text | YES | - |
+| `is_active` | boolean | YES | true |
+| `is_featured` | boolean | YES | false |
+| `display_order` | integer | YES | 0 |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `created_by` | uuid | YES | - |
+| `updated_by` | uuid | YES | - |
+| `country_code` | text | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `city_id` | `cities.id` | NO ACTION | NO ACTION |
+| `country_code` | `ref_countries.code` | NO ACTION | NO ACTION |
+| `country_id` | `countries.id` | NO ACTION | NO ACTION |
+| `created_by` | `employees.id` | NO ACTION | NO ACTION |
+| `region_id` | `regions.id` | NO ACTION | NO ACTION |
+| `updated_by` | `employees.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **luxury_hotels_delete** — `DELETE`（roles: {public}）
+    - USING: `true`
+- **luxury_hotels_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `true`
+- **luxury_hotels_select** — `SELECT`（roles: {public}）
+    - USING: `true`
+- **luxury_hotels_update** — `UPDATE`（roles: {public}）
+    - USING: `true`
+
+**Triggers**
+
+- `trg_luxury_hotels_sync_country_code` — BEFORE INSERT
+- `trg_luxury_hotels_sync_country_code` — BEFORE UPDATE
+- `trigger_luxury_hotels_updated_at` — BEFORE UPDATE
+
+---
+
+### `magic_combo_items`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `combo_id` | uuid | NO | - |
+| `magic_id` | uuid | NO | - |
+| `order_index` | integer | NO | - |
+| `role` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `combo_id` | `magic_combos.id` | CASCADE | NO ACTION |
+| `magic_id` | `magic_library.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **magic_combo_items_delete** — `DELETE`（roles: {public}）
+    - USING: `(EXISTS ( SELECT 1
+   FROM magic_combos
+  WHERE ((magic_combos.id = magic_combo_items.combo_id) AND ((magic_combos.workspace_id)::text = (get_current_user_workspace())::text))))`
+- **magic_combo_items_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(EXISTS ( SELECT 1
+   FROM magic_combos
+  WHERE ((magic_combos.id = magic_combo_items.combo_id) AND (is_super_admin() OR ((magic_combos.workspace_id)::text = (get_current_user_workspace())::text)))))`
+- **magic_combo_items_select** — `SELECT`（roles: {public}）
+    - USING: `(EXISTS ( SELECT 1
+   FROM magic_combos
+  WHERE ((magic_combos.id = magic_combo_items.combo_id) AND ((magic_combos.workspace_id)::text = (get_current_user_workspace())::text))))`
+- **magic_combo_items_update** — `UPDATE`（roles: {public}）
+    - USING: `(EXISTS ( SELECT 1
+   FROM magic_combos
+  WHERE ((magic_combos.id = magic_combo_items.combo_id) AND ((magic_combos.workspace_id)::text = (get_current_user_workspace())::text))))`
+
+---
+
+### `magic_combos`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `combo_name` | text | NO | - |
+| `description` | text | YES | - |
+| `usage_example` | text | YES | - |
+| `use_case` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **magic_combos_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **magic_combos_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **magic_combos_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **magic_combos_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+---
+
+### `magic_library`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `name` | text | NO | - |
+| `category` | text | NO | - |
+| `layer` | text | NO | - |
+| `source_type` | text | NO | - |
+| `official_url` | text | YES | - |
+| `github_url` | text | YES | - |
+| `current_version` | text | YES | - |
+| `latest_version` | text | YES | - |
+| `update_status` | text | YES | 'unknown'::text |
+| `last_checked_at` | timestamp with time zone | YES | - |
+| `description` | text | YES | - |
+| `check_frequency` | text | YES | 'quarterly'::text |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **magic_library_all** — `ALL`（roles: {public}）
+    - USING: `true`
+- **magic_library_delete** — `DELETE`（roles: {public}）
+    - USING: `true`
+- **magic_library_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `is_super_admin()`
+- **magic_library_select** — `SELECT`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **magic_library_update** — `UPDATE`（roles: {public}）
+    - USING: `true`
+
+---
+
+### `manifestation_records`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `user_id` | uuid | NO | - |
+| `record_date` | date | NO | - |
+| `content` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `user_id` | `employees.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **manifestation_records_delete** — `DELETE`（roles: {public}）
+    - USING: `true`
+- **manifestation_records_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `true`
+- **manifestation_records_select** — `SELECT`（roles: {public}）
+    - USING: `true`
+- **manifestation_records_update** — `UPDATE`（roles: {public}）
+    - USING: `true`
+
+---
+
+### `meeting_messages`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `room_id` | uuid | NO | - |
+| `sender_id` | text | NO | - |
+| `sender_name` | text | NO | - |
+| `sender_emoji` | text | YES | '👤'::text |
+| `sender_type` | text | YES | 'human'::text |
+| `content` | text | NO | - |
+| `metadata` | jsonb | YES | '{}'::jsonb |
+| `created_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `room_id` | `meeting_rooms.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **meeting_messages_delete** — `DELETE`（roles: {public}）
+    - USING: `true`
+- **meeting_messages_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `true`
+- **meeting_messages_select** — `SELECT`（roles: {public}）
+    - USING: `true`
+- **meeting_messages_update** — `UPDATE`（roles: {public}）
+    - USING: `true`
+
+---
+
+### `meeting_participants`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `room_id` | uuid | NO | - |
+| `participant_id` | text | NO | - |
+| `participant_name` | text | NO | - |
+| `participant_emoji` | text | YES | '👤'::text |
+| `participant_type` | text | YES | 'human'::text |
+| `role` | text | YES | 'participant'::text |
+| `is_online` | boolean | YES | false |
+| `last_seen_at` | timestamp with time zone | YES | now() |
+| `joined_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `room_id` | `meeting_rooms.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **meeting_participants_delete** — `DELETE`（roles: {public}）
+    - USING: `true`
+- **meeting_participants_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `true`
+- **meeting_participants_select** — `SELECT`（roles: {public}）
+    - USING: `true`
+- **meeting_participants_update** — `UPDATE`（roles: {public}）
+    - USING: `true`
+
+---
+
+### `meeting_rooms`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `name` | text | NO | - |
+| `description` | text | YES | - |
+| `room_type` | text | YES | 'general'::text |
+| `workspace_id` | uuid | YES | - |
+| `is_active` | boolean | YES | true |
+| `schedule` | jsonb | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **meeting_rooms_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **meeting_rooms_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **meeting_rooms_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **meeting_rooms_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+---
+
+### `members`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | text | NO | - |
+| `order_id` | text | YES | - |
+| `tour_id` | text | YES | - |
+| `chinese_name` | text | NO | - |
+| `english_name` | text | YES | - |
+| `gender` | text | YES | - |
+| `birth_date` | date | YES | - |
+| `national_id` | text | YES | - |
+| `passport_number` | text | YES | - |
+| `phone` | text | YES | - |
+| `email` | text | YES | - |
+| `address` | text | YES | - |
+| `emergency_contact` | text | YES | '{}'::jsonb |
+| `dietary_requirements` | text | YES | - |
+| `medical_conditions` | text | YES | - |
+| `special_requests` | text | YES | - |
+| `member_type` | text | YES | 'adult'::text |
+| `room_type` | text | YES | - |
+| `roommate` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `id_number` | text | YES | - |
+| `passport_expiry` | date | YES | - |
+| `emergency_phone` | text | YES | - |
+| `room_preference` | text | YES | - |
+| `assigned_room` | text | YES | - |
+| `reservation_code` | text | YES | - |
+| `is_child_no_bed` | boolean | YES | false |
+| `add_ons` | ARRAY | YES | - |
+| `refunds` | ARRAY | YES | - |
+| `notes` | text | YES | - |
+| `is_active` | boolean | YES | true |
+| `passport_image_url` | text | YES | - |
+| `hotel_confirmation` | text | YES | - |
+| `checked_in` | boolean | YES | false |
+| `checked_in_at` | timestamp with time zone | YES | - |
+| `workspace_id` | uuid | YES | - |
+| `created_by` | uuid | YES | - |
+| `contract_created_at` | timestamp with time zone | YES | - |
+| `updated_by` | uuid | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `created_by` | `employees.id` | NO ACTION | NO ACTION |
+| `order_id` | `orders.id` | RESTRICT | NO ACTION |
+| `tour_id` | `tours.id` | RESTRICT | NO ACTION |
+| `updated_by` | `employees.id` | NO ACTION | NO ACTION |
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **members_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **members_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **members_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **members_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **members_workspace_isolation** — `ALL`（roles: {public}）
+    - USING: `((workspace_id = get_current_user_workspace()) OR (workspace_id IS NULL))`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+- `update_members_updated_at` — BEFORE UPDATE
+
+---
+
+### `messages`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `channel_id` | uuid | NO | - |
+| `content` | text | NO | - |
+| `reactions` | jsonb | YES | '{}'::jsonb |
+| `created_at` | timestamp with time zone | YES | now() |
+| `edited_at` | timestamp with time zone | YES | - |
+| `attachments` | jsonb | YES | '[]'::jsonb |
+| `author` | jsonb | YES | '{}'::jsonb |
+| `_needs_sync` | boolean | YES | false |
+| `_synced_at` | timestamp with time zone | YES | - |
+| `_deleted` | boolean | YES | false |
+| `created_by_legacy_author` | uuid | YES | - |
+| `is_pinned` | boolean | YES | false |
+| `workspace_id` | uuid | YES | - |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `created_by` | uuid | YES | - |
+| `updated_by` | uuid | YES | - |
+| `parent_message_id` | uuid | YES | - |
+| `reply_count` | integer | YES | 0 |
+| `last_reply_at` | timestamp with time zone | YES | - |
+| `metadata` | jsonb | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `channel_id` | `channels.id` | CASCADE | NO ACTION |
+| `created_by` | `employees.id` | NO ACTION | NO ACTION |
+| `created_by_legacy_author` | `employees.id` | NO ACTION | NO ACTION |
+| `parent_message_id` | `messages.id` | SET NULL | NO ACTION |
+| `updated_by` | `employees.id` | NO ACTION | NO ACTION |
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **Allow channel members to insert messages** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(EXISTS ( SELECT 1
+   FROM channel_members
+  WHERE ((channel_members.channel_id = messages.channel_id) AND (channel_members.employee_id = auth.uid()))))`
+- **Allow members to read messages** — `SELECT`（roles: {public}）
+    - USING: `(EXISTS ( SELECT 1
+   FROM channel_members
+  WHERE ((channel_members.channel_id = messages.channel_id) AND (channel_members.employee_id = auth.uid()))))`
+- **messages_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **messages_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **messages_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **messages_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `messages_updated_at` — BEFORE UPDATE
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+- `trigger_update_message_reply_stats` — AFTER INSERT
+- `trigger_update_message_reply_stats` — AFTER DELETE
+
+---
+
+### `michelin_restaurants`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `name` | text | NO | - |
+| `english_name` | text | YES | - |
+| `name_local` | text | YES | - |
+| `michelin_stars` | integer | YES | - |
+| `michelin_guide_year` | integer | YES | - |
+| `bib_gourmand` | boolean | YES | false |
+| `michelin_plate` | boolean | YES | false |
+| `green_star` | boolean | YES | false |
+| `country_id` | text | NO | - |
+| `region_id` | text | YES | - |
+| `city_id` | text | NO | - |
+| `address` | text | YES | - |
+| `address_en` | text | YES | - |
+| `latitude` | numeric | YES | - |
+| `longitude` | numeric | YES | - |
+| `google_maps_url` | text | YES | - |
+| `cuisine_type` | ARRAY | YES | - |
+| `dining_style` | text | YES | - |
+| `price_range` | text | YES | - |
+| `avg_price_lunch` | integer | YES | - |
+| `avg_price_dinner` | integer | YES | - |
+| `currency` | text | YES | 'TWD'::text |
+| `phone` | text | YES | - |
+| `email` | text | YES | - |
+| `website` | text | YES | - |
+| `reservation_url` | text | YES | - |
+| `reservation_required` | boolean | YES | true |
+| `opening_hours` | jsonb | YES | - |
+| `description` | text | YES | - |
+| `description_en` | text | YES | - |
+| `chef_name` | text | YES | - |
+| `chef_profile` | text | YES | - |
+| `signature_dishes` | ARRAY | YES | - |
+| `specialties` | ARRAY | YES | - |
+| `facilities` | jsonb | YES | - |
+| `dress_code` | text | YES | - |
+| `dining_restrictions` | jsonb | YES | - |
+| `images` | ARRAY | YES | - |
+| `menu_images` | ARRAY | YES | - |
+| `awards` | ARRAY | YES | - |
+| `ratings` | jsonb | YES | - |
+| `commission_rate` | numeric | YES | - |
+| `booking_contact` | text | YES | - |
+| `booking_email` | text | YES | - |
+| `group_menu_available` | boolean | YES | false |
+| `min_group_size` | integer | YES | - |
+| `max_group_size` | integer | YES | - |
+| `booking_notes` | text | YES | - |
+| `recommended_for` | ARRAY | YES | - |
+| `best_season` | ARRAY | YES | - |
+| `is_active` | boolean | YES | true |
+| `display_order` | integer | YES | 0 |
+| `notes` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `created_by` | uuid | YES | - |
+| `updated_by` | uuid | YES | - |
+| `workspace_id` | uuid | NO | - |
+| `country_code` | text | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `city_id` | `cities.id` | RESTRICT | NO ACTION |
+| `country_code` | `ref_countries.code` | NO ACTION | NO ACTION |
+| `country_id` | `countries.id` | RESTRICT | NO ACTION |
+| `created_by` | `employees.id` | SET NULL | NO ACTION |
+| `region_id` | `regions.id` | SET NULL | NO ACTION |
+| `updated_by` | `employees.id` | SET NULL | NO ACTION |
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **michelin_restaurants_delete** — `DELETE`（roles: {public}）
+    - USING: `true`
+- **michelin_restaurants_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `true`
+- **michelin_restaurants_select** — `SELECT`（roles: {public}）
+    - USING: `true`
+- **michelin_restaurants_update** — `UPDATE`（roles: {public}）
+    - USING: `true`
+- **michelin_select** — `SELECT`（roles: {authenticated}）
+    - USING: `((workspace_id = get_current_user_workspace()) OR has_attraction_license(workspace_id, 'michelin'::text) OR is_super_admin())`
+- **michelin_write** — `ALL`（roles: {authenticated}）
+    - USING: `((workspace_id = get_current_user_workspace()) OR is_super_admin())`
+    - WITH CHECK: `((workspace_id = get_current_user_workspace()) OR is_super_admin())`
+
+**Triggers**
+
+- `trg_michelin_restaurants_sync_country_code` — BEFORE INSERT
+- `trg_michelin_restaurants_sync_country_code` — BEFORE UPDATE
+- `trigger_update_michelin_restaurants_updated_at` — BEFORE UPDATE
+
+---
+
+### `missed_clock_requests`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `employee_id` | uuid | NO | - |
+| `date` | date | NO | - |
+| `clock_type` | character varying | NO | - |
+| `requested_time` | time without time zone | NO | - |
+| `reason` | text | NO | - |
+| `status` | character varying | NO | 'pending'::character varying |
+| `approved_by` | uuid | YES | - |
+| `approved_at` | timestamp with time zone | YES | - |
+| `reject_reason` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `approved_by` | `employees.id` | NO ACTION | NO ACTION |
+| `employee_id` | `employees.id` | RESTRICT | NO ACTION |
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **missed_clock_requests_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `true`
+- **missed_clock_requests_select** — `SELECT`（roles: {public}）
+    - USING: `true`
+- **missed_clock_requests_update** — `UPDATE`（roles: {public}）
+    - USING: `true`
+
+---
+
+### `notes`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `user_id` | uuid | NO | - |
+| `tab_id` | text | NO | - |
+| `tab_name` | text | NO | '筆記'::text |
+| `content` | text | NO | ''::text |
+| `tab_order` | integer | NO | 0 |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `workspace_id` | uuid | YES | - |
+| `created_by` | uuid | YES | - |
+| `updated_by` | uuid | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `created_by` | `employees.id` | NO ACTION | NO ACTION |
+| `updated_by` | `employees.id` | NO ACTION | NO ACTION |
+| `user_id` | `employees.id` | NO ACTION | NO ACTION |
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **notes_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **notes_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **notes_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **notes_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+
+---
+
+### `notifications`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `recipient_id` | uuid | NO | - |
+| `sender_id` | uuid | YES | - |
+| `module` | character varying | NO | 'system'::character varying |
+| `type` | character varying | NO | 'info'::character varying |
+| `title` | character varying | NO | - |
+| `message` | text | YES | - |
+| `action_url` | character varying | YES | - |
+| `action_data` | jsonb | YES | '{}'::jsonb |
+| `is_read` | boolean | NO | false |
+| `read_at` | timestamp with time zone | YES | - |
+| `channels_sent` | jsonb | YES | '["web"]'::jsonb |
+| `created_at` | timestamp with time zone | NO | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `recipient_id` | `employees.id` | RESTRICT | NO ACTION |
+| `sender_id` | `employees.id` | SET NULL | NO ACTION |
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **notifications_delete_service** — `DELETE`（roles: {public}）
+    - USING: `true`
+- **notifications_insert_service** — `INSERT`（roles: {public}）
+    - WITH CHECK: `true`
+- **notifications_select_own** — `SELECT`（roles: {public}）
+    - USING: `(recipient_id = auth.uid())`
+- **notifications_update_own** — `UPDATE`（roles: {public}）
+    - USING: `(recipient_id = auth.uid())`
+    - WITH CHECK: `(recipient_id = auth.uid())`
+
+---
+
+### `office_documents`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | YES | - |
+| `name` | text | NO | '未命名文件'::text |
+| `type` | text | NO | - |
+| `data` | jsonb | NO | '{}'::jsonb |
+| `created_at` | timestamp with time zone | NO | now() |
+| `updated_at` | timestamp with time zone | NO | now() |
+| `created_by` | text | YES | - |
+| `updated_by` | text | YES | - |
+| `tour_id` | text | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `tour_id` | `tours.id` | SET NULL | NO ACTION |
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **office_documents_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **office_documents_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **office_documents_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **office_documents_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+- `trigger_office_documents_updated_at` — BEFORE UPDATE
+
+---
+
+### `online_trip_members`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `trip_id` | uuid | NO | - |
+| `role` | text | NO | - |
+| `name` | text | YES | - |
+| `phone` | text | YES | - |
+| `erp_employee_id` | text | YES | - |
+| `erp_order_member_id` | text | YES | - |
+| `erp_driver_task_id` | uuid | YES | - |
+| `member_type` | text | YES | - |
+| `checked_in` | boolean | YES | false |
+| `checked_in_at` | timestamp with time zone | YES | - |
+| `special_meal` | text | YES | - |
+| `remarks` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `vehicle_number` | text | YES | - |
+| `vehicle_seat` | text | YES | - |
+| `room_number` | text | YES | - |
+| `room_type` | text | YES | - |
+| `roommates` | ARRAY | YES | - |
+| `user_id` | uuid | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `trip_id` | `online_trips.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **online_trip_members_authenticated** — `ALL`（roles: {public}）
+    - USING: `(auth.role() = 'authenticated'::text)`
+
+**Triggers**
+
+- `trigger_online_trip_members_updated_at` — BEFORE UPDATE
+
+---
+
+### `online_trips`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `erp_tour_id` | text | YES | - |
+| `erp_itinerary_id` | text | YES | - |
+| `code` | text | NO | - |
+| `name` | text | NO | - |
+| `departure_date` | date | NO | - |
+| `return_date` | date | YES | - |
+| `destination` | text | YES | - |
+| `daily_itinerary` | jsonb | YES | '[]'::jsonb |
+| `leader_info` | jsonb | YES | - |
+| `meeting_info` | jsonb | YES | - |
+| `outbound_flight` | jsonb | YES | - |
+| `return_flight` | jsonb | YES | - |
+| `status` | text | YES | 'active'::text |
+| `handoff_at` | timestamp with time zone | YES | now() |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `workspace_id` | uuid | YES | - |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **online_trips_delete** — `DELETE`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **online_trips_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR (workspace_id = get_current_user_workspace()))`
+- **online_trips_select** — `SELECT`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **online_trips_update** — `UPDATE`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+
+---
+
+### `opening_balances`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `account_id` | uuid | NO | - |
+| `fiscal_year` | integer | NO | - |
+| `opening_date` | date | NO | - |
+| `debit_amount` | numeric | YES | 0 |
+| `credit_amount` | numeric | YES | 0 |
+| `created_by` | uuid | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `account_id` | `chart_of_accounts.id` | RESTRICT | NO ACTION |
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **opening_balances_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **opening_balances_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **opening_balances_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **opening_balances_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+---
+
+### `order_members`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `order_id` | text | NO | - |
+| `customer_id` | text | YES | - |
+| `member_type` | text | NO | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `identity` | character varying | YES | - |
+| `chinese_name` | character varying | YES | - |
+| `passport_name` | character varying | YES | - |
+| `birth_date` | date | YES | - |
+| `age` | integer | YES | - |
+| `id_number` | character varying | YES | - |
+| `gender` | character varying | YES | - |
+| `passport_number` | character varying | YES | - |
+| `passport_expiry` | date | YES | - |
+| `special_meal` | character varying | YES | - |
+| `pnr` | character varying | YES | - |
+| `flight_cost` | numeric | YES | - |
+| `hotel_1_name` | character varying | YES | - |
+| `hotel_1_checkin` | date | YES | - |
+| `hotel_1_checkout` | date | YES | - |
+| `hotel_2_name` | character varying | YES | - |
+| `hotel_2_checkin` | date | YES | - |
+| `hotel_2_checkout` | date | YES | - |
+| `transport_cost` | numeric | YES | - |
+| `misc_cost` | numeric | YES | - |
+| `total_payable` | numeric | YES | - |
+| `deposit_amount` | numeric | YES | - |
+| `balance_amount` | numeric | YES | - |
+| `deposit_receipt_no` | character varying | YES | - |
+| `balance_receipt_no` | character varying | YES | - |
+| `remarks` | text | YES | - |
+| `cost_price` | numeric | YES | - |
+| `selling_price` | numeric | YES | - |
+| `profit` | numeric | YES | - |
+| `workspace_id` | uuid | YES | - |
+| `created_by` | uuid | YES | - |
+| `updated_by` | uuid | YES | - |
+| `passport_image_url` | text | YES | - |
+| `ticket_number` | character varying | YES | - |
+| `ticketing_deadline` | date | YES | - |
+| `flight_self_arranged` | boolean | YES | false |
+| `contract_created_at` | timestamp with time zone | YES | - |
+| `checked_in` | boolean | YES | false |
+| `checked_in_at` | timestamp with time zone | YES | - |
+| `passport_name_print` | text | YES | - |
+| `sort_order` | integer | YES | 0 |
+| `custom_costs` | jsonb | YES | '{}'::jsonb |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `customer_id` | `customers.id` | RESTRICT | NO ACTION |
+| `order_id` | `orders.id` | RESTRICT | NO ACTION |
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **order_members_delete** — `DELETE`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **order_members_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(workspace_id = get_current_user_workspace())`
+- **order_members_select** — `SELECT`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **order_members_update** — `UPDATE`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+
+**Triggers**
+
+- `order_members_recalc_order` — AFTER DELETE
+- `order_members_recalc_order` — AFTER UPDATE
+- `order_members_recalc_order` — AFTER INSERT
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+- `trigger_order_member_cache` — AFTER INSERT
+- `trigger_order_member_cache` — AFTER UPDATE
+- `update_order_members_updated_at` — BEFORE UPDATE
+
+---
+
+### `orders`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | text | NO | gen_random_uuid() |
+| `code` | text | NO | - |
+| `tour_id` | text | YES | - |
+| `customer_id` | text | YES | - |
+| `contact_person` | text | NO | - |
+| `contact_phone` | text | YES | - |
+| `contact_email` | text | YES | - |
+| `adult_count` | integer | YES | 0 |
+| `total_amount` | numeric | YES | 0 |
+| `paid_amount` | numeric | YES | 0 |
+| `status` | text | NO | 'pending'::text |
+| `payment_status` | text | YES | '未收款'::text |
+| `notes` | text | YES | - |
+| `is_active` | boolean | YES | true |
+| `created_at` | timestamp with time zone | NO | now() |
+| `updated_at` | timestamp with time zone | NO | now() |
+| `tour_name` | text | YES | - |
+| `sales_person` | text | YES | - |
+| `assistant` | text | YES | - |
+| `member_count` | integer | YES | 0 |
+| `remaining_amount` | numeric | YES | 0 |
+| `order_number` | text | YES | - |
+| `workspace_id` | uuid | NO | - |
+| `identity_options` | jsonb | YES | '["員工", "眷屬", "朋友", "客戶"]'::jsonb |
+| `created_by` | uuid | YES | - |
+| `updated_by` | uuid | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `created_by` | `employees.id` | NO ACTION | NO ACTION |
+| `customer_id` | `customers.id` | SET NULL | NO ACTION |
+| `tour_id` | `tours.id` | SET NULL | NO ACTION |
+| `updated_by` | `employees.id` | NO ACTION | NO ACTION |
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **orders_delete** — `DELETE`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **orders_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(workspace_id = get_current_user_workspace())`
+- **orders_select** — `SELECT`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **orders_update** — `UPDATE`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+
+**Triggers**
+
+- `trigger_add_travelers_to_conversation` — AFTER UPDATE
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+- `trigger_update_customer_stats` — AFTER UPDATE
+- `trigger_update_customer_stats` — AFTER INSERT
+- `update_orders_updated_at` — BEFORE UPDATE
+
+---
+
+### `overtime_requests`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `employee_id` | uuid | NO | - |
+| `date` | date | NO | - |
+| `start_time` | time without time zone | NO | - |
+| `end_time` | time without time zone | NO | - |
+| `hours` | numeric | NO | - |
+| `reason` | text | YES | - |
+| `status` | character varying | NO | 'pending'::character varying |
+| `approved_by` | uuid | YES | - |
+| `approved_at` | timestamp with time zone | YES | - |
+| `reject_reason` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `approved_by` | `employees.id` | NO ACTION | NO ACTION |
+| `employee_id` | `employees.id` | RESTRICT | NO ACTION |
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **overtime_requests_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `true`
+- **overtime_requests_select** — `SELECT`（roles: {public}）
+    - USING: `true`
+- **overtime_requests_update** — `UPDATE`（roles: {public}）
+    - USING: `true`
+
+---
+
+### `payment_methods`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `code` | character varying | YES | - |
+| `name` | character varying | NO | - |
+| `type` | character varying | NO | - |
+| `description` | text | YES | - |
+| `is_active` | boolean | YES | true |
+| `sort_order` | integer | YES | 0 |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `debit_account_id` | uuid | YES | - |
+| `credit_account_id` | uuid | YES | - |
+| `placeholder` | character varying | YES | - |
+| `is_system` | boolean | YES | false |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `credit_account_id` | `chart_of_accounts.id` | NO ACTION | NO ACTION |
+| `debit_account_id` | `chart_of_accounts.id` | NO ACTION | NO ACTION |
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **payment_methods_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **payment_methods_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **payment_methods_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **payment_methods_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+---
+
+### `payment_request_items`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `request_id` | uuid | YES | - |
+| `description` | text | NO | - |
+| `category` | text | YES | - |
+| `quantity` | integer | YES | 1 |
+| `unitprice` | numeric | YES | 0 |
+| `subtotal` | numeric | YES | 0 |
+| `notes` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `item_number` | text | YES | '001'::text |
+| `supplier_id` | text | YES | - |
+| `supplier_name` | text | YES | '未指定'::text |
+| `payment_method` | text | YES | - |
+| `custom_request_date` | date | YES | - |
+| `sort_order` | integer | YES | 0 |
+| `workspace_id` | uuid | YES | - |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `created_by` | uuid | YES | - |
+| `updated_by` | uuid | YES | - |
+| `tour_id` | text | YES | - |
+| `tour_request_id` | uuid | YES | - |
+| `confirmation_item_id` | uuid | YES | - |
+| `advanced_by` | text | YES | - |
+| `advanced_by_name` | text | YES | - |
+| `transferred_from_tour_id` | text | YES | - |
+| `transferred_at` | timestamp with time zone | YES | - |
+| `transferred_by` | uuid | YES | - |
+| `payment_method_id` | uuid | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `confirmation_item_id` | `tour_confirmation_items.id` | NO ACTION | NO ACTION |
+| `payment_method_id` | `payment_methods.id` | SET NULL | NO ACTION |
+| `request_id` | `payment_requests.id` | RESTRICT | NO ACTION |
+| `supplier_id` | `suppliers.id` | RESTRICT | NO ACTION |
+| `tour_id` | `tours.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **payment_request_items_delete** — `DELETE`（roles: {public}）
+    - USING: `(EXISTS ( SELECT 1
+   FROM payment_requests
+  WHERE ((payment_requests.id = payment_request_items.request_id) AND (payment_requests.workspace_id = get_current_user_workspace()))))`
+- **payment_request_items_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(EXISTS ( SELECT 1
+   FROM payment_requests
+  WHERE ((payment_requests.id = payment_request_items.request_id) AND (payment_requests.workspace_id = get_current_user_workspace()))))`
+- **payment_request_items_select** — `SELECT`（roles: {public}）
+    - USING: `(EXISTS ( SELECT 1
+   FROM payment_requests
+  WHERE ((payment_requests.id = payment_request_items.request_id) AND (payment_requests.workspace_id = get_current_user_workspace()))))`
+- **payment_request_items_update** — `UPDATE`（roles: {public}）
+    - USING: `(EXISTS ( SELECT 1
+   FROM payment_requests
+  WHERE ((payment_requests.id = payment_request_items.request_id) AND (payment_requests.workspace_id = get_current_user_workspace()))))`
+
+**Triggers**
+
+- `payment_request_items_cascade_amount` — AFTER INSERT
+- `payment_request_items_cascade_amount` — AFTER UPDATE
+- `payment_request_items_cascade_amount` — AFTER DELETE
+- `payment_request_items_compute_subtotal` — BEFORE UPDATE
+- `payment_request_items_compute_subtotal` — BEFORE INSERT
+- `payment_request_items_enforce_lock` — BEFORE INSERT
+- `payment_request_items_enforce_lock` — BEFORE UPDATE
+- `payment_request_items_enforce_lock` — BEFORE DELETE
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+- `trigger_payment_request_items_updated_at` — BEFORE UPDATE
+- `trigger_update_payment_request_total_on_delete` — AFTER DELETE
+- `trigger_update_payment_request_total_on_insert` — AFTER INSERT
+- `trigger_update_payment_request_total_on_update` — AFTER UPDATE
+
+---
+
+### `payment_requests`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `code` | text | NO | - |
+| `tour_id` | text | YES | - |
+| `request_type` | text | NO | - |
+| `amount` | numeric | NO | - |
+| `supplier_id` | text | YES | - |
+| `supplier_name` | text | YES | - |
+| `status` | text | YES | 'pending'::text |
+| `approved_by` | uuid | YES | - |
+| `approved_at` | timestamp with time zone | YES | - |
+| `paid_by` | uuid | YES | - |
+| `paid_at` | timestamp with time zone | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `workspace_id` | uuid | NO | - |
+| `request_date` | date | YES | CURRENT_DATE |
+| `total_amount` | numeric | YES | 0 |
+| `tour_code` | text | YES | - |
+| `tour_name` | text | YES | - |
+| `budget_warning` | boolean | YES | false |
+| `created_by` | uuid | YES | - |
+| `updated_by` | uuid | YES | - |
+| `notes` | text | YES | - |
+| `order_id` | text | YES | - |
+| `order_number` | text | YES | - |
+| `created_by_name` | text | YES | - |
+| `request_category` | character varying | YES | 'tour'::character varying |
+| `expense_type` | character varying | YES | - |
+| `is_special_billing` | boolean | YES | false |
+| `request_number` | text | YES | - |
+| `batch_id` | uuid | YES | - |
+| `accounting_subject_id` | uuid | YES | - |
+| `payment_method_id` | uuid | YES | - |
+| `accounting_voucher_id` | uuid | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `accounting_subject_id` | `accounting_subjects.id` | NO ACTION | NO ACTION |
+| `accounting_voucher_id` | `journal_vouchers.id` | NO ACTION | NO ACTION |
+| `approved_by` | `employees.id` | NO ACTION | NO ACTION |
+| `order_id` | `orders.id` | RESTRICT | NO ACTION |
+| `paid_by` | `employees.id` | NO ACTION | NO ACTION |
+| `supplier_id` | `suppliers.id` | RESTRICT | NO ACTION |
+| `tour_id` | `tours.id` | RESTRICT | NO ACTION |
+| `updated_by` | `employees.id` | SET NULL | NO ACTION |
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **payment_requests_delete** — `DELETE`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **payment_requests_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(workspace_id = get_current_user_workspace())`
+- **payment_requests_select** — `SELECT`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **payment_requests_update** — `UPDATE`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+
+**Triggers**
+
+- `payment_requests_enforce_lock` — BEFORE UPDATE
+- `trigger_auto_post_payment_request` — AFTER UPDATE
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+- `trigger_payment_requests_updated_at` — BEFORE UPDATE
+- `update_payment_requests_updated_at` — BEFORE UPDATE
+
+---
+
+### `payments`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `payment_number` | text | NO | - |
+| `order_id` | text | YES | - |
+| `tour_id` | text | YES | - |
+| `payment_type` | text | YES | - |
+| `amount` | numeric | NO | - |
+| `payment_date` | date | NO | - |
+| `payer` | text | YES | - |
+| `received_by` | uuid | YES | - |
+| `status` | text | YES | 'completed'::text |
+| `notes` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `workspace_id` | uuid | NO | - |
+| `created_by` | uuid | YES | - |
+| `updated_by` | uuid | YES | - |
+| `payment_method_id` | uuid | YES | - |
+| `accounting_voucher_id` | uuid | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `accounting_voucher_id` | `journal_vouchers.id` | NO ACTION | NO ACTION |
+| `created_by` | `employees.id` | NO ACTION | NO ACTION |
+| `payment_method_id` | `payment_methods.id` | NO ACTION | NO ACTION |
+| `updated_by` | `employees.id` | NO ACTION | NO ACTION |
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **payments_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **payments_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **payments_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **payments_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `payments_updated_at` — BEFORE UPDATE
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+- `update_payments_updated_at` — BEFORE UPDATE
+
+---
+
+### `payroll_allowance_types`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `code` | character varying | NO | - |
+| `name` | character varying | NO | - |
+| `default_amount` | numeric | YES | 0 |
+| `is_taxable` | boolean | NO | true |
+| `is_active` | boolean | NO | true |
+| `sort_order` | integer | NO | 0 |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **payroll_allowance_types_all** — `ALL`（roles: {public}）
+    - USING: `true`
+- **payroll_allowance_types_select** — `SELECT`（roles: {public}）
+    - USING: `true`
+
+---
+
+### `payroll_deduction_types`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `code` | character varying | NO | - |
+| `name` | character varying | NO | - |
+| `calc_method` | character varying | NO | 'fixed'::character varying |
+| `calc_config` | jsonb | YES | '{}'::jsonb |
+| `is_employer_paid` | boolean | NO | false |
+| `is_active` | boolean | NO | true |
+| `sort_order` | integer | NO | 0 |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **payroll_deduction_types_all** — `ALL`（roles: {public}）
+    - USING: `true`
+- **payroll_deduction_types_select** — `SELECT`（roles: {public}）
+    - USING: `true`
+
+---
+
+### `payroll_periods`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `year` | integer | NO | - |
+| `month` | integer | NO | - |
+| `start_date` | date | NO | - |
+| `end_date` | date | NO | - |
+| `status` | character varying | NO | 'draft'::character varying |
+| `confirmed_by` | uuid | YES | - |
+| `confirmed_at` | timestamp with time zone | YES | - |
+| `paid_at` | timestamp with time zone | YES | - |
+| `notes` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `confirmed_by` | `employees.id` | NO ACTION | NO ACTION |
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **payroll_periods_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **payroll_periods_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **payroll_periods_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **payroll_periods_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+- `trigger_payroll_periods_updated_at` — BEFORE UPDATE
+
+---
+
+### `payroll_records`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `payroll_period_id` | uuid | NO | - |
+| `employee_id` | uuid | NO | - |
+| `base_salary` | numeric | NO | 0 |
+| `overtime_pay` | numeric | NO | 0 |
+| `bonus` | numeric | NO | 0 |
+| `allowances` | numeric | NO | 0 |
+| `meal_allowance` | numeric | NO | 0 |
+| `transportation_allowance` | numeric | NO | 0 |
+| `other_additions` | numeric | NO | 0 |
+| `unpaid_leave_deduction` | numeric | NO | 0 |
+| `late_deduction` | numeric | NO | 0 |
+| `other_deductions` | numeric | NO | 0 |
+| `gross_salary` | numeric | NO | 0 |
+| `total_deductions` | numeric | NO | 0 |
+| `net_salary` | numeric | NO | 0 |
+| `work_days` | integer | NO | 0 |
+| `actual_work_days` | integer | NO | 0 |
+| `overtime_hours` | numeric | NO | 0 |
+| `paid_leave_days` | numeric | NO | 0 |
+| `unpaid_leave_days` | numeric | NO | 0 |
+| `late_count` | integer | NO | 0 |
+| `overtime_details` | jsonb | YES | - |
+| `allowance_details` | jsonb | YES | - |
+| `deduction_details` | jsonb | YES | - |
+| `notes` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `employee_id` | `employees.id` | RESTRICT | NO ACTION |
+| `payroll_period_id` | `payroll_periods.id` | RESTRICT | NO ACTION |
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **payroll_records_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **payroll_records_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **payroll_records_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **payroll_records_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+- `trigger_calculate_payroll_totals` — BEFORE INSERT
+- `trigger_calculate_payroll_totals` — BEFORE UPDATE
+- `trigger_payroll_records_updated_at` — BEFORE UPDATE
+
+---
+
+### `personal_canvases`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `employee_id` | uuid | NO | - |
+| `workspace_id` | uuid | NO | - |
+| `canvas_number` | integer | NO | - |
+| `title` | text | NO | - |
+| `type` | text | YES | 'custom'::text |
+| `content` | jsonb | YES | '{}'::jsonb |
+| `layout` | jsonb | YES | '{}'::jsonb |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **personal_canvases_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **personal_canvases_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **personal_canvases_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **personal_canvases_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+
+---
+
+### `personal_expenses`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `user_id` | uuid | NO | - |
+| `amount` | numeric | NO | - |
+| `type` | text | NO | 'expense'::text |
+| `title` | text | NO | - |
+| `description` | text | YES | - |
+| `category` | text | NO | 'other'::text |
+| `payment_method` | text | YES | 'cash'::text |
+| `expense_date` | date | NO | CURRENT_DATE |
+| `expense_time` | time without time zone | YES | - |
+| `is_split` | boolean | YES | false |
+| `split_group_id` | uuid | YES | - |
+| `split_expense_id` | uuid | YES | - |
+| `tags` | ARRAY | YES | - |
+| `receipt_url` | text | YES | - |
+| `location` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `currency` | text | YES | 'TWD'::text |
+| `is_foreign_transaction` | boolean | YES | false |
+| `settlement_currency` | text | YES | - |
+| `settlement_amount` | numeric | YES | - |
+| `exchange_rate` | numeric | YES | - |
+| `is_settled` | boolean | YES | false |
+| `account_id` | uuid | YES | - |
+| `category_id` | uuid | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `account_id` | `accounts.id` | SET NULL | NO ACTION |
+| `category_id` | `expense_categories.id` | SET NULL | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **personal_expenses_delete** — `DELETE`（roles: {public}）
+    - USING: `true`
+- **personal_expenses_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `true`
+- **personal_expenses_select** — `SELECT`（roles: {public}）
+    - USING: `true`
+- **personal_expenses_update** — `UPDATE`（roles: {public}）
+    - USING: `true`
+
+**Triggers**
+
+- `trigger_update_account_balance` — AFTER INSERT
+- `trigger_update_account_balance` — AFTER DELETE
+- `trigger_update_account_balance` — AFTER UPDATE
+- `trigger_update_expense_streak` — AFTER INSERT
+
+---
+
+### `personal_records`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `user_id` | uuid | NO | - |
+| `workspace_id` | uuid | YES | - |
+| `exercise_id` | integer | NO | - |
+| `exercise_name` | text | NO | - |
+| `max_weight` | numeric | YES | - |
+| `max_reps` | integer | YES | - |
+| `one_rep_max` | numeric | YES | - |
+| `achieved_date` | date | NO | - |
+| `session_id` | uuid | YES | - |
+| `created_at` | timestamp with time zone | NO | now() |
+| `updated_at` | timestamp with time zone | NO | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **personal_records_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **personal_records_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **personal_records_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **personal_records_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+- `update_personal_records_updated_at` — BEFORE UPDATE
+
+---
+
+### `pnr_ai_queries`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `pnr_id` | uuid | YES | - |
+| `query_text` | text | NO | - |
+| `query_context` | jsonb | YES | - |
+| `response_text` | text | YES | - |
+| `response_metadata` | jsonb | YES | - |
+| `queried_by` | uuid | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `pnr_id` | `pnr_records.id` | CASCADE | NO ACTION |
+| `queried_by` | `employees.id` | NO ACTION | NO ACTION |
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **pnr_ai_queries_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **pnr_ai_queries_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **pnr_ai_queries_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **pnr_ai_queries_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+
+---
+
+### `pnr_fare_alerts`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `pnr_id` | uuid | NO | - |
+| `alert_type` | text | NO | - |
+| `threshold_amount` | numeric | YES | - |
+| `threshold_percent` | numeric | YES | - |
+| `is_active` | boolean | YES | true |
+| `last_fare` | numeric | YES | - |
+| `last_checked_at` | timestamp with time zone | YES | - |
+| `notify_channel_id` | uuid | YES | - |
+| `notify_employee_ids` | ARRAY | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `notify_channel_id` | `channels.id` | NO ACTION | NO ACTION |
+| `pnr_id` | `pnr_records.id` | CASCADE | NO ACTION |
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **pnr_fare_alerts_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **pnr_fare_alerts_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **pnr_fare_alerts_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **pnr_fare_alerts_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+- `trigger_pnr_fare_alerts_updated_at` — BEFORE UPDATE
+
+---
+
+### `pnr_fare_history`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `pnr_id` | uuid | NO | - |
+| `fare_basis` | text | YES | - |
+| `currency` | character | YES | 'TWD'::bpchar |
+| `base_fare` | numeric | YES | - |
+| `taxes` | numeric | YES | - |
+| `total_fare` | numeric | NO | - |
+| `source` | text | YES | 'manual'::text |
+| `raw_fare_data` | jsonb | YES | - |
+| `recorded_at` | timestamp with time zone | YES | now() |
+| `recorded_by` | uuid | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `pnr_id` | `pnr_records.id` | CASCADE | NO ACTION |
+| `recorded_by` | `employees.id` | NO ACTION | NO ACTION |
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **pnr_fare_history_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **pnr_fare_history_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **pnr_fare_history_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **pnr_fare_history_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+
+---
+
+### `pnr_flight_status_history`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `pnr_id` | uuid | NO | - |
+| `segment_id` | uuid | YES | - |
+| `airline_code` | character varying | NO | - |
+| `flight_number` | character varying | NO | - |
+| `flight_date` | date | NO | - |
+| `booking_status` | text | YES | - |
+| `operational_status` | text | YES | - |
+| `delay_minutes` | integer | YES | - |
+| `new_departure_time` | time without time zone | YES | - |
+| `new_arrival_time` | time without time zone | YES | - |
+| `gate_info` | character varying | YES | - |
+| `remarks` | text | YES | - |
+| `source` | text | YES | 'telegram'::text |
+| `external_data` | jsonb | YES | - |
+| `recorded_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `pnr_id` | `pnr_records.id` | CASCADE | NO ACTION |
+| `segment_id` | `pnr_segments.id` | SET NULL | NO ACTION |
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **pnr_flight_status_history_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **pnr_flight_status_history_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **pnr_flight_status_history_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **pnr_flight_status_history_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+
+---
+
+### `pnr_passengers`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `pnr_id` | uuid | NO | - |
+| `sequence_number` | integer | YES | - |
+| `surname` | character varying | NO | - |
+| `given_name` | character varying | YES | - |
+| `title` | character varying | YES | - |
+| `passenger_type` | character varying | YES | 'ADT'::character varying |
+| `date_of_birth` | date | YES | - |
+| `customer_id` | text | YES | - |
+| `order_member_id` | uuid | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `pnr_id` | `pnr_records.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **pnr_passengers_all** — `ALL`（roles: {public}）
+    - USING: `true`
+    - WITH CHECK: `true`
+
+---
+
+### `pnr_queue_items`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `pnr_id` | uuid | NO | - |
+| `queue_type` | text | NO | - |
+| `priority` | integer | YES | 0 |
+| `due_date` | timestamp with time zone | YES | - |
+| `reminder_at` | timestamp with time zone | YES | - |
+| `status` | text | YES | 'pending'::text |
+| `assigned_to` | uuid | YES | - |
+| `title` | text | NO | - |
+| `description` | text | YES | - |
+| `metadata` | jsonb | YES | - |
+| `completed_at` | timestamp with time zone | YES | - |
+| `completed_by` | uuid | YES | - |
+| `resolution_notes` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `created_by` | uuid | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `assigned_to` | `employees.id` | NO ACTION | NO ACTION |
+| `completed_by` | `employees.id` | NO ACTION | NO ACTION |
+| `created_by` | `employees.id` | NO ACTION | NO ACTION |
+| `pnr_id` | `pnr_records.id` | CASCADE | NO ACTION |
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **pnr_queue_items_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **pnr_queue_items_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **pnr_queue_items_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **pnr_queue_items_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+- `trigger_pnr_queue_items_updated_at` — BEFORE UPDATE
+- `trigger_update_pnr_queue_count` — AFTER INSERT
+- `trigger_update_pnr_queue_count` — AFTER DELETE
+- `trigger_update_pnr_queue_count` — AFTER UPDATE
+
+---
+
+### `pnr_records`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `record_locator` | character varying | NO | - |
+| `raw_content` | text | YES | - |
+| `office_id` | character varying | YES | - |
+| `created_date` | date | YES | - |
+| `ticketing_status` | character varying | YES | - |
+| `ticketing_deadline` | timestamp with time zone | YES | - |
+| `is_ticketed` | boolean | YES | false |
+| `ticket_numbers` | ARRAY | YES | - |
+| `tour_id` | text | YES | - |
+| `notes` | text | YES | - |
+| `workspace_id` | uuid | YES | - |
+| `created_by` | uuid | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `current_fare` | numeric | YES | - |
+| `fare_currency` | character | YES | 'TWD'::bpchar |
+| `ticket_issued_at` | timestamp with time zone | YES | - |
+| `has_schedule_change` | boolean | YES | false |
+| `queue_count` | integer | YES | 0 |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `created_by` | `employees.id` | NO ACTION | NO ACTION |
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **pnr_records_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **pnr_records_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **pnr_records_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **pnr_records_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+
+---
+
+### `pnr_remarks`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `pnr_id` | uuid | NO | - |
+| `remark_type` | character varying | YES | - |
+| `content` | text | NO | - |
+| `created_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `pnr_id` | `pnr_records.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **pnr_remarks_all** — `ALL`（roles: {public}）
+    - USING: `true`
+    - WITH CHECK: `true`
+
+---
+
+### `pnr_schedule_changes`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `pnr_id` | uuid | NO | - |
+| `segment_id` | uuid | YES | - |
+| `change_type` | text | NO | - |
+| `original_flight_number` | character varying | YES | - |
+| `original_departure_time` | time without time zone | YES | - |
+| `original_arrival_time` | time without time zone | YES | - |
+| `original_departure_date` | date | YES | - |
+| `new_flight_number` | character varying | YES | - |
+| `new_departure_time` | time without time zone | YES | - |
+| `new_arrival_time` | time without time zone | YES | - |
+| `new_departure_date` | date | YES | - |
+| `requires_revalidation` | boolean | YES | false |
+| `requires_reissue` | boolean | YES | false |
+| `requires_refund` | boolean | YES | false |
+| `status` | text | YES | 'pending'::text |
+| `processed_by` | uuid | YES | - |
+| `processed_at` | timestamp with time zone | YES | - |
+| `notes` | text | YES | - |
+| `detected_at` | timestamp with time zone | YES | now() |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `pnr_id` | `pnr_records.id` | CASCADE | NO ACTION |
+| `processed_by` | `employees.id` | NO ACTION | NO ACTION |
+| `segment_id` | `pnr_segments.id` | SET NULL | NO ACTION |
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **pnr_schedule_changes_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **pnr_schedule_changes_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **pnr_schedule_changes_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **pnr_schedule_changes_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+- `trigger_pnr_schedule_changes_updated_at` — BEFORE UPDATE
+
+---
+
+### `pnr_segments`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `pnr_id` | uuid | NO | - |
+| `segment_number` | integer | YES | - |
+| `airline_code` | character varying | NO | - |
+| `flight_number` | character varying | NO | - |
+| `booking_class` | character varying | YES | - |
+| `departure_date` | date | NO | - |
+| `day_of_week` | integer | YES | - |
+| `origin` | character varying | NO | - |
+| `destination` | character varying | NO | - |
+| `status_code` | character varying | YES | - |
+| `quantity` | integer | YES | 1 |
+| `departure_time` | time without time zone | YES | - |
+| `arrival_time` | time without time zone | YES | - |
+| `arrival_day_offset` | integer | YES | 0 |
+| `equipment` | character varying | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `pnr_id` | `pnr_records.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **pnr_segments_all** — `ALL`（roles: {public}）
+    - USING: `true`
+    - WITH CHECK: `true`
+
+---
+
+### `pnr_ssr_elements`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `pnr_id` | uuid | NO | - |
+| `passenger_id` | uuid | YES | - |
+| `segment_id` | uuid | YES | - |
+| `ssr_code` | character varying | NO | - |
+| `airline_code` | character varying | YES | - |
+| `status` | character varying | YES | - |
+| `free_text` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `passenger_id` | `pnr_passengers.id` | SET NULL | NO ACTION |
+| `pnr_id` | `pnr_records.id` | CASCADE | NO ACTION |
+| `segment_id` | `pnr_segments.id` | SET NULL | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **pnr_ssr_elements_all** — `ALL`（roles: {public}）
+    - USING: `true`
+    - WITH CHECK: `true`
+
+---
+
+### `pnrs`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `record_locator` | text | NO | - |
+| `workspace_id` | uuid | NO | - |
+| `employee_id` | uuid | YES | - |
+| `raw_pnr` | text | NO | - |
+| `passenger_names` | ARRAY | NO | '{}'::text[] |
+| `ticketing_deadline` | timestamp with time zone | YES | - |
+| `cancellation_deadline` | timestamp with time zone | YES | - |
+| `segments` | jsonb | YES | '[]'::jsonb |
+| `special_requests` | ARRAY | YES | - |
+| `other_info` | ARRAY | YES | - |
+| `status` | text | YES | 'active'::text |
+| `notes` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `created_by` | uuid | YES | - |
+| `updated_by` | uuid | YES | - |
+| `tour_id` | text | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `created_by` | `employees.id` | SET NULL | NO ACTION |
+| `employee_id` | `employees.id` | SET NULL | NO ACTION |
+| `tour_id` | `tours.id` | NO ACTION | NO ACTION |
+| `updated_by` | `employees.id` | SET NULL | NO ACTION |
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **pnrs_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **pnrs_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **pnrs_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **pnrs_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `pnrs_updated_at` — BEFORE UPDATE
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+- `update_pnrs_updated_at` — BEFORE UPDATE
+
+---
+
+### `posting_rules`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | YES | - |
+| `event_type` | accounting_event_type (enum) | NO | - |
+| `rule_name` | text | NO | - |
+| `rule_config` | jsonb | NO | - |
+| `is_active` | boolean | YES | true |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **posting_rules_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **posting_rules_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **posting_rules_select** — `SELECT`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **posting_rules_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+
+---
+
+### `premium_experiences`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `name` | text | NO | - |
+| `english_name` | text | YES | - |
+| `name_local` | text | YES | - |
+| `tagline` | text | YES | - |
+| `country_id` | text | NO | - |
+| `region_id` | text | YES | - |
+| `city_id` | text | NO | - |
+| `specific_location` | text | YES | - |
+| `latitude` | numeric | YES | - |
+| `longitude` | numeric | YES | - |
+| `category` | text | NO | - |
+| `sub_category` | ARRAY | YES | - |
+| `exclusivity_level` | text | NO | - |
+| `description` | text | NO | - |
+| `description_en` | text | YES | - |
+| `highlights` | ARRAY | YES | - |
+| `what_makes_it_special` | text | YES | - |
+| `expert_name` | text | YES | - |
+| `expert_title` | text | YES | - |
+| `expert_credentials` | ARRAY | YES | - |
+| `expert_profile` | text | YES | - |
+| `duration_hours` | numeric | YES | - |
+| `group_size_min` | integer | YES | - |
+| `group_size_max` | integer | YES | - |
+| `language_support` | ARRAY | YES | - |
+| `difficulty_level` | text | YES | - |
+| `physical_requirement` | text | YES | - |
+| `available_seasons` | ARRAY | YES | - |
+| `best_time_of_day` | text | YES | - |
+| `advance_booking_days` | integer | YES | - |
+| `price_per_person_min` | integer | YES | - |
+| `price_per_person_max` | integer | YES | - |
+| `currency` | text | YES | 'TWD'::text |
+| `price_includes` | ARRAY | YES | - |
+| `price_excludes` | ARRAY | YES | - |
+| `commission_rate` | numeric | YES | - |
+| `net_price_per_person` | integer | YES | - |
+| `booking_contact` | text | YES | - |
+| `booking_email` | text | YES | - |
+| `booking_phone` | text | YES | - |
+| `cancellation_policy` | text | YES | - |
+| `minimum_participants` | integer | YES | - |
+| `dress_code` | text | YES | - |
+| `what_to_bring` | ARRAY | YES | - |
+| `restrictions` | ARRAY | YES | - |
+| `meeting_point` | text | YES | - |
+| `meeting_point_coords` | jsonb | YES | - |
+| `transportation_included` | boolean | YES | false |
+| `pickup_service` | boolean | YES | false |
+| `inclusions` | jsonb | YES | - |
+| `images` | ARRAY | YES | - |
+| `thumbnail` | text | YES | - |
+| `video_url` | text | YES | - |
+| `certifications` | ARRAY | YES | - |
+| `awards` | ARRAY | YES | - |
+| `media_features` | ARRAY | YES | - |
+| `recommended_for` | ARRAY | YES | - |
+| `best_for_age_group` | text | YES | - |
+| `suitable_for_children` | boolean | YES | false |
+| `related_attractions` | ARRAY | YES | - |
+| `combine_with` | ARRAY | YES | - |
+| `sustainability_practices` | ARRAY | YES | - |
+| `supports_local_community` | boolean | YES | false |
+| `eco_friendly` | boolean | YES | false |
+| `ratings` | jsonb | YES | - |
+| `review_count` | integer | YES | 0 |
+| `is_active` | boolean | YES | true |
+| `is_featured` | boolean | YES | false |
+| `display_order` | integer | YES | 0 |
+| `internal_notes` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `created_by` | uuid | YES | - |
+| `updated_by` | uuid | YES | - |
+| `workspace_id` | uuid | NO | - |
+| `country_code` | text | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `city_id` | `cities.id` | RESTRICT | NO ACTION |
+| `country_code` | `ref_countries.code` | NO ACTION | NO ACTION |
+| `country_id` | `countries.id` | RESTRICT | NO ACTION |
+| `created_by` | `employees.id` | SET NULL | NO ACTION |
+| `region_id` | `regions.id` | SET NULL | NO ACTION |
+| `updated_by` | `employees.id` | SET NULL | NO ACTION |
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **premium_experiences_delete** — `DELETE`（roles: {public}）
+    - USING: `true`
+- **premium_experiences_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `true`
+- **premium_experiences_select** — `SELECT`（roles: {public}）
+    - USING: `true`
+- **premium_experiences_update** — `UPDATE`（roles: {public}）
+    - USING: `true`
+- **premium_select** — `SELECT`（roles: {authenticated}）
+    - USING: `((workspace_id = get_current_user_workspace()) OR has_attraction_license(workspace_id, 'premium'::text) OR is_super_admin())`
+- **premium_write** — `ALL`（roles: {authenticated}）
+    - USING: `((workspace_id = get_current_user_workspace()) OR is_super_admin())`
+    - WITH CHECK: `((workspace_id = get_current_user_workspace()) OR is_super_admin())`
+
+**Triggers**
+
+- `trg_premium_experiences_sync_country_code` — BEFORE UPDATE
+- `trg_premium_experiences_sync_country_code` — BEFORE INSERT
+- `trigger_update_premium_experiences_updated_at` — BEFORE UPDATE
+
+---
+
+### `price_list_items`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `supplier_id` | text | YES | - |
+| `item_code` | text | NO | - |
+| `item_name` | text | NO | - |
+| `category` | text | YES | - |
+| `unit` | text | YES | '個'::text |
+| `unit_price` | numeric | YES | 0 |
+| `currency` | text | YES | 'TWD'::text |
+| `valid_from` | date | YES | - |
+| `valid_until` | date | YES | - |
+| `minimum_order` | integer | YES | - |
+| `notes` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **price_list_items_authenticated** — `ALL`（roles: {public}）
+    - USING: `(auth.role() = 'authenticated'::text)`
+
+**Triggers**
+
+- `price_list_items_updated_at` — BEFORE UPDATE
+
+---
+
+### `pricing_templates`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | text | NO | - |
+| `name` | text | NO | - |
+| `description` | text | YES | - |
+| `preview_image_url` | text | YES | - |
+| `is_active` | boolean | YES | true |
+| `sort_order` | integer | YES | 0 |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **pricing_templates_authenticated_access** — `ALL`（roles: {public}）
+    - USING: `(auth.role() = 'authenticated'::text)`
+
+---
+
+### `private_messages`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `sender_id` | uuid | NO | - |
+| `receiver_id` | uuid | NO | - |
+| `content` | text | NO | - |
+| `read_at` | timestamp with time zone | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **private_messages_delete** — `DELETE`（roles: {public}）
+    - USING: `true`
+- **private_messages_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `true`
+- **private_messages_select** — `SELECT`（roles: {public}）
+    - USING: `true`
+- **private_messages_update** — `UPDATE`（roles: {public}）
+    - USING: `true`
+
+---
+
+### `profiles`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | - |
+| `name` | text | YES | - |
+| `nickname` | text | YES | - |
+| `avatar_url` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `is_beta_tester` | boolean | YES | false |
+| `customer_id` | text | YES | - |
+| `email` | text | YES | - |
+| `display_name` | text | YES | - |
+| `linked_id_number` | text | YES | - |
+| `linked_birthday` | date | YES | - |
+| `identity_verified_at` | timestamp with time zone | YES | - |
+| `is_employee` | boolean | YES | false |
+| `employee_id` | uuid | YES | - |
+| `workspace_id` | uuid | YES | - |
+| `is_traveler` | boolean | YES | false |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **profiles_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **profiles_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `true`
+- **profiles_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **profiles_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+
+---
+
+### `progress_photos`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `user_id` | uuid | NO | - |
+| `workspace_id` | uuid | YES | - |
+| `date` | date | NO | CURRENT_DATE |
+| `photo_type` | text | NO | - |
+| `photo_url` | text | NO | - |
+| `measurement_id` | uuid | YES | - |
+| `notes` | text | YES | - |
+| `created_at` | timestamp with time zone | NO | now() |
+| `updated_at` | timestamp with time zone | NO | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `measurement_id` | `body_measurements.id` | SET NULL | NO ACTION |
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **progress_photos_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **progress_photos_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **progress_photos_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **progress_photos_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+- `update_progress_photos_updated_at` — BEFORE UPDATE
+
+---
+
+### `projects`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | integer | NO | nextval('projects_id_seq'::regclass) |
+| `name` | text | NO | - |
+| `type` | text | YES | - |
+| `owner` | text | YES | - |
+| `collaborators` | ARRAY | YES | - |
+| `status` | text | YES | - |
+| `progress` | integer | YES | 0 |
+| `deadline` | date | YES | - |
+| `notes` | text | YES | - |
+| `created_at` | timestamp without time zone | YES | now() |
+| `updated_at` | timestamp without time zone | YES | now() |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **projects_delete** — `DELETE`（roles: {public}）
+    - USING: `true`
+- **projects_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `true`
+- **projects_select** — `SELECT`（roles: {public}）
+    - USING: `true`
+- **projects_update** — `UPDATE`（roles: {public}）
+    - USING: `true`
+
+**Triggers**
+
+- `update_projects_updated_at` — BEFORE UPDATE
+
+---
+
+### `quote_confirmation_logs`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `quote_id` | text | NO | - |
+| `workspace_id` | uuid | YES | - |
+| `action` | text | NO | - |
+| `confirmed_by_type` | text | YES | - |
+| `confirmed_by_name` | text | YES | - |
+| `confirmed_by_email` | text | YES | - |
+| `confirmed_by_phone` | text | YES | - |
+| `confirmed_by_staff_id` | uuid | YES | - |
+| `confirmed_version` | integer | YES | - |
+| `ip_address` | text | YES | - |
+| `user_agent` | text | YES | - |
+| `notes` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `confirmed_by_staff_id` | `employees.id` | NO ACTION | NO ACTION |
+| `quote_id` | `quotes.id` | RESTRICT | NO ACTION |
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **quote_confirmation_logs_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **quote_confirmation_logs_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **quote_confirmation_logs_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **quote_confirmation_logs_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+
+---
+
+### `quotes`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | text | NO | - |
+| `code` | text | YES | - |
+| `customer_name` | text | NO | - |
+| `customer_phone` | text | YES | - |
+| `customer_email` | text | YES | - |
+| `destination` | text | YES | - |
+| `start_date` | date | YES | - |
+| `end_date` | date | YES | - |
+| `days` | integer | YES | - |
+| `nights` | integer | YES | - |
+| `adult_count` | integer | YES | 0 |
+| `child_count` | integer | YES | 0 |
+| `infant_count` | integer | YES | 0 |
+| `total_amount` | numeric | YES | 0 |
+| `status` | text | NO | 'draft'::text |
+| `valid_until` | date | YES | - |
+| `notes` | text | YES | - |
+| `created_at` | timestamp with time zone | NO | now() |
+| `updated_at` | timestamp with time zone | NO | now() |
+| `name` | text | YES | - |
+| `group_size` | integer | YES | 0 |
+| `accommodation_days` | integer | YES | - |
+| `version` | integer | YES | 1 |
+| `created_by` | text | YES | - |
+| `created_by_name` | text | YES | - |
+| `converted_to_tour` | boolean | YES | false |
+| `tour_id` | text | YES | - |
+| `categories` | jsonb | YES | '[]'::jsonb |
+| `versions` | jsonb | YES | '[]'::jsonb |
+| `is_active` | boolean | YES | true |
+| `number_of_people` | integer | YES | 0 |
+| `customer_id` | text | YES | - |
+| `participant_counts` | jsonb | YES | '{"adult": 1, "infant": 0, "single_room": 0, "child_no_bed": 0, "child_with_bed": 0}'::jsonb |
+| `selling_prices` | jsonb | YES | '{"adult": 0, "infant": 0, "single_room": 0, "child_no_bed": 0, "child_with_bed": 0}'::jsonb |
+| `total_cost` | numeric | YES | 0 |
+| `is_pinned` | boolean | YES | false |
+| `country_id` | text | YES | - |
+| `airport_code` | text | YES | - |
+| `other_city_ids` | ARRAY | YES | '{}'::text[] |
+| `quote_type` | text | YES | 'standard'::text |
+| `contact_phone` | text | YES | - |
+| `contact_address` | text | YES | - |
+| `tour_code` | text | YES | - |
+| `handler_name` | text | YES | 'William'::text |
+| `issue_date` | date | YES | CURRENT_DATE |
+| `received_amount` | numeric | YES | 0 |
+| `balance_amount` | numeric | YES | 0 |
+| `quick_quote_items` | jsonb | YES | '[]'::jsonb |
+| `workspace_id` | uuid | NO | - |
+| `shared_with_workspaces` | ARRAY | YES | '{}'::uuid[] |
+| `updated_by` | uuid | YES | - |
+| `current_version_index` | integer | YES | 0 |
+| `itinerary_id` | text | YES | - |
+| `expense_description` | text | YES | - |
+| `tier_pricings` | jsonb | YES | '[]'::jsonb |
+| `confirmation_status` | text | YES | 'draft'::text |
+| `confirmation_token` | text | YES | - |
+| `confirmation_token_expires_at` | timestamp with time zone | YES | - |
+| `confirmed_at` | timestamp with time zone | YES | - |
+| `confirmed_by_type` | text | YES | - |
+| `confirmed_by_name` | text | YES | - |
+| `confirmed_by_email` | text | YES | - |
+| `confirmed_by_phone` | text | YES | - |
+| `confirmed_by_staff_id` | text | YES | - |
+| `confirmed_version` | integer | YES | - |
+| `confirmation_ip` | text | YES | - |
+| `confirmation_user_agent` | text | YES | - |
+| `confirmation_notes` | text | YES | - |
+| `proposal_package_id` | uuid | YES | - |
+| `cost_structure` | jsonb | YES | - |
+| `profit_margin` | numeric | YES | - |
+| `confirmed_by` | text | YES | - |
+| `customer_confirmed_at` | timestamp with time zone | YES | - |
+| `display_price` | numeric | YES | - |
+| `is_locked` | boolean | YES | false |
+| `locked_at` | timestamp with time zone | YES | - |
+| `locked_by` | uuid | YES | - |
+| `overall_margin_percent` | numeric | YES | - |
+| `country_code` | text | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `country_code` | `ref_countries.code` | NO ACTION | NO ACTION |
+| `country_id` | `countries.id` | SET NULL | NO ACTION |
+| `customer_id` | `customers.id` | RESTRICT | NO ACTION |
+| `tour_id` | `tours.id` | RESTRICT | NO ACTION |
+| `updated_by` | `employees.id` | NO ACTION | NO ACTION |
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **quotes_delete** — `DELETE`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **quotes_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(workspace_id = get_current_user_workspace())`
+- **quotes_select** — `SELECT`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **quotes_update** — `UPDATE`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+
+**Triggers**
+
+- `trg_calculate_quote_balance` — BEFORE INSERT
+- `trg_calculate_quote_balance` — BEFORE UPDATE
+- `trg_quotes_sync_country_code` — BEFORE INSERT
+- `trg_quotes_sync_country_code` — BEFORE UPDATE
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+- `trigger_generate_quote_code` — BEFORE INSERT
+- `update_quotes_updated_at` — BEFORE UPDATE
+
+---
+
+### `rate_limits`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `key` | text | NO | - |
+| `count` | integer | NO | 1 |
+| `reset_at` | timestamp with time zone | NO | - |
+
+**RLS**：`disabled`
+
+---
+
+### `receipts`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `receipt_number` | text | NO | - |
+| `order_id` | text | YES | - |
+| `customer_id` | text | YES | - |
+| `amount` | numeric | NO | - |
+| `payment_method` | text | NO | - |
+| `payment_date` | date | NO | - |
+| `bank_name` | text | YES | - |
+| `account_last_digits` | text | YES | - |
+| `transaction_id` | text | YES | - |
+| `status` | text | NO | 'pending'::text |
+| `confirmed_at` | timestamp with time zone | YES | - |
+| `confirmed_by` | text | YES | - |
+| `notes` | text | YES | - |
+| `deleted_at` | timestamp with time zone | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `workspace_id` | uuid | NO | - |
+| `order_number` | character varying | YES | - |
+| `tour_name` | character varying | YES | - |
+| `receipt_type` | integer | NO | 1 |
+| `receipt_amount` | numeric | NO | - |
+| `actual_amount` | numeric | YES | 0 |
+| `receipt_date` | date | YES | - |
+| `receipt_account` | character varying | YES | - |
+| `email` | character varying | YES | - |
+| `payment_name` | character varying | YES | - |
+| `pay_dateline` | date | YES | - |
+| `handler_name` | character varying | YES | - |
+| `account_info` | character varying | YES | - |
+| `fees` | numeric | YES | - |
+| `card_last_four` | character varying | YES | - |
+| `auth_code` | character varying | YES | - |
+| `check_number` | character varying | YES | - |
+| `check_bank` | character varying | YES | - |
+| `created_by` | uuid | YES | - |
+| `updated_by` | uuid | YES | - |
+| `customer_name` | text | YES | - |
+| `sync_status` | text | YES | 'synced'::text |
+| `tour_id` | text | YES | - |
+| `link` | text | YES | - |
+| `linkpay_order_number` | text | YES | - |
+| `check_date` | date | YES | - |
+| `total_amount` | numeric | YES | 0 |
+| `accounting_subject_id` | uuid | YES | - |
+| `payment_method_id` | uuid | NO | - |
+| `batch_id` | uuid | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `accounting_subject_id` | `accounting_subjects.id` | NO ACTION | NO ACTION |
+| `customer_id` | `customers.id` | RESTRICT | NO ACTION |
+| `order_id` | `orders.id` | RESTRICT | NO ACTION |
+| `payment_method_id` | `payment_methods.id` | RESTRICT | NO ACTION |
+| `payment_method_id` | `payment_methods.id` | RESTRICT | NO ACTION |
+| `tour_id` | `tours.id` | SET NULL | NO ACTION |
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **receipts_delete** — `DELETE`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **receipts_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(workspace_id = get_current_user_workspace())`
+- **receipts_select** — `SELECT`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **receipts_update** — `UPDATE`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+
+**Triggers**
+
+- `trigger_auto_post_receipt` — AFTER UPDATE
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+- `update_receipts_updated_at` — BEFORE UPDATE
+
+---
+
+### `ref_airlines`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `iata_code` | character varying | NO | - |
+| `icao_code` | character varying | YES | - |
+| `english_name` | character varying | YES | - |
+| `name_zh` | character varying | YES | - |
+| `country` | character varying | YES | - |
+| `alliance` | character varying | YES | - |
+| `is_active` | boolean | YES | true |
+| `created_at` | timestamp with time zone | YES | now() |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **ref_airlines_authenticated_access** — `ALL`（roles: {public}）
+    - USING: `(auth.role() = 'authenticated'::text)`
+
+---
+
+### `ref_airports`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `iata_code` | character varying | NO | - |
+| `icao_code` | character varying | YES | - |
+| `english_name` | character varying | YES | - |
+| `name_zh` | character varying | YES | - |
+| `city_code` | character varying | YES | - |
+| `city_name_en` | character varying | YES | - |
+| `city_name_zh` | character varying | YES | - |
+| `country_code` | character varying | YES | - |
+| `timezone` | character varying | YES | - |
+| `latitude` | numeric | YES | - |
+| `longitude` | numeric | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `is_favorite` | boolean | YES | false |
+| `usage_count` | integer | YES | 0 |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **ref_airports_admin_delete** — `DELETE`（roles: {authenticated}）
+    - USING: `is_super_admin()`
+- **ref_airports_admin_insert** — `INSERT`（roles: {authenticated}）
+    - WITH CHECK: `is_super_admin()`
+- **ref_airports_admin_update** — `UPDATE`（roles: {authenticated}）
+    - USING: `is_super_admin()`
+    - WITH CHECK: `is_super_admin()`
+- **ref_airports_public_read** — `SELECT`（roles: {authenticated}）
+    - USING: `true`
+
+---
+
+### `ref_airports_backup`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `iata_code` | character varying | YES | - |
+| `icao_code` | character varying | YES | - |
+| `english_name` | character varying | YES | - |
+| `name_zh` | character varying | YES | - |
+| `city_code` | character varying | YES | - |
+| `city_name_en` | character varying | YES | - |
+| `city_name_zh` | character varying | YES | - |
+| `country_code` | character varying | YES | - |
+| `timezone` | character varying | YES | - |
+| `latitude` | numeric | YES | - |
+| `longitude` | numeric | YES | - |
+| `created_at` | timestamp with time zone | YES | - |
+| `workspace_id` | uuid | YES | - |
+| `is_favorite` | boolean | YES | - |
+| `usage_count` | integer | YES | - |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **ref_airports_backup_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **ref_airports_backup_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **ref_airports_backup_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **ref_airports_backup_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+---
+
+### `ref_booking_classes`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `code` | character varying | NO | - |
+| `cabin_type` | character varying | YES | - |
+| `description` | character varying | YES | - |
+| `priority` | integer | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **ref_booking_classes_authenticated_access** — `ALL`（roles: {public}）
+    - USING: `(auth.role() = 'authenticated'::text)`
+
+---
+
+### `ref_cities`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `code` | text | NO | - |
+| `name_zh` | text | NO | - |
+| `name_en` | text | YES | - |
+| `country_code` | text | NO | - |
+| `primary_airport_iata` | text | YES | - |
+| `is_major` | boolean | YES | false |
+| `is_active` | boolean | YES | true |
+| `display_order` | integer | YES | 100 |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `iata_city_code` | character | YES | - |
+| `unlocode` | character | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `country_code` | `ref_countries.code` | NO ACTION | NO ACTION |
+
+**RLS**：`disabled`
+
+---
+
+### `ref_countries`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `code` | text | NO | - |
+| `name_zh` | text | NO | - |
+| `name_en` | text | NO | - |
+| `continent` | text | YES | - |
+| `is_active` | boolean | NO | true |
+| `created_at` | timestamp with time zone | YES | now() |
+| `sub_region` | text | YES | - |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **ref_countries_admin_delete** — `DELETE`（roles: {authenticated}）
+    - USING: `is_super_admin()`
+- **ref_countries_admin_insert** — `INSERT`（roles: {authenticated}）
+    - WITH CHECK: `is_super_admin()`
+- **ref_countries_admin_update** — `UPDATE`（roles: {authenticated}）
+    - USING: `is_super_admin()`
+    - WITH CHECK: `is_super_admin()`
+- **ref_countries_public_read** — `SELECT`（roles: {authenticated}）
+    - USING: `true`
+
+---
+
+### `ref_destinations`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `code` | text | NO | - |
+| `short_alias` | text | YES | - |
+| `country_code` | text | NO | - |
+| `name_zh` | text | YES | - |
+| `name_zh_tw` | text | YES | - |
+| `name_zh_cn` | text | YES | - |
+| `name_en` | text | YES | - |
+| `name_ja` | text | YES | - |
+| `name_ko` | text | YES | - |
+| `name_th` | text | YES | - |
+| `type` | text | YES | - |
+| `parent_code` | text | YES | - |
+| `default_airport` | text | YES | - |
+| `google_maps_url` | text | YES | - |
+| `google_place_id` | text | YES | - |
+| `latitude` | numeric | YES | - |
+| `longitude` | numeric | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `parent_code` | `ref_destinations.code` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **ref_destinations_admin_delete** — `DELETE`（roles: {authenticated}）
+    - USING: `is_super_admin()`
+- **ref_destinations_admin_insert** — `INSERT`（roles: {authenticated}）
+    - WITH CHECK: `is_super_admin()`
+- **ref_destinations_admin_update** — `UPDATE`（roles: {authenticated}）
+    - USING: `is_super_admin()`
+    - WITH CHECK: `is_super_admin()`
+- **ref_destinations_public_read** — `SELECT`（roles: {authenticated}）
+    - USING: `true`
+
+---
+
+### `ref_ssr_codes`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `code` | character varying | NO | - |
+| `category` | character varying | YES | - |
+| `description_en` | character varying | YES | - |
+| `description_zh` | character varying | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **ref_ssr_codes_authenticated_access** — `ALL`（roles: {public}）
+    - USING: `(auth.role() = 'authenticated'::text)`
+
+---
+
+### `ref_status_codes`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `code` | character varying | NO | - |
+| `category` | character varying | YES | - |
+| `description_en` | character varying | YES | - |
+| `description_zh` | character varying | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **ref_status_codes_authenticated_access** — `ALL`（roles: {public}）
+    - USING: `(auth.role() = 'authenticated'::text)`
+
+---
+
+### `refunds`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `refund_number` | character varying | NO | - |
+| `refund_type` | integer | NO | - |
+| `refund_amount` | numeric | NO | - |
+| `refund_date` | date | NO | - |
+| `refund_reason` | text | YES | - |
+| `original_receipt_id` | uuid | YES | - |
+| `order_id` | text | YES | - |
+| `tour_id` | text | YES | - |
+| `disbursement_order_id` | text | YES | - |
+| `status` | integer | NO | 0 |
+| `handler_name` | character varying | YES | - |
+| `account_info` | text | YES | - |
+| `linkpay_order_number` | character varying | YES | - |
+| `linkpay_response` | text | YES | - |
+| `created_by` | uuid | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `deleted_at` | timestamp with time zone | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `created_by` | `employees.id` | SET NULL | NO ACTION |
+| `disbursement_order_id` | `disbursement_orders.id` | SET NULL | NO ACTION |
+| `order_id` | `orders.id` | SET NULL | NO ACTION |
+| `original_receipt_id` | `receipts.id` | RESTRICT | NO ACTION |
+| `tour_id` | `tours.id` | SET NULL | NO ACTION |
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **refunds_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **refunds_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **refunds_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **refunds_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+---
+
+### `region_stats`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `city_id` | text | NO | - |
+| `attractions_count` | integer | YES | 0 |
+| `cost_templates_count` | integer | YES | 0 |
+| `quotes_count` | integer | YES | 0 |
+| `tours_count` | integer | YES | 0 |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `city_id` | `cities.id` | RESTRICT | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **region_stats_delete** — `DELETE`（roles: {public}）
+    - USING: `true`
+- **region_stats_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `true`
+- **region_stats_select** — `SELECT`（roles: {public}）
+    - USING: `true`
+- **region_stats_update** — `UPDATE`（roles: {public}）
+    - USING: `true`
+
+---
+
+### `regions`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | text | NO | - |
+| `country_id` | text | NO | - |
+| `name` | text | NO | - |
+| `name_en` | text | YES | - |
+| `description` | text | YES | - |
+| `display_order` | integer | YES | 0 |
+| `is_active` | boolean | YES | true |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `workspace_id` | uuid | YES | - |
+| `country_code` | text | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `country_code` | `ref_countries.code` | NO ACTION | NO ACTION |
+| `country_id` | `countries.id` | RESTRICT | NO ACTION |
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **regions_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **regions_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **regions_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **regions_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trg_regions_sync_country_code` — BEFORE UPDATE
+- `trg_regions_sync_country_code` — BEFORE INSERT
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+- `update_regions_updated_at_trigger` — BEFORE UPDATE
+
+---
+
+### `request_response_items`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `response_id` | uuid | NO | - |
+| `resource_type` | text | NO | - |
+| `resource_id` | uuid | YES | - |
+| `resource_name` | text | YES | - |
+| `license_plate` | text | YES | - |
+| `driver_name` | text | YES | - |
+| `driver_phone` | text | YES | - |
+| `available_start_date` | date | YES | - |
+| `available_end_date` | date | YES | - |
+| `unit_price` | numeric | YES | - |
+| `notes` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `workspace_id` | uuid | YES | - |
+| `created_by` | uuid | YES | - |
+| `updated_by` | uuid | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `created_by` | `employees.id` | NO ACTION | NO ACTION |
+| `response_id` | `request_responses.id` | CASCADE | NO ACTION |
+| `updated_by` | `employees.id` | NO ACTION | NO ACTION |
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **request_response_items_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **request_response_items_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **request_response_items_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **request_response_items_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+
+---
+
+### `request_responses`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `request_id` | uuid | NO | - |
+| `responder_workspace_id` | uuid | NO | - |
+| `response_date` | timestamp with time zone | YES | now() |
+| `status` | text | YES | 'draft'::text |
+| `total_amount` | numeric | YES | - |
+| `notes` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `responder_workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **request_responses_delete** — `DELETE`（roles: {public}）
+    - USING: `(responder_workspace_id = get_current_user_workspace())`
+- **request_responses_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(responder_workspace_id = get_current_user_workspace())`
+- **request_responses_update** — `UPDATE`（roles: {public}）
+    - USING: `(responder_workspace_id = get_current_user_workspace())`
+
+**Triggers**
+
+- `update_request_responses_updated_at` — BEFORE UPDATE
+
+---
+
+### `restaurants`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `name` | text | NO | - |
+| `english_name` | text | YES | - |
+| `name_local` | text | YES | - |
+| `country_id` | text | NO | - |
+| `region_id` | text | YES | - |
+| `city_id` | text | YES | - |
+| `address` | text | YES | - |
+| `address_en` | text | YES | - |
+| `latitude` | numeric | YES | - |
+| `longitude` | numeric | YES | - |
+| `google_maps_url` | text | YES | - |
+| `cuisine_type` | ARRAY | YES | - |
+| `category` | text | YES | - |
+| `meal_type` | ARRAY | YES | - |
+| `description` | text | YES | - |
+| `description_en` | text | YES | - |
+| `specialties` | ARRAY | YES | - |
+| `highlights` | ARRAY | YES | - |
+| `price_range` | text | YES | - |
+| `avg_price_lunch` | integer | YES | - |
+| `avg_price_dinner` | integer | YES | - |
+| `currency` | text | YES | 'TWD'::text |
+| `opening_hours` | jsonb | YES | - |
+| `phone` | text | YES | - |
+| `website` | text | YES | - |
+| `reservation_required` | boolean | YES | false |
+| `reservation_url` | text | YES | - |
+| `group_friendly` | boolean | YES | true |
+| `min_group_size` | integer | YES | - |
+| `max_group_size` | integer | YES | - |
+| `group_menu_available` | boolean | YES | false |
+| `group_menu_price` | integer | YES | - |
+| `group_menu_options` | jsonb | YES | - |
+| `private_room` | boolean | YES | false |
+| `private_room_capacity` | integer | YES | - |
+| `booking_contact` | text | YES | - |
+| `booking_email` | text | YES | - |
+| `booking_phone` | text | YES | - |
+| `booking_notes` | text | YES | - |
+| `commission_rate` | numeric | YES | - |
+| `facilities` | jsonb | YES | - |
+| `dietary_options` | ARRAY | YES | - |
+| `images` | ARRAY | YES | - |
+| `menu_images` | ARRAY | YES | - |
+| `rating` | numeric | YES | - |
+| `review_count` | integer | YES | 0 |
+| `notes` | text | YES | - |
+| `internal_notes` | text | YES | - |
+| `is_active` | boolean | YES | true |
+| `is_featured` | boolean | YES | false |
+| `display_order` | integer | YES | 0 |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `created_by` | uuid | YES | - |
+| `updated_by` | uuid | YES | - |
+| `data_verified` | boolean | YES | false |
+| `fax` | text | YES | - |
+| `country_code` | text | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `city_id` | `cities.id` | NO ACTION | NO ACTION |
+| `country_code` | `ref_countries.code` | NO ACTION | NO ACTION |
+| `country_id` | `countries.id` | NO ACTION | NO ACTION |
+| `created_by` | `employees.id` | NO ACTION | NO ACTION |
+| `region_id` | `regions.id` | NO ACTION | NO ACTION |
+| `updated_by` | `employees.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **restaurants_delete** — `DELETE`（roles: {public}）
+    - USING: `true`
+- **restaurants_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `true`
+- **restaurants_select** — `SELECT`（roles: {public}）
+    - USING: `true`
+- **restaurants_update** — `UPDATE`（roles: {public}）
+    - USING: `true`
+
+**Triggers**
+
+- `trg_restaurants_sync_country_code` — BEFORE INSERT
+- `trg_restaurants_sync_country_code` — BEFORE UPDATE
+- `trigger_restaurants_updated_at` — BEFORE UPDATE
+
+---
+
+### `rich_documents`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `canvas_id` | uuid | NO | - |
+| `title` | text | NO | - |
+| `content` | text | NO | - |
+| `format_data` | jsonb | YES | '{}'::jsonb |
+| `tags` | ARRAY | YES | '{}'::text[] |
+| `is_favorite` | boolean | YES | false |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `workspace_id` | uuid | YES | - |
+| `created_by` | uuid | YES | - |
+| `updated_by` | uuid | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `created_by` | `employees.id` | NO ACTION | NO ACTION |
+| `updated_by` | `employees.id` | NO ACTION | NO ACTION |
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **rich_documents_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **rich_documents_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **rich_documents_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **rich_documents_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+
+---
+
+### `role_tab_permissions`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `role_id` | uuid | NO | - |
+| `module_code` | text | NO | - |
+| `tab_code` | text | YES | - |
+| `can_read` | boolean | YES | false |
+| `can_write` | boolean | YES | false |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `role_id` | `workspace_roles.id` | RESTRICT | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **role_tab_permissions_delete** — `DELETE`（roles: {public}）
+    - USING: `true`
+- **role_tab_permissions_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `true`
+- **role_tab_permissions_select** — `SELECT`（roles: {public}）
+    - USING: `true`
+- **role_tab_permissions_update** — `UPDATE`（roles: {public}）
+    - USING: `true`
+
+---
+
+### `selector_field_roles`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `field_id` | uuid | NO | - |
+| `role_id` | uuid | NO | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `field_id` | `workspace_selector_fields.id` | CASCADE | NO ACTION |
+| `role_id` | `workspace_roles.id` | RESTRICT | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **selector_field_roles_delete** — `DELETE`（roles: {public}）
+    - USING: `(EXISTS ( SELECT 1
+   FROM workspace_selector_fields
+  WHERE ((workspace_selector_fields.id = selector_field_roles.field_id) AND (workspace_selector_fields.workspace_id = get_current_user_workspace()))))`
+- **selector_field_roles_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(EXISTS ( SELECT 1
+   FROM workspace_selector_fields
+  WHERE ((workspace_selector_fields.id = selector_field_roles.field_id) AND (workspace_selector_fields.workspace_id = get_current_user_workspace()))))`
+- **selector_field_roles_select** — `SELECT`（roles: {public}）
+    - USING: `(EXISTS ( SELECT 1
+   FROM workspace_selector_fields
+  WHERE ((workspace_selector_fields.id = selector_field_roles.field_id) AND (workspace_selector_fields.workspace_id = get_current_user_workspace()))))`
+- **selector_field_roles_update** — `UPDATE`（roles: {public}）
+    - USING: `(EXISTS ( SELECT 1
+   FROM workspace_selector_fields
+  WHERE ((workspace_selector_fields.id = selector_field_roles.field_id) AND (workspace_selector_fields.workspace_id = get_current_user_workspace()))))`
+
+---
+
+### `shared_order_lists`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `channel_id` | uuid | NO | - |
+| `order_ids` | jsonb | NO | '[]'::jsonb |
+| `created_by` | text | NO | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `_needs_sync` | boolean | YES | false |
+| `_synced_at` | timestamp with time zone | YES | - |
+| `_deleted` | boolean | YES | false |
+| `author_id` | text | NO | ''::text |
+| `updated_by` | uuid | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `channel_id` | `channels.id` | RESTRICT | NO ACTION |
+| `updated_by` | `employees.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **shared_order_lists_authenticated** — `ALL`（roles: {public}）
+    - USING: `(auth.role() = 'authenticated'::text)`
+
+**Triggers**
+
+- `shared_order_lists_updated_at` — BEFORE UPDATE
+
+---
+
+### `social_group_members`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `group_id` | uuid | NO | - |
+| `user_id` | uuid | NO | - |
+| `role` | text | YES | 'member'::text |
+| `status` | text | YES | 'pending'::text |
+| `applied_at` | timestamp with time zone | YES | now() |
+| `approved_at` | timestamp with time zone | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `group_id` | `social_groups.id` | CASCADE | NO ACTION |
+| `user_id` | `traveler_profiles.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **social_group_members_delete** — `DELETE`（roles: {public}）
+    - USING: `((user_id = auth.uid()) OR (EXISTS ( SELECT 1
+   FROM social_groups
+  WHERE ((social_groups.id = social_group_members.group_id) AND (social_groups.created_by = auth.uid())))))`
+- **social_group_members_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `((user_id = auth.uid()) OR (EXISTS ( SELECT 1
+   FROM social_groups
+  WHERE ((social_groups.id = social_group_members.group_id) AND (social_groups.created_by = auth.uid())))))`
+- **social_group_members_select** — `SELECT`（roles: {public}）
+    - USING: `((user_id = auth.uid()) OR (EXISTS ( SELECT 1
+   FROM social_groups
+  WHERE ((social_groups.id = social_group_members.group_id) AND ((social_groups.created_by = auth.uid()) OR (social_groups.is_private = false))))))`
+
+---
+
+### `social_group_tags`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `group_id` | uuid | NO | - |
+| `tag` | text | NO | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `group_id` | `social_groups.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **social_group_tags_delete** — `DELETE`（roles: {public}）
+    - USING: `true`
+- **social_group_tags_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `true`
+- **social_group_tags_select** — `SELECT`（roles: {public}）
+    - USING: `true`
+- **social_group_tags_update** — `UPDATE`（roles: {public}）
+    - USING: `true`
+
+---
+
+### `social_groups`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `title` | text | NO | - |
+| `description` | text | YES | - |
+| `cover_image` | text | YES | - |
+| `category` | text | YES | 'other'::text |
+| `location_name` | text | YES | - |
+| `location_address` | text | YES | - |
+| `latitude` | double precision | YES | - |
+| `longitude` | double precision | YES | - |
+| `event_date` | date | YES | - |
+| `start_time` | time without time zone | YES | - |
+| `end_time` | time without time zone | YES | - |
+| `max_members` | integer | YES | - |
+| `current_members` | integer | YES | 1 |
+| `gender_limit` | text | YES | - |
+| `require_approval` | boolean | YES | false |
+| `is_private` | boolean | YES | false |
+| `estimated_cost` | numeric | YES | - |
+| `status` | text | YES | 'draft'::text |
+| `created_by` | uuid | NO | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `created_by` | `traveler_profiles.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **social_groups_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(created_by = auth.uid())`
+- **social_groups_select** — `SELECT`（roles: {public}）
+    - USING: `((is_private = false) OR (created_by = auth.uid()) OR (EXISTS ( SELECT 1
+   FROM social_group_members
+  WHERE ((social_group_members.group_id = social_groups.id) AND (social_group_members.user_id = auth.uid())))))`
+- **social_groups_update** — `UPDATE`（roles: {public}）
+    - USING: `(created_by = auth.uid())`
+
+---
+
+### `supplier_categories`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `name` | text | NO | - |
+| `icon` | text | YES | - |
+| `color` | text | YES | - |
+| `display_order` | integer | YES | 0 |
+| `is_active` | boolean | YES | true |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **supplier_categories_delete** — `DELETE`（roles: {public}）
+    - USING: `true`
+- **supplier_categories_insert** — `INSERT`（roles: {authenticated}）
+    - WITH CHECK: `is_super_admin()`
+- **supplier_categories_select** — `SELECT`（roles: {authenticated}）
+    - USING: `true`
+- **supplier_categories_update** — `UPDATE`（roles: {public}）
+    - USING: `true`
+
+**Triggers**
+
+- `trigger_update_supplier_categories_updated_at` — BEFORE UPDATE
+
+---
+
+### `supplier_employees`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `supplier_id` | text | NO | - |
+| `code` | character varying | YES | - |
+| `name` | character varying | NO | - |
+| `phone` | character varying | YES | - |
+| `email` | character varying | YES | - |
+| `line_id` | character varying | YES | - |
+| `app_user_id` | uuid | YES | - |
+| `role` | character varying | YES | 'driver'::character varying |
+| `vehicle_type` | character varying | YES | - |
+| `vehicle_plate` | character varying | YES | - |
+| `vehicle_capacity` | integer | YES | - |
+| `is_active` | boolean | YES | true |
+| `workspace_id` | uuid | NO | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **supplier_employees_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **supplier_employees_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **supplier_employees_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **supplier_employees_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+- `trigger_supplier_employees_updated_at` — BEFORE UPDATE
+
+---
+
+### `supplier_payment_accounts`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | text | NO | (gen_random_uuid())::text |
+| `supplier_id` | text | NO | - |
+| `account_name` | text | NO | - |
+| `account_holder` | text | NO | - |
+| `bank_name` | text | NO | - |
+| `bank_code` | text | YES | - |
+| `bank_branch` | text | YES | - |
+| `account_number` | text | NO | - |
+| `swift_code` | text | YES | - |
+| `currency` | text | YES | 'TWD'::text |
+| `account_type` | text | YES | - |
+| `is_default` | boolean | YES | false |
+| `is_active` | boolean | YES | true |
+| `note` | text | YES | - |
+| `created_at` | timestamp with time zone | NO | timezone('utc'::text, now()) |
+| `created_by` | text | YES | - |
+| `updated_at` | timestamp with time zone | NO | timezone('utc'::text, now()) |
+| `updated_by` | text | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `supplier_id` | `suppliers.id` | RESTRICT | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **supplier_payment_accounts_authenticated** — `ALL`（roles: {public}）
+    - USING: `(auth.role() = 'authenticated'::text)`
+
+**Triggers**
+
+- `trigger_ensure_single_default_payment_account` — BEFORE INSERT
+- `trigger_ensure_single_default_payment_account` — BEFORE UPDATE
+
+---
+
+### `supplier_price_list`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | text | NO | (gen_random_uuid())::text |
+| `supplier_id` | text | NO | - |
+| `item_name` | text | NO | - |
+| `category` | text | NO | - |
+| `unit_price` | numeric | NO | - |
+| `unit` | text | NO | - |
+| `seasonality` | text | YES | - |
+| `valid_from` | date | YES | - |
+| `valid_to` | date | YES | - |
+| `note` | text | YES | - |
+| `created_at` | timestamp with time zone | NO | timezone('utc'::text, now()) |
+| `created_by` | text | YES | - |
+| `updated_at` | timestamp with time zone | NO | timezone('utc'::text, now()) |
+| `updated_by` | text | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `supplier_id` | `suppliers.id` | RESTRICT | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **supplier_price_list_authenticated** — `ALL`（roles: {public}）
+    - USING: `(auth.role() = 'authenticated'::text)`
+
+---
+
+### `supplier_request_responses`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `request_id` | uuid | NO | - |
+| `supplier_id` | text | NO | - |
+| `responded_by` | uuid | YES | - |
+| `response_type` | text | NO | - |
+| `quoted_price` | numeric | YES | - |
+| `currency` | text | YES | 'TWD'::text |
+| `notes` | text | YES | - |
+| `attachments` | jsonb | YES | '[]'::jsonb |
+| `created_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `responded_by` | `supplier_users.id` | SET NULL | NO ACTION |
+| `supplier_id` | `suppliers.id` | RESTRICT | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **srr_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `true`
+- **srr_select** — `SELECT`（roles: {public}）
+    - USING: `true`
+
+**Triggers**
+
+- `trigger_update_request_on_response` — AFTER INSERT
+
+---
+
+### `supplier_service_areas`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | text | NO | (gen_random_uuid())::text |
+| `supplier_id` | text | NO | - |
+| `city_id` | text | NO | - |
+| `created_at` | timestamp with time zone | NO | timezone('utc'::text, now()) |
+| `created_by` | text | YES | - |
+| `updated_by` | uuid | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `city_id` | `cities.id` | RESTRICT | NO ACTION |
+| `supplier_id` | `suppliers.id` | RESTRICT | NO ACTION |
+| `updated_by` | `employees.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **supplier_service_areas_authenticated** — `ALL`（roles: {public}）
+    - USING: `(auth.role() = 'authenticated'::text)`
+
+---
+
+### `supplier_users`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `supplier_id` | text | NO | - |
+| `user_id` | uuid | YES | - |
+| `name` | text | NO | - |
+| `email` | text | NO | - |
+| `phone` | text | YES | - |
+| `role` | text | YES | 'staff'::text |
+| `is_active` | boolean | YES | true |
+| `last_login_at` | timestamp with time zone | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `supplier_id` | `suppliers.id` | RESTRICT | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **supplier_users_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `true`
+- **supplier_users_select** — `SELECT`（roles: {public}）
+    - USING: `true`
+- **supplier_users_update** — `UPDATE`（roles: {public}）
+    - USING: `true`
+
+---
+
+### `suppliers`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | text | NO | - |
+| `code` | text | NO | - |
+| `name` | text | NO | - |
+| `contact_person` | text | YES | - |
+| `phone` | text | YES | - |
+| `email` | text | YES | - |
+| `address` | text | YES | - |
+| `total_orders` | integer | YES | 0 |
+| `total_spent` | numeric | YES | 0 |
+| `notes` | text | YES | - |
+| `is_active` | boolean | YES | true |
+| `created_at` | timestamp with time zone | NO | now() |
+| `updated_at` | timestamp with time zone | NO | now() |
+| `english_name` | character varying | YES | - |
+| `type` | character varying | YES | - |
+| `country_id` | character varying | YES | - |
+| `bank_name` | character varying | YES | - |
+| `bank_account` | character varying | YES | - |
+| `tax_id` | character varying | YES | - |
+| `payment_terms` | character varying | YES | - |
+| `currency` | character varying | YES | 'TWD'::character varying |
+| `rating` | integer | YES | - |
+| `is_preferred` | boolean | YES | false |
+| `display_order` | integer | YES | 0 |
+| `created_by` | uuid | YES | - |
+| `updated_by` | uuid | YES | - |
+| `website` | text | YES | - |
+| `bank_branch` | text | YES | - |
+| `contact` | jsonb | YES | '{"email": "", "phone": "", "address": "", "website": "", "contact_person": ""}'::jsonb |
+| `country` | text | YES | - |
+| `region` | text | YES | - |
+| `status` | text | NO | 'active'::text |
+| `category_id` | uuid | YES | - |
+| `_deleted` | boolean | YES | false |
+| `_needs_sync` | boolean | YES | false |
+| `_synced_at` | timestamp with time zone | YES | - |
+| `bank_code_legacy` | text | YES | - |
+| `workspace_id` | uuid | NO | - |
+| `fax` | character varying | YES | - |
+| `bank_account_name` | text | YES | - |
+| `country_code` | text | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `category_id` | `supplier_categories.id` | SET NULL | NO ACTION |
+| `country_code` | `ref_countries.code` | NO ACTION | NO ACTION |
+| `country_id` | `countries.id` | RESTRICT | NO ACTION |
+| `created_by` | `employees.id` | SET NULL | NO ACTION |
+| `updated_by` | `employees.id` | SET NULL | NO ACTION |
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **suppliers_delete** — `DELETE`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **suppliers_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(workspace_id = get_current_user_workspace())`
+- **suppliers_select** — `SELECT`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **suppliers_update** — `UPDATE`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+
+**Triggers**
+
+- `suppliers_cascade_rename` — AFTER UPDATE
+- `suppliers_updated_at_trigger` — BEFORE UPDATE
+- `trg_suppliers_sync_country_code` — BEFORE INSERT
+- `trg_suppliers_sync_country_code` — BEFORE UPDATE
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+- `update_suppliers_updated_at` — BEFORE UPDATE
+
+---
+
+### `syncqueue`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `table_name` | character varying | NO | - |
+| `operation` | character varying | NO | - |
+| `data` | jsonb | NO | - |
+| `status` | character varying | YES | 'pending'::character varying |
+| `retry_count` | integer | YES | 0 |
+| `error_message` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **syncqueue_delete** — `DELETE`（roles: {public}）
+    - USING: `true`
+- **syncqueue_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `true`
+- **syncqueue_select** — `SELECT`（roles: {public}）
+    - USING: `true`
+- **syncqueue_update** — `UPDATE`（roles: {public}）
+    - USING: `true`
+
+**Triggers**
+
+- `update_syncqueue_updated_at` — BEFORE UPDATE
+
+---
+
+### `system_settings`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `category` | text | NO | - |
+| `settings` | jsonb | NO | '{}'::jsonb |
+| `description` | text | YES | - |
+| `is_active` | boolean | NO | true |
+| `created_at` | timestamp with time zone | NO | now() |
+| `updated_at` | timestamp with time zone | NO | now() |
+| `workspace_id` | uuid | NO | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **system_settings_authenticated** — `ALL`（roles: {public}）
+    - USING: `(auth.role() = 'authenticated'::text)`
+- **system_settings_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **system_settings_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **system_settings_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **system_settings_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+---
+
+### `tasks`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | integer | NO | nextval('tasks_id_seq'::regclass) |
+| `project_id` | integer | YES | - |
+| `name` | text | NO | - |
+| `assignee` | text | YES | - |
+| `status` | text | YES | - |
+| `progress` | integer | YES | 0 |
+| `due_date` | date | YES | - |
+| `notes` | text | YES | - |
+| `created_at` | timestamp without time zone | YES | now() |
+| `updated_at` | timestamp without time zone | YES | now() |
+| `task_type` | text | NO | 'individual'::text |
+| `workflow_template` | text | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `project_id` | `projects.id` | RESTRICT | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **tasks_delete** — `DELETE`（roles: {public}）
+    - USING: `true`
+- **tasks_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `true`
+- **tasks_select** — `SELECT`（roles: {public}）
+    - USING: `true`
+- **tasks_update** — `UPDATE`（roles: {public}）
+    - USING: `true`
+
+**Triggers**
+
+- `update_tasks_updated_at` — BEFORE UPDATE
+
+---
+
+### `templates`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `name` | character varying | NO | - |
+| `type` | character varying | NO | - |
+| `category` | character varying | NO | - |
+| `content` | jsonb | YES | '{}'::jsonb |
+| `preview` | text | YES | - |
+| `is_active` | boolean | YES | true |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **templates_authenticated_access** — `ALL`（roles: {public}）
+    - USING: `(auth.role() = 'authenticated'::text)`
+
+**Triggers**
+
+- `update_templates_updated_at` — BEFORE UPDATE
+
+---
+
+### `timebox_boxes`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `created_at` | timestamp with time zone | NO | now() |
+| `updated_at` | timestamp with time zone | NO | now() |
+| `user_id` | uuid | NO | - |
+| `name` | text | NO | - |
+| `color` | text | YES | - |
+| `type` | text | YES | - |
+| `default_content` | jsonb | YES | - |
+| `default_duration` | integer | YES | 60 |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **timebox_boxes_delete** — `DELETE`（roles: {public}）
+    - USING: `true`
+- **timebox_boxes_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `true`
+- **timebox_boxes_select** — `SELECT`（roles: {public}）
+    - USING: `true`
+- **timebox_boxes_update** — `UPDATE`（roles: {public}）
+    - USING: `true`
+
+---
+
+### `timebox_scheduled_boxes`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `created_at` | timestamp with time zone | NO | now() |
+| `updated_at` | timestamp with time zone | NO | now() |
+| `user_id` | uuid | NO | - |
+| `box_id` | uuid | NO | - |
+| `week_id` | uuid | NO | - |
+| `day_of_week` | smallint | NO | - |
+| `start_time` | time without time zone | NO | - |
+| `duration` | integer | NO | - |
+| `completed` | boolean | NO | false |
+| `data` | jsonb | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `box_id` | `timebox_boxes.id` | CASCADE | NO ACTION |
+| `week_id` | `timebox_weeks.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **timebox_scheduled_boxes_delete** — `DELETE`（roles: {public}）
+    - USING: `true`
+- **timebox_scheduled_boxes_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `true`
+- **timebox_scheduled_boxes_select** — `SELECT`（roles: {public}）
+    - USING: `true`
+- **timebox_scheduled_boxes_update** — `UPDATE`（roles: {public}）
+    - USING: `true`
+
+---
+
+### `timebox_weeks`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `created_at` | timestamp with time zone | NO | now() |
+| `updated_at` | timestamp with time zone | NO | now() |
+| `user_id` | uuid | NO | - |
+| `week_start` | date | NO | - |
+| `name` | text | YES | - |
+| `archived` | boolean | NO | false |
+| `review_notes` | text | YES | - |
+| `next_week_goals` | text | YES | - |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **timebox_weeks_delete** — `DELETE`（roles: {public}）
+    - USING: `true`
+- **timebox_weeks_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `true`
+- **timebox_weeks_select** — `SELECT`（roles: {public}）
+    - USING: `true`
+- **timebox_weeks_update** — `UPDATE`（roles: {public}）
+    - USING: `true`
+
+---
+
+### `timebox_workout_templates`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `user_id` | uuid | NO | - |
+| `name` | text | NO | - |
+| `exercises` | jsonb | NO | '[]'::jsonb |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **workout_templates_delete** — `DELETE`（roles: {public}）
+    - USING: `(user_id = auth.uid())`
+- **workout_templates_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(user_id = auth.uid())`
+- **workout_templates_select** — `SELECT`（roles: {public}）
+    - USING: `(user_id = auth.uid())`
+- **workout_templates_update** — `UPDATE`（roles: {public}）
+    - USING: `(user_id = auth.uid())`
+
+---
+
+### `todo_columns`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `name` | text | NO | - |
+| `color` | text | YES | 'gray'::text |
+| `sort_order` | integer | NO | 0 |
+| `is_system` | boolean | YES | false |
+| `mapped_status` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **todo_columns_workspace_access** — `ALL`（roles: {public}）
+    - USING: `true`
+    - WITH CHECK: `true`
+
+---
+
+### `todos`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `title` | text | NO | - |
+| `priority` | integer | NO | 3 |
+| `deadline` | timestamp with time zone | YES | - |
+| `status` | text | NO | 'pending'::text |
+| `completed` | boolean | YES | false |
+| `assignee` | uuid | YES | - |
+| `visibility` | ARRAY | YES | '{}'::text[] |
+| `related_items` | jsonb | YES | '[]'::jsonb |
+| `sub_tasks` | jsonb | YES | '[]'::jsonb |
+| `notes` | jsonb | YES | '[]'::jsonb |
+| `enabled_quick_actions` | ARRAY | YES | '{}'::text[] |
+| `needs_creator_notification` | boolean | YES | false |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `workspace_id` | uuid | NO | - |
+| `created_by` | uuid | YES | - |
+| `updated_by` | uuid | YES | - |
+| `is_public` | boolean | YES | false |
+| `task_type` | text | YES | - |
+| `tour_request_id` | uuid | YES | - |
+| `tour_id` | text | YES | - |
+| `column_id` | uuid | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `assignee` | `employees.id` | NO ACTION | NO ACTION |
+| `column_id` | `todo_columns.id` | SET NULL | NO ACTION |
+| `created_by` | `employees.id` | SET NULL | NO ACTION |
+| `updated_by` | `employees.id` | SET NULL | NO ACTION |
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **todos_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **todos_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **todos_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **todos_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+- `update_todos_updated_at` — BEFORE UPDATE
+
+---
+
+### `tour_addons`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | text | NO | - |
+| `tour_id` | text | YES | - |
+| `name` | text | NO | - |
+| `description` | text | YES | - |
+| `price` | numeric | YES | 0 |
+| `quantity` | integer | YES | 0 |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `workspace_id` | uuid | YES | - |
+| `created_by` | uuid | YES | - |
+| `updated_by` | uuid | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `created_by` | `employees.id` | NO ACTION | NO ACTION |
+| `tour_id` | `tours.id` | RESTRICT | NO ACTION |
+| `updated_by` | `employees.id` | NO ACTION | NO ACTION |
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **tour_addons_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **tour_addons_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **tour_addons_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **tour_addons_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+
+---
+
+### `tour_bonus_settings`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `tour_id` | text | NO | - |
+| `type` | smallint | NO | - |
+| `bonus` | numeric | NO | 0 |
+| `bonus_type` | smallint | NO | 0 |
+| `employee_id` | uuid | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `employee_id` | `employees.id` | NO ACTION | NO ACTION |
+| `tour_id` | `tours.id` | RESTRICT | NO ACTION |
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **authenticated_tour_bonus_settings** — `ALL`（roles: {authenticated}）
+    - USING: `true`
+    - WITH CHECK: `true`
+- **tour_bonus_settings_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **tour_bonus_settings_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **tour_bonus_settings_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **tour_bonus_settings_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+---
+
+### `tour_confirmation_items`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `sheet_id` | uuid | NO | - |
+| `category` | text | NO | - |
+| `service_date` | date | NO | - |
+| `service_date_end` | date | YES | - |
+| `day_label` | text | YES | - |
+| `supplier_name` | text | NO | - |
+| `supplier_id` | text | YES | - |
+| `title` | text | NO | - |
+| `description` | text | YES | - |
+| `unit_price` | numeric | YES | - |
+| `currency` | text | YES | 'TWD'::text |
+| `quantity` | integer | YES | 1 |
+| `subtotal` | numeric | YES | - |
+| `expected_cost` | numeric | YES | - |
+| `actual_cost` | numeric | YES | - |
+| `contact_info` | jsonb | YES | - |
+| `booking_reference` | text | YES | - |
+| `booking_status` | text | YES | 'pending'::text |
+| `type_data` | jsonb | YES | - |
+| `sort_order` | integer | YES | 0 |
+| `notes` | text | YES | - |
+| `workspace_id` | uuid | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `request_id` | uuid | YES | - |
+| `resource_type` | text | YES | - |
+| `resource_id` | uuid | YES | - |
+| `latitude` | numeric | YES | - |
+| `longitude` | numeric | YES | - |
+| `google_maps_url` | text | YES | - |
+| `leader_expense` | numeric | YES | - |
+| `leader_expense_note` | text | YES | - |
+| `leader_expense_at` | timestamp with time zone | YES | - |
+| `receipt_images` | ARRAY | YES | '{}'::text[] |
+| `itinerary_item_id` | uuid | YES | - |
+| `created_by` | uuid | YES | - |
+| `updated_by` | uuid | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `created_by` | `employees.id` | NO ACTION | NO ACTION |
+| `itinerary_item_id` | `tour_itinerary_items.id` | SET NULL | NO ACTION |
+| `sheet_id` | `tour_confirmation_sheets.id` | CASCADE | NO ACTION |
+| `updated_by` | `employees.id` | NO ACTION | NO ACTION |
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **tour_confirmation_items_delete** — `DELETE`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **tour_confirmation_items_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(workspace_id = get_current_user_workspace())`
+- **tour_confirmation_items_select** — `SELECT`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **tour_confirmation_items_update** — `UPDATE`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+- `trigger_calculate_item_subtotal` — BEFORE UPDATE
+- `trigger_calculate_item_subtotal` — BEFORE INSERT
+- `trigger_update_confirmation_totals` — AFTER UPDATE
+- `trigger_update_confirmation_totals` — AFTER DELETE
+- `trigger_update_confirmation_totals` — AFTER INSERT
+
+---
+
+### `tour_confirmation_sheets`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `tour_id` | text | NO | - |
+| `tour_code` | text | NO | - |
+| `tour_name` | text | NO | - |
+| `departure_date` | date | YES | - |
+| `return_date` | date | YES | - |
+| `tour_leader_name` | text | YES | - |
+| `tour_leader_id` | uuid | YES | - |
+| `sales_person` | text | YES | - |
+| `assistant` | text | YES | - |
+| `pax` | integer | YES | - |
+| `flight_info` | text | YES | - |
+| `status` | text | NO | 'draft'::text |
+| `total_expected_cost` | numeric | YES | 0 |
+| `total_actual_cost` | numeric | YES | 0 |
+| `itinerary_id` | text | YES | - |
+| `itinerary_version` | integer | YES | - |
+| `notes` | text | YES | - |
+| `workspace_id` | uuid | NO | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `created_by` | text | YES | - |
+| `updated_by` | text | YES | - |
+| `foreign_currency` | text | YES | - |
+| `exchange_rate` | numeric | YES | - |
+| `petty_cash` | numeric | YES | 0 |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `tour_id` | `tours.id` | RESTRICT | NO ACTION |
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **tour_confirmation_sheets_delete** — `DELETE`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **tour_confirmation_sheets_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(workspace_id = get_current_user_workspace())`
+- **tour_confirmation_sheets_select** — `SELECT`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **tour_confirmation_sheets_update** — `UPDATE`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+
+---
+
+### `tour_control_forms`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `package_id` | uuid | NO | - |
+| `workspace_id` | uuid | NO | - |
+| `form_data` | jsonb | NO | '{}'::jsonb |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `created_by` | uuid | YES | - |
+| `updated_by` | uuid | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `created_by` | `employees.id` | SET NULL | NO ACTION |
+| `updated_by` | `employees.id` | SET NULL | NO ACTION |
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **tour_control_forms_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **tour_control_forms_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **tour_control_forms_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **tour_control_forms_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+
+---
+
+### `tour_custom_cost_fields`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `tour_id` | text | NO | - |
+| `field_name` | text | NO | - |
+| `display_order` | integer | YES | 0 |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `tour_id` | `tours.id` | RESTRICT | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **tour_custom_cost_fields_authenticated** — `ALL`（roles: {public}）
+    - USING: `(auth.role() = 'authenticated'::text)`
+
+---
+
+### `tour_custom_cost_values`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `field_id` | uuid | NO | - |
+| `member_id` | uuid | NO | - |
+| `value` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `field_id` | `tour_custom_cost_fields.id` | CASCADE | NO ACTION |
+| `member_id` | `order_members.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **tour_custom_cost_values_authenticated** — `ALL`（roles: {public}）
+    - USING: `(auth.role() = 'authenticated'::text)`
+
+---
+
+### `tour_departure_data`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `tour_id` | text | NO | - |
+| `flight_info` | jsonb | YES | '{}'::jsonb |
+| `hotel_info` | jsonb | YES | '{}'::jsonb |
+| `bus_info` | jsonb | YES | '{}'::jsonb |
+| `guide_info` | jsonb | YES | '{}'::jsonb |
+| `emergency_contact` | jsonb | YES | '{}'::jsonb |
+| `notes` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `created_by` | uuid | YES | - |
+| `updated_by` | uuid | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `tour_id` | `tours.id` | RESTRICT | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **tour_departure_data_authenticated** — `ALL`（roles: {public}）
+    - USING: `(auth.role() = 'authenticated'::text)`
+
+---
+
+### `tour_destinations`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `country` | text | NO | - |
+| `city` | text | NO | - |
+| `airport_code` | text | NO | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **tour_destinations_delete** — `DELETE`（roles: {public}）
+    - USING: `true`
+- **tour_destinations_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `true`
+- **tour_destinations_select** — `SELECT`（roles: {public}）
+    - USING: `true`
+- **tour_destinations_update** — `UPDATE`（roles: {public}）
+    - USING: `true`
+
+---
+
+### `tour_documents`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `tour_id` | text | NO | - |
+| `workspace_id` | uuid | NO | - |
+| `name` | text | NO | - |
+| `description` | text | YES | - |
+| `file_path` | text | NO | - |
+| `public_url` | text | NO | - |
+| `file_name` | text | NO | - |
+| `file_size` | integer | YES | - |
+| `mime_type` | text | YES | - |
+| `uploaded_by` | uuid | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `created_by` | uuid | YES | - |
+| `updated_by` | uuid | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `created_by` | `employees.id` | NO ACTION | NO ACTION |
+| `tour_id` | `tours.id` | RESTRICT | NO ACTION |
+| `updated_by` | `employees.id` | NO ACTION | NO ACTION |
+| `uploaded_by` | `employees.id` | SET NULL | NO ACTION |
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **tour_documents_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **tour_documents_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **tour_documents_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **tour_documents_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `set_tour_documents_updated_at` — BEFORE UPDATE
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+
+---
+
+### `tour_expenses`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `expense_id` | bigint | NO | - |
+| `itinerary_id` | text | NO | - |
+| `leader_id` | uuid | NO | - |
+| `actual_amount` | numeric | NO | - |
+| `notes` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `itinerary_id` | `itineraries.id` | RESTRICT | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **tour_expenses_all** — `ALL`（roles: {public}）
+    - USING: `true`
+- **tour_expenses_select** — `SELECT`（roles: {public}）
+    - USING: `(auth.uid() = leader_id)`
+
+---
+
+### `tour_folder_templates`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | YES | - |
+| `name` | text | NO | - |
+| `icon` | text | YES | - |
+| `default_category` | file_category (enum) | YES | - |
+| `sort_order` | integer | YES | 0 |
+| `is_active` | boolean | NO | true |
+| `created_at` | timestamp with time zone | NO | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **templates_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id IS NULL) OR (workspace_id IN ( SELECT employees.workspace_id
+   FROM employees
+  WHERE (employees.supabase_user_id = auth.uid()))))`
+- **tour_folder_templates_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **tour_folder_templates_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **tour_folder_templates_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **tour_folder_templates_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+
+---
+
+### `tour_itinerary_days`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `tour_id` | text | NO | - |
+| `itinerary_id` | text | YES | - |
+| `workspace_id` | uuid | YES | - |
+| `day_number` | integer | NO | - |
+| `title` | text | YES | - |
+| `route` | text | YES | - |
+| `note` | text | YES | - |
+| `blocks` | jsonb | YES | - |
+| `is_same_accommodation` | boolean | NO | false |
+| `breakfast_preset` | text | YES | - |
+| `lunch_preset` | text | YES | - |
+| `dinner_preset` | text | YES | - |
+| `created_at` | timestamp with time zone | NO | now() |
+| `updated_at` | timestamp with time zone | NO | now() |
+| `created_by` | uuid | YES | - |
+| `updated_by` | uuid | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `created_by` | `employees.id` | SET NULL | NO ACTION |
+| `itinerary_id` | `itineraries.id` | SET NULL | NO ACTION |
+| `tour_id` | `tours.id` | RESTRICT | NO ACTION |
+| `updated_by` | `employees.id` | SET NULL | NO ACTION |
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **tour_itinerary_days_delete** — `DELETE`（roles: {authenticated}）
+    - USING: `((workspace_id = get_current_user_workspace()) OR is_super_admin())`
+- **tour_itinerary_days_insert** — `INSERT`（roles: {authenticated}）
+    - WITH CHECK: `(workspace_id = get_current_user_workspace())`
+- **tour_itinerary_days_select** — `SELECT`（roles: {authenticated}）
+    - USING: `((workspace_id = get_current_user_workspace()) OR is_super_admin())`
+- **tour_itinerary_days_update** — `UPDATE`（roles: {authenticated}）
+    - USING: `((workspace_id = get_current_user_workspace()) OR is_super_admin())`
+
+**Triggers**
+
+- `tour_itinerary_days_updated_at` — BEFORE UPDATE
+
+---
+
+### `tour_itinerary_items`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `tour_id` | text | YES | - |
+| `itinerary_id` | text | YES | - |
+| `workspace_id` | uuid | NO | - |
+| `day_number` | integer | YES | - |
+| `sort_order` | integer | YES | 0 |
+| `category` | text | YES | - |
+| `sub_category` | text | YES | - |
+| `title` | text | YES | - |
+| `description` | text | YES | - |
+| `service_date` | date | YES | - |
+| `service_date_end` | date | YES | - |
+| `resource_type` | text | YES | - |
+| `resource_id` | uuid | YES | - |
+| `resource_name` | text | YES | - |
+| `latitude` | numeric | YES | - |
+| `longitude` | numeric | YES | - |
+| `google_maps_url` | text | YES | - |
+| `unit_price` | numeric | YES | - |
+| `quantity` | numeric | YES | - |
+| `total_cost` | numeric | YES | - |
+| `currency` | text | YES | 'TWD'::text |
+| `pricing_type` | text | YES | - |
+| `adult_price` | numeric | YES | - |
+| `child_price` | numeric | YES | - |
+| `infant_price` | numeric | YES | - |
+| `quote_note` | text | YES | - |
+| `quote_item_id` | text | YES | - |
+| `supplier_id` | text | YES | - |
+| `supplier_name` | text | YES | - |
+| `request_id` | uuid | YES | - |
+| `request_status` | text | YES | 'none'::text |
+| `request_sent_at` | timestamp with time zone | YES | - |
+| `request_reply_at` | timestamp with time zone | YES | - |
+| `reply_content` | jsonb | YES | - |
+| `reply_cost` | numeric | YES | - |
+| `estimated_cost` | numeric | YES | - |
+| `quoted_cost` | numeric | YES | - |
+| `confirmation_item_id` | uuid | YES | - |
+| `confirmed_cost` | numeric | YES | - |
+| `booking_reference` | text | YES | - |
+| `booking_status` | text | YES | - |
+| `confirmation_date` | timestamp with time zone | YES | - |
+| `confirmation_note` | text | YES | - |
+| `actual_expense` | numeric | YES | - |
+| `expense_note` | text | YES | - |
+| `expense_at` | timestamp with time zone | YES | - |
+| `receipt_images` | ARRAY | YES | - |
+| `quote_status` | text | YES | 'none'::text |
+| `confirmation_status` | text | YES | 'none'::text |
+| `leader_status` | text | YES | 'none'::text |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `created_by` | uuid | YES | - |
+| `show_on_web` | boolean | NO | true |
+| `show_on_brochure` | boolean | NO | true |
+| `updated_by` | uuid | YES | - |
+| `show_on_quote` | boolean | YES | true |
+| `driver_name` | text | YES | - |
+| `driver_phone` | text | YES | - |
+| `vehicle_plate` | text | YES | - |
+| `vehicle_type` | text | YES | - |
+| `booking_confirmed_at` | timestamp with time zone | YES | - |
+| `assignee_id` | uuid | YES | - |
+| `assigned_at` | timestamp with time zone | YES | - |
+| `assigned_by` | uuid | YES | - |
+| `handled_by` | text | YES | - |
+| `room_details` | jsonb | YES | '[]'::jsonb |
+| `override_title` | text | YES | - |
+| `override_description` | text | YES | - |
+| `override_by` | uuid | YES | - |
+| `override_at` | timestamp with time zone | YES | - |
+| `is_reserved` | boolean | YES | false |
+| `reserved_at` | timestamp with time zone | YES | - |
+| `unit_price_formula` | text | YES | - |
+| `quantity_formula` | text | YES | - |
+| `adult_price_formula` | text | YES | - |
+| `child_price_formula` | text | YES | - |
+| `infant_price_formula` | text | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `assigned_by` | `employees.id` | NO ACTION | NO ACTION |
+| `assignee_id` | `employees.id` | NO ACTION | NO ACTION |
+| `itinerary_id` | `itineraries.id` | NO ACTION | NO ACTION |
+| `override_by` | `employees.id` | NO ACTION | NO ACTION |
+| `tour_id` | `tours.id` | NO ACTION | NO ACTION |
+| `updated_by` | `employees.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **tour_itinerary_items_delete** — `DELETE`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **tour_itinerary_items_insert** — `INSERT`（roles: {authenticated}）
+    - WITH CHECK: `(workspace_id = get_current_user_workspace())`
+- **tour_itinerary_items_select** — `SELECT`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **tour_itinerary_items_update** — `UPDATE`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+
+**Triggers**
+
+- `tii_updated_at` — BEFORE UPDATE
+
+---
+
+### `tour_leaders`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `code` | character varying | YES | - |
+| `name` | character varying | NO | - |
+| `english_name` | character varying | YES | - |
+| `phone` | character varying | YES | - |
+| `email` | character varying | YES | - |
+| `address` | text | YES | - |
+| `national_id` | character varying | YES | - |
+| `passport_number` | character varying | YES | - |
+| `passport_expiry` | date | YES | - |
+| `languages` | ARRAY | YES | '{}'::text[] |
+| `specialties` | ARRAY | YES | '{}'::text[] |
+| `license_number` | character varying | YES | - |
+| `notes` | text | YES | - |
+| `status` | character varying | YES | 'active'::character varying |
+| `display_order` | integer | YES | 0 |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `photo` | text | YES | - |
+| `domestic_phone` | character varying | YES | - |
+| `overseas_phone` | character varying | YES | - |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **tour_leaders_delete** — `DELETE`（roles: {public}）
+    - USING: `true`
+- **tour_leaders_insert** — `INSERT`（roles: {authenticated}）
+    - WITH CHECK: `(auth.role() = 'authenticated'::text)`
+- **tour_leaders_select** — `SELECT`（roles: {authenticated}）
+    - USING: `true`
+- **tour_leaders_update** — `UPDATE`（roles: {authenticated}）
+    - USING: `(auth.role() = 'authenticated'::text)`
+
+**Triggers**
+
+- `update_tour_leaders_updated_at` — BEFORE UPDATE
+
+---
+
+### `tour_meal_settings`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `tour_id` | text | NO | - |
+| `day_number` | integer | NO | - |
+| `meal_type` | text | NO | - |
+| `restaurant_name` | text | YES | - |
+| `enabled` | boolean | YES | false |
+| `display_order` | integer | YES | 0 |
+| `workspace_id` | uuid | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `tour_id` | `tours.id` | RESTRICT | NO ACTION |
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **Users can delete meal settings in their workspace** — `DELETE`（roles: {public}）
+    - USING: `(workspace_id IN ( SELECT profiles.workspace_id
+   FROM profiles
+  WHERE (profiles.id = auth.uid())))`
+- **Users can insert meal settings in their workspace** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(workspace_id IN ( SELECT profiles.workspace_id
+   FROM profiles
+  WHERE (profiles.id = auth.uid())))`
+- **Users can update meal settings in their workspace** — `UPDATE`（roles: {public}）
+    - USING: `(workspace_id IN ( SELECT profiles.workspace_id
+   FROM profiles
+  WHERE (profiles.id = auth.uid())))`
+- **Users can view meal settings in their workspace** — `SELECT`（roles: {public}）
+    - USING: `(workspace_id IN ( SELECT profiles.workspace_id
+   FROM profiles
+  WHERE (profiles.id = auth.uid())))`
+- **tour_meal_settings_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **tour_meal_settings_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **tour_meal_settings_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **tour_meal_settings_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `tour_meal_settings_updated_at` — BEFORE UPDATE
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+
+---
+
+### `tour_member_fields`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `tour_id` | text | NO | - |
+| `order_member_id` | uuid | NO | - |
+| `field_name` | character varying | NO | - |
+| `field_value` | text | YES | - |
+| `display_order` | integer | YES | 0 |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `order_member_id` | `order_members.id` | CASCADE | NO ACTION |
+| `tour_id` | `tours.id` | RESTRICT | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **tour_member_fields_authenticated** — `ALL`（roles: {public}）
+    - USING: `(auth.role() = 'authenticated'::text)`
+
+**Triggers**
+
+- `update_tour_member_fields_updated_at` — BEFORE UPDATE
+
+---
+
+### `tour_members`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `tour_id` | text | NO | - |
+| `customer_id` | text | NO | - |
+| `member_type` | text | NO | - |
+| `room_type` | text | YES | - |
+| `roommate_id` | uuid | YES | - |
+| `special_requests` | text | YES | - |
+| `dietary_requirements` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `created_by` | uuid | YES | - |
+| `updated_by` | uuid | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `created_by` | `employees.id` | NO ACTION | NO ACTION |
+| `customer_id` | `customers.id` | RESTRICT | NO ACTION |
+| `tour_id` | `tours.id` | RESTRICT | NO ACTION |
+| `updated_by` | `employees.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **tour_members_authenticated** — `ALL`（roles: {public}）
+    - USING: `(auth.role() = 'authenticated'::text)`
+- **tour_members_delete** — `DELETE`（roles: {public}）
+    - USING: `(EXISTS ( SELECT 1
+   FROM tours
+  WHERE ((tours.id = tour_members.tour_id) AND ((tours.workspace_id)::text = (get_current_user_workspace())::text))))`
+- **tour_members_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `true`
+- **tour_members_select** — `SELECT`（roles: {public}）
+    - USING: `(EXISTS ( SELECT 1
+   FROM tours
+  WHERE ((tours.id = tour_members.tour_id) AND ((tours.workspace_id)::text = (get_current_user_workspace())::text))))`
+- **tour_members_update** — `UPDATE`（roles: {public}）
+    - USING: `(EXISTS ( SELECT 1
+   FROM tours
+  WHERE ((tours.id = tour_members.tour_id) AND ((tours.workspace_id)::text = (get_current_user_workspace())::text))))`
+
+---
+
+### `tour_refunds`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `tour_id` | text | YES | - |
+| `order_id` | text | YES | - |
+| `member_id` | uuid | YES | - |
+| `refund_reason` | text | NO | - |
+| `refund_amount` | numeric | NO | - |
+| `refund_date` | date | YES | - |
+| `processing_status` | text | YES | 'pending'::text |
+| `processed_by` | uuid | YES | - |
+| `notes` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **tour_refunds_authenticated** — `ALL`（roles: {public}）
+    - USING: `(auth.role() = 'authenticated'::text)`
+
+**Triggers**
+
+- `tour_refunds_updated_at` — BEFORE UPDATE
+
+---
+
+### `tour_request_items`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `request_id` | uuid | NO | - |
+| `tour_id` | text | NO | - |
+| `item_name` | text | NO | - |
+| `item_category` | text | YES | - |
+| `service_date` | date | YES | - |
+| `day_number` | integer | YES | - |
+| `sort_order` | integer | YES | 0 |
+| `source` | text | YES | 'auto_generated'::text |
+| `source_item_id` | uuid | YES | - |
+| `handled_by` | text | YES | - |
+| `handled_note` | text | YES | - |
+| `local_status` | text | YES | 'pending'::text |
+| `local_cost` | numeric | YES | - |
+| `local_currency` | text | YES | 'TWD'::text |
+| `local_notes` | text | YES | - |
+| `local_confirmed_at` | timestamp with time zone | YES | - |
+| `corner_confirmed` | boolean | YES | false |
+| `corner_notes` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `created_by` | uuid | YES | - |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `updated_by` | uuid | YES | - |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **tour_request_items_authenticated** — `ALL`（roles: {public}）
+    - USING: `(auth.role() = 'authenticated'::text)`
+- **tour_request_items_delete** — `DELETE`（roles: {public}）
+    - USING: `true`
+- **tour_request_items_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `true`
+- **tour_request_items_select** — `SELECT`（roles: {public}）
+    - USING: `true`
+- **tour_request_items_update** — `UPDATE`（roles: {public}）
+    - USING: `true`
+
+**Triggers**
+
+- `trigger_tour_request_items_updated_at` — BEFORE UPDATE
+
+---
+
+### `tour_request_member_vouchers`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `request_id` | uuid | NO | - |
+| `member_id` | uuid | NO | - |
+| `member_name` | character varying | YES | - |
+| `voucher_type` | character varying | NO | - |
+| `voucher_code` | character varying | YES | - |
+| `voucher_file_url` | text | YES | - |
+| `voucher_data` | jsonb | YES | '{}'::jsonb |
+| `unit_price` | numeric | YES | - |
+| `status` | character varying | YES | 'pending'::character varying |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **tour_request_member_vouchers_authenticated** — `ALL`（roles: {public}）
+    - USING: `(auth.role() = 'authenticated'::text)`
+- **tour_request_member_vouchers_delete** — `DELETE`（roles: {public}）
+    - USING: `true`
+- **tour_request_member_vouchers_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `true`
+- **tour_request_member_vouchers_select** — `SELECT`（roles: {public}）
+    - USING: `true`
+- **tour_request_member_vouchers_update** — `UPDATE`（roles: {public}）
+    - USING: `true`
+
+**Triggers**
+
+- `trigger_tour_request_member_vouchers_updated_at` — BEFORE UPDATE
+
+---
+
+### `tour_request_messages`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `request_id` | uuid | NO | - |
+| `sender_type` | character varying | NO | - |
+| `sender_id` | uuid | NO | - |
+| `sender_name` | character varying | YES | - |
+| `content` | text | NO | - |
+| `attachments` | jsonb | YES | '[]'::jsonb |
+| `is_read` | boolean | YES | false |
+| `read_at` | timestamp with time zone | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `is_important` | boolean | YES | false |
+| `is_read_by_staff` | boolean | YES | false |
+| `is_read_by_supplier` | boolean | YES | false |
+| `forwarded_to_channel` | boolean | YES | false |
+| `forwarded_at` | timestamp with time zone | YES | - |
+| `forwarded_message_id` | uuid | YES | - |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **tour_request_messages_authenticated** — `ALL`（roles: {public}）
+    - USING: `(auth.role() = 'authenticated'::text)`
+- **tour_request_messages_delete** — `DELETE`（roles: {public}）
+    - USING: `true`
+- **tour_request_messages_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `true`
+- **tour_request_messages_select** — `SELECT`（roles: {public}）
+    - USING: `true`
+- **tour_request_messages_update** — `UPDATE`（roles: {public}）
+    - USING: `true`
+
+---
+
+### `tour_requests`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `code` | character varying | NO | - |
+| `tour_id` | uuid | NO | - |
+| `tour_code` | character varying | YES | - |
+| `tour_name` | character varying | YES | - |
+| `order_id` | uuid | YES | - |
+| `handler_type` | character varying | NO | 'external'::character varying |
+| `assignee_id` | uuid | YES | - |
+| `assignee_name` | character varying | YES | - |
+| `supplier_id` | uuid | YES | - |
+| `supplier_name` | character varying | YES | - |
+| `supplier_type` | character varying | YES | - |
+| `category` | character varying | NO | - |
+| `service_date` | date | YES | - |
+| `service_date_end` | date | YES | - |
+| `title` | character varying | NO | - |
+| `description` | text | YES | - |
+| `quantity` | integer | YES | 1 |
+| `specifications` | jsonb | YES | '{}'::jsonb |
+| `member_ids` | ARRAY | YES | '{}'::uuid[] |
+| `member_data` | jsonb | YES | '[]'::jsonb |
+| `status` | character varying | YES | 'draft'::character varying |
+| `priority` | character varying | YES | 'normal'::character varying |
+| `reply_content` | jsonb | YES | '{}'::jsonb |
+| `reply_note` | text | YES | - |
+| `replied_at` | timestamp with time zone | YES | - |
+| `replied_by` | character varying | YES | - |
+| `estimated_cost` | numeric | YES | - |
+| `quoted_cost` | numeric | YES | - |
+| `final_cost` | numeric | YES | - |
+| `currency` | character varying | YES | 'TWD'::character varying |
+| `confirmed_at` | timestamp with time zone | YES | - |
+| `confirmed_by` | uuid | YES | - |
+| `confirmed_by_name` | character varying | YES | - |
+| `sync_to_app` | boolean | YES | false |
+| `app_sync_data` | jsonb | YES | '{}'::jsonb |
+| `synced_at` | timestamp with time zone | YES | - |
+| `workspace_id` | uuid | NO | - |
+| `target_workspace_id` | uuid | YES | - |
+| `created_by` | uuid | YES | - |
+| `created_by_name` | character varying | YES | - |
+| `updated_by` | uuid | YES | - |
+| `updated_by_name` | character varying | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `hidden` | boolean | YES | false |
+| `is_from_core` | boolean | YES | false |
+| `response_status` | text | YES | 'pending'::text |
+| `supplier_response_at` | timestamp with time zone | YES | - |
+| `recipient_workspace_id` | uuid | YES | - |
+| `sent_at` | timestamp with time zone | YES | - |
+| `request_type` | character varying | YES | - |
+| `items` | jsonb | YES | '[]'::jsonb |
+| `note` | text | YES | - |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **tour_requests_delete** — `DELETE`（roles: {public}）
+    - USING: `true`
+- **tour_requests_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `true`
+- **tour_requests_select** — `SELECT`（roles: {public}）
+    - USING: `true`
+- **tour_requests_update** — `UPDATE`（roles: {public}）
+    - USING: `true`
+
+**Triggers**
+
+- `trigger_tour_requests_updated_at` — BEFORE UPDATE
+
+---
+
+### `tour_role_assignments`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `tour_id` | text | NO | - |
+| `order_id` | text | YES | - |
+| `role_id` | uuid | YES | - |
+| `employee_id` | uuid | NO | - |
+| `created_at` | timestamp with time zone | NO | now() |
+| `field_id` | uuid | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `employee_id` | `employees.id` | RESTRICT | NO ACTION |
+| `field_id` | `workspace_selector_fields.id` | SET NULL | NO ACTION |
+| `order_id` | `orders.id` | RESTRICT | NO ACTION |
+| `role_id` | `workspace_roles.id` | RESTRICT | NO ACTION |
+| `tour_id` | `tours.id` | RESTRICT | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **tour_role_assignments_delete** — `DELETE`（roles: {public}）
+    - USING: `(EXISTS ( SELECT 1
+   FROM tours
+  WHERE ((tours.id = tour_role_assignments.tour_id) AND (tours.workspace_id = get_current_user_workspace()))))`
+- **tour_role_assignments_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(EXISTS ( SELECT 1
+   FROM tours
+  WHERE ((tours.id = tour_role_assignments.tour_id) AND (tours.workspace_id = get_current_user_workspace()))))`
+- **tour_role_assignments_select** — `SELECT`（roles: {public}）
+    - USING: `(EXISTS ( SELECT 1
+   FROM tours
+  WHERE ((tours.id = tour_role_assignments.tour_id) AND (tours.workspace_id = get_current_user_workspace()))))`
+- **tour_role_assignments_update** — `UPDATE`（roles: {public}）
+    - USING: `(EXISTS ( SELECT 1
+   FROM tours
+  WHERE ((tours.id = tour_role_assignments.tour_id) AND (tours.workspace_id = get_current_user_workspace()))))`
+
+---
+
+### `tour_room_assignments`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `room_id` | uuid | NO | - |
+| `order_member_id` | uuid | NO | - |
+| `bed_number` | integer | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `order_member_id` | `order_members.id` | CASCADE | NO ACTION |
+| `room_id` | `tour_rooms.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **tour_room_assignments_delete** — `DELETE`（roles: {public}）
+    - USING: `(EXISTS ( SELECT 1
+   FROM (tour_rooms tr
+     JOIN tours t ON ((t.id = tr.tour_id)))
+  WHERE ((tr.id = tour_room_assignments.room_id) AND (t.workspace_id = get_current_user_workspace()))))`
+- **tour_room_assignments_insert** — `INSERT`（roles: {authenticated}）
+    - WITH CHECK: `(EXISTS ( SELECT 1
+   FROM (tour_rooms tr
+     JOIN tours t ON ((t.id = tr.tour_id)))
+  WHERE ((tr.id = tour_room_assignments.room_id) AND (t.workspace_id = get_current_user_workspace()))))`
+- **tour_room_assignments_select** — `SELECT`（roles: {public}）
+    - USING: `(EXISTS ( SELECT 1
+   FROM (tour_rooms tr
+     JOIN tours t ON ((t.id = tr.tour_id)))
+  WHERE ((tr.id = tour_room_assignments.room_id) AND (t.workspace_id = get_current_user_workspace()))))`
+- **tour_room_assignments_update** — `UPDATE`（roles: {public}）
+    - USING: `(EXISTS ( SELECT 1
+   FROM (tour_rooms tr
+     JOIN tours t ON ((t.id = tr.tour_id)))
+  WHERE ((tr.id = tour_room_assignments.room_id) AND (t.workspace_id = get_current_user_workspace()))))`
+
+---
+
+### `tour_rooms`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `tour_id` | text | NO | - |
+| `hotel_name` | text | YES | - |
+| `room_type` | text | NO | - |
+| `room_number` | text | YES | - |
+| `capacity` | integer | NO | 2 |
+| `night_number` | integer | NO | 1 |
+| `notes` | text | YES | - |
+| `display_order` | integer | YES | 0 |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `booking_code` | text | YES | - |
+| `amount` | numeric | YES | - |
+| `created_by` | uuid | YES | - |
+| `updated_by` | uuid | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `tour_id` | `tours.id` | RESTRICT | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **tour_rooms_delete** — `DELETE`（roles: {public}）
+    - USING: `(EXISTS ( SELECT 1
+   FROM tours t
+  WHERE ((t.id = tour_rooms.tour_id) AND (t.workspace_id = get_current_user_workspace()))))`
+- **tour_rooms_insert** — `INSERT`（roles: {authenticated}）
+    - WITH CHECK: `(EXISTS ( SELECT 1
+   FROM tours t
+  WHERE ((t.id = tour_rooms.tour_id) AND (t.workspace_id = get_current_user_workspace()))))`
+- **tour_rooms_select** — `SELECT`（roles: {public}）
+    - USING: `(EXISTS ( SELECT 1
+   FROM tours t
+  WHERE ((t.id = tour_rooms.tour_id) AND (t.workspace_id = get_current_user_workspace()))))`
+- **tour_rooms_update** — `UPDATE`（roles: {public}）
+    - USING: `(EXISTS ( SELECT 1
+   FROM tours t
+  WHERE ((t.id = tour_rooms.tour_id) AND (t.workspace_id = get_current_user_workspace()))))`
+
+---
+
+### `tour_table_assignments`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `table_id` | uuid | NO | - |
+| `order_member_id` | uuid | NO | - |
+| `created_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `order_member_id` | `order_members.id` | CASCADE | NO ACTION |
+| `table_id` | `tour_tables.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **Users can delete table assignments** — `DELETE`（roles: {public}）
+    - USING: `(table_id IN ( SELECT tour_tables.id
+   FROM tour_tables
+  WHERE (tour_tables.workspace_id IN ( SELECT profiles.workspace_id
+           FROM profiles
+          WHERE (profiles.id = auth.uid())))))`
+- **Users can insert table assignments** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(table_id IN ( SELECT tour_tables.id
+   FROM tour_tables
+  WHERE (tour_tables.workspace_id IN ( SELECT profiles.workspace_id
+           FROM profiles
+          WHERE (profiles.id = auth.uid())))))`
+- **Users can view table assignments** — `SELECT`（roles: {public}）
+    - USING: `(table_id IN ( SELECT tour_tables.id
+   FROM tour_tables
+  WHERE (tour_tables.workspace_id IN ( SELECT profiles.workspace_id
+           FROM profiles
+          WHERE (profiles.id = auth.uid())))))`
+
+---
+
+### `tour_tables`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `tour_id` | text | NO | - |
+| `meal_setting_id` | uuid | NO | - |
+| `table_number` | integer | NO | - |
+| `capacity` | integer | NO | 10 |
+| `display_order` | integer | YES | 0 |
+| `workspace_id` | uuid | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `meal_setting_id` | `tour_meal_settings.id` | CASCADE | NO ACTION |
+| `tour_id` | `tours.id` | RESTRICT | NO ACTION |
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **Users can delete tables in their workspace** — `DELETE`（roles: {public}）
+    - USING: `(workspace_id IN ( SELECT profiles.workspace_id
+   FROM profiles
+  WHERE (profiles.id = auth.uid())))`
+- **Users can insert tables in their workspace** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(workspace_id IN ( SELECT profiles.workspace_id
+   FROM profiles
+  WHERE (profiles.id = auth.uid())))`
+- **Users can update tables in their workspace** — `UPDATE`（roles: {public}）
+    - USING: `(workspace_id IN ( SELECT profiles.workspace_id
+   FROM profiles
+  WHERE (profiles.id = auth.uid())))`
+- **Users can view tables in their workspace** — `SELECT`（roles: {public}）
+    - USING: `(workspace_id IN ( SELECT profiles.workspace_id
+   FROM profiles
+  WHERE (profiles.id = auth.uid())))`
+- **tour_tables_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **tour_tables_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **tour_tables_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **tour_tables_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `tour_tables_updated_at` — BEFORE UPDATE
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+
+---
+
+### `tour_vehicle_assignments`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `vehicle_id` | uuid | NO | - |
+| `order_member_id` | uuid | NO | - |
+| `seat_number` | integer | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `order_member_id` | `order_members.id` | CASCADE | NO ACTION |
+| `vehicle_id` | `tour_vehicles.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **tour_vehicle_assignments_authenticated** — `ALL`（roles: {public}）
+    - USING: `(auth.role() = 'authenticated'::text)`
+
+---
+
+### `tour_vehicles`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `tour_id` | text | NO | - |
+| `vehicle_name` | text | NO | - |
+| `vehicle_type` | text | YES | - |
+| `capacity` | integer | NO | 45 |
+| `driver_name` | text | YES | - |
+| `driver_phone` | text | YES | - |
+| `license_plate` | text | YES | - |
+| `notes` | text | YES | - |
+| `display_order` | integer | YES | 0 |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `tour_id` | `tours.id` | RESTRICT | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **tour_vehicles_authenticated** — `ALL`（roles: {public}）
+    - USING: `(auth.role() = 'authenticated'::text)`
+
+---
+
+### `tours`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | text | NO | - |
+| `code` | text | NO | - |
+| `name` | text | NO | - |
+| `departure_date` | date | YES | - |
+| `return_date` | date | YES | - |
+| `location` | text | YES | - |
+| `status` | text | NO | '提案'::text |
+| `price` | numeric | YES | 0 |
+| `max_participants` | integer | YES | 0 |
+| `created_at` | timestamp with time zone | NO | now() |
+| `updated_at` | timestamp with time zone | NO | now() |
+| `contract_status` | text | NO | '未簽署'::text |
+| `total_revenue` | numeric | NO | 0 |
+| `total_cost` | numeric | NO | 0 |
+| `profit` | numeric | NO | 0 |
+| `quote_id` | text | YES | - |
+| `quote_cost_structure` | jsonb | YES | - |
+| `description` | text | YES | - |
+| `is_active` | boolean | YES | true |
+| `current_participants` | integer | YES | 0 |
+| `contract_template` | text | YES | - |
+| `contract_content` | text | YES | - |
+| `contract_created_at` | timestamp with time zone | YES | - |
+| `contract_notes` | text | YES | - |
+| `contract_completed` | boolean | YES | false |
+| `contract_archived_date` | timestamp with time zone | YES | - |
+| `envelope_records` | text | YES | - |
+| `_needs_sync` | boolean | YES | false |
+| `_synced_at` | timestamp with time zone | YES | - |
+| `_deleted` | boolean | YES | false |
+| `features` | jsonb | YES | '[]'::jsonb |
+| `archived` | boolean | YES | false |
+| `country_id` | text | YES | - |
+| `airport_code` | text | YES | - |
+| `workspace_id` | uuid | NO | - |
+| `closing_status` | character varying | YES | 'open'::character varying |
+| `closing_date` | date | YES | - |
+| `closed_by` | uuid | YES | - |
+| `created_by` | uuid | YES | - |
+| `updated_by` | uuid | YES | - |
+| `enable_checkin` | boolean | YES | false |
+| `checkin_qrcode` | text | YES | - |
+| `outbound_flight` | jsonb | YES | - |
+| `return_flight` | jsonb | YES | - |
+| `locked_quote_id` | text | YES | - |
+| `locked_quote_version` | integer | YES | - |
+| `locked_itinerary_id` | text | YES | - |
+| `locked_itinerary_version` | integer | YES | - |
+| `locked_at` | timestamp with time zone | YES | - |
+| `locked_by` | uuid | YES | - |
+| `last_unlocked_at` | timestamp with time zone | YES | - |
+| `last_unlocked_by` | uuid | YES | - |
+| `modification_reason` | text | YES | - |
+| `archive_reason` | text | YES | - |
+| `controller_id` | uuid | YES | - |
+| `confirmed_requirements` | jsonb | YES | - |
+| `itinerary_id` | text | YES | - |
+| `custom_cost_fields` | jsonb | YES | '[]'::jsonb |
+| `tour_leader_id` | uuid | YES | - |
+| `selling_price_per_person` | numeric | YES | - |
+| `tour_type` | text | NO | 'official'::text |
+| `days_count` | integer | YES | - |
+| `is_deleted` | boolean | YES | false |
+| `deleted_at` | timestamp with time zone | YES | - |
+| `deleted_by` | uuid | YES | - |
+| `department_id` | uuid | YES | - |
+| `tour_service_type` | character varying | NO | 'tour_group'::character varying |
+| `selling_prices` | jsonb | YES | - |
+| `participant_counts` | jsonb | YES | - |
+| `tier_pricings` | jsonb | YES | '[]'::jsonb |
+| `accommodation_days` | integer | YES | - |
+| `country_code` | text | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `closed_by` | `employees.id` | NO ACTION | NO ACTION |
+| `controller_id` | `employees.id` | NO ACTION | NO ACTION |
+| `country_code` | `ref_countries.code` | NO ACTION | NO ACTION |
+| `country_id` | `countries.id` | NO ACTION | NO ACTION |
+| `created_by` | `employees.id` | NO ACTION | NO ACTION |
+| `deleted_by` | `employees.id` | SET NULL | NO ACTION |
+| `department_id` | `departments.id` | NO ACTION | NO ACTION |
+| `last_unlocked_by` | `employees.id` | SET NULL | NO ACTION |
+| `locked_by` | `employees.id` | SET NULL | NO ACTION |
+| `tour_leader_id` | `order_members.id` | NO ACTION | NO ACTION |
+| `updated_by` | `employees.id` | NO ACTION | NO ACTION |
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **tours_delete** — `DELETE`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **tours_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(workspace_id = get_current_user_workspace())`
+- **tours_select** — `SELECT`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **tours_update** — `UPDATE`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+
+**Triggers**
+
+- `tours_cascade_rename` — AFTER UPDATE
+- `tr_create_tour_folders` — AFTER INSERT
+- `trg_tours_sync_country_code` — BEFORE UPDATE
+- `trg_tours_sync_country_code` — BEFORE INSERT
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+- `trigger_create_tour_conversations` — AFTER INSERT
+- `trigger_tour_update_cache` — AFTER UPDATE
+- `update_tours_updated_at` — BEFORE UPDATE
+
+---
+
+### `transactions`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | text | NO | - |
+| `type` | text | NO | - |
+| `order_id` | text | YES | - |
+| `tour_id` | text | YES | - |
+| `amount` | numeric | NO | - |
+| `description` | text | YES | - |
+| `status` | text | YES | '待確認'::text |
+| `created_by` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `updated_by` | uuid | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `updated_by` | `employees.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **transactions_authenticated** — `ALL`（roles: {public}）
+    - USING: `(auth.role() = 'authenticated'::text)`
+
+**Triggers**
+
+- `update_transactions_updated_at` — BEFORE UPDATE
+
+---
+
+### `transportation_rates`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `country_id` | text | YES | - |
+| `country_name` | text | NO | - |
+| `vehicle_type` | text | NO | - |
+| `category` | text | YES | - |
+| `supplier` | text | YES | - |
+| `route` | text | YES | - |
+| `trip_type` | text | YES | - |
+| `cost_vnd` | numeric | YES | - |
+| `price_twd` | numeric | YES | - |
+| `price` | numeric | NO | 0 |
+| `currency` | text | NO | 'TWD'::text |
+| `unit` | text | NO | 'trip'::text |
+| `kkday_selling_price` | numeric | YES | - |
+| `kkday_cost` | numeric | YES | - |
+| `kkday_profit` | numeric | YES | - |
+| `is_backup` | boolean | YES | false |
+| `is_active` | boolean | NO | true |
+| `display_order` | integer | NO | 0 |
+| `notes` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `created_by` | uuid | YES | - |
+| `updated_by` | uuid | YES | - |
+| `deleted_at` | timestamp with time zone | YES | - |
+| `deleted_by` | uuid | YES | - |
+| `country_code` | text | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `country_code` | `ref_countries.code` | NO ACTION | NO ACTION |
+| `country_id` | `countries.id` | SET NULL | NO ACTION |
+| `created_by` | `employees.id` | SET NULL | NO ACTION |
+| `deleted_by` | `employees.id` | SET NULL | NO ACTION |
+| `updated_by` | `employees.id` | SET NULL | NO ACTION |
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **transportation_rates_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **transportation_rates_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **transportation_rates_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **transportation_rates_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `set_transportation_rates_updated_at` — BEFORE UPDATE
+- `trg_transportation_rates_sync_country_code` — BEFORE INSERT
+- `trg_transportation_rates_sync_country_code` — BEFORE UPDATE
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+
+---
+
+### `travel_card_templates`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `category` | text | NO | - |
+| `code` | text | NO | - |
+| `icon` | text | NO | - |
+| `label_zh` | text | NO | - |
+| `translations` | jsonb | NO | '{}'::jsonb |
+| `sort_order` | integer | YES | 0 |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **travel_card_templates_authenticated_access** — `ALL`（roles: {public}）
+    - USING: `(auth.role() = 'authenticated'::text)`
+
+---
+
+### `travel_invoices`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `transaction_no` | text | NO | - |
+| `merchant_id` | text | YES | - |
+| `invoice_number` | text | YES | - |
+| `invoice_date` | date | NO | - |
+| `total_amount` | numeric | NO | - |
+| `tax_type` | text | NO | 'dutiable'::text |
+| `buyer_name` | text | NO | - |
+| `buyer_ubn` | text | YES | - |
+| `buyer_email` | text | YES | - |
+| `buyer_mobile` | text | YES | - |
+| `buyer_info` | jsonb | NO | '{}'::jsonb |
+| `items` | jsonb | NO | '[]'::jsonb |
+| `status` | text | NO | 'pending'::text |
+| `random_num` | text | YES | - |
+| `barcode` | text | YES | - |
+| `qrcode_l` | text | YES | - |
+| `qrcode_r` | text | YES | - |
+| `void_date` | timestamp with time zone | YES | - |
+| `void_reason` | text | YES | - |
+| `voided_by` | uuid | YES | - |
+| `allowance_date` | timestamp with time zone | YES | - |
+| `allowance_amount` | numeric | YES | - |
+| `allowance_items` | jsonb | YES | - |
+| `allowance_no` | text | YES | - |
+| `allowanced_by` | uuid | YES | - |
+| `order_id` | text | YES | - |
+| `tour_id` | text | YES | - |
+| `created_by` | uuid | NO | - |
+| `created_at` | timestamp with time zone | NO | now() |
+| `updated_at` | timestamp with time zone | NO | now() |
+| `workspace_id` | uuid | NO | - |
+| `is_batch` | boolean | YES | false |
+| `updated_by` | uuid | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `allowanced_by` | `employees.id` | NO ACTION | NO ACTION |
+| `created_by` | `employees.id` | NO ACTION | NO ACTION |
+| `order_id` | `orders.id` | NO ACTION | NO ACTION |
+| `tour_id` | `tours.id` | NO ACTION | NO ACTION |
+| `updated_by` | `employees.id` | NO ACTION | NO ACTION |
+| `voided_by` | `employees.id` | NO ACTION | NO ACTION |
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **travel_invoices_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **travel_invoices_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **travel_invoices_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **travel_invoices_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+
+---
+
+### `traveler_badges`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `user_id` | uuid | NO | - |
+| `badge_type` | text | NO | - |
+| `metadata` | jsonb | YES | '{}'::jsonb |
+| `earned_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `user_id` | `traveler_profiles.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **traveler_badges_authenticated** — `ALL`（roles: {public}）
+    - USING: `(auth.role() = 'authenticated'::text)`
+
+---
+
+### `traveler_conversation_members`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `conversation_id` | uuid | NO | - |
+| `user_id` | uuid | NO | - |
+| `role` | text | NO | 'member'::text |
+| `last_read_message_id` | uuid | YES | - |
+| `last_read_at` | timestamp with time zone | YES | - |
+| `is_muted` | boolean | YES | false |
+| `left_at` | timestamp with time zone | YES | - |
+| `joined_at` | timestamp with time zone | YES | now() |
+| `employee_id` | uuid | YES | - |
+| `member_type` | text | YES | 'traveler'::text |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `conversation_id` | `traveler_conversations.id` | CASCADE | NO ACTION |
+| `employee_id` | `employees.id` | RESTRICT | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **traveler_conversation_members_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `((user_id = auth.uid()) OR (EXISTS ( SELECT 1
+   FROM traveler_conversation_members traveler_conversation_members_1
+  WHERE ((traveler_conversation_members_1.conversation_id = traveler_conversation_members_1.conversation_id) AND (traveler_conversation_members_1.user_id = auth.uid()) AND (traveler_conversation_members_1.role = ANY (ARRAY['owner'::text, 'admin'::text])) AND (traveler_conversation_members_1.left_at IS NULL)))))`
+- **traveler_conversation_members_select** — `SELECT`（roles: {public}）
+    - USING: `((EXISTS ( SELECT 1
+   FROM traveler_conversation_members m
+  WHERE ((m.conversation_id = traveler_conversation_members.conversation_id) AND (m.user_id = auth.uid()) AND (m.left_at IS NULL)))) OR (EXISTS ( SELECT 1
+   FROM (traveler_conversation_members tcm
+     JOIN employees e ON ((e.id = tcm.employee_id)))
+  WHERE ((tcm.conversation_id = traveler_conversation_members.conversation_id) AND (e.supabase_user_id = auth.uid()) AND (tcm.left_at IS NULL)))) OR (EXISTS ( SELECT 1
+   FROM (traveler_conversations c
+     JOIN employees e ON ((e.workspace_id = c.workspace_id)))
+  WHERE ((c.id = traveler_conversation_members.conversation_id) AND (e.supabase_user_id = auth.uid())))))`
+- **traveler_conversation_members_update** — `UPDATE`（roles: {public}）
+    - USING: `((user_id = auth.uid()) OR (EXISTS ( SELECT 1
+   FROM traveler_conversation_members traveler_conversation_members_1
+  WHERE ((traveler_conversation_members_1.conversation_id = traveler_conversation_members_1.conversation_id) AND (traveler_conversation_members_1.user_id = auth.uid()) AND (traveler_conversation_members_1.role = ANY (ARRAY['owner'::text, 'admin'::text])) AND (traveler_conversation_members_1.left_at IS NULL)))))`
+
+---
+
+### `traveler_conversations`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `type` | text | NO | 'direct'::text |
+| `name` | text | YES | - |
+| `avatar_url` | text | YES | - |
+| `trip_id` | uuid | YES | - |
+| `split_group_id` | uuid | YES | - |
+| `created_by` | uuid | YES | - |
+| `last_message_id` | uuid | YES | - |
+| `last_message_at` | timestamp with time zone | YES | - |
+| `last_message_preview` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `tour_id` | text | YES | - |
+| `is_open` | boolean | YES | false |
+| `open_at` | timestamp with time zone | YES | - |
+| `close_at` | timestamp with time zone | YES | - |
+| `auto_open_before_days` | integer | YES | 3 |
+| `workspace_id` | uuid | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `last_message_id` | `traveler_messages.id` | SET NULL | NO ACTION |
+| `split_group_id` | `traveler_split_groups.id` | SET NULL | NO ACTION |
+| `tour_id` | `tours.id` | SET NULL | NO ACTION |
+| `trip_id` | `traveler_trips.id` | SET NULL | NO ACTION |
+| `workspace_id` | `workspaces.id` | SET NULL | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **traveler_conversations_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **traveler_conversations_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **traveler_conversations_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **traveler_conversations_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+
+---
+
+### `traveler_expense_splits`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `expense_id` | uuid | NO | - |
+| `user_id` | uuid | NO | - |
+| `amount` | numeric | NO | - |
+| `is_settled` | boolean | YES | false |
+| `settled_at` | timestamp with time zone | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `expense_id` | `traveler_expenses.id` | CASCADE | NO ACTION |
+| `user_id` | `traveler_profiles.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **traveler_expense_splits_all** — `ALL`（roles: {public}）
+    - USING: `((user_id = auth.uid()) OR (EXISTS ( SELECT 1
+   FROM (traveler_expenses e
+     JOIN traveler_split_group_members m ON ((m.group_id = e.split_group_id)))
+  WHERE ((e.id = traveler_expense_splits.expense_id) AND (m.user_id = auth.uid())))))`
+
+---
+
+### `traveler_expenses`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `trip_id` | uuid | YES | - |
+| `split_group_id` | uuid | YES | - |
+| `title` | text | NO | - |
+| `description` | text | YES | - |
+| `category` | text | YES | 'other'::text |
+| `amount` | numeric | NO | - |
+| `currency` | text | YES | 'TWD'::text |
+| `paid_by` | uuid | NO | - |
+| `expense_date` | date | YES | CURRENT_DATE |
+| `receipt_url` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `paid_by` | `traveler_profiles.id` | NO ACTION | NO ACTION |
+| `split_group_id` | `traveler_split_groups.id` | RESTRICT | NO ACTION |
+| `trip_id` | `traveler_trips.id` | RESTRICT | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **traveler_expenses_all** — `ALL`（roles: {public}）
+    - USING: `((paid_by = auth.uid()) OR (EXISTS ( SELECT 1
+   FROM traveler_split_group_members
+  WHERE ((traveler_split_group_members.group_id = traveler_expenses.split_group_id) AND (traveler_split_group_members.user_id = auth.uid())))))`
+
+---
+
+### `traveler_friends`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `user_id` | uuid | NO | - |
+| `friend_id` | uuid | NO | - |
+| `status` | text | YES | 'pending'::text |
+| `invite_code` | text | YES | - |
+| `invite_message` | text | YES | - |
+| `expires_at` | timestamp with time zone | YES | (now() + '7 days'::interval) |
+| `created_at` | timestamp with time zone | YES | now() |
+| `accepted_at` | timestamp with time zone | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `friend_id` | `traveler_profiles.id` | CASCADE | NO ACTION |
+| `user_id` | `traveler_profiles.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **traveler_friends_delete** — `DELETE`（roles: {public}）
+    - USING: `(user_id = auth.uid())`
+- **traveler_friends_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(user_id = auth.uid())`
+- **traveler_friends_select** — `SELECT`（roles: {public}）
+    - USING: `((user_id = auth.uid()) OR (friend_id = auth.uid()))`
+- **traveler_friends_update** — `UPDATE`（roles: {public}）
+    - USING: `((user_id = auth.uid()) OR (friend_id = auth.uid()))`
+
+---
+
+### `traveler_messages`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `conversation_id` | uuid | NO | - |
+| `sender_id` | uuid | NO | - |
+| `content` | text | YES | - |
+| `type` | text | NO | 'text'::text |
+| `attachments` | jsonb | YES | '[]'::jsonb |
+| `reply_to_id` | uuid | YES | - |
+| `reactions` | jsonb | YES | '{}'::jsonb |
+| `metadata` | jsonb | YES | - |
+| `edited_at` | timestamp with time zone | YES | - |
+| `deleted_at` | timestamp with time zone | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `conversation_id` | `traveler_conversations.id` | RESTRICT | NO ACTION |
+| `reply_to_id` | `traveler_messages.id` | SET NULL | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **traveler_messages_delete** — `DELETE`（roles: {public}）
+    - USING: `(sender_id = auth.uid())`
+- **traveler_messages_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(((sender_id = auth.uid()) AND (EXISTS ( SELECT 1
+   FROM traveler_conversation_members
+  WHERE ((traveler_conversation_members.conversation_id = traveler_messages.conversation_id) AND (traveler_conversation_members.user_id = auth.uid()) AND (traveler_conversation_members.left_at IS NULL))))) OR (EXISTS ( SELECT 1
+   FROM (traveler_conversations c
+     JOIN employees e ON ((e.workspace_id = c.workspace_id)))
+  WHERE ((c.id = traveler_messages.conversation_id) AND (e.supabase_user_id = auth.uid())))) OR (sender_id IS NULL))`
+- **traveler_messages_select** — `SELECT`（roles: {public}）
+    - USING: `((EXISTS ( SELECT 1
+   FROM traveler_conversation_members m
+  WHERE ((m.conversation_id = traveler_messages.conversation_id) AND ((m.user_id = auth.uid()) OR (EXISTS ( SELECT 1
+           FROM employees e
+          WHERE ((e.id = m.employee_id) AND (e.supabase_user_id = auth.uid()))))) AND (m.left_at IS NULL)))) OR (EXISTS ( SELECT 1
+   FROM (traveler_conversations c
+     JOIN employees e ON ((e.workspace_id = c.workspace_id)))
+  WHERE ((c.id = traveler_messages.conversation_id) AND (e.supabase_user_id = auth.uid())))))`
+- **traveler_messages_update** — `UPDATE`（roles: {public}）
+    - USING: `(sender_id = auth.uid())`
+
+**Triggers**
+
+- `trigger_update_conversation_last_message` — AFTER INSERT
+
+---
+
+### `traveler_profiles`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | - |
+| `full_name` | text | YES | - |
+| `display_name` | text | YES | - |
+| `username` | text | YES | - |
+| `avatar_url` | text | YES | - |
+| `phone` | text | YES | - |
+| `email` | text | YES | - |
+| `bio` | text | YES | - |
+| `location` | text | YES | - |
+| `id_number` | text | YES | - |
+| `id_verified_at` | timestamp with time zone | YES | - |
+| `user_type` | text | YES | 'traveler'::text |
+| `is_founding_member` | boolean | YES | false |
+| `member_number` | integer | YES | - |
+| `member_level` | text | YES | 'basic'::text |
+| `is_profile_complete` | boolean | YES | false |
+| `active_group_count` | integer | YES | 0 |
+| `customer_id` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `last_synced_at` | timestamp with time zone | YES | - |
+| `sync_version` | integer | YES | 0 |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **traveler_profiles_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(id = auth.uid())`
+- **traveler_profiles_update** — `UPDATE`（roles: {public}）
+    - USING: `(id = auth.uid())`
+
+**Triggers**
+
+- `trigger_build_cache_on_id_bind` — AFTER UPDATE
+- `trigger_check_member_upgrade` — BEFORE UPDATE
+- `trigger_traveler_profiles_updated_at` — BEFORE UPDATE
+
+---
+
+### `traveler_settlements`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `trip_id` | uuid | YES | - |
+| `split_group_id` | uuid | YES | - |
+| `from_user` | uuid | NO | - |
+| `to_user` | uuid | NO | - |
+| `amount` | numeric | NO | - |
+| `currency` | text | YES | 'TWD'::text |
+| `status` | text | YES | 'pending'::text |
+| `note` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `completed_at` | timestamp with time zone | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `from_user` | `traveler_profiles.id` | NO ACTION | NO ACTION |
+| `split_group_id` | `traveler_split_groups.id` | RESTRICT | NO ACTION |
+| `to_user` | `traveler_profiles.id` | NO ACTION | NO ACTION |
+| `trip_id` | `traveler_trips.id` | RESTRICT | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **traveler_settlements_all** — `ALL`（roles: {public}）
+    - USING: `((from_user = auth.uid()) OR (to_user = auth.uid()))`
+
+---
+
+### `traveler_split_group_members`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `group_id` | uuid | NO | - |
+| `user_id` | uuid | YES | - |
+| `role` | text | YES | 'member'::text |
+| `display_name` | text | YES | - |
+| `nickname` | text | YES | - |
+| `is_virtual` | boolean | YES | false |
+| `joined_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `group_id` | `traveler_split_groups.id` | RESTRICT | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **traveler_split_group_members_all** — `ALL`（roles: {public}）
+    - USING: `((user_id = auth.uid()) OR (EXISTS ( SELECT 1
+   FROM traveler_split_groups
+  WHERE ((traveler_split_groups.id = traveler_split_group_members.group_id) AND (traveler_split_groups.created_by = auth.uid())))))`
+
+---
+
+### `traveler_split_groups`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `name` | text | NO | - |
+| `description` | text | YES | - |
+| `cover_image` | text | YES | - |
+| `trip_id` | uuid | YES | - |
+| `default_currency` | text | YES | 'TWD'::text |
+| `created_by` | uuid | NO | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `created_by` | `traveler_profiles.id` | CASCADE | NO ACTION |
+| `trip_id` | `traveler_trips.id` | SET NULL | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **traveler_split_groups_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(created_by = auth.uid())`
+- **traveler_split_groups_select** — `SELECT`（roles: {public}）
+    - USING: `((created_by = auth.uid()) OR (EXISTS ( SELECT 1
+   FROM traveler_split_group_members
+  WHERE ((traveler_split_group_members.group_id = traveler_split_groups.id) AND (traveler_split_group_members.user_id = auth.uid())))))`
+- **traveler_split_groups_update** — `UPDATE`（roles: {public}）
+    - USING: `(created_by = auth.uid())`
+
+---
+
+### `traveler_tour_cache`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `traveler_id` | uuid | NO | - |
+| `id_number` | text | NO | - |
+| `tour_id` | text | NO | - |
+| `tour_code` | text | NO | - |
+| `tour_name` | text | YES | - |
+| `departure_date` | date | YES | - |
+| `return_date` | date | YES | - |
+| `tour_status` | text | YES | - |
+| `location` | text | YES | - |
+| `order_id` | text | NO | - |
+| `order_code` | text | YES | - |
+| `order_status` | text | YES | - |
+| `order_member_id` | text | NO | - |
+| `chinese_name` | text | YES | - |
+| `english_name` | text | YES | - |
+| `member_type` | text | YES | - |
+| `identity` | text | YES | - |
+| `outbound_flight` | jsonb | YES | - |
+| `return_flight` | jsonb | YES | - |
+| `itinerary_id` | text | YES | - |
+| `itinerary_title` | text | YES | - |
+| `itinerary_updated_at` | timestamp with time zone | YES | - |
+| `cached_at` | timestamp with time zone | YES | now() |
+| `source_updated_at` | timestamp with time zone | YES | - |
+| `needs_refresh` | boolean | YES | false |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `traveler_id` | `traveler_profiles.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **traveler_tour_cache_delete** — `DELETE`（roles: {public}）
+    - USING: `true`
+- **traveler_tour_cache_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `true`
+- **traveler_tour_cache_select** — `SELECT`（roles: {public}）
+    - USING: `true`
+- **traveler_tour_cache_update** — `UPDATE`（roles: {public}）
+    - USING: `true`
+
+---
+
+### `traveler_trip_accommodations`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `trip_id` | uuid | NO | - |
+| `name` | text | NO | - |
+| `address` | text | YES | - |
+| `phone` | text | YES | - |
+| `check_in_date` | date | YES | - |
+| `check_out_date` | date | YES | - |
+| `room_type` | text | YES | - |
+| `room_count` | integer | YES | 1 |
+| `confirmation_number` | text | YES | - |
+| `booking_platform` | text | YES | - |
+| `latitude` | double precision | YES | - |
+| `longitude` | double precision | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `trip_id` | `traveler_trips.id` | RESTRICT | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **traveler_trip_accommodations_all** — `ALL`（roles: {public}）
+    - USING: `(EXISTS ( SELECT 1
+   FROM traveler_trips
+  WHERE ((traveler_trips.id = traveler_trip_accommodations.trip_id) AND (traveler_trips.created_by = auth.uid()))))`
+    - WITH CHECK: `(EXISTS ( SELECT 1
+   FROM traveler_trips
+  WHERE ((traveler_trips.id = traveler_trip_accommodations.trip_id) AND (traveler_trips.created_by = auth.uid()))))`
+
+---
+
+### `traveler_trip_briefings`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `trip_id` | uuid | NO | - |
+| `title` | text | NO | - |
+| `content` | text | YES | - |
+| `category` | text | YES | - |
+| `sort_order` | integer | YES | 0 |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `trip_id` | `traveler_trips.id` | RESTRICT | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **traveler_trip_briefings_all** — `ALL`（roles: {public}）
+    - USING: `(EXISTS ( SELECT 1
+   FROM traveler_trips t
+  WHERE ((t.id = traveler_trip_briefings.trip_id) AND ((t.created_by = auth.uid()) OR (EXISTS ( SELECT 1
+           FROM traveler_trip_members m
+          WHERE ((m.trip_id = t.id) AND (m.user_id = auth.uid()))))))))`
+
+---
+
+### `traveler_trip_flights`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `trip_id` | uuid | NO | - |
+| `flight_type` | text | YES | 'outbound'::text |
+| `airline` | text | YES | - |
+| `flight_no` | text | YES | - |
+| `departure_date` | date | YES | - |
+| `departure_time` | time without time zone | YES | - |
+| `departure_airport` | text | YES | - |
+| `departure_airport_code` | text | YES | - |
+| `arrival_date` | date | YES | - |
+| `arrival_time` | time without time zone | YES | - |
+| `arrival_airport` | text | YES | - |
+| `arrival_airport_code` | text | YES | - |
+| `pnr` | text | YES | - |
+| `ticket_number` | text | YES | - |
+| `cabin_class` | text | YES | - |
+| `meeting_time` | time without time zone | YES | - |
+| `meeting_location` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `trip_id` | `traveler_trips.id` | RESTRICT | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **traveler_trip_flights_all** — `ALL`（roles: {public}）
+    - USING: `(EXISTS ( SELECT 1
+   FROM traveler_trips
+  WHERE ((traveler_trips.id = traveler_trip_flights.trip_id) AND (traveler_trips.created_by = auth.uid()))))`
+    - WITH CHECK: `(EXISTS ( SELECT 1
+   FROM traveler_trips
+  WHERE ((traveler_trips.id = traveler_trip_flights.trip_id) AND (traveler_trips.created_by = auth.uid()))))`
+
+---
+
+### `traveler_trip_invitations`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `trip_id` | uuid | NO | - |
+| `inviter_id` | uuid | NO | - |
+| `invitee_id` | uuid | YES | - |
+| `invite_code` | text | NO | - |
+| `status` | text | YES | 'pending'::text |
+| `role` | text | YES | 'member'::text |
+| `expires_at` | timestamp with time zone | YES | (now() + '7 days'::interval) |
+| `created_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `invitee_id` | `traveler_profiles.id` | CASCADE | NO ACTION |
+| `inviter_id` | `traveler_profiles.id` | CASCADE | NO ACTION |
+| `trip_id` | `traveler_trips.id` | RESTRICT | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **traveler_trip_invitations_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `((inviter_id = auth.uid()) AND (EXISTS ( SELECT 1
+   FROM traveler_trips
+  WHERE ((traveler_trips.id = traveler_trip_invitations.trip_id) AND (traveler_trips.created_by = auth.uid())))))`
+- **traveler_trip_invitations_select** — `SELECT`（roles: {public}）
+    - USING: `((invitee_id = auth.uid()) OR (inviter_id = auth.uid()) OR (EXISTS ( SELECT 1
+   FROM traveler_trips
+  WHERE ((traveler_trips.id = traveler_trip_invitations.trip_id) AND (traveler_trips.created_by = auth.uid())))))`
+- **traveler_trip_invitations_update** — `UPDATE`（roles: {public}）
+    - USING: `(invitee_id = auth.uid())`
+
+---
+
+### `traveler_trip_itinerary_items`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `trip_id` | uuid | NO | - |
+| `day_number` | integer | YES | - |
+| `item_date` | date | YES | - |
+| `start_time` | time without time zone | YES | - |
+| `end_time` | time without time zone | YES | - |
+| `title` | text | NO | - |
+| `description` | text | YES | - |
+| `category` | text | YES | - |
+| `icon` | text | YES | - |
+| `location_name` | text | YES | - |
+| `location_address` | text | YES | - |
+| `location_url` | text | YES | - |
+| `latitude` | numeric | YES | - |
+| `longitude` | numeric | YES | - |
+| `currency` | text | YES | 'TWD'::text |
+| `estimated_cost` | numeric | YES | - |
+| `notes` | text | YES | - |
+| `sort_order` | integer | YES | 0 |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `trip_id` | `traveler_trips.id` | RESTRICT | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **traveler_trip_itinerary_items_all** — `ALL`（roles: {public}）
+    - USING: `(EXISTS ( SELECT 1
+   FROM traveler_trips t
+  WHERE ((t.id = traveler_trip_itinerary_items.trip_id) AND ((t.created_by = auth.uid()) OR (EXISTS ( SELECT 1
+           FROM traveler_trip_members m
+          WHERE ((m.trip_id = t.id) AND (m.user_id = auth.uid()))))))))`
+
+---
+
+### `traveler_trip_members`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `trip_id` | uuid | NO | - |
+| `user_id` | uuid | NO | - |
+| `role` | text | YES | 'member'::text |
+| `nickname` | text | YES | - |
+| `joined_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `trip_id` | `traveler_trips.id` | RESTRICT | NO ACTION |
+| `user_id` | `traveler_profiles.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **traveler_trip_members_delete** — `DELETE`（roles: {public}）
+    - USING: `(EXISTS ( SELECT 1
+   FROM traveler_trips
+  WHERE ((traveler_trips.id = traveler_trip_members.trip_id) AND (traveler_trips.created_by = auth.uid()))))`
+- **traveler_trip_members_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(EXISTS ( SELECT 1
+   FROM traveler_trips
+  WHERE ((traveler_trips.id = traveler_trip_members.trip_id) AND (traveler_trips.created_by = auth.uid()))))`
+- **traveler_trip_members_select** — `SELECT`（roles: {public}）
+    - USING: `((user_id = auth.uid()) OR (EXISTS ( SELECT 1
+   FROM traveler_trips
+  WHERE ((traveler_trips.id = traveler_trip_members.trip_id) AND (traveler_trips.created_by = auth.uid())))))`
+
+---
+
+### `traveler_trips`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `title` | text | NO | - |
+| `description` | text | YES | - |
+| `cover_image` | text | YES | - |
+| `start_date` | date | YES | - |
+| `end_date` | date | YES | - |
+| `status` | text | YES | 'planning'::text |
+| `default_currency` | text | YES | 'TWD'::text |
+| `created_by` | uuid | NO | - |
+| `erp_tour_id` | text | YES | - |
+| `tour_code` | text | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `trip_source` | text | YES | 'self_created'::text |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `created_by` | `traveler_profiles.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **traveler_trips_delete** — `DELETE`（roles: {public}）
+    - USING: `(created_by = auth.uid())`
+- **traveler_trips_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(created_by = auth.uid())`
+- **traveler_trips_select** — `SELECT`（roles: {public}）
+    - USING: `((created_by = auth.uid()) OR (EXISTS ( SELECT 1
+   FROM traveler_trip_members
+  WHERE ((traveler_trip_members.trip_id = traveler_trips.id) AND (traveler_trip_members.user_id = auth.uid())))))`
+- **traveler_trips_update** — `UPDATE`（roles: {public}）
+    - USING: `(created_by = auth.uid())`
+
+---
+
+### `trip_members`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | uuid_generate_v4() |
+| `assigned_itinerary_id` | uuid | NO | - |
+| `customer_id` | text | YES | - |
+| `app_user_id` | text | YES | - |
+| `name` | text | NO | - |
+| `email` | text | YES | - |
+| `phone` | text | YES | - |
+| `role` | text | NO | 'member'::text |
+| `status` | text | NO | 'active'::text |
+| `invited_by` | text | YES | - |
+| `created_at` | timestamp with time zone | NO | now() |
+| `updated_at` | timestamp with time zone | NO | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `assigned_itinerary_id` | `customer_assigned_itineraries.id` | RESTRICT | NO ACTION |
+| `customer_id` | `customers.id` | RESTRICT | NO ACTION |
+| `invited_by` | `customers.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **trip_members_delete** — `DELETE`（roles: {public}）
+    - USING: `true`
+- **trip_members_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `true`
+- **trip_members_select** — `SELECT`（roles: {public}）
+    - USING: `true`
+- **trip_members_update** — `UPDATE`（roles: {public}）
+    - USING: `true`
+
+**Triggers**
+
+- `update_trip_members_updated_at` — BEFORE UPDATE
+
+---
+
+### `trip_members_v2`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `assigned_itinerary_id` | uuid | NO | - |
+| `customer_id` | text | NO | - |
+| `role` | text | NO | 'member'::text |
+| `joined_at` | timestamp with time zone | NO | now() |
+| `visa_status` | text | YES | 'pending'::text |
+| `visa_country` | text | YES | - |
+| `visa_type` | text | YES | - |
+| `visa_application_date` | date | YES | - |
+| `visa_expiry_date` | date | YES | - |
+| `visa_notes` | text | YES | - |
+| `esim_url` | text | YES | - |
+| `esim_provider` | text | YES | - |
+| `esim_data_plan` | text | YES | - |
+| `esim_activation_date` | date | YES | - |
+| `esim_expiry_date` | date | YES | - |
+| `payment_status` | text | YES | 'pending'::text |
+| `payment_total_amount` | integer | YES | 0 |
+| `payment_paid_amount` | integer | YES | 0 |
+| `payment_currency` | text | YES | 'TWD'::text |
+| `payment_deposit_amount` | integer | YES | - |
+| `payment_deposit_paid_at` | timestamp with time zone | YES | - |
+| `payment_balance_due_date` | date | YES | - |
+| `payment_records` | jsonb | YES | '[]'::jsonb |
+| `room_assignments` | jsonb | YES | '[]'::jsonb |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `assigned_itinerary_id` | `assigned_itineraries.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **trip_members_v2_delete** — `DELETE`（roles: {public}）
+    - USING: `true`
+- **trip_members_v2_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `true`
+- **trip_members_v2_select** — `SELECT`（roles: {public}）
+    - USING: `true`
+- **trip_members_v2_update** — `UPDATE`（roles: {public}）
+    - USING: `true`
+
+---
+
+### `usa_esta`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `tour_id` | text | YES | - |
+| `order_id` | text | YES | - |
+| `customer_id` | text | YES | - |
+| `application_code` | text | NO | - |
+| `applicant_name_zh` | text | NO | - |
+| `passport_validity_over_2_years` | boolean | NO | - |
+| `birth_city` | text | YES | - |
+| `birth_country` | text | YES | - |
+| `has_other_citizenship` | boolean | YES | false |
+| `other_citizenship_country` | text | YES | - |
+| `other_citizenship_method` | text | YES | - |
+| `other_citizenship_method_detail` | text | YES | - |
+| `had_other_citizenship` | boolean | YES | false |
+| `had_other_citizenship_country` | text | YES | - |
+| `had_citizenship_acquired_date` | date | YES | - |
+| `had_citizenship_renounced_date` | date | YES | - |
+| `has_other_names` | boolean | YES | false |
+| `other_name_surname_zh` | text | YES | - |
+| `other_name_surname_en` | text | YES | - |
+| `other_name_firstname_zh` | text | YES | - |
+| `other_name_firstname_en` | text | YES | - |
+| `has_other_passport_or_id` | boolean | YES | false |
+| `other_document_type` | text | YES | - |
+| `other_document_country` | text | YES | - |
+| `other_document_number` | text | YES | - |
+| `other_document_expiry_year` | integer | YES | - |
+| `contact_address_zh` | text | YES | - |
+| `contact_address_en` | text | YES | - |
+| `contact_phone` | text | YES | - |
+| `provides_social_media` | boolean | YES | false |
+| `no_social_media` | boolean | YES | false |
+| `social_media_platform_1` | text | YES | - |
+| `social_media_id_1` | text | YES | - |
+| `social_media_platform_2` | text | YES | - |
+| `social_media_id_2` | text | YES | - |
+| `is_cbp_global_entry_member` | boolean | YES | false |
+| `cbp_membership_number` | text | YES | - |
+| `father_surname_zh` | text | YES | - |
+| `father_surname_en` | text | YES | - |
+| `father_firstname_zh` | text | YES | - |
+| `father_firstname_en` | text | YES | - |
+| `mother_surname_zh` | text | YES | - |
+| `mother_surname_en` | text | YES | - |
+| `mother_firstname_zh` | text | YES | - |
+| `mother_firstname_en` | text | YES | - |
+| `job_title_zh` | text | YES | - |
+| `job_title_en` | text | YES | - |
+| `employment_status` | text | YES | - |
+| `company_name_zh` | text | YES | - |
+| `company_name_en` | text | YES | - |
+| `company_address_zh` | text | YES | - |
+| `company_address_en` | text | YES | - |
+| `company_phone` | text | YES | - |
+| `is_transit_to_another_country` | boolean | YES | false |
+| `transit_destination_country` | text | YES | - |
+| `us_contact_name_en` | text | YES | - |
+| `us_contact_address_en` | text | YES | - |
+| `us_contact_city_en` | text | YES | - |
+| `us_contact_state_en` | text | YES | - |
+| `us_contact_phone` | text | YES | - |
+| `us_stay_address_en` | text | YES | - |
+| `us_stay_city_en` | text | YES | - |
+| `us_stay_state_en` | text | YES | - |
+| `emergency_contact_surname_zh` | text | YES | - |
+| `emergency_contact_surname_en` | text | YES | - |
+| `emergency_contact_firstname_zh` | text | YES | - |
+| `emergency_contact_firstname_en` | text | YES | - |
+| `emergency_contact_country_code` | text | YES | - |
+| `emergency_contact_phone` | text | YES | - |
+| `emergency_contact_email` | text | YES | - |
+| `q1_has_health_issues` | boolean | YES | false |
+| `q2_has_criminal_record` | boolean | YES | false |
+| `q3_has_drug_violation` | boolean | YES | false |
+| `q4_involved_in_terrorism` | boolean | YES | false |
+| `q5_committed_fraud` | boolean | YES | false |
+| `q6_illegal_employment` | boolean | YES | false |
+| `q7_visa_denied` | boolean | YES | false |
+| `q7_denied_when` | text | YES | - |
+| `q7_denied_where` | text | YES | - |
+| `q8_overstayed` | boolean | YES | false |
+| `q9_visited_restricted_countries` | boolean | YES | false |
+| `q9_countries_visited` | ARRAY | YES | - |
+| `q9_visit_start_year` | integer | YES | - |
+| `q9_visit_start_month` | integer | YES | - |
+| `q9_visit_end_year` | integer | YES | - |
+| `q9_visit_end_month` | integer | YES | - |
+| `q9_visit_purpose` | text | YES | - |
+| `q9_visit_purpose_detail` | text | YES | - |
+| `status` | text | YES | 'draft'::text |
+| `application_number` | text | YES | - |
+| `esta_validity_start` | date | YES | - |
+| `esta_validity_end` | date | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `created_by` | uuid | YES | - |
+| `updated_by` | uuid | YES | - |
+| `deleted_at` | timestamp with time zone | YES | - |
+| `deleted_by` | uuid | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `created_by` | `employees.id` | SET NULL | NO ACTION |
+| `customer_id` | `customers.id` | SET NULL | NO ACTION |
+| `deleted_by` | `employees.id` | SET NULL | NO ACTION |
+| `order_id` | `orders.id` | SET NULL | NO ACTION |
+| `tour_id` | `tours.id` | SET NULL | NO ACTION |
+| `updated_by` | `employees.id` | SET NULL | NO ACTION |
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **usa_esta_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **usa_esta_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **usa_esta_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **usa_esta_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+**Triggers**
+
+- `set_usa_esta_updated_at` — BEFORE UPDATE
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+
+---
+
+### `user_badges`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `user_id` | uuid | NO | - |
+| `badge_id` | uuid | NO | - |
+| `awarded_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `badge_id` | `badges.id` | CASCADE | NO ACTION |
+| `user_id` | `profiles.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **user_badges_authenticated** — `ALL`（roles: {public}）
+    - USING: `(auth.role() = 'authenticated'::text)`
+
+---
+
+### `user_points_transactions`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | uuid_generate_v4() |
+| `user_id` | text | NO | - |
+| `points_change` | integer | NO | - |
+| `transaction_type` | text | NO | - |
+| `description` | text | YES | - |
+| `reference_id` | uuid | YES | - |
+| `created_at` | timestamp with time zone | NO | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `user_id` | `customers.id` | RESTRICT | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **user_points_transactions_delete** — `DELETE`（roles: {public}）
+    - USING: `true`
+- **user_points_transactions_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `true`
+- **user_points_transactions_select** — `SELECT`（roles: {public}）
+    - USING: `true`
+- **user_points_transactions_update** — `UPDATE`（roles: {public}）
+    - USING: `true`
+
+**Triggers**
+
+- `trigger_update_customer_points` — AFTER DELETE
+- `trigger_update_customer_points` — AFTER INSERT
+
+---
+
+### `user_preferences`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `user_id` | uuid | NO | - |
+| `preference_key` | text | NO | - |
+| `preference_value` | jsonb | NO | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `user_id` | `employees.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **user_preferences_all** — `ALL`（roles: {public}）
+    - USING: `(user_id = auth.uid())`
+    - WITH CHECK: `(user_id = auth.uid())`
+
+---
+
+### `user_roles`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `user_id` | uuid | NO | - |
+| `role` | text | NO | - |
+| `permissions` | ARRAY | YES | '{}'::text[] |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **user_roles_authenticated** — `ALL`（roles: {public}）
+    - USING: `(auth.role() = 'authenticated'::text)`
+
+---
+
+### `vendor_costs`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `vendor_name` | text | NO | - |
+| `visa_type` | text | NO | - |
+| `cost` | numeric | NO | 0 |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **vendor_costs_delete** — `DELETE`（roles: {authenticated}）
+    - USING: `true`
+- **vendor_costs_insert** — `INSERT`（roles: {authenticated}）
+    - WITH CHECK: `true`
+- **vendor_costs_select** — `SELECT`（roles: {authenticated}）
+    - USING: `true`
+- **vendor_costs_update** — `UPDATE`（roles: {authenticated}）
+    - USING: `true`
+
+---
+
+### `visas`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `applicant_name` | character varying | NO | - |
+| `contact_person` | character varying | NO | - |
+| `contact_phone` | character varying | NO | - |
+| `visa_type` | character varying | NO | - |
+| `country` | character varying | NO | - |
+| `status` | character varying | YES | '待送件'::character varying |
+| `submission_date` | date | YES | - |
+| `received_date` | date | YES | - |
+| `pickup_date` | date | YES | - |
+| `order_id` | text | NO | - |
+| `order_number` | character varying | NO | - |
+| `tour_id` | text | NO | - |
+| `code` | character varying | NO | - |
+| `fee` | numeric | YES | 0 |
+| `cost` | numeric | YES | 0 |
+| `notes` | text | YES | - |
+| `created_by` | text | YES | - |
+| `_needs_sync` | boolean | YES | false |
+| `_synced_at` | timestamp with time zone | YES | - |
+| `is_active` | boolean | YES | true |
+| `workspace_id` | uuid | NO | - |
+| `updated_by` | uuid | YES | - |
+| `vendor` | text | YES | - |
+| `documents_returned_date` | date | YES | - |
+| `expected_issue_date` | date | YES | - |
+| `actual_submission_date` | date | YES | - |
+| `is_urgent` | boolean | YES | false |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `tour_id` | `tours.id` | RESTRICT | NO ACTION |
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **visas_delete** — `DELETE`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **visas_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(workspace_id = get_current_user_workspace())`
+- **visas_select** — `SELECT`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **visas_update** — `UPDATE`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+- `update_visas_updated_at` — BEFORE UPDATE
+
+---
+
+### `website_day_activities`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `day_id` | uuid | YES | - |
+| `time` | text | NO | - |
+| `title` | text | NO | - |
+| `description` | text | YES | - |
+| `image_url` | text | YES | - |
+| `sort_order` | integer | YES | 0 |
+| `created_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `day_id` | `website_itinerary_days.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **website_day_activities_delete** — `DELETE`（roles: {public}）
+    - USING: `true`
+- **website_day_activities_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `true`
+- **website_day_activities_select** — `SELECT`（roles: {public}）
+    - USING: `true`
+- **website_day_activities_update** — `UPDATE`（roles: {public}）
+    - USING: `true`
+
+---
+
+### `website_destinations`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `name` | text | NO | - |
+| `country` | text | YES | - |
+| `image_url` | text | YES | - |
+| `description` | text | YES | - |
+| `sort_order` | integer | YES | 0 |
+| `is_active` | boolean | YES | true |
+| `created_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **website_destinations_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **website_destinations_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **website_destinations_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **website_destinations_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+---
+
+### `website_footer_links`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `category` | text | NO | - |
+| `label` | text | NO | - |
+| `url` | text | YES | - |
+| `sort_order` | integer | YES | 0 |
+| `is_active` | boolean | YES | true |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **website_footer_links_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **website_footer_links_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **website_footer_links_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **website_footer_links_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+---
+
+### `website_hero_content`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `top_text` | text | YES | - |
+| `main_title` | text | NO | - |
+| `sub_title` | text | YES | - |
+| `description` | text | YES | - |
+| `cta_primary_text` | text | YES | - |
+| `cta_primary_link` | text | YES | - |
+| `cta_secondary_text` | text | YES | - |
+| `cta_secondary_link` | text | YES | - |
+| `is_active` | boolean | YES | true |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **website_hero_content_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **website_hero_content_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **website_hero_content_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **website_hero_content_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+---
+
+### `website_hero_videos`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `label` | text | NO | - |
+| `video_url` | text | NO | - |
+| `poster_url` | text | YES | - |
+| `sort_order` | integer | YES | 0 |
+| `is_active` | boolean | YES | true |
+| `created_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **website_hero_videos_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **website_hero_videos_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **website_hero_videos_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **website_hero_videos_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+---
+
+### `website_itineraries`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `title` | text | NO | - |
+| `subtitle` | text | YES | - |
+| `slug` | text | NO | - |
+| `hero_image_url` | text | YES | - |
+| `duration` | text | YES | - |
+| `cities` | text | YES | - |
+| `meals_included` | text | YES | - |
+| `highlights_summary` | text | YES | - |
+| `price_from` | integer | YES | - |
+| `is_published` | boolean | YES | false |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **website_itineraries_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **website_itineraries_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **website_itineraries_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **website_itineraries_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+---
+
+### `website_itinerary_days`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `itinerary_id` | uuid | YES | - |
+| `day_number` | integer | NO | - |
+| `title` | text | NO | - |
+| `subtitle` | text | YES | - |
+| `hero_image_url` | text | YES | - |
+| `hero_style` | text | YES | 'full'::text |
+| `sort_order` | integer | YES | 0 |
+| `created_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `itinerary_id` | `website_itineraries.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **website_itinerary_days_delete** — `DELETE`（roles: {public}）
+    - USING: `true`
+- **website_itinerary_days_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `true`
+- **website_itinerary_days_select** — `SELECT`（roles: {public}）
+    - USING: `true`
+- **website_itinerary_days_update** — `UPDATE`（roles: {public}）
+    - USING: `true`
+
+---
+
+### `website_settings`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `key` | text | NO | - |
+| `value` | jsonb | NO | '{}'::jsonb |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **website_settings_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **website_settings_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **website_settings_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **website_settings_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+---
+
+### `website_spot_highlights`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `day_id` | uuid | YES | - |
+| `name` | text | NO | - |
+| `description` | text | YES | - |
+| `image_url` | text | YES | - |
+| `sort_order` | integer | YES | 0 |
+| `created_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `day_id` | `website_itinerary_days.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **website_spot_highlights_delete** — `DELETE`（roles: {public}）
+    - USING: `true`
+- **website_spot_highlights_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `true`
+- **website_spot_highlights_select** — `SELECT`（roles: {public}）
+    - USING: `true`
+- **website_spot_highlights_update** — `UPDATE`（roles: {public}）
+    - USING: `true`
+
+---
+
+### `website_story_sections`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `tag` | text | YES | - |
+| `title` | text | NO | - |
+| `description` | text | YES | - |
+| `image_url` | text | YES | - |
+| `cta_text` | text | YES | - |
+| `cta_link` | text | YES | - |
+| `sort_order` | integer | YES | 0 |
+| `is_active` | boolean | YES | true |
+| `created_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **website_story_sections_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **website_story_sections_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **website_story_sections_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **website_story_sections_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+---
+
+### `wishlist_template_items`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `template_id` | uuid | NO | - |
+| `attraction_id` | uuid | YES | - |
+| `name` | character varying | NO | - |
+| `image_url` | text | YES | - |
+| `description` | text | YES | - |
+| `region` | character varying | YES | - |
+| `category` | character varying | YES | - |
+| `display_order` | integer | YES | 0 |
+| `created_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `template_id` | `wishlist_templates.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **Public can view template items** — `SELECT`（roles: {public}）
+    - USING: `(EXISTS ( SELECT 1
+   FROM wishlist_templates t
+  WHERE ((t.id = wishlist_template_items.template_id) AND ((t.status)::text = 'published'::text))))`
+- **Service role full access items** — `ALL`（roles: {public}）
+    - USING: `true`
+    - WITH CHECK: `true`
+
+---
+
+### `wishlist_templates`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `name` | character varying | NO | - |
+| `slug` | character varying | NO | - |
+| `cover_image` | text | YES | - |
+| `description` | text | YES | - |
+| `status` | character varying | YES | 'draft'::character varying |
+| `created_by` | uuid | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `created_by` | `employees.id` | NO ACTION | NO ACTION |
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **Public can view published templates** — `SELECT`（roles: {public}）
+    - USING: `((status)::text = 'published'::text)`
+- **Service role full access templates** — `ALL`（roles: {public}）
+    - USING: `true`
+    - WITH CHECK: `true`
+- **wishlist_templates_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **wishlist_templates_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **wishlist_templates_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **wishlist_templates_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+---
+
+### `workload_summary`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | integer | NO | nextval('workload_summary_id_seq'::regclass) |
+| `person` | text | NO | - |
+| `total_tasks` | integer | YES | 0 |
+| `urgent_tasks` | integer | YES | 0 |
+| `in_progress_tasks` | integer | YES | 0 |
+| `completed_tasks` | integer | YES | 0 |
+| `workload_level` | text | YES | - |
+| `updated_at` | timestamp without time zone | YES | now() |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **workload_summary_delete** — `DELETE`（roles: {public}）
+    - USING: `true`
+- **workload_summary_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `true`
+- **workload_summary_select** — `SELECT`（roles: {public}）
+    - USING: `true`
+- **workload_summary_update** — `UPDATE`（roles: {public}）
+    - USING: `true`
+
+**Triggers**
+
+- `update_workload_updated_at` — BEFORE UPDATE
+
+---
+
+### `workspace_attendance_settings`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `workspace_id` | uuid | NO | - |
+| `work_start_time` | time without time zone | NO | '09:00:00'::time without time zone |
+| `work_end_time` | time without time zone | NO | '18:00:00'::time without time zone |
+| `late_threshold_minutes` | integer | NO | 0 |
+| `early_leave_threshold_minutes` | integer | NO | 0 |
+| `standard_work_hours` | numeric | NO | 8.00 |
+| `allow_missed_clock_request` | boolean | NO | true |
+| `require_gps` | boolean | NO | false |
+| `gps_latitude` | numeric | YES | - |
+| `gps_longitude` | numeric | YES | - |
+| `gps_radius_meters` | integer | YES | 500 |
+| `enable_line_clock` | boolean | NO | true |
+| `enable_web_clock` | boolean | NO | true |
+| `created_at` | timestamp with time zone | NO | now() |
+| `updated_at` | timestamp with time zone | NO | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **workspace_attendance_settings_all** — `ALL`（roles: {public}）
+    - USING: `(workspace_id IN ( SELECT employees.workspace_id
+   FROM employees
+  WHERE (employees.id = auth.uid())))`
+- **workspace_attendance_settings_select** — `SELECT`（roles: {public}）
+    - USING: `(workspace_id IN ( SELECT employees.workspace_id
+   FROM employees
+  WHERE (employees.id = auth.uid())))`
+- **workspace_attendance_settings_service** — `ALL`（roles: {public}）
+    - USING: `true`
+    - WITH CHECK: `true`
+
+---
+
+### `workspace_bonus_defaults`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `type` | smallint | NO | - |
+| `bonus` | numeric | NO | 0 |
+| `bonus_type` | smallint | NO | 0 |
+| `employee_id` | uuid | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `employee_id` | `employees.id` | NO ACTION | NO ACTION |
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **authenticated_workspace_bonus_defaults** — `ALL`（roles: {authenticated}）
+    - USING: `true`
+    - WITH CHECK: `true`
+- **workspace_bonus_defaults_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **workspace_bonus_defaults_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **workspace_bonus_defaults_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **workspace_bonus_defaults_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+---
+
+### `workspace_countries`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `workspace_id` | uuid | NO | - |
+| `country_code` | text | NO | - |
+| `is_enabled` | boolean | NO | true |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `country_code` | `ref_countries.code` | RESTRICT | NO ACTION |
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **workspace_countries_delete** — `DELETE`（roles: {authenticated}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **workspace_countries_insert** — `INSERT`（roles: {authenticated}）
+    - WITH CHECK: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **workspace_countries_select** — `SELECT`（roles: {authenticated}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **workspace_countries_update** — `UPDATE`（roles: {authenticated}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+    - WITH CHECK: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+---
+
+### `workspace_features`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | YES | - |
+| `feature_code` | text | NO | - |
+| `enabled` | boolean | YES | false |
+| `enabled_at` | timestamp with time zone | YES | - |
+| `enabled_by` | uuid | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **workspace_features_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **workspace_features_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **workspace_features_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **workspace_features_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+---
+
+### `workspace_items`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `owner` | text | NO | - |
+| `title` | text | NO | - |
+| `description` | text | YES | - |
+| `item_type` | text | NO | - |
+| `content` | jsonb | YES | '{}'::jsonb |
+| `tags` | ARRAY | YES | '{}'::text[] |
+| `priority` | integer | YES | - |
+| `is_pinned` | boolean | YES | false |
+| `deleted_at` | timestamp with time zone | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **workspace_items_authenticated** — `ALL`（roles: {public}）
+    - USING: `(auth.role() = 'authenticated'::text)`
+
+**Triggers**
+
+- `update_workspace_items_updated_at` — BEFORE UPDATE
+
+---
+
+### `workspace_job_roles`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `name` | text | NO | - |
+| `sort_order` | integer | NO | 0 |
+| `created_at` | timestamp with time zone | NO | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **workspace_job_roles_tenant_delete** — `DELETE`（roles: {public}）
+    - USING: `(workspace_id = ( SELECT employees.workspace_id
+   FROM employees
+  WHERE (employees.user_id = auth.uid())
+ LIMIT 1))`
+- **workspace_job_roles_tenant_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(workspace_id = ( SELECT employees.workspace_id
+   FROM employees
+  WHERE (employees.user_id = auth.uid())
+ LIMIT 1))`
+- **workspace_job_roles_tenant_select** — `SELECT`（roles: {public}）
+    - USING: `(workspace_id = ( SELECT employees.workspace_id
+   FROM employees
+  WHERE (employees.user_id = auth.uid())
+ LIMIT 1))`
+- **workspace_job_roles_tenant_update** — `UPDATE`（roles: {public}）
+    - USING: `(workspace_id = ( SELECT employees.workspace_id
+   FROM employees
+  WHERE (employees.user_id = auth.uid())
+ LIMIT 1))`
+    - WITH CHECK: `(workspace_id = ( SELECT employees.workspace_id
+   FROM employees
+  WHERE (employees.user_id = auth.uid())
+ LIMIT 1))`
+
+---
+
+### `workspace_line_config`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | YES | - |
+| `channel_access_token` | text | YES | - |
+| `channel_secret` | text | YES | - |
+| `bot_basic_id` | text | YES | - |
+| `login_channel_id` | text | YES | - |
+| `login_channel_secret` | text | YES | - |
+| `webhook_url` | text | YES | - |
+| `is_connected` | boolean | YES | false |
+| `connected_at` | timestamp without time zone | YES | - |
+| `bot_display_name` | text | YES | - |
+| `bot_user_id` | text | YES | - |
+| `setup_step` | integer | YES | 0 |
+| `created_at` | timestamp without time zone | YES | now() |
+| `updated_at` | timestamp without time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `workspace_id` | `workspaces.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **workspace_line_config_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **workspace_line_config_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(workspace_id = get_current_user_workspace())`
+- **workspace_line_config_select** — `SELECT`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **workspace_line_config_update** — `UPDATE`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+
+---
+
+### `workspace_meta_config`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `workspace_id` | uuid | NO | - |
+| `verify_token` | text | YES | - |
+| `page_access_token` | text | YES | - |
+| `app_secret` | text | YES | - |
+| `app_id` | text | YES | - |
+| `is_connected` | boolean | NO | false |
+| `setup_step` | integer | NO | 0 |
+| `connected_at` | timestamp with time zone | YES | - |
+| `created_at` | timestamp with time zone | NO | now() |
+| `updated_at` | timestamp with time zone | NO | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **workspace_meta_config_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(workspace_id = get_current_user_workspace())`
+- **workspace_meta_config_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id = get_current_user_workspace()) OR is_super_admin())`
+- **workspace_meta_config_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id = get_current_user_workspace()) OR is_super_admin())`
+
+---
+
+### `workspace_modules`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `module_name` | character varying | NO | - |
+| `is_enabled` | boolean | YES | true |
+| `enabled_at` | timestamp with time zone | YES | now() |
+| `expires_at` | timestamp with time zone | YES | - |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **workspace_modules_delete** — `DELETE`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **workspace_modules_insert** — `INSERT`（roles: {authenticated}）
+    - WITH CHECK: `((workspace_id = get_current_user_workspace()) OR is_super_admin())`
+- **workspace_modules_select** — `SELECT`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **workspace_modules_update** — `UPDATE`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+
+**Triggers**
+
+- `trigger_auto_set_workspace_id` — BEFORE INSERT
+
+---
+
+### `workspace_notification_settings`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `workspace_id` | uuid | NO | - |
+| `enable_line` | boolean | NO | true |
+| `enable_email` | boolean | NO | false |
+| `notify_leave_request` | boolean | NO | true |
+| `notify_overtime_request` | boolean | NO | true |
+| `notify_missed_clock_request` | boolean | NO | true |
+| `notify_approval_result` | boolean | NO | true |
+| `notify_payroll_confirmed` | boolean | NO | true |
+| `notify_tour_status_change` | boolean | NO | false |
+| `created_at` | timestamp with time zone | NO | now() |
+| `updated_at` | timestamp with time zone | NO | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **notification_settings_all** — `ALL`（roles: {public}）
+    - USING: `true`
+    - WITH CHECK: `true`
+- **notification_settings_select** — `SELECT`（roles: {public}）
+    - USING: `(workspace_id IN ( SELECT employees.workspace_id
+   FROM employees
+  WHERE (employees.id = auth.uid())))`
+
+---
+
+### `workspace_roles`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | YES | - |
+| `name` | text | NO | - |
+| `description` | text | YES | - |
+| `is_admin` | boolean | YES | false |
+| `sort_order` | integer | YES | 0 |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **workspace_roles_delete** — `DELETE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **workspace_roles_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(is_super_admin() OR ((workspace_id)::text = (get_current_user_workspace())::text))`
+- **workspace_roles_select** — `SELECT`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+- **workspace_roles_update** — `UPDATE`（roles: {public}）
+    - USING: `((workspace_id)::text = (get_current_user_workspace())::text)`
+
+---
+
+### `workspace_selector_fields`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `workspace_id` | uuid | NO | - |
+| `name` | text | NO | - |
+| `level` | text | NO | - |
+| `is_required` | boolean | NO | false |
+| `sort_order` | integer | NO | 0 |
+| `created_at` | timestamp with time zone | NO | now() |
+| `updated_at` | timestamp with time zone | NO | now() |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `workspace_id` | `workspaces.id` | CASCADE | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **workspace_selector_fields_delete** — `DELETE`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **workspace_selector_fields_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(workspace_id = get_current_user_workspace())`
+- **workspace_selector_fields_select** — `SELECT`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+- **workspace_selector_fields_update** — `UPDATE`（roles: {public}）
+    - USING: `(workspace_id = get_current_user_workspace())`
+
+---
+
+### `workspaces`
+
+**Columns**
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| `id` | uuid | NO | gen_random_uuid() |
+| `name` | text | NO | - |
+| `description` | text | YES | - |
+| `icon` | text | YES | - |
+| `is_active` | boolean | YES | true |
+| `created_at` | timestamp with time zone | YES | now() |
+| `updated_at` | timestamp with time zone | YES | now() |
+| `_needs_sync` | boolean | YES | false |
+| `_synced_at` | timestamp with time zone | YES | - |
+| `_deleted` | boolean | YES | false |
+| `created_by` | uuid | YES | - |
+| `payment_config` | jsonb | YES | '{}'::jsonb |
+| `code` | text | NO | 'TP'::text |
+| `type` | text | YES | 'travel_agency'::text |
+| `employee_number_prefix` | character varying | YES | 'E'::character varying |
+| `default_password` | character varying | YES | '1234'::character varying |
+| `logo_url` | text | YES | - |
+| `address` | text | YES | - |
+| `phone` | text | YES | - |
+| `fax` | text | YES | - |
+| `tax_id` | text | YES | - |
+| `bank_name` | text | YES | - |
+| `bank_branch` | text | YES | - |
+| `bank_account` | text | YES | - |
+| `bank_account_name` | text | YES | - |
+| `company_seal_url` | text | YES | - |
+| `email` | text | YES | - |
+| `website` | text | YES | - |
+| `invoice_seal_image_url` | text | YES | - |
+| `updated_by` | uuid | YES | - |
+| `legal_name` | text | YES | - |
+| `subtitle` | text | YES | - |
+| `contract_seal_image_url` | text | YES | - |
+| `personal_seal_url` | text | YES | - |
+| `premium_enabled` | boolean | YES | false |
+| `custom_domain` | text | YES | - |
+| `setup_state` | jsonb | YES | '{"has_employees": false, "password_changed": false, "company_info_done": false, "tutorial_dismissed": false}'::jsonb |
+| `enabled_tour_categories` | ARRAY | YES | ARRAY['tour_group'::text, 'flight'::text, 'flight_hotel'::text, 'hotel'::text, 'car_service'::text, 'visa'::text, 'esim'::text] |
+| `home_country_code` | text | YES | - |
+| `max_employees` | integer | YES | - |
+
+**Foreign Keys**
+
+| Column | References | ON DELETE | ON UPDATE |
+|---|---|---|---|
+| `created_by` | `employees.id` | NO ACTION | NO ACTION |
+| `home_country_code` | `ref_countries.code` | NO ACTION | NO ACTION |
+| `updated_by` | `employees.id` | NO ACTION | NO ACTION |
+
+**RLS**：`enabled`
+
+**Policies**
+
+- **workspaces_delete** — `DELETE`（roles: {public}）
+    - USING: `true`
+- **workspaces_insert** — `INSERT`（roles: {authenticated}）
+    - WITH CHECK: `is_super_admin()`
+- **workspaces_select** — `SELECT`（roles: {public}）
+    - USING: `(id = get_current_user_workspace())`
+- **workspaces_update** — `UPDATE`（roles: {public}）
+    - USING: `(id = get_current_user_workspace())`
+
+**Triggers**
+
+- `trg_create_default_finance_settings` — AFTER INSERT
+- `trg_create_default_todo_columns` — AFTER INSERT
+- `workspaces_updated_at` — BEFORE UPDATE
+
+---
+
+
+## 🔧 Public Functions（273 個）
+
+| Name | Args | Returns | SECURITY DEFINER | Volatility |
+|---|---|---|---|---|
+| `add_employee_to_tour_conversation` | `p_tour_id text, p_employee_id uuid, p_role text` | `void` | ✓ | volatile |
+| `add_travelers_to_tour_conversation` | `-` | `trigger` | ✓ | volatile |
+| `archive_heroic_summon_result` | `-` | `trigger` |  | volatile |
+| `array_to_halfvec` | `double precision[], integer, boolean` | `halfvec` |  | immutable |
+| `array_to_halfvec` | `real[], integer, boolean` | `halfvec` |  | immutable |
+| `array_to_halfvec` | `integer[], integer, boolean` | `halfvec` |  | immutable |
+| `array_to_halfvec` | `numeric[], integer, boolean` | `halfvec` |  | immutable |
+| `array_to_sparsevec` | `numeric[], integer, boolean` | `sparsevec` |  | immutable |
+| `array_to_sparsevec` | `real[], integer, boolean` | `sparsevec` |  | immutable |
+| `array_to_sparsevec` | `double precision[], integer, boolean` | `sparsevec` |  | immutable |
+| `array_to_sparsevec` | `integer[], integer, boolean` | `sparsevec` |  | immutable |
+| `array_to_vector` | `numeric[], integer, boolean` | `vector` |  | immutable |
+| `array_to_vector` | `double precision[], integer, boolean` | `vector` |  | immutable |
+| `array_to_vector` | `integer[], integer, boolean` | `vector` |  | immutable |
+| `array_to_vector` | `real[], integer, boolean` | `vector` |  | immutable |
+| `auto_build_cache_on_id_bind` | `-` | `trigger` | ✓ | volatile |
+| `auto_categorize_file` | `-` | `trigger` |  | volatile |
+| `auto_compute_request_item_subtotal` | `-` | `trigger` |  | volatile |
+| `auto_create_lead` | `-` | `trigger` |  | volatile |
+| `auto_increment_version_number` | `-` | `trigger` |  | volatile |
+| `auto_link_email_contacts` | `-` | `trigger` |  | volatile |
+| `auto_move_file_to_folder` | `-` | `trigger` |  | volatile |
+| `auto_open_tour_conversations` | `-` | `integer` | ✓ | volatile |
+| `auto_open_tour_conversations_with_logging` | `-` | `void` | ✓ | volatile |
+| `auto_post_customer_receipt` | `-` | `trigger` |  | volatile |
+| `auto_post_supplier_payment` | `-` | `trigger` |  | volatile |
+| `auto_refresh_cache_on_tour_update` | `-` | `trigger` | ✓ | volatile |
+| `auto_refresh_traveler_cache` | `-` | `trigger` | ✓ | volatile |
+| `auto_set_workspace_id` | `-` | `trigger` | ✓ | volatile |
+| `avg` | `halfvec` | `halfvec` |  | immutable |
+| `avg` | `vector` | `vector` |  | immutable |
+| `binary_quantize` | `vector` | `bit` |  | immutable |
+| `binary_quantize` | `halfvec` | `bit` |  | immutable |
+| `calculate_confirmation_item_subtotal` | `-` | `trigger` |  | volatile |
+| `calculate_payroll_totals` | `-` | `trigger` |  | volatile |
+| `calculate_quote_balance` | `-` | `trigger` |  | volatile |
+| `calculate_work_hours` | `-` | `trigger` |  | volatile |
+| `can_manage_workspace` | `target_workspace_id uuid` | `boolean` | ✓ | stable |
+| `cascade_disbursement_paid_to_requests` | `-` | `trigger` | ✓ | volatile |
+| `cascade_items_to_parent_amount` | `-` | `trigger` | ✓ | volatile |
+| `cascade_supplier_rename` | `-` | `trigger` | ✓ | volatile |
+| `cascade_tour_rename` | `-` | `trigger` | ✓ | volatile |
+| `check_itinerary_handoff_status` | `-` | `trigger` |  | volatile |
+| `check_leader_schedule_conflict` | `p_leader_id uuid, p_start_date date, p_end_date date, p_exclude_id uuid` | `boolean` |  | volatile |
+| `check_member_upgrade` | `-` | `trigger` |  | volatile |
+| `check_my_tours_updates` | `p_last_synced_at timestamp with time zone` | `jsonb` | ✓ | volatile |
+| `check_rate_limit` | `p_key text, p_limit integer, p_window_seconds integer` | `boolean` | ✓ | volatile |
+| `check_vehicle_schedule_conflict` | `p_vehicle_id uuid, p_start_date date, p_end_date date, p_exclude_id uuid` | `boolean` |  | volatile |
+| `cleanup_rate_limits` | `-` | `void` | ✓ | volatile |
+| `confirm_quote_by_customer` | `p_token text, p_name text, p_email text, p_phone text, p_notes text, p_ip_address text, p_user_agent text` | `json` | ✓ | volatile |
+| `confirm_quote_by_staff` | `p_quote_id text, p_staff_id uuid, p_staff_name text, p_notes text` | `json` | ✓ | volatile |
+| `cosine_distance` | `halfvec, halfvec` | `double precision` |  | immutable |
+| `cosine_distance` | `vector, vector` | `double precision` |  | immutable |
+| `cosine_distance` | `sparsevec, sparsevec` | `double precision` |  | immutable |
+| `create_atomic_transaction` | `p_account_id uuid, p_amount numeric, p_transaction_type text, p_description text, p_category_id uuid, p_transaction_date timestamp with time zone` | `void` | ✓ | volatile |
+| `create_default_finance_settings` | `-` | `trigger` |  | volatile |
+| `create_default_leave_types` | `p_workspace_id uuid` | `void` |  | volatile |
+| `create_default_payment_methods` | `-` | `trigger` |  | volatile |
+| `create_default_todo_columns` | `-` | `trigger` |  | volatile |
+| `create_tour_conversations` | `-` | `trigger` | ✓ | volatile |
+| `create_tour_folders` | `-` | `trigger` |  | volatile |
+| `enforce_disbursement_order_lock` | `-` | `trigger` |  | volatile |
+| `enforce_payment_request_items_lock` | `-` | `trigger` |  | volatile |
+| `enforce_payment_request_lock` | `-` | `trigger` |  | volatile |
+| `ensure_conversation_exists` | `p_workspace_id uuid, p_conversation_type text, p_target_id text, p_target_name text` | `uuid` |  | volatile |
+| `ensure_single_default_payment_account` | `-` | `trigger` |  | volatile |
+| `ensure_traveler_profile` | `p_user_id uuid, p_email text, p_full_name text, p_avatar_url text` | `uuid` | ✓ | volatile |
+| `generate_confirmation_token` | `-` | `text` |  | volatile |
+| `generate_inquiry_code` | `-` | `trigger` |  | volatile |
+| `generate_quote_code` | `-` | `trigger` |  | volatile |
+| `generate_voucher_no` | `p_workspace_id uuid` | `text` |  | volatile |
+| `get_account_id_by_code` | `p_workspace_id uuid, p_code text` | `uuid` |  | volatile |
+| `get_cron_job_status` | `-` | `TABLE(job_name text, schedule text, last_run timestamp with time zone, next_run timestamp with time zone, status text)` | ✓ | volatile |
+| `get_current_employee_id` | `-` | `uuid` | ✓ | stable |
+| `get_current_traveler_id` | `-` | `uuid` | ✓ | stable |
+| `get_current_user_workspace` | `-` | `uuid` | ✓ | stable |
+| `get_my_tour_details` | `p_tour_code text` | `jsonb` | ✓ | volatile |
+| `get_or_create_direct_conversation` | `other_user_id uuid` | `uuid` | ✓ | volatile |
+| `get_or_create_dm_channel` | `p_user_1_id uuid, p_user_2_id uuid, p_workspace_id uuid` | `SETOF channels` | ✓ | volatile |
+| `get_order_invoiceable_amount` | `p_order_id text` | `numeric` |  | stable |
+| `get_order_invoiced_amount` | `p_order_id text` | `numeric` |  | stable |
+| `get_person_workload` | `person_name text` | `TABLE(total_projects bigint, total_tasks bigint, urgent_tasks bigint, in_progress_tasks bigint)` |  | volatile |
+| `get_projects_overview` | `-` | `TABLE(total_projects bigint, urgent_projects bigint, in_progress_projects bigint, pending_projects bigint, completed_projects bigint)` |  | volatile |
+| `get_tour_conversations` | `p_workspace_id uuid` | `TABLE(conversation_id uuid, conversation_type text, tour_id uuid, tour_code text, tour_name text, departure_date date, is_open boolean, open_at timestamp with time zone, unread_count bigint, last_message_at timestamp with time zone, last_message_preview text, member_count bigint, traveler_count bigint)` | ✓ | volatile |
+| `get_tour_pnl` | `p_workspace_id uuid, p_year_start date, p_year_end date` | `TABLE(id text, code text, name text, departure_date date, return_date date, status text, max_participants integer, estimated_cost numeric, estimated_revenue numeric, estimated_profit numeric, actual_revenue numeric, actual_cost numeric, actual_profit numeric, revenue_diff numeric, cost_diff numeric, closing_date date)` |  | stable |
+| `get_unread_count` | `p_conversation_id uuid` | `integer` | ✓ | volatile |
+| `get_unread_counts_batch` | `p_conversation_ids uuid[]` | `TABLE(conversation_id uuid, unread_count integer)` | ✓ | volatile |
+| `get_user_permission` | `p_user_id uuid, p_itinerary_id text` | `text` | ✓ | volatile |
+| `get_user_project_ids` | `uid uuid` | `SETOF uuid` | ✓ | stable |
+| `get_user_workspace_id` | `-` | `uuid` | ✓ | stable |
+| `halfvec` | `halfvec, integer, boolean` | `halfvec` |  | immutable |
+| `halfvec_accum` | `double precision[], halfvec` | `double precision[]` |  | immutable |
+| `halfvec_add` | `halfvec, halfvec` | `halfvec` |  | immutable |
+| `halfvec_avg` | `double precision[]` | `halfvec` |  | immutable |
+| `halfvec_cmp` | `halfvec, halfvec` | `integer` |  | immutable |
+| `halfvec_combine` | `double precision[], double precision[]` | `double precision[]` |  | immutable |
+| `halfvec_concat` | `halfvec, halfvec` | `halfvec` |  | immutable |
+| `halfvec_eq` | `halfvec, halfvec` | `boolean` |  | immutable |
+| `halfvec_ge` | `halfvec, halfvec` | `boolean` |  | immutable |
+| `halfvec_gt` | `halfvec, halfvec` | `boolean` |  | immutable |
+| `halfvec_in` | `cstring, oid, integer` | `halfvec` |  | immutable |
+| `halfvec_l2_squared_distance` | `halfvec, halfvec` | `double precision` |  | immutable |
+| `halfvec_le` | `halfvec, halfvec` | `boolean` |  | immutable |
+| `halfvec_lt` | `halfvec, halfvec` | `boolean` |  | immutable |
+| `halfvec_mul` | `halfvec, halfvec` | `halfvec` |  | immutable |
+| `halfvec_ne` | `halfvec, halfvec` | `boolean` |  | immutable |
+| `halfvec_negative_inner_product` | `halfvec, halfvec` | `double precision` |  | immutable |
+| `halfvec_out` | `halfvec` | `cstring` |  | immutable |
+| `halfvec_recv` | `internal, oid, integer` | `halfvec` |  | immutable |
+| `halfvec_send` | `halfvec` | `bytea` |  | immutable |
+| `halfvec_spherical_distance` | `halfvec, halfvec` | `double precision` |  | immutable |
+| `halfvec_sub` | `halfvec, halfvec` | `halfvec` |  | immutable |
+| `halfvec_to_float4` | `halfvec, integer, boolean` | `real[]` |  | immutable |
+| `halfvec_to_sparsevec` | `halfvec, integer, boolean` | `sparsevec` |  | immutable |
+| `halfvec_to_vector` | `halfvec, integer, boolean` | `vector` |  | immutable |
+| `halfvec_typmod_in` | `cstring[]` | `integer` |  | immutable |
+| `hamming_distance` | `bit, bit` | `double precision` |  | immutable |
+| `handle_new_user` | `-` | `trigger` | ✓ | volatile |
+| `handle_user_update` | `-` | `trigger` | ✓ | volatile |
+| `has_attraction_license` | `p_source_workspace uuid, p_kind text` | `boolean` | ✓ | stable |
+| `has_permission` | `permission_name text` | `boolean` | ✓ | stable |
+| `hnsw_bit_support` | `internal` | `internal` |  | volatile |
+| `hnsw_halfvec_support` | `internal` | `internal` |  | volatile |
+| `hnsw_sparsevec_support` | `internal` | `internal` |  | volatile |
+| `hnswhandler` | `internal` | `index_am_handler` |  | volatile |
+| `increment_points` | `customer_id_param text, points_param integer` | `void` | ✓ | volatile |
+| `inner_product` | `vector, vector` | `double precision` |  | immutable |
+| `inner_product` | `halfvec, halfvec` | `double precision` |  | immutable |
+| `inner_product` | `sparsevec, sparsevec` | `double precision` |  | immutable |
+| `is_admin` | `-` | `boolean` | ✓ | stable |
+| `is_admin` | `p_user_id uuid` | `boolean` | ✓ | volatile |
+| `is_country_enabled` | `p_workspace uuid, p_code text` | `boolean` |  | stable |
+| `is_employee` | `-` | `boolean` | ✓ | stable |
+| `is_service_role` | `-` | `boolean` | ✓ | volatile |
+| `is_super_admin` | `-` | `boolean` | ✓ | stable |
+| `is_traveler` | `-` | `boolean` | ✓ | stable |
+| `ivfflat_bit_support` | `internal` | `internal` |  | volatile |
+| `ivfflat_halfvec_support` | `internal` | `internal` |  | volatile |
+| `ivfflathandler` | `internal` | `index_am_handler` |  | volatile |
+| `jaccard_distance` | `bit, bit` | `double precision` |  | immutable |
+| `l1_distance` | `sparsevec, sparsevec` | `double precision` |  | immutable |
+| `l1_distance` | `vector, vector` | `double precision` |  | immutable |
+| `l1_distance` | `halfvec, halfvec` | `double precision` |  | immutable |
+| `l2_distance` | `vector, vector` | `double precision` |  | immutable |
+| `l2_distance` | `sparsevec, sparsevec` | `double precision` |  | immutable |
+| `l2_distance` | `halfvec, halfvec` | `double precision` |  | immutable |
+| `l2_norm` | `halfvec` | `double precision` |  | immutable |
+| `l2_norm` | `sparsevec` | `double precision` |  | immutable |
+| `l2_normalize` | `halfvec` | `halfvec` |  | immutable |
+| `l2_normalize` | `vector` | `vector` |  | immutable |
+| `l2_normalize` | `sparsevec` | `sparsevec` |  | immutable |
+| `log_file_changes` | `-` | `trigger` | ✓ | volatile |
+| `log_file_download` | `p_file_id uuid` | `void` | ✓ | volatile |
+| `mark_conversation_read` | `p_conversation_id uuid` | `void` | ✓ | volatile |
+| `notify_ai_message` | `-` | `trigger` |  | volatile |
+| `recalculate_order_totals` | `p_order_id text` | `void` | ✓ | volatile |
+| `refresh_all_region_stats` | `-` | `void` |  | volatile |
+| `refresh_traveler_tour_cache` | `p_traveler_id uuid` | `integer` | ✓ | volatile |
+| `revoke_quote_confirmation` | `p_quote_id text, p_staff_id uuid, p_staff_name text, p_reason text` | `json` | ✓ | volatile |
+| `run_auto_open_now` | `-` | `TABLE(opened_count integer, executed_at timestamp with time zone)` | ✓ | volatile |
+| `run_invoice_reminder_now` | `-` | `TABLE(sent_count integer, executed_at timestamp with time zone)` | ✓ | volatile |
+| `seed_default_roles_for_workspace` | `p_workspace_id uuid` | `TABLE(role_id uuid, role_name text, action text)` | ✓ | volatile |
+| `seed_tenant_base_data` | `source_workspace_id uuid, target_workspace_id uuid` | `void` | ✓ | volatile |
+| `send_daily_invoice_reminder` | `-` | `integer` | ✓ | volatile |
+| `send_quote_confirmation` | `p_quote_id text, p_expires_in_days integer, p_staff_id uuid` | `json` | ✓ | volatile |
+| `send_tour_message` | `p_conversation_id uuid, p_content text, p_type text, p_attachments jsonb` | `uuid` | ✓ | volatile |
+| `set_current_workspace` | `p_workspace_id text` | `void` | ✓ | volatile |
+| `set_itinerary_workspace` | `-` | `trigger` | ✓ | volatile |
+| `sparsevec` | `sparsevec, integer, boolean` | `sparsevec` |  | immutable |
+| `sparsevec_cmp` | `sparsevec, sparsevec` | `integer` |  | immutable |
+| `sparsevec_eq` | `sparsevec, sparsevec` | `boolean` |  | immutable |
+| `sparsevec_ge` | `sparsevec, sparsevec` | `boolean` |  | immutable |
+| `sparsevec_gt` | `sparsevec, sparsevec` | `boolean` |  | immutable |
+| `sparsevec_in` | `cstring, oid, integer` | `sparsevec` |  | immutable |
+| `sparsevec_l2_squared_distance` | `sparsevec, sparsevec` | `double precision` |  | immutable |
+| `sparsevec_le` | `sparsevec, sparsevec` | `boolean` |  | immutable |
+| `sparsevec_lt` | `sparsevec, sparsevec` | `boolean` |  | immutable |
+| `sparsevec_ne` | `sparsevec, sparsevec` | `boolean` |  | immutable |
+| `sparsevec_negative_inner_product` | `sparsevec, sparsevec` | `double precision` |  | immutable |
+| `sparsevec_out` | `sparsevec` | `cstring` |  | immutable |
+| `sparsevec_recv` | `internal, oid, integer` | `sparsevec` |  | immutable |
+| `sparsevec_send` | `sparsevec` | `bytea` |  | immutable |
+| `sparsevec_to_halfvec` | `sparsevec, integer, boolean` | `halfvec` |  | immutable |
+| `sparsevec_to_vector` | `sparsevec, integer, boolean` | `vector` |  | immutable |
+| `sparsevec_typmod_in` | `cstring[]` | `integer` |  | immutable |
+| `subvector` | `halfvec, integer, integer` | `halfvec` |  | immutable |
+| `subvector` | `vector, integer, integer` | `vector` |  | immutable |
+| `sum` | `vector` | `vector` |  | immutable |
+| `sum` | `halfvec` | `halfvec` |  | immutable |
+| `sync_confirmation_from_request` | `-` | `trigger` |  | volatile |
+| `sync_country_code_from_id` | `-` | `trigger` |  | volatile |
+| `sync_customer_passport_to_members` | `-` | `trigger` |  | volatile |
+| `sync_my_tours` | `-` | `jsonb` | ✓ | volatile |
+| `sync_passport_to_order_members` | `p_customer_id text, p_passport_number text, p_passport_name text, p_passport_expiry text, p_passport_image_url text, p_birth_date text, p_gender text, p_id_number text` | `integer` | ✓ | volatile |
+| `toggle_tour_conversation` | `p_tour_id text, p_is_open boolean, p_send_welcome boolean` | `void` | ✓ | volatile |
+| `trigger_recalc_order_on_member_change` | `-` | `trigger` |  | volatile |
+| `trigger_update_stats_on_quote_region_change` | `-` | `trigger` |  | volatile |
+| `update_account_balance` | `-` | `trigger` |  | volatile |
+| `update_ai_memories_updated_at` | `-` | `trigger` |  | volatile |
+| `update_airport_images_updated_at` | `-` | `trigger` |  | volatile |
+| `update_attendance_records_updated_at` | `-` | `trigger` |  | volatile |
+| `update_city_stats` | `p_city_id text` | `void` |  | volatile |
+| `update_company_assets_updated_at` | `-` | `trigger` |  | volatile |
+| `update_confirmation_sheet_totals` | `-` | `trigger` |  | volatile |
+| `update_confirmations_updated_at` | `-` | `trigger` |  | volatile |
+| `update_conversation_last_message` | `-` | `trigger` |  | volatile |
+| `update_conversation_timestamp` | `-` | `trigger` |  | volatile |
+| `update_customer_stats` | `-` | `trigger` |  | volatile |
+| `update_customer_total_points` | `-` | `trigger` |  | volatile |
+| `update_designer_drafts_updated_at` | `-` | `trigger` |  | volatile |
+| `update_driver_tasks_updated_at` | `-` | `trigger` |  | volatile |
+| `update_emails_updated_at` | `-` | `trigger` |  | volatile |
+| `update_expense_streak` | `-` | `trigger` |  | volatile |
+| `update_files_updated_at` | `-` | `trigger` |  | volatile |
+| `update_folders_updated_at` | `-` | `trigger` |  | volatile |
+| `update_heroic_summon_updated_at` | `-` | `trigger` |  | volatile |
+| `update_hotels_updated_at` | `-` | `trigger` |  | volatile |
+| `update_image_library_updated_at` | `-` | `trigger` |  | volatile |
+| `update_itineraries_updated_at` | `-` | `trigger` |  | volatile |
+| `update_leave_balance_on_approval` | `-` | `trigger` |  | volatile |
+| `update_leave_balances_updated_at` | `-` | `trigger` |  | volatile |
+| `update_luxury_hotels_updated_at` | `-` | `trigger` |  | volatile |
+| `update_message_reply_stats` | `-` | `trigger` |  | volatile |
+| `update_michelin_restaurants_updated_at` | `-` | `trigger` |  | volatile |
+| `update_online_trip_members_updated_at` | `-` | `trigger` |  | volatile |
+| `update_payment_request_total` | `-` | `trigger` |  | volatile |
+| `update_payroll_periods_updated_at` | `-` | `trigger` |  | volatile |
+| `update_payroll_records_updated_at` | `-` | `trigger` |  | volatile |
+| `update_pnr_queue_count` | `-` | `trigger` |  | volatile |
+| `update_pnrs_updated_at` | `-` | `trigger` |  | volatile |
+| `update_premium_experiences_updated_at` | `-` | `trigger` |  | volatile |
+| `update_quote_regions_updated_at` | `-` | `trigger` |  | volatile |
+| `update_regions_updated_at` | `-` | `trigger` |  | volatile |
+| `update_request_on_response` | `-` | `trigger` |  | volatile |
+| `update_restaurants_updated_at` | `-` | `trigger` |  | volatile |
+| `update_supplier_categories_updated_at` | `-` | `trigger` |  | volatile |
+| `update_suppliers_updated_at` | `-` | `trigger` |  | volatile |
+| `update_tii_updated_at` | `-` | `trigger` |  | volatile |
+| `update_tour_meal_settings_updated_at` | `-` | `trigger` |  | volatile |
+| `update_tour_requests_updated_at` | `-` | `trigger` |  | volatile |
+| `update_tour_tables_updated_at` | `-` | `trigger` |  | volatile |
+| `update_traveler_profiles_updated_at` | `-` | `trigger` |  | volatile |
+| `update_updated_at` | `-` | `trigger` |  | volatile |
+| `update_updated_at_column` | `-` | `trigger` |  | volatile |
+| `vector` | `vector, integer, boolean` | `vector` |  | immutable |
+| `vector_accum` | `double precision[], vector` | `double precision[]` |  | immutable |
+| `vector_add` | `vector, vector` | `vector` |  | immutable |
+| `vector_avg` | `double precision[]` | `vector` |  | immutable |
+| `vector_cmp` | `vector, vector` | `integer` |  | immutable |
+| `vector_combine` | `double precision[], double precision[]` | `double precision[]` |  | immutable |
+| `vector_concat` | `vector, vector` | `vector` |  | immutable |
+| `vector_dims` | `halfvec` | `integer` |  | immutable |
+| `vector_dims` | `vector` | `integer` |  | immutable |
+| `vector_eq` | `vector, vector` | `boolean` |  | immutable |
+| `vector_ge` | `vector, vector` | `boolean` |  | immutable |
+| `vector_gt` | `vector, vector` | `boolean` |  | immutable |
+| `vector_in` | `cstring, oid, integer` | `vector` |  | immutable |
+| `vector_l2_squared_distance` | `vector, vector` | `double precision` |  | immutable |
+| `vector_le` | `vector, vector` | `boolean` |  | immutable |
+| `vector_lt` | `vector, vector` | `boolean` |  | immutable |
+| `vector_mul` | `vector, vector` | `vector` |  | immutable |
+| `vector_ne` | `vector, vector` | `boolean` |  | immutable |
+| `vector_negative_inner_product` | `vector, vector` | `double precision` |  | immutable |
+| `vector_norm` | `vector` | `double precision` |  | immutable |
+| `vector_out` | `vector` | `cstring` |  | immutable |
+| `vector_recv` | `internal, oid, integer` | `vector` |  | immutable |
+| `vector_send` | `vector` | `bytea` |  | immutable |
+| `vector_spherical_distance` | `vector, vector` | `double precision` |  | immutable |
+| `vector_sub` | `vector, vector` | `vector` |  | immutable |
+| `vector_to_float4` | `vector, integer, boolean` | `real[]` |  | immutable |
+| `vector_to_halfvec` | `vector, integer, boolean` | `halfvec` |  | immutable |
+| `vector_to_sparsevec` | `vector, integer, boolean` | `sparsevec` |  | immutable |
+| `vector_typmod_in` | `cstring[]` | `integer` |  | immutable |
+
+---
+
+## 📑 Indexes（1494 個）
+
+<details><summary>展開看全部</summary>
+
+| Table | Index | Definition |
+|---|---|---|
+| `_migrations` | `_migrations_name_key` | `CREATE UNIQUE INDEX _migrations_name_key ON public._migrations USING btree (name)` |
+| `_migrations` | `_migrations_pkey` | `CREATE UNIQUE INDEX _migrations_pkey ON public._migrations USING btree (id)` |
+| `accounting_accounts` | `accounting_accounts_pkey` | `CREATE UNIQUE INDEX accounting_accounts_pkey ON public.accounting_accounts USING btree (id)` |
+| `accounting_accounts` | `idx_accounting_accounts_is_active` | `CREATE INDEX idx_accounting_accounts_is_active ON public.accounting_accounts USING btree (is_active)` |
+| `accounting_accounts` | `idx_accounting_accounts_user_id` | `CREATE INDEX idx_accounting_accounts_user_id ON public.accounting_accounts USING btree (user_id)` |
+| `accounting_categories` | `accounting_categories_pkey` | `CREATE UNIQUE INDEX accounting_categories_pkey ON public.accounting_categories USING btree (id)` |
+| `accounting_entries` | `accounting_entries_entry_number_key` | `CREATE UNIQUE INDEX accounting_entries_entry_number_key ON public.accounting_entries USING btree (entry_number)` |
+| `accounting_entries` | `accounting_entries_pkey` | `CREATE UNIQUE INDEX accounting_entries_pkey ON public.accounting_entries USING btree (id)` |
+| `accounting_entries` | `idx_accounting_entries_category` | `CREATE INDEX idx_accounting_entries_category ON public.accounting_entries USING btree (category)` |
+| `accounting_entries` | `idx_accounting_entries_date` | `CREATE INDEX idx_accounting_entries_date ON public.accounting_entries USING btree (entry_date)` |
+| `accounting_entries` | `idx_accounting_entries_tour` | `CREATE INDEX idx_accounting_entries_tour ON public.accounting_entries USING btree (tour_id)` |
+| `accounting_entries` | `idx_accounting_entries_type` | `CREATE INDEX idx_accounting_entries_type ON public.accounting_entries USING btree (entry_type)` |
+| `accounting_events` | `accounting_events_pkey` | `CREATE UNIQUE INDEX accounting_events_pkey ON public.accounting_events USING btree (id)` |
+| `accounting_events` | `idx_accounting_events_date` | `CREATE INDEX idx_accounting_events_date ON public.accounting_events USING btree (event_date)` |
+| `accounting_events` | `idx_accounting_events_reversal_event_id` | `CREATE INDEX idx_accounting_events_reversal_event_id ON public.accounting_events USING btree (reversal_event_id)` |
+| `accounting_events` | `idx_accounting_events_source` | `CREATE INDEX idx_accounting_events_source ON public.accounting_events USING btree (source_type, source_id)` |
+| `accounting_events` | `idx_accounting_events_tour` | `CREATE INDEX idx_accounting_events_tour ON public.accounting_events USING btree (tour_id)` |
+| `accounting_events` | `idx_accounting_events_type` | `CREATE INDEX idx_accounting_events_type ON public.accounting_events USING btree (event_type)` |
+| `accounting_events` | `idx_accounting_events_workspace` | `CREATE INDEX idx_accounting_events_workspace ON public.accounting_events USING btree (workspace_id)` |
+| `accounting_period_closings` | `accounting_period_closings_pkey` | `CREATE UNIQUE INDEX accounting_period_closings_pkey ON public.accounting_period_closings USING btree (id)` |
+| `accounting_period_closings` | `accounting_period_closings_workspace_id_period_type_period__key` | `CREATE UNIQUE INDEX accounting_period_closings_workspace_id_period_type_period__key ON public.accounting_period_closings USING btree (workspace_id, period_type, period_start, period_end)` |
+| `accounting_period_closings` | `idx_accounting_period_closings_period` | `CREATE INDEX idx_accounting_period_closings_period ON public.accounting_period_closings USING btree (period_start, period_end)` |
+| `accounting_period_closings` | `idx_accounting_period_closings_workspace` | `CREATE INDEX idx_accounting_period_closings_workspace ON public.accounting_period_closings USING btree (workspace_id)` |
+| `accounting_periods` | `accounting_periods_pkey` | `CREATE UNIQUE INDEX accounting_periods_pkey ON public.accounting_periods USING btree (id)` |
+| `accounting_subjects` | `accounting_subjects_pkey` | `CREATE UNIQUE INDEX accounting_subjects_pkey ON public.accounting_subjects USING btree (id)` |
+| `accounting_subjects` | `idx_accounting_subjects_parent` | `CREATE INDEX idx_accounting_subjects_parent ON public.accounting_subjects USING btree (parent_id)` |
+| `accounting_subjects` | `idx_accounting_subjects_workspace` | `CREATE INDEX idx_accounting_subjects_workspace ON public.accounting_subjects USING btree (workspace_id)` |
+| `accounting_subjects` | `unique_subject_code` | `CREATE UNIQUE INDEX unique_subject_code ON public.accounting_subjects USING btree (workspace_id, code)` |
+| `accounting_transactions` | `accounting_transactions_pkey` | `CREATE UNIQUE INDEX accounting_transactions_pkey ON public.accounting_transactions USING btree (id)` |
+| `accounting_transactions` | `idx_accounting_transactions_account_id` | `CREATE INDEX idx_accounting_transactions_account_id ON public.accounting_transactions USING btree (account_id)` |
+| `accounting_transactions` | `idx_accounting_transactions_date` | `CREATE INDEX idx_accounting_transactions_date ON public.accounting_transactions USING btree (date DESC)` |
+| `accounting_transactions` | `idx_accounting_transactions_type` | `CREATE INDEX idx_accounting_transactions_type ON public.accounting_transactions USING btree (type)` |
+| `accounting_transactions` | `idx_accounting_transactions_user_id` | `CREATE INDEX idx_accounting_transactions_user_id ON public.accounting_transactions USING btree (user_id)` |
+| `accounts` | `accounts_account_code_key` | `CREATE UNIQUE INDEX accounts_account_code_key ON public.accounts USING btree (account_code)` |
+| `accounts` | `accounts_pkey` | `CREATE UNIQUE INDEX accounts_pkey ON public.accounts USING btree (id)` |
+| `accounts` | `idx_accounts_account_code` | `CREATE INDEX idx_accounts_account_code ON public.accounts USING btree (account_code)` |
+| `accounts` | `idx_accounts_account_type` | `CREATE INDEX idx_accounts_account_type ON public.accounts USING btree (account_type)` |
+| `accounts` | `idx_accounts_is_active` | `CREATE INDEX idx_accounts_is_active ON public.accounts USING btree (is_active)` |
+| `accounts` | `idx_accounts_parent_code` | `CREATE INDEX idx_accounts_parent_code ON public.accounts USING btree (parent_code)` |
+| `activities` | `activities_activity_code_key` | `CREATE UNIQUE INDEX activities_activity_code_key ON public.activities USING btree (activity_code)` |
+| `activities` | `activities_pkey` | `CREATE UNIQUE INDEX activities_pkey ON public.activities USING btree (id)` |
+| `activities` | `idx_activities_active` | `CREATE INDEX idx_activities_active ON public.activities USING btree (is_active) WHERE (deleted_at IS NULL)` |
+| `activities` | `idx_activities_code` | `CREATE INDEX idx_activities_code ON public.activities USING btree (activity_code)` |
+| `activities` | `idx_activities_region` | `CREATE INDEX idx_activities_region ON public.activities USING btree (region_id)` |
+| `activities` | `idx_activities_supplier` | `CREATE INDEX idx_activities_supplier ON public.activities USING btree (supplier_id)` |
+| `activities` | `idx_activities_type` | `CREATE INDEX idx_activities_type ON public.activities USING btree (activity_type)` |
+| `advance_items` | `advance_items_pkey` | `CREATE UNIQUE INDEX advance_items_pkey ON public.advance_items USING btree (id)` |
+| `advance_items` | `idx_advance_items_list` | `CREATE INDEX idx_advance_items_list ON public.advance_items USING btree (advance_list_id)` |
+| `advance_items` | `idx_advance_items_payment_request` | `CREATE INDEX idx_advance_items_payment_request ON public.advance_items USING btree (payment_request_id)` |
+| `advance_items` | `idx_advance_items_status` | `CREATE INDEX idx_advance_items_status ON public.advance_items USING btree (status)` |
+| `advance_lists` | `advance_lists_pkey` | `CREATE UNIQUE INDEX advance_lists_pkey ON public.advance_lists USING btree (id)` |
+| `advance_lists` | `idx_advance_lists_author` | `CREATE INDEX idx_advance_lists_author ON public.advance_lists USING btree (created_by_legacy_author)` |
+| `advance_lists` | `idx_advance_lists_channel` | `CREATE INDEX idx_advance_lists_channel ON public.advance_lists USING btree (channel_id)` |
+| `advance_lists` | `idx_advance_lists_created_at` | `CREATE INDEX idx_advance_lists_created_at ON public.advance_lists USING btree (created_at DESC)` |
+| `agent_registry` | `agent_registry_agent_key_key` | `CREATE UNIQUE INDEX agent_registry_agent_key_key ON public.agent_registry USING btree (agent_key)` |
+| `agent_registry` | `agent_registry_pkey` | `CREATE UNIQUE INDEX agent_registry_pkey ON public.agent_registry USING btree (id)` |
+| `agent_registry` | `idx_agent_registry_bot` | `CREATE INDEX idx_agent_registry_bot ON public.agent_registry USING btree (bot_id)` |
+| `agent_registry` | `idx_agent_registry_key` | `CREATE INDEX idx_agent_registry_key ON public.agent_registry USING btree (agent_key)` |
+| `agent_registry` | `idx_agent_registry_workspace` | `CREATE INDEX idx_agent_registry_workspace ON public.agent_registry USING btree (workspace_id)` |
+| `ai_bots` | `ai_bots_bot_id_key` | `CREATE UNIQUE INDEX ai_bots_bot_id_key ON public.ai_bots USING btree (bot_id)` |
+| `ai_bots` | `ai_bots_pkey` | `CREATE UNIQUE INDEX ai_bots_pkey ON public.ai_bots USING btree (id)` |
+| `ai_bots` | `idx_ai_bots_workspace_id` | `CREATE INDEX idx_ai_bots_workspace_id ON public.ai_bots USING btree (workspace_id)` |
+| `ai_conversations` | `ai_conversations_pkey` | `CREATE UNIQUE INDEX ai_conversations_pkey ON public.ai_conversations USING btree (id)` |
+| `ai_conversations` | `idx_ai_conversations_created_at` | `CREATE INDEX idx_ai_conversations_created_at ON public.ai_conversations USING btree (created_at DESC)` |
+| `ai_conversations` | `idx_ai_conversations_employee_id` | `CREATE INDEX idx_ai_conversations_employee_id ON public.ai_conversations USING btree (employee_id)` |
+| `ai_conversations` | `idx_ai_conversations_workspace_id` | `CREATE INDEX idx_ai_conversations_workspace_id ON public.ai_conversations USING btree (workspace_id)` |
+| `ai_memories` | `ai_memories_pkey` | `CREATE UNIQUE INDEX ai_memories_pkey ON public.ai_memories USING btree (id)` |
+| `ai_memories` | `idx_ai_memories_category` | `CREATE INDEX idx_ai_memories_category ON public.ai_memories USING btree (category)` |
+| `ai_memories` | `idx_ai_memories_content_search` | `CREATE INDEX idx_ai_memories_content_search ON public.ai_memories USING gin (to_tsvector('simple'::regconfig, ((COALESCE(title, ''::text) || ' '::text) || content)))` |
+| `ai_memories` | `idx_ai_memories_created_at` | `CREATE INDEX idx_ai_memories_created_at ON public.ai_memories USING btree (created_at DESC)` |
+| `ai_memories` | `idx_ai_memories_importance` | `CREATE INDEX idx_ai_memories_importance ON public.ai_memories USING btree (importance DESC)` |
+| `ai_memories` | `idx_ai_memories_tags` | `CREATE INDEX idx_ai_memories_tags ON public.ai_memories USING gin (tags)` |
+| `ai_memories` | `idx_ai_memories_workspace_id` | `CREATE INDEX idx_ai_memories_workspace_id ON public.ai_memories USING btree (workspace_id)` |
+| `ai_messages` | `ai_messages_pkey` | `CREATE UNIQUE INDEX ai_messages_pkey ON public.ai_messages USING btree (id)` |
+| `ai_messages` | `idx_ai_messages_created_at` | `CREATE INDEX idx_ai_messages_created_at ON public.ai_messages USING btree (created_at DESC)` |
+| `ai_messages` | `idx_ai_messages_to_agent` | `CREATE INDEX idx_ai_messages_to_agent ON public.ai_messages USING btree (to_agent, is_read)` |
+| `ai_settings` | `ai_settings_pkey` | `CREATE UNIQUE INDEX ai_settings_pkey ON public.ai_settings USING btree (id)` |
+| `ai_settings` | `ai_settings_workspace_id_setting_category_setting_key_key` | `CREATE UNIQUE INDEX ai_settings_workspace_id_setting_category_setting_key_key ON public.ai_settings USING btree (workspace_id, setting_category, setting_key)` |
+| `ai_settings` | `idx_ai_settings_updated_by` | `CREATE INDEX idx_ai_settings_updated_by ON public.ai_settings USING btree (updated_by)` |
+| `airport_images` | `airport_images_pkey` | `CREATE UNIQUE INDEX airport_images_pkey ON public.airport_images USING btree (id)` |
+| `airport_images` | `idx_airport_images_airport_code` | `CREATE INDEX idx_airport_images_airport_code ON public.airport_images USING btree (airport_code)` |
+| `airport_images` | `idx_airport_images_season` | `CREATE INDEX idx_airport_images_season ON public.airport_images USING btree (season)` |
+| `airport_images` | `idx_airport_images_uploaded_by` | `CREATE INDEX idx_airport_images_uploaded_by ON public.airport_images USING btree (uploaded_by)` |
+| `airport_images` | `idx_airport_images_workspace` | `CREATE INDEX idx_airport_images_workspace ON public.airport_images USING btree (workspace_id)` |
+| `announcements` | `announcements_pkey` | `CREATE UNIQUE INDEX announcements_pkey ON public.announcements USING btree (id)` |
+| `announcements` | `idx_announcements_published` | `CREATE INDEX idx_announcements_published ON public.announcements USING btree (published_at DESC)` |
+| `announcements` | `idx_announcements_workspace` | `CREATE INDEX idx_announcements_workspace ON public.announcements USING btree (workspace_id)` |
+| `api_usage` | `api_usage_pkey` | `CREATE UNIQUE INDEX api_usage_pkey ON public.api_usage USING btree (id)` |
+| `api_usage` | `api_usage_unique` | `CREATE UNIQUE INDEX api_usage_unique ON public.api_usage USING btree (api_name, month)` |
+| `api_usage_log` | `api_usage_log_pkey` | `CREATE UNIQUE INDEX api_usage_log_pkey ON public.api_usage_log USING btree (id)` |
+| `assigned_itineraries` | `assigned_itineraries_pkey` | `CREATE UNIQUE INDEX assigned_itineraries_pkey ON public.assigned_itineraries USING btree (id)` |
+| `assigned_itineraries` | `idx_assigned_itineraries_itinerary_id` | `CREATE INDEX idx_assigned_itineraries_itinerary_id ON public.assigned_itineraries USING btree (itinerary_id)` |
+| `attendance_records` | `attendance_records_employee_id_date_key` | `CREATE UNIQUE INDEX attendance_records_employee_id_date_key ON public.attendance_records USING btree (employee_id, date)` |
+| `attendance_records` | `attendance_records_pkey` | `CREATE UNIQUE INDEX attendance_records_pkey ON public.attendance_records USING btree (id)` |
+| `attendance_records` | `idx_attendance_records_created_by` | `CREATE INDEX idx_attendance_records_created_by ON public.attendance_records USING btree (created_by)` |
+| `attendance_records` | `idx_attendance_records_date` | `CREATE INDEX idx_attendance_records_date ON public.attendance_records USING btree (date)` |
+| `attendance_records` | `idx_attendance_records_employee` | `CREATE INDEX idx_attendance_records_employee ON public.attendance_records USING btree (employee_id)` |
+| `attendance_records` | `idx_attendance_records_employee_date` | `CREATE INDEX idx_attendance_records_employee_date ON public.attendance_records USING btree (employee_id, date DESC)` |
+| `attendance_records` | `idx_attendance_records_leave_request_id` | `CREATE INDEX idx_attendance_records_leave_request_id ON public.attendance_records USING btree (leave_request_id)` |
+| `attendance_records` | `idx_attendance_records_status` | `CREATE INDEX idx_attendance_records_status ON public.attendance_records USING btree (status)` |
+| `attendance_records` | `idx_attendance_records_updated_by` | `CREATE INDEX idx_attendance_records_updated_by ON public.attendance_records USING btree (updated_by)` |
+| `attendance_records` | `idx_attendance_records_workspace` | `CREATE INDEX idx_attendance_records_workspace ON public.attendance_records USING btree (workspace_id)` |
+| `attraction_licenses` | `attraction_licenses_licensee_workspace_id_source_workspace__key` | `CREATE UNIQUE INDEX attraction_licenses_licensee_workspace_id_source_workspace__key ON public.attraction_licenses USING btree (licensee_workspace_id, source_workspace_id)` |
+| `attraction_licenses` | `attraction_licenses_pkey` | `CREATE UNIQUE INDEX attraction_licenses_pkey ON public.attraction_licenses USING btree (id)` |
+| `attraction_licenses` | `idx_attraction_licenses_licensee` | `CREATE INDEX idx_attraction_licenses_licensee ON public.attraction_licenses USING btree (licensee_workspace_id)` |
+| `attractions` | `attractions_name_city_unique` | `CREATE UNIQUE INDEX attractions_name_city_unique ON public.attractions USING btree (name, city_id)` |
+| `attractions` | `attractions_pkey` | `CREATE UNIQUE INDEX attractions_pkey ON public.attractions USING btree (id)` |
+| `attractions` | `idx_attractions_category` | `CREATE INDEX idx_attractions_category ON public.attractions USING btree (category)` |
+| `attractions` | `idx_attractions_city` | `CREATE INDEX idx_attractions_city ON public.attractions USING btree (city_id)` |
+| `attractions` | `idx_attractions_country` | `CREATE INDEX idx_attractions_country ON public.attractions USING btree (country_id)` |
+| `attractions` | `idx_attractions_country_code` | `CREATE INDEX idx_attractions_country_code ON public.attractions USING btree (country_code)` |
+| `attractions` | `idx_attractions_created_by` | `CREATE INDEX idx_attractions_created_by ON public.attractions USING btree (created_by)` |
+| `attractions` | `idx_attractions_is_active` | `CREATE INDEX idx_attractions_is_active ON public.attractions USING btree (is_active)` |
+| `attractions` | `idx_attractions_region` | `CREATE INDEX idx_attractions_region ON public.attractions USING btree (region_id)` |
+| `attractions` | `idx_attractions_tags` | `CREATE INDEX idx_attractions_tags ON public.attractions USING gin (tags)` |
+| `attractions` | `idx_attractions_updated_by` | `CREATE INDEX idx_attractions_updated_by ON public.attractions USING btree (updated_by)` |
+| `attractions` | `idx_attractions_workspace_id` | `CREATE INDEX idx_attractions_workspace_id ON public.attractions USING btree (workspace_id)` |
+| `background_tasks` | `background_tasks_pkey` | `CREATE UNIQUE INDEX background_tasks_pkey ON public.background_tasks USING btree (id)` |
+| `background_tasks` | `idx_background_tasks_status_scheduled` | `CREATE INDEX idx_background_tasks_status_scheduled ON public.background_tasks USING btree (status, scheduled_at) WHERE (status = 'pending'::task_status)` |
+| `background_tasks` | `idx_background_tasks_type` | `CREATE INDEX idx_background_tasks_type ON public.background_tasks USING btree (type)` |
+| `background_tasks` | `idx_background_tasks_workspace` | `CREATE INDEX idx_background_tasks_workspace ON public.background_tasks USING btree (workspace_id)` |
+| `badge_definitions` | `badge_definitions_pkey` | `CREATE UNIQUE INDEX badge_definitions_pkey ON public.badge_definitions USING btree (id)` |
+| `badge_definitions` | `idx_badge_active` | `CREATE INDEX idx_badge_active ON public.badge_definitions USING btree (is_active)` |
+| `badge_definitions` | `idx_badge_category` | `CREATE INDEX idx_badge_category ON public.badge_definitions USING btree (category)` |
+| `badge_definitions` | `idx_badge_definitions_active` | `CREATE INDEX idx_badge_definitions_active ON public.badge_definitions USING btree (is_active)` |
+| `badge_definitions` | `idx_badge_sort` | `CREATE INDEX idx_badge_sort ON public.badge_definitions USING btree (sort_order)` |
+| `badges` | `badges_code_key` | `CREATE UNIQUE INDEX badges_code_key ON public.badges USING btree (code)` |
+| `badges` | `badges_pkey` | `CREATE UNIQUE INDEX badges_pkey ON public.badges USING btree (id)` |
+| `bank_accounts` | `bank_accounts_pkey` | `CREATE UNIQUE INDEX bank_accounts_pkey ON public.bank_accounts USING btree (id)` |
+| `bank_accounts` | `bank_accounts_workspace_id_code_key` | `CREATE UNIQUE INDEX bank_accounts_workspace_id_code_key ON public.bank_accounts USING btree (workspace_id, code)` |
+| `bank_accounts` | `idx_bank_accounts_account_id` | `CREATE INDEX idx_bank_accounts_account_id ON public.bank_accounts USING btree (account_id)` |
+| `body_measurements` | `body_measurements_pkey` | `CREATE UNIQUE INDEX body_measurements_pkey ON public.body_measurements USING btree (id)` |
+| `body_measurements` | `body_measurements_user_id_date_key` | `CREATE UNIQUE INDEX body_measurements_user_id_date_key ON public.body_measurements USING btree (user_id, date)` |
+| `body_measurements` | `idx_body_measurements_date` | `CREATE INDEX idx_body_measurements_date ON public.body_measurements USING btree (date)` |
+| `body_measurements` | `idx_body_measurements_user_id` | `CREATE INDEX idx_body_measurements_user_id ON public.body_measurements USING btree (user_id)` |
+| `body_measurements` | `idx_body_measurements_workspace_id` | `CREATE INDEX idx_body_measurements_workspace_id ON public.body_measurements USING btree (workspace_id)` |
+| `bot_groups` | `bot_groups_pkey` | `CREATE UNIQUE INDEX bot_groups_pkey ON public.bot_groups USING btree (id)` |
+| `bot_groups` | `idx_bot_groups_bot_id` | `CREATE INDEX idx_bot_groups_bot_id ON public.bot_groups USING btree (bot_id)` |
+| `bot_groups` | `idx_bot_groups_is_new` | `CREATE INDEX idx_bot_groups_is_new ON public.bot_groups USING btree (is_new)` |
+| `bot_registry` | `bot_registry_pkey` | `CREATE UNIQUE INDEX bot_registry_pkey ON public.bot_registry USING btree (id)` |
+| `bot_registry` | `idx_bot_registry_platform` | `CREATE INDEX idx_bot_registry_platform ON public.bot_registry USING btree (platform)` |
+| `brochure_documents` | `brochure_documents_pkey` | `CREATE UNIQUE INDEX brochure_documents_pkey ON public.brochure_documents USING btree (id)` |
+| `brochure_documents` | `idx_brochure_documents_design_type` | `CREATE INDEX idx_brochure_documents_design_type ON public.brochure_documents USING btree (design_type)` |
+| `brochure_documents` | `idx_brochure_documents_itinerary_id` | `CREATE INDEX idx_brochure_documents_itinerary_id ON public.brochure_documents USING btree (itinerary_id)` |
+| `brochure_documents` | `idx_brochure_documents_package_id` | `CREATE INDEX idx_brochure_documents_package_id ON public.brochure_documents USING btree (package_id)` |
+| `brochure_documents` | `idx_brochure_documents_status` | `CREATE INDEX idx_brochure_documents_status ON public.brochure_documents USING btree (status)` |
+| `brochure_documents` | `idx_brochure_documents_tour_id` | `CREATE INDEX idx_brochure_documents_tour_id ON public.brochure_documents USING btree (tour_id)` |
+| `brochure_documents` | `idx_brochure_documents_workspace_id` | `CREATE INDEX idx_brochure_documents_workspace_id ON public.brochure_documents USING btree (workspace_id)` |
+| `brochure_versions` | `brochure_versions_document_id_version_number_key` | `CREATE UNIQUE INDEX brochure_versions_document_id_version_number_key ON public.brochure_versions USING btree (document_id, version_number)` |
+| `brochure_versions` | `brochure_versions_pkey` | `CREATE UNIQUE INDEX brochure_versions_pkey ON public.brochure_versions USING btree (id)` |
+| `brochure_versions` | `idx_brochure_versions_created_at` | `CREATE INDEX idx_brochure_versions_created_at ON public.brochure_versions USING btree (created_at DESC)` |
+| `brochure_versions` | `idx_brochure_versions_document_id` | `CREATE INDEX idx_brochure_versions_document_id ON public.brochure_versions USING btree (document_id)` |
+| `budgets` | `budgets_pkey` | `CREATE UNIQUE INDEX budgets_pkey ON public.budgets USING btree (id)` |
+| `budgets` | `idx_budgets_category_id` | `CREATE INDEX idx_budgets_category_id ON public.budgets USING btree (category_id)` |
+| `budgets` | `idx_budgets_is_active` | `CREATE INDEX idx_budgets_is_active ON public.budgets USING btree (is_active)` |
+| `budgets` | `idx_budgets_period` | `CREATE INDEX idx_budgets_period ON public.budgets USING btree (period)` |
+| `bulletins` | `bulletins_pkey` | `CREATE UNIQUE INDEX bulletins_pkey ON public.bulletins USING btree (id)` |
+| `bulletins` | `idx_bulletins_created` | `CREATE INDEX idx_bulletins_created ON public.bulletins USING btree (created_at DESC)` |
+| `bulletins` | `idx_bulletins_priority` | `CREATE INDEX idx_bulletins_priority ON public.bulletins USING btree (priority)` |
+| `bulletins` | `idx_bulletins_workspace` | `CREATE INDEX idx_bulletins_workspace ON public.bulletins USING btree (workspace_id)` |
+| `calendar_events` | `calendar_events_pkey` | `CREATE UNIQUE INDEX calendar_events_pkey ON public.calendar_events USING btree (id)` |
+| `calendar_events` | `idx_calendar_events_created_by` | `CREATE INDEX idx_calendar_events_created_by ON public.calendar_events USING btree (created_by)` |
+| `calendar_events` | `idx_calendar_events_end` | `CREATE INDEX idx_calendar_events_end ON public.calendar_events USING btree ("end")` |
+| `calendar_events` | `idx_calendar_events_owner_id` | `CREATE INDEX idx_calendar_events_owner_id ON public.calendar_events USING btree (owner_id)` |
+| `calendar_events` | `idx_calendar_events_start` | `CREATE INDEX idx_calendar_events_start ON public.calendar_events USING btree (start)` |
+| `calendar_events` | `idx_calendar_events_type` | `CREATE INDEX idx_calendar_events_type ON public.calendar_events USING btree (type)` |
+| `calendar_events` | `idx_calendar_events_updated_by` | `CREATE INDEX idx_calendar_events_updated_by ON public.calendar_events USING btree (updated_by)` |
+| `calendar_events` | `idx_calendar_events_workspace_id` | `CREATE INDEX idx_calendar_events_workspace_id ON public.calendar_events USING btree (workspace_id)` |
+| `casual_trips` | `casual_trips_pkey` | `CREATE UNIQUE INDEX casual_trips_pkey ON public.casual_trips USING btree (id)` |
+| `casual_trips` | `idx_casual_trips_coords` | `CREATE INDEX idx_casual_trips_coords ON public.casual_trips USING btree (latitude, longitude)` |
+| `casual_trips` | `idx_casual_trips_user` | `CREATE INDEX idx_casual_trips_user ON public.casual_trips USING btree (user_id)` |
+| `casual_trips` | `idx_casual_trips_visibility` | `CREATE INDEX idx_casual_trips_visibility ON public.casual_trips USING btree (visibility)` |
+| `categories` | `categories_pkey` | `CREATE UNIQUE INDEX categories_pkey ON public.categories USING btree (id)` |
+| `categories` | `idx_categories_is_active` | `CREATE INDEX idx_categories_is_active ON public.categories USING btree (is_active)` |
+| `categories` | `idx_categories_name` | `CREATE INDEX idx_categories_name ON public.categories USING btree (name)` |
+| `categories` | `idx_categories_parent_id` | `CREATE INDEX idx_categories_parent_id ON public.categories USING btree (parent_id)` |
+| `categories` | `idx_categories_type` | `CREATE INDEX idx_categories_type ON public.categories USING btree (type)` |
+| `channel_groups` | `channel_groups_pkey` | `CREATE UNIQUE INDEX channel_groups_pkey ON public.channel_groups USING btree (id)` |
+| `channel_groups` | `idx_channel_groups_order` | `CREATE INDEX idx_channel_groups_order ON public.channel_groups USING btree ("order")` |
+| `channel_groups` | `idx_channel_groups_workspace` | `CREATE INDEX idx_channel_groups_workspace ON public.channel_groups USING btree (workspace_id)` |
+| `channel_groups` | `idx_channel_groups_workspace_system_type` | `CREATE UNIQUE INDEX idx_channel_groups_workspace_system_type ON public.channel_groups USING btree (workspace_id, system_type) WHERE (system_type IS NOT NULL)` |
+| `channel_members` | `channel_members_pkey` | `CREATE UNIQUE INDEX channel_members_pkey ON public.channel_members USING btree (id)` |
+| `channel_members` | `channel_members_workspace_id_channel_id_employee_id_key` | `CREATE UNIQUE INDEX channel_members_workspace_id_channel_id_employee_id_key ON public.channel_members USING btree (workspace_id, channel_id, employee_id)` |
+| `channel_members` | `idx_channel_members_channel` | `CREATE INDEX idx_channel_members_channel ON public.channel_members USING btree (channel_id)` |
+| `channel_members` | `idx_channel_members_employee` | `CREATE INDEX idx_channel_members_employee ON public.channel_members USING btree (employee_id)` |
+| `channel_members` | `idx_channel_members_status` | `CREATE INDEX idx_channel_members_status ON public.channel_members USING btree (status)` |
+| `channel_members` | `idx_channel_members_workspace` | `CREATE INDEX idx_channel_members_workspace ON public.channel_members USING btree (workspace_id)` |
+| `channel_threads` | `channel_threads_pkey` | `CREATE UNIQUE INDEX channel_threads_pkey ON public.channel_threads USING btree (id)` |
+| `channel_threads` | `idx_channel_threads_channel_id` | `CREATE INDEX idx_channel_threads_channel_id ON public.channel_threads USING btree (channel_id)` |
+| `channel_threads` | `idx_channel_threads_created_at` | `CREATE INDEX idx_channel_threads_created_at ON public.channel_threads USING btree (created_at DESC)` |
+| `channel_threads` | `idx_channel_threads_created_by` | `CREATE INDEX idx_channel_threads_created_by ON public.channel_threads USING btree (created_by)` |
+| `channels` | `channels_pkey` | `CREATE UNIQUE INDEX channels_pkey ON public.channels USING btree (id)` |
+| `channels` | `idx_channels_channel_type` | `CREATE INDEX idx_channels_channel_type ON public.channels USING btree (channel_type)` |
+| `channels` | `idx_channels_created_by` | `CREATE INDEX idx_channels_created_by ON public.channels USING btree (created_by)` |
+| `channels` | `idx_channels_dm_target_id` | `CREATE INDEX idx_channels_dm_target_id ON public.channels USING btree (dm_target_id)` |
+| `channels` | `idx_channels_favorite` | `CREATE INDEX idx_channels_favorite ON public.channels USING btree (is_favorite) WHERE (is_favorite = true)` |
+| `channels` | `idx_channels_group` | `CREATE INDEX idx_channels_group ON public.channels USING btree (group_id)` |
+| `channels` | `idx_channels_is_announcement` | `CREATE INDEX idx_channels_is_announcement ON public.channels USING btree (is_announcement)` |
+| `channels` | `idx_channels_is_archived` | `CREATE INDEX idx_channels_is_archived ON public.channels USING btree (is_archived) WHERE (is_archived = true)` |
+| `channels` | `idx_channels_is_pinned` | `CREATE INDEX idx_channels_is_pinned ON public.channels USING btree (is_pinned) WHERE (is_pinned = true)` |
+| `channels` | `idx_channels_tour` | `CREATE INDEX idx_channels_tour ON public.channels USING btree (tour_id)` |
+| `channels` | `idx_channels_type` | `CREATE INDEX idx_channels_type ON public.channels USING btree (type)` |
+| `channels` | `idx_channels_workspace` | `CREATE INDEX idx_channels_workspace ON public.channels USING btree (workspace_id)` |
+| `chart_of_accounts` | `chart_of_accounts_pkey` | `CREATE UNIQUE INDEX chart_of_accounts_pkey ON public.chart_of_accounts USING btree (id)` |
+| `chart_of_accounts` | `chart_of_accounts_workspace_id_code_key` | `CREATE UNIQUE INDEX chart_of_accounts_workspace_id_code_key ON public.chart_of_accounts USING btree (workspace_id, code)` |
+| `chart_of_accounts` | `idx_chart_of_accounts_parent` | `CREATE INDEX idx_chart_of_accounts_parent ON public.chart_of_accounts USING btree (parent_id)` |
+| `chart_of_accounts` | `idx_chart_of_accounts_type` | `CREATE INDEX idx_chart_of_accounts_type ON public.chart_of_accounts USING btree (account_type)` |
+| `chart_of_accounts` | `idx_chart_of_accounts_workspace` | `CREATE INDEX idx_chart_of_accounts_workspace ON public.chart_of_accounts USING btree (workspace_id)` |
+| `checks` | `checks_pkey` | `CREATE UNIQUE INDEX checks_pkey ON public.checks USING btree (id)` |
+| `checks` | `idx_checks_due_date` | `CREATE INDEX idx_checks_due_date ON public.checks USING btree (due_date)` |
+| `checks` | `idx_checks_workspace` | `CREATE INDEX idx_checks_workspace ON public.checks USING btree (workspace_id)` |
+| `cities` | `cities_country_name_workspace_key` | `CREATE UNIQUE INDEX cities_country_name_workspace_key ON public.cities USING btree (country_id, name, workspace_id)` |
+| `cities` | `cities_pkey` | `CREATE UNIQUE INDEX cities_pkey ON public.cities USING btree (id)` |
+| `cities` | `idx_cities_active` | `CREATE INDEX idx_cities_active ON public.cities USING btree (country_id, is_active, display_order)` |
+| `cities` | `idx_cities_airport_code` | `CREATE INDEX idx_cities_airport_code ON public.cities USING btree (airport_code)` |
+| `cities` | `idx_cities_background_image` | `CREATE INDEX idx_cities_background_image ON public.cities USING btree (background_image_url) WHERE (background_image_url IS NOT NULL)` |
+| `cities` | `idx_cities_background_image_2` | `CREATE INDEX idx_cities_background_image_2 ON public.cities USING btree (background_image_url_2) WHERE (background_image_url_2 IS NOT NULL)` |
+| `cities` | `idx_cities_country` | `CREATE INDEX idx_cities_country ON public.cities USING btree (country_id)` |
+| `cities` | `idx_cities_country_code` | `CREATE INDEX idx_cities_country_code ON public.cities USING btree (country_code)` |
+| `cities` | `idx_cities_is_major` | `CREATE INDEX idx_cities_is_major ON public.cities USING btree (is_major)` |
+| `cities` | `idx_cities_parent_city_id` | `CREATE INDEX idx_cities_parent_city_id ON public.cities USING btree (parent_city_id)` |
+| `cities` | `idx_cities_region` | `CREATE INDEX idx_cities_region ON public.cities USING btree (region_id)` |
+| `cities` | `idx_cities_usage_count` | `CREATE INDEX idx_cities_usage_count ON public.cities USING btree (usage_count DESC)` |
+| `cities` | `idx_cities_workspace` | `CREATE INDEX idx_cities_workspace ON public.cities USING btree (workspace_id)` |
+| `companies` | `companies_pkey` | `CREATE UNIQUE INDEX companies_pkey ON public.companies USING btree (id)` |
+| `companies` | `idx_companies_workspace_id` | `CREATE INDEX idx_companies_workspace_id ON public.companies USING btree (workspace_id)` |
+| `company_announcements` | `company_announcements_pkey` | `CREATE UNIQUE INDEX company_announcements_pkey ON public.company_announcements USING btree (id)` |
+| `company_announcements` | `idx_company_announcements_workspace_id` | `CREATE INDEX idx_company_announcements_workspace_id ON public.company_announcements USING btree (workspace_id)` |
+| `company_asset_folders` | `company_asset_folders_pkey` | `CREATE UNIQUE INDEX company_asset_folders_pkey ON public.company_asset_folders USING btree (id)` |
+| `company_asset_folders` | `idx_company_asset_folders_created_by` | `CREATE INDEX idx_company_asset_folders_created_by ON public.company_asset_folders USING btree (created_by)` |
+| `company_asset_folders` | `idx_company_asset_folders_parent` | `CREATE INDEX idx_company_asset_folders_parent ON public.company_asset_folders USING btree (parent_id)` |
+| `company_asset_folders` | `idx_company_asset_folders_updated_by` | `CREATE INDEX idx_company_asset_folders_updated_by ON public.company_asset_folders USING btree (updated_by)` |
+| `company_asset_folders` | `idx_company_asset_folders_workspace` | `CREATE INDEX idx_company_asset_folders_workspace ON public.company_asset_folders USING btree (workspace_id)` |
+| `company_assets` | `company_assets_pkey` | `CREATE UNIQUE INDEX company_assets_pkey ON public.company_assets USING btree (id)` |
+| `company_assets` | `idx_company_assets_created_at` | `CREATE INDEX idx_company_assets_created_at ON public.company_assets USING btree (created_at DESC)` |
+| `company_assets` | `idx_company_assets_created_by` | `CREATE INDEX idx_company_assets_created_by ON public.company_assets USING btree (created_by)` |
+| `company_assets` | `idx_company_assets_folder` | `CREATE INDEX idx_company_assets_folder ON public.company_assets USING btree (folder_id)` |
+| `company_assets` | `idx_company_assets_updated_by` | `CREATE INDEX idx_company_assets_updated_by ON public.company_assets USING btree (updated_by)` |
+| `company_assets` | `idx_company_assets_workspace` | `CREATE INDEX idx_company_assets_workspace ON public.company_assets USING btree (workspace_id)` |
+| `company_contacts` | `company_contacts_pkey` | `CREATE UNIQUE INDEX company_contacts_pkey ON public.company_contacts USING btree (id)` |
+| `company_contacts` | `idx_company_contacts_company_id` | `CREATE INDEX idx_company_contacts_company_id ON public.company_contacts USING btree (company_id)` |
+| `confirmations` | `confirmations_created_at_idx` | `CREATE INDEX confirmations_created_at_idx ON public.confirmations USING btree (created_at DESC)` |
+| `confirmations` | `confirmations_pkey` | `CREATE UNIQUE INDEX confirmations_pkey ON public.confirmations USING btree (id)` |
+| `confirmations` | `confirmations_status_idx` | `CREATE INDEX confirmations_status_idx ON public.confirmations USING btree (status)` |
+| `confirmations` | `confirmations_type_idx` | `CREATE INDEX confirmations_type_idx ON public.confirmations USING btree (type)` |
+| `confirmations` | `confirmations_workspace_id_idx` | `CREATE INDEX confirmations_workspace_id_idx ON public.confirmations USING btree (workspace_id)` |
+| `confirmations` | `idx_confirmations_booking_number` | `CREATE INDEX idx_confirmations_booking_number ON public.confirmations USING btree (booking_number)` |
+| `confirmations` | `idx_confirmations_created_at` | `CREATE INDEX idx_confirmations_created_at ON public.confirmations USING btree (created_at DESC)` |
+| `confirmations` | `idx_confirmations_created_by` | `CREATE INDEX idx_confirmations_created_by ON public.confirmations USING btree (created_by)` |
+| `confirmations` | `idx_confirmations_status` | `CREATE INDEX idx_confirmations_status ON public.confirmations USING btree (status)` |
+| `confirmations` | `idx_confirmations_type` | `CREATE INDEX idx_confirmations_type ON public.confirmations USING btree (type)` |
+| `confirmations` | `idx_confirmations_updated_by` | `CREATE INDEX idx_confirmations_updated_by ON public.confirmations USING btree (updated_by)` |
+| `confirmations` | `idx_confirmations_workspace_id` | `CREATE INDEX idx_confirmations_workspace_id ON public.confirmations USING btree (workspace_id)` |
+| `contracts` | `contracts_pkey` | `CREATE UNIQUE INDEX contracts_pkey ON public.contracts USING btree (id)` |
+| `contracts` | `contracts_workspace_code_key` | `CREATE UNIQUE INDEX contracts_workspace_code_key ON public.contracts USING btree (workspace_id, code)` |
+| `cost_templates` | `cost_templates_pkey` | `CREATE UNIQUE INDEX cost_templates_pkey ON public.cost_templates USING btree (id)` |
+| `cost_templates` | `idx_cost_templates_active` | `CREATE INDEX idx_cost_templates_active ON public.cost_templates USING btree (is_active)` |
+| `cost_templates` | `idx_cost_templates_attraction` | `CREATE INDEX idx_cost_templates_attraction ON public.cost_templates USING btree (attraction_id)` |
+| `cost_templates` | `idx_cost_templates_category` | `CREATE INDEX idx_cost_templates_category ON public.cost_templates USING btree (category)` |
+| `cost_templates` | `idx_cost_templates_city` | `CREATE INDEX idx_cost_templates_city ON public.cost_templates USING btree (city_id)` |
+| `cost_templates` | `idx_cost_templates_supplier` | `CREATE INDEX idx_cost_templates_supplier ON public.cost_templates USING btree (supplier_id)` |
+| `cost_templates` | `idx_cost_templates_trip_type` | `CREATE INDEX idx_cost_templates_trip_type ON public.cost_templates USING btree (trip_type)` |
+| `cost_templates` | `idx_cost_templates_valid_from` | `CREATE INDEX idx_cost_templates_valid_from ON public.cost_templates USING btree (valid_from)` |
+| `cost_templates` | `idx_cost_templates_valid_until` | `CREATE INDEX idx_cost_templates_valid_until ON public.cost_templates USING btree (valid_until)` |
+| `cost_templates` | `idx_cost_templates_vehicle_type` | `CREATE INDEX idx_cost_templates_vehicle_type ON public.cost_templates USING btree (vehicle_type)` |
+| `countries` | `countries_code_workspace_key` | `CREATE UNIQUE INDEX countries_code_workspace_key ON public.countries USING btree (code, workspace_id)` |
+| `countries` | `countries_pkey` | `CREATE UNIQUE INDEX countries_pkey ON public.countries USING btree (id)` |
+| `countries` | `idx_countries_active` | `CREATE INDEX idx_countries_active ON public.countries USING btree (is_active, display_order)` |
+| `countries` | `idx_countries_usage_count` | `CREATE INDEX idx_countries_usage_count ON public.countries USING btree (usage_count DESC)` |
+| `countries` | `idx_countries_workspace` | `CREATE INDEX idx_countries_workspace ON public.countries USING btree (workspace_id)` |
+| `cover_templates` | `cover_templates_component_name_key` | `CREATE UNIQUE INDEX cover_templates_component_name_key ON public.cover_templates USING btree (component_name)` |
+| `cover_templates` | `cover_templates_is_active_idx` | `CREATE INDEX cover_templates_is_active_idx ON public.cover_templates USING btree (is_active)` |
+| `cover_templates` | `cover_templates_pkey` | `CREATE UNIQUE INDEX cover_templates_pkey ON public.cover_templates USING btree (id)` |
+| `cover_templates` | `cover_templates_sort_order_idx` | `CREATE INDEX cover_templates_sort_order_idx ON public.cover_templates USING btree (sort_order)` |
+| `cron_execution_logs` | `cron_execution_logs_pkey` | `CREATE UNIQUE INDEX cron_execution_logs_pkey ON public.cron_execution_logs USING btree (id)` |
+| `cron_execution_logs` | `idx_cron_logs_executed_at` | `CREATE INDEX idx_cron_logs_executed_at ON public.cron_execution_logs USING btree (executed_at DESC)` |
+| `cron_execution_logs` | `idx_cron_logs_job_name` | `CREATE INDEX idx_cron_logs_job_name ON public.cron_execution_logs USING btree (job_name)` |
+| `customer_assigned_itineraries` | `customer_assigned_itineraries_customer_id_itinerary_id_assi_key` | `CREATE UNIQUE INDEX customer_assigned_itineraries_customer_id_itinerary_id_assi_key ON public.customer_assigned_itineraries USING btree (customer_id, itinerary_id, assigned_date)` |
+| `customer_assigned_itineraries` | `customer_assigned_itineraries_customer_id_itinerary_id_assig_ke` | `CREATE UNIQUE INDEX customer_assigned_itineraries_customer_id_itinerary_id_assig_ke ON public.customer_assigned_itineraries USING btree (customer_id, itinerary_id, assigned_date)` |
+| `customer_assigned_itineraries` | `customer_assigned_itineraries_pkey` | `CREATE UNIQUE INDEX customer_assigned_itineraries_pkey ON public.customer_assigned_itineraries USING btree (id)` |
+| `customer_assigned_itineraries` | `idx_assigned_customer` | `CREATE INDEX idx_assigned_customer ON public.customer_assigned_itineraries USING btree (customer_id)` |
+| `customer_assigned_itineraries` | `idx_assigned_itinerary` | `CREATE INDEX idx_assigned_itinerary ON public.customer_assigned_itineraries USING btree (itinerary_id)` |
+| `customer_assigned_itineraries` | `idx_assigned_order` | `CREATE INDEX idx_assigned_order ON public.customer_assigned_itineraries USING btree (order_id)` |
+| `customer_assigned_itineraries` | `idx_assigned_workspace` | `CREATE INDEX idx_assigned_workspace ON public.customer_assigned_itineraries USING btree (workspace_id)` |
+| `customer_assigned_itineraries` | `idx_customer_assigned_customer` | `CREATE INDEX idx_customer_assigned_customer ON public.customer_assigned_itineraries USING btree (customer_id)` |
+| `customer_assigned_itineraries` | `idx_customer_assigned_itinerary` | `CREATE INDEX idx_customer_assigned_itinerary ON public.customer_assigned_itineraries USING btree (itinerary_id)` |
+| `customer_badges` | `customer_badges_customer_id_badge_id_key` | `CREATE UNIQUE INDEX customer_badges_customer_id_badge_id_key ON public.customer_badges USING btree (customer_id, badge_id)` |
+| `customer_badges` | `customer_badges_pkey` | `CREATE UNIQUE INDEX customer_badges_pkey ON public.customer_badges USING btree (id)` |
+| `customer_group_members` | `customer_group_members_group_id_customer_id_key` | `CREATE UNIQUE INDEX customer_group_members_group_id_customer_id_key ON public.customer_group_members USING btree (group_id, customer_id)` |
+| `customer_group_members` | `customer_group_members_pkey` | `CREATE UNIQUE INDEX customer_group_members_pkey ON public.customer_group_members USING btree (id)` |
+| `customer_group_members` | `idx_customer_group_members_customer_id` | `CREATE INDEX idx_customer_group_members_customer_id ON public.customer_group_members USING btree (customer_id)` |
+| `customer_group_members` | `idx_customer_group_members_group_id` | `CREATE INDEX idx_customer_group_members_group_id ON public.customer_group_members USING btree (group_id)` |
+| `customer_groups` | `customer_groups_pkey` | `CREATE UNIQUE INDEX customer_groups_pkey ON public.customer_groups USING btree (id)` |
+| `customer_groups` | `idx_customer_groups_created_by` | `CREATE INDEX idx_customer_groups_created_by ON public.customer_groups USING btree (created_by)` |
+| `customer_groups` | `idx_customer_groups_type` | `CREATE INDEX idx_customer_groups_type ON public.customer_groups USING btree (type)` |
+| `customer_groups` | `idx_customer_groups_workspace_id` | `CREATE INDEX idx_customer_groups_workspace_id ON public.customer_groups USING btree (workspace_id)` |
+| `customer_inquiries` | `customer_inquiries_pkey` | `CREATE UNIQUE INDEX customer_inquiries_pkey ON public.customer_inquiries USING btree (id)` |
+| `customer_inquiries` | `idx_customer_inquiries_line_user_id` | `CREATE INDEX idx_customer_inquiries_line_user_id ON public.customer_inquiries USING btree (line_user_id) WHERE (line_user_id IS NOT NULL)` |
+| `customer_inquiries` | `idx_customer_inquiries_status` | `CREATE INDEX idx_customer_inquiries_status ON public.customer_inquiries USING btree (status)` |
+| `customer_inquiries` | `idx_customer_inquiries_template` | `CREATE INDEX idx_customer_inquiries_template ON public.customer_inquiries USING btree (template_id)` |
+| `customer_inquiries` | `idx_customer_inquiries_workspace` | `CREATE INDEX idx_customer_inquiries_workspace ON public.customer_inquiries USING btree (workspace_id)` |
+| `customer_service_conversations` | `customer_service_conversations_pkey` | `CREATE UNIQUE INDEX customer_service_conversations_pkey ON public.customer_service_conversations USING btree (id)` |
+| `customer_service_conversations` | `idx_conversations_created_at` | `CREATE INDEX idx_conversations_created_at ON public.customer_service_conversations USING btree (created_at DESC)` |
+| `customer_service_conversations` | `idx_conversations_intent` | `CREATE INDEX idx_conversations_intent ON public.customer_service_conversations USING btree (intent)` |
+| `customer_service_conversations` | `idx_conversations_platform_user` | `CREATE INDEX idx_conversations_platform_user ON public.customer_service_conversations USING btree (platform, platform_user_id)` |
+| `customer_service_conversations` | `idx_customer_service_conversations_workspace_id` | `CREATE INDEX idx_customer_service_conversations_workspace_id ON public.customer_service_conversations USING btree (workspace_id)` |
+| `customer_service_conversations` | `unique_conversation` | `CREATE UNIQUE INDEX unique_conversation ON public.customer_service_conversations USING btree (platform, platform_user_id, user_message, created_at)` |
+| `customer_service_leads` | `customer_service_leads_pkey` | `CREATE UNIQUE INDEX customer_service_leads_pkey ON public.customer_service_leads USING btree (id)` |
+| `customer_service_leads` | `idx_leads_platform_user` | `CREATE INDEX idx_leads_platform_user ON public.customer_service_leads USING btree (platform, platform_user_id)` |
+| `customer_service_leads` | `idx_leads_status` | `CREATE INDEX idx_leads_status ON public.customer_service_leads USING btree (status)` |
+| `customer_service_leads` | `unique_lead` | `CREATE UNIQUE INDEX unique_lead ON public.customer_service_leads USING btree (platform, platform_user_id)` |
+| `customer_travel_cards` | `customer_travel_cards_customer_id_template_id_key` | `CREATE UNIQUE INDEX customer_travel_cards_customer_id_template_id_key ON public.customer_travel_cards USING btree (customer_id, template_id)` |
+| `customer_travel_cards` | `customer_travel_cards_pkey` | `CREATE UNIQUE INDEX customer_travel_cards_pkey ON public.customer_travel_cards USING btree (id)` |
+| `customer_travel_cards` | `idx_customer_travel_cards_active` | `CREATE INDEX idx_customer_travel_cards_active ON public.customer_travel_cards USING btree (customer_id, is_active) WHERE (is_active = true)` |
+| `customer_travel_cards` | `idx_customer_travel_cards_customer` | `CREATE INDEX idx_customer_travel_cards_customer ON public.customer_travel_cards USING btree (customer_id)` |
+| `customers` | `customers_pkey` | `CREATE UNIQUE INDEX customers_pkey ON public.customers USING btree (id)` |
+| `customers` | `customers_workspace_code_key` | `CREATE UNIQUE INDEX customers_workspace_code_key ON public.customers USING btree (workspace_id, code)` |
+| `customers` | `idx_customers_company` | `CREATE INDEX idx_customers_company ON public.customers USING btree (company) WHERE (company IS NOT NULL)` |
+| `customers` | `idx_customers_email` | `CREATE INDEX idx_customers_email ON public.customers USING btree (email)` |
+| `customers` | `idx_customers_is_active` | `CREATE INDEX idx_customers_is_active ON public.customers USING btree (is_active)` |
+| `customers` | `idx_customers_is_vip` | `CREATE INDEX idx_customers_is_vip ON public.customers USING btree (is_vip) WHERE (is_vip = true)` |
+| `customers` | `idx_customers_last_order_date` | `CREATE INDEX idx_customers_last_order_date ON public.customers USING btree (last_order_date DESC)` |
+| `customers` | `idx_customers_line_user_id` | `CREATE INDEX idx_customers_line_user_id ON public.customers USING btree (line_user_id) WHERE (line_user_id IS NOT NULL)` |
+| `customers` | `idx_customers_member_type` | `CREATE INDEX idx_customers_member_type ON public.customers USING btree (member_type)` |
+| `customers` | `idx_customers_online_user_id` | `CREATE INDEX idx_customers_online_user_id ON public.customers USING btree (online_user_id)` |
+| `customers` | `idx_customers_phone` | `CREATE INDEX idx_customers_phone ON public.customers USING btree (phone)` |
+| `customers` | `idx_customers_source` | `CREATE INDEX idx_customers_source ON public.customers USING btree (source)` |
+| `customers` | `idx_customers_total_points` | `CREATE INDEX idx_customers_total_points ON public.customers USING btree (total_points DESC)` |
+| `customers` | `idx_customers_vip_level` | `CREATE INDEX idx_customers_vip_level ON public.customers USING btree (vip_level) WHERE (vip_level IS NOT NULL)` |
+| `customers` | `idx_customers_workspace_id` | `CREATE INDEX idx_customers_workspace_id ON public.customers USING btree (workspace_id)` |
+| `customization_requests` | `customization_requests_pkey` | `CREATE UNIQUE INDEX customization_requests_pkey ON public.customization_requests USING btree (id)` |
+| `customization_requests` | `idx_customization_assigned` | `CREATE INDEX idx_customization_assigned ON public.customization_requests USING btree (assigned_itinerary_id)` |
+| `customization_requests` | `idx_customization_customer` | `CREATE INDEX idx_customization_customer ON public.customization_requests USING btree (customer_id)` |
+| `customization_requests` | `idx_customization_status` | `CREATE INDEX idx_customization_status ON public.customization_requests USING btree (status)` |
+| `customization_requests` | `idx_customization_workspace` | `CREATE INDEX idx_customization_workspace ON public.customization_requests USING btree (workspace_id)` |
+| `daily_templates` | `daily_templates_component_name_key` | `CREATE UNIQUE INDEX daily_templates_component_name_key ON public.daily_templates USING btree (component_name)` |
+| `daily_templates` | `daily_templates_is_active_idx` | `CREATE INDEX daily_templates_is_active_idx ON public.daily_templates USING btree (is_active)` |
+| `daily_templates` | `daily_templates_pkey` | `CREATE UNIQUE INDEX daily_templates_pkey ON public.daily_templates USING btree (id)` |
+| `daily_templates` | `daily_templates_sort_order_idx` | `CREATE INDEX daily_templates_sort_order_idx ON public.daily_templates USING btree (sort_order)` |
+| `decisions_log` | `decisions_log_pkey` | `CREATE UNIQUE INDEX decisions_log_pkey ON public.decisions_log USING btree (id)` |
+| `decisions_log` | `idx_decisions_project_id` | `CREATE INDEX idx_decisions_project_id ON public.decisions_log USING btree (project_id)` |
+| `departments` | `departments_pkey` | `CREATE UNIQUE INDEX departments_pkey ON public.departments USING btree (id)` |
+| `departments` | `departments_workspace_id_code_key` | `CREATE UNIQUE INDEX departments_workspace_id_code_key ON public.departments USING btree (workspace_id, code)` |
+| `design_templates` | `design_templates_pkey` | `CREATE UNIQUE INDEX design_templates_pkey ON public.design_templates USING btree (id)` |
+| `design_templates` | `idx_design_templates_is_public` | `CREATE INDEX idx_design_templates_is_public ON public.design_templates USING btree (is_public) WHERE (is_public = true)` |
+| `design_templates` | `idx_design_templates_type` | `CREATE INDEX idx_design_templates_type ON public.design_templates USING btree (type)` |
+| `design_templates` | `idx_design_templates_workspace_id` | `CREATE INDEX idx_design_templates_workspace_id ON public.design_templates USING btree (workspace_id)` |
+| `designer_drafts` | `designer_drafts_pkey` | `CREATE UNIQUE INDEX designer_drafts_pkey ON public.designer_drafts USING btree (id)` |
+| `designer_drafts` | `idx_designer_drafts_itinerary` | `CREATE INDEX idx_designer_drafts_itinerary ON public.designer_drafts USING btree (itinerary_id)` |
+| `designer_drafts` | `idx_designer_drafts_itinerary_unique` | `CREATE UNIQUE INDEX idx_designer_drafts_itinerary_unique ON public.designer_drafts USING btree (itinerary_id) WHERE (itinerary_id IS NOT NULL)` |
+| `designer_drafts` | `idx_designer_drafts_package` | `CREATE INDEX idx_designer_drafts_package ON public.designer_drafts USING btree (package_id)` |
+| `designer_drafts` | `idx_designer_drafts_package_unique` | `CREATE UNIQUE INDEX idx_designer_drafts_package_unique ON public.designer_drafts USING btree (package_id) WHERE (package_id IS NOT NULL)` |
+| `designer_drafts` | `idx_designer_drafts_proposal` | `CREATE INDEX idx_designer_drafts_proposal ON public.designer_drafts USING btree (proposal_id)` |
+| `designer_drafts` | `idx_designer_drafts_proposal_unique` | `CREATE UNIQUE INDEX idx_designer_drafts_proposal_unique ON public.designer_drafts USING btree (proposal_id) WHERE (proposal_id IS NOT NULL)` |
+| `designer_drafts` | `idx_designer_drafts_tour` | `CREATE INDEX idx_designer_drafts_tour ON public.designer_drafts USING btree (tour_id)` |
+| `designer_drafts` | `idx_designer_drafts_tour_unique` | `CREATE UNIQUE INDEX idx_designer_drafts_tour_unique ON public.designer_drafts USING btree (tour_id) WHERE (tour_id IS NOT NULL)` |
+| `designer_drafts` | `idx_designer_drafts_user` | `CREATE INDEX idx_designer_drafts_user ON public.designer_drafts USING btree (user_id)` |
+| `designer_drafts` | `idx_designer_drafts_workspace` | `CREATE INDEX idx_designer_drafts_workspace ON public.designer_drafts USING btree (workspace_id)` |
+| `disbursement_orders` | `disbursement_orders_pkey` | `CREATE UNIQUE INDEX disbursement_orders_pkey ON public.disbursement_orders USING btree (id)` |
+| `disbursement_orders` | `disbursement_orders_workspace_code_key` | `CREATE UNIQUE INDEX disbursement_orders_workspace_code_key ON public.disbursement_orders USING btree (workspace_id, code)` |
+| `disbursement_orders` | `idx_disbursement_orders_bank_account_id` | `CREATE INDEX idx_disbursement_orders_bank_account_id ON public.disbursement_orders USING btree (bank_account_id)` |
+| `disbursement_orders` | `idx_disbursement_orders_code` | `CREATE INDEX idx_disbursement_orders_code ON public.disbursement_orders USING btree (code)` |
+| `disbursement_orders` | `idx_disbursement_orders_date` | `CREATE INDEX idx_disbursement_orders_date ON public.disbursement_orders USING btree (disbursement_date)` |
+| `disbursement_orders` | `idx_disbursement_orders_refund` | `CREATE INDEX idx_disbursement_orders_refund ON public.disbursement_orders USING btree (refund_id) WHERE (refund_id IS NOT NULL)` |
+| `disbursement_orders` | `idx_disbursement_orders_status` | `CREATE INDEX idx_disbursement_orders_status ON public.disbursement_orders USING btree (status)` |
+| `disbursement_orders` | `idx_disbursement_orders_type` | `CREATE INDEX idx_disbursement_orders_type ON public.disbursement_orders USING btree (disbursement_type)` |
+| `disbursement_orders` | `idx_disbursement_orders_workspace_id` | `CREATE INDEX idx_disbursement_orders_workspace_id ON public.disbursement_orders USING btree (workspace_id)` |
+| `disbursement_requests` | `disbursement_requests_disbursement_order_id_payment_request_key` | `CREATE UNIQUE INDEX disbursement_requests_disbursement_order_id_payment_request_key ON public.disbursement_requests USING btree (disbursement_order_id, payment_request_id)` |
+| `disbursement_requests` | `disbursement_requests_pkey` | `CREATE UNIQUE INDEX disbursement_requests_pkey ON public.disbursement_requests USING btree (id)` |
+| `disbursement_requests` | `idx_disbursement_requests_disbursement` | `CREATE INDEX idx_disbursement_requests_disbursement ON public.disbursement_requests USING btree (disbursement_order_id)` |
+| `disbursement_requests` | `idx_disbursement_requests_payment` | `CREATE INDEX idx_disbursement_requests_payment ON public.disbursement_requests USING btree (payment_request_id)` |
+| `driver_tasks` | `driver_tasks_pkey` | `CREATE UNIQUE INDEX driver_tasks_pkey ON public.driver_tasks USING btree (id)` |
+| `driver_tasks` | `idx_driver_tasks_code` | `CREATE INDEX idx_driver_tasks_code ON public.driver_tasks USING btree (task_code)` |
+| `driver_tasks` | `idx_driver_tasks_driver` | `CREATE INDEX idx_driver_tasks_driver ON public.driver_tasks USING btree (driver_id)` |
+| `driver_tasks` | `idx_driver_tasks_service_date` | `CREATE INDEX idx_driver_tasks_service_date ON public.driver_tasks USING btree (service_date)` |
+| `driver_tasks` | `idx_driver_tasks_status` | `CREATE INDEX idx_driver_tasks_status ON public.driver_tasks USING btree (status)` |
+| `driver_tasks` | `idx_driver_tasks_supplier` | `CREATE INDEX idx_driver_tasks_supplier ON public.driver_tasks USING btree (supplier_id)` |
+| `driver_tasks` | `idx_driver_tasks_tour_request` | `CREATE INDEX idx_driver_tasks_tour_request ON public.driver_tasks USING btree (tour_request_id)` |
+| `driver_tasks` | `idx_driver_tasks_workspace` | `CREATE INDEX idx_driver_tasks_workspace ON public.driver_tasks USING btree (workspace_id)` |
+| `email_accounts` | `email_accounts_pkey` | `CREATE UNIQUE INDEX email_accounts_pkey ON public.email_accounts USING btree (id)` |
+| `email_accounts` | `email_accounts_workspace_id_email_address_key` | `CREATE UNIQUE INDEX email_accounts_workspace_id_email_address_key ON public.email_accounts USING btree (workspace_id, email_address)` |
+| `email_accounts` | `idx_email_accounts_owner` | `CREATE INDEX idx_email_accounts_owner ON public.email_accounts USING btree (owner_id)` |
+| `email_accounts` | `idx_email_accounts_workspace` | `CREATE INDEX idx_email_accounts_workspace ON public.email_accounts USING btree (workspace_id)` |
+| `email_attachments` | `email_attachments_pkey` | `CREATE UNIQUE INDEX email_attachments_pkey ON public.email_attachments USING btree (id)` |
+| `email_attachments` | `idx_email_attachments_email` | `CREATE INDEX idx_email_attachments_email ON public.email_attachments USING btree (email_id)` |
+| `email_attachments` | `idx_email_attachments_workspace` | `CREATE INDEX idx_email_attachments_workspace ON public.email_attachments USING btree (workspace_id)` |
+| `emails` | `emails_message_id_key` | `CREATE UNIQUE INDEX emails_message_id_key ON public.emails USING btree (message_id)` |
+| `emails` | `emails_pkey` | `CREATE UNIQUE INDEX emails_pkey ON public.emails USING btree (id)` |
+| `emails` | `idx_emails_created` | `CREATE INDEX idx_emails_created ON public.emails USING btree (workspace_id, created_at DESC)` |
+| `emails` | `idx_emails_customer` | `CREATE INDEX idx_emails_customer ON public.emails USING btree (customer_id)` |
+| `emails` | `idx_emails_direction` | `CREATE INDEX idx_emails_direction ON public.emails USING btree (workspace_id, direction)` |
+| `emails` | `idx_emails_from` | `CREATE INDEX idx_emails_from ON public.emails USING btree (from_address)` |
+| `emails` | `idx_emails_search` | `CREATE INDEX idx_emails_search ON public.emails USING gin (to_tsvector('simple'::regconfig, ((COALESCE(subject, ''::text) || ' '::text) || COALESCE(body_text, ''::text))))` |
+| `emails` | `idx_emails_status` | `CREATE INDEX idx_emails_status ON public.emails USING btree (workspace_id, status)` |
+| `emails` | `idx_emails_supplier` | `CREATE INDEX idx_emails_supplier ON public.emails USING btree (supplier_id)` |
+| `emails` | `idx_emails_thread` | `CREATE INDEX idx_emails_thread ON public.emails USING btree (thread_id)` |
+| `emails` | `idx_emails_tour` | `CREATE INDEX idx_emails_tour ON public.emails USING btree (tour_id)` |
+| `emails` | `idx_emails_unread` | `CREATE INDEX idx_emails_unread ON public.emails USING btree (workspace_id, is_read) WHERE (is_read = false)` |
+| `emails` | `idx_emails_workspace` | `CREATE INDEX idx_emails_workspace ON public.emails USING btree (workspace_id)` |
+| `employee_payroll_config` | `employee_payroll_config_pkey` | `CREATE UNIQUE INDEX employee_payroll_config_pkey ON public.employee_payroll_config USING btree (employee_id)` |
+| `employee_permission_overrides` | `employee_permission_overrides_employee_id_module_code_tab_c_key` | `CREATE UNIQUE INDEX employee_permission_overrides_employee_id_module_code_tab_c_key ON public.employee_permission_overrides USING btree (employee_id, module_code, tab_code)` |
+| `employee_permission_overrides` | `employee_permission_overrides_pkey` | `CREATE UNIQUE INDEX employee_permission_overrides_pkey ON public.employee_permission_overrides USING btree (id)` |
+| `employee_route_overrides` | `employee_route_overrides_employee_id_route_key` | `CREATE UNIQUE INDEX employee_route_overrides_employee_id_route_key ON public.employee_route_overrides USING btree (employee_id, route)` |
+| `employee_route_overrides` | `employee_route_overrides_pkey` | `CREATE UNIQUE INDEX employee_route_overrides_pkey ON public.employee_route_overrides USING btree (id)` |
+| `employee_route_overrides` | `idx_employee_route_overrides_employee` | `CREATE INDEX idx_employee_route_overrides_employee ON public.employee_route_overrides USING btree (employee_id)` |
+| `employees` | `employees_pkey` | `CREATE UNIQUE INDEX employees_pkey ON public.employees USING btree (id)` |
+| `employees` | `employees_workspace_employee_number_unique` | `CREATE UNIQUE INDEX employees_workspace_employee_number_unique ON public.employees USING btree (workspace_id, employee_number)` |
+| `employees` | `idx_employees_avatar_url` | `CREATE INDEX idx_employees_avatar_url ON public.employees USING btree (avatar_url) WHERE (avatar_url IS NOT NULL)` |
+| `employees` | `idx_employees_created_by` | `CREATE INDEX idx_employees_created_by ON public.employees USING btree (created_by)` |
+| `employees` | `idx_employees_employee_number` | `CREATE INDEX idx_employees_employee_number ON public.employees USING btree (employee_number)` |
+| `employees` | `idx_employees_id_number` | `CREATE INDEX idx_employees_id_number ON public.employees USING btree (id_number)` |
+| `employees` | `idx_employees_is_active` | `CREATE INDEX idx_employees_is_active ON public.employees USING btree (is_active)` |
+| `employees` | `idx_employees_is_bot` | `CREATE INDEX idx_employees_is_bot ON public.employees USING btree (workspace_id, is_bot) WHERE (is_bot = false)` |
+| `employees` | `idx_employees_number` | `CREATE INDEX idx_employees_number ON public.employees USING btree (employee_number)` |
+| `employees` | `idx_employees_role_id` | `CREATE INDEX idx_employees_role_id ON public.employees USING btree (role_id)` |
+| `employees` | `idx_employees_roles` | `CREATE INDEX idx_employees_roles ON public.employees USING gin (roles)` |
+| `employees` | `idx_employees_status` | `CREATE INDEX idx_employees_status ON public.employees USING btree (status)` |
+| `employees` | `idx_employees_supabase_user_id` | `CREATE INDEX idx_employees_supabase_user_id ON public.employees USING btree (supabase_user_id)` |
+| `employees` | `idx_employees_updated_by` | `CREATE INDEX idx_employees_updated_by ON public.employees USING btree (updated_by)` |
+| `employees` | `idx_employees_user_id` | `CREATE INDEX idx_employees_user_id ON public.employees USING btree (user_id)` |
+| `employees` | `idx_employees_uuid_new` | `CREATE UNIQUE INDEX idx_employees_uuid_new ON public.employees USING btree (id)` |
+| `erp_bank_accounts` | `erp_bank_accounts_pkey` | `CREATE UNIQUE INDEX erp_bank_accounts_pkey ON public.erp_bank_accounts USING btree (id)` |
+| `erp_bank_accounts` | `idx_erp_bank_accounts_workspace` | `CREATE INDEX idx_erp_bank_accounts_workspace ON public.erp_bank_accounts USING btree (workspace_id)` |
+| `esims` | `esims_esim_number_key` | `CREATE UNIQUE INDEX esims_esim_number_key ON public.esims USING btree (esim_number)` |
+| `esims` | `esims_pkey` | `CREATE UNIQUE INDEX esims_pkey ON public.esims USING btree (id)` |
+| `esims` | `idx_esims_group_code` | `CREATE INDEX idx_esims_group_code ON public.esims USING btree (group_code)` |
+| `esims` | `idx_esims_workspace_id` | `CREATE INDEX idx_esims_workspace_id ON public.esims USING btree (workspace_id)` |
+| `expense_categories` | `expense_categories_pkey` | `CREATE UNIQUE INDEX expense_categories_pkey ON public.expense_categories USING btree (id)` |
+| `expense_categories` | `idx_expense_categories_credit_account_id` | `CREATE INDEX idx_expense_categories_credit_account_id ON public.expense_categories USING btree (credit_account_id)` |
+| `expense_categories` | `idx_expense_categories_debit_account_id` | `CREATE INDEX idx_expense_categories_debit_account_id ON public.expense_categories USING btree (debit_account_id)` |
+| `expense_categories` | `idx_expense_categories_parent` | `CREATE INDEX idx_expense_categories_parent ON public.expense_categories USING btree (parent_id)` |
+| `expense_categories` | `idx_expense_categories_type` | `CREATE INDEX idx_expense_categories_type ON public.expense_categories USING btree (type)` |
+| `expense_categories` | `idx_expense_categories_user_id` | `CREATE INDEX idx_expense_categories_user_id ON public.expense_categories USING btree (user_id)` |
+| `expense_monthly_stats` | `expense_monthly_stats_pkey` | `CREATE UNIQUE INDEX expense_monthly_stats_pkey ON public.expense_monthly_stats USING btree (id)` |
+| `expense_monthly_stats` | `expense_monthly_stats_user_id_year_month_key` | `CREATE UNIQUE INDEX expense_monthly_stats_user_id_year_month_key ON public.expense_monthly_stats USING btree (user_id, year_month)` |
+| `expense_monthly_stats` | `idx_expense_monthly_stats_user` | `CREATE INDEX idx_expense_monthly_stats_user ON public.expense_monthly_stats USING btree (user_id, year_month)` |
+| `expense_streaks` | `expense_streaks_pkey` | `CREATE UNIQUE INDEX expense_streaks_pkey ON public.expense_streaks USING btree (id)` |
+| `expense_streaks` | `expense_streaks_user_id_key` | `CREATE UNIQUE INDEX expense_streaks_user_id_key ON public.expense_streaks USING btree (user_id)` |
+| `expense_streaks` | `idx_expense_streaks_user` | `CREATE INDEX idx_expense_streaks_user ON public.expense_streaks USING btree (user_id)` |
+| `eyeline_submissions` | `eyeline_submissions_pkey` | `CREATE UNIQUE INDEX eyeline_submissions_pkey ON public.eyeline_submissions USING btree (id)` |
+| `eyeline_submissions` | `idx_eyeline_created` | `CREATE INDEX idx_eyeline_created ON public.eyeline_submissions USING btree (created_at DESC)` |
+| `eyeline_submissions` | `idx_eyeline_status` | `CREATE INDEX idx_eyeline_status ON public.eyeline_submissions USING btree (status)` |
+| `eyeline_submissions` | `idx_eyeline_type` | `CREATE INDEX idx_eyeline_type ON public.eyeline_submissions USING btree (submission_type)` |
+| `eyeline_submissions` | `idx_eyeline_user` | `CREATE INDEX idx_eyeline_user ON public.eyeline_submissions USING btree (user_id)` |
+| `eyeline_submissions` | `idx_eyeline_workspace` | `CREATE INDEX idx_eyeline_workspace ON public.eyeline_submissions USING btree (workspace_id)` |
+| `features_templates` | `features_templates_pkey` | `CREATE UNIQUE INDEX features_templates_pkey ON public.features_templates USING btree (id)` |
+| `file_audit_logs` | `file_audit_logs_pkey` | `CREATE UNIQUE INDEX file_audit_logs_pkey ON public.file_audit_logs USING btree (id)` |
+| `file_audit_logs` | `idx_file_audit_logs_action` | `CREATE INDEX idx_file_audit_logs_action ON public.file_audit_logs USING btree (file_id, action)` |
+| `file_audit_logs` | `idx_file_audit_logs_created` | `CREATE INDEX idx_file_audit_logs_created ON public.file_audit_logs USING btree (created_at DESC)` |
+| `file_audit_logs` | `idx_file_audit_logs_file` | `CREATE INDEX idx_file_audit_logs_file ON public.file_audit_logs USING btree (file_id)` |
+| `file_audit_logs` | `idx_file_audit_logs_performed_by` | `CREATE INDEX idx_file_audit_logs_performed_by ON public.file_audit_logs USING btree (performed_by)` |
+| `file_audit_logs` | `idx_file_audit_logs_workspace` | `CREATE INDEX idx_file_audit_logs_workspace ON public.file_audit_logs USING btree (workspace_id)` |
+| `files` | `files_pkey` | `CREATE UNIQUE INDEX files_pkey ON public.files USING btree (id)` |
+| `files` | `idx_files_category` | `CREATE INDEX idx_files_category ON public.files USING btree (workspace_id, category)` |
+| `files` | `idx_files_created` | `CREATE INDEX idx_files_created ON public.files USING btree (workspace_id, created_at DESC)` |
+| `files` | `idx_files_created_by` | `CREATE INDEX idx_files_created_by ON public.files USING btree (created_by)` |
+| `files` | `idx_files_customer` | `CREATE INDEX idx_files_customer ON public.files USING btree (customer_id)` |
+| `files` | `idx_files_email` | `CREATE INDEX idx_files_email ON public.files USING btree (email_id)` |
+| `files` | `idx_files_folder` | `CREATE INDEX idx_files_folder ON public.files USING btree (folder_id)` |
+| `files` | `idx_files_order_id` | `CREATE INDEX idx_files_order_id ON public.files USING btree (order_id)` |
+| `files` | `idx_files_previous_version_id` | `CREATE INDEX idx_files_previous_version_id ON public.files USING btree (previous_version_id)` |
+| `files` | `idx_files_search` | `CREATE INDEX idx_files_search ON public.files USING gin (to_tsvector('simple'::regconfig, ((COALESCE(filename, ''::text) || ' '::text) || COALESCE(description, ''::text))))` |
+| `files` | `idx_files_supplier` | `CREATE INDEX idx_files_supplier ON public.files USING btree (supplier_id)` |
+| `files` | `idx_files_tour` | `CREATE INDEX idx_files_tour ON public.files USING btree (tour_id)` |
+| `files` | `idx_files_updated_by` | `CREATE INDEX idx_files_updated_by ON public.files USING btree (updated_by)` |
+| `files` | `idx_files_workspace` | `CREATE INDEX idx_files_workspace ON public.files USING btree (workspace_id)` |
+| `fleet_drivers` | `fleet_drivers_pkey` | `CREATE UNIQUE INDEX fleet_drivers_pkey ON public.fleet_drivers USING btree (id)` |
+| `fleet_schedules` | `fleet_schedules_pkey` | `CREATE UNIQUE INDEX fleet_schedules_pkey ON public.fleet_schedules USING btree (id)` |
+| `fleet_schedules` | `idx_fleet_schedules_dates` | `CREATE INDEX idx_fleet_schedules_dates ON public.fleet_schedules USING btree (start_date, end_date)` |
+| `fleet_schedules` | `idx_fleet_schedules_driver` | `CREATE INDEX idx_fleet_schedules_driver ON public.fleet_schedules USING btree (driver_id)` |
+| `fleet_schedules` | `idx_fleet_schedules_status` | `CREATE INDEX idx_fleet_schedules_status ON public.fleet_schedules USING btree (status)` |
+| `fleet_schedules` | `idx_fleet_schedules_vehicle` | `CREATE INDEX idx_fleet_schedules_vehicle ON public.fleet_schedules USING btree (vehicle_id)` |
+| `fleet_schedules` | `idx_fleet_schedules_workspace` | `CREATE INDEX idx_fleet_schedules_workspace ON public.fleet_schedules USING btree (workspace_id)` |
+| `fleet_vehicle_logs` | `fleet_vehicle_logs_pkey` | `CREATE UNIQUE INDEX fleet_vehicle_logs_pkey ON public.fleet_vehicle_logs USING btree (id)` |
+| `fleet_vehicles` | `fleet_vehicles_pkey` | `CREATE UNIQUE INDEX fleet_vehicles_pkey ON public.fleet_vehicles USING btree (id)` |
+| `fleet_vehicles` | `fleet_vehicles_workspace_id_license_plate_key` | `CREATE UNIQUE INDEX fleet_vehicles_workspace_id_license_plate_key ON public.fleet_vehicles USING btree (workspace_id, license_plate)` |
+| `fleet_vehicles` | `idx_fleet_vehicles_default_driver` | `CREATE INDEX idx_fleet_vehicles_default_driver ON public.fleet_vehicles USING btree (default_driver_id)` |
+| `fleet_vehicles` | `idx_fleet_vehicles_inspection_due` | `CREATE INDEX idx_fleet_vehicles_inspection_due ON public.fleet_vehicles USING btree (inspection_due_date)` |
+| `fleet_vehicles` | `idx_fleet_vehicles_insurance_due` | `CREATE INDEX idx_fleet_vehicles_insurance_due ON public.fleet_vehicles USING btree (insurance_due_date)` |
+| `fleet_vehicles` | `idx_fleet_vehicles_status` | `CREATE INDEX idx_fleet_vehicles_status ON public.fleet_vehicles USING btree (status)` |
+| `fleet_vehicles` | `idx_fleet_vehicles_workspace` | `CREATE INDEX idx_fleet_vehicles_workspace ON public.fleet_vehicles USING btree (workspace_id)` |
+| `flight_status_subscriptions` | `flight_status_subscriptions_pkey` | `CREATE UNIQUE INDEX flight_status_subscriptions_pkey ON public.flight_status_subscriptions USING btree (id)` |
+| `flight_templates` | `flight_templates_component_name_key` | `CREATE UNIQUE INDEX flight_templates_component_name_key ON public.flight_templates USING btree (component_name)` |
+| `flight_templates` | `flight_templates_is_active_idx` | `CREATE INDEX flight_templates_is_active_idx ON public.flight_templates USING btree (is_active)` |
+| `flight_templates` | `flight_templates_pkey` | `CREATE UNIQUE INDEX flight_templates_pkey ON public.flight_templates USING btree (id)` |
+| `flight_templates` | `flight_templates_sort_order_idx` | `CREATE INDEX flight_templates_sort_order_idx ON public.flight_templates USING btree (sort_order)` |
+| `folders` | `folders_pkey` | `CREATE UNIQUE INDEX folders_pkey ON public.folders USING btree (id)` |
+| `folders` | `folders_workspace_id_tour_id_name_key` | `CREATE UNIQUE INDEX folders_workspace_id_tour_id_name_key ON public.folders USING btree (workspace_id, tour_id, name)` |
+| `folders` | `idx_folders_created_by` | `CREATE INDEX idx_folders_created_by ON public.folders USING btree (created_by)` |
+| `folders` | `idx_folders_customer` | `CREATE INDEX idx_folders_customer ON public.folders USING btree (customer_id)` |
+| `folders` | `idx_folders_parent` | `CREATE INDEX idx_folders_parent ON public.folders USING btree (parent_id)` |
+| `folders` | `idx_folders_path` | `CREATE INDEX idx_folders_path ON public.folders USING btree (path)` |
+| `folders` | `idx_folders_supplier` | `CREATE INDEX idx_folders_supplier ON public.folders USING btree (supplier_id)` |
+| `folders` | `idx_folders_tour` | `CREATE INDEX idx_folders_tour ON public.folders USING btree (tour_id)` |
+| `folders` | `idx_folders_workspace` | `CREATE INDEX idx_folders_workspace ON public.folders USING btree (workspace_id)` |
+| `friends` | `friends_pkey` | `CREATE UNIQUE INDEX friends_pkey ON public.friends USING btree (id)` |
+| `friends` | `friends_user_id_friend_id_key` | `CREATE UNIQUE INDEX friends_user_id_friend_id_key ON public.friends USING btree (user_id, friend_id)` |
+| `friends` | `idx_friends_friend` | `CREATE INDEX idx_friends_friend ON public.friends USING btree (friend_id)` |
+| `friends` | `idx_friends_status` | `CREATE INDEX idx_friends_status ON public.friends USING btree (status)` |
+| `friends` | `idx_friends_user` | `CREATE INDEX idx_friends_user ON public.friends USING btree (user_id)` |
+| `game_office_rooms` | `game_office_rooms_pkey` | `CREATE UNIQUE INDEX game_office_rooms_pkey ON public.game_office_rooms USING btree (id)` |
+| `game_office_rooms` | `game_office_rooms_user_unique` | `CREATE UNIQUE INDEX game_office_rooms_user_unique ON public.game_office_rooms USING btree (workspace_id, user_id)` |
+| `game_office_rooms` | `idx_game_office_rooms_updated_by` | `CREATE INDEX idx_game_office_rooms_updated_by ON public.game_office_rooms USING btree (updated_by)` |
+| `game_office_rooms` | `idx_game_office_rooms_workspace` | `CREATE INDEX idx_game_office_rooms_workspace ON public.game_office_rooms USING btree (workspace_id)` |
+| `general_ledger` | `general_ledger_pkey` | `CREATE UNIQUE INDEX general_ledger_pkey ON public.general_ledger USING btree (id)` |
+| `general_ledger` | `idx_general_ledger_period` | `CREATE INDEX idx_general_ledger_period ON public.general_ledger USING btree (year, month)` |
+| `general_ledger` | `idx_general_ledger_workspace` | `CREATE INDEX idx_general_ledger_workspace ON public.general_ledger USING btree (workspace_id)` |
+| `general_ledger` | `unique_ledger_period` | `CREATE UNIQUE INDEX unique_ledger_period ON public.general_ledger USING btree (workspace_id, subject_id, year, month)` |
+| `hotel_templates` | `hotel_templates_pkey` | `CREATE UNIQUE INDEX hotel_templates_pkey ON public.hotel_templates USING btree (id)` |
+| `hotels` | `idx_hotels_active` | `CREATE INDEX idx_hotels_active ON public.hotels USING btree (is_active)` |
+| `hotels` | `idx_hotels_brand` | `CREATE INDEX idx_hotels_brand ON public.hotels USING btree (brand)` |
+| `hotels` | `idx_hotels_city` | `CREATE INDEX idx_hotels_city ON public.hotels USING btree (city_id)` |
+| `hotels` | `idx_hotels_class` | `CREATE INDEX idx_hotels_class ON public.hotels USING btree (hotel_class)` |
+| `hotels` | `idx_hotels_country` | `CREATE INDEX idx_hotels_country ON public.hotels USING btree (country_id)` |
+| `hotels` | `idx_hotels_country_code` | `CREATE INDEX idx_hotels_country_code ON public.hotels USING btree (country_code)` |
+| `hotels` | `idx_hotels_created_by` | `CREATE INDEX idx_hotels_created_by ON public.hotels USING btree (created_by)` |
+| `hotels` | `idx_hotels_region_id` | `CREATE INDEX idx_hotels_region_id ON public.hotels USING btree (region_id)` |
+| `hotels` | `idx_hotels_star` | `CREATE INDEX idx_hotels_star ON public.hotels USING btree (star_rating)` |
+| `hotels` | `idx_hotels_updated_by` | `CREATE INDEX idx_hotels_updated_by ON public.hotels USING btree (updated_by)` |
+| `hotels` | `luxury_hotels_pkey` | `CREATE UNIQUE INDEX luxury_hotels_pkey ON public.hotels USING btree (id)` |
+| `image_library` | `idx_image_library_attraction_id` | `CREATE INDEX idx_image_library_attraction_id ON public.image_library USING btree (attraction_id)` |
+| `image_library` | `idx_image_library_category` | `CREATE INDEX idx_image_library_category ON public.image_library USING btree (category)` |
+| `image_library` | `idx_image_library_city_id` | `CREATE INDEX idx_image_library_city_id ON public.image_library USING btree (city_id)` |
+| `image_library` | `idx_image_library_country_id` | `CREATE INDEX idx_image_library_country_id ON public.image_library USING btree (country_id)` |
+| `image_library` | `idx_image_library_tags` | `CREATE INDEX idx_image_library_tags ON public.image_library USING gin (tags)` |
+| `image_library` | `idx_image_library_workspace_id` | `CREATE INDEX idx_image_library_workspace_id ON public.image_library USING btree (workspace_id)` |
+| `image_library` | `image_library_pkey` | `CREATE UNIQUE INDEX image_library_pkey ON public.image_library USING btree (id)` |
+| `invoice_orders` | `idx_invoice_orders_invoice_id` | `CREATE INDEX idx_invoice_orders_invoice_id ON public.invoice_orders USING btree (invoice_id)` |
+| `invoice_orders` | `idx_invoice_orders_order_id` | `CREATE INDEX idx_invoice_orders_order_id ON public.invoice_orders USING btree (order_id)` |
+| `invoice_orders` | `idx_invoice_orders_workspace_id` | `CREATE INDEX idx_invoice_orders_workspace_id ON public.invoice_orders USING btree (workspace_id)` |
+| `invoice_orders` | `invoice_orders_pkey` | `CREATE UNIQUE INDEX invoice_orders_pkey ON public.invoice_orders USING btree (id)` |
+| `invoice_orders` | `invoice_orders_unique` | `CREATE UNIQUE INDEX invoice_orders_unique ON public.invoice_orders USING btree (invoice_id, order_id)` |
+| `itineraries` | `idx_itineraries_archived_at` | `CREATE INDEX idx_itineraries_archived_at ON public.itineraries USING btree (archived_at)` |
+| `itineraries` | `idx_itineraries_city` | `CREATE INDEX idx_itineraries_city ON public.itineraries USING btree (city)` |
+| `itineraries` | `idx_itineraries_closed_at` | `CREATE INDEX idx_itineraries_closed_at ON public.itineraries USING btree (closed_at) WHERE (closed_at IS NOT NULL)` |
+| `itineraries` | `idx_itineraries_code` | `CREATE INDEX idx_itineraries_code ON public.itineraries USING btree (code)` |
+| `itineraries` | `idx_itineraries_country` | `CREATE INDEX idx_itineraries_country ON public.itineraries USING btree (country)` |
+| `itineraries` | `idx_itineraries_created_by` | `CREATE INDEX idx_itineraries_created_by ON public.itineraries USING btree (created_by)` |
+| `itineraries` | `idx_itineraries_deleted` | `CREATE INDEX idx_itineraries_deleted ON public.itineraries USING btree (_deleted)` |
+| `itineraries` | `idx_itineraries_departure_date` | `CREATE INDEX idx_itineraries_departure_date ON public.itineraries USING btree (departure_date)` |
+| `itineraries` | `idx_itineraries_erp_id` | `CREATE INDEX idx_itineraries_erp_id ON public.itineraries USING btree (erp_itinerary_id)` |
+| `itineraries` | `idx_itineraries_is_latest` | `CREATE INDEX idx_itineraries_is_latest ON public.itineraries USING btree (is_latest) WHERE (is_latest = true)` |
+| `itineraries` | `idx_itineraries_is_template` | `CREATE INDEX idx_itineraries_is_template ON public.itineraries USING btree (is_template) WHERE (is_template = true)` |
+| `itineraries` | `idx_itineraries_parent_id` | `CREATE INDEX idx_itineraries_parent_id ON public.itineraries USING btree (parent_id)` |
+| `itineraries` | `idx_itineraries_status` | `CREATE INDEX idx_itineraries_status ON public.itineraries USING btree (status)` |
+| `itineraries` | `idx_itineraries_template_id` | `CREATE INDEX idx_itineraries_template_id ON public.itineraries USING btree (template_id)` |
+| `itineraries` | `idx_itineraries_tour_id` | `CREATE INDEX idx_itineraries_tour_id ON public.itineraries USING btree (tour_id)` |
+| `itineraries` | `idx_itineraries_updated_by` | `CREATE INDEX idx_itineraries_updated_by ON public.itineraries USING btree (updated_by)` |
+| `itineraries` | `idx_itineraries_version` | `CREATE INDEX idx_itineraries_version ON public.itineraries USING btree (version)` |
+| `itineraries` | `idx_itineraries_workspace_id` | `CREATE INDEX idx_itineraries_workspace_id ON public.itineraries USING btree (workspace_id)` |
+| `itineraries` | `idx_itineraries_workspace_status` | `CREATE INDEX idx_itineraries_workspace_status ON public.itineraries USING btree (workspace_id, status) WHERE (_deleted = false)` |
+| `itineraries` | `itineraries_cover_template_id_idx` | `CREATE INDEX itineraries_cover_template_id_idx ON public.itineraries USING btree (cover_template_id)` |
+| `itineraries` | `itineraries_created_at_idx` | `CREATE INDEX itineraries_created_at_idx ON public.itineraries USING btree (created_at DESC)` |
+| `itineraries` | `itineraries_created_by_idx` | `CREATE INDEX itineraries_created_by_idx ON public.itineraries USING btree (created_by)` |
+| `itineraries` | `itineraries_daily_template_id_idx` | `CREATE INDEX itineraries_daily_template_id_idx ON public.itineraries USING btree (daily_template_id)` |
+| `itineraries` | `itineraries_flight_template_id_idx` | `CREATE INDEX itineraries_flight_template_id_idx ON public.itineraries USING btree (flight_template_id)` |
+| `itineraries` | `itineraries_pkey` | `CREATE UNIQUE INDEX itineraries_pkey ON public.itineraries USING btree (id)` |
+| `itineraries` | `itineraries_tour_id_idx` | `CREATE INDEX itineraries_tour_id_idx ON public.itineraries USING btree (tour_id)` |
+| `itinerary_documents` | `idx_itinerary_documents_tour_id` | `CREATE INDEX idx_itinerary_documents_tour_id ON public.itinerary_documents USING btree (tour_id)` |
+| `itinerary_documents` | `idx_itinerary_documents_workspace_id` | `CREATE INDEX idx_itinerary_documents_workspace_id ON public.itinerary_documents USING btree (workspace_id)` |
+| `itinerary_documents` | `itinerary_documents_pkey` | `CREATE UNIQUE INDEX itinerary_documents_pkey ON public.itinerary_documents USING btree (id)` |
+| `itinerary_permissions` | `Itinerary_Permissions_itinerary_id_user_id_key` | `CREATE UNIQUE INDEX "Itinerary_Permissions_itinerary_id_user_id_key" ON public.itinerary_permissions USING btree (itinerary_id, user_id)` |
+| `itinerary_permissions` | `Itinerary_Permissions_pkey` | `CREATE UNIQUE INDEX "Itinerary_Permissions_pkey" ON public.itinerary_permissions USING btree (id)` |
+| `itinerary_permissions` | `idx_itinerary_permissions_itinerary` | `CREATE INDEX idx_itinerary_permissions_itinerary ON public.itinerary_permissions USING btree (itinerary_id)` |
+| `itinerary_permissions` | `idx_itinerary_permissions_user` | `CREATE INDEX idx_itinerary_permissions_user ON public.itinerary_permissions USING btree (user_id)` |
+| `itinerary_versions` | `idx_itinerary_versions_created_at` | `CREATE INDEX idx_itinerary_versions_created_at ON public.itinerary_versions USING btree (created_at DESC)` |
+| `itinerary_versions` | `idx_itinerary_versions_document_id` | `CREATE INDEX idx_itinerary_versions_document_id ON public.itinerary_versions USING btree (document_id)` |
+| `itinerary_versions` | `itinerary_versions_document_id_version_number_key` | `CREATE UNIQUE INDEX itinerary_versions_document_id_version_number_key ON public.itinerary_versions USING btree (document_id, version_number)` |
+| `itinerary_versions` | `itinerary_versions_pkey` | `CREATE UNIQUE INDEX itinerary_versions_pkey ON public.itinerary_versions USING btree (id)` |
+| `journal_lines` | `idx_journal_lines_account` | `CREATE INDEX idx_journal_lines_account ON public.journal_lines USING btree (account_id)` |
+| `journal_lines` | `idx_journal_lines_voucher` | `CREATE INDEX idx_journal_lines_voucher ON public.journal_lines USING btree (voucher_id)` |
+| `journal_lines` | `journal_lines_pkey` | `CREATE UNIQUE INDEX journal_lines_pkey ON public.journal_lines USING btree (id)` |
+| `journal_vouchers` | `idx_journal_vouchers_date` | `CREATE INDEX idx_journal_vouchers_date ON public.journal_vouchers USING btree (voucher_date)` |
+| `journal_vouchers` | `idx_journal_vouchers_reversed_by` | `CREATE INDEX idx_journal_vouchers_reversed_by ON public.journal_vouchers USING btree (reversed_by_id)` |
+| `journal_vouchers` | `idx_journal_vouchers_reversed_from` | `CREATE INDEX idx_journal_vouchers_reversed_from ON public.journal_vouchers USING btree (reversed_from_id)` |
+| `journal_vouchers` | `idx_journal_vouchers_status` | `CREATE INDEX idx_journal_vouchers_status ON public.journal_vouchers USING btree (status)` |
+| `journal_vouchers` | `idx_journal_vouchers_workspace` | `CREATE INDEX idx_journal_vouchers_workspace ON public.journal_vouchers USING btree (workspace_id)` |
+| `journal_vouchers` | `journal_vouchers_event_id_key` | `CREATE UNIQUE INDEX journal_vouchers_event_id_key ON public.journal_vouchers USING btree (event_id)` |
+| `journal_vouchers` | `journal_vouchers_pkey` | `CREATE UNIQUE INDEX journal_vouchers_pkey ON public.journal_vouchers USING btree (id)` |
+| `journal_vouchers` | `journal_vouchers_workspace_id_voucher_no_key` | `CREATE UNIQUE INDEX journal_vouchers_workspace_id_voucher_no_key ON public.journal_vouchers USING btree (workspace_id, voucher_no)` |
+| `knowledge_base` | `idx_knowledge_base_category` | `CREATE INDEX idx_knowledge_base_category ON public.knowledge_base USING btree (category)` |
+| `knowledge_base` | `idx_knowledge_base_workspace` | `CREATE INDEX idx_knowledge_base_workspace ON public.knowledge_base USING btree (workspace_id)` |
+| `knowledge_base` | `knowledge_base_pkey` | `CREATE UNIQUE INDEX knowledge_base_pkey ON public.knowledge_base USING btree (id)` |
+| `leader_availability` | `idx_leader_availability_dates` | `CREATE INDEX idx_leader_availability_dates ON public.leader_availability USING btree (available_start_date, available_end_date)` |
+| `leader_availability` | `idx_leader_availability_leader` | `CREATE INDEX idx_leader_availability_leader ON public.leader_availability USING btree (leader_id)` |
+| `leader_availability` | `idx_leader_availability_workspace` | `CREATE INDEX idx_leader_availability_workspace ON public.leader_availability USING btree (workspace_id)` |
+| `leader_availability` | `leader_availability_pkey` | `CREATE UNIQUE INDEX leader_availability_pkey ON public.leader_availability USING btree (id)` |
+| `leader_schedules` | `idx_leader_schedules_dates` | `CREATE INDEX idx_leader_schedules_dates ON public.leader_schedules USING btree (start_date, end_date)` |
+| `leader_schedules` | `idx_leader_schedules_leader` | `CREATE INDEX idx_leader_schedules_leader ON public.leader_schedules USING btree (leader_id)` |
+| `leader_schedules` | `idx_leader_schedules_tour` | `CREATE INDEX idx_leader_schedules_tour ON public.leader_schedules USING btree (tour_id)` |
+| `leader_schedules` | `idx_leader_schedules_workspace` | `CREATE INDEX idx_leader_schedules_workspace ON public.leader_schedules USING btree (workspace_id)` |
+| `leader_schedules` | `leader_schedules_pkey` | `CREATE UNIQUE INDEX leader_schedules_pkey ON public.leader_schedules USING btree (id)` |
+| `leader_templates` | `leader_templates_pkey` | `CREATE UNIQUE INDEX leader_templates_pkey ON public.leader_templates USING btree (id)` |
+| `leave_balances` | `idx_leave_balances_employee` | `CREATE INDEX idx_leave_balances_employee ON public.leave_balances USING btree (employee_id)` |
+| `leave_balances` | `idx_leave_balances_employee_year` | `CREATE INDEX idx_leave_balances_employee_year ON public.leave_balances USING btree (employee_id, year)` |
+| `leave_balances` | `idx_leave_balances_workspace` | `CREATE INDEX idx_leave_balances_workspace ON public.leave_balances USING btree (workspace_id)` |
+| `leave_balances` | `idx_leave_balances_year` | `CREATE INDEX idx_leave_balances_year ON public.leave_balances USING btree (year)` |
+| `leave_balances` | `leave_balances_employee_id_leave_type_id_year_key` | `CREATE UNIQUE INDEX leave_balances_employee_id_leave_type_id_year_key ON public.leave_balances USING btree (employee_id, leave_type_id, year)` |
+| `leave_balances` | `leave_balances_pkey` | `CREATE UNIQUE INDEX leave_balances_pkey ON public.leave_balances USING btree (id)` |
+| `leave_requests` | `idx_leave_requests_dates` | `CREATE INDEX idx_leave_requests_dates ON public.leave_requests USING btree (start_date, end_date)` |
+| `leave_requests` | `idx_leave_requests_employee` | `CREATE INDEX idx_leave_requests_employee ON public.leave_requests USING btree (employee_id)` |
+| `leave_requests` | `idx_leave_requests_employee_dates` | `CREATE INDEX idx_leave_requests_employee_dates ON public.leave_requests USING btree (employee_id, start_date, end_date)` |
+| `leave_requests` | `idx_leave_requests_status` | `CREATE INDEX idx_leave_requests_status ON public.leave_requests USING btree (status)` |
+| `leave_requests` | `idx_leave_requests_workspace` | `CREATE INDEX idx_leave_requests_workspace ON public.leave_requests USING btree (workspace_id)` |
+| `leave_requests` | `leave_requests_pkey` | `CREATE UNIQUE INDEX leave_requests_pkey ON public.leave_requests USING btree (id)` |
+| `leave_types` | `idx_leave_types_active` | `CREATE INDEX idx_leave_types_active ON public.leave_types USING btree (workspace_id, is_active)` |
+| `leave_types` | `idx_leave_types_workspace` | `CREATE INDEX idx_leave_types_workspace ON public.leave_types USING btree (workspace_id)` |
+| `leave_types` | `leave_types_pkey` | `CREATE UNIQUE INDEX leave_types_pkey ON public.leave_types USING btree (id)` |
+| `leave_types` | `leave_types_workspace_id_code_key` | `CREATE UNIQUE INDEX leave_types_workspace_id_code_key ON public.leave_types USING btree (workspace_id, code)` |
+| `line_conversations` | `idx_line_conversations_target` | `CREATE INDEX idx_line_conversations_target ON public.line_conversations USING btree (target_id)` |
+| `line_conversations` | `idx_line_conversations_updated` | `CREATE INDEX idx_line_conversations_updated ON public.line_conversations USING btree (updated_at DESC)` |
+| `line_conversations` | `idx_line_conversations_workspace` | `CREATE INDEX idx_line_conversations_workspace ON public.line_conversations USING btree (workspace_id)` |
+| `line_conversations` | `line_conversations_pkey` | `CREATE UNIQUE INDEX line_conversations_pkey ON public.line_conversations USING btree (id)` |
+| `line_conversations` | `line_conversations_workspace_id_conversation_type_target_id_key` | `CREATE UNIQUE INDEX line_conversations_workspace_id_conversation_type_target_id_key ON public.line_conversations USING btree (workspace_id, conversation_type, target_id)` |
+| `line_groups` | `line_groups_group_id_key` | `CREATE UNIQUE INDEX line_groups_group_id_key ON public.line_groups USING btree (group_id)` |
+| `line_groups` | `line_groups_pkey` | `CREATE UNIQUE INDEX line_groups_pkey ON public.line_groups USING btree (id)` |
+| `line_messages` | `idx_line_messages_conversation` | `CREATE INDEX idx_line_messages_conversation ON public.line_messages USING btree (conversation_id, created_at)` |
+| `line_messages` | `idx_line_messages_created` | `CREATE INDEX idx_line_messages_created ON public.line_messages USING btree (created_at DESC)` |
+| `line_messages` | `idx_line_messages_workspace` | `CREATE INDEX idx_line_messages_workspace ON public.line_messages USING btree (workspace_id)` |
+| `line_messages` | `line_messages_pkey` | `CREATE UNIQUE INDEX line_messages_pkey ON public.line_messages USING btree (id)` |
+| `line_users` | `idx_line_users_employee` | `CREATE INDEX idx_line_users_employee ON public.line_users USING btree (employee_id)` |
+| `line_users` | `idx_line_users_supplier` | `CREATE INDEX idx_line_users_supplier ON public.line_users USING btree (supplier_id)` |
+| `line_users` | `idx_line_users_workspace` | `CREATE INDEX idx_line_users_workspace ON public.line_users USING btree (workspace_id)` |
+| `line_users` | `line_users_pkey` | `CREATE UNIQUE INDEX line_users_pkey ON public.line_users USING btree (id)` |
+| `line_users` | `line_users_user_id_key` | `CREATE UNIQUE INDEX line_users_user_id_key ON public.line_users USING btree (user_id)` |
+| `linkpay_logs` | `idx_linkpay_order_number` | `CREATE INDEX idx_linkpay_order_number ON public.linkpay_logs USING btree (linkpay_order_number)` |
+| `linkpay_logs` | `idx_linkpay_receipt` | `CREATE INDEX idx_linkpay_receipt ON public.linkpay_logs USING btree (receipt_number)` |
+| `linkpay_logs` | `idx_linkpay_status` | `CREATE INDEX idx_linkpay_status ON public.linkpay_logs USING btree (status)` |
+| `linkpay_logs` | `idx_linkpay_workspace` | `CREATE INDEX idx_linkpay_workspace ON public.linkpay_logs USING btree (workspace_id)` |
+| `linkpay_logs` | `linkpay_logs_pkey` | `CREATE UNIQUE INDEX linkpay_logs_pkey ON public.linkpay_logs USING btree (id)` |
+| `linkpay_logs` | `linkpay_logs_workspace_linkpay_order_number_key` | `CREATE UNIQUE INDEX linkpay_logs_workspace_linkpay_order_number_key ON public.linkpay_logs USING btree (workspace_id, linkpay_order_number)` |
+| `luxury_hotels` | `idx_luxury_hotels_active` | `CREATE INDEX idx_luxury_hotels_active ON public.luxury_hotels USING btree (is_active)` |
+| `luxury_hotels` | `idx_luxury_hotels_brand` | `CREATE INDEX idx_luxury_hotels_brand ON public.luxury_hotels USING btree (brand)` |
+| `luxury_hotels` | `idx_luxury_hotels_city` | `CREATE INDEX idx_luxury_hotels_city ON public.luxury_hotels USING btree (city_id)` |
+| `luxury_hotels` | `idx_luxury_hotels_class` | `CREATE INDEX idx_luxury_hotels_class ON public.luxury_hotels USING btree (hotel_class)` |
+| `luxury_hotels` | `idx_luxury_hotels_country` | `CREATE INDEX idx_luxury_hotels_country ON public.luxury_hotels USING btree (country_id)` |
+| `luxury_hotels` | `idx_luxury_hotels_country_code` | `CREATE INDEX idx_luxury_hotels_country_code ON public.luxury_hotels USING btree (country_code)` |
+| `luxury_hotels` | `idx_luxury_hotels_created_by` | `CREATE INDEX idx_luxury_hotels_created_by ON public.luxury_hotels USING btree (created_by)` |
+| `luxury_hotels` | `idx_luxury_hotels_region_id` | `CREATE INDEX idx_luxury_hotels_region_id ON public.luxury_hotels USING btree (region_id)` |
+| `luxury_hotels` | `idx_luxury_hotels_star` | `CREATE INDEX idx_luxury_hotels_star ON public.luxury_hotels USING btree (star_rating)` |
+| `luxury_hotels` | `idx_luxury_hotels_updated_by` | `CREATE INDEX idx_luxury_hotels_updated_by ON public.luxury_hotels USING btree (updated_by)` |
+| `luxury_hotels` | `luxury_hotels_pkey1` | `CREATE UNIQUE INDEX luxury_hotels_pkey1 ON public.luxury_hotels USING btree (id)` |
+| `magic_combo_items` | `idx_magic_combo_items_combo` | `CREATE INDEX idx_magic_combo_items_combo ON public.magic_combo_items USING btree (combo_id)` |
+| `magic_combo_items` | `idx_magic_combo_items_magic` | `CREATE INDEX idx_magic_combo_items_magic ON public.magic_combo_items USING btree (magic_id)` |
+| `magic_combo_items` | `magic_combo_items_pkey` | `CREATE UNIQUE INDEX magic_combo_items_pkey ON public.magic_combo_items USING btree (id)` |
+| `magic_combos` | `idx_magic_combos_workspace` | `CREATE INDEX idx_magic_combos_workspace ON public.magic_combos USING btree (workspace_id)` |
+| `magic_combos` | `magic_combos_pkey` | `CREATE UNIQUE INDEX magic_combos_pkey ON public.magic_combos USING btree (id)` |
+| `magic_library` | `idx_magic_library_category` | `CREATE INDEX idx_magic_library_category ON public.magic_library USING btree (category)` |
+| `magic_library` | `idx_magic_library_layer` | `CREATE INDEX idx_magic_library_layer ON public.magic_library USING btree (layer)` |
+| `magic_library` | `idx_magic_library_status` | `CREATE INDEX idx_magic_library_status ON public.magic_library USING btree (update_status)` |
+| `magic_library` | `idx_magic_library_update_status` | `CREATE INDEX idx_magic_library_update_status ON public.magic_library USING btree (update_status)` |
+| `magic_library` | `idx_magic_library_workspace` | `CREATE INDEX idx_magic_library_workspace ON public.magic_library USING btree (workspace_id)` |
+| `magic_library` | `magic_library_pkey` | `CREATE UNIQUE INDEX magic_library_pkey ON public.magic_library USING btree (id)` |
+| `manifestation_records` | `idx_manifestation_records_date` | `CREATE INDEX idx_manifestation_records_date ON public.manifestation_records USING btree (record_date)` |
+| `manifestation_records` | `idx_manifestation_records_user_id` | `CREATE INDEX idx_manifestation_records_user_id ON public.manifestation_records USING btree (user_id)` |
+| `manifestation_records` | `manifestation_records_pkey` | `CREATE UNIQUE INDEX manifestation_records_pkey ON public.manifestation_records USING btree (id)` |
+| `manifestation_records` | `manifestation_records_user_id_record_date_key` | `CREATE UNIQUE INDEX manifestation_records_user_id_record_date_key ON public.manifestation_records USING btree (user_id, record_date)` |
+| `meeting_messages` | `idx_meeting_messages_room_id` | `CREATE INDEX idx_meeting_messages_room_id ON public.meeting_messages USING btree (room_id, created_at DESC)` |
+| `meeting_messages` | `idx_meeting_messages_sender` | `CREATE INDEX idx_meeting_messages_sender ON public.meeting_messages USING btree (sender_id)` |
+| `meeting_messages` | `meeting_messages_pkey` | `CREATE UNIQUE INDEX meeting_messages_pkey ON public.meeting_messages USING btree (id)` |
+| `meeting_participants` | `idx_meeting_participants_room` | `CREATE INDEX idx_meeting_participants_room ON public.meeting_participants USING btree (room_id)` |
+| `meeting_participants` | `meeting_participants_pkey` | `CREATE UNIQUE INDEX meeting_participants_pkey ON public.meeting_participants USING btree (id)` |
+| `meeting_participants` | `meeting_participants_room_id_participant_id_key` | `CREATE UNIQUE INDEX meeting_participants_room_id_participant_id_key ON public.meeting_participants USING btree (room_id, participant_id)` |
+| `meeting_rooms` | `idx_meeting_rooms_workspace_id` | `CREATE INDEX idx_meeting_rooms_workspace_id ON public.meeting_rooms USING btree (workspace_id)` |
+| `meeting_rooms` | `meeting_rooms_pkey` | `CREATE UNIQUE INDEX meeting_rooms_pkey ON public.meeting_rooms USING btree (id)` |
+| `members` | `idx_members_created_by` | `CREATE INDEX idx_members_created_by ON public.members USING btree (created_by)` |
+| `members` | `idx_members_id_number` | `CREATE INDEX idx_members_id_number ON public.members USING btree (id_number)` |
+| `members` | `idx_members_is_active` | `CREATE INDEX idx_members_is_active ON public.members USING btree (is_active)` |
+| `members` | `idx_members_name` | `CREATE INDEX idx_members_name ON public.members USING btree (chinese_name)` |
+| `members` | `idx_members_order_id` | `CREATE INDEX idx_members_order_id ON public.members USING btree (order_id)` |
+| `members` | `idx_members_passport_number` | `CREATE INDEX idx_members_passport_number ON public.members USING btree (passport_number)` |
+| `members` | `idx_members_tour_id` | `CREATE INDEX idx_members_tour_id ON public.members USING btree (tour_id)` |
+| `members` | `idx_members_workspace_id` | `CREATE INDEX idx_members_workspace_id ON public.members USING btree (workspace_id)` |
+| `members` | `members_pkey` | `CREATE UNIQUE INDEX members_pkey ON public.members USING btree (id)` |
+| `messages` | `idx_messages_attachments` | `CREATE INDEX idx_messages_attachments ON public.messages USING gin (attachments)` |
+| `messages` | `idx_messages_author` | `CREATE INDEX idx_messages_author ON public.messages USING btree (created_by_legacy_author)` |
+| `messages` | `idx_messages_channel` | `CREATE INDEX idx_messages_channel ON public.messages USING btree (channel_id)` |
+| `messages` | `idx_messages_created` | `CREATE INDEX idx_messages_created ON public.messages USING btree (created_at DESC)` |
+| `messages` | `idx_messages_parent_message_id` | `CREATE INDEX idx_messages_parent_message_id ON public.messages USING btree (parent_message_id) WHERE (parent_message_id IS NOT NULL)` |
+| `messages` | `idx_messages_pinned` | `CREATE INDEX idx_messages_pinned ON public.messages USING btree (channel_id, is_pinned) WHERE (is_pinned = true)` |
+| `messages` | `idx_messages_reply_count` | `CREATE INDEX idx_messages_reply_count ON public.messages USING btree (reply_count) WHERE (reply_count > 0)` |
+| `messages` | `idx_messages_workspace_id` | `CREATE INDEX idx_messages_workspace_id ON public.messages USING btree (workspace_id)` |
+| `messages` | `messages_pkey` | `CREATE UNIQUE INDEX messages_pkey ON public.messages USING btree (id)` |
+| `michelin_restaurants` | `idx_michelin_restaurants_active` | `CREATE INDEX idx_michelin_restaurants_active ON public.michelin_restaurants USING btree (is_active)` |
+| `michelin_restaurants` | `idx_michelin_restaurants_bib` | `CREATE INDEX idx_michelin_restaurants_bib ON public.michelin_restaurants USING btree (bib_gourmand) WHERE (bib_gourmand = true)` |
+| `michelin_restaurants` | `idx_michelin_restaurants_city` | `CREATE INDEX idx_michelin_restaurants_city ON public.michelin_restaurants USING btree (city_id)` |
+| `michelin_restaurants` | `idx_michelin_restaurants_country` | `CREATE INDEX idx_michelin_restaurants_country ON public.michelin_restaurants USING btree (country_id)` |
+| `michelin_restaurants` | `idx_michelin_restaurants_country_code` | `CREATE INDEX idx_michelin_restaurants_country_code ON public.michelin_restaurants USING btree (country_code)` |
+| `michelin_restaurants` | `idx_michelin_restaurants_created_by` | `CREATE INDEX idx_michelin_restaurants_created_by ON public.michelin_restaurants USING btree (created_by)` |
+| `michelin_restaurants` | `idx_michelin_restaurants_cuisine` | `CREATE INDEX idx_michelin_restaurants_cuisine ON public.michelin_restaurants USING gin (cuisine_type)` |
+| `michelin_restaurants` | `idx_michelin_restaurants_name` | `CREATE INDEX idx_michelin_restaurants_name ON public.michelin_restaurants USING btree (name)` |
+| `michelin_restaurants` | `idx_michelin_restaurants_region_id` | `CREATE INDEX idx_michelin_restaurants_region_id ON public.michelin_restaurants USING btree (region_id)` |
+| `michelin_restaurants` | `idx_michelin_restaurants_stars` | `CREATE INDEX idx_michelin_restaurants_stars ON public.michelin_restaurants USING btree (michelin_stars) WHERE (michelin_stars IS NOT NULL)` |
+| `michelin_restaurants` | `idx_michelin_restaurants_updated_by` | `CREATE INDEX idx_michelin_restaurants_updated_by ON public.michelin_restaurants USING btree (updated_by)` |
+| `michelin_restaurants` | `idx_michelin_restaurants_workspace_id` | `CREATE INDEX idx_michelin_restaurants_workspace_id ON public.michelin_restaurants USING btree (workspace_id)` |
+| `michelin_restaurants` | `michelin_restaurants_pkey` | `CREATE UNIQUE INDEX michelin_restaurants_pkey ON public.michelin_restaurants USING btree (id)` |
+| `missed_clock_requests` | `idx_missed_clock_requests_employee` | `CREATE INDEX idx_missed_clock_requests_employee ON public.missed_clock_requests USING btree (employee_id)` |
+| `missed_clock_requests` | `idx_missed_clock_requests_status` | `CREATE INDEX idx_missed_clock_requests_status ON public.missed_clock_requests USING btree (status)` |
+| `missed_clock_requests` | `missed_clock_requests_pkey` | `CREATE UNIQUE INDEX missed_clock_requests_pkey ON public.missed_clock_requests USING btree (id)` |
+| `notes` | `idx_notes_created_by` | `CREATE INDEX idx_notes_created_by ON public.notes USING btree (created_by)` |
+| `notes` | `idx_notes_updated_by` | `CREATE INDEX idx_notes_updated_by ON public.notes USING btree (updated_by)` |
+| `notes` | `idx_notes_user_id` | `CREATE INDEX idx_notes_user_id ON public.notes USING btree (user_id)` |
+| `notes` | `idx_notes_workspace_id` | `CREATE INDEX idx_notes_workspace_id ON public.notes USING btree (workspace_id)` |
+| `notes` | `notes_pkey` | `CREATE UNIQUE INDEX notes_pkey ON public.notes USING btree (id)` |
+| `notes` | `notes_user_id_tab_id_key` | `CREATE UNIQUE INDEX notes_user_id_tab_id_key ON public.notes USING btree (user_id, tab_id)` |
+| `notifications` | `idx_notifications_created` | `CREATE INDEX idx_notifications_created ON public.notifications USING btree (created_at DESC)` |
+| `notifications` | `idx_notifications_module` | `CREATE INDEX idx_notifications_module ON public.notifications USING btree (module)` |
+| `notifications` | `idx_notifications_recipient` | `CREATE INDEX idx_notifications_recipient ON public.notifications USING btree (recipient_id)` |
+| `notifications` | `idx_notifications_unread` | `CREATE INDEX idx_notifications_unread ON public.notifications USING btree (recipient_id, is_read) WHERE (is_read = false)` |
+| `notifications` | `idx_notifications_workspace` | `CREATE INDEX idx_notifications_workspace ON public.notifications USING btree (workspace_id)` |
+| `notifications` | `notifications_pkey` | `CREATE UNIQUE INDEX notifications_pkey ON public.notifications USING btree (id)` |
+| `office_documents` | `idx_office_documents_tour_id` | `CREATE INDEX idx_office_documents_tour_id ON public.office_documents USING btree (tour_id)` |
+| `office_documents` | `idx_office_documents_type` | `CREATE INDEX idx_office_documents_type ON public.office_documents USING btree (type)` |
+| `office_documents` | `idx_office_documents_updated_at` | `CREATE INDEX idx_office_documents_updated_at ON public.office_documents USING btree (updated_at DESC)` |
+| `office_documents` | `idx_office_documents_workspace_id` | `CREATE INDEX idx_office_documents_workspace_id ON public.office_documents USING btree (workspace_id)` |
+| `office_documents` | `office_documents_pkey` | `CREATE UNIQUE INDEX office_documents_pkey ON public.office_documents USING btree (id)` |
+| `online_trip_members` | `idx_online_trip_members_erp_order_member` | `CREATE INDEX idx_online_trip_members_erp_order_member ON public.online_trip_members USING btree (erp_order_member_id)` |
+| `online_trip_members` | `idx_online_trip_members_role` | `CREATE INDEX idx_online_trip_members_role ON public.online_trip_members USING btree (role)` |
+| `online_trip_members` | `idx_online_trip_members_trip` | `CREATE INDEX idx_online_trip_members_trip ON public.online_trip_members USING btree (trip_id)` |
+| `online_trip_members` | `idx_online_trip_members_user_id` | `CREATE INDEX idx_online_trip_members_user_id ON public.online_trip_members USING btree (user_id)` |
+| `online_trip_members` | `online_trip_members_pkey` | `CREATE UNIQUE INDEX online_trip_members_pkey ON public.online_trip_members USING btree (id)` |
+| `online_trips` | `idx_online_trips_departure` | `CREATE INDEX idx_online_trips_departure ON public.online_trips USING btree (departure_date)` |
+| `online_trips` | `idx_online_trips_erp_tour` | `CREATE INDEX idx_online_trips_erp_tour ON public.online_trips USING btree (erp_tour_id)` |
+| `online_trips` | `idx_online_trips_status` | `CREATE INDEX idx_online_trips_status ON public.online_trips USING btree (status)` |
+| `online_trips` | `online_trips_pkey` | `CREATE UNIQUE INDEX online_trips_pkey ON public.online_trips USING btree (id)` |
+| `opening_balances` | `idx_opening_balances_account` | `CREATE INDEX idx_opening_balances_account ON public.opening_balances USING btree (account_id)` |
+| `opening_balances` | `idx_opening_balances_workspace` | `CREATE INDEX idx_opening_balances_workspace ON public.opening_balances USING btree (workspace_id)` |
+| `opening_balances` | `idx_opening_balances_year` | `CREATE INDEX idx_opening_balances_year ON public.opening_balances USING btree (fiscal_year)` |
+| `opening_balances` | `opening_balances_pkey` | `CREATE UNIQUE INDEX opening_balances_pkey ON public.opening_balances USING btree (id)` |
+| `opening_balances` | `opening_balances_workspace_id_account_id_fiscal_year_key` | `CREATE UNIQUE INDEX opening_balances_workspace_id_account_id_fiscal_year_key ON public.opening_balances USING btree (workspace_id, account_id, fiscal_year)` |
+| `order_members` | `idx_order_members_customer` | `CREATE INDEX idx_order_members_customer ON public.order_members USING btree (customer_id)` |
+| `order_members` | `idx_order_members_flight_self_arranged` | `CREATE INDEX idx_order_members_flight_self_arranged ON public.order_members USING btree (flight_self_arranged) WHERE (flight_self_arranged = false)` |
+| `order_members` | `idx_order_members_order_id` | `CREATE INDEX idx_order_members_order_id ON public.order_members USING btree (order_id)` |
+| `order_members` | `idx_order_members_sort_order` | `CREATE INDEX idx_order_members_sort_order ON public.order_members USING btree (order_id, sort_order)` |
+| `order_members` | `idx_order_members_workspace_id` | `CREATE INDEX idx_order_members_workspace_id ON public.order_members USING btree (workspace_id)` |
+| `order_members` | `order_members_order_id_customer_id_key` | `CREATE UNIQUE INDEX order_members_order_id_customer_id_key ON public.order_members USING btree (order_id, customer_id)` |
+| `order_members` | `order_members_pkey` | `CREATE UNIQUE INDEX order_members_pkey ON public.order_members USING btree (id)` |
+| `orders` | `idx_orders_code` | `CREATE INDEX idx_orders_code ON public.orders USING btree (code)` |
+| `orders` | `idx_orders_created_by` | `CREATE INDEX idx_orders_created_by ON public.orders USING btree (created_by)` |
+| `orders` | `idx_orders_created_workspace` | `CREATE INDEX idx_orders_created_workspace ON public.orders USING btree (created_at, workspace_id)` |
+| `orders` | `idx_orders_customer_id` | `CREATE INDEX idx_orders_customer_id ON public.orders USING btree (customer_id)` |
+| `orders` | `idx_orders_is_active` | `CREATE INDEX idx_orders_is_active ON public.orders USING btree (is_active)` |
+| `orders` | `idx_orders_member_count` | `CREATE INDEX idx_orders_member_count ON public.orders USING btree (member_count)` |
+| `orders` | `idx_orders_payment_status` | `CREATE INDEX idx_orders_payment_status ON public.orders USING btree (payment_status)` |
+| `orders` | `idx_orders_status` | `CREATE INDEX idx_orders_status ON public.orders USING btree (status)` |
+| `orders` | `idx_orders_tour_id` | `CREATE INDEX idx_orders_tour_id ON public.orders USING btree (tour_id)` |
+| `orders` | `idx_orders_tour_status` | `CREATE INDEX idx_orders_tour_status ON public.orders USING btree (tour_id, status)` |
+| `orders` | `idx_orders_updated_by` | `CREATE INDEX idx_orders_updated_by ON public.orders USING btree (updated_by)` |
+| `orders` | `idx_orders_workspace_id` | `CREATE INDEX idx_orders_workspace_id ON public.orders USING btree (workspace_id)` |
+| `orders` | `orders_pkey` | `CREATE UNIQUE INDEX orders_pkey ON public.orders USING btree (id)` |
+| `orders` | `orders_workspace_code_key` | `CREATE UNIQUE INDEX orders_workspace_code_key ON public.orders USING btree (workspace_id, code)` |
+| `overtime_requests` | `idx_overtime_requests_date` | `CREATE INDEX idx_overtime_requests_date ON public.overtime_requests USING btree (date)` |
+| `overtime_requests` | `idx_overtime_requests_employee` | `CREATE INDEX idx_overtime_requests_employee ON public.overtime_requests USING btree (employee_id)` |
+| `overtime_requests` | `idx_overtime_requests_status` | `CREATE INDEX idx_overtime_requests_status ON public.overtime_requests USING btree (status)` |
+| `overtime_requests` | `overtime_requests_pkey` | `CREATE UNIQUE INDEX overtime_requests_pkey ON public.overtime_requests USING btree (id)` |
+| `payment_methods` | `idx_payment_methods_credit_account_id` | `CREATE INDEX idx_payment_methods_credit_account_id ON public.payment_methods USING btree (credit_account_id)` |
+| `payment_methods` | `idx_payment_methods_debit_account_id` | `CREATE INDEX idx_payment_methods_debit_account_id ON public.payment_methods USING btree (debit_account_id)` |
+| `payment_methods` | `idx_payment_methods_type` | `CREATE INDEX idx_payment_methods_type ON public.payment_methods USING btree (type)` |
+| `payment_methods` | `idx_payment_methods_workspace` | `CREATE INDEX idx_payment_methods_workspace ON public.payment_methods USING btree (workspace_id)` |
+| `payment_methods` | `payment_methods_pkey` | `CREATE UNIQUE INDEX payment_methods_pkey ON public.payment_methods USING btree (id)` |
+| `payment_methods` | `payment_methods_workspace_id_code_type_key` | `CREATE UNIQUE INDEX payment_methods_workspace_id_code_type_key ON public.payment_methods USING btree (workspace_id, code, type)` |
+| `payment_request_items` | `idx_payment_request_items_confirmation_item_id` | `CREATE INDEX idx_payment_request_items_confirmation_item_id ON public.payment_request_items USING btree (confirmation_item_id)` |
+| `payment_request_items` | `idx_payment_request_items_custom_date` | `CREATE INDEX idx_payment_request_items_custom_date ON public.payment_request_items USING btree (custom_request_date)` |
+| `payment_request_items` | `idx_payment_request_items_payment_method` | `CREATE INDEX idx_payment_request_items_payment_method ON public.payment_request_items USING btree (payment_method)` |
+| `payment_request_items` | `idx_payment_request_items_request_id` | `CREATE INDEX idx_payment_request_items_request_id ON public.payment_request_items USING btree (request_id)` |
+| `payment_request_items` | `idx_payment_request_items_supplier_id` | `CREATE INDEX idx_payment_request_items_supplier_id ON public.payment_request_items USING btree (supplier_id)` |
+| `payment_request_items` | `idx_payment_request_items_tour_id` | `CREATE INDEX idx_payment_request_items_tour_id ON public.payment_request_items USING btree (tour_id)` |
+| `payment_request_items` | `idx_payment_request_items_tour_request_id` | `CREATE INDEX idx_payment_request_items_tour_request_id ON public.payment_request_items USING btree (tour_request_id) WHERE (tour_request_id IS NOT NULL)` |
+| `payment_request_items` | `idx_payment_request_items_workspace_id` | `CREATE INDEX idx_payment_request_items_workspace_id ON public.payment_request_items USING btree (workspace_id)` |
+| `payment_request_items` | `payment_request_items_pkey` | `CREATE UNIQUE INDEX payment_request_items_pkey ON public.payment_request_items USING btree (id)` |
+| `payment_requests` | `idx_payment_requests_accounting_subject_id` | `CREATE INDEX idx_payment_requests_accounting_subject_id ON public.payment_requests USING btree (accounting_subject_id)` |
+| `payment_requests` | `idx_payment_requests_accounting_voucher` | `CREATE INDEX idx_payment_requests_accounting_voucher ON public.payment_requests USING btree (accounting_voucher_id)` |
+| `payment_requests` | `idx_payment_requests_approved_by` | `CREATE INDEX idx_payment_requests_approved_by ON public.payment_requests USING btree (approved_by)` |
+| `payment_requests` | `idx_payment_requests_batch_id` | `CREATE INDEX idx_payment_requests_batch_id ON public.payment_requests USING btree (batch_id) WHERE (batch_id IS NOT NULL)` |
+| `payment_requests` | `idx_payment_requests_code` | `CREATE INDEX idx_payment_requests_code ON public.payment_requests USING btree (code)` |
+| `payment_requests` | `idx_payment_requests_expense_type` | `CREATE INDEX idx_payment_requests_expense_type ON public.payment_requests USING btree (expense_type)` |
+| `payment_requests` | `idx_payment_requests_order_id` | `CREATE INDEX idx_payment_requests_order_id ON public.payment_requests USING btree (order_id)` |
+| `payment_requests` | `idx_payment_requests_order_number` | `CREATE INDEX idx_payment_requests_order_number ON public.payment_requests USING btree (order_number)` |
+| `payment_requests` | `idx_payment_requests_paid_by` | `CREATE INDEX idx_payment_requests_paid_by ON public.payment_requests USING btree (paid_by)` |
+| `payment_requests` | `idx_payment_requests_payment_method` | `CREATE INDEX idx_payment_requests_payment_method ON public.payment_requests USING btree (payment_method_id)` |
+| `payment_requests` | `idx_payment_requests_request_category` | `CREATE INDEX idx_payment_requests_request_category ON public.payment_requests USING btree (request_category)` |
+| `payment_requests` | `idx_payment_requests_request_date` | `CREATE INDEX idx_payment_requests_request_date ON public.payment_requests USING btree (request_date)` |
+| `payment_requests` | `idx_payment_requests_status` | `CREATE INDEX idx_payment_requests_status ON public.payment_requests USING btree (status)` |
+| `payment_requests` | `idx_payment_requests_supplier_id` | `CREATE INDEX idx_payment_requests_supplier_id ON public.payment_requests USING btree (supplier_id)` |
+| `payment_requests` | `idx_payment_requests_tour_code` | `CREATE INDEX idx_payment_requests_tour_code ON public.payment_requests USING btree (tour_code)` |
+| `payment_requests` | `idx_payment_requests_tour_id` | `CREATE INDEX idx_payment_requests_tour_id ON public.payment_requests USING btree (tour_id)` |
+| `payment_requests` | `idx_payment_requests_tour_status` | `CREATE INDEX idx_payment_requests_tour_status ON public.payment_requests USING btree (tour_id, status)` |
+| `payment_requests` | `idx_payment_requests_updated_by` | `CREATE INDEX idx_payment_requests_updated_by ON public.payment_requests USING btree (updated_by)` |
+| `payment_requests` | `idx_payment_requests_workspace_id` | `CREATE INDEX idx_payment_requests_workspace_id ON public.payment_requests USING btree (workspace_id)` |
+| `payment_requests` | `payment_requests_pkey` | `CREATE UNIQUE INDEX payment_requests_pkey ON public.payment_requests USING btree (id)` |
+| `payment_requests` | `payment_requests_workspace_code_key` | `CREATE UNIQUE INDEX payment_requests_workspace_code_key ON public.payment_requests USING btree (workspace_id, code)` |
+| `payments` | `idx_payments_accounting_voucher` | `CREATE INDEX idx_payments_accounting_voucher ON public.payments USING btree (accounting_voucher_id)` |
+| `payments` | `idx_payments_orderid` | `CREATE INDEX idx_payments_orderid ON public.payments USING btree (order_id)` |
+| `payments` | `idx_payments_status` | `CREATE INDEX idx_payments_status ON public.payments USING btree (status)` |
+| `payments` | `idx_payments_workspace_id` | `CREATE INDEX idx_payments_workspace_id ON public.payments USING btree (workspace_id)` |
+| `payments` | `payments_pkey` | `CREATE UNIQUE INDEX payments_pkey ON public.payments USING btree (id)` |
+| `payments` | `payments_workspace_payment_number_key` | `CREATE UNIQUE INDEX payments_workspace_payment_number_key ON public.payments USING btree (workspace_id, payment_number)` |
+| `payroll_allowance_types` | `payroll_allowance_types_pkey` | `CREATE UNIQUE INDEX payroll_allowance_types_pkey ON public.payroll_allowance_types USING btree (id)` |
+| `payroll_allowance_types` | `payroll_allowance_types_workspace_id_code_key` | `CREATE UNIQUE INDEX payroll_allowance_types_workspace_id_code_key ON public.payroll_allowance_types USING btree (workspace_id, code)` |
+| `payroll_deduction_types` | `payroll_deduction_types_pkey` | `CREATE UNIQUE INDEX payroll_deduction_types_pkey ON public.payroll_deduction_types USING btree (id)` |
+| `payroll_deduction_types` | `payroll_deduction_types_workspace_id_code_key` | `CREATE UNIQUE INDEX payroll_deduction_types_workspace_id_code_key ON public.payroll_deduction_types USING btree (workspace_id, code)` |
+| `payroll_periods` | `idx_payroll_periods_status` | `CREATE INDEX idx_payroll_periods_status ON public.payroll_periods USING btree (status)` |
+| `payroll_periods` | `idx_payroll_periods_workspace` | `CREATE INDEX idx_payroll_periods_workspace ON public.payroll_periods USING btree (workspace_id)` |
+| `payroll_periods` | `idx_payroll_periods_year_month` | `CREATE INDEX idx_payroll_periods_year_month ON public.payroll_periods USING btree (year, month)` |
+| `payroll_periods` | `payroll_periods_pkey` | `CREATE UNIQUE INDEX payroll_periods_pkey ON public.payroll_periods USING btree (id)` |
+| `payroll_periods` | `payroll_periods_workspace_id_year_month_key` | `CREATE UNIQUE INDEX payroll_periods_workspace_id_year_month_key ON public.payroll_periods USING btree (workspace_id, year, month)` |
+| `payroll_records` | `idx_payroll_records_employee` | `CREATE INDEX idx_payroll_records_employee ON public.payroll_records USING btree (employee_id)` |
+| `payroll_records` | `idx_payroll_records_period` | `CREATE INDEX idx_payroll_records_period ON public.payroll_records USING btree (payroll_period_id)` |
+| `payroll_records` | `idx_payroll_records_period_employee` | `CREATE INDEX idx_payroll_records_period_employee ON public.payroll_records USING btree (payroll_period_id, employee_id)` |
+| `payroll_records` | `idx_payroll_records_workspace` | `CREATE INDEX idx_payroll_records_workspace ON public.payroll_records USING btree (workspace_id)` |
+| `payroll_records` | `payroll_records_payroll_period_id_employee_id_key` | `CREATE UNIQUE INDEX payroll_records_payroll_period_id_employee_id_key ON public.payroll_records USING btree (payroll_period_id, employee_id)` |
+| `payroll_records` | `payroll_records_pkey` | `CREATE UNIQUE INDEX payroll_records_pkey ON public.payroll_records USING btree (id)` |
+| `personal_canvases` | `idx_personal_canvases_employee` | `CREATE INDEX idx_personal_canvases_employee ON public.personal_canvases USING btree (employee_id)` |
+| `personal_canvases` | `idx_personal_canvases_workspace` | `CREATE INDEX idx_personal_canvases_workspace ON public.personal_canvases USING btree (workspace_id)` |
+| `personal_canvases` | `personal_canvases_pkey` | `CREATE UNIQUE INDEX personal_canvases_pkey ON public.personal_canvases USING btree (id)` |
+| `personal_expenses` | `idx_personal_expenses_account` | `CREATE INDEX idx_personal_expenses_account ON public.personal_expenses USING btree (account_id)` |
+| `personal_expenses` | `idx_personal_expenses_category` | `CREATE INDEX idx_personal_expenses_category ON public.personal_expenses USING btree (category)` |
+| `personal_expenses` | `idx_personal_expenses_category_id` | `CREATE INDEX idx_personal_expenses_category_id ON public.personal_expenses USING btree (category_id)` |
+| `personal_expenses` | `idx_personal_expenses_currency` | `CREATE INDEX idx_personal_expenses_currency ON public.personal_expenses USING btree (currency)` |
+| `personal_expenses` | `idx_personal_expenses_date` | `CREATE INDEX idx_personal_expenses_date ON public.personal_expenses USING btree (expense_date)` |
+| `personal_expenses` | `idx_personal_expenses_foreign` | `CREATE INDEX idx_personal_expenses_foreign ON public.personal_expenses USING btree (is_foreign_transaction) WHERE (is_foreign_transaction = true)` |
+| `personal_expenses` | `idx_personal_expenses_split` | `CREATE INDEX idx_personal_expenses_split ON public.personal_expenses USING btree (is_split, split_group_id)` |
+| `personal_expenses` | `idx_personal_expenses_user_id` | `CREATE INDEX idx_personal_expenses_user_id ON public.personal_expenses USING btree (user_id)` |
+| `personal_expenses` | `personal_expenses_pkey` | `CREATE UNIQUE INDEX personal_expenses_pkey ON public.personal_expenses USING btree (id)` |
+| `personal_records` | `idx_personal_records_exercise_id` | `CREATE INDEX idx_personal_records_exercise_id ON public.personal_records USING btree (exercise_id)` |
+| `personal_records` | `idx_personal_records_user_id` | `CREATE INDEX idx_personal_records_user_id ON public.personal_records USING btree (user_id)` |
+| `personal_records` | `idx_personal_records_workspace_id` | `CREATE INDEX idx_personal_records_workspace_id ON public.personal_records USING btree (workspace_id)` |
+| `personal_records` | `personal_records_pkey` | `CREATE UNIQUE INDEX personal_records_pkey ON public.personal_records USING btree (id)` |
+| `personal_records` | `personal_records_user_id_exercise_id_key` | `CREATE UNIQUE INDEX personal_records_user_id_exercise_id_key ON public.personal_records USING btree (user_id, exercise_id)` |
+| `pnr_ai_queries` | `pnr_ai_queries_pkey` | `CREATE UNIQUE INDEX pnr_ai_queries_pkey ON public.pnr_ai_queries USING btree (id)` |
+| `pnr_fare_alerts` | `pnr_fare_alerts_pkey` | `CREATE UNIQUE INDEX pnr_fare_alerts_pkey ON public.pnr_fare_alerts USING btree (id)` |
+| `pnr_fare_history` | `pnr_fare_history_pkey` | `CREATE UNIQUE INDEX pnr_fare_history_pkey ON public.pnr_fare_history USING btree (id)` |
+| `pnr_flight_status_history` | `pnr_flight_status_history_pkey` | `CREATE UNIQUE INDEX pnr_flight_status_history_pkey ON public.pnr_flight_status_history USING btree (id)` |
+| `pnr_passengers` | `idx_pnr_passengers_customer` | `CREATE INDEX idx_pnr_passengers_customer ON public.pnr_passengers USING btree (customer_id) WHERE (customer_id IS NOT NULL)` |
+| `pnr_passengers` | `idx_pnr_passengers_pnr` | `CREATE INDEX idx_pnr_passengers_pnr ON public.pnr_passengers USING btree (pnr_id)` |
+| `pnr_passengers` | `pnr_passengers_pkey` | `CREATE UNIQUE INDEX pnr_passengers_pkey ON public.pnr_passengers USING btree (id)` |
+| `pnr_queue_items` | `idx_pnr_queue_assigned` | `CREATE INDEX idx_pnr_queue_assigned ON public.pnr_queue_items USING btree (assigned_to, status)` |
+| `pnr_queue_items` | `idx_pnr_queue_due_date` | `CREATE INDEX idx_pnr_queue_due_date ON public.pnr_queue_items USING btree (due_date) WHERE (status = 'pending'::text)` |
+| `pnr_queue_items` | `idx_pnr_queue_items_type` | `CREATE INDEX idx_pnr_queue_items_type ON public.pnr_queue_items USING btree (queue_type)` |
+| `pnr_queue_items` | `idx_pnr_queue_pnr` | `CREATE INDEX idx_pnr_queue_pnr ON public.pnr_queue_items USING btree (pnr_id)` |
+| `pnr_queue_items` | `idx_pnr_queue_workspace_status` | `CREATE INDEX idx_pnr_queue_workspace_status ON public.pnr_queue_items USING btree (workspace_id, status)` |
+| `pnr_queue_items` | `pnr_queue_items_pkey` | `CREATE UNIQUE INDEX pnr_queue_items_pkey ON public.pnr_queue_items USING btree (id)` |
+| `pnr_records` | `idx_pnr_records_deadline` | `CREATE INDEX idx_pnr_records_deadline ON public.pnr_records USING btree (ticketing_deadline) WHERE (ticketing_deadline IS NOT NULL)` |
+| `pnr_records` | `idx_pnr_records_locator` | `CREATE INDEX idx_pnr_records_locator ON public.pnr_records USING btree (record_locator)` |
+| `pnr_records` | `idx_pnr_records_tour` | `CREATE INDEX idx_pnr_records_tour ON public.pnr_records USING btree (tour_id) WHERE (tour_id IS NOT NULL)` |
+| `pnr_records` | `idx_pnr_records_workspace` | `CREATE INDEX idx_pnr_records_workspace ON public.pnr_records USING btree (workspace_id)` |
+| `pnr_records` | `pnr_records_pkey` | `CREATE UNIQUE INDEX pnr_records_pkey ON public.pnr_records USING btree (id)` |
+| `pnr_remarks` | `pnr_remarks_pkey` | `CREATE UNIQUE INDEX pnr_remarks_pkey ON public.pnr_remarks USING btree (id)` |
+| `pnr_schedule_changes` | `idx_pnr_schedule_changes_pnr` | `CREATE INDEX idx_pnr_schedule_changes_pnr ON public.pnr_schedule_changes USING btree (pnr_id)` |
+| `pnr_schedule_changes` | `idx_pnr_schedule_changes_status` | `CREATE INDEX idx_pnr_schedule_changes_status ON public.pnr_schedule_changes USING btree (workspace_id, status)` |
+| `pnr_schedule_changes` | `pnr_schedule_changes_pkey` | `CREATE UNIQUE INDEX pnr_schedule_changes_pkey ON public.pnr_schedule_changes USING btree (id)` |
+| `pnr_segments` | `idx_pnr_segments_date` | `CREATE INDEX idx_pnr_segments_date ON public.pnr_segments USING btree (departure_date)` |
+| `pnr_segments` | `idx_pnr_segments_pnr` | `CREATE INDEX idx_pnr_segments_pnr ON public.pnr_segments USING btree (pnr_id)` |
+| `pnr_segments` | `pnr_segments_pkey` | `CREATE UNIQUE INDEX pnr_segments_pkey ON public.pnr_segments USING btree (id)` |
+| `pnr_ssr_elements` | `pnr_ssr_elements_pkey` | `CREATE UNIQUE INDEX pnr_ssr_elements_pkey ON public.pnr_ssr_elements USING btree (id)` |
+| `pnrs` | `idx_pnrs_created_at` | `CREATE INDEX idx_pnrs_created_at ON public.pnrs USING btree (created_at DESC)` |
+| `pnrs` | `idx_pnrs_created_by` | `CREATE INDEX idx_pnrs_created_by ON public.pnrs USING btree (created_by)` |
+| `pnrs` | `idx_pnrs_employee_id` | `CREATE INDEX idx_pnrs_employee_id ON public.pnrs USING btree (employee_id)` |
+| `pnrs` | `idx_pnrs_record_locator` | `CREATE INDEX idx_pnrs_record_locator ON public.pnrs USING btree (record_locator)` |
+| `pnrs` | `idx_pnrs_status` | `CREATE INDEX idx_pnrs_status ON public.pnrs USING btree (status)` |
+| `pnrs` | `idx_pnrs_ticketing_deadline` | `CREATE INDEX idx_pnrs_ticketing_deadline ON public.pnrs USING btree (ticketing_deadline)` |
+| `pnrs` | `idx_pnrs_tour_id` | `CREATE INDEX idx_pnrs_tour_id ON public.pnrs USING btree (tour_id) WHERE (tour_id IS NOT NULL)` |
+| `pnrs` | `idx_pnrs_updated_by` | `CREATE INDEX idx_pnrs_updated_by ON public.pnrs USING btree (updated_by)` |
+| `pnrs` | `idx_pnrs_workspace` | `CREATE INDEX idx_pnrs_workspace ON public.pnrs USING btree (workspace_id)` |
+| `pnrs` | `idx_pnrs_workspace_id` | `CREATE INDEX idx_pnrs_workspace_id ON public.pnrs USING btree (workspace_id)` |
+| `pnrs` | `pnrs_pkey` | `CREATE UNIQUE INDEX pnrs_pkey ON public.pnrs USING btree (id)` |
+| `pnrs` | `pnrs_workspace_record_locator_key` | `CREATE UNIQUE INDEX pnrs_workspace_record_locator_key ON public.pnrs USING btree (workspace_id, record_locator)` |
+| `posting_rules` | `posting_rules_pkey` | `CREATE UNIQUE INDEX posting_rules_pkey ON public.posting_rules USING btree (id)` |
+| `premium_experiences` | `idx_premium_experiences_active` | `CREATE INDEX idx_premium_experiences_active ON public.premium_experiences USING btree (is_active)` |
+| `premium_experiences` | `idx_premium_experiences_category` | `CREATE INDEX idx_premium_experiences_category ON public.premium_experiences USING btree (category)` |
+| `premium_experiences` | `idx_premium_experiences_city` | `CREATE INDEX idx_premium_experiences_city ON public.premium_experiences USING btree (city_id)` |
+| `premium_experiences` | `idx_premium_experiences_country` | `CREATE INDEX idx_premium_experiences_country ON public.premium_experiences USING btree (country_id)` |
+| `premium_experiences` | `idx_premium_experiences_country_code` | `CREATE INDEX idx_premium_experiences_country_code ON public.premium_experiences USING btree (country_code)` |
+| `premium_experiences` | `idx_premium_experiences_created_by` | `CREATE INDEX idx_premium_experiences_created_by ON public.premium_experiences USING btree (created_by)` |
+| `premium_experiences` | `idx_premium_experiences_exclusivity` | `CREATE INDEX idx_premium_experiences_exclusivity ON public.premium_experiences USING btree (exclusivity_level)` |
+| `premium_experiences` | `idx_premium_experiences_featured` | `CREATE INDEX idx_premium_experiences_featured ON public.premium_experiences USING btree (is_featured) WHERE (is_featured = true)` |
+| `premium_experiences` | `idx_premium_experiences_recommended_for` | `CREATE INDEX idx_premium_experiences_recommended_for ON public.premium_experiences USING gin (recommended_for)` |
+| `premium_experiences` | `idx_premium_experiences_region_id` | `CREATE INDEX idx_premium_experiences_region_id ON public.premium_experiences USING btree (region_id)` |
+| `premium_experiences` | `idx_premium_experiences_sub_category` | `CREATE INDEX idx_premium_experiences_sub_category ON public.premium_experiences USING gin (sub_category)` |
+| `premium_experiences` | `idx_premium_experiences_updated_by` | `CREATE INDEX idx_premium_experiences_updated_by ON public.premium_experiences USING btree (updated_by)` |
+| `premium_experiences` | `idx_premium_experiences_workspace_id` | `CREATE INDEX idx_premium_experiences_workspace_id ON public.premium_experiences USING btree (workspace_id)` |
+| `premium_experiences` | `premium_experiences_pkey` | `CREATE UNIQUE INDEX premium_experiences_pkey ON public.premium_experiences USING btree (id)` |
+| `price_list_items` | `price_list_items_itemcode_key` | `CREATE UNIQUE INDEX price_list_items_itemcode_key ON public.price_list_items USING btree (item_code)` |
+| `price_list_items` | `price_list_items_pkey` | `CREATE UNIQUE INDEX price_list_items_pkey ON public.price_list_items USING btree (id)` |
+| `pricing_templates` | `pricing_templates_pkey` | `CREATE UNIQUE INDEX pricing_templates_pkey ON public.pricing_templates USING btree (id)` |
+| `private_messages` | `idx_private_messages_created` | `CREATE INDEX idx_private_messages_created ON public.private_messages USING btree (created_at DESC)` |
+| `private_messages` | `idx_private_messages_receiver` | `CREATE INDEX idx_private_messages_receiver ON public.private_messages USING btree (receiver_id)` |
+| `private_messages` | `idx_private_messages_sender` | `CREATE INDEX idx_private_messages_sender ON public.private_messages USING btree (sender_id)` |
+| `private_messages` | `private_messages_pkey` | `CREATE UNIQUE INDEX private_messages_pkey ON public.private_messages USING btree (id)` |
+| `profiles` | `idx_profiles_linked_id_number` | `CREATE INDEX idx_profiles_linked_id_number ON public.profiles USING btree (linked_id_number)` |
+| `profiles` | `profiles_pkey` | `CREATE UNIQUE INDEX profiles_pkey ON public.profiles USING btree (id)` |
+| `progress_photos` | `idx_progress_photos_date` | `CREATE INDEX idx_progress_photos_date ON public.progress_photos USING btree (date)` |
+| `progress_photos` | `idx_progress_photos_user_id` | `CREATE INDEX idx_progress_photos_user_id ON public.progress_photos USING btree (user_id)` |
+| `progress_photos` | `idx_progress_photos_workspace_id` | `CREATE INDEX idx_progress_photos_workspace_id ON public.progress_photos USING btree (workspace_id)` |
+| `progress_photos` | `progress_photos_pkey` | `CREATE UNIQUE INDEX progress_photos_pkey ON public.progress_photos USING btree (id)` |
+| `projects` | `idx_projects_owner` | `CREATE INDEX idx_projects_owner ON public.projects USING btree (owner)` |
+| `projects` | `idx_projects_status` | `CREATE INDEX idx_projects_status ON public.projects USING btree (status)` |
+| `projects` | `projects_pkey` | `CREATE UNIQUE INDEX projects_pkey ON public.projects USING btree (id)` |
+| `quote_confirmation_logs` | `idx_quote_confirmation_logs_created_at` | `CREATE INDEX idx_quote_confirmation_logs_created_at ON public.quote_confirmation_logs USING btree (created_at DESC)` |
+| `quote_confirmation_logs` | `idx_quote_confirmation_logs_quote_id` | `CREATE INDEX idx_quote_confirmation_logs_quote_id ON public.quote_confirmation_logs USING btree (quote_id)` |
+| `quote_confirmation_logs` | `quote_confirmation_logs_pkey` | `CREATE UNIQUE INDEX quote_confirmation_logs_pkey ON public.quote_confirmation_logs USING btree (id)` |
+| `quotes` | `idx_quotes_adult_count` | `CREATE INDEX idx_quotes_adult_count ON public.quotes USING btree (adult_count)` |
+| `quotes` | `idx_quotes_code` | `CREATE INDEX idx_quotes_code ON public.quotes USING btree (code)` |
+| `quotes` | `idx_quotes_confirmation_status` | `CREATE INDEX idx_quotes_confirmation_status ON public.quotes USING btree (confirmation_status)` |
+| `quotes` | `idx_quotes_confirmation_token` | `CREATE INDEX idx_quotes_confirmation_token ON public.quotes USING btree (confirmation_token) WHERE (confirmation_token IS NOT NULL)` |
+| `quotes` | `idx_quotes_country_code` | `CREATE INDEX idx_quotes_country_code ON public.quotes USING btree (country_code)` |
+| `quotes` | `idx_quotes_country_id` | `CREATE INDEX idx_quotes_country_id ON public.quotes USING btree (country_id) WHERE (country_id IS NOT NULL)` |
+| `quotes` | `idx_quotes_customer_email` | `CREATE INDEX idx_quotes_customer_email ON public.quotes USING btree (customer_email) WHERE (customer_email IS NOT NULL)` |
+| `quotes` | `idx_quotes_customer_id` | `CREATE INDEX idx_quotes_customer_id ON public.quotes USING btree (customer_id)` |
+| `quotes` | `idx_quotes_is_active` | `CREATE INDEX idx_quotes_is_active ON public.quotes USING btree (is_active)` |
+| `quotes` | `idx_quotes_issue_date` | `CREATE INDEX idx_quotes_issue_date ON public.quotes USING btree (issue_date) WHERE (issue_date IS NOT NULL)` |
+| `quotes` | `idx_quotes_itinerary_id` | `CREATE INDEX idx_quotes_itinerary_id ON public.quotes USING btree (itinerary_id)` |
+| `quotes` | `idx_quotes_main_city_id` | `CREATE INDEX idx_quotes_main_city_id ON public.quotes USING btree (airport_code) WHERE (airport_code IS NOT NULL)` |
+| `quotes` | `idx_quotes_proposal_package` | `CREATE INDEX idx_quotes_proposal_package ON public.quotes USING btree (proposal_package_id) WHERE (proposal_package_id IS NOT NULL)` |
+| `quotes` | `idx_quotes_quote_type` | `CREATE INDEX idx_quotes_quote_type ON public.quotes USING btree (quote_type)` |
+| `quotes` | `idx_quotes_start_date` | `CREATE INDEX idx_quotes_start_date ON public.quotes USING btree (start_date)` |
+| `quotes` | `idx_quotes_status` | `CREATE INDEX idx_quotes_status ON public.quotes USING btree (status)` |
+| `quotes` | `idx_quotes_total_cost` | `CREATE INDEX idx_quotes_total_cost ON public.quotes USING btree (total_cost)` |
+| `quotes` | `idx_quotes_tour_code` | `CREATE INDEX idx_quotes_tour_code ON public.quotes USING btree (tour_code) WHERE (tour_code IS NOT NULL)` |
+| `quotes` | `idx_quotes_tour_id` | `CREATE INDEX idx_quotes_tour_id ON public.quotes USING btree (tour_id)` |
+| `quotes` | `idx_quotes_updated_by` | `CREATE INDEX idx_quotes_updated_by ON public.quotes USING btree (updated_by)` |
+| `quotes` | `idx_quotes_workspace_id` | `CREATE INDEX idx_quotes_workspace_id ON public.quotes USING btree (workspace_id)` |
+| `quotes` | `quotes_pkey` | `CREATE UNIQUE INDEX quotes_pkey ON public.quotes USING btree (id)` |
+| `quotes` | `quotes_workspace_code_key` | `CREATE UNIQUE INDEX quotes_workspace_code_key ON public.quotes USING btree (workspace_id, code)` |
+| `rate_limits` | `idx_rate_limits_reset_at` | `CREATE INDEX idx_rate_limits_reset_at ON public.rate_limits USING btree (reset_at)` |
+| `rate_limits` | `rate_limits_pkey` | `CREATE UNIQUE INDEX rate_limits_pkey ON public.rate_limits USING btree (key)` |
+| `receipts` | `idx_receipts_accounting_subject_id` | `CREATE INDEX idx_receipts_accounting_subject_id ON public.receipts USING btree (accounting_subject_id)` |
+| `receipts` | `idx_receipts_customer` | `CREATE INDEX idx_receipts_customer ON public.receipts USING btree (customer_id)` |
+| `receipts` | `idx_receipts_date` | `CREATE INDEX idx_receipts_date ON public.receipts USING btree (receipt_date) WHERE (deleted_at IS NULL)` |
+| `receipts` | `idx_receipts_number` | `CREATE INDEX idx_receipts_number ON public.receipts USING btree (receipt_number)` |
+| `receipts` | `idx_receipts_order` | `CREATE INDEX idx_receipts_order ON public.receipts USING btree (order_id)` |
+| `receipts` | `idx_receipts_order_id` | `CREATE INDEX idx_receipts_order_id ON public.receipts USING btree (order_id)` |
+| `receipts` | `idx_receipts_payment_date` | `CREATE INDEX idx_receipts_payment_date ON public.receipts USING btree (payment_date)` |
+| `receipts` | `idx_receipts_payment_method_id` | `CREATE INDEX idx_receipts_payment_method_id ON public.receipts USING btree (payment_method_id)` |
+| `receipts` | `idx_receipts_status` | `CREATE INDEX idx_receipts_status ON public.receipts USING btree (status)` |
+| `receipts` | `idx_receipts_tour_id` | `CREATE INDEX idx_receipts_tour_id ON public.receipts USING btree (tour_id)` |
+| `receipts` | `idx_receipts_type` | `CREATE INDEX idx_receipts_type ON public.receipts USING btree (receipt_type) WHERE (deleted_at IS NULL)` |
+| `receipts` | `idx_receipts_workspace` | `CREATE INDEX idx_receipts_workspace ON public.receipts USING btree (workspace_id) WHERE (deleted_at IS NULL)` |
+| `receipts` | `receipts_pkey` | `CREATE UNIQUE INDEX receipts_pkey ON public.receipts USING btree (id)` |
+| `receipts` | `receipts_workspace_receipt_number_key` | `CREATE UNIQUE INDEX receipts_workspace_receipt_number_key ON public.receipts USING btree (workspace_id, receipt_number)` |
+| `ref_airlines` | `ref_airlines_pkey` | `CREATE UNIQUE INDEX ref_airlines_pkey ON public.ref_airlines USING btree (iata_code)` |
+| `ref_airports` | `idx_ref_airports_country` | `CREATE INDEX idx_ref_airports_country ON public.ref_airports USING btree (country_code)` |
+| `ref_airports` | `idx_ref_airports_favorite` | `CREATE INDEX idx_ref_airports_favorite ON public.ref_airports USING btree (is_favorite) WHERE (is_favorite = true)` |
+| `ref_airports` | `ref_airports_pkey` | `CREATE UNIQUE INDEX ref_airports_pkey ON public.ref_airports USING btree (iata_code)` |
+| `ref_booking_classes` | `ref_booking_classes_pkey` | `CREATE UNIQUE INDEX ref_booking_classes_pkey ON public.ref_booking_classes USING btree (code)` |
+| `ref_cities` | `idx_ref_cities_active` | `CREATE INDEX idx_ref_cities_active ON public.ref_cities USING btree (is_active) WHERE (is_active = true)` |
+| `ref_cities` | `idx_ref_cities_country` | `CREATE INDEX idx_ref_cities_country ON public.ref_cities USING btree (country_code)` |
+| `ref_cities` | `idx_ref_cities_iata` | `CREATE UNIQUE INDEX idx_ref_cities_iata ON public.ref_cities USING btree (iata_city_code) WHERE (iata_city_code IS NOT NULL)` |
+| `ref_cities` | `idx_ref_cities_unlocode` | `CREATE UNIQUE INDEX idx_ref_cities_unlocode ON public.ref_cities USING btree (unlocode) WHERE (unlocode IS NOT NULL)` |
+| `ref_cities` | `ref_cities_pkey` | `CREATE UNIQUE INDEX ref_cities_pkey ON public.ref_cities USING btree (code)` |
+| `ref_countries` | `ref_countries_continent_idx` | `CREATE INDEX ref_countries_continent_idx ON public.ref_countries USING btree (continent)` |
+| `ref_countries` | `ref_countries_pkey` | `CREATE UNIQUE INDEX ref_countries_pkey ON public.ref_countries USING btree (code)` |
+| `ref_destinations` | `idx_ref_destinations_parent_code` | `CREATE INDEX idx_ref_destinations_parent_code ON public.ref_destinations USING btree (parent_code)` |
+| `ref_destinations` | `ref_destinations_country_idx` | `CREATE INDEX ref_destinations_country_idx ON public.ref_destinations USING btree (country_code)` |
+| `ref_destinations` | `ref_destinations_pkey` | `CREATE UNIQUE INDEX ref_destinations_pkey ON public.ref_destinations USING btree (code)` |
+| `ref_destinations` | `ref_destinations_short_alias_idx` | `CREATE INDEX ref_destinations_short_alias_idx ON public.ref_destinations USING btree (short_alias)` |
+| `ref_destinations` | `ref_destinations_short_alias_key` | `CREATE UNIQUE INDEX ref_destinations_short_alias_key ON public.ref_destinations USING btree (short_alias)` |
+| `ref_ssr_codes` | `ref_ssr_codes_pkey` | `CREATE UNIQUE INDEX ref_ssr_codes_pkey ON public.ref_ssr_codes USING btree (code)` |
+| `ref_status_codes` | `ref_status_codes_pkey` | `CREATE UNIQUE INDEX ref_status_codes_pkey ON public.ref_status_codes USING btree (code)` |
+| `refunds` | `idx_refunds_date` | `CREATE INDEX idx_refunds_date ON public.refunds USING btree (refund_date DESC)` |
+| `refunds` | `idx_refunds_disbursement` | `CREATE INDEX idx_refunds_disbursement ON public.refunds USING btree (disbursement_order_id) WHERE (disbursement_order_id IS NOT NULL)` |
+| `refunds` | `idx_refunds_number` | `CREATE INDEX idx_refunds_number ON public.refunds USING btree (refund_number)` |
+| `refunds` | `idx_refunds_order` | `CREATE INDEX idx_refunds_order ON public.refunds USING btree (order_id) WHERE (order_id IS NOT NULL)` |
+| `refunds` | `idx_refunds_receipt` | `CREATE INDEX idx_refunds_receipt ON public.refunds USING btree (original_receipt_id)` |
+| `refunds` | `idx_refunds_status` | `CREATE INDEX idx_refunds_status ON public.refunds USING btree (status) WHERE (deleted_at IS NULL)` |
+| `refunds` | `idx_refunds_tour` | `CREATE INDEX idx_refunds_tour ON public.refunds USING btree (tour_id) WHERE (tour_id IS NOT NULL)` |
+| `refunds` | `idx_refunds_workspace` | `CREATE INDEX idx_refunds_workspace ON public.refunds USING btree (workspace_id) WHERE (deleted_at IS NULL)` |
+| `refunds` | `refunds_pkey` | `CREATE UNIQUE INDEX refunds_pkey ON public.refunds USING btree (id)` |
+| `refunds` | `refunds_workspace_refund_number_key` | `CREATE UNIQUE INDEX refunds_workspace_refund_number_key ON public.refunds USING btree (workspace_id, refund_number)` |
+| `region_stats` | `idx_region_stats_updated` | `CREATE INDEX idx_region_stats_updated ON public.region_stats USING btree (updated_at)` |
+| `region_stats` | `region_stats_pkey` | `CREATE UNIQUE INDEX region_stats_pkey ON public.region_stats USING btree (city_id)` |
+| `regions` | `idx_regions_active` | `CREATE INDEX idx_regions_active ON public.regions USING btree (country_id, is_active, display_order)` |
+| `regions` | `idx_regions_country` | `CREATE INDEX idx_regions_country ON public.regions USING btree (country_id)` |
+| `regions` | `idx_regions_country_code` | `CREATE INDEX idx_regions_country_code ON public.regions USING btree (country_code)` |
+| `regions` | `idx_regions_workspace` | `CREATE INDEX idx_regions_workspace ON public.regions USING btree (workspace_id)` |
+| `regions` | `regions_country_id_name_key` | `CREATE UNIQUE INDEX regions_country_id_name_key ON public.regions USING btree (country_id, name)` |
+| `regions` | `regions_pkey` | `CREATE UNIQUE INDEX regions_pkey ON public.regions USING btree (id)` |
+| `request_response_items` | `idx_request_response_items_response` | `CREATE INDEX idx_request_response_items_response ON public.request_response_items USING btree (response_id)` |
+| `request_response_items` | `idx_request_response_items_workspace` | `CREATE INDEX idx_request_response_items_workspace ON public.request_response_items USING btree (workspace_id)` |
+| `request_response_items` | `request_response_items_pkey` | `CREATE UNIQUE INDEX request_response_items_pkey ON public.request_response_items USING btree (id)` |
+| `request_responses` | `idx_request_responses_request` | `CREATE INDEX idx_request_responses_request ON public.request_responses USING btree (request_id)` |
+| `request_responses` | `idx_request_responses_responder` | `CREATE INDEX idx_request_responses_responder ON public.request_responses USING btree (responder_workspace_id)` |
+| `request_responses` | `request_responses_pkey` | `CREATE UNIQUE INDEX request_responses_pkey ON public.request_responses USING btree (id)` |
+| `restaurants` | `idx_restaurants_active` | `CREATE INDEX idx_restaurants_active ON public.restaurants USING btree (is_active)` |
+| `restaurants` | `idx_restaurants_category` | `CREATE INDEX idx_restaurants_category ON public.restaurants USING btree (category)` |
+| `restaurants` | `idx_restaurants_city` | `CREATE INDEX idx_restaurants_city ON public.restaurants USING btree (city_id)` |
+| `restaurants` | `idx_restaurants_country` | `CREATE INDEX idx_restaurants_country ON public.restaurants USING btree (country_id)` |
+| `restaurants` | `idx_restaurants_country_code` | `CREATE INDEX idx_restaurants_country_code ON public.restaurants USING btree (country_code)` |
+| `restaurants` | `idx_restaurants_created_by` | `CREATE INDEX idx_restaurants_created_by ON public.restaurants USING btree (created_by)` |
+| `restaurants` | `idx_restaurants_cuisine` | `CREATE INDEX idx_restaurants_cuisine ON public.restaurants USING gin (cuisine_type)` |
+| `restaurants` | `idx_restaurants_group` | `CREATE INDEX idx_restaurants_group ON public.restaurants USING btree (group_friendly)` |
+| `restaurants` | `idx_restaurants_region_id` | `CREATE INDEX idx_restaurants_region_id ON public.restaurants USING btree (region_id)` |
+| `restaurants` | `idx_restaurants_updated_by` | `CREATE INDEX idx_restaurants_updated_by ON public.restaurants USING btree (updated_by)` |
+| `restaurants` | `restaurants_pkey` | `CREATE UNIQUE INDEX restaurants_pkey ON public.restaurants USING btree (id)` |
+| `rich_documents` | `idx_rich_documents_canvas` | `CREATE INDEX idx_rich_documents_canvas ON public.rich_documents USING btree (canvas_id)` |
+| `rich_documents` | `rich_documents_pkey` | `CREATE UNIQUE INDEX rich_documents_pkey ON public.rich_documents USING btree (id)` |
+| `role_tab_permissions` | `role_tab_permissions_pkey` | `CREATE UNIQUE INDEX role_tab_permissions_pkey ON public.role_tab_permissions USING btree (id)` |
+| `role_tab_permissions` | `role_tab_permissions_role_id_module_code_tab_code_key` | `CREATE UNIQUE INDEX role_tab_permissions_role_id_module_code_tab_code_key ON public.role_tab_permissions USING btree (role_id, module_code, tab_code)` |
+| `selector_field_roles` | `idx_selector_field_roles_field` | `CREATE INDEX idx_selector_field_roles_field ON public.selector_field_roles USING btree (field_id)` |
+| `selector_field_roles` | `idx_selector_field_roles_role` | `CREATE INDEX idx_selector_field_roles_role ON public.selector_field_roles USING btree (role_id)` |
+| `selector_field_roles` | `selector_field_roles_pkey` | `CREATE UNIQUE INDEX selector_field_roles_pkey ON public.selector_field_roles USING btree (field_id, role_id)` |
+| `shared_order_lists` | `idx_shared_order_lists_author` | `CREATE INDEX idx_shared_order_lists_author ON public.shared_order_lists USING btree (author_id)` |
+| `shared_order_lists` | `idx_shared_order_lists_channel` | `CREATE INDEX idx_shared_order_lists_channel ON public.shared_order_lists USING btree (channel_id)` |
+| `shared_order_lists` | `idx_shared_order_lists_created_at` | `CREATE INDEX idx_shared_order_lists_created_at ON public.shared_order_lists USING btree (created_at DESC)` |
+| `shared_order_lists` | `idx_shared_order_lists_created_by` | `CREATE INDEX idx_shared_order_lists_created_by ON public.shared_order_lists USING btree (created_by)` |
+| `shared_order_lists` | `shared_order_lists_pkey` | `CREATE UNIQUE INDEX shared_order_lists_pkey ON public.shared_order_lists USING btree (id)` |
+| `social_group_members` | `idx_social_group_members_group` | `CREATE INDEX idx_social_group_members_group ON public.social_group_members USING btree (group_id)` |
+| `social_group_members` | `idx_social_group_members_status` | `CREATE INDEX idx_social_group_members_status ON public.social_group_members USING btree (status)` |
+| `social_group_members` | `idx_social_group_members_user` | `CREATE INDEX idx_social_group_members_user ON public.social_group_members USING btree (user_id)` |
+| `social_group_members` | `social_group_members_group_id_user_id_key` | `CREATE UNIQUE INDEX social_group_members_group_id_user_id_key ON public.social_group_members USING btree (group_id, user_id)` |
+| `social_group_members` | `social_group_members_pkey` | `CREATE UNIQUE INDEX social_group_members_pkey ON public.social_group_members USING btree (id)` |
+| `social_group_tags` | `idx_social_group_tags_group` | `CREATE INDEX idx_social_group_tags_group ON public.social_group_tags USING btree (group_id)` |
+| `social_group_tags` | `idx_social_group_tags_tag` | `CREATE INDEX idx_social_group_tags_tag ON public.social_group_tags USING btree (tag)` |
+| `social_group_tags` | `social_group_tags_group_id_tag_key` | `CREATE UNIQUE INDEX social_group_tags_group_id_tag_key ON public.social_group_tags USING btree (group_id, tag)` |
+| `social_group_tags` | `social_group_tags_pkey` | `CREATE UNIQUE INDEX social_group_tags_pkey ON public.social_group_tags USING btree (id)` |
+| `social_groups` | `idx_social_groups_category` | `CREATE INDEX idx_social_groups_category ON public.social_groups USING btree (category)` |
+| `social_groups` | `idx_social_groups_created_by` | `CREATE INDEX idx_social_groups_created_by ON public.social_groups USING btree (created_by)` |
+| `social_groups` | `idx_social_groups_event_date` | `CREATE INDEX idx_social_groups_event_date ON public.social_groups USING btree (event_date)` |
+| `social_groups` | `idx_social_groups_latitude` | `CREATE INDEX idx_social_groups_latitude ON public.social_groups USING btree (latitude) WHERE (latitude IS NOT NULL)` |
+| `social_groups` | `idx_social_groups_longitude` | `CREATE INDEX idx_social_groups_longitude ON public.social_groups USING btree (longitude) WHERE (longitude IS NOT NULL)` |
+| `social_groups` | `idx_social_groups_status` | `CREATE INDEX idx_social_groups_status ON public.social_groups USING btree (status)` |
+| `social_groups` | `social_groups_pkey` | `CREATE UNIQUE INDEX social_groups_pkey ON public.social_groups USING btree (id)` |
+| `supplier_categories` | `idx_supplier_categories_display_order` | `CREATE INDEX idx_supplier_categories_display_order ON public.supplier_categories USING btree (display_order)` |
+| `supplier_categories` | `idx_supplier_categories_is_active` | `CREATE INDEX idx_supplier_categories_is_active ON public.supplier_categories USING btree (is_active)` |
+| `supplier_categories` | `idx_supplier_categories_name` | `CREATE INDEX idx_supplier_categories_name ON public.supplier_categories USING btree (name)` |
+| `supplier_categories` | `supplier_categories_name_key` | `CREATE UNIQUE INDEX supplier_categories_name_key ON public.supplier_categories USING btree (name)` |
+| `supplier_categories` | `supplier_categories_pkey` | `CREATE UNIQUE INDEX supplier_categories_pkey ON public.supplier_categories USING btree (id)` |
+| `supplier_employees` | `idx_supplier_employees_app_user` | `CREATE INDEX idx_supplier_employees_app_user ON public.supplier_employees USING btree (app_user_id)` |
+| `supplier_employees` | `idx_supplier_employees_role` | `CREATE INDEX idx_supplier_employees_role ON public.supplier_employees USING btree (role)` |
+| `supplier_employees` | `idx_supplier_employees_supplier` | `CREATE INDEX idx_supplier_employees_supplier ON public.supplier_employees USING btree (supplier_id)` |
+| `supplier_employees` | `idx_supplier_employees_workspace` | `CREATE INDEX idx_supplier_employees_workspace ON public.supplier_employees USING btree (workspace_id)` |
+| `supplier_employees` | `supplier_employees_pkey` | `CREATE UNIQUE INDEX supplier_employees_pkey ON public.supplier_employees USING btree (id)` |
+| `supplier_payment_accounts` | `idx_supplier_payment_accounts_currency` | `CREATE INDEX idx_supplier_payment_accounts_currency ON public.supplier_payment_accounts USING btree (currency)` |
+| `supplier_payment_accounts` | `idx_supplier_payment_accounts_is_default` | `CREATE INDEX idx_supplier_payment_accounts_is_default ON public.supplier_payment_accounts USING btree (supplier_id, is_default) WHERE (is_default = true)` |
+| `supplier_payment_accounts` | `idx_supplier_payment_accounts_supplier_id` | `CREATE INDEX idx_supplier_payment_accounts_supplier_id ON public.supplier_payment_accounts USING btree (supplier_id)` |
+| `supplier_payment_accounts` | `supplier_payment_accounts_bank_name_account_number_key` | `CREATE UNIQUE INDEX supplier_payment_accounts_bank_name_account_number_key ON public.supplier_payment_accounts USING btree (bank_name, account_number)` |
+| `supplier_payment_accounts` | `supplier_payment_accounts_pkey` | `CREATE UNIQUE INDEX supplier_payment_accounts_pkey ON public.supplier_payment_accounts USING btree (id)` |
+| `supplier_price_list` | `idx_supplier_price_list_category` | `CREATE INDEX idx_supplier_price_list_category ON public.supplier_price_list USING btree (category)` |
+| `supplier_price_list` | `idx_supplier_price_list_supplier_id` | `CREATE INDEX idx_supplier_price_list_supplier_id ON public.supplier_price_list USING btree (supplier_id)` |
+| `supplier_price_list` | `supplier_price_list_pkey` | `CREATE UNIQUE INDEX supplier_price_list_pkey ON public.supplier_price_list USING btree (id)` |
+| `supplier_request_responses` | `idx_srr_created` | `CREATE INDEX idx_srr_created ON public.supplier_request_responses USING btree (created_at DESC)` |
+| `supplier_request_responses` | `idx_srr_request` | `CREATE INDEX idx_srr_request ON public.supplier_request_responses USING btree (request_id)` |
+| `supplier_request_responses` | `idx_srr_supplier` | `CREATE INDEX idx_srr_supplier ON public.supplier_request_responses USING btree (supplier_id)` |
+| `supplier_request_responses` | `supplier_request_responses_pkey` | `CREATE UNIQUE INDEX supplier_request_responses_pkey ON public.supplier_request_responses USING btree (id)` |
+| `supplier_service_areas` | `idx_supplier_service_areas_city_id` | `CREATE INDEX idx_supplier_service_areas_city_id ON public.supplier_service_areas USING btree (city_id)` |
+| `supplier_service_areas` | `idx_supplier_service_areas_supplier_id` | `CREATE INDEX idx_supplier_service_areas_supplier_id ON public.supplier_service_areas USING btree (supplier_id)` |
+| `supplier_service_areas` | `supplier_cities_pkey` | `CREATE UNIQUE INDEX supplier_cities_pkey ON public.supplier_service_areas USING btree (id)` |
+| `supplier_service_areas` | `supplier_cities_supplier_id_city_id_key` | `CREATE UNIQUE INDEX supplier_cities_supplier_id_city_id_key ON public.supplier_service_areas USING btree (supplier_id, city_id)` |
+| `supplier_users` | `idx_supplier_users_email` | `CREATE INDEX idx_supplier_users_email ON public.supplier_users USING btree (email)` |
+| `supplier_users` | `idx_supplier_users_supplier` | `CREATE INDEX idx_supplier_users_supplier ON public.supplier_users USING btree (supplier_id)` |
+| `supplier_users` | `idx_supplier_users_user_id` | `CREATE INDEX idx_supplier_users_user_id ON public.supplier_users USING btree (user_id)` |
+| `supplier_users` | `supplier_users_pkey` | `CREATE UNIQUE INDEX supplier_users_pkey ON public.supplier_users USING btree (id)` |
+| `supplier_users` | `supplier_users_supplier_id_email_key` | `CREATE UNIQUE INDEX supplier_users_supplier_id_email_key ON public.supplier_users USING btree (supplier_id, email)` |
+| `suppliers` | `idx_suppliers_active` | `CREATE INDEX idx_suppliers_active ON public.suppliers USING btree (is_active)` |
+| `suppliers` | `idx_suppliers_category_id` | `CREATE INDEX idx_suppliers_category_id ON public.suppliers USING btree (category_id)` |
+| `suppliers` | `idx_suppliers_code` | `CREATE INDEX idx_suppliers_code ON public.suppliers USING btree (code)` |
+| `suppliers` | `idx_suppliers_country` | `CREATE INDEX idx_suppliers_country ON public.suppliers USING btree (country_id)` |
+| `suppliers` | `idx_suppliers_country_code` | `CREATE INDEX idx_suppliers_country_code ON public.suppliers USING btree (country_code)` |
+| `suppliers` | `idx_suppliers_created_by` | `CREATE INDEX idx_suppliers_created_by ON public.suppliers USING btree (created_by)` |
+| `suppliers` | `idx_suppliers_deleted` | `CREATE INDEX idx_suppliers_deleted ON public.suppliers USING btree (_deleted) WHERE (_deleted = false)` |
+| `suppliers` | `idx_suppliers_is_active` | `CREATE INDEX idx_suppliers_is_active ON public.suppliers USING btree (is_active)` |
+| `suppliers` | `idx_suppliers_name` | `CREATE INDEX idx_suppliers_name ON public.suppliers USING btree (name)` |
+| `suppliers` | `idx_suppliers_needs_sync` | `CREATE INDEX idx_suppliers_needs_sync ON public.suppliers USING btree (_needs_sync) WHERE (_needs_sync = true)` |
+| `suppliers` | `idx_suppliers_type` | `CREATE INDEX idx_suppliers_type ON public.suppliers USING btree (type)` |
+| `suppliers` | `idx_suppliers_updated_by` | `CREATE INDEX idx_suppliers_updated_by ON public.suppliers USING btree (updated_by)` |
+| `suppliers` | `idx_suppliers_workspace` | `CREATE INDEX idx_suppliers_workspace ON public.suppliers USING btree (workspace_id)` |
+| `suppliers` | `suppliers_pkey` | `CREATE UNIQUE INDEX suppliers_pkey ON public.suppliers USING btree (id)` |
+| `suppliers` | `suppliers_workspace_code_key` | `CREATE UNIQUE INDEX suppliers_workspace_code_key ON public.suppliers USING btree (workspace_id, code)` |
+| `syncqueue` | `idx_syncqueue_created_at` | `CREATE INDEX idx_syncqueue_created_at ON public.syncqueue USING btree (created_at)` |
+| `syncqueue` | `idx_syncqueue_operation` | `CREATE INDEX idx_syncqueue_operation ON public.syncqueue USING btree (operation)` |
+| `syncqueue` | `idx_syncqueue_retry_count` | `CREATE INDEX idx_syncqueue_retry_count ON public.syncqueue USING btree (retry_count)` |
+| `syncqueue` | `idx_syncqueue_status` | `CREATE INDEX idx_syncqueue_status ON public.syncqueue USING btree (status)` |
+| `syncqueue` | `idx_syncqueue_table_name` | `CREATE INDEX idx_syncqueue_table_name ON public.syncqueue USING btree (table_name)` |
+| `syncqueue` | `syncqueue_pkey` | `CREATE UNIQUE INDEX syncqueue_pkey ON public.syncqueue USING btree (id)` |
+| `system_settings` | `idx_system_settings_category` | `CREATE INDEX idx_system_settings_category ON public.system_settings USING btree (category)` |
+| `system_settings` | `system_settings_category_workspace` | `CREATE UNIQUE INDEX system_settings_category_workspace ON public.system_settings USING btree (category, workspace_id)` |
+| `system_settings` | `system_settings_pkey` | `CREATE UNIQUE INDEX system_settings_pkey ON public.system_settings USING btree (id)` |
+| `system_settings` | `system_settings_workspace_category_key` | `CREATE UNIQUE INDEX system_settings_workspace_category_key ON public.system_settings USING btree (workspace_id, category)` |
+| `tasks` | `idx_tasks_assignee` | `CREATE INDEX idx_tasks_assignee ON public.tasks USING btree (assignee)` |
+| `tasks` | `idx_tasks_project_id` | `CREATE INDEX idx_tasks_project_id ON public.tasks USING btree (project_id)` |
+| `tasks` | `idx_tasks_status` | `CREATE INDEX idx_tasks_status ON public.tasks USING btree (status)` |
+| `tasks` | `idx_tasks_task_type` | `CREATE INDEX idx_tasks_task_type ON public.tasks USING btree (task_type)` |
+| `tasks` | `tasks_pkey` | `CREATE UNIQUE INDEX tasks_pkey ON public.tasks USING btree (id)` |
+| `templates` | `idx_templates_category` | `CREATE INDEX idx_templates_category ON public.templates USING btree (category)` |
+| `templates` | `idx_templates_is_active` | `CREATE INDEX idx_templates_is_active ON public.templates USING btree (is_active)` |
+| `templates` | `idx_templates_type` | `CREATE INDEX idx_templates_type ON public.templates USING btree (type)` |
+| `templates` | `templates_pkey` | `CREATE UNIQUE INDEX templates_pkey ON public.templates USING btree (id)` |
+| `timebox_boxes` | `idx_timebox_boxes_user` | `CREATE INDEX idx_timebox_boxes_user ON public.timebox_boxes USING btree (user_id)` |
+| `timebox_boxes` | `timebox_boxes_pkey` | `CREATE UNIQUE INDEX timebox_boxes_pkey ON public.timebox_boxes USING btree (id)` |
+| `timebox_boxes` | `timebox_boxes_user_id_idx` | `CREATE INDEX timebox_boxes_user_id_idx ON public.timebox_boxes USING btree (user_id)` |
+| `timebox_scheduled_boxes` | `idx_timebox_scheduled_user` | `CREATE INDEX idx_timebox_scheduled_user ON public.timebox_scheduled_boxes USING btree (user_id)` |
+| `timebox_scheduled_boxes` | `timebox_scheduled_boxes_pkey` | `CREATE UNIQUE INDEX timebox_scheduled_boxes_pkey ON public.timebox_scheduled_boxes USING btree (id)` |
+| `timebox_scheduled_boxes` | `timebox_scheduled_boxes_user_id_week_id_idx` | `CREATE INDEX timebox_scheduled_boxes_user_id_week_id_idx ON public.timebox_scheduled_boxes USING btree (user_id, week_id)` |
+| `timebox_weeks` | `idx_timebox_weeks_user` | `CREATE INDEX idx_timebox_weeks_user ON public.timebox_weeks USING btree (user_id)` |
+| `timebox_weeks` | `timebox_weeks_pkey` | `CREATE UNIQUE INDEX timebox_weeks_pkey ON public.timebox_weeks USING btree (id)` |
+| `timebox_weeks` | `timebox_weeks_user_id_week_start_idx` | `CREATE INDEX timebox_weeks_user_id_week_start_idx ON public.timebox_weeks USING btree (user_id, week_start)` |
+| `timebox_workout_templates` | `idx_workout_templates_user_id` | `CREATE INDEX idx_workout_templates_user_id ON public.timebox_workout_templates USING btree (user_id)` |
+| `timebox_workout_templates` | `timebox_workout_templates_pkey` | `CREATE UNIQUE INDEX timebox_workout_templates_pkey ON public.timebox_workout_templates USING btree (id)` |
+| `todo_columns` | `idx_todo_columns_sort` | `CREATE INDEX idx_todo_columns_sort ON public.todo_columns USING btree (workspace_id, sort_order)` |
+| `todo_columns` | `idx_todo_columns_workspace` | `CREATE INDEX idx_todo_columns_workspace ON public.todo_columns USING btree (workspace_id)` |
+| `todo_columns` | `todo_columns_pkey` | `CREATE UNIQUE INDEX todo_columns_pkey ON public.todo_columns USING btree (id)` |
+| `todos` | `idx_todos_assignee` | `CREATE INDEX idx_todos_assignee ON public.todos USING btree (assignee)` |
+| `todos` | `idx_todos_column` | `CREATE INDEX idx_todos_column ON public.todos USING btree (column_id)` |
+| `todos` | `idx_todos_created_by` | `CREATE INDEX idx_todos_created_by ON public.todos USING btree (created_by)` |
+| `todos` | `idx_todos_deadline` | `CREATE INDEX idx_todos_deadline ON public.todos USING btree (deadline)` |
+| `todos` | `idx_todos_priority` | `CREATE INDEX idx_todos_priority ON public.todos USING btree (priority)` |
+| `todos` | `idx_todos_status` | `CREATE INDEX idx_todos_status ON public.todos USING btree (status)` |
+| `todos` | `idx_todos_updated_by` | `CREATE INDEX idx_todos_updated_by ON public.todos USING btree (updated_by)` |
+| `todos` | `idx_todos_workspace_id` | `CREATE INDEX idx_todos_workspace_id ON public.todos USING btree (workspace_id)` |
+| `todos` | `todos_pkey` | `CREATE UNIQUE INDEX todos_pkey ON public.todos USING btree (id)` |
+| `tour_addons` | `idx_tour_addons_tour_id` | `CREATE INDEX idx_tour_addons_tour_id ON public.tour_addons USING btree (tour_id)` |
+| `tour_addons` | `idx_tour_addons_workspace` | `CREATE INDEX idx_tour_addons_workspace ON public.tour_addons USING btree (workspace_id)` |
+| `tour_addons` | `tour_addons_pkey` | `CREATE UNIQUE INDEX tour_addons_pkey ON public.tour_addons USING btree (id)` |
+| `tour_bonus_settings` | `idx_tour_bonus_settings_tour_id` | `CREATE INDEX idx_tour_bonus_settings_tour_id ON public.tour_bonus_settings USING btree (tour_id)` |
+| `tour_bonus_settings` | `idx_tour_bonus_settings_workspace_id` | `CREATE INDEX idx_tour_bonus_settings_workspace_id ON public.tour_bonus_settings USING btree (workspace_id)` |
+| `tour_bonus_settings` | `tour_bonus_settings_pkey` | `CREATE UNIQUE INDEX tour_bonus_settings_pkey ON public.tour_bonus_settings USING btree (id)` |
+| `tour_confirmation_items` | `idx_confirmation_items_category` | `CREATE INDEX idx_confirmation_items_category ON public.tour_confirmation_items USING btree (category)` |
+| `tour_confirmation_items` | `idx_confirmation_items_request_id` | `CREATE INDEX idx_confirmation_items_request_id ON public.tour_confirmation_items USING btree (request_id)` |
+| `tour_confirmation_items` | `idx_confirmation_items_resource` | `CREATE INDEX idx_confirmation_items_resource ON public.tour_confirmation_items USING btree (resource_type, resource_id)` |
+| `tour_confirmation_items` | `idx_confirmation_items_resource_id` | `CREATE INDEX idx_confirmation_items_resource_id ON public.tour_confirmation_items USING btree (resource_id)` |
+| `tour_confirmation_items` | `idx_confirmation_items_resource_type` | `CREATE INDEX idx_confirmation_items_resource_type ON public.tour_confirmation_items USING btree (resource_type)` |
+| `tour_confirmation_items` | `idx_confirmation_items_service_date` | `CREATE INDEX idx_confirmation_items_service_date ON public.tour_confirmation_items USING btree (service_date)` |
+| `tour_confirmation_items` | `idx_confirmation_items_sheet_id` | `CREATE INDEX idx_confirmation_items_sheet_id ON public.tour_confirmation_items USING btree (sheet_id)` |
+| `tour_confirmation_items` | `idx_confirmation_items_supplier_name` | `CREATE INDEX idx_confirmation_items_supplier_name ON public.tour_confirmation_items USING btree (supplier_name)` |
+| `tour_confirmation_items` | `idx_confirmation_items_workspace_id` | `CREATE INDEX idx_confirmation_items_workspace_id ON public.tour_confirmation_items USING btree (workspace_id)` |
+| `tour_confirmation_items` | `idx_tour_confirmation_items_itinerary_item_id` | `CREATE INDEX idx_tour_confirmation_items_itinerary_item_id ON public.tour_confirmation_items USING btree (itinerary_item_id)` |
+| `tour_confirmation_items` | `tour_confirmation_items_pkey` | `CREATE UNIQUE INDEX tour_confirmation_items_pkey ON public.tour_confirmation_items USING btree (id)` |
+| `tour_confirmation_sheets` | `idx_confirmation_sheets_status` | `CREATE INDEX idx_confirmation_sheets_status ON public.tour_confirmation_sheets USING btree (status)` |
+| `tour_confirmation_sheets` | `idx_confirmation_sheets_tour_id` | `CREATE INDEX idx_confirmation_sheets_tour_id ON public.tour_confirmation_sheets USING btree (tour_id)` |
+| `tour_confirmation_sheets` | `idx_confirmation_sheets_workspace_id` | `CREATE INDEX idx_confirmation_sheets_workspace_id ON public.tour_confirmation_sheets USING btree (workspace_id)` |
+| `tour_confirmation_sheets` | `tour_confirmation_sheets_pkey` | `CREATE UNIQUE INDEX tour_confirmation_sheets_pkey ON public.tour_confirmation_sheets USING btree (id)` |
+| `tour_control_forms` | `idx_tour_control_forms_package_id` | `CREATE INDEX idx_tour_control_forms_package_id ON public.tour_control_forms USING btree (package_id)` |
+| `tour_control_forms` | `idx_tour_control_forms_workspace_id` | `CREATE INDEX idx_tour_control_forms_workspace_id ON public.tour_control_forms USING btree (workspace_id)` |
+| `tour_control_forms` | `tour_control_forms_package_id_key` | `CREATE UNIQUE INDEX tour_control_forms_package_id_key ON public.tour_control_forms USING btree (package_id)` |
+| `tour_control_forms` | `tour_control_forms_pkey` | `CREATE UNIQUE INDEX tour_control_forms_pkey ON public.tour_control_forms USING btree (id)` |
+| `tour_custom_cost_fields` | `idx_tour_custom_cost_fields_tour_id` | `CREATE INDEX idx_tour_custom_cost_fields_tour_id ON public.tour_custom_cost_fields USING btree (tour_id)` |
+| `tour_custom_cost_fields` | `tour_custom_cost_fields_pkey` | `CREATE UNIQUE INDEX tour_custom_cost_fields_pkey ON public.tour_custom_cost_fields USING btree (id)` |
+| `tour_custom_cost_values` | `idx_tour_custom_cost_values_field_id` | `CREATE INDEX idx_tour_custom_cost_values_field_id ON public.tour_custom_cost_values USING btree (field_id)` |
+| `tour_custom_cost_values` | `idx_tour_custom_cost_values_member_id` | `CREATE INDEX idx_tour_custom_cost_values_member_id ON public.tour_custom_cost_values USING btree (member_id)` |
+| `tour_custom_cost_values` | `tour_custom_cost_values_field_id_member_id_key` | `CREATE UNIQUE INDEX tour_custom_cost_values_field_id_member_id_key ON public.tour_custom_cost_values USING btree (field_id, member_id)` |
+| `tour_custom_cost_values` | `tour_custom_cost_values_pkey` | `CREATE UNIQUE INDEX tour_custom_cost_values_pkey ON public.tour_custom_cost_values USING btree (id)` |
+| `tour_departure_data` | `idx_tour_departure_data_tour_id` | `CREATE INDEX idx_tour_departure_data_tour_id ON public.tour_departure_data USING btree (tour_id)` |
+| `tour_departure_data` | `tour_departure_data_pkey` | `CREATE UNIQUE INDEX tour_departure_data_pkey ON public.tour_departure_data USING btree (id)` |
+| `tour_departure_data` | `tour_departure_data_tour_id_key` | `CREATE UNIQUE INDEX tour_departure_data_tour_id_key ON public.tour_departure_data USING btree (tour_id)` |
+| `tour_destinations` | `idx_tour_destinations_airport_code` | `CREATE INDEX idx_tour_destinations_airport_code ON public.tour_destinations USING btree (airport_code)` |
+| `tour_destinations` | `idx_tour_destinations_country` | `CREATE INDEX idx_tour_destinations_country ON public.tour_destinations USING btree (country)` |
+| `tour_destinations` | `tour_destinations_country_city_key` | `CREATE UNIQUE INDEX tour_destinations_country_city_key ON public.tour_destinations USING btree (country, city)` |
+| `tour_destinations` | `tour_destinations_pkey` | `CREATE UNIQUE INDEX tour_destinations_pkey ON public.tour_destinations USING btree (id)` |
+| `tour_documents` | `idx_tour_documents_created_by` | `CREATE INDEX idx_tour_documents_created_by ON public.tour_documents USING btree (created_by)` |
+| `tour_documents` | `idx_tour_documents_tour_id` | `CREATE INDEX idx_tour_documents_tour_id ON public.tour_documents USING btree (tour_id)` |
+| `tour_documents` | `idx_tour_documents_updated_by` | `CREATE INDEX idx_tour_documents_updated_by ON public.tour_documents USING btree (updated_by)` |
+| `tour_documents` | `idx_tour_documents_uploaded_by` | `CREATE INDEX idx_tour_documents_uploaded_by ON public.tour_documents USING btree (uploaded_by)` |
+| `tour_documents` | `idx_tour_documents_workspace_id` | `CREATE INDEX idx_tour_documents_workspace_id ON public.tour_documents USING btree (workspace_id)` |
+| `tour_documents` | `tour_documents_pkey` | `CREATE UNIQUE INDEX tour_documents_pkey ON public.tour_documents USING btree (id)` |
+| `tour_expenses` | `Tour_Expenses_pkey` | `CREATE UNIQUE INDEX "Tour_Expenses_pkey" ON public.tour_expenses USING btree (expense_id)` |
+| `tour_expenses` | `idx_tour_expenses_itinerary` | `CREATE INDEX idx_tour_expenses_itinerary ON public.tour_expenses USING btree (itinerary_id)` |
+| `tour_expenses` | `idx_tour_expenses_leader` | `CREATE INDEX idx_tour_expenses_leader ON public.tour_expenses USING btree (leader_id)` |
+| `tour_folder_templates` | `idx_tour_folder_templates_workspace_id` | `CREATE INDEX idx_tour_folder_templates_workspace_id ON public.tour_folder_templates USING btree (workspace_id)` |
+| `tour_folder_templates` | `tour_folder_templates_pkey` | `CREATE UNIQUE INDEX tour_folder_templates_pkey ON public.tour_folder_templates USING btree (id)` |
+| `tour_itinerary_days` | `tour_itinerary_days_itinerary_id_idx` | `CREATE INDEX tour_itinerary_days_itinerary_id_idx ON public.tour_itinerary_days USING btree (itinerary_id) WHERE (itinerary_id IS NOT NULL)` |
+| `tour_itinerary_days` | `tour_itinerary_days_pkey` | `CREATE UNIQUE INDEX tour_itinerary_days_pkey ON public.tour_itinerary_days USING btree (id)` |
+| `tour_itinerary_days` | `tour_itinerary_days_tour_id_day_number_key` | `CREATE UNIQUE INDEX tour_itinerary_days_tour_id_day_number_key ON public.tour_itinerary_days USING btree (tour_id, day_number)` |
+| `tour_itinerary_days` | `tour_itinerary_days_tour_id_idx` | `CREATE INDEX tour_itinerary_days_tour_id_idx ON public.tour_itinerary_days USING btree (tour_id)` |
+| `tour_itinerary_days` | `tour_itinerary_days_workspace_id_idx` | `CREATE INDEX tour_itinerary_days_workspace_id_idx ON public.tour_itinerary_days USING btree (workspace_id) WHERE (workspace_id IS NOT NULL)` |
+| `tour_itinerary_items` | `idx_tii_category` | `CREATE INDEX idx_tii_category ON public.tour_itinerary_items USING btree (category)` |
+| `tour_itinerary_items` | `idx_tii_day_sort` | `CREATE INDEX idx_tii_day_sort ON public.tour_itinerary_items USING btree (day_number, sort_order)` |
+| `tour_itinerary_items` | `idx_tii_itinerary_id` | `CREATE INDEX idx_tii_itinerary_id ON public.tour_itinerary_items USING btree (itinerary_id)` |
+| `tour_itinerary_items` | `idx_tii_request_id` | `CREATE INDEX idx_tii_request_id ON public.tour_itinerary_items USING btree (request_id)` |
+| `tour_itinerary_items` | `idx_tii_service_date` | `CREATE INDEX idx_tii_service_date ON public.tour_itinerary_items USING btree (service_date)` |
+| `tour_itinerary_items` | `idx_tii_tour_id` | `CREATE INDEX idx_tii_tour_id ON public.tour_itinerary_items USING btree (tour_id)` |
+| `tour_itinerary_items` | `idx_tii_workspace_id` | `CREATE INDEX idx_tii_workspace_id ON public.tour_itinerary_items USING btree (workspace_id)` |
+| `tour_itinerary_items` | `idx_tour_itinerary_items_assigned_by` | `CREATE INDEX idx_tour_itinerary_items_assigned_by ON public.tour_itinerary_items USING btree (assigned_by)` |
+| `tour_itinerary_items` | `idx_tour_itinerary_items_assignee_id` | `CREATE INDEX idx_tour_itinerary_items_assignee_id ON public.tour_itinerary_items USING btree (assignee_id)` |
+| `tour_itinerary_items` | `idx_tour_itinerary_items_override_by` | `CREATE INDEX idx_tour_itinerary_items_override_by ON public.tour_itinerary_items USING btree (override_by)` |
+| `tour_itinerary_items` | `idx_tour_itinerary_items_updated_by` | `CREATE INDEX idx_tour_itinerary_items_updated_by ON public.tour_itinerary_items USING btree (updated_by)` |
+| `tour_itinerary_items` | `tour_itinerary_items_pkey` | `CREATE UNIQUE INDEX tour_itinerary_items_pkey ON public.tour_itinerary_items USING btree (id)` |
+| `tour_leaders` | `idx_tour_leaders_code` | `CREATE INDEX idx_tour_leaders_code ON public.tour_leaders USING btree (code)` |
+| `tour_leaders` | `idx_tour_leaders_name` | `CREATE INDEX idx_tour_leaders_name ON public.tour_leaders USING btree (name)` |
+| `tour_leaders` | `idx_tour_leaders_status` | `CREATE INDEX idx_tour_leaders_status ON public.tour_leaders USING btree (status)` |
+| `tour_leaders` | `tour_leaders_code_key` | `CREATE UNIQUE INDEX tour_leaders_code_key ON public.tour_leaders USING btree (code)` |
+| `tour_leaders` | `tour_leaders_pkey` | `CREATE UNIQUE INDEX tour_leaders_pkey ON public.tour_leaders USING btree (id)` |
+| `tour_meal_settings` | `idx_tour_meal_settings_enabled` | `CREATE INDEX idx_tour_meal_settings_enabled ON public.tour_meal_settings USING btree (tour_id, enabled) WHERE (enabled = true)` |
+| `tour_meal_settings` | `idx_tour_meal_settings_tour` | `CREATE INDEX idx_tour_meal_settings_tour ON public.tour_meal_settings USING btree (tour_id)` |
+| `tour_meal_settings` | `tour_meal_settings_pkey` | `CREATE UNIQUE INDEX tour_meal_settings_pkey ON public.tour_meal_settings USING btree (id)` |
+| `tour_meal_settings` | `tour_meal_settings_tour_id_day_number_meal_type_key` | `CREATE UNIQUE INDEX tour_meal_settings_tour_id_day_number_meal_type_key ON public.tour_meal_settings USING btree (tour_id, day_number, meal_type)` |
+| `tour_member_fields` | `idx_tour_member_fields_member` | `CREATE INDEX idx_tour_member_fields_member ON public.tour_member_fields USING btree (order_member_id)` |
+| `tour_member_fields` | `idx_tour_member_fields_name` | `CREATE INDEX idx_tour_member_fields_name ON public.tour_member_fields USING btree (field_name)` |
+| `tour_member_fields` | `idx_tour_member_fields_tour` | `CREATE INDEX idx_tour_member_fields_tour ON public.tour_member_fields USING btree (tour_id)` |
+| `tour_member_fields` | `tour_member_fields_pkey` | `CREATE UNIQUE INDEX tour_member_fields_pkey ON public.tour_member_fields USING btree (id)` |
+| `tour_member_fields` | `unique_tour_member_field` | `CREATE UNIQUE INDEX unique_tour_member_field ON public.tour_member_fields USING btree (tour_id, order_member_id, field_name)` |
+| `tour_members` | `idx_tour_members_created_by` | `CREATE INDEX idx_tour_members_created_by ON public.tour_members USING btree (created_by)` |
+| `tour_members` | `idx_tour_members_customer` | `CREATE INDEX idx_tour_members_customer ON public.tour_members USING btree (customer_id)` |
+| `tour_members` | `idx_tour_members_customer_id` | `CREATE INDEX idx_tour_members_customer_id ON public.tour_members USING btree (customer_id)` |
+| `tour_members` | `idx_tour_members_tour` | `CREATE INDEX idx_tour_members_tour ON public.tour_members USING btree (tour_id)` |
+| `tour_members` | `idx_tour_members_tour_id` | `CREATE INDEX idx_tour_members_tour_id ON public.tour_members USING btree (tour_id)` |
+| `tour_members` | `idx_tour_members_updated_by` | `CREATE INDEX idx_tour_members_updated_by ON public.tour_members USING btree (updated_by)` |
+| `tour_members` | `tour_members_pkey` | `CREATE UNIQUE INDEX tour_members_pkey ON public.tour_members USING btree (id)` |
+| `tour_members` | `tour_members_tour_id_customer_id_key` | `CREATE UNIQUE INDEX tour_members_tour_id_customer_id_key ON public.tour_members USING btree (tour_id, customer_id)` |
+| `tour_refunds` | `idx_tour_refunds_tourid` | `CREATE INDEX idx_tour_refunds_tourid ON public.tour_refunds USING btree (tour_id)` |
+| `tour_refunds` | `tour_refunds_pkey` | `CREATE UNIQUE INDEX tour_refunds_pkey ON public.tour_refunds USING btree (id)` |
+| `tour_request_items` | `idx_tour_request_items_request` | `CREATE INDEX idx_tour_request_items_request ON public.tour_request_items USING btree (request_id)` |
+| `tour_request_items` | `tour_request_items_day_number_idx` | `CREATE INDEX tour_request_items_day_number_idx ON public.tour_request_items USING btree (day_number)` |
+| `tour_request_items` | `tour_request_items_local_status_idx` | `CREATE INDEX tour_request_items_local_status_idx ON public.tour_request_items USING btree (local_status)` |
+| `tour_request_items` | `tour_request_items_pkey` | `CREATE UNIQUE INDEX tour_request_items_pkey ON public.tour_request_items USING btree (id)` |
+| `tour_request_items` | `tour_request_items_request_id_idx` | `CREATE INDEX tour_request_items_request_id_idx ON public.tour_request_items USING btree (request_id)` |
+| `tour_request_items` | `tour_request_items_tour_id_idx` | `CREATE INDEX tour_request_items_tour_id_idx ON public.tour_request_items USING btree (tour_id)` |
+| `tour_request_items` | `tour_request_items_workspace_id_idx` | `CREATE INDEX tour_request_items_workspace_id_idx ON public.tour_request_items USING btree (workspace_id)` |
+| `tour_request_member_vouchers` | `idx_tour_request_member_vouchers_member` | `CREATE INDEX idx_tour_request_member_vouchers_member ON public.tour_request_member_vouchers USING btree (member_id)` |
+| `tour_request_member_vouchers` | `idx_tour_request_member_vouchers_request` | `CREATE INDEX idx_tour_request_member_vouchers_request ON public.tour_request_member_vouchers USING btree (request_id)` |
+| `tour_request_member_vouchers` | `tour_request_member_vouchers_pkey` | `CREATE UNIQUE INDEX tour_request_member_vouchers_pkey ON public.tour_request_member_vouchers USING btree (id)` |
+| `tour_request_messages` | `idx_tour_request_messages_request` | `CREATE INDEX idx_tour_request_messages_request ON public.tour_request_messages USING btree (request_id)` |
+| `tour_request_messages` | `idx_tour_request_messages_sender` | `CREATE INDEX idx_tour_request_messages_sender ON public.tour_request_messages USING btree (sender_id)` |
+| `tour_request_messages` | `tour_request_messages_pkey` | `CREATE UNIQUE INDEX tour_request_messages_pkey ON public.tour_request_messages USING btree (id)` |
+| `tour_requests` | `idx_tour_requests_assignee` | `CREATE INDEX idx_tour_requests_assignee ON public.tour_requests USING btree (assignee_id)` |
+| `tour_requests` | `idx_tour_requests_category` | `CREATE INDEX idx_tour_requests_category ON public.tour_requests USING btree (category)` |
+| `tour_requests` | `idx_tour_requests_handler_type` | `CREATE INDEX idx_tour_requests_handler_type ON public.tour_requests USING btree (handler_type)` |
+| `tour_requests` | `idx_tour_requests_hidden` | `CREATE INDEX idx_tour_requests_hidden ON public.tour_requests USING btree (hidden) WHERE (hidden = true)` |
+| `tour_requests` | `idx_tour_requests_service_date` | `CREATE INDEX idx_tour_requests_service_date ON public.tour_requests USING btree (service_date)` |
+| `tour_requests` | `idx_tour_requests_status` | `CREATE INDEX idx_tour_requests_status ON public.tour_requests USING btree (status)` |
+| `tour_requests` | `idx_tour_requests_supplier` | `CREATE INDEX idx_tour_requests_supplier ON public.tour_requests USING btree (supplier_id)` |
+| `tour_requests` | `idx_tour_requests_tour` | `CREATE INDEX idx_tour_requests_tour ON public.tour_requests USING btree (tour_id)` |
+| `tour_requests` | `idx_tour_requests_tour_id` | `CREATE INDEX idx_tour_requests_tour_id ON public.tour_requests USING btree (tour_id)` |
+| `tour_requests` | `idx_tour_requests_workspace` | `CREATE INDEX idx_tour_requests_workspace ON public.tour_requests USING btree (workspace_id)` |
+| `tour_requests` | `tour_requests_code_key` | `CREATE UNIQUE INDEX tour_requests_code_key ON public.tour_requests USING btree (code)` |
+| `tour_requests` | `tour_requests_pkey` | `CREATE UNIQUE INDEX tour_requests_pkey ON public.tour_requests USING btree (id)` |
+| `tour_role_assignments` | `idx_tour_role_assignments_field` | `CREATE INDEX idx_tour_role_assignments_field ON public.tour_role_assignments USING btree (field_id)` |
+| `tour_role_assignments` | `idx_tour_role_assignments_order` | `CREATE INDEX idx_tour_role_assignments_order ON public.tour_role_assignments USING btree (order_id)` |
+| `tour_role_assignments` | `idx_tour_role_assignments_tour` | `CREATE INDEX idx_tour_role_assignments_tour ON public.tour_role_assignments USING btree (tour_id)` |
+| `tour_role_assignments` | `tour_role_assignments_pkey` | `CREATE UNIQUE INDEX tour_role_assignments_pkey ON public.tour_role_assignments USING btree (id)` |
+| `tour_role_assignments` | `tour_role_assignments_tour_id_order_id_role_id_key` | `CREATE UNIQUE INDEX tour_role_assignments_tour_id_order_id_role_id_key ON public.tour_role_assignments USING btree (tour_id, order_id, role_id)` |
+| `tour_room_assignments` | `idx_tour_room_assignments_member_id` | `CREATE INDEX idx_tour_room_assignments_member_id ON public.tour_room_assignments USING btree (order_member_id)` |
+| `tour_room_assignments` | `idx_tour_room_assignments_room_id` | `CREATE INDEX idx_tour_room_assignments_room_id ON public.tour_room_assignments USING btree (room_id)` |
+| `tour_room_assignments` | `tour_room_assignments_pkey` | `CREATE UNIQUE INDEX tour_room_assignments_pkey ON public.tour_room_assignments USING btree (id)` |
+| `tour_room_assignments` | `tour_room_assignments_room_id_order_member_id_key` | `CREATE UNIQUE INDEX tour_room_assignments_room_id_order_member_id_key ON public.tour_room_assignments USING btree (room_id, order_member_id)` |
+| `tour_rooms` | `idx_tour_rooms_night` | `CREATE INDEX idx_tour_rooms_night ON public.tour_rooms USING btree (tour_id, night_number)` |
+| `tour_rooms` | `idx_tour_rooms_tour_id` | `CREATE INDEX idx_tour_rooms_tour_id ON public.tour_rooms USING btree (tour_id)` |
+| `tour_rooms` | `tour_rooms_pkey` | `CREATE UNIQUE INDEX tour_rooms_pkey ON public.tour_rooms USING btree (id)` |
+| `tour_table_assignments` | `idx_tour_table_assignments_member` | `CREATE INDEX idx_tour_table_assignments_member ON public.tour_table_assignments USING btree (order_member_id)` |
+| `tour_table_assignments` | `idx_tour_table_assignments_table` | `CREATE INDEX idx_tour_table_assignments_table ON public.tour_table_assignments USING btree (table_id)` |
+| `tour_table_assignments` | `tour_table_assignments_pkey` | `CREATE UNIQUE INDEX tour_table_assignments_pkey ON public.tour_table_assignments USING btree (id)` |
+| `tour_table_assignments` | `tour_table_assignments_table_id_order_member_id_key` | `CREATE UNIQUE INDEX tour_table_assignments_table_id_order_member_id_key ON public.tour_table_assignments USING btree (table_id, order_member_id)` |
+| `tour_tables` | `idx_tour_tables_meal_setting` | `CREATE INDEX idx_tour_tables_meal_setting ON public.tour_tables USING btree (meal_setting_id)` |
+| `tour_tables` | `tour_tables_meal_setting_id_table_number_key` | `CREATE UNIQUE INDEX tour_tables_meal_setting_id_table_number_key ON public.tour_tables USING btree (meal_setting_id, table_number)` |
+| `tour_tables` | `tour_tables_pkey` | `CREATE UNIQUE INDEX tour_tables_pkey ON public.tour_tables USING btree (id)` |
+| `tour_vehicle_assignments` | `idx_tour_vehicle_assignments_member_id` | `CREATE INDEX idx_tour_vehicle_assignments_member_id ON public.tour_vehicle_assignments USING btree (order_member_id)` |
+| `tour_vehicle_assignments` | `idx_tour_vehicle_assignments_vehicle_id` | `CREATE INDEX idx_tour_vehicle_assignments_vehicle_id ON public.tour_vehicle_assignments USING btree (vehicle_id)` |
+| `tour_vehicle_assignments` | `tour_vehicle_assignments_pkey` | `CREATE UNIQUE INDEX tour_vehicle_assignments_pkey ON public.tour_vehicle_assignments USING btree (id)` |
+| `tour_vehicle_assignments` | `tour_vehicle_assignments_vehicle_id_order_member_id_key` | `CREATE UNIQUE INDEX tour_vehicle_assignments_vehicle_id_order_member_id_key ON public.tour_vehicle_assignments USING btree (vehicle_id, order_member_id)` |
+| `tour_vehicles` | `idx_tour_vehicles_tour_id` | `CREATE INDEX idx_tour_vehicles_tour_id ON public.tour_vehicles USING btree (tour_id)` |
+| `tour_vehicles` | `tour_vehicles_pkey` | `CREATE UNIQUE INDEX tour_vehicles_pkey ON public.tour_vehicles USING btree (id)` |
+| `tours` | `idx_tours_archived` | `CREATE INDEX idx_tours_archived ON public.tours USING btree (archived) WHERE (archived = true)` |
+| `tours` | `idx_tours_closed_by` | `CREATE INDEX idx_tours_closed_by ON public.tours USING btree (closed_by)` |
+| `tours` | `idx_tours_closing_date` | `CREATE INDEX idx_tours_closing_date ON public.tours USING btree (closing_date)` |
+| `tours` | `idx_tours_closing_status` | `CREATE INDEX idx_tours_closing_status ON public.tours USING btree (closing_status)` |
+| `tours` | `idx_tours_code` | `CREATE INDEX idx_tours_code ON public.tours USING btree (code)` |
+| `tours` | `idx_tours_contract_template` | `CREATE INDEX idx_tours_contract_template ON public.tours USING btree (contract_template)` |
+| `tours` | `idx_tours_controller` | `CREATE INDEX idx_tours_controller ON public.tours USING btree (controller_id)` |
+| `tours` | `idx_tours_country_code` | `CREATE INDEX idx_tours_country_code ON public.tours USING btree (country_code)` |
+| `tours` | `idx_tours_country_id` | `CREATE INDEX idx_tours_country_id ON public.tours USING btree (country_id)` |
+| `tours` | `idx_tours_created_by` | `CREATE INDEX idx_tours_created_by ON public.tours USING btree (created_by)` |
+| `tours` | `idx_tours_date_range` | `CREATE INDEX idx_tours_date_range ON public.tours USING btree (departure_date, return_date)` |
+| `tours` | `idx_tours_deleted` | `CREATE INDEX idx_tours_deleted ON public.tours USING btree (_deleted) WHERE (_deleted = true)` |
+| `tours` | `idx_tours_deleted_by` | `CREATE INDEX idx_tours_deleted_by ON public.tours USING btree (deleted_by)` |
+| `tours` | `idx_tours_department` | `CREATE INDEX idx_tours_department ON public.tours USING btree (department_id)` |
+| `tours` | `idx_tours_is_active` | `CREATE INDEX idx_tours_is_active ON public.tours USING btree (is_active)` |
+| `tours` | `idx_tours_is_deleted` | `CREATE INDEX idx_tours_is_deleted ON public.tours USING btree (is_deleted) WHERE (is_deleted = false)` |
+| `tours` | `idx_tours_itinerary_id` | `CREATE INDEX idx_tours_itinerary_id ON public.tours USING btree (itinerary_id)` |
+| `tours` | `idx_tours_last_unlocked_by` | `CREATE INDEX idx_tours_last_unlocked_by ON public.tours USING btree (last_unlocked_by)` |
+| `tours` | `idx_tours_locked_at` | `CREATE INDEX idx_tours_locked_at ON public.tours USING btree (locked_at)` |
+| `tours` | `idx_tours_locked_by` | `CREATE INDEX idx_tours_locked_by ON public.tours USING btree (locked_by)` |
+| `tours` | `idx_tours_locked_itinerary` | `CREATE INDEX idx_tours_locked_itinerary ON public.tours USING btree (locked_itinerary_id)` |
+| `tours` | `idx_tours_locked_quote` | `CREATE INDEX idx_tours_locked_quote ON public.tours USING btree (locked_quote_id)` |
+| `tours` | `idx_tours_main_city_id` | `CREATE INDEX idx_tours_main_city_id ON public.tours USING btree (airport_code)` |
+| `tours` | `idx_tours_needs_sync` | `CREATE INDEX idx_tours_needs_sync ON public.tours USING btree (_needs_sync) WHERE (_needs_sync = true)` |
+| `tours` | `idx_tours_quote_id` | `CREATE INDEX idx_tours_quote_id ON public.tours USING btree (quote_id)` |
+| `tours` | `idx_tours_service_type` | `CREATE INDEX idx_tours_service_type ON public.tours USING btree (tour_service_type)` |
+| `tours` | `idx_tours_start_date` | `CREATE INDEX idx_tours_start_date ON public.tours USING btree (departure_date)` |
+| `tours` | `idx_tours_status` | `CREATE INDEX idx_tours_status ON public.tours USING btree (status)` |
+| `tours` | `idx_tours_tour_leader_id` | `CREATE INDEX idx_tours_tour_leader_id ON public.tours USING btree (tour_leader_id)` |
+| `tours` | `idx_tours_updated_by` | `CREATE INDEX idx_tours_updated_by ON public.tours USING btree (updated_by)` |
+| `tours` | `idx_tours_workspace_id` | `CREATE INDEX idx_tours_workspace_id ON public.tours USING btree (workspace_id)` |
+| `tours` | `idx_tours_workspace_status` | `CREATE INDEX idx_tours_workspace_status ON public.tours USING btree (workspace_id, status)` |
+| `tours` | `tours_code_key` | `CREATE UNIQUE INDEX tours_code_key ON public.tours USING btree (code)` |
+| `tours` | `tours_pkey` | `CREATE UNIQUE INDEX tours_pkey ON public.tours USING btree (id)` |
+| `transactions` | `idx_transactions_order_id` | `CREATE INDEX idx_transactions_order_id ON public.transactions USING btree (order_id)` |
+| `transactions` | `idx_transactions_tour_id` | `CREATE INDEX idx_transactions_tour_id ON public.transactions USING btree (tour_id)` |
+| `transactions` | `idx_transactions_type` | `CREATE INDEX idx_transactions_type ON public.transactions USING btree (type)` |
+| `transactions` | `transactions_pkey` | `CREATE UNIQUE INDEX transactions_pkey ON public.transactions USING btree (id)` |
+| `transportation_rates` | `idx_transportation_rates_active` | `CREATE INDEX idx_transportation_rates_active ON public.transportation_rates USING btree (is_active) WHERE (deleted_at IS NULL)` |
+| `transportation_rates` | `idx_transportation_rates_category` | `CREATE INDEX idx_transportation_rates_category ON public.transportation_rates USING btree (category) WHERE (deleted_at IS NULL)` |
+| `transportation_rates` | `idx_transportation_rates_country` | `CREATE INDEX idx_transportation_rates_country ON public.transportation_rates USING btree (country_id) WHERE (deleted_at IS NULL)` |
+| `transportation_rates` | `idx_transportation_rates_vehicle_type` | `CREATE INDEX idx_transportation_rates_vehicle_type ON public.transportation_rates USING btree (vehicle_type) WHERE (deleted_at IS NULL)` |
+| `transportation_rates` | `idx_transportation_rates_workspace` | `CREATE INDEX idx_transportation_rates_workspace ON public.transportation_rates USING btree (workspace_id) WHERE (deleted_at IS NULL)` |
+| `transportation_rates` | `transportation_rates_pkey` | `CREATE UNIQUE INDEX transportation_rates_pkey ON public.transportation_rates USING btree (id)` |
+| `travel_card_templates` | `idx_travel_card_templates_category` | `CREATE INDEX idx_travel_card_templates_category ON public.travel_card_templates USING btree (category)` |
+| `travel_card_templates` | `travel_card_templates_code_key` | `CREATE UNIQUE INDEX travel_card_templates_code_key ON public.travel_card_templates USING btree (code)` |
+| `travel_card_templates` | `travel_card_templates_pkey` | `CREATE UNIQUE INDEX travel_card_templates_pkey ON public.travel_card_templates USING btree (id)` |
+| `travel_invoices` | `idx_travel_invoices_created_at` | `CREATE INDEX idx_travel_invoices_created_at ON public.travel_invoices USING btree (created_at DESC)` |
+| `travel_invoices` | `idx_travel_invoices_invoice_date` | `CREATE INDEX idx_travel_invoices_invoice_date ON public.travel_invoices USING btree (invoice_date)` |
+| `travel_invoices` | `idx_travel_invoices_invoice_number` | `CREATE INDEX idx_travel_invoices_invoice_number ON public.travel_invoices USING btree (invoice_number)` |
+| `travel_invoices` | `idx_travel_invoices_order_id` | `CREATE INDEX idx_travel_invoices_order_id ON public.travel_invoices USING btree (order_id)` |
+| `travel_invoices` | `idx_travel_invoices_status` | `CREATE INDEX idx_travel_invoices_status ON public.travel_invoices USING btree (status)` |
+| `travel_invoices` | `idx_travel_invoices_tour_id` | `CREATE INDEX idx_travel_invoices_tour_id ON public.travel_invoices USING btree (tour_id)` |
+| `travel_invoices` | `idx_travel_invoices_transaction_no` | `CREATE INDEX idx_travel_invoices_transaction_no ON public.travel_invoices USING btree (transaction_no)` |
+| `travel_invoices` | `travel_invoices_pkey` | `CREATE UNIQUE INDEX travel_invoices_pkey ON public.travel_invoices USING btree (id)` |
+| `travel_invoices` | `travel_invoices_workspace_transaction_no_key` | `CREATE UNIQUE INDEX travel_invoices_workspace_transaction_no_key ON public.travel_invoices USING btree (workspace_id, transaction_no)` |
+| `traveler_badges` | `idx_traveler_badges_type` | `CREATE INDEX idx_traveler_badges_type ON public.traveler_badges USING btree (badge_type)` |
+| `traveler_badges` | `idx_traveler_badges_user` | `CREATE INDEX idx_traveler_badges_user ON public.traveler_badges USING btree (user_id)` |
+| `traveler_badges` | `traveler_badges_pkey` | `CREATE UNIQUE INDEX traveler_badges_pkey ON public.traveler_badges USING btree (id)` |
+| `traveler_badges` | `traveler_badges_user_id_badge_type_key` | `CREATE UNIQUE INDEX traveler_badges_user_id_badge_type_key ON public.traveler_badges USING btree (user_id, badge_type)` |
+| `traveler_conversation_members` | `idx_conversation_members_active` | `CREATE INDEX idx_conversation_members_active ON public.traveler_conversation_members USING btree (conversation_id, user_id) WHERE (left_at IS NULL)` |
+| `traveler_conversation_members` | `idx_conversation_members_conversation` | `CREATE INDEX idx_conversation_members_conversation ON public.traveler_conversation_members USING btree (conversation_id)` |
+| `traveler_conversation_members` | `idx_conversation_members_unique` | `CREATE UNIQUE INDEX idx_conversation_members_unique ON public.traveler_conversation_members USING btree (conversation_id, COALESCE(user_id, '00000000-0000-0000-0000-000000000000'::uuid), COALESCE(employee_id, '00000000-0000-0000-0000-000000000000'::uuid))` |
+| `traveler_conversation_members` | `idx_conversation_members_user` | `CREATE INDEX idx_conversation_members_user ON public.traveler_conversation_members USING btree (user_id)` |
+| `traveler_conversation_members` | `traveler_conversation_members_pkey` | `CREATE UNIQUE INDEX traveler_conversation_members_pkey ON public.traveler_conversation_members USING btree (id)` |
+| `traveler_conversations` | `idx_conversations_is_open` | `CREATE INDEX idx_conversations_is_open ON public.traveler_conversations USING btree (is_open) WHERE (tour_id IS NOT NULL)` |
+| `traveler_conversations` | `idx_conversations_last_message` | `CREATE INDEX idx_conversations_last_message ON public.traveler_conversations USING btree (last_message_at DESC)` |
+| `traveler_conversations` | `idx_conversations_split` | `CREATE INDEX idx_conversations_split ON public.traveler_conversations USING btree (split_group_id) WHERE (split_group_id IS NOT NULL)` |
+| `traveler_conversations` | `idx_conversations_tour` | `CREATE INDEX idx_conversations_tour ON public.traveler_conversations USING btree (tour_id) WHERE (tour_id IS NOT NULL)` |
+| `traveler_conversations` | `idx_conversations_trip` | `CREATE INDEX idx_conversations_trip ON public.traveler_conversations USING btree (trip_id) WHERE (trip_id IS NOT NULL)` |
+| `traveler_conversations` | `idx_conversations_type` | `CREATE INDEX idx_conversations_type ON public.traveler_conversations USING btree (type)` |
+| `traveler_conversations` | `idx_conversations_workspace` | `CREATE INDEX idx_conversations_workspace ON public.traveler_conversations USING btree (workspace_id) WHERE (workspace_id IS NOT NULL)` |
+| `traveler_conversations` | `idx_traveler_conversations_created_by` | `CREATE INDEX idx_traveler_conversations_created_by ON public.traveler_conversations USING btree (created_by)` |
+| `traveler_conversations` | `idx_traveler_conversations_last_message_id` | `CREATE INDEX idx_traveler_conversations_last_message_id ON public.traveler_conversations USING btree (last_message_id)` |
+| `traveler_conversations` | `traveler_conversations_pkey` | `CREATE UNIQUE INDEX traveler_conversations_pkey ON public.traveler_conversations USING btree (id)` |
+| `traveler_expense_splits` | `idx_traveler_expense_splits_expense` | `CREATE INDEX idx_traveler_expense_splits_expense ON public.traveler_expense_splits USING btree (expense_id)` |
+| `traveler_expense_splits` | `idx_traveler_expense_splits_unsettled` | `CREATE INDEX idx_traveler_expense_splits_unsettled ON public.traveler_expense_splits USING btree (user_id, is_settled) WHERE (is_settled = false)` |
+| `traveler_expense_splits` | `idx_traveler_expense_splits_user` | `CREATE INDEX idx_traveler_expense_splits_user ON public.traveler_expense_splits USING btree (user_id)` |
+| `traveler_expense_splits` | `traveler_expense_splits_expense_id_user_id_key` | `CREATE UNIQUE INDEX traveler_expense_splits_expense_id_user_id_key ON public.traveler_expense_splits USING btree (expense_id, user_id)` |
+| `traveler_expense_splits` | `traveler_expense_splits_pkey` | `CREATE UNIQUE INDEX traveler_expense_splits_pkey ON public.traveler_expense_splits USING btree (id)` |
+| `traveler_expenses` | `idx_traveler_expenses_date` | `CREATE INDEX idx_traveler_expenses_date ON public.traveler_expenses USING btree (expense_date)` |
+| `traveler_expenses` | `idx_traveler_expenses_paid_by` | `CREATE INDEX idx_traveler_expenses_paid_by ON public.traveler_expenses USING btree (paid_by)` |
+| `traveler_expenses` | `idx_traveler_expenses_split_group` | `CREATE INDEX idx_traveler_expenses_split_group ON public.traveler_expenses USING btree (split_group_id) WHERE (split_group_id IS NOT NULL)` |
+| `traveler_expenses` | `idx_traveler_expenses_trip` | `CREATE INDEX idx_traveler_expenses_trip ON public.traveler_expenses USING btree (trip_id) WHERE (trip_id IS NOT NULL)` |
+| `traveler_expenses` | `traveler_expenses_pkey` | `CREATE UNIQUE INDEX traveler_expenses_pkey ON public.traveler_expenses USING btree (id)` |
+| `traveler_friends` | `idx_traveler_friends_friend` | `CREATE INDEX idx_traveler_friends_friend ON public.traveler_friends USING btree (friend_id)` |
+| `traveler_friends` | `idx_traveler_friends_invite_code` | `CREATE INDEX idx_traveler_friends_invite_code ON public.traveler_friends USING btree (invite_code) WHERE (invite_code IS NOT NULL)` |
+| `traveler_friends` | `idx_traveler_friends_status` | `CREATE INDEX idx_traveler_friends_status ON public.traveler_friends USING btree (status)` |
+| `traveler_friends` | `idx_traveler_friends_user` | `CREATE INDEX idx_traveler_friends_user ON public.traveler_friends USING btree (user_id)` |
+| `traveler_friends` | `traveler_friends_pkey` | `CREATE UNIQUE INDEX traveler_friends_pkey ON public.traveler_friends USING btree (id)` |
+| `traveler_friends` | `traveler_friends_user_id_friend_id_key` | `CREATE UNIQUE INDEX traveler_friends_user_id_friend_id_key ON public.traveler_friends USING btree (user_id, friend_id)` |
+| `traveler_messages` | `idx_messages_conversation` | `CREATE INDEX idx_messages_conversation ON public.traveler_messages USING btree (conversation_id)` |
+| `traveler_messages` | `idx_messages_reply` | `CREATE INDEX idx_messages_reply ON public.traveler_messages USING btree (reply_to_id) WHERE (reply_to_id IS NOT NULL)` |
+| `traveler_messages` | `idx_messages_sender` | `CREATE INDEX idx_messages_sender ON public.traveler_messages USING btree (sender_id)` |
+| `traveler_messages` | `traveler_messages_pkey` | `CREATE UNIQUE INDEX traveler_messages_pkey ON public.traveler_messages USING btree (id)` |
+| `traveler_profiles` | `idx_traveler_profiles_id_number` | `CREATE INDEX idx_traveler_profiles_id_number ON public.traveler_profiles USING btree (id_number) WHERE (id_number IS NOT NULL)` |
+| `traveler_profiles` | `idx_traveler_profiles_user_type` | `CREATE INDEX idx_traveler_profiles_user_type ON public.traveler_profiles USING btree (user_type)` |
+| `traveler_profiles` | `idx_traveler_profiles_username` | `CREATE INDEX idx_traveler_profiles_username ON public.traveler_profiles USING btree (username) WHERE (username IS NOT NULL)` |
+| `traveler_profiles` | `traveler_profiles_pkey` | `CREATE UNIQUE INDEX traveler_profiles_pkey ON public.traveler_profiles USING btree (id)` |
+| `traveler_profiles` | `traveler_profiles_username_key` | `CREATE UNIQUE INDEX traveler_profiles_username_key ON public.traveler_profiles USING btree (username)` |
+| `traveler_settlements` | `idx_traveler_settlements_from` | `CREATE INDEX idx_traveler_settlements_from ON public.traveler_settlements USING btree (from_user)` |
+| `traveler_settlements` | `idx_traveler_settlements_split_group` | `CREATE INDEX idx_traveler_settlements_split_group ON public.traveler_settlements USING btree (split_group_id) WHERE (split_group_id IS NOT NULL)` |
+| `traveler_settlements` | `idx_traveler_settlements_to` | `CREATE INDEX idx_traveler_settlements_to ON public.traveler_settlements USING btree (to_user)` |
+| `traveler_settlements` | `idx_traveler_settlements_trip` | `CREATE INDEX idx_traveler_settlements_trip ON public.traveler_settlements USING btree (trip_id) WHERE (trip_id IS NOT NULL)` |
+| `traveler_settlements` | `traveler_settlements_pkey` | `CREATE UNIQUE INDEX traveler_settlements_pkey ON public.traveler_settlements USING btree (id)` |
+| `traveler_split_group_members` | `idx_traveler_split_group_members_group` | `CREATE INDEX idx_traveler_split_group_members_group ON public.traveler_split_group_members USING btree (group_id)` |
+| `traveler_split_group_members` | `idx_traveler_split_group_members_user` | `CREATE INDEX idx_traveler_split_group_members_user ON public.traveler_split_group_members USING btree (user_id) WHERE (user_id IS NOT NULL)` |
+| `traveler_split_group_members` | `traveler_split_group_members_pkey` | `CREATE UNIQUE INDEX traveler_split_group_members_pkey ON public.traveler_split_group_members USING btree (id)` |
+| `traveler_split_groups` | `idx_traveler_split_groups_created_by` | `CREATE INDEX idx_traveler_split_groups_created_by ON public.traveler_split_groups USING btree (created_by)` |
+| `traveler_split_groups` | `idx_traveler_split_groups_trip` | `CREATE INDEX idx_traveler_split_groups_trip ON public.traveler_split_groups USING btree (trip_id) WHERE (trip_id IS NOT NULL)` |
+| `traveler_split_groups` | `traveler_split_groups_pkey` | `CREATE UNIQUE INDEX traveler_split_groups_pkey ON public.traveler_split_groups USING btree (id)` |
+| `traveler_tour_cache` | `idx_traveler_tour_cache_departure` | `CREATE INDEX idx_traveler_tour_cache_departure ON public.traveler_tour_cache USING btree (departure_date DESC)` |
+| `traveler_tour_cache` | `idx_traveler_tour_cache_id_number` | `CREATE INDEX idx_traveler_tour_cache_id_number ON public.traveler_tour_cache USING btree (id_number)` |
+| `traveler_tour_cache` | `idx_traveler_tour_cache_tour_code` | `CREATE INDEX idx_traveler_tour_cache_tour_code ON public.traveler_tour_cache USING btree (tour_code)` |
+| `traveler_tour_cache` | `idx_traveler_tour_cache_traveler` | `CREATE INDEX idx_traveler_tour_cache_traveler ON public.traveler_tour_cache USING btree (traveler_id)` |
+| `traveler_tour_cache` | `traveler_tour_cache_pkey` | `CREATE UNIQUE INDEX traveler_tour_cache_pkey ON public.traveler_tour_cache USING btree (id)` |
+| `traveler_tour_cache` | `traveler_tour_cache_traveler_id_tour_id_key` | `CREATE UNIQUE INDEX traveler_tour_cache_traveler_id_tour_id_key ON public.traveler_tour_cache USING btree (traveler_id, tour_id)` |
+| `traveler_trip_accommodations` | `idx_traveler_trip_accommodations_trip` | `CREATE INDEX idx_traveler_trip_accommodations_trip ON public.traveler_trip_accommodations USING btree (trip_id)` |
+| `traveler_trip_accommodations` | `traveler_trip_accommodations_pkey` | `CREATE UNIQUE INDEX traveler_trip_accommodations_pkey ON public.traveler_trip_accommodations USING btree (id)` |
+| `traveler_trip_briefings` | `idx_traveler_trip_briefings_trip_id` | `CREATE INDEX idx_traveler_trip_briefings_trip_id ON public.traveler_trip_briefings USING btree (trip_id)` |
+| `traveler_trip_briefings` | `traveler_trip_briefings_pkey` | `CREATE UNIQUE INDEX traveler_trip_briefings_pkey ON public.traveler_trip_briefings USING btree (id)` |
+| `traveler_trip_flights` | `idx_traveler_trip_flights_trip` | `CREATE INDEX idx_traveler_trip_flights_trip ON public.traveler_trip_flights USING btree (trip_id)` |
+| `traveler_trip_flights` | `traveler_trip_flights_pkey` | `CREATE UNIQUE INDEX traveler_trip_flights_pkey ON public.traveler_trip_flights USING btree (id)` |
+| `traveler_trip_invitations` | `idx_traveler_trip_invitations_code` | `CREATE INDEX idx_traveler_trip_invitations_code ON public.traveler_trip_invitations USING btree (invite_code)` |
+| `traveler_trip_invitations` | `idx_traveler_trip_invitations_invitee` | `CREATE INDEX idx_traveler_trip_invitations_invitee ON public.traveler_trip_invitations USING btree (invitee_id)` |
+| `traveler_trip_invitations` | `idx_traveler_trip_invitations_trip` | `CREATE INDEX idx_traveler_trip_invitations_trip ON public.traveler_trip_invitations USING btree (trip_id)` |
+| `traveler_trip_invitations` | `traveler_trip_invitations_invite_code_key` | `CREATE UNIQUE INDEX traveler_trip_invitations_invite_code_key ON public.traveler_trip_invitations USING btree (invite_code)` |
+| `traveler_trip_invitations` | `traveler_trip_invitations_pkey` | `CREATE UNIQUE INDEX traveler_trip_invitations_pkey ON public.traveler_trip_invitations USING btree (id)` |
+| `traveler_trip_itinerary_items` | `idx_traveler_trip_itinerary_items_date` | `CREATE INDEX idx_traveler_trip_itinerary_items_date ON public.traveler_trip_itinerary_items USING btree (item_date)` |
+| `traveler_trip_itinerary_items` | `idx_traveler_trip_itinerary_items_day` | `CREATE INDEX idx_traveler_trip_itinerary_items_day ON public.traveler_trip_itinerary_items USING btree (trip_id, day_number, sort_order)` |
+| `traveler_trip_itinerary_items` | `idx_traveler_trip_itinerary_items_trip_id` | `CREATE INDEX idx_traveler_trip_itinerary_items_trip_id ON public.traveler_trip_itinerary_items USING btree (trip_id)` |
+| `traveler_trip_itinerary_items` | `traveler_trip_itinerary_items_pkey` | `CREATE UNIQUE INDEX traveler_trip_itinerary_items_pkey ON public.traveler_trip_itinerary_items USING btree (id)` |
+| `traveler_trip_members` | `idx_traveler_trip_members_trip` | `CREATE INDEX idx_traveler_trip_members_trip ON public.traveler_trip_members USING btree (trip_id)` |
+| `traveler_trip_members` | `idx_traveler_trip_members_user` | `CREATE INDEX idx_traveler_trip_members_user ON public.traveler_trip_members USING btree (user_id)` |
+| `traveler_trip_members` | `traveler_trip_members_pkey` | `CREATE UNIQUE INDEX traveler_trip_members_pkey ON public.traveler_trip_members USING btree (id)` |
+| `traveler_trip_members` | `traveler_trip_members_trip_id_user_id_key` | `CREATE UNIQUE INDEX traveler_trip_members_trip_id_user_id_key ON public.traveler_trip_members USING btree (trip_id, user_id)` |
+| `traveler_trips` | `idx_traveler_trips_created_by` | `CREATE INDEX idx_traveler_trips_created_by ON public.traveler_trips USING btree (created_by)` |
+| `traveler_trips` | `idx_traveler_trips_dates` | `CREATE INDEX idx_traveler_trips_dates ON public.traveler_trips USING btree (start_date, end_date)` |
+| `traveler_trips` | `idx_traveler_trips_erp_tour_id` | `CREATE INDEX idx_traveler_trips_erp_tour_id ON public.traveler_trips USING btree (erp_tour_id) WHERE (erp_tour_id IS NOT NULL)` |
+| `traveler_trips` | `idx_traveler_trips_status` | `CREATE INDEX idx_traveler_trips_status ON public.traveler_trips USING btree (status)` |
+| `traveler_trips` | `idx_traveler_trips_tour_code` | `CREATE INDEX idx_traveler_trips_tour_code ON public.traveler_trips USING btree (tour_code) WHERE (tour_code IS NOT NULL)` |
+| `traveler_trips` | `traveler_trips_pkey` | `CREATE UNIQUE INDEX traveler_trips_pkey ON public.traveler_trips USING btree (id)` |
+| `trip_members` | `idx_trip_members_assigned` | `CREATE INDEX idx_trip_members_assigned ON public.trip_members USING btree (assigned_itinerary_id)` |
+| `trip_members` | `idx_trip_members_customer` | `CREATE INDEX idx_trip_members_customer ON public.trip_members USING btree (customer_id)` |
+| `trip_members` | `trip_members_assigned_itinerary_id_customer_id_key` | `CREATE UNIQUE INDEX trip_members_assigned_itinerary_id_customer_id_key ON public.trip_members USING btree (assigned_itinerary_id, customer_id)` |
+| `trip_members` | `trip_members_pkey` | `CREATE UNIQUE INDEX trip_members_pkey ON public.trip_members USING btree (id)` |
+| `trip_members_v2` | `idx_trip_members_v2_assigned_itinerary_id` | `CREATE INDEX idx_trip_members_v2_assigned_itinerary_id ON public.trip_members_v2 USING btree (assigned_itinerary_id)` |
+| `trip_members_v2` | `idx_trip_members_v2_customer_id` | `CREATE INDEX idx_trip_members_v2_customer_id ON public.trip_members_v2 USING btree (customer_id)` |
+| `trip_members_v2` | `idx_trip_members_v2_payment_status` | `CREATE INDEX idx_trip_members_v2_payment_status ON public.trip_members_v2 USING btree (payment_status)` |
+| `trip_members_v2` | `idx_trip_members_v2_visa_status` | `CREATE INDEX idx_trip_members_v2_visa_status ON public.trip_members_v2 USING btree (visa_status)` |
+| `trip_members_v2` | `trip_members_v2_assigned_itinerary_id_customer_id_key` | `CREATE UNIQUE INDEX trip_members_v2_assigned_itinerary_id_customer_id_key ON public.trip_members_v2 USING btree (assigned_itinerary_id, customer_id)` |
+| `trip_members_v2` | `trip_members_v2_pkey` | `CREATE UNIQUE INDEX trip_members_v2_pkey ON public.trip_members_v2 USING btree (id)` |
+| `usa_esta` | `idx_usa_esta_applicant_name` | `CREATE INDEX idx_usa_esta_applicant_name ON public.usa_esta USING btree (applicant_name_zh) WHERE (deleted_at IS NULL)` |
+| `usa_esta` | `idx_usa_esta_customer` | `CREATE INDEX idx_usa_esta_customer ON public.usa_esta USING btree (customer_id) WHERE (deleted_at IS NULL)` |
+| `usa_esta` | `idx_usa_esta_order` | `CREATE INDEX idx_usa_esta_order ON public.usa_esta USING btree (order_id) WHERE (deleted_at IS NULL)` |
+| `usa_esta` | `idx_usa_esta_status` | `CREATE INDEX idx_usa_esta_status ON public.usa_esta USING btree (status) WHERE (deleted_at IS NULL)` |
+| `usa_esta` | `idx_usa_esta_tour` | `CREATE INDEX idx_usa_esta_tour ON public.usa_esta USING btree (tour_id) WHERE (deleted_at IS NULL)` |
+| `usa_esta` | `idx_usa_esta_workspace` | `CREATE INDEX idx_usa_esta_workspace ON public.usa_esta USING btree (workspace_id) WHERE (deleted_at IS NULL)` |
+| `usa_esta` | `usa_esta_pkey` | `CREATE UNIQUE INDEX usa_esta_pkey ON public.usa_esta USING btree (id)` |
+| `user_badges` | `user_badges_pkey` | `CREATE UNIQUE INDEX user_badges_pkey ON public.user_badges USING btree (id)` |
+| `user_badges` | `user_badges_user_id_badge_id_key` | `CREATE UNIQUE INDEX user_badges_user_id_badge_id_key ON public.user_badges USING btree (user_id, badge_id)` |
+| `user_points_transactions` | `idx_points_tx_created` | `CREATE INDEX idx_points_tx_created ON public.user_points_transactions USING btree (created_at DESC)` |
+| `user_points_transactions` | `idx_points_tx_reference` | `CREATE INDEX idx_points_tx_reference ON public.user_points_transactions USING btree (reference_id) WHERE (reference_id IS NOT NULL)` |
+| `user_points_transactions` | `idx_points_tx_type` | `CREATE INDEX idx_points_tx_type ON public.user_points_transactions USING btree (transaction_type)` |
+| `user_points_transactions` | `idx_points_tx_user` | `CREATE INDEX idx_points_tx_user ON public.user_points_transactions USING btree (user_id)` |
+| `user_points_transactions` | `user_points_transactions_pkey` | `CREATE UNIQUE INDEX user_points_transactions_pkey ON public.user_points_transactions USING btree (id)` |
+| `user_preferences` | `idx_user_preferences_user_id` | `CREATE INDEX idx_user_preferences_user_id ON public.user_preferences USING btree (user_id)` |
+| `user_preferences` | `user_preferences_pkey` | `CREATE UNIQUE INDEX user_preferences_pkey ON public.user_preferences USING btree (id)` |
+| `user_preferences` | `user_preferences_user_id_preference_key_key` | `CREATE UNIQUE INDEX user_preferences_user_id_preference_key_key ON public.user_preferences USING btree (user_id, preference_key)` |
+| `user_roles` | `idx_user_roles_user_id` | `CREATE INDEX idx_user_roles_user_id ON public.user_roles USING btree (user_id)` |
+| `user_roles` | `user_roles_pkey` | `CREATE UNIQUE INDEX user_roles_pkey ON public.user_roles USING btree (id)` |
+| `vendor_costs` | `vendor_costs_pkey` | `CREATE UNIQUE INDEX vendor_costs_pkey ON public.vendor_costs USING btree (id)` |
+| `vendor_costs` | `vendor_costs_unique` | `CREATE UNIQUE INDEX vendor_costs_unique ON public.vendor_costs USING btree (vendor_name, visa_type)` |
+| `visas` | `idx_visas_applicant_name` | `CREATE INDEX idx_visas_applicant_name ON public.visas USING btree (applicant_name)` |
+| `visas` | `idx_visas_is_active` | `CREATE INDEX idx_visas_is_active ON public.visas USING btree (is_active)` |
+| `visas` | `idx_visas_needs_sync` | `CREATE INDEX idx_visas_needs_sync ON public.visas USING btree (_needs_sync)` |
+| `visas` | `idx_visas_order_id` | `CREATE INDEX idx_visas_order_id ON public.visas USING btree (order_id)` |
+| `visas` | `idx_visas_status` | `CREATE INDEX idx_visas_status ON public.visas USING btree (status)` |
+| `visas` | `idx_visas_submission_date` | `CREATE INDEX idx_visas_submission_date ON public.visas USING btree (submission_date)` |
+| `visas` | `idx_visas_tour_id` | `CREATE INDEX idx_visas_tour_id ON public.visas USING btree (tour_id)` |
+| `visas` | `idx_visas_workspace_id` | `CREATE INDEX idx_visas_workspace_id ON public.visas USING btree (workspace_id)` |
+| `visas` | `visas_pkey` | `CREATE UNIQUE INDEX visas_pkey ON public.visas USING btree (id)` |
+| `website_day_activities` | `website_day_activities_pkey` | `CREATE UNIQUE INDEX website_day_activities_pkey ON public.website_day_activities USING btree (id)` |
+| `website_destinations` | `idx_website_destinations_ws` | `CREATE INDEX idx_website_destinations_ws ON public.website_destinations USING btree (workspace_id)` |
+| `website_destinations` | `website_destinations_pkey` | `CREATE UNIQUE INDEX website_destinations_pkey ON public.website_destinations USING btree (id)` |
+| `website_footer_links` | `idx_website_footer_links_ws` | `CREATE INDEX idx_website_footer_links_ws ON public.website_footer_links USING btree (workspace_id)` |
+| `website_footer_links` | `website_footer_links_pkey` | `CREATE UNIQUE INDEX website_footer_links_pkey ON public.website_footer_links USING btree (id)` |
+| `website_hero_content` | `idx_website_hero_content_ws` | `CREATE INDEX idx_website_hero_content_ws ON public.website_hero_content USING btree (workspace_id)` |
+| `website_hero_content` | `website_hero_content_pkey` | `CREATE UNIQUE INDEX website_hero_content_pkey ON public.website_hero_content USING btree (id)` |
+| `website_hero_videos` | `idx_website_hero_videos_ws` | `CREATE INDEX idx_website_hero_videos_ws ON public.website_hero_videos USING btree (workspace_id)` |
+| `website_hero_videos` | `website_hero_videos_pkey` | `CREATE UNIQUE INDEX website_hero_videos_pkey ON public.website_hero_videos USING btree (id)` |
+| `website_itineraries` | `idx_website_itineraries_ws` | `CREATE INDEX idx_website_itineraries_ws ON public.website_itineraries USING btree (workspace_id)` |
+| `website_itineraries` | `website_itineraries_pkey` | `CREATE UNIQUE INDEX website_itineraries_pkey ON public.website_itineraries USING btree (id)` |
+| `website_itineraries` | `website_itineraries_workspace_id_slug_key` | `CREATE UNIQUE INDEX website_itineraries_workspace_id_slug_key ON public.website_itineraries USING btree (workspace_id, slug)` |
+| `website_itinerary_days` | `website_itinerary_days_pkey` | `CREATE UNIQUE INDEX website_itinerary_days_pkey ON public.website_itinerary_days USING btree (id)` |
+| `website_settings` | `idx_website_settings_ws` | `CREATE INDEX idx_website_settings_ws ON public.website_settings USING btree (workspace_id)` |
+| `website_settings` | `website_settings_pkey` | `CREATE UNIQUE INDEX website_settings_pkey ON public.website_settings USING btree (id)` |
+| `website_settings` | `website_settings_workspace_id_key_key` | `CREATE UNIQUE INDEX website_settings_workspace_id_key_key ON public.website_settings USING btree (workspace_id, key)` |
+| `website_spot_highlights` | `website_spot_highlights_pkey` | `CREATE UNIQUE INDEX website_spot_highlights_pkey ON public.website_spot_highlights USING btree (id)` |
+| `website_story_sections` | `idx_website_story_sections_ws` | `CREATE INDEX idx_website_story_sections_ws ON public.website_story_sections USING btree (workspace_id)` |
+| `website_story_sections` | `website_story_sections_pkey` | `CREATE UNIQUE INDEX website_story_sections_pkey ON public.website_story_sections USING btree (id)` |
+| `wishlist_template_items` | `idx_wishlist_template_items_template` | `CREATE INDEX idx_wishlist_template_items_template ON public.wishlist_template_items USING btree (template_id)` |
+| `wishlist_template_items` | `wishlist_template_items_pkey` | `CREATE UNIQUE INDEX wishlist_template_items_pkey ON public.wishlist_template_items USING btree (id)` |
+| `wishlist_templates` | `idx_wishlist_templates_created_by` | `CREATE INDEX idx_wishlist_templates_created_by ON public.wishlist_templates USING btree (created_by)` |
+| `wishlist_templates` | `idx_wishlist_templates_slug` | `CREATE INDEX idx_wishlist_templates_slug ON public.wishlist_templates USING btree (slug)` |
+| `wishlist_templates` | `idx_wishlist_templates_status` | `CREATE INDEX idx_wishlist_templates_status ON public.wishlist_templates USING btree (status)` |
+| `wishlist_templates` | `idx_wishlist_templates_workspace` | `CREATE INDEX idx_wishlist_templates_workspace ON public.wishlist_templates USING btree (workspace_id)` |
+| `wishlist_templates` | `wishlist_templates_pkey` | `CREATE UNIQUE INDEX wishlist_templates_pkey ON public.wishlist_templates USING btree (id)` |
+| `wishlist_templates` | `wishlist_templates_workspace_id_slug_key` | `CREATE UNIQUE INDEX wishlist_templates_workspace_id_slug_key ON public.wishlist_templates USING btree (workspace_id, slug)` |
+| `workload_summary` | `idx_workload_person` | `CREATE UNIQUE INDEX idx_workload_person ON public.workload_summary USING btree (person)` |
+| `workload_summary` | `workload_summary_pkey` | `CREATE UNIQUE INDEX workload_summary_pkey ON public.workload_summary USING btree (id)` |
+| `workspace_attendance_settings` | `workspace_attendance_settings_pkey` | `CREATE UNIQUE INDEX workspace_attendance_settings_pkey ON public.workspace_attendance_settings USING btree (workspace_id)` |
+| `workspace_bonus_defaults` | `idx_workspace_bonus_defaults_workspace_id` | `CREATE INDEX idx_workspace_bonus_defaults_workspace_id ON public.workspace_bonus_defaults USING btree (workspace_id)` |
+| `workspace_bonus_defaults` | `workspace_bonus_defaults_pkey` | `CREATE UNIQUE INDEX workspace_bonus_defaults_pkey ON public.workspace_bonus_defaults USING btree (id)` |
+| `workspace_countries` | `workspace_countries_pkey` | `CREATE UNIQUE INDEX workspace_countries_pkey ON public.workspace_countries USING btree (workspace_id, country_code)` |
+| `workspace_countries` | `workspace_countries_workspace_idx` | `CREATE INDEX workspace_countries_workspace_idx ON public.workspace_countries USING btree (workspace_id)` |
+| `workspace_features` | `workspace_features_pkey` | `CREATE UNIQUE INDEX workspace_features_pkey ON public.workspace_features USING btree (id)` |
+| `workspace_features` | `workspace_features_workspace_id_feature_code_key` | `CREATE UNIQUE INDEX workspace_features_workspace_id_feature_code_key ON public.workspace_features USING btree (workspace_id, feature_code)` |
+| `workspace_items` | `idx_workspace_items_owner` | `CREATE INDEX idx_workspace_items_owner ON public.workspace_items USING btree (owner) WHERE (deleted_at IS NULL)` |
+| `workspace_items` | `idx_workspace_items_pinned` | `CREATE INDEX idx_workspace_items_pinned ON public.workspace_items USING btree (is_pinned) WHERE (deleted_at IS NULL)` |
+| `workspace_items` | `idx_workspace_items_type` | `CREATE INDEX idx_workspace_items_type ON public.workspace_items USING btree (item_type)` |
+| `workspace_items` | `workspace_items_pkey` | `CREATE UNIQUE INDEX workspace_items_pkey ON public.workspace_items USING btree (id)` |
+| `workspace_job_roles` | `idx_workspace_job_roles_workspace` | `CREATE INDEX idx_workspace_job_roles_workspace ON public.workspace_job_roles USING btree (workspace_id)` |
+| `workspace_job_roles` | `workspace_job_roles_pkey` | `CREATE UNIQUE INDEX workspace_job_roles_pkey ON public.workspace_job_roles USING btree (id)` |
+| `workspace_job_roles` | `workspace_job_roles_workspace_id_name_key` | `CREATE UNIQUE INDEX workspace_job_roles_workspace_id_name_key ON public.workspace_job_roles USING btree (workspace_id, name)` |
+| `workspace_line_config` | `workspace_line_config_pkey` | `CREATE UNIQUE INDEX workspace_line_config_pkey ON public.workspace_line_config USING btree (id)` |
+| `workspace_line_config` | `workspace_line_config_workspace_id_key` | `CREATE UNIQUE INDEX workspace_line_config_workspace_id_key ON public.workspace_line_config USING btree (workspace_id)` |
+| `workspace_meta_config` | `workspace_meta_config_pkey` | `CREATE UNIQUE INDEX workspace_meta_config_pkey ON public.workspace_meta_config USING btree (workspace_id)` |
+| `workspace_modules` | `workspace_modules_pkey` | `CREATE UNIQUE INDEX workspace_modules_pkey ON public.workspace_modules USING btree (id)` |
+| `workspace_modules` | `workspace_modules_workspace_id_module_name_key` | `CREATE UNIQUE INDEX workspace_modules_workspace_id_module_name_key ON public.workspace_modules USING btree (workspace_id, module_name)` |
+| `workspace_notification_settings` | `workspace_notification_settings_pkey` | `CREATE UNIQUE INDEX workspace_notification_settings_pkey ON public.workspace_notification_settings USING btree (workspace_id)` |
+| `workspace_roles` | `idx_workspace_roles_workspace_id` | `CREATE INDEX idx_workspace_roles_workspace_id ON public.workspace_roles USING btree (workspace_id)` |
+| `workspace_roles` | `workspace_roles_pkey` | `CREATE UNIQUE INDEX workspace_roles_pkey ON public.workspace_roles USING btree (id)` |
+| `workspace_selector_fields` | `idx_workspace_selector_fields_workspace` | `CREATE INDEX idx_workspace_selector_fields_workspace ON public.workspace_selector_fields USING btree (workspace_id)` |
+| `workspace_selector_fields` | `workspace_selector_fields_pkey` | `CREATE UNIQUE INDEX workspace_selector_fields_pkey ON public.workspace_selector_fields USING btree (id)` |
+| `workspace_selector_fields` | `workspace_selector_fields_workspace_id_name_key` | `CREATE UNIQUE INDEX workspace_selector_fields_workspace_id_name_key ON public.workspace_selector_fields USING btree (workspace_id, name)` |
+| `workspaces` | `idx_workspaces_active` | `CREATE INDEX idx_workspaces_active ON public.workspaces USING btree (is_active)` |
+| `workspaces` | `idx_workspaces_created_by` | `CREATE INDEX idx_workspaces_created_by ON public.workspaces USING btree (created_by)` |
+| `workspaces` | `idx_workspaces_custom_domain` | `CREATE UNIQUE INDEX idx_workspaces_custom_domain ON public.workspaces USING btree (custom_domain) WHERE (custom_domain IS NOT NULL)` |
+| `workspaces` | `idx_workspaces_home_country_code` | `CREATE INDEX idx_workspaces_home_country_code ON public.workspaces USING btree (home_country_code)` |
+| `workspaces` | `idx_workspaces_needs_sync` | `CREATE INDEX idx_workspaces_needs_sync ON public.workspaces USING btree (_needs_sync) WHERE (_needs_sync = true)` |
+| `workspaces` | `idx_workspaces_updated_by` | `CREATE INDEX idx_workspaces_updated_by ON public.workspaces USING btree (updated_by)` |
+| `workspaces` | `workspaces_code_key` | `CREATE UNIQUE INDEX workspaces_code_key ON public.workspaces USING btree (code)` |
+| `workspaces` | `workspaces_pkey` | `CREATE UNIQUE INDEX workspaces_pkey ON public.workspaces USING btree (id)` |
+
+</details>
