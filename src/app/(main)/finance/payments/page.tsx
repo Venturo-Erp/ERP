@@ -12,6 +12,7 @@
 
 import { logger } from '@/lib/utils/logger'
 import { useAuthStore } from '@/stores'
+import { usePermissions } from '@/hooks/usePermissions'
 import { UnauthorizedPage } from '@/components/unauthorized-page'
 import { useState, useEffect, useCallback } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
@@ -57,7 +58,8 @@ export default function PaymentsPage() {
     handleUpdateReceipt,
     handleDeleteReceipt,
   } = usePaymentData()
-  const { user, isAdmin } = useAuthStore()
+  const { user } = useAuthStore()
+  const { canViewFinance } = usePermissions()
 
   // 讀取 URL 參數（從快速收款按鈕傳入）
   const urlOrderId = searchParams.get('order_id')
@@ -208,7 +210,7 @@ export default function PaymentsPage() {
     },
   ]
 
-  if (!isAdmin) return <UnauthorizedPage />
+  if (!canViewFinance) return <UnauthorizedPage />
 
   return (
     <>

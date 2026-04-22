@@ -77,7 +77,7 @@ interface TourItineraryTabProps {
 // Main Component
 // ============================================================
 export function TourItineraryTab({ tour }: TourItineraryTabProps) {
-  const { user: currentUser, isAdmin } = useAuthStore()
+  const { user: currentUser } = useAuthStore()
   const { items: itineraries, refresh } = useItineraries()
   const { syncToCore } = useSyncItineraryToCore()
   const { items: coreItems, refresh: refreshCoreItems } = useTourItineraryItemsByTour(tour.id)
@@ -87,8 +87,9 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
     [allItineraryDays, tour.id]
   )
 
-  // 權限：是否可以編輯資料庫
-  const canEditDatabase = isAdmin || currentUser?.permissions?.includes('database') || false
+  // 權限：是否可以編輯資料庫（match 'database' root or any 'database:*' tab permission）
+  const canEditDatabase =
+    currentUser?.permissions?.some(p => p === 'database' || p.startsWith('database:')) ?? false
 
   // State
   const [loading, setLoading] = useState(true)

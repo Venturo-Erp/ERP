@@ -246,7 +246,6 @@ export const useAuthStore = create<AuthState>()(
       checkPermission: (permission: string) => {
         const user = get().user
         if (!user) return false
-        if (get().isAdmin) return true
         return user.permissions.some(p => p === permission || p.startsWith(`${permission}:`))
       },
 

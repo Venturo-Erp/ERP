@@ -281,22 +281,23 @@ export function usePermissions() {
 
   const canAccess = useCallback(
     (route: string): boolean => {
-      if (isAdmin) return true
+      // Feature 載入中時先放行、避免閃 UnauthorizedPage（拔除 isAdmin 短路的配套）
+      if (workspaceFeatures.loading) return true
       if (!workspaceFeatures.isRouteAvailable(route)) return false
       if (!rolePermissions.canRead(route)) return false
       return true
     },
-    [isAdmin, workspaceFeatures, rolePermissions]
+    [workspaceFeatures, rolePermissions]
   )
 
   const canEdit = useCallback(
     (route: string): boolean => {
-      if (isAdmin) return true
+      if (workspaceFeatures.loading) return true
       if (!workspaceFeatures.isRouteAvailable(route)) return false
       if (!rolePermissions.canWrite(route)) return false
       return true
     },
-    [isAdmin, workspaceFeatures, rolePermissions]
+    [workspaceFeatures, rolePermissions]
   )
 
   return {
