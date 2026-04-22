@@ -18,6 +18,12 @@ import { getServerAuth } from '@/lib/auth/server-auth'
 import { logger } from '@/lib/utils/logger'
 import { MODULES } from '@/lib/permissions/module-tabs'
 
+// Corner workspace 當全站職務模板的來源。
+// 理由：Corner 是 Venturo 首家實客戶、職務權限由 William 手工調校過；
+// 跟 migration 20260422160000_sync_default_roles_from_corner.sql 同源。
+const CORNER_WORKSPACE_ID = '8ef05a74-1f87-48ab-afd3-9bfeb423935d'
+const DEFAULT_ROLE_NAMES = ['管理員', '業務', '會計', '助理'] as const
+
 interface CreateTenantRequest {
   // Workspace 資訊
   workspaceName: string
@@ -223,265 +229,79 @@ export async function POST(request: NextRequest) {
     }
 
     // 2.5 建立預設職務並設定管理員
-    const defaultRoles = [
-      { name: '管理員', is_admin: true },
-      { name: '業務', is_admin: false },
-      { name: '會計', is_admin: false },
-      { name: '助理', is_admin: false },
-    ]
-
+    // P001 收尾（2026-04-22）：職務權限模板從 Corner 複製、跟 migration 20260422160000 同源
     const { data: createdRoles, error: rolesError } = await supabaseAdmin
       .from('workspace_roles')
-      .insert(defaultRoles.map(r => ({ ...r, workspace_id: workspace.id })))
+      .insert(
+        DEFAULT_ROLE_NAMES.map(name => ({
+          workspace_id: workspace.id,
+          name,
+          is_admin: name === '管理員',
+        }))
+      )
       .select('id, name')
 
-    if (rolesError) {
+    if (rolesError || !createdRoles) {
       logger.warn('Failed to create default roles:', rolesError)
     } else {
-      logger.log(`Default roles created: ${createdRoles?.length}`)
+      logger.log(`Default roles created: ${createdRoles.length}`)
 
-      // 找到管理員職務的 ID
-      const adminRole = createdRoles?.find(r => r.name === '管理員')
+      const adminRole = createdRoles.find(r => r.name === '管理員')
       if (adminRole) {
-        // 存到頂層 role_id（2026-04-18 統一、不再寫 job_info.role_id）
         await supabaseAdmin
           .from('employees')
           .update({ role_id: adminRole.id })
           .eq('id', employee.id)
         logger.log(`Admin employee role_id set: ${adminRole.id}`)
+      }
 
-        // 管理員權限（全開）
-        const adminModules = [
-          'dashboard',
-          'tours',
-          'orders',
-          'quotes',
-          'finance',
-          'database',
-          'hr',
-          'settings',
-          'calendar',
-          'todos',
-          'workspace',
-          'itinerary',
-          'visas',
-          'customers',
-          'channel',
-        ]
-        const adminPermissions = adminModules.map(mod => ({
-          role_id: adminRole.id,
-          module_code: mod,
-          tab_code: null,
-          can_read: true,
-          can_write: true,
-        }))
+      // 從 Corner 模板複製 4 職務的 role_tab_permissions
+      const { data: cornerRoles } = await supabaseAdmin
+        .from('workspace_roles')
+        .select('id, name')
+        .eq('workspace_id', CORNER_WORKSPACE_ID)
+        .in('name', DEFAULT_ROLE_NAMES as unknown as string[])
 
-        // 管理員下拉資格：可當承辦業務 / 助理 / 團控（小公司老闆常兼三職）
-        const adminEligibilityPermissions = [
-          { role_id: adminRole.id, module_code: 'tours', tab_code: 'as_sales', can_read: true, can_write: true },
-          { role_id: adminRole.id, module_code: 'tours', tab_code: 'as_assistant', can_read: true, can_write: true },
-          { role_id: adminRole.id, module_code: 'tours', tab_code: 'as_tour_controller', can_read: true, can_write: true },
-        ]
+      if (!cornerRoles || cornerRoles.length === 0) {
+        logger.warn('Corner template roles not found, skipping permission seed')
+      } else {
+        const { data: cornerPerms } = await supabaseAdmin
+          .from('role_tab_permissions')
+          .select('role_id, module_code, tab_code, can_read, can_write')
+          .in(
+            'role_id',
+            cornerRoles.map(r => r.id)
+          )
 
-        // 設定預設權限（其他職務）
-        const accountingRole = createdRoles?.find(r => r.name === '會計')
-        const salesRole = createdRoles?.find(r => r.name === '業務')
-        const assistantRole = createdRoles?.find(r => r.name === '助理')
+        if (cornerPerms && cornerPerms.length > 0) {
+          const cornerRoleNameById = new Map(cornerRoles.map(r => [r.id, r.name]))
+          const newRoleIdByName = new Map(createdRoles.map(r => [r.name, r.id]))
 
-        const defaultTabPermissions = [
-          // 管理員權限
-          ...adminPermissions,
-          ...adminEligibilityPermissions,
-          // 會計權限
-          ...(accountingRole
-            ? [
-                {
-                  role_id: accountingRole.id,
-                  module_code: 'accounting',
-                  tab_code: null,
-                  can_read: true,
-                  can_write: true,
-                },
-                {
-                  role_id: accountingRole.id,
-                  module_code: 'finance',
-                  tab_code: 'payments',
-                  can_read: true,
-                  can_write: true,
-                },
-                {
-                  role_id: accountingRole.id,
-                  module_code: 'finance',
-                  tab_code: 'requests',
-                  can_read: true,
-                  can_write: true,
-                },
-                {
-                  role_id: accountingRole.id,
-                  module_code: 'finance',
-                  tab_code: 'treasury',
-                  can_read: true,
-                  can_write: true,
-                },
-                {
-                  role_id: accountingRole.id,
-                  module_code: 'dashboard',
-                  tab_code: null,
-                  can_read: true,
-                  can_write: false,
-                },
-                {
-                  role_id: accountingRole.id,
-                  module_code: 'calendar',
-                  tab_code: null,
-                  can_read: true,
-                  can_write: true,
-                },
-                {
-                  role_id: accountingRole.id,
-                  module_code: 'todos',
-                  tab_code: null,
-                  can_read: true,
-                  can_write: true,
-                },
-                {
-                  role_id: accountingRole.id,
-                  module_code: 'settings',
-                  tab_code: 'personal',
-                  can_read: true,
-                  can_write: true,
-                },
-              ]
-            : []),
-          // 業務權限
-          ...(salesRole
-            ? [
-                {
-                  role_id: salesRole.id,
-                  module_code: 'tours',
-                  tab_code: null,
-                  can_read: true,
-                  can_write: true,
-                },
-                // 下拉資格：業務可當「承辦業務」（開團時選得到）
-                {
-                  role_id: salesRole.id,
-                  module_code: 'tours',
-                  tab_code: 'as_sales',
-                  can_read: true,
-                  can_write: true,
-                },
-                {
-                  role_id: salesRole.id,
-                  module_code: 'orders',
-                  tab_code: null,
-                  can_read: true,
-                  can_write: true,
-                },
-                {
-                  role_id: salesRole.id,
-                  module_code: 'database',
-                  tab_code: 'customers',
-                  can_read: true,
-                  can_write: true,
-                },
-                {
-                  role_id: salesRole.id,
-                  module_code: 'dashboard',
-                  tab_code: null,
-                  can_read: true,
-                  can_write: false,
-                },
-                {
-                  role_id: salesRole.id,
-                  module_code: 'calendar',
-                  tab_code: null,
-                  can_read: true,
-                  can_write: true,
-                },
-                {
-                  role_id: salesRole.id,
-                  module_code: 'todos',
-                  tab_code: null,
-                  can_read: true,
-                  can_write: true,
-                },
-                {
-                  role_id: salesRole.id,
-                  module_code: 'settings',
-                  tab_code: 'personal',
-                  can_read: true,
-                  can_write: true,
-                },
-              ]
-            : []),
-          // 助理權限（同業務）
-          ...(assistantRole
-            ? [
-                {
-                  role_id: assistantRole.id,
-                  module_code: 'tours',
-                  tab_code: null,
-                  can_read: true,
-                  can_write: true,
-                },
-                // 下拉資格：助理可當「助理」（開團時選得到）
-                {
-                  role_id: assistantRole.id,
-                  module_code: 'tours',
-                  tab_code: 'as_assistant',
-                  can_read: true,
-                  can_write: true,
-                },
-                {
-                  role_id: assistantRole.id,
-                  module_code: 'orders',
-                  tab_code: null,
-                  can_read: true,
-                  can_write: true,
-                },
-                {
-                  role_id: assistantRole.id,
-                  module_code: 'database',
-                  tab_code: 'customers',
-                  can_read: true,
-                  can_write: true,
-                },
-                {
-                  role_id: assistantRole.id,
-                  module_code: 'dashboard',
-                  tab_code: null,
-                  can_read: true,
-                  can_write: false,
-                },
-                {
-                  role_id: assistantRole.id,
-                  module_code: 'calendar',
-                  tab_code: null,
-                  can_read: true,
-                  can_write: true,
-                },
-                {
-                  role_id: assistantRole.id,
-                  module_code: 'todos',
-                  tab_code: null,
-                  can_read: true,
-                  can_write: true,
-                },
-                {
-                  role_id: assistantRole.id,
-                  module_code: 'settings',
-                  tab_code: 'personal',
-                  can_read: true,
-                  can_write: true,
-                },
-              ]
-            : []),
-        ]
+          const templatePerms = cornerPerms
+            .map(cp => {
+              const roleName = cornerRoleNameById.get(cp.role_id)
+              const newRoleId = roleName ? newRoleIdByName.get(roleName) : undefined
+              if (!newRoleId) return null
+              return {
+                role_id: newRoleId,
+                module_code: cp.module_code,
+                tab_code: cp.tab_code,
+                can_read: cp.can_read,
+                can_write: cp.can_write,
+              }
+            })
+            .filter((p): p is NonNullable<typeof p> => p !== null)
 
-        if (defaultTabPermissions.length > 0) {
-          await supabaseAdmin.from('role_tab_permissions').insert(defaultTabPermissions)
-          logger.log(`Default tab permissions created: ${defaultTabPermissions.length}`)
+          if (templatePerms.length > 0) {
+            const { error: permError } = await supabaseAdmin
+              .from('role_tab_permissions')
+              .insert(templatePerms)
+            if (permError) {
+              logger.warn('Failed to seed template permissions:', permError)
+            } else {
+              logger.log(`Template permissions seeded from Corner: ${templatePerms.length} rows`)
+            }
+          }
         }
       }
     }
