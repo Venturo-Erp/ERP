@@ -82,74 +82,15 @@ export function useOrderMembers({
     }
   }, [tourId])
 
-  // 載入分房資訊
+  // 載入分房資訊（2026-04-23：tour_rooms / tour_vehicles 砍除、stub 為 noop）
   const loadRoomAssignments = useCallback(async () => {
-    if (!tourId) return
-    try {
-      const { data: rooms } = await supabase
-        .from('tour_rooms')
-        .select('id, room_number, room_type')
-        .eq('tour_id', tourId)
+    setRoomAssignments({})
+  }, [])
 
-      if (!rooms || rooms.length === 0) return
-
-      const { data: assignments } = await supabase
-        .from('tour_room_assignments')
-        .select('order_member_id, room_id')
-        .in(
-          'room_id',
-          rooms.map(r => r.id)
-        )
-
-      if (assignments) {
-        const map: Record<string, string> = {}
-        assignments.forEach(a => {
-          const room = rooms.find(r => r.id === a.room_id)
-          if (room) {
-            map[a.order_member_id] = room.room_number || room.room_type || COMP_ORDERS_LABELS.已分房
-          }
-        })
-        setRoomAssignments(map)
-      }
-    } catch (error) {
-      logger.error(COMP_ORDERS_LABELS.載入分房資訊失敗, error)
-    }
-  }, [tourId])
-
-  // 載入分車資訊
+  // 載入分車資訊（2026-04-23：同上、stub）
   const loadVehicleAssignments = useCallback(async () => {
-    if (!tourId) return
-    try {
-      const { data: vehicles } = await supabase
-        .from('tour_vehicles')
-        .select('id, vehicle_name, vehicle_type')
-        .eq('tour_id', tourId)
-
-      if (!vehicles || vehicles.length === 0) return
-
-      const { data: assignments } = await supabase
-        .from('tour_vehicle_assignments')
-        .select('order_member_id, vehicle_id')
-        .in(
-          'vehicle_id',
-          vehicles.map(v => v.id)
-        )
-
-      if (assignments) {
-        const map: Record<string, string> = {}
-        assignments.forEach(a => {
-          const vehicle = vehicles.find(v => v.id === a.vehicle_id)
-          if (vehicle) {
-            map[a.order_member_id] =
-              vehicle.vehicle_name || vehicle.vehicle_type || COMP_ORDERS_LABELS.已分車
-          }
-        })
-        setVehicleAssignments(map)
-      }
-    } catch (error) {
-      logger.error(COMP_ORDERS_LABELS.載入分車資訊失敗, error)
-    }
-  }, [tourId])
+    setVehicleAssignments({})
+  }, [])
 
   // 載入成員資料
   const loadMembers = useCallback(async () => {

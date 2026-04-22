@@ -58,17 +58,10 @@ export function useTourHealth(tourId: string): TourHealthData {
       try {
         setData(prev => ({ ...prev, isLoading: true, error: null }))
 
-        // 1. 查詢需求單狀態
-        const { data: tourRequests } = await supabase
-          .from('tour_requests')
-          .select('id, status')
-          .eq('tour_id', tourId)
-
-        const requestIds = tourRequests?.map(req => req.id) || []
-
-        // 統計待回覆的需求單
-        const pendingRequests =
-          tourRequests?.filter(r => r.status === 'pending' || r.status === 'sent') || []
+        // 1. 查詢需求單狀態（2026-04-23：tour_requests 砍除、stub 為空）
+        const tourRequests: Array<{ id: string; status: string }> = []
+        const requestIds: string[] = []
+        const pendingRequests: Array<{ id: string; status: string }> = []
 
         // 2. 查詢該團所有成員的護照和機票狀態
         // 先查詢該團的所有訂單

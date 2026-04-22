@@ -35,19 +35,9 @@ export function TourOverviewTab({ tour }: TourOverviewTabProps) {
   // Financial calculations
   const quotePrice = tourQuote?.total_cost || tour.price || 0
   const expectedRevenue = (quotePrice || 0) * currentParticipants
-  // 總支出 = 請款單項目 local_cost 加總（不用 tour.total_cost，那是報價預估值）
-  const [actualExpense, setActualExpense] = useState(0)
-  useEffect(() => {
-    if (!tour.id) return
-    supabase
-      .from('tour_request_items')
-      .select('local_cost')
-      .eq('tour_id', tour.id)
-      .then(({ data }) => {
-        const sum = (data || []).reduce((acc, item) => acc + (Number(item.local_cost) || 0), 0)
-        setActualExpense(sum)
-      })
-  }, [tour.id])
+  // 總支出（2026-04-23：tour_request_items 砍除、stub 為 0）
+  // 之後重做時改從 payment_request_items（請款單項目）算
+  const [actualExpense] = useState(0)
 
   const actualRevenue = totalPaidAmount
   const grossProfit = actualRevenue - actualExpense

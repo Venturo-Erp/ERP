@@ -41,6 +41,7 @@ export interface User {
   display_name: string
   english_name: string
   email: Email
+  // 登入時由 role_tab_permissions + employee_permission_overrides 算出、塞進袋子、不是 DB 欄位
   permissions: string[]
   avatar?: URL
   is_active: boolean

@@ -459,3 +459,21 @@ _完整 audit 細節見 `/Users/williamchien/Projects/VENTURO_ROUTE_AUDIT/`。_
 **邊界 case**：大團跨訂單同房同車（roommate_id 跨 order）— uuid 不限同訂單、相容
 **估時**：M（半天）
 **估值**：⚠️ 不急、無安全問題、純架構清晰度
+
+---
+
+## 🟡 上線後待做
+
+### [LOGIN] 「記住我」功能真實實作
+**動機**：2026-04-23 盤查發現「記住我」勾選框是**假按鈕**——
+- page 收勾選狀態傳給 validateLogin
+- validateLogin 函式收進來但內部 0 使用
+- Supabase session 預設就會 auto-refresh 30 天、跟勾不勾無關
+- 寫「30 天內免重新登入」實質是欺騙用戶
+
+**現狀**：UI 已拔除假按鈕（2026-04-23 commit）、避免欺騙
+**未來做**：
+- 接 Supabase session expiry 邏輯：勾 = 30 天、不勾 = 短 session（瀏覽器關閉就登出）
+- 或考慮整合 OAuth provider 的「保持登入」選項
+**估時**：S（30-60 分鐘）
+**優先級**：低（上線必要功能不缺、是 UX nice-to-have）

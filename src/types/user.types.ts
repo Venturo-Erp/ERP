@@ -46,6 +46,7 @@ export interface User {
       reason: string
     }[]
   }
+  // 登入時由 validate-login 從 role_tab_permissions + employee_permission_overrides 算出、塞進袋子、不是 DB 欄位
   permissions: string[]
   roles?: UserRole[] // RBAC 角色（從 rbac-config.ts 定義）
   attendance: {

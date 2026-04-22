@@ -1,1 +1,0 @@
-export { PayrollManagementPage } from './PayrollManagementPage'

@@ -102,22 +102,10 @@ export const ToursPage: React.FC = () => {
     handleSortChange,
   } = useToursPage()
 
-  // Local/DMC：查詢收到的委託數量
+  // Local/DMC 查詢委託數量（2026-04-23：tour_requests + Local/DMC 整族砍除、stub 為 0）
   useEffect(() => {
-    if (!isLocal || !user?.workspace_id) return
-
-    const fetchReceivedCount = async () => {
-      const { count } = await supabase
-        .from('tour_requests')
-        .select('*', { count: 'exact', head: true })
-        .eq('recipient_workspace_id', user.workspace_id as string)
-        .eq('status', 'sent')
-
-      setReceivedCount(count || 0)
-    }
-
-    fetchReceivedCount()
-  }, [isLocal, user?.workspace_id])
+    setReceivedCount(0)
+  }, [])
 
   const {
     itineraryDialogTour,

@@ -377,8 +377,6 @@ export function useTourOperations(params: UseTourOperationsParams) {
         await Promise.all([
           supabase.from('calendar_events').delete().eq('related_tour_id', tour.id),
           supabase.from('channels').delete().eq('tour_id', tour.id),
-          supabase.from('tour_confirmation_sheets').delete().eq('tour_id', tour.id),
-          supabase.from('pnrs').delete().eq('tour_id', tour.id),
         ])
 
         // 斷開報價單和行程表連結

@@ -52,36 +52,8 @@ export default function TourPage({ data, isPreview = false, viewMode = 'desktop'
   const { scrollOpacity } = useTourScrollEffects({ viewMode, isPreview })
   const { activeDayIndex, dayRefs, handleDayNavigate } = useTourItineraryNav(dailyItinerary)
 
-  // 載入公司 LOGO
-  useEffect(() => {
-    const fetchCompanyLogo = async () => {
-      try {
-        const { data: assets, error } = await supabase
-          .from('company_assets')
-          .select('file_path')
-          .like('file_path', 'logos/%')
-          .limit(1)
-          .single()
-
-        if (error || !assets) {
-          logger.log('No company logo found')
-          return
-        }
-
-        const { data: urlData } = supabase.storage
-          .from('company-assets')
-          .getPublicUrl(assets.file_path)
-
-        if (urlData?.publicUrl) {
-          setCompanyLogoUrl(urlData.publicUrl)
-        }
-      } catch (error) {
-        logger.error('Error fetching company logo:', error)
-      }
-    }
-
-    fetchCompanyLogo()
-  }, [])
+  // 公司 LOGO 載入功能已移除（2026-04-23、company_assets 表砍除）
+  // 之後重做時直接從 workspace.logo_url 抓
 
   // 判斷是否為特定風格
   const isLuxury = style === 'luxury'

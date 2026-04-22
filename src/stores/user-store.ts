@@ -129,13 +129,6 @@ export const userStoreHelpers = {
   },
 
   /**
-   * 更新權限
-   */
-  updateUserPermissions: async (id: string, permissions: string[]): Promise<void> => {
-    await useUserStore.getState().update(id, { permissions } as Partial<User>)
-  },
-
-  /**
    * 更新基本薪資
    */
   updateBaseSalary: async (id: string, newSalary: number, reason: string): Promise<void> => {

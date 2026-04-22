@@ -1,6 +1,3 @@
 'use client'
 
-export * from './useLeaveTypes'
-export * from './useLeaveRequests'
-export * from './useAttendanceRecords'
-export * from './usePayroll'
+// 2026-04-23: HR 出勤/請假/薪資 hooks 全砍除（功能未做完、之後重做）

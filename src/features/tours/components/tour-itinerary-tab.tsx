@@ -573,50 +573,8 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
             relatedCoreItem.unit_price > 0 &&
             relatedCoreItem.quote_status === 'confirmed')) // Local 報價已確認
 
-      // 🆕 如果已發需求單，自動產生取消單
-      if (relatedCoreItem?.request_id) {
-        try {
-          const sb = createSupabaseBrowserClient()
-          const { data: originalRequest } = await sb
-            .from('tour_requests')
-            .select(
-              'id, code, tour_id, workspace_id, request_type, status, supplier_name, supplier_id, supplier_contact, supplier_response, items, note, sent_at, sent_to, sent_via, replied_at, replied_by, accepted_at, accepted_by, confirmed_at, confirmed_by, rejected_at, rejected_by, rejection_reason, closed_at, closed_by, close_note, package_status, selected_tier, covered_item_ids, recipient_workspace_id, target_workspace_id, source_type, source_id, request_scope, assigned_employee_id, assigned_employee_name, line_group_id, line_group_name, hidden, created_at, created_by, updated_at, updated_by'
-            )
-            .eq('id', relatedCoreItem.request_id)
-            .single()
-
-          if (originalRequest && originalRequest.status !== 'draft') {
-            // 產生取消單
-            await sb.from('tour_requests').insert({
-              tour_id: originalRequest.tour_id,
-              workspace_id: originalRequest.workspace_id,
-              request_type: 'cancellation',
-              supplier_name: originalRequest.supplier_name,
-              supplier_id: originalRequest.supplier_id,
-              supplier_contact: originalRequest.supplier_contact,
-              source_type: originalRequest.source_type,
-              source_id: originalRequest.source_id,
-              status: 'draft',
-              note: `行程異動，取消「${attractionName}」，煩請協助取消預訂`,
-              items: originalRequest.items,
-              created_by: currentUser?.id || undefined,
-            })
-
-            toast.success(
-              `✅ 已自動產生取消單\n\n景點「${attractionName}」已刪除，取消單已建立（待發送）`,
-              {
-                duration: 6000,
-                style: {
-                  whiteSpace: 'pre-line',
-                  maxWidth: '500px',
-                },
-              }
-            )
-          }
-        } catch (error) {
-          logger.error('Failed to create cancellation request', error)
-        }
-      }
+      // 🆕 自動產生取消單（2026-04-23：tour_requests 整族砍除、整段邏輯移除）
+      // 之後重做客製化詢價系統時恢復取消單功能
 
       // 如果有其他下游資料，顯示警告
       if (hasDownstream) {
@@ -763,20 +721,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
         hasRequest: false,
       }
 
-      // 查需求單
-      const { data: requests } = await sb
-        .from('tour_requests')
-        .select('status')
-        .eq('tour_id', tour.id)
-        .ilike('supplier_name', `%${old.title.substring(0, 10)}%`)
-        .not('status', 'eq', 'draft')
-        .limit(1)
-
-      if (requests && requests.length > 0) {
-        change.hasRequest = true
-        change.requestStatus = requests[0].status || undefined
-      }
-
+      // 查需求單（2026-04-23：tour_requests 砍除、change.hasRequest 永遠 false）
       changes.push(change)
     }
 

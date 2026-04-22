@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
     // 支援兩種登入：員工編號（E001）或 email（amin@xxx.com）
     const isEmail = username.includes('@')
     const selectFields =
-      'id, employee_number, display_name, english_name, email, avatar, status, password_hash, supabase_user_id, workspace_id, role_id, job_info, permissions, is_active, created_at, updated_at, login_failed_count, login_locked_until'
+      'id, employee_number, display_name, english_name, email, avatar, status, password_hash, supabase_user_id, workspace_id, role_id, job_info, is_active, created_at, updated_at, login_failed_count, login_locked_until'
 
     const lookupResult = isEmail
       ? await supabase

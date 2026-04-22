@@ -18,7 +18,7 @@ import type { CalendarEvent } from '@/types/calendar.types'
 import type { DatesSetArg } from '@fullcalendar/core'
 import useSWR from 'swr'
 
-// 請假資料類型
+// 請假資料類型（2026-04-23：leave_requests 表砍除、保留 type 但 stub data = []）
 interface LeaveRequest {
   id: string
   employee_id: string
@@ -69,27 +69,8 @@ export function useCalendarEvents() {
   const { items: employees } = useEmployeesSlim()
   const { workspaces, loadWorkspaces } = useWorkspaceStore()
 
-  // 載入已核准的請假資料（顯示在行事曆上）
-  const workspaceId = user?.workspace_id
-  const { data: leaveRequests } = useSWR<LeaveRequest[]>(
-    workspaceId ? ['leave_requests_for_calendar', workspaceId] : null,
-    async ([, wsId]: [string, string]) => {
-      const { data, error } = await supabase
-        .from('leave_requests')
-        .select(
-          `
-          id, employee_id, leave_type_id, start_date, end_date, days, status,
-          employee:employees!leave_requests_employee_id_fkey(chinese_name, english_name, display_name),
-          leave_type:leave_types!leave_requests_leave_type_id_fkey(name, code)
-        `
-        )
-        .eq('workspace_id', wsId)
-        .eq('status', 'approved')
-      if (error) throw error
-      return data as LeaveRequest[]
-    },
-    { revalidateOnFocus: false }
-  )
+  // 載入已核准的請假資料（2026-04-23：leave_requests 表砍除、stub 為空陣列）
+  const leaveRequests: LeaveRequest[] = []
 
   // Workspace 篩選狀態（只有管理員能用）
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string | null>(null)

@@ -517,64 +517,9 @@ export function PnrMatchDialog({
         }
       }
 
-      // 3. 保存 PNR 記錄到 pnrs 表（讓列印時可以讀取完整航班資訊）
-      if (workspaceId && parsedPnr.segments.length > 0) {
-        try {
-          // 檢查 PNR 是否已存在
-          const { data: existingPNR } = await supabase
-            .from('pnrs')
-            .select('id')
-            .eq('record_locator', recordLocator)
-            .eq('workspace_id', workspaceId)
-            .single()
-
-          // 準備 segment 資料（包含 via 經停資訊）
-          const segmentsData = parsedPnr.segments.map(seg => ({
-            airline: seg.airline,
-            flightNumber: seg.flightNumber,
-            origin: seg.origin,
-            destination: seg.destination,
-            departureDate: seg.departureDate,
-            departureTime: seg.departureTime || null,
-            arrivalTime: seg.arrivalTime || null,
-            status: seg.status,
-            class: seg.class,
-            via: seg.via || [], // 保留經停資訊
-            isDirect: seg.isDirect,
-          }))
-
-          if (existingPNR) {
-            // PNR 已存在，更新它
-            await supabase
-              .from('pnrs')
-              .update({
-                raw_pnr: rawPnr,
-                passenger_names: parsedPnr.passengerNames,
-                segments: segmentsData,
-                tour_id: tourId || null,
-                ticketing_deadline: parsedPnr.ticketingDeadline?.toISOString() || null,
-              })
-              .eq('id', existingPNR.id)
-            logger.info(`PNR ${recordLocator} 已更新`)
-          } else {
-            // PNR 不存在，新建
-            await supabase.from('pnrs').insert({
-              record_locator: recordLocator,
-              workspace_id: workspaceId,
-              raw_pnr: rawPnr,
-              passenger_names: parsedPnr.passengerNames,
-              segments: segmentsData,
-              tour_id: tourId || null,
-              status: 'active',
-              ticketing_deadline: parsedPnr.ticketingDeadline?.toISOString() || null,
-            })
-            logger.info(`PNR ${recordLocator} 已建立`)
-          }
-        } catch (pnrError) {
-          // PNR 保存失敗不阻止其他操作
-          logger.error(COMP_ORDERS_LABELS.保存_PNR_記錄失敗, pnrError)
-        }
-      }
+      // PNR 記錄存到 pnrs 表的功能已移除（2026-04-23、pnrs 進階系統砍除）
+      // PnrMatchDialog 仍能解析 PNR + 配對團員 + 寫入 order_members.pnr 字串
+      // 之後重做完整 PNR 系統時再恢復
 
       // 顯示結果
       // 注意：不更新 tours 的團體航班，PNR 是個人機票資訊，跟團體航班是分開的

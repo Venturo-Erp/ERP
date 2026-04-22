@@ -3,7 +3,7 @@
 import { LABELS } from './constants/labels'
 
 import { useState, useEffect } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { useAuthStore } from '@/stores/auth-store'
 import { AlertCircle, Eye, EyeOff } from 'lucide-react'
 import { logger } from '@/lib/utils/logger'
@@ -17,10 +17,8 @@ export default function LoginPage() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
-  const [rememberMe, setRememberMe] = useState(true)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
-  const router = useRouter()
   const searchParams = useSearchParams()
   const { validateLogin } = useAuthStore()
 
@@ -64,15 +62,15 @@ export default function LoginPage() {
       localStorage.setItem(LAST_CODE_KEY, trimmedCode)
       localStorage.setItem(LAST_USERNAME_KEY, username.trim())
 
-      const result = await validateLogin(username.trim(), password, trimmedCode, rememberMe)
+      const result = await validateLogin(username.trim(), password, trimmedCode)
       if (result.success) {
         window.location.href = getRedirectPath()
       } else {
-        setError(result.message || '帳號或密碼錯誤')
+        setError(result.message || LABELS.ERROR_INVALID_CREDENTIALS)
       }
     } catch (error) {
       logger.error('Login error:', error)
-      setError('系統錯誤，請稍後再試')
+      setError(LABELS.ERROR_SYSTEM)
     } finally {
       setIsLoading(false)
     }
@@ -95,9 +93,9 @@ export default function LoginPage() {
           className="text-center font-black text-[28px] tracking-tight"
           style={{ color: 'var(--morandi-gold)' }}
         >
-          Venturo
+          {LABELS.TITLE}
         </h1>
-        <p className="text-center text-xs text-morandi-muted mt-1">旅遊資源管理系統</p>
+        <p className="text-center text-xs text-morandi-muted mt-1">{LABELS.SUBTITLE}</p>
 
         {/* 錯誤訊息 */}
         {error && (
@@ -113,7 +111,7 @@ export default function LoginPage() {
             type="text"
             value={code}
             onChange={e => setCode(e.target.value.toUpperCase())}
-            placeholder="公司代號"
+            placeholder={LABELS.PLACEHOLDER_CODE}
             required
             autoComplete="organization"
             autoFocus
@@ -123,7 +121,7 @@ export default function LoginPage() {
             type="text"
             value={username}
             onChange={e => setUsername(e.target.value)}
-            placeholder="帳號（例：E001）"
+            placeholder={LABELS.PLACEHOLDER_USERNAME}
             required
             autoComplete="username"
             className="login-input"
@@ -133,7 +131,7 @@ export default function LoginPage() {
               type={showPassword ? 'text' : 'password'}
               value={password}
               onChange={e => setPassword(e.target.value)}
-              placeholder="密碼"
+              placeholder={LABELS.PLACEHOLDER_PASSWORD}
               required
               autoComplete="current-password"
               className="login-input pr-10"
@@ -147,26 +145,9 @@ export default function LoginPage() {
             </button>
           </div>
 
-          {/* 記住我 */}
-          <div className="flex items-center gap-2 mt-3 ml-2">
-            <input
-              type="checkbox"
-              id="rememberMe"
-              checked={rememberMe}
-              onChange={e => setRememberMe(e.target.checked)}
-              className="w-3.5 h-3.5 rounded accent-[var(--morandi-gold)] cursor-pointer"
-            />
-            <label
-              htmlFor="rememberMe"
-              className="text-[11px] text-morandi-muted cursor-pointer select-none"
-            >
-              記住我（30 天內免重新登入）
-            </label>
-          </div>
-
           {/* 登入按鈕 */}
           <button type="submit" disabled={isLoading || !code.trim()} className="login-button">
-            {isLoading ? '登入中...' : '登入'}
+            {isLoading ? LABELS.LOGIN_BUTTON_LOADING : LABELS.LOGIN_BUTTON}
           </button>
         </form>
       </div>
@@ -219,25 +200,6 @@ export default function LoginPage() {
           opacity: 0.6;
           cursor: not-allowed;
           transform: none;
-        }
-        .login-social-btn {
-          background: linear-gradient(45deg, rgb(60, 60, 60) 0%, rgb(120, 120, 120) 100%);
-          border: 4px solid white;
-          padding: 8px;
-          border-radius: 50%;
-          width: 40px;
-          height: 40px;
-          display: grid;
-          place-content: center;
-          box-shadow: rgba(180, 160, 120, 0.3) 0px 12px 10px -8px;
-          transition: all 0.2s ease-in-out;
-          cursor: pointer;
-        }
-        .login-social-btn:hover {
-          transform: scale(1.15);
-        }
-        .login-social-btn:active {
-          transform: scale(0.9);
         }
       `}</style>
     </div>

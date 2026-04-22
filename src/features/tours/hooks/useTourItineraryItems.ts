@@ -400,26 +400,8 @@ export function useSyncItineraryToCore() {
           })
         }
 
-        // 5. 標記修改項目的需求單為 outdated
-        if (modifiedRequestIds.size > 0) {
-          await supabase
-            .from('tour_requests')
-            .update({ status: 'outdated' })
-            .in('id', Array.from(modifiedRequestIds))
-        }
-
-        // 6. 標記刪除項目的需求單為 cancelled
-        for (const [request_id, cancellation] of cancellationsByRequestId) {
-          const cancellationNote = `行程刪除，取消項目：\n${cancellation.items.map(i => `- ${i.service_date || ''} ${i.title}`).join('\n')}`
-
-          await supabase
-            .from('tour_requests')
-            .update({
-              status: 'cancelled',
-              note: cancellationNote,
-            })
-            .eq('id', request_id)
-        }
+        // 5. 標記修改項目的需求單為 outdated（2026-04-23：tour_requests 砍除、整段停用）
+        // 6. 標記刪除項目的需求單為 cancelled（同上、之後重做客製化詢價時恢復）
 
         // 7. 刪除所有舊的行程項目（行程是 SSOT，不保護下游資料）
         const { error: delete_error } = await supabase

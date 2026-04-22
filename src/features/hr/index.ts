@@ -1,17 +1,10 @@
 /**
  * 人資模組匯出
+ * 2026-04-23: 砍除 leave / attendance / payroll 子模組（功能未做完）
+ * 之後重做時恢復
  */
 
 'use client'
 
-// Leave
-export * from './components/leave'
-
-// Attendance
-export * from './components/attendance'
-
-// Payroll
-export * from './components/payroll'
-
-// Hooks
-export * from './hooks'
+// 此檔暫無 export、之後重做 HR 子模組時恢復
+export {}

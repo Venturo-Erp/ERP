@@ -153,17 +153,7 @@ function AccommodationForm({ todo, onUpdate, onClose }: FormProps) {
 
     setIsSubmitting(true)
     try {
-      // 1. 更新核心表（如果有 tour_request_id）
-      if (todo.tour_request_id) {
-        const { supabase } = await import('@/lib/supabase/client')
-        await supabase
-          .from('tour_requests')
-          .update({
-            status: 'confirmed',
-            confirmed_at: new Date().toISOString(),
-          })
-          .eq('id', todo.tour_request_id)
-      }
+      // 1. 更新核心表（2026-04-23：tour_requests 砍除、todo.tour_request_id 已不存在、整段停用）
 
       // 2. 如果有付款，建立請款單
       if (formData.paymentStatus !== 'unpaid' && formData.amount > 0) {

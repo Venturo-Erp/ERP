@@ -59,7 +59,6 @@ export async function checkTourDependencies(tourId: string): Promise<TourDepende
 export async function deleteTourConfigurationData(tourId: string): Promise<void> {
   const results = await Promise.all([
     supabase.from('designer_drafts').delete().eq('tour_id', tourId),
-    supabase.from('folders').delete().eq('tour_id', tourId),
     supabase.from('members').delete().eq('tour_id', tourId),
     supabase.from('tour_addons').delete().eq('tour_id', tourId),
     supabase.from('tour_bonus_settings').delete().eq('tour_id', tourId),
@@ -70,9 +69,6 @@ export async function deleteTourConfigurationData(tourId: string): Promise<void>
     supabase.from('tour_meal_settings').delete().eq('tour_id', tourId),
     supabase.from('tour_member_fields').delete().eq('tour_id', tourId),
     supabase.from('tour_role_assignments').delete().eq('tour_id', tourId),
-    supabase.from('tour_rooms').delete().eq('tour_id', tourId),
-    supabase.from('tour_tables').delete().eq('tour_id', tourId),
-    supabase.from('tour_vehicles').delete().eq('tour_id', tourId),
   ])
   const failed = results.find(r => r.error)
   if (failed?.error) {

@@ -53,19 +53,15 @@ export const SimpleOrderTable = React.memo(function SimpleOrderTable({
 
     // 檢查財務 / 業務關聯單據是否存在
     // 團員（order_members）不擋、因為人員身份已在顧客管理、團員記錄可直接刪
-    // 真正要守護的是：請款單 / 收款單 / 需求單 / 確認單
-    const [reqRes, rcptRes, trReqRes, confRes] = await Promise.all([
+    // 真正要守護的是：請款單 / 收款單（需求單/確認單 已砍除）
+    const [reqRes, rcptRes] = await Promise.all([
       supabase.from('payment_requests').select('id', { count: 'exact', head: true }).eq('order_id', order.id),
       supabase.from('receipts').select('id', { count: 'exact', head: true }).eq('order_id', order.id),
-      supabase.from('tour_requests').select('id', { count: 'exact', head: true }).eq('order_id', order.id),
-      supabase.from('confirmations').select('id', { count: 'exact', head: true }).eq('order_id', order.id),
     ])
 
     const blockers: string[] = []
     if ((reqRes.count || 0) > 0) blockers.push(`請款單 ${reqRes.count} 張`)
     if ((rcptRes.count || 0) > 0) blockers.push(`收款單 ${rcptRes.count} 張`)
-    if ((trReqRes.count || 0) > 0) blockers.push(`需求單 ${trReqRes.count} 張`)
-    if ((confRes.count || 0) > 0) blockers.push(`確認單 ${confRes.count} 張`)
 
     if (blockers.length > 0) {
       await alert(

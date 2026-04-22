@@ -16,12 +16,11 @@ export async function updateMembersTicketingDeadline(
   if (error) throw error
 }
 
-/** 批量插入房間分配 */
+/** 批量插入房間分配（2026-04-23：tour_room_assignments 砍除、stub） */
 export async function insertRoomAssignments(
-  assignments: Array<{ room_id: string; order_member_id: string }>
+  _assignments: Array<{ room_id: string; order_member_id: string }>
 ): Promise<void> {
-  const { error } = await supabase.from('tour_room_assignments').insert(assignments)
-  if (error) throw error
+  // 分房功能砍除、之後重做時恢復
 }
 
 /** 查詢所有客戶（用於護照驗證比對） */

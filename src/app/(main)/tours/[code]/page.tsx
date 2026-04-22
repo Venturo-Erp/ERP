@@ -17,11 +17,8 @@ import { useVisibleModuleTabs } from '@/lib/permissions/hooks'
 import { CODE_LABELS } from './constants/labels'
 import { TOUR_DETAIL_PAGE_LABELS } from '@/features/tours/constants/labels'
 
-const TourRequestFormDialog = dynamic(
-  () =>
-    import('@/features/tours/components/TourRequestFormDialog').then(m => m.TourRequestFormDialog),
-  { ssr: false }
-)
+// 2026-04-23: TourRequestFormDialog（需求單對話框）已砍除（tour_requests 整族廢）
+// 之後重做客製化詢價時恢復
 
 export default function TourDetailPage() {
   const params = useParams()
@@ -161,20 +158,7 @@ export default function TourDetailPage() {
         }}
       />
 
-      {/* 需求單對話框 */}
-      {requestData && tour && (
-        <TourRequestFormDialog
-          isOpen={showRequestDialog}
-          onClose={() => {
-            setShowRequestDialog(false)
-            setRequestData(null)
-          }}
-          tour={tour}
-          category={requestData.category}
-          supplierName={requestData.supplierName}
-          items={requestData.items}
-        />
-      )}
+      {/* 需求單對話框已砍除（2026-04-23、tour_requests 整族廢）*/}
     </ContentPageLayout>
   )
 }
