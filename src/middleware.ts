@@ -11,6 +11,64 @@ import { verifyQuickLoginToken } from '@/lib/auth/quick-login-token'
  * - 已移除：自家 JWT（auth-token cookie）→ 現在完全由 Supabase session 管
  */
 
+// P002（2026-04-22）：公開路由改白名單。
+// 精確匹配 + 子路徑 prefix 分兩組，避免 `/api/auth` 這種過寬 prefix 把敏感 API 放行。
+const EXACT_PUBLIC_PATHS = new Set<string>([
+  // === 頁面（無子路由者）===
+  '/landing',
+  '/login',
+  '/confirm',
+  '/public',
+  '/view',
+  '/game',
+  // === 靜態資源 ===
+  '/favicon.ico',
+  '/manifest.json',
+  // === 認證 API ===
+  '/api/auth/validate-login',
+  '/api/auth/logout',
+  // sync-employee：解「登入時 session cookie 尚未就緒」的雞生蛋問題。
+  // 自帶 access_token 驗證（比 cookie session 更嚴、已是 defense-in-depth）。
+  '/api/auth/sync-employee',
+  '/api/health',
+  // === 客戶簽單確認（透過分享連結）===
+  '/api/contracts/sign',
+  '/api/quotes/confirmation/customer',
+  // === LINE LIFF customer 登入前查詢 ===
+  '/api/customers/by-line',
+  '/api/customers/link-line',
+  '/api/customers/match',
+])
+
+const PREFIX_PUBLIC_PATHS: readonly string[] = [
+  // === 頁面子路由（帶斜線避開 /login-x 這類誤中）===
+  '/login/',
+  '/confirm/',
+  '/public/',
+  '/view/',
+  '/p/',
+  '/game/',
+  // === LINE customer OAuth 家族 (/api/auth/line, /callback, /me) ===
+  '/api/auth/line',
+  // === Server-to-server webhook ===
+  '/api/line/webhook',
+  '/api/meta/webhook',
+  '/api/linkpay/callback',
+  '/api/linkpay/webhook',
+  // === Cron (Vercel internal) ===
+  '/api/cron/',
+  // === 分享連結 ===
+  '/api/itineraries/',
+  '/api/d/',
+  // === Next.js static ===
+  '/_next/',
+]
+
+function isPublicPath(pathname: string): boolean {
+  if (EXACT_PUBLIC_PATHS.has(pathname)) return true
+  return PREFIX_PUBLIC_PATHS.some(p => pathname.startsWith(p))
+}
+
 async function isAuthenticated(request: NextRequest, response: NextResponse): Promise<boolean> {
   // 1. 先看 quick-login token（一次性登入、保留原本機制）
   const quickLoginCookie = request.cookies.get('auth-token')
@@ -53,55 +111,11 @@ export async function middleware(request: NextRequest) {
     return response
   }
 
-  // 公開路由：不需要登入即可訪問（prefix 匹配）
-  const publicPaths = [
-    // === 頁面 ===
-    '/landing',
-    '/login',
-    '/confirm',
-    '/public',
-    '/view',
-    '/p/',
-    '/game',
-
-    // === 認證 API ===
-    '/api/auth',
-    '/api/health',
-
-    // === Webhook ===
-    '/api/line/webhook',
-    '/api/meta/webhook',
-    '/api/linkpay/callback',
-    '/api/linkpay/webhook',
-
-    // === Cron ===
-    '/api/cron',
-
-    // === 公開 API ===
-    '/api/itineraries',
-    '/api/contracts/sign',
-    '/api/quotes/confirmation/customer',
-    '/api/d',
-
-    // === App API（Bearer token）===
-    '/api/my',
-    '/api/trips',
-    '/api/eyeline',
-    '/api/join-trip',
-
-    // === LINE 客戶端 ===
-    '/api/customers/by-line',
-    '/api/customers/link-line',
-    '/api/customers/match',
-
-    // === 靜態資源 ===
-    '/_next',
-    '/favicon.ico',
-    '/manifest.json',
-  ]
-
-  const isPublicPath = publicPaths.some(path => pathname.startsWith(path))
-  if (isPublicPath) {
+  // P002（2026-04-22）：公開路由白名單、改精確匹配。
+  // 原 `startsWith('/api/auth')` prefix 會把 admin-reset-password / create-employee-auth /
+  // reset-employee-password / change-password / get-employee-data 全放行、
+  // 這些是敏感 API、必須走登入守門（endpoint 本身有 getServerAuth 是第二道、middleware 是第一道）。
+  if (isPublicPath(pathname)) {
     return response
   }
 
