@@ -23,7 +23,6 @@ export type {
   Tour,
   Member,
   TourAddOn,
-  TourRefund,
   ItineraryFeature,
   FocusCard,
   LeaderInfo,

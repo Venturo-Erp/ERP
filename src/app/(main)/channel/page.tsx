@@ -6,13 +6,10 @@ import { ChannelChat } from '@/components/workspace/ChannelChat'
 import { useWorkspaceChannels } from '@/stores/workspace-store'
 import { useAuthStore } from '@/stores/auth-store'
 import { cn } from '@/lib/utils'
-import { MobileHeader } from '@/components/layout/mobile-header'
-import { MobileSidebar } from '@/components/layout/mobile-sidebar'
 import { ModuleLoading } from '@/components/module-loading'
 
 export default function WorkspacePage() {
   const { sidebarCollapsed } = useAuthStore()
-  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
 
   const { loadWorkspaces, loadChannelGroups, loadChannels, currentWorkspace } =
     useWorkspaceChannels()
@@ -56,10 +53,6 @@ export default function WorkspacePage() {
   // 工作空間頁面使用自訂 layout，最大化聊天區域
   return (
     <>
-      {/* 手機版頂部標題列 */}
-      <MobileHeader onMenuClick={() => setMobileSidebarOpen(true)} />
-      <MobileSidebar isOpen={mobileSidebarOpen} onClose={() => setMobileSidebarOpen(false)} />
-
       {/* 主內容區域 - 頂部對齊，分割線對齊 logo 下方 */}
       <main
         className={cn(

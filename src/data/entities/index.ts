@@ -379,52 +379,6 @@ export {
 } from './company-contacts'
 
 // ============================================
-// 車隊管理
-// ============================================
-
-// Fleet Vehicles
-export {
-  fleetVehicleEntity,
-  useFleetVehicles,
-  useFleetVehiclesSlim,
-  useFleetVehicle,
-  useFleetVehiclesPaginated,
-  useFleetVehicleDictionary,
-  createFleetVehicle,
-  updateFleetVehicle,
-  deleteFleetVehicle,
-  invalidateFleetVehicles,
-} from './fleet-vehicles'
-
-// Fleet Drivers
-export {
-  fleetDriverEntity,
-  useFleetDrivers,
-  useFleetDriversSlim,
-  useFleetDriver,
-  useFleetDriversPaginated,
-  useFleetDriverDictionary,
-  createFleetDriver,
-  updateFleetDriver,
-  deleteFleetDriver,
-  invalidateFleetDrivers,
-} from './fleet-drivers'
-
-// Fleet Schedules
-export {
-  fleetScheduleEntity,
-  useFleetSchedules,
-  useFleetSchedulesSlim,
-  useFleetSchedule,
-  useFleetSchedulesPaginated,
-  useFleetScheduleDictionary,
-  createFleetSchedule,
-  updateFleetSchedule,
-  deleteFleetSchedule,
-  invalidateFleetSchedules,
-} from './fleet-schedules'
-
-// ============================================
 // 領隊管理
 // ============================================
 
@@ -441,20 +395,6 @@ export {
   deleteTourLeader,
   invalidateTourLeaders,
 } from './tour-leaders'
-
-// Leader Schedules
-export {
-  leaderScheduleEntity,
-  useLeaderSchedules,
-  useLeaderSchedulesSlim,
-  useLeaderSchedule,
-  useLeaderSchedulesPaginated,
-  useLeaderScheduleDictionary,
-  createLeaderSchedule,
-  updateLeaderSchedule,
-  deleteLeaderSchedule,
-  invalidateLeaderSchedules,
-} from './leader-schedules'
 
 // ============================================
 // 行事曆與加購
@@ -533,42 +473,6 @@ export {
   deleteLinkPayLog,
   invalidateLinkPayLogs,
 } from './linkpay-logs'
-
-// ============================================
-// eSIM 網卡
-// ============================================
-
-// Esims
-export {
-  esimEntity,
-  useEsims,
-  useEsimsSlim,
-  useEsim,
-  useEsimsPaginated,
-  useEsimDictionary,
-  createEsim,
-  updateEsim,
-  deleteEsim,
-  invalidateEsims,
-} from './esims'
-
-// ============================================
-// 確認單
-// ============================================
-
-// Confirmations
-export {
-  confirmationEntity,
-  useConfirmations,
-  useConfirmationsSlim,
-  useConfirmation,
-  useConfirmationsPaginated,
-  useConfirmationDictionary,
-  createConfirmation,
-  updateConfirmation,
-  deleteConfirmation,
-  invalidateConfirmations,
-} from './confirmations'
 
 // ============================================
 // 成本模板

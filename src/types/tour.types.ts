@@ -128,22 +128,6 @@ export interface TourAddOn {
   updated_at: string
 }
 
-export interface TourRefund {
-  id: string
-  tour_id: string
-  order_id: string
-  order_number: string
-  member_name: string
-  reason: string
-  amount: number
-  status: 'pending' | 'approved' | 'refunded' | 'rejected'
-  applied_date: string
-  processed_date?: string
-  notes?: string
-  created_at: string
-  updated_at: string
-}
-
 // ============================================
 // 行程表相關型別
 // ============================================

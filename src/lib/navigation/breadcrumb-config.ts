@@ -87,17 +87,6 @@ export const BREADCRUMB_CONFIG: Record<string, BreadcrumbConfig> = {
   '/reports': { label: '報表', parent: '/', hidden: true },
   '/reports/tour-closing': { label: '結團報表', parent: '/' },
 
-  // ========== 健身模組 ==========
-  // fitness removed
-
-  // ========== 行動版 ==========
-  '/m': { label: '行動版', parent: '/' },
-  '/m/workbench': { label: '工作台', parent: '/m' },
-  '/m/profile': { label: '個人資料', parent: '/m' },
-  '/m/search': { label: '搜尋', parent: '/m' },
-  '/m/todos': { label: '待辦事項', parent: '/m' },
-  '/m/tours/[id]': { label: '團詳情', parent: '/m' },
-  '/m/members/[id]': { label: '成員詳情', parent: '/m' },
 }
 
 /**

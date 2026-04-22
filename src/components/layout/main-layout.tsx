@@ -3,13 +3,10 @@
 import { useState, useEffect } from 'react'
 import { useAuthStore } from '@/stores/auth-store'
 import { Sidebar } from './sidebar'
-import { MobileHeader } from './mobile-header'
-import { MobileSidebar } from './mobile-sidebar'
 import { cn } from '@/lib/utils'
 import { NotificationCapsule } from './notification-capsule'
 // import { TutorialProvider } from '@/components/tutorial/tutorial-provider'  // 2026-04-18 暫關、不影響上線進度
 import { usePathname } from 'next/navigation'
-import { useSwipeNavigation } from '@/hooks/useSwipeNavigation'
 import {
   NO_SIDEBAR_PAGES,
   CUSTOM_LAYOUT_PAGES,
@@ -30,10 +27,6 @@ export function MainLayout({ children }: MainLayoutProps) {
   const { sidebarCollapsed } = useAuthStore()
   const pathname = usePathname()
   const [isClient, setIsClient] = useState(false)
-  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
-
-  // 啟用滑動導航（手機模式）
-  useSwipeNavigation()
 
   useEffect(() => {
     setIsClient(true)
@@ -108,14 +101,8 @@ export function MainLayout({ children }: MainLayoutProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* 左下象限 - 側邊欄（桌面模式 >= lg） */}
+      {/* 左下象限 - 側邊欄 */}
       <Sidebar />
-
-      {/* 手機版頂部標題列（手機模式 < lg） */}
-      <MobileHeader onMenuClick={() => setMobileSidebarOpen(true)} />
-
-      {/* 手機版側邊欄（手機模式 < lg） */}
-      <MobileSidebar isOpen={mobileSidebarOpen} onClose={() => setMobileSidebarOpen(false)} />
 
       {/* 右下象限 - 主內容區域 */}
       <main

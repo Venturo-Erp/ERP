@@ -981,15 +981,6 @@ export function OrderMembersExpandable({
                 <Plane size={14} className="mr-1" />
                 {COMP_ORDERS_LABELS.PNR_配對}
               </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 px-2"
-                onClick={() => roomVehicle.setShowRoomManager(true)}
-              >
-                <Hotel size={14} className="mr-1" />
-                {COMP_ORDERS_LABELS.分配}
-              </Button>
             </>
           )}
           <Button
@@ -1452,33 +1443,6 @@ export function OrderMembersExpandable({
         onOpenChange={passportUpload.setConflictDialogOpen}
         conflicts={passportUpload.conflicts}
         passportData={passportUpload.conflictPassportData || {}}
-      />
-      <TourAssignmentManager
-        tourId={tourId}
-        tour={
-          membersData.departureDate && membersData.returnDate
-            ? {
-                id: tourId,
-                code: effectiveTour?.code,
-                name: effectiveTour?.name,
-                departure_date: membersData.departureDate,
-                return_date: membersData.returnDate,
-              }
-            : undefined
-        }
-        members={membersData.members.map(m => ({
-          id: m.id,
-          chinese_name: m.chinese_name ?? null,
-          passport_name: m.passport_name ?? null,
-        }))}
-        open={roomVehicle.showRoomManager}
-        onOpenChange={open => {
-          roomVehicle.setShowRoomManager(open)
-          if (!open) {
-            roomVehicle.loadRoomAssignments()
-            roomVehicle.loadVehicleAssignments()
-          }
-        }}
       />
     </div>
   )
