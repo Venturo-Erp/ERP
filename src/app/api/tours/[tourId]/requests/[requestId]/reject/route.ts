@@ -14,9 +14,9 @@ export async function POST(
   try {
     const supabase = await createApiClient()
     const { reason } = await req.json()
-    const { requestId } = await params
+    const { tourId, requestId } = await params
 
-    // 更新 tour_requests 狀態為不成交（RLS 自動過濾）
+    // P003-F（2026-04-22）：防止 tour ↔ request 錯配、加 tour_id 守門
     const { error } = await supabase
       .from('tour_requests')
       .update({
@@ -26,6 +26,7 @@ export async function POST(
         status: '取消',
       })
       .eq('id', requestId)
+      .eq('tour_id', tourId)
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 })

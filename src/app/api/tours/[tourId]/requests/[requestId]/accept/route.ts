@@ -20,7 +20,20 @@ export async function POST(
       return NextResponse.json({ error: '缺少人數梯次' }, { status: 400 })
     }
 
-    // 1. 更新 tour_requests 狀態為已成交（RLS 自動過濾）
+    // P003-F（2026-04-22）：防止 tour ↔ request 錯配攻擊。
+    //   原本只靠 RLS 擋跨租戶、但同租戶內 user 可以打 /tours/T1/requests/R2/accept
+    //   讓 R2（原屬 T2）被掛到 T1 的行程項目、資料錯亂。
+    //   修法：先驗 request.tour_id === path tourId、不符直接 404。
+    const { data: reqCheck } = await supabase
+      .from('tour_requests')
+      .select('tour_id')
+      .eq('id', requestId)
+      .single()
+    if (!reqCheck || reqCheck.tour_id !== tourId) {
+      return NextResponse.json({ error: '此需求單不屬於此團' }, { status: 404 })
+    }
+
+    // 1. 更新 tour_requests 狀態為已成交（RLS 自動過濾 + tour_id 守門）
     const { error: updateError } = await supabase
       .from('tour_requests')
       .update({
@@ -30,6 +43,7 @@ export async function POST(
         status: '已確認',
       })
       .eq('id', requestId)
+      .eq('tour_id', tourId)
 
     if (updateError) {
       return NextResponse.json({ error: updateError.message }, { status: 500 })

@@ -151,6 +151,7 @@ export async function writePricingToCore(
     for (const item of category.items) {
       if (item.itinerary_item_id) {
         // UPDATE: 已有核心表 row → 更新報價欄位
+        // P003-G（2026-04-22）：加 workspace_id filter 當 defense-in-depth、RLS 是第一道
         currentCoreItemIds.add(item.itinerary_item_id)
         const { error } = await supabase
           .from('tour_itinerary_items')
@@ -171,6 +172,7 @@ export async function writePricingToCore(
             quote_status: 'drafted',
           })
           .eq('id', item.itinerary_item_id)
+          .eq('workspace_id', workspace_id)
 
         if (error) {
           logger.error('Update core item failed:', { id: item.itinerary_item_id, error })
@@ -190,6 +192,7 @@ export async function writePricingToCore(
           .from('tour_itinerary_items')
           .select('id')
           .eq('tour_id', tour_id)
+          .eq('workspace_id', workspace_id)
           .eq('category', category.id)
           .eq('title', item.name || '')
           .is('itinerary_id', null)
@@ -217,6 +220,7 @@ export async function writePricingToCore(
               quote_status: 'drafted',
             })
             .eq('id', existing[0].id)
+            .eq('workspace_id', workspace_id)
           result.synced++
           continue
         }
@@ -298,12 +302,17 @@ export async function writePricingToCore(
             quote_status: 'none',
           })
           .eq('id', coreItem.id)
+          .eq('workspace_id', workspace_id)
 
         if (!error) result.cleared++
       }
     } else {
       // 報價頁建的項目（無 itinerary_id）→ DELETE row
-      const { error } = await supabase.from('tour_itinerary_items').delete().eq('id', coreItem.id)
+      const { error } = await supabase
+        .from('tour_itinerary_items')
+        .delete()
+        .eq('id', coreItem.id)
+        .eq('workspace_id', workspace_id)
 
       if (!error) result.cleared++
     }
