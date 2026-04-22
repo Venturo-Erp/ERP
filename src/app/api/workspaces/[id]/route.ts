@@ -1,14 +1,52 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/api-client'
+import { getServerAuth } from '@/lib/auth/server-auth'
+import { getSupabaseAdminClient } from '@/lib/supabase/admin'
 
 /**
  * GET /api/workspaces/[workspaceId]
  * 取得租戶詳情（含員工人數、管理員資訊）
  *
- * 注意：這是 Super Admin 操作，可以查看任何租戶（使用 service_client 繞過 RLS）
+ * 存取規則（P003-H 2026-04-22）：
+ * - 自己 workspace：任何登入用戶都可讀（UI 需要拿自己公司的 premium_enabled 等）
+ * - 別的 workspace：必須有「租戶管理」權限（role_tab_permissions.settings.tenants.can_write）
  */
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id: workspaceId } = await params
+
+  // 🔒 P003-H 守門
+  const auth = await getServerAuth()
+  if (!auth.success) {
+    return NextResponse.json({ error: '請先登入' }, { status: 401 })
+  }
+
+  if (workspaceId !== auth.data.workspaceId) {
+    // 跨租戶讀：要租戶管理權限
+    const adminClient = getSupabaseAdminClient()
+    const { data: employee } = await adminClient
+      .from('employees')
+      .select('role_id, job_info')
+      .eq('id', auth.data.employeeId)
+      .single()
+    const effectiveRoleId =
+      employee?.role_id ||
+      ((employee?.job_info as Record<string, unknown> | null)?.role_id as string | undefined)
+    let canManageTenants = false
+    if (effectiveRoleId) {
+      const { data: rolePerm } = await adminClient
+        .from('role_tab_permissions')
+        .select('can_write')
+        .eq('role_id', effectiveRoleId)
+        .eq('module_code', 'settings')
+        .eq('tab_code', 'tenants')
+        .single()
+      canManageTenants = rolePerm?.can_write ?? false
+    }
+    if (!canManageTenants) {
+      return NextResponse.json({ error: '不能讀取其他公司的租戶詳情' }, { status: 403 })
+    }
+  }
+
   const supabase = createServiceClient()
 
   const { data, error } = await supabase

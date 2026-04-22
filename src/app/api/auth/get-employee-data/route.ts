@@ -42,6 +42,19 @@ export async function POST(request: NextRequest) {
       return ApiError.validation('找不到此代號')
     }
 
+    // 🔒 P003-I（2026-04-22）：跨租戶查員工資料守門
+    //   原本只驗 auth 通過、body 的 code 隨便填、登入用戶可查任一家員工的
+    //   supabase_user_id / permissions / job_info 當後續攻擊原料。
+    //   修法：body 的 workspace code 必須解析為等於 auth.data.workspaceId。
+    if (workspace.id !== auth.data.workspaceId) {
+      logger.error('跨租戶查員工資料嘗試', {
+        caller_workspace: auth.data.workspaceId,
+        requested_workspace: workspace.id,
+        requested_code: code,
+      })
+      return ApiError.forbidden('不能查詢其他公司的員工資料')
+    }
+
     // 2. 查詢員工（大小寫不敏感）
     const { data: employee, error: empError } = await supabase
       .from('employees')
