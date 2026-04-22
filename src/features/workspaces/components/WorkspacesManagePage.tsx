@@ -74,15 +74,21 @@ export function WorkspacesManagePage() {
       if (!confirmed) return
 
       try {
-        const { error } = await supabase.from('workspaces').delete().eq('id', workspace.id)
-
-        if (error) throw error
+        // P016：走 API（DB policy 只允許 service_role、防止 client-side 繞 RLS 刪 workspace）
+        const res = await fetch(`/api/workspaces/${workspace.id}`, { method: 'DELETE' })
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({ error: WORKSPACES_LABELS.刪除失敗 }))
+          throw new Error(errData.error || WORKSPACES_LABELS.刪除失敗)
+        }
 
         await alert(WORKSPACES_LABELS.公司已刪除, 'success')
         fetchWorkspaces()
       } catch (error) {
         logger.error(WORKSPACES_LABELS.刪除公司失敗, error)
-        await alert(WORKSPACES_LABELS.刪除失敗, 'error')
+        await alert(
+          error instanceof Error ? error.message : WORKSPACES_LABELS.刪除失敗,
+          'error'
+        )
       }
     },
     [fetchWorkspaces]

@@ -136,7 +136,9 @@ export function AddWorkspaceDialog({ open, onOpenChange, onSuccess }: AddWorkspa
 
       if (empError) {
         // 如果建立員工失敗，刪除剛建立的公司
-        await supabase.from('workspaces').delete().eq('id', workspace.id)
+        // P016：走 API（DB policy 只允許 service_role）。此 rollback 情境 workspace 剛建、
+        // 0 員工 + 非 Corner + 非自己登入的那家 → API 所有 guard 都會通過。
+        await fetch(`/api/workspaces/${workspace.id}`, { method: 'DELETE' })
         throw empError
       }
 
