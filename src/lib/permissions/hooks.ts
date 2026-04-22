@@ -109,8 +109,9 @@ export function useWorkspaceFeatures() {
 
     const fetchFeatures = async () => {
       try {
+        // 自己 workspace 走 RLS 路徑；跨租戶查才需要帶 workspace_id 參數（需租戶管理權限）
         const [res, wsRes] = await Promise.all([
-          fetch(`/api/permissions/features?workspace_id=${user.workspace_id}`),
+          fetch(`/api/permissions/features`),
           fetch(`/api/workspaces/${user.workspace_id}`),
         ])
 
