@@ -3,8 +3,9 @@
 Last updated：2026-04-22
 Schema version：1.0
 
-Status summary：🔵 10 發現 / 🟡 0 計畫 / 🟠 0 / 🟢 **5 完成（P001 / P002 / P003 / P004 / P010）** / ⚫ 0 廢棄
-本次更新：**2026-04-22 今日大修（完整版）**。
+Status summary：🔵 11 發現 / 🟡 0 計畫 / 🟠 **1 部分（P019）** / 🟢 **7 完成（P001 / P002 / P003 / P004 / P010 / P016 / P017）** / ⚫ 0 廢棄
+本次更新：**2026-04-22 晚間 v1.2（/login v3.0 覆盤接力）**。P001-P004/P010 白天已修、v3.0 DB 層挖新紅色 P016-P018、全站掃再發現 P019 母 pattern（83 張 USING:true 需分類）。
+**2026-04-22 白天**：
 - P001 升 🟢（tenants/create seed e2e 驗收：TESTAUTH → Playwright 登入 → POST /api/tenants/create → TESTSEED、4 職務 row 74/40/26/32 全對齊 Corner）
 - P002 升 🟢（middleware 前門從 prefix 放行改精確白名單、5 支敏感 auth API 不再裸奔、e2e 4 家 workspace 守門過）
 - P003 升 🟢（9 支子彈全清：A-G + 覆盤 sub-agent 補抓 H `GET workspaces/[id]` + I `get-employee-data`；recalculateReceiptStats + linkpay webhook 評估後 RLS/簽章已充分）
@@ -390,6 +391,145 @@ Status summary：🔵 10 發現 / 🟡 0 計畫 / 🟠 0 / 🟢 **5 完成（P00
 
 ---
 
+### P016 — `workspaces_delete` policy = `USING: true`（**v3.0 覆盤挖到、v2.0 漏抓**）
+
+| 欄位 | 值 |
+|---|---|
+| ID | P016 |
+| 對應原則 | 3（租戶一致性每層都守）|
+| 業務翻譯 | 「公司名牌」那張表、3 條規則鎖緊（誰能看、誰能改、誰能建）、**只有「刪除」那條忘了鎖** — 任何員工（包括別家公司的）技術上可以刪掉 Corner 整間公司、連帶刪掉所有員工/旅遊團/訂單/收款（CASCADE）|
+| 命中（已驗） | `workspaces` 表 DELETE policy（DB 實證查 `qual="true"`）|
+| 命中（gitnexus/全站掃預測） | 見 P019 的 45 張漏鎖表分類、有 workspace_id 欄但 policy USING:true 的需逐張驗 |
+| 審計盲點 | **原始 migration `20260405500000:622-626` 是 `USING (is_super_admin())`、但 DB 現況被覆寫成 `USING: true`、覆寫來源不明**（某個 `disable_all_remaining_rls` 類 migration 或手動 console 操作）。需補 audit trail |
+| 統一修法 | `ALTER POLICY workspaces_delete ON workspaces USING (is_super_admin())`（回到原始設計）；或更嚴格 `USING (id = get_current_user_workspace() AND is_super_admin())`|
+| 估時 | 0.3 人日（1 行 SQL + 驗）實際 ~45 分鐘（含方案 B+ 配套 API + UI）|
+| 優先級 | 🔴 上線前必改 |
+| 狀態 | 🟢 **完成（2026-04-22 晚間 pattern-heal v1）** |
+| 首次發現 | 2026-04-22（/login v3.0）|
+| 最後更新 | 2026-04-22 晚間 |
+
+**幕僚會議摘要**：安全（03）判 existential risk — 整間公司可被蒸發、普通 authenticated 員工即可打。資深工程（04）抓到 migration 歷史矛盾、建議修前先找覆寫來源、避免下次再被覆蓋。優先級（06）判 🥇 今晚就能修、0.3 人日極低風險高收益。
+
+**修復紀錄**：
+- 2026-04-22 晚間：pattern-heal v1 執行（方案 B+、4 幕僚會議 senior-dev / code-reviewer / minimal-change / security）
+- Migration `20260422170000_fix_workspaces_delete_policy.sql` 套到線上 DB：policy 改 `USING (auth.role() = 'service_role')`、DB 驗證 DO block 守 CLAUDE.md 紅線（workspaces 不 FORCE RLS）
+- API `src/app/api/workspaces/[id]/route.ts` 新增 DELETE handler：`requireTenantAdmin`（tenants.can_write）+ 3 道 guard（Corner 硬擋 / self-delete 禁 / 員工數 > 0 防呆）+ rate limit（10/分鐘）+ audit log（logger.warn 留痕）
+- UI `WorkspacesManagePage.tsx:77` 改呼叫 API（非 client-side DB）
+- UI `AddWorkspaceDialog.tsx:139` rollback 改呼叫 API（0 員工情境 guard 不觸發、可通過）
+- type-check ✅ 0 error
+- login-api 4 家 workspace 守門 ✅（CLAUDE.md 紅線 NO FORCE RLS 未動）
+- middleware 擋未登入 DELETE → 307 ✅
+- William 拍板：Q1 Corner 可跨租戶刪、Q2 rate limit + audit log 都加（未加新 audit_log 表、只 console.log 留痕）
+- 覆寫來源未查（原始 20260405500000 是 is_super_admin()、DB 現況是 true）、已寫進 migration 註解歷史
+
+---
+
+### P017 — 系統表 RLS 未啟用（`_migrations` / `rate_limits` / `ref_cities`、**v3.0 新挖**）
+
+| 欄位 | 值 |
+|---|---|
+| ID | P017 |
+| 對應原則 | 3 |
+| 業務翻譯 | 3 張「系統性表」根本沒上 RLS 鎖 — `_migrations`（裝修藍圖）、`rate_limits`（登入嘗試紀錄）、`ref_cities`（城市參考）。前兩張是漏鎖、`ref_cities` 可能是漏掉沒補（同族 `ref_countries` / `ref_airports` / `ref_destinations` 都開了 RLS）|
+| 命中（已驗） | `_migrations` / `rate_limits` / `ref_cities` 三張 |
+| 威脅 | `_migrations`：攻擊者可讀所有 migration SQL、洩漏架構與歷次漏洞修補路徑；`rate_limits`：可讀別人登入 rate limit 狀態推模式；`ref_cities`：全域參考資料、通常 by design 但該跟 ref_* 家族齊一 |
+| 統一修法 | `_migrations` + `rate_limits`：`ENABLE ROW LEVEL SECURITY` + policy 限 service_role；`ref_cities`：套 `ref_countries` 同型 4-policy（public read + super_admin write）|
+| 估時 | 0.5 人日（3 張各 1 行 SQL + 測）實際 ~15 分鐘 |
+| 優先級 | 🔴 上線前必改（`_migrations` + `rate_limits`）/ 🟡 上線後短期（`ref_cities` 齊一化）|
+| 狀態 | 🟢 **完成（2026-04-22 晚間、單一 migration 20260422180000）** |
+| 首次發現 | 2026-04-22（/login v3.0）|
+| 最後更新 | 2026-04-22 晚間 |
+
+**幕僚會議摘要**：後端（02）確認 `check_rate_limit()` 是 SECURITY DEFINER、ENABLE RLS 不影響既有邏輯。資深工程（04）grep 確認 `src/` 沒有直接讀 `_migrations` / `rate_limits` 的代碼、修這兩張 blast radius 趨近 0。優先級（06）判 🥈 今晚可順手做、1-2h。
+
+**修復紀錄**：
+- 2026-04-22 晚間：migration `20260422180000_enable_system_tables_rls.sql` 套到線上 DB
+  - `_migrations`：ENABLE RLS + policy 限 service_role（FOR ALL、app 沒直讀、blast radius 0）
+  - `rate_limits`：ENABLE RLS + policy 限 service_role（`check_rate_limit()` SECURITY DEFINER 繞 RLS、login-api 4 家守門驗證運作正常）
+  - `ref_cities`：ENABLE RLS + 套 `ref_countries` 同族模式（SELECT public read + INSERT/UPDATE/DELETE is_super_admin()）
+- 驗證：3 張表 rls=true、force_rls=false、policy_count 分別 1/1/4 ✅
+- login-api 4 家 workspace 守門 ✅（CLAUDE.md 紅線 NO FORCE RLS 守住）
+- type-check 不需跑（純 SQL migration、沒動代碼）
+
+---
+
+### P018 — `employee_permission_overrides` 缺 workspace_id + 4 policy 全 `USING: true`（**v2.0 點名未修、v3.0 升格 pattern**）
+
+| 欄位 | 值 |
+|---|---|
+| ID | P018 |
+| 對應原則 | 3 |
+| 業務翻譯 | 這張表是「某員工的特殊權限加掛」、但**沒有 workspace_id 欄位**、加上 4 條 RLS 規則全部零條件（讀/寫/刪/新增都放行）→ 任何員工可以對別家公司員工的權限加掛做任意操作。是 v2.0 Agent F 就點名「USING:true 完全無過濾」的那張、沒升格 pattern、沒人動、至今仍在 |
+| 命中（已驗） | `employee_permission_overrides` 表 |
+| 對比組 | `employee_route_overrides` 同概念、policy 正確（自己看自己 + service_role）— 同概念兩表強度不一 |
+| 威脅 | 攻擊門檻低：普通 authenticated 員工 → 用 supabase-js `from('employee_permission_overrides').insert(...)` → 幫自己加「管理員」權限 bypass、或改別人的 |
+| 統一修法 | 3-stage migration：(1) 加 `workspace_id` nullable 欄 + FK → workspaces(id) CASCADE (2) `UPDATE` 從 employees JOIN 回填 (3) `ALTER` NOT NULL + 重寫 4 條 policy 為 `workspace_id = get_current_user_workspace()` + `WITH CHECK` 同；**同步** `src/app/api/employees/[employeeId]/permission-overrides/route.ts:57-64` PUT insert 加 `workspace_id: auth.data.workspaceId` |
+| 估時 | 0.8 人日（migration + backfill + 代碼同步 + 新 e2e spec）|
+| 優先級 | 🔴 上線前必改（舊債）|
+| 狀態 | 🔵 發現（v2.0 點名、v3.0 升格 pattern）|
+| 首次發現 | 2026-04-22（v2.0 Agent F）|
+| 最後更新 | 2026-04-22（v3.0 升格）|
+
+**幕僚會議摘要**：安全（03）判 Top priority 威脅（CWE-269 提權）、優先度高於 P016。後端（02）給 3-stage migration 樣板、backfill 邏輯走 employees JOIN 可完整還原。資深工程（04）警告 migration 跟 code PR 必須同批上線、不能先 migration 後 code 否則 PUT insert 會因 NOT NULL 炸。優先級（06）判：**不要今晚動**（schema migration + backfill 在疲勞下不適合）、排本週。
+
+---
+
+### P019 — DB Policy `USING: true` 全站盤點（**本次 pattern-map 新挖、分類待 William 拍板**）
+
+| 欄位 | 值 |
+|---|---|
+| ID | P019 |
+| 對應原則 | 3 |
+| 業務翻譯 | 跟 P016 / P018 同病、但掃全站發現 **83 張表的 policy 有 `USING: true` 或 `WITH CHECK: true`**。大部分是全域參考表（ref_* / 米其林餐廳 / 機場等）by design 要全員可讀、**但至少 45 張是真漏鎖**（薪資 / 訊息 / 加班 / 通知 / 團員 / 團需求 / 網站設計等個人或租戶敏感資料）|
+| 命中分類（幕僚 2 後端）| ✅ by design ~13 張（ref_*、badge_definitions、magic_library）/ 🟡 可能 by design 要鎖寫 ~6 張 / 🔴 絕對漏鎖 ~45 張（含 P016 + P018 + payroll_allowance_types / payroll_deduction_types / meeting_messages / tour_members / tour_requests / overtime_requests / notifications / personal_expenses 等）/ ❓ 需 William 拍板 ~17 張（luxury_hotels、premium_experiences、michelin_restaurants：「公版還是租戶精選」邊界）|
+| 全清單 | `/Users/williamchien/Projects/venturo-erp/docs/ROUTE_CONSISTENCY_REPORT_2026-04-22/_pattern_map_session/_using_true_tables.txt` 83 張；分類詳見同資料夾 `2-backend-architect.md` |
+| 統一修法 | 5 個 SQL migration template（A 租戶敏感 / B 個人敏感 / C 員工資料 / D 全域參考（只鎖寫）/ E 系統內部）見 `2-backend-architect.md`；pattern-heal 可批次跑 |
+| 估時 | 🔴 45 張 sprint 1-2 約 4.5 人日；🟡 ❓ 類等 William 決策後排 |
+| 優先級 | 🔴 敏感資料分批（Sprint 1-2）/ 🟢 全域參考標 by design 不動 |
+| 狀態 | 🟠 **部分完成（2026-04-22 晚間、✅ + 🟡 + ❓ 分類完成並記錄 by design、🔴 45 張待 pattern-heal 批次修）** |
+| 首次發現 | 2026-04-22（pattern-map v2）|
+| 最後更新 | 2026-04-22 晚間 |
+
+**幕僚會議摘要**：這是 P016 + P018 的**全站母 pattern**、光靠 per-route verify 永遠挖不完（被動觸發）、需靠 DB_TRUTH 全站掃。優先級（06）建議快速勝利：先掃「有 workspace_id 欄位但 policy = USING:true」的 → 純 policy 修復、不動 schema。❓ 17 張語義不明的請 William 拍板「公版還是租戶精選」。
+
+---
+
+#### 📋 P019 分類 ADR（2026-04-22 晚間、來源：幕僚 2 backend-architect）
+
+**✅ By design 全域可讀（13 張、不改）** — SELECT `USING:true` 正確、寫入應限 admin：
+
+- `ref_airports` / `ref_countries` / `ref_destinations`（已 `is_super_admin()` 寫入、✅ 齊整）
+- `ref_cities`（本次 P017 修完、已齊一 ref_* 家族）
+- `badge_definitions` / `badges`（遊戲化徽章、全站共用）
+- `supplier_categories` / `region_stats`（lookup 表）
+- `activities` / `luxury_hotels` / `michelin_restaurants` / `restaurants` / `premium_experiences` / `tour_destinations` — **分類為 by design 前提是「全域公版」**、若實際是「每家租戶自己精選池」則應歸 🔴、**語義待 William 拍板**
+
+**🟡 讀可寬、寫要鎖（6 張、下次修）**：
+
+| Table | 修法方向 |
+|---|---|
+| `wishlist_templates` / `wishlist_template_items` | 有 workspace_id + created_by — 模板共享可、但寫入應限建立者租戶 |
+| `todo_columns` | 有 workspace_id — 應綁租戶 |
+| `workspace_attendance_settings` / `workspace_notification_settings` / `workspace_bonus_defaults` | 租戶級設定、SELECT `USING:true` 意味他租戶可讀 → 應綁自家 workspace |
+
+**❓ 需 William 拍板（17 張）**：
+
+- **公版 vs 租戶**：`activities` / `luxury_hotels` / `michelin_restaurants` / `restaurants` / `premium_experiences` / `tour_destinations` — 全站公版還是每家精選池？
+- **PNR 子表**：`pnr_passengers` / `pnr_remarks` / `pnr_segments` / `pnr_ssr_elements` — 應走父表 pnrs workspace 邊界（join 判）
+- 其他：`profiles` / `hotels` / `customer_inquiries` / `friends` / `notifications` / `private_messages` / `meeting_messages`（均涉人際 / 個資邊界、需業務語義確認）
+
+**🔴 絕對漏鎖 45 張（下一輪 pattern-heal 批次修、Sprint 1-2 約 4.5 人日）**：
+
+含 workspace_id 欄但 policy 沒用、或含 user_id / employee_id 屬個人敏感、或訊息 / 金流類。完整清單見：
+- `docs/ROUTE_CONSISTENCY_REPORT_2026-04-22/_pattern_map_session/_using_true_tables.txt`（83 張全清單）
+- `docs/ROUTE_CONSISTENCY_REPORT_2026-04-22/_pattern_map_session/2-backend-architect.md`（5 個 SQL template：租戶 / 個人 / 員工 / 參考 / 系統）
+
+代表性：`payroll_allowance_types` / `payroll_deduction_types`（有 workspace_id 但 USING:true）/ `meeting_messages` / `tour_members` / `tour_requests` / `overtime_requests` / `notifications` / `personal_expenses` / `website_day_activities` 等。
+
+**本次 ADR 不動代碼 / DB、只做分類留痕 + 標記哪些「是漏洞」vs「是 by design」、讓下輪 pattern-heal 知道優先級**。
+
+---
+
 ## Pattern 依賴圖（修復順序）
 
 ```
@@ -498,3 +638,4 @@ scripts/pattern-detectors/check-feature-consistency.mjs
 |---|---|---|---|
 | 2026-04-22 | 1.0 | 首版建立。6 幕僚並行會診、15 個 pattern（6🔴 5🟡 4🟢）、本次核心是 P007/P008/P009 三位一體的權限 SSOT 破碎、新挖 P010 / P011 致命問題 | pattern-map skill |
 | 2026-04-22 | 1.1 | **P010 修完 🟢**。pattern-heal 執行、migration 20260422140000 已套到線上 DB。分布改為 5🔴 / 5🟡 / 4🟢 **+ 1🟢 已完成** | pattern-heal skill |
+| 2026-04-22 | 1.2 | **/login v3.0 覆盤接力、pattern-map 第二輪**。6 幕僚會診 DB 層 4 條新/遺留紅色、合併為 P016 P017 P018 + 全站掃新增 P019（USING:true 83 張表分類）。現況 8🔴（5 舊 + P016/P017 部分/P018）+ 5🟡 + 4🟢 + 5🟢 完成（P001-P004 + P010）+ P019 待分類。v2.0 三項盲點（4-policy 抽樣、RLS disabled 全站掃、per-route 點名不自動升格）交幕僚 5 產演進建議、已寫入本檔與 skill meta | pattern-map v2 |

@@ -248,7 +248,7 @@
 | `employee_payroll_config` | ✓ |  | 2 | 7 |  |  |
 | `employee_permission_overrides` | ✓ |  | 4 | 7 |  |  |
 | `employee_route_overrides` | ✓ |  | 2 | 8 |  |  |
-| `employees` | ✓ |  | 4 | 42 | ✓ | public.employees |
+| `employees` | ✓ |  | 4 | 44 | ✓ | public.employees |
 | `erp_bank_accounts` | ✓ |  | 4 | 9 | ✓ |  |
 | `esims` | ✓ |  | 4 | 16 | ✓ |  |
 | `expense_categories` | ✓ |  | 1 | 13 |  |  |
@@ -362,7 +362,7 @@
 | `request_responses` | ✓ |  | 3 | 9 |  |  |
 | `restaurants` | ✓ |  | 4 | 59 |  | public.employees |
 | `rich_documents` | ✓ |  | 4 | 12 | ✓ | public.employees |
-| `role_tab_permissions` | ✓ |  | 4 | 8 |  |  |
+| `role_tab_permissions` | ✓ |  | 5 | 8 |  |  |
 | `selector_field_roles` | ✓ |  | 4 | 2 |  |  |
 | `shared_order_lists` | ✓ |  | 1 | 11 |  |  |
 | `social_group_members` | ✓ |  | 3 | 7 |  |  |
@@ -4165,6 +4165,8 @@
 | `login_locked_until` | timestamp with time zone | YES | - |
 | `terminated_at` | timestamp with time zone | YES | - |
 | `terminated_by` | uuid | YES | - |
+| `amadeus_totp_secret` | text | YES | - |
+| `amadeus_totp_account_name` | text | YES | - |
 
 **Foreign Keys**
 
@@ -9653,14 +9655,28 @@
 
 **Policies**
 
-- **role_tab_permissions_delete** — `DELETE`（roles: {public}）
-    - USING: `true`
-- **role_tab_permissions_insert** — `INSERT`（roles: {public}）
-    - WITH CHECK: `true`
-- **role_tab_permissions_select** — `SELECT`（roles: {public}）
-    - USING: `true`
-- **role_tab_permissions_update** — `UPDATE`（roles: {public}）
-    - USING: `true`
+- **role_tab_permissions_service_role** — `ALL`（roles: {public}）
+    - USING: `(auth.role() = 'service_role'::text)`
+    - WITH CHECK: `(auth.role() = 'service_role'::text)`
+- **role_tab_permissions_tenant_delete** — `DELETE`（roles: {public}）
+    - USING: `(role_id IN ( SELECT workspace_roles.id
+   FROM workspace_roles
+  WHERE (workspace_roles.workspace_id = get_current_user_workspace())))`
+- **role_tab_permissions_tenant_insert** — `INSERT`（roles: {public}）
+    - WITH CHECK: `(role_id IN ( SELECT workspace_roles.id
+   FROM workspace_roles
+  WHERE (workspace_roles.workspace_id = get_current_user_workspace())))`
+- **role_tab_permissions_tenant_select** — `SELECT`（roles: {public}）
+    - USING: `(role_id IN ( SELECT workspace_roles.id
+   FROM workspace_roles
+  WHERE (workspace_roles.workspace_id = get_current_user_workspace())))`
+- **role_tab_permissions_tenant_update** — `UPDATE`（roles: {public}）
+    - USING: `(role_id IN ( SELECT workspace_roles.id
+   FROM workspace_roles
+  WHERE (workspace_roles.workspace_id = get_current_user_workspace())))`
+    - WITH CHECK: `(role_id IN ( SELECT workspace_roles.id
+   FROM workspace_roles
+  WHERE (workspace_roles.workspace_id = get_current_user_workspace())))`
 
 ---
 
