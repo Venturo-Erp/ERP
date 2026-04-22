@@ -149,13 +149,6 @@ export const FEATURES: FeatureDefinition[] = [
   },
   // ===== 進階功能（付費） =====
   {
-    code: 'customized',
-    name: '客製化管理',
-    description: '客製化行程選單、客戶詢價管理',
-    category: 'premium',
-    routes: ['/customized-tours', '/inquiries'],
-  },
-  {
     code: 'workspace',
     name: '頻道',
     description: '團隊頻道、協作空間',
@@ -182,14 +175,7 @@ export const FEATURES: FeatureDefinition[] = [
     name: '設計工具',
     description: '手冊設計、行銷素材',
     category: 'premium',
-    routes: ['/design', '/brochures', '/marketing'],
-  },
-  {
-    code: 'office',
-    name: '文件管理',
-    description: '文件編輯、檔案管理',
-    category: 'premium',
-    routes: ['/office', '/office/editor', '/files'],
+    routes: ['/design'],
   },
 
   // ===== 進階功能（付費）- AI & 機器人管理 =====
@@ -202,27 +188,6 @@ export const FEATURES: FeatureDefinition[] = [
   },
 
   // ===== 企業功能 =====
-  {
-    code: 'fleet',
-    name: '車隊管理',
-    description: '車輛、司機、車趟管理',
-    category: 'enterprise',
-    routes: ['/database/fleet', '/supplier/trips'],
-  },
-  {
-    code: 'local',
-    name: 'Local 案件',
-    description: '地接案件、委託管理',
-    category: 'enterprise',
-    routes: ['/local', '/local/cases', '/local/requests'],
-  },
-  {
-    code: 'supplier_portal',
-    name: '供應商入口',
-    description: '供應商專用介面',
-    category: 'enterprise',
-    routes: ['/supplier', '/supplier/requests', '/supplier/finance', '/supplier/dispatch'],
-  },
   {
     code: 'departments',
     name: '部門管理',
@@ -248,13 +213,6 @@ export const FEATURES: FeatureDefinition[] = [
     code: 'tenants',
     name: '租戶管理',
     description: '建立與管理其他公司租戶',
-    category: 'enterprise',
-    routes: ['/tenants'],
-  },
-  {
-    code: 'esims',
-    name: 'eSIM 管理',
-    description: '網卡管理、派發',
     category: 'enterprise',
     routes: ['/tenants'],
   },

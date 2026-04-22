@@ -68,8 +68,6 @@ export const MODULES: ModuleDefinition[] = [
         category: 'premium',
       },
       { code: 'quote', name: '報價', description: '報價計算、成本' },
-      { code: 'requirements', name: '需求', description: '供應商需求發送' },
-      { code: 'confirmation-sheet', name: '團確單', description: '供應商確認單' },
       { code: 'contract', name: '合約', description: '旅遊合約、電子簽約', category: 'premium' },
       { code: 'checkin', name: '報到', description: '團員報到狀態' },
       { code: 'closing', name: '結案', description: '結團報表、損益確認' },
@@ -167,9 +165,6 @@ export const MODULES: ModuleDefinition[] = [
     tabs: [
       { code: 'employees', name: '員工管理', description: '員工資料、到職離職' },
       { code: 'roles', name: '職務管理', description: '職務角色與權限' },
-      { code: 'attendance', name: '出勤管理', description: '上下班打卡記錄' },
-      { code: 'leave', name: '請假管理', description: '請假申請、審核' },
-      { code: 'payroll', name: '薪資管理', description: '薪資計算、發放' },
     ],
   },
   {
@@ -178,7 +173,6 @@ export const MODULES: ModuleDefinition[] = [
     description: '客戶、供應商、資源',
     tabs: [
       { code: 'customers', name: '顧客管理', description: '個人客戶、公司客戶' },
-      { code: 'customer-groups', name: '客戶群組', description: '客戶分群' },
       { code: 'attractions', name: '旅遊資料庫', description: '景點、餐廳、飯店' },
       { code: 'suppliers', name: '供應商管理', description: '合作供應商' },
       { code: 'archive', name: '封存管理', description: '封存資料查閱' },
