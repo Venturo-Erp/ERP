@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { useAuthStore } from '@/stores'
+import { useTabPermissions } from '@/lib/permissions'
 import { UnauthorizedPage } from '@/components/unauthorized-page'
+import { ModuleLoading } from '@/components/module-loading'
 import dynamic from 'next/dynamic'
 import { ListPageLayout } from '@/components/layout/list-page-layout'
 import { usePayments } from '@/features/payments/hooks/usePayments'
@@ -20,7 +21,7 @@ const AddRequestDialog = dynamic(
 )
 
 export default function RequestsPage() {
-  const isAdmin = useAuthStore(state => state.isAdmin)
+  const { canRead, loading: permLoading } = useTabPermissions()
   const searchParams = useSearchParams()
   const router = useRouter()
   const { payment_requests, loading, loadPaymentRequests } = usePayments()
@@ -60,7 +61,8 @@ export default function RequestsPage() {
     setSelectedRequest(request)
   }
 
-  if (!isAdmin) return <UnauthorizedPage />
+  if (permLoading) return <ModuleLoading fullscreen />
+  if (!canRead('finance', 'requests')) return <UnauthorizedPage />
 
   return (
     <>

@@ -47,9 +47,6 @@ export const BREADCRUMB_CONFIG: Record<string, BreadcrumbConfig> = {
   '/finance/reports': { label: '財務報表', parent: '/finance' },
   '/finance/treasury': { label: '出納管理', parent: '/finance' },
   '/finance/treasury/disbursement': { label: '出帳單', parent: '/finance/treasury' },
-  '/finance/travel-invoice': { label: '代轉發票', parent: '/finance' },
-  '/finance/travel-invoice/[id]': { label: '發票詳情', parent: '/finance/travel-invoice' },
-  '/finance/travel-invoice/create': { label: '開立發票', parent: '/finance/travel-invoice' },
 
   // ========== 會計系統 ==========
   '/accounting': { label: '會計', parent: '/' },

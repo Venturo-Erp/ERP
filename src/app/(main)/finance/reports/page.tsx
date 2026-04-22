@@ -2,8 +2,9 @@
 
 import { useState, useCallback, useMemo } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { useAuthStore } from '@/stores'
+import { useTabPermissions } from '@/lib/permissions'
 import { UnauthorizedPage } from '@/components/unauthorized-page'
+import { ModuleLoading } from '@/components/module-loading'
 import { ContentPageLayout } from '@/components/layout/content-page-layout'
 import { Tabs, TabsContent } from '@/components/ui/tabs'
 import {
@@ -58,7 +59,7 @@ function getDefaultRange(): DateRange {
 }
 
 export default function ReportsPage() {
-  const isAdmin = useAuthStore(state => state.isAdmin)
+  const { canRead, loading: permLoading } = useTabPermissions()
   const searchParams = useSearchParams()
   const router = useRouter()
   const initialTab = (searchParams.get('tab') as TabValue) || 'overview'
@@ -93,7 +94,8 @@ export default function ReportsPage() {
     []
   )
 
-  if (!isAdmin) return <UnauthorizedPage />
+  if (permLoading) return <ModuleLoading fullscreen />
+  if (!canRead('finance', 'reports')) return <UnauthorizedPage />
 
   return (
     <ContentPageLayout

@@ -2,8 +2,8 @@
 
 **路由**：`/hr` + `/hr/roles` + `/hr/attendance` + `/hr/leave` + `/hr/payroll`（前兩個上線、後三個預留）  
 **代碼路徑**：`src/app/(main)/hr/`  
-**最後驗證**：2026-04-22  
-**原始驗證報告**：`docs/ROUTE_CONSISTENCY_REPORT_2026-04-22/hr/raw/A-E.md`
+**最後驗證**：2026-04-22 深夜（**v2.0 重驗**：對 v1.2 三大紅色狀態確認 + 新 pattern P016/P018/P011/P008/P019 在 /hr 的命中檢測）
+**原始驗證報告**：`docs/ROUTE_CONSISTENCY_REPORT_2026-04-22/hr/raw/A-E.md`（v1.2）
 
 ---
 
@@ -72,6 +72,38 @@
   ↓ 登入時
 系統檢查 useTabPermissions → 查該員工的職務權限 → 簽入 JWT
 ```
+
+---
+
+## v2.0 重驗結果（2026-04-22 深夜）
+
+### v1.2 三大紅色當前狀態
+
+| 編號 | 問題 | v2.0 親查狀態 |
+|---|---|---|
+| 1 | usePermissions / useTabPermissions isAdmin 短路 | 🔴 **仍在**：useTabPermissions L80/97/113/122 4 處短路；usePermissions / permissions/hooks PR-1a 已修 ✅；屬 P001 漏修部分（見 _PATTERN_MAP P001）|
+| 2 | 員工自改 role_id（create-store update 無權限）| 🔴 仍在；EmployeeForm L270 直接寫 role_id；DB RLS 兜底但應用層應禁；屬 P003 應補 |
+| 3 | workspace_job_roles 孤兒表 | 🟡 **修正**：DB 表還在但**不是裸表**（4 條 policy 是 employees JOIN tenant scoped）、是「前端代碼遷出沒人用」、不是 P019 USING:true 孤兒。歸檔不急 |
+
+### 新 pattern 在 /hr 的命中
+
+| Pattern | 命中 | 嚴重度 |
+|---|---|---|
+| **P018**（employee_permission_overrides 4 policy USING:true + 無 workspace_id 欄）| ✅ 仍在；DB 親查證實 | 🔴 上線前必改 |
+| **P016 同型 DELETE policy**（workspace_roles / role_tab_permissions / employees / workspace_job_roles）| ✅ 親查全綠；workspace_roles 4 條 workspace_id filter；workspace_job_roles 4 條 employees JOIN；無 USING:true | ✅ 不在紅 |
+| **P011 JWT permissions_version 缺**| ✅ 仍在；validate-login 簽 JWT 不加版本號；員工 role 改完要等 1 小時或重登 | 🟡 上線後短期 |
+| **P008 權限檢查雙層散佈**| ✅ 仍在；EmployeeForm / useTabPermissions / auth-store 各寫 | 🟡 上線後短期 |
+| **P003 在 /hr API 家族**| ⚠️ 部分在；`PUT /api/employees/[employeeId]/permission-overrides` 應驗 target employee.workspace_id === auth.data.workspaceId、需親查確認 | 🔴 上線前 |
+
+### /hr 相關表 RLS Policy 親查結果（2026-04-22 深夜）
+
+| 表名 | SELECT | INSERT | UPDATE | DELETE | 評分 |
+|---|---|---|---|---|---|
+| `employees` | workspace_id ✅ | workspace_id ✅ | workspace_id ✅ | workspace_id ✅ | 🟢 |
+| `role_tab_permissions` | role JOIN workspace ✅ | WITH CHECK ✅ | USING + WITH CHECK ✅ | USING ✅ | 🟢（P010 修完） |
+| `workspace_roles` | workspace_id ✅ | workspace_id ✅ | workspace_id ✅ | workspace_id ✅ | 🟢 |
+| `workspace_job_roles` | employees JOIN ✅ | employees JOIN ✅ | employees JOIN ✅ | employees JOIN ✅ | 🟢（前端不用、但 policy 對）|
+| `employee_permission_overrides` | USING:true 🔴 | WITH CHECK:true 🔴 | USING:true 🔴 | USING:true 🔴 | 🔴 P018 仍未修 |
 
 ---
 

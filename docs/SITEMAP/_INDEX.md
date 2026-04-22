@@ -5,9 +5,9 @@
 
 **這份 _INDEX.md 是累積脈絡的靈魂**——每次驗新頁前必讀、subagent prompt 必帶、確保 SSOT 不在驗證元層級破碎。
 
-Last updated：2026-04-22 晚間（**/login v3.0 覆盤**：v2.0 四紅色 P001/P002/P003/P004 今晚全修、但覆盤挖到 3 項 v2.0 漏抓的新🔴 + 2 項 v2.0 點名仍未修 + 4 項結構性發現 + 6 項需人工實測）
+Last updated：2026-04-22 深夜（**v1.4 強迫症深掘第二輪**：在 4 路由重驗結果上、用 SQL 全站盤 P020、grep 全站盤 P001 isAdmin 短路、API endpoint grep 找出 P022 CRITICAL）
 
-**📋 跨 pattern 統籌修復地圖**：見 [`_PATTERN_MAP.md`](./_PATTERN_MAP.md)（首版 2026-04-22、15 條 pattern、6🔴 5🟡 4🟢）
+**📋 跨 pattern 統籌修復地圖**：見 [`_PATTERN_MAP.md`](./_PATTERN_MAP.md)（v1.4 2026-04-22 深夜、18 條 pattern、6🔴 5🟡 4🟢 + P020 P021 P022 新加）
 
 ---
 
@@ -189,19 +189,18 @@ Last updated：2026-04-22 晚間（**/login v3.0 覆盤**：v2.0 四紅色 P001/
 
 | 路由 | 業務目的 | 最新驗證 | 最嚴重問題（白話） | 對照原則 |
 |---|---|---|---|---|
-| [/login](./login.md) | 員工登入（未來 SaaS 多租戶） | 2026-04-22 **v3.0** | v2.0 四紅色已修 ✅；覆盤挖到 workspaces_delete USING:true（任何登入用戶可刪 workspace）+ _migrations/rate_limits 無 RLS + employee_permission_overrides 仍 USING:true（v2.0 點名未修）| 違反原則 3（DB delete policy 層）|
-| [/hr](./hr.md) | 職務定義 + 員工管理 | 2026-04-22（v1.2） | isAdmin 短路讓職務權限失效 + 員工能自改職務 + 兩套職務系統並存 | 違反原則 1 + 2 |
-| [/finance/payments](./finance_payments.md) | 收款管理（5 種方式、會計核准 / 異常、自動連動訂單與團財務） | 2026-04-22（v2.0 首驗） | 整頁 admin 大鎖同 /login + orders.payment_status 雙寫違背業務意圖 + LinkPay webhook 無租戶驗證 + payment_method_id DB NOT NULL 但代碼不寫 | 違反原則 1 + 2 + 3、涉候選原則 4 |
-| [/tours](./tours.md) | 旅遊團管理本體（列表 + 單團 11 Tab + 行動版）| 2026-04-22（v2.0 首驗） | syncToCore delete-then-insert 破下游聯繫（AI 重排必爆） + writePricingToCore UPDATE 跨租戶 + `/api/tours/by-code` 用 service_role 無 auth + 結帳未完 + 公司模板 0% + 報價計算兩套不一致 | 違反原則 1 + 2、涉候選原則 4-8、新增 5-8 |
+| [/login](./login.md) | 員工登入（未來 SaaS 多租戶） | 2026-04-22 **v3.1 落地驗** | v3.0 修的 P001-P004/P010/P016/P017 全落地 ✅；**重驗親查發現 P001 漏修 6 處 isAdmin 短路**（useTabPermissions 4 處 + sidebar + useChannelSidebar）；P018 + rememberMe + getServerAuth `.or()` 仍未修 | 違反原則 1（hook 層仍有缺口）+ 3（DB 層補完）|
+| [/hr](./hr.md) | 職務定義 + 員工管理 | 2026-04-22 **v2.0 重驗** | useTabPermissions 4 處 isAdmin 短路（屬 P001 漏修部分）+ 員工自改 role_id 仍仰賴 RLS 兜底（P003 應用層應補）+ employee_permission_overrides P018 仍 4 條 USING:true + workspace_job_roles 是 tenant scoped 不是 USING:true 孤兒（前一輪沒查清）| 違反原則 1（hook 層）+ 2（職務系統）+ 3（P018 仍開）|
+| [/finance/payments](./finance_payments.md) | 收款管理（5 種方式、會計核准 / 異常、自動連動訂單與團財務） | 2026-04-22 **v3.0 重驗** | P001 PR-1c 整頁大鎖已修 ✅（page.tsx:213 改 canViewFinance）；DB 層親查全綠 ✅（receipts/linkpay_logs/payment_methods/payment_requests/orders 都有 workspace_id filter）；payment_method_id 之謎結案（DB 真相 nullable + FK SET NULL、不是 NOT NULL）；trigger_auto_post_receipt 是活的會計過帳 trigger 不是殘影；recalculateReceiptStats 雙寫仍在（原則 4 違反）；4 動作細權限仍未做 | 違反原則 1（4 動作）+ 4（雙寫）|
+| [/tours](./tours.md) | 旅遊團管理本體（列表 + 單團 11 Tab + 行動版）| 2026-04-22 **v3.0 重驗** | P003-F P003-G 親查確認落地 ✅；**新挖 P020**（tour_members ALL `authenticated` policy 與 cmd-specific 並存、effective 任何登入者可讀寫該表）；**新挖 P021**（tour_destinations / tour_leaders 無 workspace_id + 4 條 USING:true、待 William 拍板「公版 vs 租戶」）；syncToCore delete-then-insert 仍未修；by-code service_role 仍無 auth；tour_role_assignments 親查證實 4 條 EXISTS workspace（不是裸表）| 違反原則 3（P020 P021）、涉候選原則 4-8 |
 
-### ⏳ 待以 v2.0 重驗（新 pattern 可能也中）
+### ⏳ 待重驗（新 pattern 可能也中、本輪未涵蓋）
 
 | 路由 | 可能中的 pattern | 緊急度 |
 |---|---|---|
-| [/hr](./hr.md) | 欄位識別符多重（employees 三個登入 ID）/ FORCE RLS + service_role / middleware 公開清單寬鬆 / **v3.0 新：敏感表 DELETE policy 弱、三套權限系統並存** | 🔴 次頁驗完回頭 |
-| [/finance/payments](./finance_payments.md) | 候選原則 8（快速入口 ≠ 獨立資料）確認是否命中、payments 該不該被視為訂單頁延伸 / **v3.0 新：receipts 表 DELETE policy 是否也 USING:true** | 🔴 候選原則拍板後 |
-| [/tours](./tours.md) | **v3.0 新：tours 表 DELETE policy 是否 USING:true、tour_members / tour_rooms 是否有同類 delete 漏** | 🔴 立刻補驗 |
 | [/login](./login.md) + [/hr](./hr.md) | 候選原則 6（聚合 vs 明細分離）在員工列表、客戶列表、訂單列表的適用性 | 🟢 低 |
+| 其他未驗路由 | P020 多 policy 重疊（pg_policies WHERE cmd='ALL' 跟同表 cmd-specific 並存的全站盤）| 🔴 高 |
+| `/dashboard` `/calendar` 等待驗路由 | P001 6 處 isAdmin 短路是不是全 codebase 還有更多、P018 / P019 ❓ 17 張公版 vs 租戶拍板後的影響 | 🟡 中 |
 
 ---
 
@@ -212,12 +211,33 @@ Last updated：2026-04-22 晚間（**/login v3.0 覆盤**：v2.0 四紅色 P001/
 ### 🔴 Role-gate 偽裝成 Permission-gate
 **樣態**：API 用 `isAdmin` 當大鎖、繞過細緻權限系統；`checkPermission` 有 `if (isAdmin) return true` 短路。
 
-- **已確認命中**：
-  - /login（auth-store.ts:249 + 4 個 API）
-  - /hr（usePermissions / useTabPermissions）
-  - /finance/payments（page.tsx:211 整頁 `if (!isAdmin)`、4 個動作無細分）
-  - /tours（hook 層 auth-store.ts:249 短路 + `tour-itinerary-tab.tsx:80` canEditDatabase 依 isAdmin + API 層 accept/reject 只靠 RLS 無職務檢查）
-- **可能也中**：/tenants/[id]、所有含「建立 / 刪除 / 重設」動作的 API、/finance/* + /accounting/* 其餘頁
+**v1.4 強迫症深掘 grep 全站結果 — 17 處 isAdmin 短路完整清單**：
+
+🔴 **整 layout 大鎖（業務員 / 會計 / 助理進不去整個家族）**：
+- `src/app/(main)/accounting/layout.tsx:13`
+- `src/app/(main)/database/layout.tsx:14`
+
+🔴 **整頁大鎖**：
+- `src/app/(main)/finance/settings/page.tsx:433`
+- `src/app/(main)/finance/requests/page.tsx:63`（請款管理、OP / 業務本來就該用）
+- `src/app/(main)/finance/travel-invoice/page.tsx:49`
+- `src/app/(main)/finance/treasury/page.tsx:135`
+- `src/app/(main)/finance/reports/page.tsx:96`
+
+🟡 **權限 hook 短路**：
+- `src/lib/permissions/useTabPermissions.tsx:80, 97, 113, 122`（canRead / canWrite / canReadAny / canWriteAny 4 函式各一）
+- `src/lib/permissions/index.ts:114`
+- `src/components/guards/ModuleGuard.tsx:49`
+
+🟢 **UI 顯示層**：
+- `src/components/layout/sidebar.tsx:522, 565, 596`（3 處）
+- `src/components/layout/mobile-sidebar.tsx:260`
+- `src/components/workspace/channel-sidebar/useChannelSidebar.ts:17`
+- `src/app/(main)/settings/components/WorkspaceSwitcher.tsx:16`
+
+**PR-1a 已修確認 ✅**（grep 親驗 0 處）：`auth-store.ts:249` / `permissions/hooks.ts:284,293` / `usePermissions.ts` 9 個 bool
+**PR-1c 已修確認 ✅**：`/finance/payments/page.tsx:213` 改 canViewFinance（但 finance 其餘 5 子頁沒一起改 — finance 模組整體還是「半通半不通」）
+**/tours**：`tour-itinerary-tab.tsx:91` canEditDatabase 改純 permission 比對 ✅、API 層 accept/reject 已加 tour_id filter ✅
 
 ### 🟡 職務系統分裂（多套並存）
 **樣態**：同一概念「職務」在多個表、定義不同、ID 不同、某些表沒人用。
@@ -305,6 +325,52 @@ Last updated：2026-04-22 晚間（**/login v3.0 覆盤**：v2.0 四紅色 P001/
   - **`workspaces_delete`（v3.0 新挖）**：任何登入用戶可 DELETE 任一 workspace row、級聯刪所有 workspace_roles/employees/tours/orders/receipts — SELECT/UPDATE 都對、偏偏 DELETE 弱
 - **對比**：`employee_route_overrides` 同概念、policy 正確（自己看自己 + service_role）— **同概念兩表強度不一**
 - **驗證盲點**：每張 table 的 4 條 policy（SELECT/INSERT/UPDATE/DELETE）要逐條看、不能看 2 條就判
+
+### 🔴 多 RLS policy 重疊互相打架（v1.3 新增、v1.4 全站盤完）— 18 張 effective 失守
+**樣態**：同一表上 `cmd='ALL'` policy 跟 `cmd='SELECT/INSERT/UPDATE/DELETE'` cmd-specific policy 並存。PostgreSQL 多 policy 是 OR 邏輯、寬的會覆蓋嚴的、cmd-specific 守門等於沒寫。
+
+**v1.4 全站盤點完整**（用 SQL `pg_policies WHERE cmd='ALL'` join 同表 cmd-specific）：
+
+🔴 **ALL policy = `true`（任何用戶通吃、13 張）**：
+- `bot_groups` / `bot_registry`
+- `customer_inquiries`（policyname 寫 "Service role full access" 但 USING/CHECK 都是 true、命名錯置）
+- `employee_payroll_config`
+- `itinerary_permissions`
+- `magic_library`（可能 by design）
+- `payroll_allowance_types` / `payroll_deduction_types`
+- `tour_bonus_settings` / `tour_expenses`
+- `wishlist_template_items` / `wishlist_templates`（命名錯置同 customer_inquiries）
+- `workspace_attendance_settings`（重複 ALL policy 一條 true 一條 employee JOIN）
+- `workspace_bonus_defaults` / `workspace_notification_settings`
+
+🟡 **ALL policy = `auth.role()='authenticated'`（任意登入者、5 張）**：
+- `system_settings`
+- `tour_members`
+- `tour_request_items` / `tour_request_member_vouchers` / `tour_request_messages`
+
+✅ **ALL policy 寫對的（13 張、不在受害名單）**：
+- `attraction_licenses`（is_super_admin）
+- `company_asset_folders`（workspace_id）
+- `employee_route_overrides`（service_role）
+- `fleet_drivers / fleet_schedules / fleet_vehicle_logs / fleet_vehicles`（4 張、workspace_id）
+- `members`（workspace_id OR NULL）
+- `michelin_restaurants` / `premium_experiences`（workspace_id OR is_super_admin）
+- `role_tab_permissions`（service_role、P010 修法正確）
+
+**驗證 SQL**：
+```sql
+WITH counts AS (SELECT tablename, COUNT(*) FILTER (WHERE cmd='ALL') AS all_count, COUNT(*) FILTER (WHERE cmd!='ALL') AS specific_count FROM pg_policies WHERE schemaname='public' GROUP BY tablename)
+SELECT tablename FROM counts WHERE all_count > 0 AND specific_count > 0 ORDER BY tablename;
+-- 31 row、其中 18 張需修
+```
+
+### 🔴 應用層 + DB 層雙層裸奔（v1.4 新增、CRITICAL CWE-269 提權）
+**樣態**：API endpoint 用 cookie session client 想靠 RLS 兜底、但對應表的 RLS 4 條 policy 全 USING:true（如 P018 的 employee_permission_overrides）、應用層自己又 0 守門 — 雙層都沒、任何登入用戶可任意操作。
+
+- **已確認命中**：`/api/employees/[employeeId]/permission-overrides` route.ts（0 auth 檢查）+ employee_permission_overrides 表（4 條 USING:true）= P022 CRITICAL
+- **可能也中**：任何「靠 RLS 守 + 表 RLS 沒鎖」的 API、需全站盤 `grep -L "getServerAuth\|requireTenantAdmin" src/app/api/**/route.ts`
+- **修法**：API 加 `getServerAuth` + 業務權限檢查 + 目標 workspace 對齊；同時表的 RLS 補完
+- **緊急度**：🔴 CRITICAL 上線前必修（提權漏洞）
 
 ### 🔴 系統表 RLS 沒開（v3.0 新增）
 **樣態**：Supabase 建 schema 時某些系統性 table 預設 RLS 未啟用、任何登入用戶可完全讀取。

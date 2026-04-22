@@ -19,7 +19,6 @@ import { SimpleOrderTable } from '@/features/orders/components/simple-order-tabl
 import { OrderEditDialog } from '@/features/orders/components/order-edit-dialog'
 import { BatchVisaDialog } from '@/features/orders/components/BatchVisaDialog'
 import { AddReceiptDialog } from '@/features/finance/payments'
-import { InvoiceDialog } from '@/features/finance/components/invoice-dialog'
 import { useWorkspaceFeatures } from '@/lib/permissions/hooks'
 
 const AddRequestDialog = dynamic(
@@ -55,7 +54,6 @@ export function OrderListView({
   // Dialog 狀態（集中管）
   const [receiptOpen, setReceiptOpen] = useState(false)
   const [requestOpen, setRequestOpen] = useState(false)
-  const [invoiceOpen, setInvoiceOpen] = useState(false)
   const [editOpen, setEditOpen] = useState(false)
   const [visaOpen, setVisaOpen] = useState(false)
 
@@ -69,10 +67,6 @@ export function OrderListView({
     setSelectedOrder(order)
     setRequestOpen(true)
   }, [])
-  const openInvoice = useCallback((order: Order) => {
-    setSelectedOrder(order)
-    setInvoiceOpen(true)
-  }, [])
   const openEdit = useCallback((order: Order) => {
     setSelectedOrder(order)
     setEditOpen(true)
@@ -83,8 +77,8 @@ export function OrderListView({
   }, [])
 
   const clearIfAllClosed = useCallback(
-    (r: boolean, q: boolean, i: boolean, e: boolean, v: boolean) => {
-      if (!r && !q && !i && !e && !v) setSelectedOrder(null)
+    (r: boolean, q: boolean, e: boolean, v: boolean) => {
+      if (!r && !q && !e && !v) setSelectedOrder(null)
     },
     []
   )
@@ -98,7 +92,6 @@ export function OrderListView({
         showTourInfo={showTourInfo}
         onQuickReceipt={openReceipt}
         onQuickPaymentRequest={openRequest}
-        onQuickInvoice={openInvoice}
         onEdit={openEdit}
         onQuickVisa={visasEnabled ? openVisa : undefined}
       />
@@ -107,7 +100,7 @@ export function OrderListView({
         open={receiptOpen}
         onOpenChange={open => {
           setReceiptOpen(open)
-          clearIfAllClosed(open, requestOpen, invoiceOpen, editOpen, visaOpen)
+          clearIfAllClosed(open, requestOpen, editOpen, visaOpen)
         }}
         defaultTourId={selectedOrder?.tour_id || undefined}
         defaultOrderId={selectedOrder?.id}
@@ -118,21 +111,11 @@ export function OrderListView({
         open={requestOpen}
         onOpenChange={open => {
           setRequestOpen(open)
-          clearIfAllClosed(receiptOpen, open, invoiceOpen, editOpen, visaOpen)
+          clearIfAllClosed(receiptOpen, open, editOpen, visaOpen)
         }}
         defaultTourId={selectedOrder?.tour_id || undefined}
         defaultOrderId={selectedOrder?.id}
         onSuccess={onRequestSuccess}
-      />
-
-      <InvoiceDialog
-        open={invoiceOpen}
-        onOpenChange={open => {
-          setInvoiceOpen(open)
-          clearIfAllClosed(receiptOpen, requestOpen, open, editOpen, visaOpen)
-        }}
-        defaultOrderId={selectedOrder?.id}
-        defaultTourId={selectedOrder?.tour_id || undefined}
       />
 
       {selectedOrder && (
@@ -140,7 +123,7 @@ export function OrderListView({
           open={editOpen}
           onOpenChange={open => {
             setEditOpen(open)
-            clearIfAllClosed(receiptOpen, requestOpen, invoiceOpen, open, visaOpen)
+            clearIfAllClosed(receiptOpen, requestOpen, open, visaOpen)
           }}
           order={selectedOrder}
         />
@@ -151,7 +134,7 @@ export function OrderListView({
           open={visaOpen}
           onOpenChange={open => {
             setVisaOpen(open)
-            clearIfAllClosed(receiptOpen, requestOpen, invoiceOpen, editOpen, open)
+            clearIfAllClosed(receiptOpen, requestOpen, editOpen, open)
           }}
           order={selectedOrder}
         />

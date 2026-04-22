@@ -110,13 +110,6 @@ const menuItems: MenuItem[] = [
       },
       // { href: '/erp-accounting/vouchers', label: COMP_LAYOUT_LABELS.會計傳票, icon: FileText, requiredPermission: 'vouchers' },
       {
-        href: '/finance/travel-invoice',
-        label: COMP_LAYOUT_LABELS.代轉發票,
-        icon: FileText,
-        requiredPermission: 'travel_invoice',
-        restrictedFeature: 'travel_invoices',
-      },
-      {
         href: '/finance/reports',
         label: COMP_LAYOUT_LABELS.報表管理,
         icon: BarChart3,
@@ -256,9 +249,9 @@ export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
           return null
         }
         if (!item.requiredPermission) return item
-        // 管理員有所有權限
-        if (isAdmin) return item
-        return userPermissions.includes(item.requiredPermission) ? item : null
+        // 精確比對或前綴比對（與桌面 sidebar 一致；admin 透過 backfill 拿到所有 module 權限）
+        const perm = item.requiredPermission
+        return userPermissions.some(p => p === perm || p.startsWith(`${perm}:`)) ? item : null
       })
       .filter((item): item is MenuItem => item !== null)
   }

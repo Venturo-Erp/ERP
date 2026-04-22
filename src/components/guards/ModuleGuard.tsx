@@ -28,8 +28,6 @@ export function ModuleGuard({ children }: ModuleGuardProps) {
   const { isRouteAvailable, loading, features } = useWorkspaceFeatures()
   const [checked, setChecked] = useState(false)
 
-  const { isAdmin } = useAuthStore()
-
   useEffect(() => {
     if (loading) return
 
@@ -45,13 +43,8 @@ export function ModuleGuard({ children }: ModuleGuardProps) {
       return
     }
 
-    // Super Admin 跳過檢查
-    if (isAdmin) {
-      setChecked(true)
-      return
-    }
-
     // 如果沒有設定任何 feature，預設全開（向下相容）
+    // admin 角色亦走此路徑（admin 不再 bypass workspace_features）
     if (features.length === 0) {
       setChecked(true)
       return
@@ -64,7 +57,7 @@ export function ModuleGuard({ children }: ModuleGuardProps) {
     }
 
     setChecked(true)
-  }, [pathname, loading, isRouteAvailable, router, isAdmin, features.length])
+  }, [pathname, loading, isRouteAvailable, router, features.length])
 
   if (loading || !checked) {
     return <ModuleLoading fullscreen />

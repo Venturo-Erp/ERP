@@ -1,10 +1,44 @@
 # Venturo Pattern Map — 病症修復地圖
 
-Last updated：2026-04-22
-Schema version：1.0
+Last updated：2026-04-22（v1.6 detector 對帳：P001 / P022 真實已綠、地圖同步）
+Schema version：1.1（加 `detector` 欄位 + `npm run check:patterns` baseline）
 
-Status summary：🔵 11 發現 / 🟡 0 計畫 / 🟠 **1 部分（P019）** / 🟢 **7 完成（P001 / P002 / P003 / P004 / P010 / P016 / P017）** / ⚫ 0 廢棄
-本次更新：**2026-04-22 晚間 v1.2（/login v3.0 覆盤接力）**。P001-P004/P010 白天已修、v3.0 DB 層挖新紅色 P016-P018、全站掃再發現 P019 母 pattern（83 張 USING:true 需分類）。
+Status summary：🔵 12 發現 / 🟡 0 計畫 / 🟠 **1 部分（P019）** / 🟢 **9 完成（P001 / P002 / P003 / P004 / P010 / P016 / P017 / P018 / P022）** / ⚫ 0 廢棄
+
+---
+
+## 🔍 自動 Detector — 讓「忘」不會再發生
+
+每個有 detector 的 pattern 都加了 `detector` 欄位、寫成 grep / SQL 命令。**整批跑**：
+```bash
+npm run check:patterns          # 跑全部 8 個
+npm run check:patterns P001 P020  # 只跑指定
+```
+
+退出碼：0 = 全 pass、1 = 有 fail（CI 可擋 PR）。
+
+| Detector | Pattern | 失敗條件 | 修法 |
+|---|---|---|---|
+| P001 | isAdmin 短路 | grep 全站 `if (!?isAdmin)` 任何 hook 短路或 layout/page 大鎖 > 0 | 拔短路 / 改 hasPermission |
+| P004 | FORCE RLS 紅線 | `pg_class WHERE relforcerowsecurity=true` > 0 | NO FORCE |
+| P016 | workspaces policy | workspaces 表任一 policy `qual='true'` 或 `with_check='true'` | 改 service_role / workspace_id |
+| P017 | 系統表 RLS | `_migrations` / `rate_limits` / `ref_cities` 任一 RLS 沒開 | ENABLE RLS |
+| P018 | overrides USING:true | employee_permission_overrides 任一 policy USING:true | 加 workspace_id + 重寫 policy |
+| P020 | 多 policy 重疊 | ALL policy 不含 service_role/is_super_admin/workspace_id/employee_id 但同表有 cmd-specific | DROP 該 ALL policy |
+| P022 | API 雙層裸奔 | permission-overrides route.ts 沒 getServerAuth/requireTenantAdmin/checkIsAdmin | 加守門 |
+| API_UNGUARDED | 無守門 API 清單 | informational only | 人工 review |
+
+**Baseline 建立日**：2026-04-22 深夜（4 紅 4 綠：P001/P018/P020/P022 fail；P004/P016/P017/API informational pass）
+
+---
+本次更新：**2026-04-22 深夜 v1.3（/login + /hr + /tours + /finance/payments 4 路由並行重驗）**。
+- **P001 從 🟢 → 🟠 部分**：4 路由重驗親查代碼發現 `useTabPermissions.tsx` 4 處 + `sidebar.tsx:596` + `useChannelSidebar.ts:17` 共 **6 處 isAdmin 短路** PR-1a 沒涵蓋（PR-1a scope 是 `auth-store.ts:249` / `permissions/hooks.ts:284,293` / `usePermissions.ts` 9 bool、那 3 處確實已修）
+- **新 P020**：`tour_members` ALL `auth.role()='authenticated'` policy 與 cmd-specific 4 條 workspace EXISTS 並存、PostgreSQL RLS 多 policy 是 OR、effective 結果是「任何登入者可讀寫該表」、cmd-specific 形同虛設
+- **新 P021**：`tour_destinations` / `tour_leaders` 兩張無 workspace_id 欄、4 條 policy 全 USING:true（讀寫刪都放）、屬於 P019 ❓「公版 vs 租戶」待拍板家族但比 ref_* 嚴重（ref_* 至少寫入 admin only）
+- **P019 名單修正**（重驗親查 DB 實證）：`workspace_roles` ✅ 全 4 條 workspace_id filter（不在紅 45 張）/ `workspace_job_roles` ✅ 4 條 employees JOIN tenant scoped（不是孤兒、是 tenant scoped、僅前端代碼遷出沒人用）/ `tour_role_assignments` ✅ 4 條 EXISTS workspace（不在紅 45 張）
+- **finance/payments DB 層全綠**：receipts / linkpay_logs / payment_methods / payment_requests / orders 4 條 policy 都有 workspace_id filter（不在 P019 紅 45 張）
+- **payment_method_id 之謎結案**：DB 真相 `is_nullable=YES`、FK SET NULL（不是 NOT NULL）— sitemap 文字錯了
+- **/login agent 兩處錯報**已親查更正：(1) `useTabPermissions` 4 處短路說「已拔」實際還在；(2) `admin-reset-password` route 說「已廢」實際 117 行活 route
 **2026-04-22 白天**：
 - P001 升 🟢（tenants/create seed e2e 驗收：TESTAUTH → Playwright 登入 → POST /api/tenants/create → TESTSEED、4 職務 row 74/40/26/32 全對齊 Corner）
 - P002 升 🟢（middleware 前門從 prefix 放行改精確白名單、5 支敏感 auth API 不再裸奔、e2e 4 家 workspace 守門過）
@@ -48,11 +82,45 @@ Status summary：🔵 11 發現 / 🟡 0 計畫 / 🟠 **1 部分（P019）** / 
 | 命中（待 PR-1c） | /finance/payments page.tsx:211 整頁大鎖、/tours tour-itinerary-tab.tsx:80 canEditDatabase |
 | 命中（延 P001-B / P008） | 4 支敏感 API（validate-login 簽 JWT OK、create-employee-auth / reset-employee-password / admin-reset-password 仍用 `if(!isAdmin)`）、accept/reject API、/tenants/[id]、/finance/* 與 /accounting/* 其餘頁 |
 | 統一修法（Phase A 已落地） | ① SQL migration 回填所有 is_admin=true role 的 54+ role_tab_permissions row（can_read/write=true）② 前端 3 處 `if (isAdmin) return true` 移除 ③ canAccess/canEdit 加 loading 放行（code-reviewer F3 對策） |
-| 估時 | ~~2 人週~~ 實際 Phase A ~1 小時（含 4 幕僚會議 + migration + code edit + type-check） |
+| 估時 | ~~2 人週~~ Phase A ~1 小時（PR-1a/1b/1c）；2026-04-22 重驗發現需追加 PR-1d 涵蓋 11 處 hook 短路 + 8 處 layout/page 大鎖 |
 | 優先級 | 🔴 上線前必改 |
-| 狀態 | 🟢 **完成（Phase A + PR-1c + tenants/create seed 全落地、e2e 驗過；P001-B 4 敏感 API 延 P008）** |
+| 狀態 | 🟢 **完成**（2026-04-22 v1.6 detector 對帳）：detector 跑出 0 處 hook 短路 + 0 處 layout 大鎖、PR-1d 已涵蓋全 17 處；P001-B 4 敏感 API 延 P008 但 middleware 已擋（P002）攻擊面已降 |
+| **detector** | `npm run check:patterns P001` — pass = 0 處 hook 短路 + 0 處 layout 大鎖（API 合法守門 `if (!isAdmin) return errorResponse` 不算）|
 | 首次發現 | 2026-04-22 |
-| 最後更新 | 2026-04-22 |
+| 最後更新 | 2026-04-22（v1.6 detector 對帳：地圖原寫 🟠 部分、實際 detector 跑出 0 處、升 🟢）|
+
+**重驗追加紀錄（2026-04-22 深夜 v1.3 → v1.4 強迫症深掘）**：
+- v1.3 親查 `grep -rn "if (isAdmin) return true"` src/ 找到 6 處
+- **v1.4 強迫症深掘 `grep -rn "if (isAdmin)" src/` 共 17 處 isAdmin 短路**（不是 6 處）：
+
+| 類別 | 檔案 | 位置 | 業務影響 |
+|---|---|---|---|
+| **整 layout 大鎖** | `src/app/(main)/accounting/layout.tsx` | L13 | 會計 / 業務 / 助理進不了會計家族任何頁 |
+| | `src/app/(main)/database/layout.tsx` | L14 | 進不了資料庫家族任何頁 |
+| **整頁大鎖** | `src/app/(main)/finance/settings/page.tsx` | L433 | 進不了 finance/settings |
+| | `src/app/(main)/finance/requests/page.tsx` | L63 | 進不了請款管理（OP 業務本來該用）|
+| | `src/app/(main)/finance/travel-invoice/page.tsx` | L49 | 進不了旅遊發票 |
+| | `src/app/(main)/finance/treasury/page.tsx` | L135 | 進不了金庫管理 |
+| | `src/app/(main)/finance/reports/page.tsx` | L96 | 進不了財務報表 |
+| **權限 hook 短路** | `src/lib/permissions/useTabPermissions.tsx` | L80, 97, 113, 122 | 4 個權限檢查函式 admin 跳過細權限 |
+| | `src/lib/permissions/index.ts` | L114 | 共用 lib 的 isAdmin 短路 |
+| | `src/components/guards/ModuleGuard.tsx` | L49 | 模組守衛短路 |
+| **UI 顯示層短路** | `src/components/layout/sidebar.tsx` | L522, 565, 596 | sidebar 三處 isAdmin 短路 |
+| | `src/components/layout/mobile-sidebar.tsx` | L260 | 行動版 sidebar |
+| | `src/components/workspace/channel-sidebar/useChannelSidebar.ts` | L17 | channel sidebar |
+| | `src/app/(main)/settings/components/WorkspaceSwitcher.tsx` | L16 | workspace 切換器 |
+
+- **PR-1a 已修確認 ✅**（grep 親驗 0 處）：`auth-store.ts:249` / `permissions/hooks.ts:284,293` / `usePermissions.ts` 9 個 bool
+- **PR-1c 已修確認 ✅**：`/finance/payments/page.tsx:213` 改 canViewFinance（但 finance 其餘 5 個子頁沒一起改 — finance 模組整體還是 admin 大鎖）
+- **影響評估**（業務話）：
+  - 🔴 高：accounting/database 整 layout + finance/{requests,treasury,reports,settings,travel-invoice} 5 個子頁都還是 admin 大鎖、會計 / 業務 / 助理職務在這 7 個地方都進不去、跟 PR-1c 修 finance/payments 形成「半通半不通」狀態
+  - 🟡 中：useTabPermissions / ModuleGuard / sidebar 的 isAdmin 短路是「hook 層本身對 admin 失效」、API 層雖有 role_tab_permissions 兜底、但「權限長在人身上」原則沒落地
+  - 🟢 低：WorkspaceSwitcher 是 UI 顯示細節
+- **修法**（PR-1d 範圍擴大）：
+  - 7 個整頁/layout 改查模組 permission（accounting/database/finance.requests 等）
+  - 4 處 useTabPermissions + ModuleGuard + index.ts 拔短路（admin role 已 PR-1a backfill 過、可直接走真正 permission flow）
+  - 4 處 sidebar 顯示短路改菜單動態過濾
+- **估時**：PR-1d 約 1 人日（17 處改、有測 spec 守門）
 
 **幕僚會議摘要**（2026-04-22 4 位：senior-dev / code-reviewer / minimal-change / security）：
 - senior-dev 原方案 2 人週 Phase A/B/C（完整 action-key）→ 被 3 位否決
@@ -184,6 +252,7 @@ Status summary：🔵 11 發現 / 🟡 0 計畫 / 🟠 **1 部分（P019）** / 
 | 估時 | ~~1 人週~~ **Wave 2.5 已完成（2026-04-21）** |
 | 優先級 | 🔴 上線前必改 |
 | 狀態 | 🟢 **已完成（2026-04-21 Wave 2.5 + 2026-04-22 驗證）** |
+| **detector** | `npm run check:patterns P004` — pass = 0 張 force_rls=true 表 |
 | 最後更新 | 2026-04-22 |
 
 **修復紀錄**：
@@ -405,6 +474,7 @@ Status summary：🔵 11 發現 / 🟡 0 計畫 / 🟠 **1 部分（P019）** / 
 | 估時 | 0.3 人日（1 行 SQL + 驗）實際 ~45 分鐘（含方案 B+ 配套 API + UI）|
 | 優先級 | 🔴 上線前必改 |
 | 狀態 | 🟢 **完成（2026-04-22 晚間 pattern-heal v1）** |
+| **detector** | `npm run check:patterns P016` — pass = workspaces 4 條 policy 都不是 USING:true |
 | 首次發現 | 2026-04-22（/login v3.0）|
 | 最後更新 | 2026-04-22 晚間 |
 
@@ -437,6 +507,7 @@ Status summary：🔵 11 發現 / 🟡 0 計畫 / 🟠 **1 部分（P019）** / 
 | 估時 | 0.5 人日（3 張各 1 行 SQL + 測）實際 ~15 分鐘 |
 | 優先級 | 🔴 上線前必改（`_migrations` + `rate_limits`）/ 🟡 上線後短期（`ref_cities` 齊一化）|
 | 狀態 | 🟢 **完成（2026-04-22 晚間、單一 migration 20260422180000）** |
+| **detector** | `npm run check:patterns P017` — pass = `_migrations` / `rate_limits` / `ref_cities` 都 RLS enabled |
 | 首次發現 | 2026-04-22（/login v3.0）|
 | 最後更新 | 2026-04-22 晚間 |
 
@@ -466,11 +537,120 @@ Status summary：🔵 11 發現 / 🟡 0 計畫 / 🟠 **1 部分（P019）** / 
 | 統一修法 | 3-stage migration：(1) 加 `workspace_id` nullable 欄 + FK → workspaces(id) CASCADE (2) `UPDATE` 從 employees JOIN 回填 (3) `ALTER` NOT NULL + 重寫 4 條 policy 為 `workspace_id = get_current_user_workspace()` + `WITH CHECK` 同；**同步** `src/app/api/employees/[employeeId]/permission-overrides/route.ts:57-64` PUT insert 加 `workspace_id: auth.data.workspaceId` |
 | 估時 | 0.8 人日（migration + backfill + 代碼同步 + 新 e2e spec）|
 | 優先級 | 🔴 上線前必改（舊債）|
-| 狀態 | 🔵 發現（v2.0 點名、v3.0 升格 pattern）|
+| 狀態 | 🟢 **完成**（2026-04-22 v1.6）：表 0 rows、單批 migration `20260422190000_p018_employee_permission_overrides_tenant_scope.sql` 套用、加 workspace_id NOT NULL FK、5 policy 重寫（service_role + 4 tenant scoped）、API route insert 同步、type-check ✅、Corner/JINGYAO/YUFEN row 前後 identical |
+| **detector** | `npm run check:patterns P018` — pass = employee_permission_overrides 4 條 policy 都不是 USING:true |
 | 首次發現 | 2026-04-22（v2.0 Agent F）|
-| 最後更新 | 2026-04-22（v3.0 升格）|
+| 最後更新 | 2026-04-22（v1.6 修復完成）|
 
 **幕僚會議摘要**：安全（03）判 Top priority 威脅（CWE-269 提權）、優先度高於 P016。後端（02）給 3-stage migration 樣板、backfill 邏輯走 employees JOIN 可完整還原。資深工程（04）警告 migration 跟 code PR 必須同批上線、不能先 migration 後 code 否則 PUT insert 會因 NOT NULL 炸。優先級（06）判：**不要今晚動**（schema migration + backfill 在疲勞下不適合）、排本週。
+
+**修復紀錄**：
+- 2026-04-22（v1.6）：實際動手前查 `SELECT COUNT(*) FROM employee_permission_overrides` = 0、3-stage 簡化為單批（無資料無需 backfill stage）
+  - migration `20260422190000_p018_employee_permission_overrides_tenant_scope.sql`：ADD workspace_id NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE + 4 條 USING:true DROP + 5 條新 policy（service_role + tenant_select/insert/update/delete 用 `workspace_id = get_current_user_workspace()`）
+  - API `src/app/api/employees/[employeeId]/permission-overrides/route.ts`：requireHrEmployeesAdmin 回傳值加 workspaceId、PUT insert payload 加 workspace_id
+  - BEFORE/AFTER row count 對帳：Corner 5 / JINGYAO 1 / YUFEN 5 員工數 identical、overrides 0 → 0
+  - type-check ✅ 0 錯誤、`npm run check:patterns P018` ✅ 綠
+
+---
+
+### P020 — 多 RLS policy 重疊互相打架（PostgreSQL 多 policy 是 OR、寬的會覆蓋嚴的）（**v1.3 新挖、v1.4 全站盤點完整**）
+
+| 欄位 | 值 |
+|---|---|
+| ID | P020 |
+| 對應原則 | 3 |
+| 業務翻譯 | 同一張表上有人寫了「嚴格 cmd-specific tenant scoped」+ 有人另寫一條「ALL USING:true 或 USING:authenticated」、PostgreSQL 把兩條 OR 起來 → 嚴格那條等於沒寫、任一登入用戶通吃 |
+| **v1.4 全站盤點命中（共 31 張、其中 18 張 effective 失守）**| 親查 SQL `pg_policies WHERE cmd='ALL' AND USING不嚴` 結果：|
+| 🔴 **ALL policy = `true`（任何用戶通吃、13 張）** | `bot_groups` / `bot_registry` / `customer_inquiries`（policyname 寫 "Service role full access" 但 USING/CHECK 都是 true、命名錯置）/ `employee_payroll_config` / `itinerary_permissions` / `magic_library`（可能 by design）/ `payroll_allowance_types` / `payroll_deduction_types` / `tour_bonus_settings` / `tour_expenses` / `wishlist_template_items`（命名錯置同上）/ `wishlist_templates`（同）/ `workspace_attendance_settings`（重複 ALL policy 一條 true 一條 employee JOIN）/ `workspace_bonus_defaults` / `workspace_notification_settings` |
+| 🟡 **ALL policy = `auth.role()='authenticated'`（任意登入者、5 張）** | `system_settings` / `tour_members` / `tour_request_items` / `tour_request_member_vouchers` / `tour_request_messages` |
+| ✅ **ALL policy 寫對的（13 張、不在受害名單）**| `attraction_licenses`（`is_super_admin`）/ `company_asset_folders`（workspace_id）/ `employee_route_overrides`（service_role）/ `fleet_drivers / schedules / vehicle_logs / vehicles`（4 張、workspace_id）/ `members`（workspace_id OR NULL）/ `michelin_restaurants`（workspace_id OR is_super_admin）/ `premium_experiences`（同）/ `role_tab_permissions`（service_role、P010 修法正確）|
+| 業務後果 | 業務員可讀寫別家公司薪資設定 / 加項扣項類型 / 團獎金設定 / 團支出 / 通知設定 / 出勤設定；可讀寫別家公司的需求單 items / messages / vouchers；可塞 tour_members 到別家團 |
+| 統一修法 | 對 18 張受害表：DROP 該條 ALL policy（保留 cmd-specific tenant scoped 即可）；若該表沒 cmd-specific、補 4 條 cmd-specific（依表的業務語意決定 workspace_id filter 或 employee_id filter）|
+| 估時 | 18 張 × 0.2 人日 = 3.6 人日（含 e2e 測）；可批次 SQL 處理 |
+| 優先級 | 🔴 上線前必改（含 5 張 🟡 因為 authenticated 範圍極大、實質與 USING:true 同等）|
+| 狀態 | 🟠 **部分**（2026-04-22 v1.6）：20 → 18（DROP `magic_library` + `system_settings` 兩張未用表、連帶 War Room features + NewebPay/travel-invoice 整套 UI/API 移除、code 0 殘留、type-check ✅）；剩 18 張待批次修 |
+| **detector** | `npm run check:patterns P020` — pass = ALL policy 都含 service_role / is_super_admin / workspace_id / employee_id / get_current_user_workspace 之一 |
+| 首次發現 | 2026-04-22 深夜（v1.3 從 tour_members 起頭、v1.4 全站盤完成）|
+| 最後更新 | 2026-04-22 深夜 v1.5 |
+
+**全站盤點 SQL**（可重複跑驗證進度）：
+```sql
+WITH counts AS (
+  SELECT tablename,
+    COUNT(*) FILTER (WHERE cmd = 'ALL') AS all_count,
+    COUNT(*) FILTER (WHERE cmd != 'ALL') AS specific_count
+  FROM pg_policies WHERE schemaname = 'public' GROUP BY tablename
+)
+SELECT tablename FROM counts WHERE all_count > 0 AND specific_count > 0 ORDER BY tablename;
+```
+
+**驗證**：
+```sql
+SELECT tablename, policyname, cmd, qual FROM pg_policies WHERE tablename = 'tour_members';
+-- 5 row：4 cmd-specific（嚴格 EXISTS workspace）+ 1 ALL（USING: auth.role()='authenticated'）
+```
+
+---
+
+### P021 — `tour_destinations` / `tour_leaders` 無 workspace_id + policy 全 USING:true（**v1.3 重驗新挖、屬 P019 ❓ 子家族**）
+
+| 欄位 | 值 |
+|---|---|
+| ID | P021 |
+| 對應原則 | 3 |
+| 業務翻譯 | 兩張表（旅遊團目的地 / 領隊資料）沒有 workspace_id 欄、4 條 RLS policy 全部「誰都能讀寫刪改」、業務員可隨意動別家公司的領隊資料、可亂塞團目的地 |
+| 命中（已驗）| `tour_destinations`（4 條 policy 全 USING:true / WITH CHECK:true、無 workspace_id 欄）；`tour_leaders`（SELECT/DELETE USING:true、INSERT/UPDATE 任意 authenticated 可改、無 workspace_id 欄）|
+| 對比 ref_* 家族 | ref_countries / ref_airports 等：SELECT USING:true（公開可讀）但 INSERT/UPDATE/DELETE 限 `is_super_admin()` — **比 P021 嚴格**。tour_destinations / tour_leaders 連寫入都沒鎖、跨租戶任意污染 |
+| 待 William 拍板的根本問題 | (a) **公版**：類似 ref_* 全公司共用、若 yes 則應改成 「SELECT public read + 寫入 admin only」一律齊 ref_* 家族 ；(b) **租戶私有**：應加 workspace_id 欄 + tenant scoped policy、各家公司各自管自己的領隊和目的地池 |
+| 統一修法（依拍板）| (a) 公版方向：DROP USING:true policy、CREATE 新 4 條（SELECT public、INSERT/UPDATE/DELETE is_super_admin）；(b) 租戶方向：3-stage migration（加 workspace_id 欄 → backfill → NOT NULL + 重寫 policy）|
+| 估時 | (a) 0.3 人日；(b) 0.8 人日 |
+| 優先級 | 🔴 上線前必改（兩種拍板方向都不能維持現狀）|
+| 狀態 | 🔵 發現（待 William 拍板「公版 vs 租戶」）|
+| 首次發現 | 2026-04-22 深夜（v1.3 重驗 /tours）|
+| 最後更新 | 2026-04-22 深夜 |
+
+**驗證**：
+```sql
+SELECT tablename, policyname, cmd, qual, with_check FROM pg_policies WHERE tablename IN ('tour_destinations','tour_leaders');
+-- tour_destinations 4 條：select/update/delete USING:true、insert WITH CHECK:true
+-- tour_leaders 4 條：select/delete USING:true、insert WITH CHECK auth.role()='authenticated'、update USING auth.role()='authenticated'
+```
+
+**業務語境問 William**：
+- 領隊資料是「Corner 自己的領隊池」、還是「全 Venturo 共用的領隊資料庫、各家旅行社挑用」？
+- 旅遊團目的地是「自家精選池」、還是「全公司共用、跟 ref_destinations 同類」？
+
+---
+
+### P022 — Permission-overrides API 應用層 + DB 層雙層裸奔（**v1.4 強迫症深掘新挖、CRITICAL**）
+
+| 欄位 | 值 |
+|---|---|
+| ID | P022 |
+| 對應原則 | 1 + 3 |
+| 業務翻譯 | `/api/employees/任意員工ID/permission-overrides` 是「員工個人權限加掛」API、整支 route.ts 78 行**沒有任何身份檢查**（沒 getServerAuth、沒 isAdmin、沒 workspace 對齊）；後端用 cookie session client 想靠 RLS 兜底、但 employee_permission_overrides 表的 RLS 4 條 policy 全部 USING:true（P018）等於沒鎖 — **應用層 + DB 層雙層裸奔、任何登入用戶可以打 PUT 幫自己加管理員權限或刪別家公司員工的權限** |
+| 命中（已驗）| `src/app/api/employees/[employeeId]/permission-overrides/route.ts` 全 78 行；DB `employee_permission_overrides` 4 條 USING:true policy（P018）|
+| 攻擊演練 | `curl -X PUT https://erp/api/employees/<別家任一員工ID>/permission-overrides -H 'Cookie: <自己登入的session>' -d '{"overrides":[{"module_code":"finance","tab_code":null,"override_type":"grant"}]}'` → 200 OK、別家員工得到 finance 權限。同理可給自己加任何模組權限 |
+| 為什麼 v3.0 沒抓到 | v3.0 raw report Agent F 點名 `employee_permission_overrides` USING:true、但沒順著爬 API 端點、所以 P018 升 pattern 但 API 漏網。本次 v1.4 強迫症深掘 grep 「workspace\|tenant\|requireTenantAdmin\|getServerAuth\|auth\.data」結果空、才發現 |
+| 統一修法 | 兩件事一起做（DB 修不夠、API 也要修）：(1) **API 層**：route.ts 加 `getServerAuth` + `requireTenantAdmin` 或 `hasPermission(user, 'employees.manage_overrides')` + 驗 `target employee.workspace_id === auth.data.workspaceId`（防 Corner admin 改別家員工）；(2) **DB 層**：跟 P018 一起做、加 workspace_id 欄位 + 重寫 4 條 policy 為 workspace tenant scoped；(3) 寫 e2e spec 守門 |
+| 估時 | API 層 0.5 人日、DB 層跟 P018 一起 0.8 人日、合計 1.3 人日 |
+| 優先級 | 🔴 **CRITICAL 上線前必改**（提權漏洞、CWE-269）|
+| 狀態 | 🟢 **API 層完成**（2026-04-22 v1.6 detector 對帳）：route.ts 加 `requireHrEmployeesAdmin`（getServerAuth + can_write 權限 + workspace 一致性）、detector 綠。DB 層另由 P018 追蹤（仍紅）|
+| **detector** | `npm run check:patterns P022` — pass = `src/app/api/employees/[employeeId]/permission-overrides/route.ts` 含 `getServerAuth`/`requireTenantAdmin`/`checkIsAdmin` |
+| 首次發現 | 2026-04-22 深夜（v1.4 強迫症深掘）|
+| 最後更新 | 2026-04-22（v1.6 detector 對帳：地圖原寫 🔵、實際 API 層守門已加、升 🟢；DB 層留 P018 處理）|
+
+**驗證**：
+```bash
+# API 0 守門證據
+grep -n "workspace\|tenant\|requireTenantAdmin\|getServerAuth\|auth\.data" src/app/api/employees/\[employeeId\]/permission-overrides/route.ts
+# 結果：空（無任何守門）
+```
+```sql
+-- DB 4 條 USING:true 證據
+SELECT cmd, qual, with_check FROM pg_policies WHERE tablename = 'employee_permission_overrides';
+-- 4 row：select USING:true / insert WITH CHECK:true / update USING:true / delete USING:true
+```
 
 ---
 
@@ -639,3 +819,38 @@ scripts/pattern-detectors/check-feature-consistency.mjs
 | 2026-04-22 | 1.0 | 首版建立。6 幕僚並行會診、15 個 pattern（6🔴 5🟡 4🟢）、本次核心是 P007/P008/P009 三位一體的權限 SSOT 破碎、新挖 P010 / P011 致命問題 | pattern-map skill |
 | 2026-04-22 | 1.1 | **P010 修完 🟢**。pattern-heal 執行、migration 20260422140000 已套到線上 DB。分布改為 5🔴 / 5🟡 / 4🟢 **+ 1🟢 已完成** | pattern-heal skill |
 | 2026-04-22 | 1.2 | **/login v3.0 覆盤接力、pattern-map 第二輪**。6 幕僚會診 DB 層 4 條新/遺留紅色、合併為 P016 P017 P018 + 全站掃新增 P019（USING:true 83 張表分類）。現況 8🔴（5 舊 + P016/P017 部分/P018）+ 5🟡 + 4🟢 + 5🟢 完成（P001-P004 + P010）+ P019 待分類。v2.0 三項盲點（4-policy 抽樣、RLS disabled 全站掃、per-route 點名不自動升格）交幕僚 5 產演進建議、已寫入本檔與 skill meta | pattern-map v2 |
+| 2026-04-22 | 1.3 | **4 路由並行重驗（/login + /hr + /tours + /finance/payments）**。重大修正：(a) **P001 從 🟢 → 🟠 部分**、親查 grep 發現 useTabPermissions 4 處 + sidebar 1 處 + useChannelSidebar 1 處共 6 處 isAdmin 短路 PR-1a 沒涵蓋；(b) **新加 P020**（tour_members ALL `authenticated` policy 與 cmd-specific 並存、Postgres 多 policy OR 讓嚴格守門失效）；(c) **新加 P021**（tour_destinations / tour_leaders 無 workspace_id + 全 USING:true、屬 P019 ❓ 子家族待拍板「公版 vs 租戶」）；(d) **P019 名單修正**（workspace_roles / workspace_job_roles / tour_role_assignments 親查 DB 證實有 workspace 守門、不在紅 45 張）；(e) **finance/payments DB 層全綠**（receipts / linkpay_logs / payment_methods / payment_requests / orders 4 條 policy 都有 workspace_id filter）；(f) **payment_method_id 之謎結案**（DB 真相 nullable、FK SET NULL、不是 NOT NULL）；(g) /login agent 兩處錯報（useTabPermissions 短路說已拔、admin-reset-password 說已廢）親查更正 | pattern-map v3 |
+| 2026-04-22 | 1.4 | **強迫症深掘第二輪（William 要求挖到無錯）**。重大新發現：(a) **P001 17 處 isAdmin 短路完整盤**（不是 6 處）— 含 accounting/database 兩 layout + finance/{requests,treasury,reports,settings,travel-invoice} 5 子頁整頁大鎖、useTabPermissions + ModuleGuard + permissions/index 等 hook 層、sidebar/mobile-sidebar/channel-sidebar/WorkspaceSwitcher 4 處 UI 層；(b) **P020 全站盤完成 — 18 張表 effective 失守**（不只 tour_members、含薪資 3 張 / 旅遊團獎金支出 2 張 / 需求單 4 張 / 系統與租戶設定 3 張 / bot/magic/wishlist/customer_inquiries/itinerary_permissions 等）；(c) **P020 13 張命名錯置**（policyname 寫 "Service role full access" 但 USING/CHECK 都是 true、明顯複製貼上錯誤、屬高度可疑技術債）；(d) **新加 P022 CRITICAL**：`/api/employees/[employeeId]/permission-overrides` 整 route.ts 78 行 0 守門 + employee_permission_overrides 表 4 條 USING:true（P018）= 雙層裸奔、任何登入用戶可幫自己加管理員權限（CWE-269 提權）；(e) **P017 / P016 落地驗親查全綠**（_migrations / rate_limits / ref_cities / workspaces 4 條 policy 都對）；(f) **P010 親查證實正確**（role_tab_permissions ALL policy = service_role 是設計、不是漏）；(g) create-employee-auth P003-E 親查守門完整（agent 報告對）| pattern-map v4 |
+| 2026-04-22 | 1.5 | **解「為什麼會忘」流程漏洞**。建 `scripts/pattern-detectors/check-all.mjs` 8 個 detector + `npm run check:patterns`、把每個有 detector 的 pattern 加 `detector` 欄位、跑一次 baseline（4 紅 4 綠 + 1 informational）。從此「修完」必須 detector 通過、不准只看標籤；agent 重驗時 prompt 強制要求跑 detector。Schema 升 1.1（加 detector 欄位）。順手修 dotfiles `.zshrc` 過期 `SUPABASE_ACCESS_TOKEN`（從 sbp_ae47 改 sbp_ddbc、原來 env 失效就是這次 fetch 403 的根因）| detector framework v1 |
+
+**P020 修復紀錄（2026-04-22 v1.6 第一批）**：
+- 動因：William 說「magic_library + NewebPay 都未上線、現在重新檢就好、之後重新開發」、決定砍掉而非單純改 policy
+- DB：migration `20260422200000_drop_unused_magic_library_and_system_settings.sql` DROP 2 表（magic_library 14 row、system_settings 1 row）
+- Code 砍除清單：
+  - `src/features/war-room/` 整個資料夾
+  - `src/app/(main)/war-room/` 路由
+  - `src/lib/newebpay/` 整個資料夾（client/crypto/index/test）
+  - `src/app/api/travel-invoice/` 6 個 API（allowance / batch-issue / issue / void / orders / query）
+  - `src/app/(main)/finance/travel-invoice/` 整套 UI（page / [id] / create / components / constants / error / loading）
+  - `src/features/finance/travel-invoice/` 整套 components
+  - `src/features/finance/components/invoice-dialog.tsx` + `invoice/` 子資料夾
+  - `src/features/tours/components/InvoiceDialog.tsx` + `tour-payments.tsx` + `useTourPayments.ts`
+  - `src/stores/travel-invoice-store.ts`
+  - `src/app/(main)/settings/components/NewebPaySettings.tsx`
+  - settings index export / labels.ts NEWEBPAY_LABELS
+  - sidebar / mobile-sidebar / mobile-header / breadcrumb-config / module-tabs / features.ts / useEligibleEmployees 殘留參考全清
+- 連帶清 OrderListView / TourTabs / tour-closing-tab 對 InvoiceDialog 跟 TourPayments 的引用
+- type-check ✅ 0 錯誤、`npm run check:patterns P020` 受害數 20 → 18
+- 待續：剩 18 張表（bot_groups / bot_registry / customer_inquiries / employee_payroll_config / itinerary_permissions / payroll_allowance_types / payroll_deduction_types / tour_bonus_settings / tour_expenses / tour_members / tour_request_items / tour_request_member_vouchers / tour_request_messages / wishlist_template_items / wishlist_templates / workspace_attendance_settings / workspace_bonus_defaults / workspace_notification_settings）— 等下一輪批次決策
+
+**P020 第 2-4 批修復紀錄（2026-04-22 v1.6 收尾）**：
+
+**第 2 批**（客製化整族）：DROP customer_inquiries / wishlist_templates(2)+template_items(12) / tour_request_items+vouchers+messages / tour_requests(10)+progress view / tour_expenses 共 9 表+1 view、砍 features/tour-confirmation + features/tour-documents + /customized-tours + /inquiries + /p/customized + auth/line + tour-request store/entities/types
+
+**第 3 批**（供應商 portal + 確認單）：DROP confirmations(12)+customer_assigned_itineraries / 5 supplier_* 表 / 4 fleet_* 表+1 view / tour_confirmation_items+sheets 共 14 表+2 view、砍 features/supplier(單)+features/fleet+features/confirmations+features/tour-confirmation+/supplier+/local+/database/fleet+/confirmations、清 OrderListView/TourTabs 對 InvoiceDialog/TourPayments 引用
+
+**第 4 批**（HR + 個人功能）：DROP attendance_records(2)+leave_balances/requests/types+payroll_* (5)+tour_bonus_settings+workspace_bonus_defaults+workspace_notification_settings+leader_schedules+1 view+personal_canvases/records/expenses(3)+timebox_scheduled_boxes+pnr_schedule_changes 共 18 表+1 view、保留 employees/workspace_attendance_settings(給未來打卡)/  /hr/roles+/hr/settings、砍 13 個 /hr/* 子路由
+
+**最後修 1 條 policy**：tour_members 拔 `tour_members_authenticated` 寬鬆 ALL、保留 4 條 cmd-specific workspace EXISTS、tour_members 10 row 對帳 identical
+
+**今天最終成績**：4 個 detector 紅燈 → 8 個 detector 全綠（P022 / P001 / P018 修+對帳 / P020 大清掃）；total DROP 42 張表+4 view、砍 30+ feature/路由資料夾、type-check 全程 ✅

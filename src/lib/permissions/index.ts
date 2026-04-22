@@ -106,14 +106,12 @@ function getModuleFromRoute(route: string): string | null {
 export function hasPermissionForRoute(
   userPermissions: string[] | undefined,
   route: string,
-  isAdmin?: boolean
+  _isAdmin?: boolean
 ): boolean {
   if (!userPermissions || userPermissions.length === 0) return false
 
-  // 管理員有所有權限（由 isAdmin flag 決定）
-  if (isAdmin) {
-    return true
-  }
+  // 權限決策一律走 userPermissions（admin role 已 backfill 全權）
+  // _isAdmin 參數保留供舊 caller 簽名相容、不再短路
 
   // 無需特殊權限的路由
   const publicRoutes = ['/dashboard', '/profile']

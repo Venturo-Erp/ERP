@@ -106,8 +106,6 @@ export default function ArchiveManagementPage() {
       await Promise.all([
         supabase.from('calendar_events').delete().eq('related_tour_id', tour.id),
         supabase.from('channels').delete().eq('tour_id', tour.id),
-        supabase.from('tour_confirmation_sheets').delete().eq('tour_id', tour.id),
-        supabase.from('pnrs').delete().eq('tour_id', tour.id),
       ])
       await unlinkTourQuotes(tour.id)
       await unlinkTourItineraries(tour.id)

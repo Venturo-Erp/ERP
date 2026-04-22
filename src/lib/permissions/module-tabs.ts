@@ -118,7 +118,6 @@ export const MODULES: ModuleDefinition[] = [
       { code: 'requests-company', name: '公司請款', description: '非團體的公司支出' },
       { code: 'treasury', name: '金庫總覽', description: '資金狀況總覽' },
       { code: 'disbursement', name: '出納管理', description: '撥款作業' },
-      { code: 'travel-invoice', name: '代轉發票', description: '代收代付發票' },
       { code: 'reports', name: '報表管理', description: '財務報表' },
       { code: 'settings', name: '財務設定', description: '付款方式、科目設定' },
       // ===== 下拉資格（admin 可個別取消）=====
@@ -128,7 +127,6 @@ export const MODULES: ModuleDefinition[] = [
         description: '勾寫入 → 出現在請款頁「代墊款人」下拉',
         isEligibility: true,
       },
-      // 注意：發票開立人 復用現有 travel-invoice 權限、不另設
     ],
   },
   {

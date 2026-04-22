@@ -607,40 +607,16 @@ export {
 } from './supplier-categories'
 
 // ============================================
-// PNR 訂位記錄
-// ============================================
-
-// PNRs
-export {
-  pnrEntity,
-  usePNRs,
-  usePNRsSlim,
-  usePNR,
-  usePNRsPaginated,
-  usePNRDictionary,
-  createPNR,
-  updatePNR,
-  deletePNR,
-  invalidatePNRs,
-} from './pnrs'
-
-// ============================================
 // 報價單項目
 // ============================================
 
 // Quote Items — 已移除（quote_items 表不存在）
-
-// Company Assets
-export * from './company-assets'
 
 // Notes
 export * from './notes'
 
 // Channel Members
 export * from './channel-members'
-
-// Tour Requests
-export * from './tour-requests'
 
 // Image Library
 export * from './image-library'

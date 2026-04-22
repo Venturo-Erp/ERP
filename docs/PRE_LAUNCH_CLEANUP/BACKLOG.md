@@ -432,3 +432,30 @@ A3 agent 修正：dead UI 實際只 2 個真 dead（`BatchReceiptConfirmDialog` 
 
 _每次 session 結束記得更新勾選狀態。_
 _完整 audit 細節見 `/Users/williamchien/Projects/VENTURO_ROUTE_AUDIT/`。_
+
+---
+
+## 🔄 上線後第一週重構
+
+### [SSOT] tour_members 整合進 order_members
+**動機**：William 2026-04-22 親口確認「團員必然是訂單成員、tour_members 只是觀看層級不同、應整合才是完整 SSOT」
+**現況**：
+- tour_members 10 row（Corner 真實資料）、4 欄（room_type / roommate_id / special_requests / dietary_requirements）
+- order_members 151 row、47 欄、是 SSOT 主體
+- P020 policy bug 已修（2026-04-22）、所以**只剩架構問題、無安全問題**
+
+**做法**（M、半天）：
+1. ALTER order_members ADD COLUMN room_type / roommate_id (uuid) / special_requests / dietary_requirements
+2. Migrate 10 row：JOIN order_members ON tour_id+customer_id、複製 4 欄值
+3. 更新 5 檔 src 改用 order_members：
+   - `src/app/public/insurance/[code]/page.tsx`
+   - `src/features/tours/components/TourOperationsAddButton.tsx`
+   - `src/features/tours/services/tour_dependency.service.ts`
+   - `src/features/orders/components/PnrMatchDialog.tsx`
+   - `src/features/orders/components/pnr-name-matcher.ts`
+4. DROP TABLE tour_members
+5. type-check + 對帳（10 row 必須完整 migrate）
+
+**邊界 case**：大團跨訂單同房同車（roommate_id 跨 order）— uuid 不限同訂單、相容
+**估時**：M（半天）
+**估值**：⚠️ 不急、無安全問題、純架構清晰度

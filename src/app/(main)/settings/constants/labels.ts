@@ -322,33 +322,6 @@ export const MODULE_MANAGEMENT_LABELS = {
   LABEL_3126: '查看各模組的功能特性',
 }
 
-export const NEWEBPAY_LABELS = {
-  TITLE: '藍新金流設定',
-  LOADING: '載入中...',
-  SUBTITLE: '旅行業代收轉付電子收據',
-  MERCHANT_ID: '商店代號 (MerchantID)',
-  MERCHANT_ID_HINT: '在藍新後台「商店管理」可查看',
-  SETUP_GUIDE: '設定說明',
-  GUIDE_1: '請先在藍新金流申請「旅行業代收轉付電子收據」服務',
-  GUIDE_3: '測試環境可使用測試商店代號進行開發測試',
-  GUIDE_4: '正式上線前請切換到正式環境並使用正式商店資訊',
-
-  LABEL_8125: '輸入藍新商店代號',
-  LABEL_6384: '輸入 32 字元的 HashKey',
-  LABEL_1330: '輸入 16 字元的 HashIV',
-  LABEL_2112: '正式環境',
-  HASHKEY_HINT: '32 字元，在藍新後台「API 串接資訊」可查看',
-  HASHIV_HINT: '16 字元，在藍新後台「API 串接資訊」可查看',
-  ENV_PRODUCTION: '目前使用正式環境 (api.travelinvoice.com.tw)',
-  ENV_TEST: '目前使用測試環境 (capi.travelinvoice.com.tw)',
-  SAVING: '儲存中...',
-  SAVE: '儲存設定',
-  GUIDE_2: 'HashKey 和 HashIV 是加密用金鑰，請妥善保管',
-  LOAD_FAILED: '載入設定失敗',
-  SAVE_SUCCESS: '設定已儲存',
-  SAVE_FAILED: '儲存設定失敗',
-}
-
 export const OTHER_SETTINGS_LABELS = {
   TITLE: '其他設定',
   LANGUAGE_SETTING: '語言設定',

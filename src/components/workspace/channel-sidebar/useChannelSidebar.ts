@@ -10,16 +10,16 @@ export function useChannelSidebar(channels: Channel[], searchQuery: string, chan
     ungrouped: true,
   })
 
-  const isAdmin = useAuthStore(state => state.isAdmin)
-
   const canManageMembers = useMemo(() => {
     if (!user) return false
-    if (isAdmin) return true
     const permissions = user.permissions || []
+    // admin role 透過 backfill 拿到 'workspace' 模組權限（無 tab、視為全管理）
     return (
-      permissions.includes('workspace:manage_members') || permissions.includes('workspace:manage')
+      permissions.includes('workspace') ||
+      permissions.includes('workspace:manage_members') ||
+      permissions.includes('workspace:manage')
     )
-  }, [user, isAdmin])
+  }, [user])
 
   // 篩選頻道
   const filteredChannels = useMemo(() => {

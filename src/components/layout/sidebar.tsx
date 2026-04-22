@@ -158,13 +158,6 @@ const menuItems: MenuItem[] = [
       },
 
       {
-        href: '/finance/travel-invoice',
-        label: COMP_LAYOUT_LABELS.代轉發票,
-        icon: FileText,
-        requiredPermission: 'finance',
-        restrictedFeature: 'travel_invoices',
-      },
-      {
         href: '/finance/reports',
         label: COMP_LAYOUT_LABELS.報表管理,
         icon: BarChart3,
@@ -233,40 +226,6 @@ const menuItems: MenuItem[] = [
     label: COMP_LAYOUT_LABELS.設計,
     icon: PhPalette,
     requiredPermission: 'design',
-    children: [
-      {
-        href: '/brochures',
-        label: COMP_LAYOUT_LABELS.手冊,
-        icon: BookOpenText,
-        requiredPermission: 'design',
-      },
-      {
-        href: '/marketing',
-        label: COMP_LAYOUT_LABELS.行銷素材,
-        icon: Confetti,
-        requiredPermission: 'design',
-      },
-    ],
-  },
-  {
-    href: '/office',
-    label: COMP_LAYOUT_LABELS.文件,
-    icon: FileCloud,
-    requiredPermission: 'office',
-    children: [
-      {
-        href: '/office',
-        label: COMP_LAYOUT_LABELS.文件列表,
-        icon: FileSpreadsheet,
-        requiredPermission: 'office',
-      },
-      {
-        href: '/office/editor',
-        label: COMP_LAYOUT_LABELS.新增文件,
-        icon: FileSpreadsheet,
-        requiredPermission: 'office',
-      },
-    ],
   },
   // 合約管理和確認單管理已整合到團的操作中，不需要獨立入口
   // { href: '/contracts', label: '合約管理', icon: FileSignature, requiredPermission: 'contracts' },
@@ -337,35 +296,15 @@ const menuItems: MenuItem[] = [
   //     { href: '/local/cases', label: COMP_LAYOUT_LABELS.案件列表, icon: FolderOpen },
   //   ],
   // },
-  { href: '/war-room', label: '作戰會議室', icon: Target, requiredPermission: 'war_room' },
   {
     href: '/hr',
     label: COMP_LAYOUT_LABELS.人資管理,
     icon: UserSquare,
     requiredPermission: 'hr',
     children: [
-      // 員工自助
-      { href: '/hr/my-attendance', label: '我的人資', icon: User },
-      // 管理員功能（每個頁面內部用 tabs 切換相關子功能）
       { href: '/hr', label: '員工管理', icon: Users, requiredPermission: 'hr' },
-      { href: '/hr/attendance', label: '出勤與請假', icon: Clock, requiredPermission: 'hr' },
-      { href: '/hr/payroll', label: '薪資管理', icon: Wallet, requiredPermission: 'hr' },
+      { href: '/hr/roles', label: '員工職務', icon: UserSquare, requiredPermission: 'hr' },
       { href: '/hr/settings', label: '人資設定', icon: Settings, requiredPermission: 'hr' },
-    ],
-  },
-  {
-    href: '/customized-tours',
-    label: '客製化管理',
-    icon: Lego,
-    requiredPermission: 'customized',
-    children: [
-      {
-        href: '/customized-tours',
-        label: '客製化行程',
-        icon: LayoutTemplate,
-        requiredPermission: 'customized',
-      },
-      { href: '/inquiries', label: '詢價單管理', icon: Inbox, requiredPermission: 'customized' },
     ],
   },
   {
@@ -517,13 +456,9 @@ export function Sidebar() {
   const visibleMenuItems = useMemo(() => {
     const workspaceCode = user?.workspace_code
 
-    // Super Admin 看到所有功能（開發需要）
-    // 不受租戶類型限制
-    if (isAdmin) {
-      // 直接進入完整選單過濾邏輯
-    }
     // 車行使用簡化選單（車趟管理為主）
-    else if (isTransport) {
+    // admin 角色不受租戶類型限制、進入完整選單過濾邏輯
+    if (!isAdmin && isTransport) {
       return transportMenuItems
     }
     // Local 和旅行社使用完整選單
@@ -561,9 +496,8 @@ export function Sidebar() {
             return null
           }
           if (!item.requiredPermission) return item
-          // '*' 代表擁有所有權限
-          if (isAdmin) return item
           // 精確比對或前綴比對（例如 requiredPermission='tours'，權限有 'tours:overview' 也算符合）
+          // admin role 透過 backfill 拿到所有 module 權限、走同一條過濾邏輯
           const perm = item.requiredPermission
           return userPermissions.some(p => p === perm || p.startsWith(`${perm}:`)) ? item : null
         })
@@ -593,7 +527,6 @@ export function Sidebar() {
       if (!user) return !item.requiredPermission
       if (isMenuItemHidden(item.href, hiddenMenuItems)) return false
       if (!item.requiredPermission) return true
-      if (isAdmin) return true
       const perm = item.requiredPermission
       return userPermissions.some(p => p === perm || p.startsWith(`${perm}:`))
     })

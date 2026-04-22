@@ -11,13 +11,10 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { useReferenceData } from '@/lib/pnr'
-import {
-  fetchTourPnrs,
-  fetchPnrsByLocators,
-} from '@/features/tours/services/tour_dependency.service'
 import type { Tour } from '@/stores/types'
 import type { OrderMember, ExportColumnsConfig } from '@/features/orders/types/order-member.types'
-import type { PNR } from '@/types/pnr.types'
+// PNR 進階系統已砍（2026-04-22）、列印 PNR detail 暫時不可用、用 any[] stub
+type PNR = unknown
 import { COLUMN_LABELS, DEFAULT_COLUMNS } from './tour-print-constants'
 import { TOUR_PRINT_DIALOG_LABELS } from '../constants/labels'
 import { logger } from '@/lib/utils/logger'
@@ -174,39 +171,11 @@ export function TourPrintDialog({ isOpen, tour, members, onClose }: TourPrintDia
     return AIRLINE_NAMES[code] || code
   }
 
-  // 載入 PNR 資料
+  // PNR 進階系統砍除後 (2026-04-22)、列印對話框不再載入 PNR detail
   useEffect(() => {
-    if (isOpen && tour.id) {
-      setLoadingPnr(true)
-      const memberPnrCodes = members.map(m => m.pnr).filter((pnr): pnr is string => !!pnr)
-
-      const fetchPnrs = async () => {
-        const results: PNR[] = []
-        const tourPnrs = await fetchTourPnrs(tour.id)
-        if (tourPnrs.length > 0) results.push(...(tourPnrs as unknown as PNR[]))
-
-        if (memberPnrCodes.length > 0) {
-          const existingLocators = new Set(results.map(p => p.record_locator))
-          const missingCodes = memberPnrCodes.filter(c => !existingLocators.has(c))
-          if (missingCodes.length > 0) {
-            const memberPnrs = await fetchPnrsByLocators(missingCodes)
-            if (memberPnrs.length > 0) results.push(...(memberPnrs as unknown as PNR[]))
-          }
-        }
-
-        setPnrData(results)
-        setLoadingPnr(false)
-      }
-      fetchPnrs().catch(err =>
-        logger.error('[fetchPnrs]', {
-          message: err?.message,
-          code: err?.code,
-          details: err?.details,
-          hint: err?.hint,
-        })
-      )
-    }
-  }, [isOpen, tour.id, members])
+    setPnrData([])
+    setLoadingPnr(false)
+  }, [isOpen, tour.id])
 
   // 欄位 & 成員選擇
   const toggleColumn = (key: keyof ExportColumnsConfig) =>

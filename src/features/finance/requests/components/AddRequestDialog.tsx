@@ -28,7 +28,6 @@ import { CreateSupplierDialog } from './CreateSupplierDialog'
 import { CostTransferDialog } from './CostTransferDialog'
 import { useRequestForm } from '../hooks/useRequestForm'
 import { useRequestOperations } from '../hooks/useRequestOperations'
-import { useTourRequestItems } from '../hooks/useTourRequestItems'
 import { usePayments } from '@/features/payments/hooks/usePayments'
 import { RequestItem, categoryOptions, statusLabels, statusColors } from '../types'
 import { PaymentRequest, PaymentItemCategory, CompanyExpenseType } from '@/stores/types'
@@ -153,9 +152,17 @@ export function AddRequestDialog({
     Record<string, { selected: boolean; amount: number }>
   >({})
 
-  const { items: tourRequestItems, loading: loadingRequestItems } = useTourRequestItems(
-    importFromRequests && formData.tour_id ? formData.tour_id : null
-  )
+  // P020 cleanup（2026-04-22）：tour_requests 整族砍除、importFromRequests 功能廢止
+  const tourRequestItems: Array<{
+    id: string
+    quotedCost?: number
+    estimatedCost?: number
+    category: string
+    supplierId: string
+    supplierName: string
+    title: string
+  }> = []
+  const loadingRequestItems = false
 
   // === 批量請款狀態 ===
   const [batchDate, setBatchDate] = useState(getTodayString())

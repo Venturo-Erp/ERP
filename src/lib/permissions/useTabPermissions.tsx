@@ -50,13 +50,9 @@ export function useTabPermissions() {
         }
         const roleData = await roleRes.json()
 
-        // 管理員角色擁有所有權限
-        if (roleData.is_admin) {
-          setIsAdmin(true)
-          setPermissions([])
-          setLoading(false)
-          return
-        }
+        // is_admin 保留為 audit/UI flag、但權限決策一律走 role_tab_permissions
+        // admin role 已 backfill 全 module/tab 權限、見 20260422150000_backfill_admin_role_tab_permissions.sql
+        setIsAdmin(roleData.is_admin === true)
 
         // 取得角色的分頁權限
         const permRes = await fetch(`/api/roles/${roleData.role_id}/tab-permissions`)
@@ -76,10 +72,6 @@ export function useTabPermissions() {
   // 檢查是否有讀取權限
   const canRead = useCallback(
     (moduleCode: string, tabCode?: string): boolean => {
-      // 管理員擁有所有權限
-      if (isAdmin) return true
-
-      // 找對應的權限記錄
       const perm = permissions.find(
         p =>
           p.module_code === moduleCode && (tabCode ? p.tab_code === tabCode : p.tab_code === null)
@@ -87,16 +79,12 @@ export function useTabPermissions() {
 
       return perm?.can_read ?? false
     },
-    [permissions, isAdmin]
+    [permissions]
   )
 
   // 檢查是否有寫入權限
   const canWrite = useCallback(
     (moduleCode: string, tabCode?: string): boolean => {
-      // 管理員擁有所有權限
-      if (isAdmin) return true
-
-      // 找對應的權限記錄
       const perm = permissions.find(
         p =>
           p.module_code === moduleCode && (tabCode ? p.tab_code === tabCode : p.tab_code === null)
@@ -104,25 +92,23 @@ export function useTabPermissions() {
 
       return perm?.can_write ?? false
     },
-    [permissions, isAdmin]
+    [permissions]
   )
 
   // 檢查模組內任一分頁是否有讀取權限
   const canReadAny = useCallback(
     (moduleCode: string): boolean => {
-      if (isAdmin) return true
       return permissions.some(p => p.module_code === moduleCode && p.can_read)
     },
-    [permissions, isAdmin]
+    [permissions]
   )
 
   // 檢查模組內任一分頁是否有寫入權限
   const canWriteAny = useCallback(
     (moduleCode: string): boolean => {
-      if (isAdmin) return true
       return permissions.some(p => p.module_code === moduleCode && p.can_write)
     },
-    [permissions, isAdmin]
+    [permissions]
   )
 
   return {

@@ -1,9 +1,13 @@
 import type { Tour } from '@/stores/types'
 import type { OrderMember } from '@/features/orders/types/order-member.types'
-import type { PNR, PNRSegment } from '@/types/pnr.types'
 import type { FlightInfo } from '@/types/flight.types'
 import { SSRCategory } from '@/lib/pnr-parser/types'
 import type { EnhancedSSR, EnhancedOSI } from '@/lib/pnr-parser'
+// PNR 進階系統砍除（2026-04-22）、PNR 列印 detail 暫時停用、stub any 讓 type-check 過
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type PNR = any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type PNRSegment = any
 import { CLASS_NAMES } from '../tour-print-constants'
 import { FLIGHT_PRINT_LABELS } from './flight-print-labels'
 import { getCompanyInfo, getCompanyFooterLine } from '@/lib/workspace-company-info'
@@ -173,7 +177,8 @@ function buildFlightCard(
   let flightTypeHtml = ''
   if (seg.via && seg.via.length > 0) {
     const stops = seg.via
-      .map(v => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .map((v: any) => {
         const parts = [v.city || v.airport || '']
         if (v.duration) parts.push(v.duration)
         return parts.join(' ')

@@ -9,12 +9,13 @@ Code paths：
 - Stores / Hooks：`src/stores/auth-store.ts`、`src/hooks/usePermissions.ts`、`src/lib/permissions/hooks.ts`
 - e2e：`tests/e2e/admin-login-permissions.spec.ts`、`tests/e2e/login-api.spec.ts`
 
-Last updated：2026-04-22（**v3.0 覆盤**、今晚 11 commit 大修後）
+Last updated：2026-04-22 深夜（**v3.1 落地驗**：對 v3.0 宣告修完的紅色逐項親查代碼 / DB）
 
 Raw reports：
-- v1.2（2026-04-21）：`docs/ROUTE_CONSISTENCY_REPORT_2026-04-21/login_raw/`（Agent A–E）
+- v1.2（2026-04-21）：`docs/ROUTE_CONSISTENCY_REPORT_2026-04-21/login_raw/`
 - v2.0（2026-04-22）：`docs/ROUTE_CONSISTENCY_REPORT_2026-04-22/login/raw/`
-- **v3.0（2026-04-22 晚間）**：`docs/ROUTE_CONSISTENCY_REPORT_2026-04-22/login_v3/raw/`（Agent A–F）
+- v3.0（2026-04-22 晚間）：`docs/ROUTE_CONSISTENCY_REPORT_2026-04-22/login_v3/raw/`
+- **v3.1（2026-04-22 深夜）**：4 路由並行重驗、本路由為「落地驗」mode、結果寫進本檔 v3.1 區段
 
 ---
 
@@ -52,6 +53,27 @@ Raw reports：
 
 ## 真正該警惕的問題
 
+### 🔴 v3.1 落地驗親查發現：P001 漏修 6 處 isAdmin 短路（PR-1a scope 沒涵蓋）
+
+`grep -rn "if (isAdmin) return true" src/` 親查結果：
+
+| 檔案 | 位置 | 函式 | 影響 |
+|---|---|---|---|
+| `src/lib/permissions/useTabPermissions.tsx` | L80 | `canRead` | finance/hr/tours 等頁查讀權限時 admin 跳過 |
+| `src/lib/permissions/useTabPermissions.tsx` | L97 | `canWrite` | 寫權限同上 |
+| `src/lib/permissions/useTabPermissions.tsx` | L113 | `canReadAny` | 模組讀權限同上 |
+| `src/lib/permissions/useTabPermissions.tsx` | L122 | `canWriteAny` | 模組寫權限同上 |
+| `src/components/layout/sidebar.tsx` | L596 | sidebar 顯示判定 | UI 菜單可見性 |
+| `src/components/workspace/channel-sidebar/useChannelSidebar.ts` | L17 | channel sidebar | 工作區頻道 UI |
+
+**為什麼 PR-1a 沒抓到**：PR-1a 的 scope 是 `auth-store.ts:249` / `permissions/hooks.ts:284,293` / `usePermissions.ts` 9 bool（已親驗 ✅ 拔乾淨）。useTabPermissions 是另一個獨立 hook、PR-1a scope 沒列、屬「同病不同檔、批次清不夠廣」的工作分配漏。
+
+**風險評級**：🟡 中（API 層 role_tab_permissions 二次驗大部分撐住、但 admin 改 role permission 後 useTabPermissions 仍直通、原則 1「權限長在人身上」hook 層仍有缺口）
+
+**修法**：PR-1d、拔這 6 處短路、改查 role_tab_permissions（admin role 已 PR-1a backfill 補滿）
+
+---
+
 ### ✅ v2.0 四紅色警告、今晚已修
 
 | ID | 原問題 | 修法 | 狀態 |
@@ -71,6 +93,14 @@ Raw reports：
 - P003-H: GET `/api/workspaces/[id]` 跨租戶需「租戶管理」權限
 - P003-I: get-employee-data 驗 body workspace code 對齊 caller
 - P010: role_tab_permissions RLS 從 USING:true 改 tenant scoped（migration 20260422140000）
+
+**v3.1 落地驗親查證據**：
+- migration 20260422140000 / 150000 / 160000 / 170000 / 180000 全 5 支套到線上 DB ✅
+- pg_class 查 force_rls=true 表數 = 0（P004 守住）
+- workspaces / role_tab_permissions / employee_permission_overrides DB policy 親查、結果與 v3.0 紀錄一致
+- middleware.ts EXACT_PUBLIC_PATHS 29 項 + PREFIX_PUBLIC_PATHS 8 項、敏感 API 不在公開清單 ✅
+- 9 支跨租戶守門 API 親查確認 workspace 對齊邏輯都在
+- ⚠️ admin-reset-password route 117 行仍是活的 route（不是 deprecation stub、有 checkIsAdmin 邏輯）— v3.0 P003-D 修法是「從 employees 反查 target workspace」、route 沒 deprecate
 
 ---
 

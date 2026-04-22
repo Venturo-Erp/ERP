@@ -48,17 +48,6 @@ const TourCheckin = dynamic(
   { loading: () => <TabLoading /> }
 )
 
-const TourRequirementsTab = dynamic(
-  () =>
-    import('@/features/tours/components/tour-requirements-tab').then(m => m.TourRequirementsTab),
-  { loading: () => <TabLoading /> }
-)
-
-const TourPayments = dynamic(
-  () => import('@/features/tours/components/tour-payments').then(m => m.TourPayments),
-  { loading: () => <TabLoading /> }
-)
-
 const TourCosts = dynamic(
   () => import('@/features/tours/components/tour-costs').then(m => m.TourCosts),
   { loading: () => <TabLoading /> }
@@ -92,12 +81,6 @@ const TourContractTab = dynamic(
   { loading: () => <TabLoading /> }
 )
 
-const ConfirmationSheet = dynamic(
-  () =>
-    import('@/features/confirmations/components/ConfirmationSheet').then(m => m.ConfirmationSheet),
-  { loading: () => <TabLoading /> }
-)
-
 // ============================================================================
 // 頁籤定義（共用）
 // ============================================================================
@@ -109,8 +92,6 @@ export const TOUR_TABS = [
   { value: 'itinerary', label: COMP_TOURS_LABELS.行程 },
   { value: 'display-itinerary', label: '展示行程' },
   { value: 'quote', label: COMP_TOURS_LABELS.報價 },
-  { value: 'requirements', label: COMP_TOURS_LABELS.需求 },
-  { value: 'confirmation-sheet', label: COMP_TOURS_LABELS.團確單 },
   { value: 'contract', label: '合約' },
   { value: 'checkin', label: COMP_TOURS_LABELS.報到 },
   { value: 'closing', label: COMP_TOURS_LABELS.結案 },
@@ -170,20 +151,8 @@ export function TourTabContent({
       )
     case 'orders':
       return <TourOrders tour={tour} />
-    case 'confirmation-sheet':
-      return <ConfirmationSheet tourId={tour.id} />
     case 'checkin':
       return <TourCheckin tour={tour} />
-    case 'requirements':
-      return (
-        <TourRequirementsTab
-          key={`requirements-${tour.id}`} // 強制重新掛載
-          tourId={tour.id}
-          quoteId={tour.quote_id}
-          tour={tour}
-          onOpenRequestDialog={onOpenRequestDialog}
-        />
-      )
     case 'quote':
       return <TourQuoteTabV2 tour={tour} />
     case 'itinerary':
@@ -194,7 +163,6 @@ export function TourTabContent({
       return (
         <div className="space-y-6">
           <TourOverview tour={tour} />
-          <TourPayments tour={tour} showSummary={false} />
           <TourCosts tour={tour} showSummary={false} />
         </div>
       )

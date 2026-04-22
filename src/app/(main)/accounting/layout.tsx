@@ -1,15 +1,17 @@
 'use client'
 
-import { useAuthStore } from '@/stores'
+import { useTabPermissions } from '@/lib/permissions'
 import { UnauthorizedPage } from '@/components/unauthorized-page'
+import { ModuleLoading } from '@/components/module-loading'
 
 /**
- * Accounting 模組 admin-only guard
+ * Accounting 模組權限守衛
  * 覆蓋 /accounting 所有子路由（page / accounts / checks / period-closing / reports / vouchers）
- * Wave 2 Batch 2 · 2026-04-21
+ * 改用 role_tab_permissions：只要擁有 accounting 任一 tab 權限即可進
  */
 export default function AccountingLayout({ children }: { children: React.ReactNode }) {
-  const isAdmin = useAuthStore(state => state.isAdmin)
-  if (!isAdmin) return <UnauthorizedPage />
+  const { canReadAny, loading } = useTabPermissions()
+  if (loading) return <ModuleLoading fullscreen />
+  if (!canReadAny('accounting')) return <UnauthorizedPage />
   return <>{children}</>
 }

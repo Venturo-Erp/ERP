@@ -2,18 +2,23 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Building2, Eye, Check } from 'lucide-react'
 import { useWorkspaceChannels } from '@/stores/workspace'
-import { useAuthStore } from '@/stores/auth-store'
+import { useTabPermissions } from '@/lib/permissions'
 import { useState, useEffect } from 'react'
 import { WORKSPACE_SWITCHER_LABELS } from '../constants/labels'
 
 export function WorkspaceSwitcher() {
   const { workspaces, loadWorkspaces } = useWorkspaceChannels()
-  const { user, isAdmin } = useAuthStore()
+  // 改用 role_tab_permissions：擁有 settings:company 寫入權限者才看得到 workspace 切換器
+  // admin role 透過 backfill 拿到 settings:company can_write=true
+  const { canWrite, loading: permLoading } = useTabPermissions()
+  const canSwitch = !permLoading && canWrite('settings', 'company')
   const [currentWorkspace, setCurrentWorkspace] = useState<string | null>(null)
 
   // ⚠️ useEffect 必須在 return 之前（React Hooks 規則）
   useEffect(() => {
-    if (!isAdmin) return
+    if (!canSwitch) {
+      return
+    }
 
     // 載入 workspaces 資料
     loadWorkspaces()
@@ -21,10 +26,10 @@ export function WorkspaceSwitcher() {
     // 從 localStorage 讀取當前選擇的 workspace
     const saved = localStorage.getItem('current_workspace_filter')
     setCurrentWorkspace(saved)
-  }, [isAdmin])
+  }, [canSwitch])
 
-  // 如果不是 admin，不顯示切換器
-  if (!isAdmin) {
+  // 沒權限不顯示切換器
+  if (!canSwitch) {
     return null
   }
 

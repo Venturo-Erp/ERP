@@ -69,7 +69,6 @@ export async function deleteTourConfigurationData(tourId: string): Promise<void>
     supabase.from('tour_itinerary_days').delete().eq('tour_id', tourId),
     supabase.from('tour_meal_settings').delete().eq('tour_id', tourId),
     supabase.from('tour_member_fields').delete().eq('tour_id', tourId),
-    supabase.from('tour_members').delete().eq('tour_id', tourId),
     supabase.from('tour_role_assignments').delete().eq('tour_id', tourId),
     supabase.from('tour_rooms').delete().eq('tour_id', tourId),
     supabase.from('tour_tables').delete().eq('tour_id', tourId),
@@ -210,44 +209,5 @@ export async function unlinkTourItineraries(tourId: string): Promise<number> {
   return linkedItineraries?.length ?? 0
 }
 
-/**
- * 取得旅遊團的 PNR 資料
- */
-export async function fetchTourPnrs(tourId: string): Promise<unknown[]> {
-  const { data, error } = await supabase
-    .from('pnrs')
-    .select(
-      'id, tour_id, record_locator, status, segments, passenger_names, workspace_id, created_at, updated_at'
-    )
-    .eq('tour_id', tourId)
-    .limit(500)
-  if (error) {
-    logger.error('查詢團 PNR 失敗:', {
-      message: error.message,
-      code: error.code,
-      details: error.details,
-      hint: error.hint,
-    })
-    throw error
-  }
-  return data ?? []
-}
-
-/**
- * 根據 record_locator 取得 PNR 資料
- */
-export async function fetchPnrsByLocators(locators: string[]): Promise<unknown[]> {
-  if (locators.length === 0) return []
-  const { data, error } = await supabase
-    .from('pnrs')
-    .select(
-      'id, tour_id, record_locator, status, segments, passenger_names, workspace_id, created_at, updated_at'
-    )
-    .in('record_locator', locators)
-    .limit(500)
-  if (error) {
-    logger.error('查詢 PNR 失敗:', error)
-    throw error
-  }
-  return data ?? []
-}
+// 已移除（2026-04-22）：fetchTourPnrs / fetchPnrsByLocators
+// 跟著 PNR 進階系統 11 張表一起砍、保留 order_members.pnr 簡單欄位即可

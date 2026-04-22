@@ -48,7 +48,6 @@ export const FEATURES: FeatureDefinition[] = [
       '/finance/requests',
       '/finance/treasury',
       '/finance/treasury/disbursement',
-      '/finance/travel-invoice',
       '/finance/reports',
       '/finance/settings',
     ],

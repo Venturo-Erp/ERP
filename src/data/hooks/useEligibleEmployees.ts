@@ -10,7 +10,6 @@
  *   助理下拉     : useEligibleEmployees('tours', 'as_assistant')
  *   團控下拉     : useEligibleEmployees('tours', 'as_tour_controller')
  *   代墊款下拉   : useEligibleEmployees('finance', 'advance_payment')
- *   發票開立人   : useEligibleEmployees('finance', 'travel-invoice')
  *
  * 邏輯：
  *   1. 從 role_tab_permissions 找出「該 module.tab 有 can_write=true」的 role_id 清單

@@ -11,8 +11,8 @@
 - 通知：`@/lib/utils/bot-notification`（異常金額發機器人）
 - 工具：`@/lib/utils/receipt-number-generator`（單號 `{團號}-R{nn}`）
 
-**Last updated**：2026-04-22（v2.0 首次驗證）
-**Raw reports**：`docs/ROUTE_CONSISTENCY_REPORT_2026-04-22/finance_payments/raw/A-F.md`
+**Last updated**：2026-04-22 深夜（**v3.0 重驗**：v2.0 紅色狀態 + P001 PR-1c 整頁大鎖落地驗 + payment_method_id 之謎結案 + trigger_auto_post_receipt 確認 + 5 張 finance 表 4 條 policy 親查）
+**Raw reports**：`docs/ROUTE_CONSISTENCY_REPORT_2026-04-22/finance_payments/raw/A-F.md`（v2.0）
 
 ---
 
@@ -57,6 +57,40 @@
 - 主表：`receipts`（42 欄、其中 5 欄是 UI / 代碼完全沒用的孤兒）
 - 連動：`orders` + `tours`（被 service 回寫）+ `linkpay_logs`（LinkPay 記錄）
 - FK：審計欄位（`created_by` / `updated_by`）正確指向 `employees(id)`（符合 CLAUDE.md 紅線 ✓）
+
+---
+
+## v3.0 重驗結果（2026-04-22 深夜）
+
+### v2.0 已挖紅色當前狀態
+
+| 編號 | 問題 | v3.0 親查狀態 |
+|---|---|---|
+| 1 | 整頁 admin 大鎖（page.tsx:211 if !isAdmin）| ✅ **P001 PR-1c 修完落地**：page.tsx:213 改 `if (!canViewFinance) return UnauthorizedPage`；canViewFinance = hasModulePermission(userPermissions, 'finance') OR 'accounting'；OP/業務/會計都能進、不再卡死 |
+| 2 | 原則 4 違反（雙寫冗餘欄位）| 🔴 仍在；recalculateReceiptStats 仍會回寫 orders.payment_status / paid_amount / remaining_amount + tours.total_revenue / profit；待確認金額仍無地方拿 |
+| 3 | LinkPay webhook 跨租戶 | 🟡 低風險可接受；MAC 簽章 + 金額驗證 + RLS 三層防、receipt_number 是業務級主鍵、攻擊面小；補一層 workspace 檢查可加分但非必須 |
+| 4 | payment_method_id NOT NULL 但代碼不寫 | ✅ **之謎結案**：DB_TRUTH 親查 `is_nullable=YES`、FK 是 SET NULL（不是 RESTRICT、不是 NOT NULL）；sitemap 文字錯了；createReceipt 寫 null 或 '' 都不會 FK violation；資料品質瑕疵但非當機 |
+| 5 | 4 動作沒細分權限 | 🔴 仍在；canViewFinance 進頁有檔、4 動作仍共用同一 permission key |
+| 6 | trigger_auto_post_receipt 黑盒 | ✅ 親查 function body 確認；migration 20260111200000 第 70-274 行；當 receipts.status='1' 時觸發、自動建 accounting_events + journal_vouchers + journal_lines；計算手續費（刷卡 1.68%、LinkPay 2%）；Debit 銀行 / Credit 預收團款；**是活的會計過帳機制、不是殘影、不需要 drop**；usePaymentData:37 註釋「會計模組已停用」是舊註釋誤導 |
+| 7 | 付款方式映射 4 處 | 🟡 仍在；usePaymentForm.ts:16 + useReceiptMutations.ts:16 PAYMENT_METHOD_MAP 重複定義同內容、可合併到共用常數 |
+
+### 5 張 finance 表 4 條 policy 親查結果（2026-04-22 深夜）
+
+| 表名 | SELECT | INSERT | UPDATE | DELETE | 評分 |
+|---|---|---|---|---|---|
+| `receipts` | workspace_id ✅ | workspace_id ✅ | workspace_id ✅ | workspace_id ✅ | 🟢 |
+| `linkpay_logs` | workspace_id ✅ | super_admin OR workspace_id ✅ | workspace_id ✅ | workspace_id ✅ | 🟢 |
+| `payment_methods` | workspace_id ✅ | super_admin OR workspace_id ✅ | workspace_id ✅ | workspace_id ✅ | 🟢 |
+| `payment_requests` | workspace_id ✅ | workspace_id ✅ | workspace_id ✅ | workspace_id ✅ | 🟢 |
+| `orders` | workspace_id ✅ | workspace_id ✅ | workspace_id ✅ | workspace_id ✅ | 🟢 |
+
+**結論**：finance/payments 整個 DB 層 policy 全綠、不在 P019 紅 45 張、無 P016 同型 DELETE 漏洞、無 P020 多 policy 重疊。是目前所有重驗路由中 DB 層最乾淨的。
+
+### 候選原則 8（快速入口 ≠ 獨立資料）實裝驗證
+
+- ✅ /tours 頁快速收款 → /finance/payments?order_id=XXX → AddReceiptDialog → createReceipt → `receipts` 主表
+- ✅ tour 表沒 payments 相關欄位、不是平行系統
+- 結論：候選原則 8 實裝符合、跟 /tours 重驗結論一致、可升正式
 
 ---
 

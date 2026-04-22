@@ -7,8 +7,8 @@ Code paths：
 - 耦合 features：`quotes`、`orders`、`payments`、`disbursement`、`confirmations`、`itinerary`、`attractions`、`tour-leaders`、`tour-confirmation`、`tour-documents`
 - API：`src/app/api/tours/[tourId]/requests/[requestId]/{accept,reject}/route.ts`、`src/app/api/tours/by-code/[code]/route.ts`
 
-Last updated：2026-04-22（v2.0）
-Raw reports：`docs/ROUTE_CONSISTENCY_REPORT_2026-04-22/tours/raw/A-F.md`
+Last updated：2026-04-22 深夜（**v3.0 重驗**：v2.0 紅色狀態 + P003-F/G 落地驗 + 8 張 tour_* 表 4 條 policy 親查 + 候選原則 8）
+Raw reports：`docs/ROUTE_CONSISTENCY_REPORT_2026-04-22/tours/raw/A-F.md`（v2.0）
 
 ---
 
@@ -66,6 +66,62 @@ Raw reports：`docs/ROUTE_CONSISTENCY_REPORT_2026-04-22/tours/raw/A-F.md`
 - **API**：accept / reject / by-code 三支；by-code 用 service_role 無 auth
 - **外部依賴**：AeroDataBox（航班）/ OCR + Gemini Vision（護照辨識）/ Gemini（AI 行程文案）/ LINE（工作頻道）
 - **行動版 `/m/tours/[id]`** 共用 hooks 層、UI 獨立
+
+---
+
+## v3.0 重驗結果（2026-04-22 深夜）
+
+### v2.0 已挖紅色當前狀態
+
+| 編號 | 問題 | v3.0 親查狀態 |
+|---|---|---|
+| 1 | syncToCore delete-then-insert | 🔴 仍在；useTourItineraryItems.ts:241-579 完整 DELETE+INSERT；AI 重排必爆未修 |
+| 2 | writePricingToCore UPDATE 跨租戶 | ✅ **P003-G 修完落地**；core-table-adapter.ts:155/174/195/223/304/314 共 6 處加 `.eq('workspace_id', ws)` |
+| 3 | `/api/tours/by-code/[code]` service_role 無 auth | 🔴 仍在；只選公開欄位（code/name/location/date）但無 workspace 隔離、無 RLS 檢查 |
+| 4 | accept/reject API 無 workspace 檢查 | ✅ **P003-F 修完落地**；accept 線性流程先 SELECT 驗 request.tour_id === path tourId、reject UPDATE 直接加 tour_id filter |
+| 5 | tour_members INSERT WITH CHECK:true | 🔴 **升級為 P020 母 pattern**：親查 DB 發現 tour_members 上有 ALL `auth.role()='authenticated'` policy 與 4 條 cmd-specific 並存、effective 任何登入者通吃讀寫刪改 |
+| 6 | 報價計算邏輯兩套（useCategoryItems vs useQuoteLoader）| 🔴 仍在 |
+| 7 | 結帳未完成 + 公司模板 0%| ✅ William 已知 |
+
+### 8 張 tour_* 表 4 條 policy 親查結果（2026-04-22 深夜）
+
+| 表名 | SELECT | INSERT | UPDATE | DELETE | 評分 |
+|---|---|---|---|---|---|
+| `tours` | workspace_id ✅ | workspace_id ✅ | workspace_id ✅ | workspace_id ✅ | 🟢 |
+| `tour_itinerary_items` | workspace_id ✅ | workspace_id ✅ | workspace_id ✅ | workspace_id ✅ | 🟢 |
+| `tour_requests` | workspace_id ✅ | workspace_id ✅ | workspace_id ✅ | workspace_id ✅ | 🟢 |
+| `tour_rooms` | tour_id JOIN ✅ | tour_id JOIN ✅ | tour_id JOIN ✅ | tour_id JOIN ✅ | 🟢 |
+| `tour_room_assignments` | room → tour JOIN ✅ | 同 ✅ | 同 ✅ | 同 ✅ | 🟢 |
+| `tour_documents` | workspace_id ✅ | workspace_id ✅ | workspace_id ✅ | workspace_id ✅ | 🟢 |
+| `tour_role_assignments` | EXISTS workspace ✅ | EXISTS workspace ✅ | EXISTS workspace ✅ | EXISTS workspace ✅ | 🟢（v2.0 agent 報告「FOR ALL USING(true)」是錯的）|
+| `tour_members` | EXISTS ws ✅ + ALL authenticated 🔴 | WITH CHECK:true 🔴 | EXISTS ws ✅ + ALL authenticated 🔴 | EXISTS ws ✅ + ALL authenticated 🔴 | 🔴 **P020：多 policy OR、effective 任何登入者通吃** |
+| `tour_destinations` | USING:true 🔴 | WITH CHECK:true 🔴 | USING:true 🔴 | USING:true 🔴 | 🔴 **P021：無 workspace_id 欄、待 William 拍板「公版 vs 租戶」** |
+| `tour_leaders` | USING:true 🔴 | WITH CHECK authenticated 🔴 | USING authenticated 🔴 | USING:true 🔴 | 🔴 **P021：無 workspace_id 欄、待拍板** |
+
+### 新挖到的 pattern
+
+#### 🔴 P020：tour_members 多 policy 重疊（嚴的被寬的覆蓋）
+- 原以為 v2.0 已挖完只是 `tour_members_insert WITH CHECK:true`、親查發現另有一條 `tour_members_authenticated` ALL policy `USING: auth.role()='authenticated'`
+- PostgreSQL 多 policy 是 OR、4 條 cmd-specific（select/update/delete 嚴格 EXISTS workspace）形同虛設
+- 業務員可塞 row 到別家公司的團、可讀寫別家 tour_members
+- 修法：DROP `tour_members_authenticated`、INSERT WITH CHECK 補 EXISTS workspace
+- 估時：0.3 人日
+
+#### 🔴 P021：tour_destinations / tour_leaders 待 William 拍板「公版 vs 租戶」
+- 兩張表無 workspace_id 欄、4 條 policy 全 USING:true
+- 對比 ref_* 家族：ref_countries 等 SELECT public read + INSERT/UPDATE/DELETE limit `is_super_admin()`、P021 兩張連寫入都沒鎖
+- William 業務語境拍板問題：
+  - **領隊資料** = Corner 自己的領隊池？還是全 Venturo 共用的領隊資料庫？
+  - **旅遊團目的地** = Corner 自家精選池？還是全公司共用、跟 ref_destinations 同類？
+- 修法依拍板：(a) 公版方向 0.3 人日；(b) 租戶方向 0.8 人日
+
+### 候選原則 8（快速入口 ≠ 獨立資料）實裝驗證
+
+`tour-payments.tsx` + `useTourPayments` hook 親查：
+- ✅ 寫目標表正確：useTourPayments 調 AddReceiptDialog → createReceipt → `receipts` 主表
+- ✅ 邏輯獨立、非 tour 本地 JSON
+- ✅ receipts 表 RLS 4 條 policy workspace_id filter（finance/payments 重驗證實）
+- 結論：候選原則 8 實裝符合、可升正式
 
 ---
 
