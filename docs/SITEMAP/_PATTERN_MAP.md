@@ -7,7 +7,7 @@ Status summary：🔵 10 發現 / 🟡 0 計畫 / 🟠 0 / 🟢 **5 完成（P00
 本次更新：**2026-04-22 今日大修（完整版）**。
 - P001 升 🟢（tenants/create seed e2e 驗收：TESTAUTH → Playwright 登入 → POST /api/tenants/create → TESTSEED、4 職務 row 74/40/26/32 全對齊 Corner）
 - P002 升 🟢（middleware 前門從 prefix 放行改精確白名單、5 支敏感 auth API 不再裸奔、e2e 4 家 workspace 守門過）
-- P003 升 🟢（7 支子彈全清：A PUT features / B sync-employee / C reset-employee-password / D admin-reset-password / E create-employee-auth / F accept+reject tour↔request / G writePricingToCore；recalculateReceiptStats + linkpay webhook 評估後 RLS/簽章已充分）
+- P003 升 🟢（9 支子彈全清：A-G + 覆盤 sub-agent 補抓 H `GET workspaces/[id]` + I `get-employee-data`；recalculateReceiptStats + linkpay webhook 評估後 RLS/簽章已充分）
 - P004 升 🟢（Wave 2.5 其實 04-21 就做掉了、pg_class 查 0 張 FORCE RLS、今天只是補文件狀態）
 
 ---
@@ -125,9 +125,9 @@ Status summary：🔵 10 發現 / 🟡 0 計畫 / 🟠 0 / 🟢 **5 完成（P00
 | 命中（本次新挖 🆘） | **`PUT /api/permissions/features` (`src/app/api/permissions/features/route.ts:48-94`)**：零認證、service_role 繞 RLS、任一登入用戶可改任何 workspace 的 feature 開關 / 打開 premium（幕僚 3 發現） |
 | 命中（預測） | 所有用 admin client 做 INSERT/UPDATE/DELETE 的 endpoint |
 | 統一修法 | 每支敏感 API：(1) 取 session workspace_id (2) 查目標資料 workspace_id (3) 不符 → 403。寫成通用 middleware `withWorkspaceCheck()` 套用 |
-| 估時 | ~~3 人週~~ 7 支子彈今日收完 |
+| 估時 | ~~3 人週~~ 9 支子彈今日收完 |
 | 優先級 | 🔴 上線前必改 |
-| 狀態 | 🟢 **7 支子彈全清完**（A PUT features / B sync-employee / C reset-employee-password / D admin-reset-password / E create-employee-auth / F accept+reject / G writePricingToCore）；recalculateReceiptStats 與 linkpay webhook 評估後 RLS/簽章守門已充分、不需額外動 |
+| 狀態 | 🟢 **9 支子彈全清完**（A PUT features / B sync-employee / C reset-employee-password / D admin-reset-password / E create-employee-auth / F accept+reject / G writePricingToCore / H GET workspaces/[id] / I get-employee-data）；recalculateReceiptStats 與 linkpay webhook 評估後 RLS/簽章守門已充分、不需額外動 |
 
 **幕僚會議摘要**：這是 Venturo SaaS 多租戶的命脈。本次在盤權限病時又挖到一支（PUT /api/permissions/features）、證明此 pattern 不是零散 bug 而是架構漏。中央式 workspace middleware 是上線前必須。
 
@@ -162,6 +162,12 @@ Status summary：🔵 10 發現 / 🟡 0 計畫 / 🟠 0 / 🟢 **5 完成（P00
 - 2026-04-22 傍晚：**評估後不動**
   - `recalculateReceiptStats`：查 order/tour 先走 RLS、跨租戶 query 必空、到不了 UPDATE、加 defense 要改簽名 + 5+ caller、代價大
   - `linkpay webhook`：已有 verifyWebhookSignature MAC 簽章 + 金額驗證、pattern map 原紀錄 stale
+- 2026-04-22 傍晚（覆盤 sub-agent 補抓）：**P003-H 🟢 + P003-I 🟢**
+  - **H** `GET /api/workspaces/[id]`：0 auth + service_role、登入用戶可讀別家 workspace 名稱/付費狀態 + 員工花名冊
+  - 修法：自己 workspace 直通、跨租戶需「租戶管理」權限（同 P003-A pattern）
+  - **I** `POST /api/auth/get-employee-data`：有登入但沒驗 body.code 對齊 caller workspace、可查別家員工 supabase_user_id / permissions / job_info
+  - 修法：body 的 workspace.id 必須等於 auth.data.workspaceId、否則 403
+  - 這 2 支是「讀側 information disclosure」、不是寫側、嚴重度比 A-G 低但仍上線前必修
 
 ---
 
