@@ -1,14 +1,9 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
-import { verifyQuickLoginToken } from '@/lib/auth/quick-login-token'
 
 /**
  * Next.js Middleware - 伺服器端路由保護
- *
- * 架構（2026-04-18 簡化）：
- * - 單一認證：Supabase Auth（session cookies 由 @supabase/ssr 管理）
- * - 保留：Quick-Login Token（特殊 one-time 登入、用 HMAC 驗）
- * - 已移除：自家 JWT（auth-token cookie）→ 現在完全由 Supabase session 管
+ * 認證來源：Supabase Auth（session cookies 由 @supabase/ssr 管理）
  */
 
 // P002（2026-04-22）：公開路由改白名單。
@@ -70,13 +65,6 @@ function isPublicPath(pathname: string): boolean {
 }
 
 async function isAuthenticated(request: NextRequest, response: NextResponse): Promise<boolean> {
-  // 1. 先看 quick-login token（一次性登入、保留原本機制）
-  const quickLoginCookie = request.cookies.get('auth-token')
-  if (quickLoginCookie?.value?.startsWith('quick-login-')) {
-    return await verifyQuickLoginToken(quickLoginCookie.value)
-  }
-
-  // 2. 標準登入：讀 Supabase session
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
