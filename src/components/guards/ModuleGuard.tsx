@@ -63,7 +63,7 @@ export function ModuleGuard({ children }: ModuleGuardProps) {
       return
     }
 
-    // 平台超管專屬：/tenants、/hr/settings、/settings/{bot-line,menu,modules,receipt-test}
+    // 平台超管專屬：/tenants、/hr/settings、/settings/{menu,modules,receipt-test}
     if (isPlatformAdminRoute(pathname)) {
       if (!isAdmin) {
         router.replace('/unauthorized')

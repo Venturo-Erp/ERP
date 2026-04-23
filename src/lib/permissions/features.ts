@@ -120,7 +120,6 @@ export const FEATURES: FeatureDefinition[] = [
       '/settings/menu',
       '/settings/appearance',
       '/settings/modules',
-      '/settings/bot-line',
     ],
   },
 
