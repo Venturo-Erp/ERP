@@ -27,6 +27,7 @@ const COLORS = {
   lightBrown: '#FAF7F2',
   gray: '#4B5563',
   lightGray: '#9CA3AF',
+  red: '#B84C4C', // 轉移出（負金額）、Morandi 紅
 }
 
 interface PrintDisbursementPreviewProps {
@@ -36,6 +37,7 @@ interface PrintDisbursementPreviewProps {
 }
 
 interface ProcessedItem {
+  requestId: string // 用來過濾成本轉移 pair requests
   requestCode: string
   createdBy: string
   tourName: string
@@ -74,6 +76,7 @@ function processItems(
     const payFor = advancedBy ? `${advancedBy}（${supplierName}）` : supplierName
 
     return {
+      requestId: item.request_id,
       requestCode: request?.code || '-',
       createdBy: request?.created_by_name || '-',
       tourName,
@@ -224,44 +227,80 @@ export const PrintDisbursementPreview = forwardRef<HTMLDivElement, PrintDisburse
       [paymentRequests, paymentRequestItems]
     )
 
-    // 偵測成本轉移項目
-    const transferredItemIds = useMemo(() => {
+    // 偵測成本轉移請款單（按 transferred_pair_id、新對沖模式）
+    const transferredRequestIds = useMemo(() => {
       const ids = new Set<string>()
-      for (const item of paymentRequestItems) {
-        const transferred = (item as unknown as Record<string, unknown>).transferred_from_tour_id
-        if (transferred) ids.add(item.id)
+      for (const req of paymentRequests) {
+        const pairId = (req as unknown as Record<string, unknown>).transferred_pair_id
+        if (pairId) ids.add(req.id)
       }
       return ids
-    }, [paymentRequestItems])
+    }, [paymentRequests])
 
-    // 分離：團體請款、公司請款、成本轉移
+    // 分離：團體請款、公司請款（都排除成本轉移 pair requests）
     const companyItems = useMemo(
-      () => processedItems.filter(item => item.isCompany),
-      [processedItems]
+      () =>
+        processedItems.filter(
+          item => item.isCompany && !transferredRequestIds.has(item.requestId)
+        ),
+      [processedItems, transferredRequestIds]
     )
     const tourItems = useMemo(
-      () => processedItems.filter(item => !item.isCompany),
-      [processedItems]
+      () =>
+        processedItems.filter(
+          item => !item.isCompany && !transferredRequestIds.has(item.requestId)
+        ),
+      [processedItems, transferredRequestIds]
     )
 
-    // 成本轉移項目（從 paymentRequestItems 中找有 transferred_from_tour_id 的）
-    const transferItems = useMemo(() => {
-      return paymentRequestItems
-        .filter(item => (item as unknown as Record<string, unknown>).transferred_from_tour_id)
-        .map(item => {
-          const request = paymentRequests.find(r => r.id === item.request_id)
-          return {
-            id: item.id,
-            fromTourName: request?.tour_name || '-',
-            fromTourCode: request?.tour_code || '-',
-            description: item.description || '-',
-            supplier: item.supplier_name || '-',
-            amount: item.subtotal || 0,
-          }
-        })
-    }, [paymentRequestItems, paymentRequests])
+    // 成本轉移 pairs（按 transferred_pair_id 配對兩張請款單、A 負 + B 正）
+    interface TransferPairRow {
+      pairId: string
+      fromTourCode: string
+      fromTourName: string
+      toTourCode: string
+      toTourName: string
+      amount: number
+      items: Array<{ description: string; supplier: string; subtotal: number }>
+    }
+    const transferPairs = useMemo<TransferPairRow[]>(() => {
+      // 1. group requests by pair_id
+      const pairGroups = new Map<string, PaymentRequest[]>()
+      for (const req of paymentRequests) {
+        const pairId = (req as unknown as Record<string, unknown>).transferred_pair_id as
+          | string
+          | undefined
+        if (!pairId) continue
+        if (!pairGroups.has(pairId)) pairGroups.set(pairId, [])
+        pairGroups.get(pairId)!.push(req)
+      }
 
-    const transferTotal = transferItems.reduce((sum, item) => sum + item.amount, 0)
+      // 2. 每對取 src（amount<0）跟 dst（amount>0）、構造 row
+      const rows: TransferPairRow[] = []
+      for (const [pairId, reqs] of pairGroups) {
+        const src = reqs.find(r => (r.amount || 0) < 0)
+        const dst = reqs.find(r => (r.amount || 0) > 0)
+        if (!src || !dst) continue
+        // 正向 items（給 UI 顯示 description、supplier）
+        const dstItems = paymentRequestItems
+          .filter(i => i.request_id === dst.id)
+          .map(i => ({
+            description: i.description || '-',
+            supplier: i.supplier_name || '-',
+            subtotal: i.subtotal || 0,
+          }))
+        rows.push({
+          pairId,
+          fromTourCode: src.tour_code || '-',
+          fromTourName: src.tour_name || '-',
+          toTourCode: dst.tour_code || '-',
+          toTourName: dst.tour_name || '-',
+          amount: dst.amount || 0,
+          items: dstItems,
+        })
+      }
+      return rows
+    }, [paymentRequests, paymentRequestItems])
 
     // 分別分組
     const companyGroups = useMemo(
@@ -830,8 +869,8 @@ export const PrintDisbursementPreview = forwardRef<HTMLDivElement, PrintDisburse
           </div>
         )}
 
-        {/* 成本轉移區塊 */}
-        {transferItems.length > 0 && (
+        {/* 成本轉移區塊（對沖模式：每對顯示「原團 -X / 新團 +X」、小計自動 = 0） */}
+        {transferPairs.length > 0 && (
           <div style={{ marginBottom: '12px' }}>
             <div
               style={{
@@ -867,7 +906,7 @@ export const PrintDisbursementPreview = forwardRef<HTMLDivElement, PrintDisburse
                       fontWeight: 500,
                     }}
                   >
-                    原團
+                    團
                   </th>
                   <th
                     style={{
@@ -902,16 +941,43 @@ export const PrintDisbursementPreview = forwardRef<HTMLDivElement, PrintDisburse
                 </tr>
               </thead>
               <tbody>
-                {transferItems.map((item, i) => (
-                  <tr key={item.id} style={{ borderBottom: `1px solid #e5e5e5` }}>
-                    <td style={{ padding: '5px 8px', color: COLORS.gray }}>{item.fromTourCode}</td>
-                    <td style={{ padding: '5px 8px', color: COLORS.gray }}>{item.supplier}</td>
-                    <td style={{ padding: '5px 8px', color: COLORS.gray }}>{item.description}</td>
-                    <td style={{ padding: '5px 8px', textAlign: 'right', color: COLORS.gray }}>
-                      {item.amount.toLocaleString()}
-                    </td>
-                  </tr>
-                ))}
+                {transferPairs.map(pair => {
+                  const primary = pair.items[0] || { description: '-', supplier: '-', subtotal: 0 }
+                  return (
+                    <React.Fragment key={pair.pairId}>
+                      {/* 原團（出）— 負金額 */}
+                      <tr style={{ borderBottom: `1px solid #e5e5e5` }}>
+                        <td style={{ padding: '5px 8px', color: COLORS.gray }}>
+                          {pair.fromTourCode}
+                        </td>
+                        <td style={{ padding: '5px 8px', color: COLORS.gray }}>
+                          {primary.supplier}
+                        </td>
+                        <td style={{ padding: '5px 8px', color: COLORS.gray }}>
+                          轉出：{primary.description}
+                        </td>
+                        <td style={{ padding: '5px 8px', textAlign: 'right', color: COLORS.red }}>
+                          {(-pair.amount).toLocaleString()}
+                        </td>
+                      </tr>
+                      {/* 新團（入）— 正金額 */}
+                      <tr style={{ borderBottom: `1px solid #e5e5e5` }}>
+                        <td style={{ padding: '5px 8px', color: COLORS.gray }}>
+                          {pair.toTourCode}
+                        </td>
+                        <td style={{ padding: '5px 8px', color: COLORS.gray }}>
+                          {primary.supplier}
+                        </td>
+                        <td style={{ padding: '5px 8px', color: COLORS.gray }}>
+                          轉入：{primary.description}
+                        </td>
+                        <td style={{ padding: '5px 8px', textAlign: 'right', color: COLORS.gray }}>
+                          {pair.amount.toLocaleString()}
+                        </td>
+                      </tr>
+                    </React.Fragment>
+                  )
+                })}
               </tbody>
             </table>
             <div
@@ -925,9 +991,7 @@ export const PrintDisbursementPreview = forwardRef<HTMLDivElement, PrintDisburse
               }}
             >
               <span style={{ color: COLORS.lightGray, marginRight: '16px' }}>轉移小計</span>
-              <span style={{ fontWeight: 600, color: COLORS.gray }}>
-                NT$ {transferTotal.toLocaleString()}
-              </span>
+              <span style={{ fontWeight: 600, color: COLORS.gray }}>NT$ 0</span>
             </div>
           </div>
         )}

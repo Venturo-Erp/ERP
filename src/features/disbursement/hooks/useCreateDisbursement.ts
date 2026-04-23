@@ -13,7 +13,6 @@ import {
   updateDisbursementOrder as updateDisbursementOrderApi,
   invalidateDisbursementOrders,
   invalidatePaymentRequests,
-  usePaymentRequestItems,
 } from '@/data'
 import { supabase } from '@/lib/supabase/client'
 import { useAuthStore } from '@/stores/auth-store'
@@ -81,7 +80,6 @@ export function useCreateDisbursement({
 }: UseCreateDisbursementProps) {
   // 使用 @/data hooks（SWR 自動載入）
   const { items: disbursement_orders } = useDisbursementOrders()
-  const { items: paymentRequestItems } = usePaymentRequestItems()
   const user = useAuthStore(state => state.user)
 
   const isEditMode = !!editingOrder
@@ -130,23 +128,21 @@ export function useCreateDisbursement({
     })
   }, [pendingRequests, searchTerm, dateFilter, statusFilter])
 
-  // 選中的總金額（扣掉成本轉移：transferred_from_tour_id 的 items 不算實際出帳金額）
+  // 選中的總金額（扣掉成本轉移：transferred_pair_id 的 requests 淨流量 = 0、不算實際出帳）
+  //
+  // 對沖模式（新）：每對成本轉移有兩張 request（R_src amount<0、R_dst amount>0）、
+  //   - 兩張都選：sum(r.amount) 自動抵銷（-X + +X = 0）、不用特別處理
+  //   - 只選一張：要扣掉那張的 amount、讓「本期統計」反映真實銀行流量
+  //   統一邏輯：不管選幾張、把 pair_id 的 request.amount 從總和扣掉（正負都扣）
   const selectedAmount = useMemo(() => {
     return pendingRequests
       .filter(r => selectedRequestIds.includes(r.id))
       .reduce((sum, r) => {
-        const transferredSum = paymentRequestItems
-          .filter(i => {
-            const item = i as unknown as Record<string, unknown>
-            return item.request_id === r.id && item.transferred_from_tour_id
-          })
-          .reduce((s, i) => {
-            const item = i as unknown as Record<string, unknown>
-            return s + ((item.subtotal as number) || 0)
-          }, 0)
-        return sum + (r.amount || 0) - transferredSum
+        const pairId = (r as unknown as Record<string, unknown>).transferred_pair_id
+        if (pairId) return sum // 成本轉移 request、不算進出帳金額
+        return sum + (r.amount || 0)
       }, 0)
-  }, [pendingRequests, selectedRequestIds, paymentRequestItems])
+  }, [pendingRequests, selectedRequestIds])
 
   // 切換選擇
   const toggleSelect = useCallback((requestId: string) => {
