@@ -136,15 +136,23 @@ export default function PaymentsPage() {
       key: 'receipt_amount',
       label: FinanceLabels.receiptAmount,
       sortable: true,
-      width: '115',
-      render: value => <CurrencyCell amount={Number(value)} />,
+      width: '130',
+      render: value => (
+        <div className="whitespace-nowrap">
+          <CurrencyCell amount={Number(value)} />
+        </div>
+      ),
     },
     {
       key: 'actual_amount',
       label: FinanceLabels.actualAmount,
       sortable: true,
-      width: '115',
-      render: value => <CurrencyCell amount={Number(value) || 0} />,
+      width: '130',
+      render: value => (
+        <div className="whitespace-nowrap">
+          <CurrencyCell amount={Number(value) || 0} />
+        </div>
+      ),
     },
     {
       key: 'payment_method',
