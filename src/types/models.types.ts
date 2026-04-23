@@ -30,24 +30,6 @@ export type DisbursementOrder = Database['public']['Tables']['disbursement_order
 // ReceiptOrder 已廢棄，改用 Receipt（見 ADR-001）
 // export type ReceiptOrder = Database['public']['Tables']['receipt_orders']['Row']
 
-// ==================== 使用者相關 ====================
-
-/**
- * 當前登入使用者
- */
-export interface User {
-  id: ID
-  employee_number: string
-  display_name: string
-  english_name: string
-  email: Email
-  // 登入時由 role_tab_permissions + employee_permission_overrides 算出、塞進袋子、不是 DB 欄位
-  permissions: string[]
-  avatar?: URL
-  is_active: boolean
-  last_login_at?: ISODateTime
-}
-
 // ==================== 工作區相關 ====================
 
 /**

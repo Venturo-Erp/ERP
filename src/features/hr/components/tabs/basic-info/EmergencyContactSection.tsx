@@ -2,12 +2,12 @@
 
 import React from 'react'
 import { Input } from '@/components/ui/input'
-import { Employee } from '@/stores/types'
+import { EmployeeFull } from '@/stores/types'
 import { BasicInfoFormData } from './types'
 import { BASIC_INFO_LABELS } from './constants/labels'
 
 interface EmergencyContactSectionProps {
-  employee: Employee
+  employee: EmployeeFull
   isEditing: boolean
   formData: BasicInfoFormData
   setFormData: (data: BasicInfoFormData) => void

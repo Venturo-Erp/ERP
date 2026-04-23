@@ -8,7 +8,7 @@ import { ListPageLayout } from '@/components/layout/list-page-layout'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { useUserStore, userStoreHelpers } from '@/stores/user-store'
-import { Employee } from '@/stores/types'
+import { EmployeeFull } from '@/stores/types'
 import { EmployeeForm } from '@/features/hr/components/EmployeeForm'
 import { useRouter } from 'next/navigation'
 import { HR_ADMIN_TABS } from './components/hr-admin-tabs'
@@ -62,7 +62,7 @@ export default function HRPage() {
     [users]
   )
 
-  const getStatusLabel = (status: Employee['status']) => {
+  const getStatusLabel = (status: EmployeeFull['status']) => {
     const statusMap = {
       active: LABELS.STATUS_ACTIVE,
       probation: LABELS.STATUS_PROBATION,
@@ -72,7 +72,7 @@ export default function HRPage() {
     return statusMap[status]
   }
 
-  const getStatusColor = (status: Employee['status']) => {
+  const getStatusColor = (status: EmployeeFull['status']) => {
     const colorMap = {
       active: 'text-morandi-primary bg-morandi-container',
       probation: 'text-status-warning bg-status-warning-bg',
@@ -82,11 +82,11 @@ export default function HRPage() {
     return colorMap[status]
   }
 
-  const handleEmployeeClick = (employee: Employee) => {
+  const handleEmployeeClick = (employee: EmployeeFull) => {
     setExpandedEmployee(employee.id)
   }
 
-  const handleTerminateEmployee = async (employee: Employee, e?: React.MouseEvent) => {
+  const handleTerminateEmployee = async (employee: EmployeeFull, e?: React.MouseEvent) => {
     if (e) {
       e.stopPropagation()
     }
@@ -120,7 +120,7 @@ export default function HRPage() {
     }
   }
 
-  const columns: TableColumn<Employee>[] = useMemo(
+  const columns: TableColumn<EmployeeFull>[] = useMemo(
     () => [
       {
         key: 'employee_number',
@@ -134,7 +134,7 @@ export default function HRPage() {
         label: LABELS.COL_NAME,
         sortable: true,
         width: '100px',
-        render: (value, employee: Employee) => (
+        render: (value, employee: EmployeeFull) => (
           <span className="font-medium">
             {String(value || employee.chinese_name || LABELS.UNNAMED_EMPLOYEE)}
           </span>
@@ -145,7 +145,7 @@ export default function HRPage() {
         label: '職務',
         sortable: false,
         width: '100px',
-        render: (_value, employee: Employee) => {
+        render: (_value, employee: EmployeeFull) => {
           // 從職務列表取得職務名稱
           // role_id 優先讀頂層、fallback nested（2026-04-18 統一過渡期）
           const empRoleId =
@@ -163,7 +163,7 @@ export default function HRPage() {
         label: LABELS.COL_CONTACT,
         sortable: false,
         width: '200px',
-        render: (_value, employee: Employee) => {
+        render: (_value, employee: EmployeeFull) => {
           const info = employee.personal_info as {
             phone?: string | string[]
             email?: string
@@ -185,7 +185,7 @@ export default function HRPage() {
         label: LABELS.COL_STATUS,
         sortable: true,
         width: '70px',
-        render: (_value, employee: Employee) => (
+        render: (_value, employee: EmployeeFull) => (
           <span
             className={`px-2 py-1 rounded text-sm font-medium ${getStatusColor(employee.status)}`}
           >
@@ -198,7 +198,7 @@ export default function HRPage() {
         label: LABELS.COL_HIRE_DATE,
         sortable: true,
         width: '100px',
-        render: (_value, employee: Employee) => {
+        render: (_value, employee: EmployeeFull) => {
           if (!employee.job_info?.hire_date)
             return <span className="text-morandi-muted text-sm">{LABELS.NOT_SET}</span>
           return <DateCell date={employee.job_info.hire_date} />
@@ -209,7 +209,7 @@ export default function HRPage() {
   )
 
   const renderActions = useCallback(
-    (employee: Employee) => (
+    (employee: EmployeeFull) => (
       <ActionCell
         actions={[
           {
@@ -243,7 +243,7 @@ export default function HRPage() {
         onStatusTabChange={href => router.push(href)}
         data={filteredEmployees}
         columns={columns}
-        searchFields={['display_name', 'employee_number', 'personal_info'] as (keyof Employee)[]}
+        searchFields={['display_name', 'employee_number', 'personal_info'] as (keyof EmployeeFull)[]}
         searchPlaceholder={LABELS.SEARCH_PLACEHOLDER}
         onRowClick={handleEmployeeClick}
         renderActions={renderActions}

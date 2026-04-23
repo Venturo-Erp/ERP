@@ -1,10 +1,10 @@
 import { useState } from 'react'
-import { Employee } from '@/stores/types'
+import { EmployeeFull } from '@/stores/types'
 import { useUserStore, userStoreHelpers } from '@/stores/user-store'
 import { BasicInfoFormData, PasswordData } from './types'
 import { COMP_HR_LABELS } from '@/features/hr/constants/labels'
 
-export function useBasicInfoForm(employee: Employee, setIsEditing: (editing: boolean) => void) {
+export function useBasicInfoForm(employee: EmployeeFull, setIsEditing: (editing: boolean) => void) {
   const { update: updateUser } = useUserStore()
 
   const [formData, setFormData] = useState<BasicInfoFormData>({
@@ -46,7 +46,7 @@ export function useBasicInfoForm(employee: Employee, setIsEditing: (editing: boo
 
   const handleSave = async () => {
     // 只更新允許修改的欄位，不要修改 employee_number
-    const updates: Partial<Employee> = {
+    const updates: Partial<EmployeeFull> = {
       display_name: formData.display_name,
       chinese_name: formData.chinese_name,
       english_name: formData.english_name,

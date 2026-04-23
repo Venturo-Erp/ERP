@@ -10,7 +10,7 @@
 
 import { useCallback } from 'react'
 import { Archive, ArchiveRestore, Trash2, Edit, Share2 } from 'lucide-react'
-import { Tour, User } from '@/stores/types'
+import { Tour, EmployeeFull } from '@/stores/types'
 import { TOUR_ACTIONS } from '../constants'
 
 import { Button } from '@/components/ui/button'
@@ -20,7 +20,7 @@ import { toast } from 'sonner'
 interface UseTourActionButtonsParams {
   quotes: unknown[]
   activeStatusTab: string
-  user: User | null
+  user: EmployeeFull | null
   operations: {
     handleArchiveTour: (tour: Tour, reason?: string) => Promise<void>
   }

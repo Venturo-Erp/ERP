@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { User } from './types'
+import { EmployeeFull } from './types'
 // generateToken, AuthPayload 已移除 — 不再需要舊的 token 格式
 import { logger } from '@/lib/utils/logger'
 import type { UserRole } from '@/lib/rbac-config'
@@ -23,7 +23,7 @@ type EmployeeRow = Database['public']['Tables']['employees']['Row']
  */
 async function fetchWorkspaceInfo(
   workspaceId: string | null | undefined
-): Promise<{ code?: string; name?: string; type?: User['workspace_type'] }> {
+): Promise<{ code?: string; name?: string; type?: EmployeeFull['workspace_type'] }> {
   if (!workspaceId) return {}
 
   try {
@@ -38,7 +38,7 @@ async function fetchWorkspaceInfo(
       return {
         code: workspace.code || workspace.name?.substring(0, 2).toUpperCase(),
         name: workspace.name || undefined,
-        type: (workspace.type as User['workspace_type']) || undefined,
+        type: (workspace.type as EmployeeFull['workspace_type']) || undefined,
       }
     }
   } catch (wsError) {
@@ -48,7 +48,7 @@ async function fetchWorkspaceInfo(
 }
 
 /**
- * 從 EmployeeRow 構建 User 物件
+ * 從 EmployeeRow 構建 EmployeeFull 物件
  * @param employeeData - 員工資料
  * @param workspaceInfo - Workspace 資訊
  * @param options - 額外選項
@@ -56,9 +56,9 @@ async function fetchWorkspaceInfo(
 
 function buildUserFromEmployee(
   employeeData: EmployeeRow,
-  workspaceInfo: { code?: string; name?: string; type?: User['workspace_type'] },
+  workspaceInfo: { code?: string; name?: string; type?: EmployeeFull['workspace_type'] },
   options?: { mustChangePassword?: boolean; rolePermissions?: string[]; isAdmin?: boolean }
-): User {
+): EmployeeFull {
   const userRoles = (employeeData.roles || []) as UserRole[]
   // 權限完全由 JWT（role_tab_permissions）決定
   const mergedPermissions = options?.rolePermissions || []
@@ -71,17 +71,17 @@ function buildUserFromEmployee(
     english_name: employeeData.english_name ?? '',
     display_name: employeeData.display_name ?? '',
     chinese_name: employeeData.chinese_name ?? employeeData.display_name ?? '',
-    personal_info: (employeeData.personal_info ?? {}) as User['personal_info'],
-    job_info: (employeeData.job_info ?? {}) as User['job_info'],
-    salary_info: (employeeData.salary_info ?? {}) as User['salary_info'],
+    personal_info: (employeeData.personal_info ?? {}) as unknown as EmployeeFull['personal_info'],
+    job_info: (employeeData.job_info ?? {}) as unknown as EmployeeFull['job_info'],
+    salary_info: (employeeData.salary_info ?? {}) as unknown as EmployeeFull['salary_info'],
     permissions: mergedPermissions,
-    roles: userRoles as User['roles'],
+    roles: userRoles as EmployeeFull['roles'],
     attendance: (employeeData.attendance ?? {
       leave_records: [],
       overtime_records: [],
-    }) as User['attendance'],
-    contracts: (employeeData.contracts ?? []) as User['contracts'],
-    status: employeeData.status as User['status'],
+    }) as unknown as EmployeeFull['attendance'],
+    contracts: (employeeData.contracts ?? []) as unknown as EmployeeFull['contracts'],
+    status: employeeData.status as EmployeeFull['status'],
     workspace_id: employeeData.workspace_id ?? undefined,
     workspace_code: workspaceInfo.code,
     workspace_name: workspaceInfo.name,
@@ -94,14 +94,14 @@ function buildUserFromEmployee(
 }
 
 interface AuthState {
-  user: User | null
+  user: EmployeeFull | null
   isAuthenticated: boolean
   isAdmin: boolean // Added isAdmin flag
   sidebarCollapsed: boolean
   _hasHydrated: boolean
 
   // Methods
-  setUser: (user: User | null, isAdmin?: boolean) => void
+  setUser: (user: EmployeeFull | null, isAdmin?: boolean) => void
   logout: () => void
   validateLogin: (
     username: string,
@@ -219,7 +219,7 @@ export const useAuthStore = create<AuthState>()(
             workspaceId: employeeData.workspace_id ?? undefined,
           })
 
-          // 4. 查詢 workspace 資訊並構建 User 物件
+          // 4. 查詢 workspace 資訊並構建 EmployeeFull 物件
           const workspaceInfo = await fetchWorkspaceInfo(employeeData.workspace_id)
 
           // 5. 權限從 validate-login API 的 response body 取得（server-side 已計算好）

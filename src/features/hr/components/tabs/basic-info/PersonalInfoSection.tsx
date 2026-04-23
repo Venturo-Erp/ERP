@@ -5,12 +5,12 @@ import { Input } from '@/components/ui/input'
 import { DatePicker } from '@/components/ui/date-picker'
 import { Calendar } from 'lucide-react'
 import { DateCell } from '@/components/table-cells'
-import { Employee } from '@/stores/types'
+import { EmployeeFull } from '@/stores/types'
 import { BasicInfoFormData } from './types'
 import { COMP_HR_LABELS } from '@/features/hr/constants/labels'
 
 interface PersonalInfoSectionProps {
-  employee: Employee
+  employee: EmployeeFull
   isEditing: boolean
   formData: BasicInfoFormData
   setFormData: (data: BasicInfoFormData) => void

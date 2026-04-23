@@ -4,12 +4,12 @@ import React from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Lock, Eye, EyeOff } from 'lucide-react'
-import { Employee } from '@/stores/types'
+import { EmployeeFull } from '@/stores/types'
 import { PasswordData } from './types'
 import { COMP_HR_LABELS } from '@/features/hr/constants/labels'
 
 interface PasswordManagementSectionProps {
-  employee: Employee
+  employee: EmployeeFull
   showPasswordSection: boolean
   setShowPasswordSection: (show: boolean) => void
   passwordData: PasswordData

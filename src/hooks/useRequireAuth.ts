@@ -27,12 +27,12 @@
 
 import { logger } from '@/lib/utils/logger'
 import { useAuthStore } from '@/stores/auth-store'
-import { User } from '@/stores/types'
+import { EmployeeFull } from '@/stores/types'
 import { alert } from '@/lib/ui/alert-dialog'
 
 interface AuthInfo {
   isAuthenticated: boolean
-  user: User | null
+  user: EmployeeFull | null
   workspaceId: string | null
   showLoginRequired: (message?: string) => void
   showWorkspaceMissing: (message?: string) => void

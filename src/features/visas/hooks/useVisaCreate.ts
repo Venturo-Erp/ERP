@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { supabase } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { logger } from '@/lib/utils/logger'
-import type { Tour, Order, User } from '@/stores/types'
+import type { Tour, Order, EmployeeFull } from '@/stores/types'
 
 interface VisaApplicant {
   id: string
@@ -33,7 +33,7 @@ interface ContactInfo {
 export function useVisaCreate(
   tours: Tour[],
   orders: Order[],
-  user: User | null,
+  user: EmployeeFull | null,
   canManageVisas: boolean,
   calculateFee: (country: string) => number,
   addVisa: (data: Record<string, unknown>) => Promise<void>,

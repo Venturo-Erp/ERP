@@ -59,7 +59,7 @@ export function MemberSidebar({ isOpen }: MemberSidebarProps) {
             ? {
                 displayName: employee.display_name,
                 englishName: employee.english_name,
-                email: employee.personal_info?.email,
+                email: (employee.personal_info as { email?: string } | null)?.email,
                 status: employee.status,
               }
             : null,
@@ -90,7 +90,7 @@ export function MemberSidebar({ isOpen }: MemberSidebarProps) {
     if (searchQuery !== '') {
       const query = searchQuery.toLowerCase()
       return (
-        emp.display_name.toLowerCase().includes(query) ||
+        emp.display_name?.toLowerCase().includes(query) ||
         emp.english_name?.toLowerCase().includes(query) ||
         emp.employee_number.toLowerCase().includes(query)
       )
@@ -242,7 +242,7 @@ export function MemberSidebar({ isOpen }: MemberSidebarProps) {
                     }`}
                   >
                     <div className="w-10 h-10 rounded-full bg-morandi-gold/20 flex items-center justify-center text-sm font-medium text-morandi-primary">
-                      {employee.display_name[0]?.toUpperCase() || 'M'}
+                      {employee.display_name?.[0]?.toUpperCase() || 'M'}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-morandi-primary truncate">

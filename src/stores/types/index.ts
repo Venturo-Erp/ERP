@@ -14,8 +14,10 @@ export type {
   AirportImageSeason,
 } from './base.types'
 
-// 使用者相關型別
-export type { User, Employee } from './user.types'
+// 使用者相關型別（2026-04-23 SSOT 統整）
+//   - EmployeeFull: 全站用（含 personal_info 巢狀 + workspace context + permissions）
+//   - Employee: DB row 真相（models.types、少用）
+export type { EmployeeFull, Employee } from './user.types'
 
 // 行程相關型別
 export type {

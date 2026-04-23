@@ -1,4 +1,4 @@
-import { Employee } from '@/stores/types'
+import { EmployeeFull } from '@/stores/types'
 
 export interface BasicInfoFormData {
   display_name: string
@@ -31,7 +31,7 @@ export interface PasswordData {
 }
 
 export interface BasicInfoTabProps {
-  employee: Employee
+  employee: EmployeeFull
   isEditing: boolean
   setIsEditing: (editing: boolean) => void
 }

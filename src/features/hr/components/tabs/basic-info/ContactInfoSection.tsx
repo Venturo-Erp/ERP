@@ -4,12 +4,12 @@ import React from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Phone, Mail, MapPin, Plus, Trash2 } from 'lucide-react'
-import { Employee } from '@/stores/types'
+import { EmployeeFull } from '@/stores/types'
 import { BasicInfoFormData } from './types'
 import { BASIC_INFO_LABELS } from './constants/labels'
 
 interface ContactInfoSectionProps {
-  employee: Employee
+  employee: EmployeeFull
   isEditing: boolean
   formData: BasicInfoFormData
   setFormData: (data: BasicInfoFormData) => void

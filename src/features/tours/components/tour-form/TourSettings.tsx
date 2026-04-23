@@ -3,13 +3,13 @@
 import React, { useMemo, useState, useEffect } from 'react'
 import { Combobox } from '@/components/ui/combobox'
 import { useEmployeesSlim } from '@/data'
-import type { Employee } from '@/stores/types'
+import type { EmployeeFull } from '@/stores/types'
 import type { SyncableEntity } from '@/types'
 import type { NewTourData } from '../../types'
 import { Loader2 } from 'lucide-react'
 import { logger } from '@/lib/utils/logger'
 
-type EmployeeWithSync = Employee & Partial<SyncableEntity>
+type EmployeeWithSync = EmployeeFull & Partial<SyncableEntity>
 
 interface SelectorField {
   id: string
@@ -49,7 +49,7 @@ export function TourSettings({ newTour, setNewTour }: TourSettingsProps) {
   // 所有在職員工
   const activeEmployees = useMemo(() => {
     return employees.filter(emp => {
-      const empWithSync = emp as EmployeeWithSync
+      const empWithSync = emp as unknown as EmployeeWithSync
       return !empWithSync._deleted && emp.status === 'active' && emp.employee_type !== 'bot'
     })
   }, [employees])
@@ -64,7 +64,7 @@ export function TourSettings({ newTour, setNewTour }: TourSettingsProps) {
       // role_id 優先讀頂層、fallback nested（2026-04-18 統一過渡期）
       const empRoleId =
         (emp as unknown as { role_id?: string }).role_id ||
-        (emp as Employee & { job_info?: { role_id?: string } }).job_info?.role_id
+        (emp as unknown as EmployeeFull & { job_info?: { role_id?: string } }).job_info?.role_id
       return empRoleId && roleIds.has(empRoleId)
     })
   }

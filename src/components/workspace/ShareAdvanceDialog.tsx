@@ -168,8 +168,8 @@ export function ShareAdvanceDialog({
                   <td className="py-2 px-2">
                     <Combobox
                       options={activeEmployees.map(emp => ({
-                        value: emp.display_name || emp.english_name,
-                        label: `${emp.display_name || emp.english_name} (${emp.employee_number})`,
+                        value: emp.display_name || emp.english_name || '',
+                        label: `${emp.display_name || emp.english_name || ''} (${emp.employee_number})`,
                       }))}
                       value={row.advance_person}
                       onChange={value => updateRow(index, 'advance_person', value)}

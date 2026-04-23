@@ -7,7 +7,7 @@ import { Check, Star, Info, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { logger } from '@/lib/utils/logger'
-import type { User } from '@/stores/types'
+import type { EmployeeFull } from '@/stores/types'
 import { PREFERRED_FEATURES_LABELS } from '../constants/labels'
 
 // 定義所有可選功能
@@ -185,7 +185,7 @@ export function PreferredFeaturesSettings() {
 
     // 2. 立即更新 auth-store（讓側邊欄即時反應）
     if (user) {
-      const updatedUser: User = {
+      const updatedUser: EmployeeFull = {
         ...user,
         preferred_features: newFeatures,
       }
@@ -216,7 +216,7 @@ export function PreferredFeaturesSettings() {
     pendingFeaturesRef.current = defaultFeatures
 
     if (user) {
-      const updatedUser: User = {
+      const updatedUser: EmployeeFull = {
         ...user,
         preferred_features: defaultFeatures,
       }
