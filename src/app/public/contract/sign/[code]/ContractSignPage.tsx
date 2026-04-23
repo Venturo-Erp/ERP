@@ -46,7 +46,6 @@ interface Contract {
   workspaces: {
     id: string
     name: string
-    seal_image_url: string
   }
   members: ContractMember[]
   itineraryData: {

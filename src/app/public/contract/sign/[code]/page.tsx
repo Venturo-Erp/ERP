@@ -36,7 +36,7 @@ export default async function Page({ params }: PageProps) {
       .single(),
     supabase
       .from('workspaces')
-      .select('id, name, seal_image_url')
+      .select('id, name')
       .eq('id', contract.workspace_id)
       .single(),
   ])
@@ -91,7 +91,7 @@ export default async function Page({ params }: PageProps) {
       departure_date: '',
       return_date: '',
     },
-    workspaces: workspace || { id: '', name: '未知', seal_image_url: '' },
+    workspaces: workspace || { id: '', name: '未知' },
     members,
     itineraryData,
     itineraryDepartureDate,

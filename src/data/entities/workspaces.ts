@@ -15,7 +15,6 @@ export interface WorkspaceEntity extends BaseEntity {
   description?: string | null
   icon?: string | null
   is_active: boolean | null
-  seal_image_url?: string | null
   contract_seal_image_url?: string | null
   created_by?: string | null
   max_employees?: number | null
