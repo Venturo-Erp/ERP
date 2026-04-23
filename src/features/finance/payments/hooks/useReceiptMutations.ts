@@ -149,7 +149,6 @@ export function useReceiptMutations() {
       const { formData, paymentItems, orderInfo, tourInfo, userId, workspaceId } = params
 
       const { createReceipt, updateReceipt } = await import('@/data')
-      const { generateReceiptNumber } = await import('@/lib/utils/receipt-number-generator')
       const { supabase } = await import('@/lib/supabase/client')
 
       const tourId = orderInfo?.tour_id || formData.tour_id
@@ -186,34 +185,16 @@ export function useReceiptMutations() {
         return byCode?.id || paymentMethodsData[0]?.id || ''
       }
 
-      // 查詢已存在的收款單編號（用於生成編號）
-      const { data: existingReceipts } = await supabase
-        .from('receipts')
-        .select('receipt_number')
-        .like('receipt_number', `${tourCode}-R%`)
-
-      // 取得現有收款單（用於計算下一個流水號）
-      const filteredReceipts =
-        existingReceipts?.filter(r => r.receipt_number?.startsWith(`${tourCode}-R`)) || []
-
-      // 找出目前最大的 R 編號
+      // 編號改透過 DB RPC generate_receipt_no(tour_id) 在迴圈內逐筆生成
+      // 每筆呼叫含 advisory lock、INSERT commit 後下一次 RPC 才能看到新 row、序列遞增
       const prefix = `${tourCode}-R`
-      let maxNumber = 0
-      filteredReceipts.forEach(receipt => {
-        const code = receipt.receipt_number
-        if (code?.startsWith(prefix)) {
-          // 取 R 後面的數字部分（忽略舊格式的 -A, -B 後綴）
-          const numberPart = code.substring(prefix.length).split('-')[0]
-          const num = parseInt(numberPart, 10)
-          if (!isNaN(num) && num > maxNumber) maxNumber = num
-        }
-      })
 
       // 計算總金額
       const totalAmount = paymentItems.reduce((sum, item) => sum + (item.amount || 0), 0)
 
       const linkPayResults: LinkPayResult[] = []
       let firstReceiptId: string | null = null
+      let firstReceiptNumber: string | null = null
 
       // 統一處理所有收款項目 — 每個品項獨立流水號
       for (let i = 0; i < paymentItems.length; i++) {
@@ -222,9 +203,14 @@ export function useReceiptMutations() {
         const paymentMethod = PAYMENT_METHOD_MAP[receiptTypeNum] || 'transfer'
         const paymentMethodId = getPaymentMethodId(receiptTypeNum, item.receipt_type)
 
-        // 每個品項獨立編號：R01, R02, R03...（跨收款單全域遞增）
-        const nextNum = (maxNumber + 1 + i).toString().padStart(2, '0')
-        const itemReceiptNumber = `${prefix}${nextNum}`
+        // 每個品項獨立編號 — 透過 DB RPC、advisory lock 防 race
+        const { data: itemReceiptNumber, error: numErr } = await supabase.rpc(
+          'generate_receipt_no',
+          { p_tour_id: tourId }
+        )
+        if (numErr || !itemReceiptNumber) {
+          throw new Error(`生成收款單號失敗：${numErr?.message || 'unknown'}`)
+        }
 
         logger.info('[createReceiptWithItems] Creating receipt...', {
           index: i,
@@ -280,6 +266,7 @@ export function useReceiptMutations() {
         // 第一筆的 ID 作為 batch_id（多筆時）
         if (i === 0) {
           firstReceiptId = createdReceipt.id
+          firstReceiptNumber = itemReceiptNumber as string
           // 多筆時，第一筆也要設 batch_id（指向自己）
           if (paymentItems.length > 1) {
             await updateReceipt(createdReceipt.id, { batch_id: firstReceiptId })
@@ -325,7 +312,7 @@ export function useReceiptMutations() {
       return {
         success: true,
         receiptId: firstReceiptId || '',
-        receiptNumber: `${prefix}${(maxNumber + 1).toString().padStart(2, '0')}`,
+        receiptNumber: firstReceiptNumber || `${prefix}01`,
         linkPayResults,
         totalAmount,
         itemCount: paymentItems.length,

@@ -18,7 +18,6 @@ import {
   useLinkPayLogs,
 } from '@/data'
 import { sendPaymentAbnormalNotification } from '@/lib/utils/bot-notification'
-import { generateReceiptNumber } from '@/lib/utils/receipt-number-generator'
 import { recalculateReceiptStats } from '@/features/finance/payments/services/receipt-core.service'
 import type { ReceiptItem } from '@/stores'
 import { ReceiptType } from '@/types/receipt.types'
@@ -92,12 +91,15 @@ export function usePaymentData() {
     }
 
     // 為每個收款項目建立收款單
+    const { supabase } = await import('@/lib/supabase/client')
     for (const item of paymentItems) {
-      // 生成收款單號（新格式：{團號}-R{2位數}）
-      const receiptNumber = generateReceiptNumber(
-        tourCode,
-        receipts.filter(r => r.receipt_number?.startsWith(`${tourCode}-R`))
-      )
+      // 生成收款單號 — 透過 DB RPC、advisory lock 防 race
+      const { data: receiptNumber, error: numErr } = await supabase.rpc('generate_receipt_no', {
+        p_tour_id: selectedOrder?.tour_id || '',
+      })
+      if (numErr || !receiptNumber) {
+        throw new Error(`生成收款單號失敗：${numErr?.message || 'unknown'}`)
+      }
 
       // 建立收款單
       const receipt = await createReceipt({

@@ -19,7 +19,6 @@ import {
 import { useOrdersSlim, useToursSlim, createReceipt, invalidateReceipts } from '@/data'
 import { useAuthStore } from '@/stores'
 import { usePaymentMethodsCached } from '@/data/hooks'
-import { generateReceiptNumber } from '@/lib/utils/receipt-number-generator'
 import { logger } from '@/lib/utils/logger'
 import { PaymentMethod } from '@/stores/types'
 import {
@@ -322,13 +321,20 @@ export function BatchReceiptDialog({ open, onOpenChange }: BatchReceiptDialogPro
         const tour = order.tour_id ? tours.find(t => t.id === order.tour_id) : null
         const tourCode = tour?.code || ''
 
-        if (!tourCode) {
+        if (!tourCode || !order.tour_id) {
           logger.warn(`訂單 ${order.code} 沒有關聯團號，跳過`)
           continue
         }
 
-        // 生成收款單號
-        const receiptNumber = generateReceiptNumber(tourCode, [])
+        // 生成收款單號 — 透過 DB RPC、advisory lock 防 race
+        const { supabase } = await import('@/lib/supabase/client')
+        const { data: receiptNumber, error: numErr } = await supabase.rpc('generate_receipt_no', {
+          p_tour_id: order.tour_id,
+        })
+        if (numErr || !receiptNumber) {
+          logger.warn(`訂單 ${order.code} 生成收款單號失敗、跳過`)
+          continue
+        }
 
         await createReceipt({
           receipt_number: receiptNumber,
