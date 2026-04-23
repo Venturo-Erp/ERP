@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
     // 支援兩種登入：員工編號（E001）或 email（amin@xxx.com）
     const isEmail = username.includes('@')
     const selectFields =
-      'id, employee_number, display_name, english_name, email, avatar, status, password_hash, supabase_user_id, workspace_id, role_id, job_info, created_at, updated_at, login_failed_count, login_locked_until'
+      'id, employee_number, display_name, english_name, email, avatar_url, status, password_hash, supabase_user_id, workspace_id, role_id, job_info, created_at, updated_at, login_failed_count, login_locked_until'
 
     const lookupResult = isEmail
       ? await supabase
@@ -138,10 +138,7 @@ export async function POST(request: NextRequest) {
     // 7. 從職務系統取得權限（統一用 role_tab_permissions）
     let rolePermissions: string[] = []
     let isAdmin = false
-    // 優先讀 top-level role_id（新架構）、fallback 到 job_info.role_id（舊資料）
-    const jobInfo = employee.job_info as { role_id?: string } | null
-    const roleId =
-      (employee as Record<string, unknown>).role_id as string | undefined ?? jobInfo?.role_id
+    const roleId = (employee as Record<string, unknown>).role_id as string | undefined
 
     if (roleId) {
       // 查職務是否為管理員

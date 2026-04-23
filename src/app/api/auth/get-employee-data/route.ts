@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
     const { data: employee, error: empError } = await supabase
       .from('employees')
       .select(
-        'id, employee_number, display_name, english_name, email, avatar, status, password_hash, supabase_user_id, workspace_id, job_info, created_at, updated_at'
+        'id, employee_number, display_name, english_name, email, avatar_url, status, password_hash, supabase_user_id, workspace_id, job_info, created_at, updated_at'
       )
       .ilike('employee_number', username)
       .eq('workspace_id', workspace.id)

@@ -86,7 +86,7 @@ function buildUserFromEmployee(
     workspace_code: workspaceInfo.code,
     workspace_name: workspaceInfo.name,
     workspace_type: workspaceInfo.type,
-    avatar: employeeData.avatar_url ?? employeeData.avatar ?? undefined,
+    avatar: employeeData.avatar_url ?? undefined,
     must_change_password: options?.mustChangePassword,
     created_at: employeeData.created_at ?? new Date().toISOString(),
     updated_at: employeeData.updated_at ?? new Date().toISOString(),
@@ -261,7 +261,7 @@ export const useAuthStore = create<AuthState>()(
           const { data, error } = await supabase
             .from('employees')
             .select(
-              'id, employee_number, display_name, english_name, email, avatar, status, workspace_id, job_info, created_at, updated_at'
+              'id, employee_number, display_name, english_name, email, avatar_url, status, workspace_id, job_info, created_at, updated_at'
             )
             .eq('id', currentUser.id)
             .maybeSingle()

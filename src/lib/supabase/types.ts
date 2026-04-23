@@ -5008,7 +5008,6 @@ export type Database = {
       employees: {
         Row: {
           attendance: Json | null
-          avatar: string | null
           avatar_url: string | null
           birth_date: string | null
           chinese_name: string | null
@@ -5048,7 +5047,6 @@ export type Database = {
         }
         Insert: {
           attendance?: Json | null
-          avatar?: string | null
           avatar_url?: string | null
           birth_date?: string | null
           chinese_name?: string | null
@@ -5088,7 +5086,6 @@ export type Database = {
         }
         Update: {
           attendance?: Json | null
-          avatar?: string | null
           avatar_url?: string | null
           birth_date?: string | null
           chinese_name?: string | null

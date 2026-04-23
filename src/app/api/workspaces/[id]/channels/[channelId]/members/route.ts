@@ -77,7 +77,7 @@ export async function GET(_request: Request, { params }: RouteParams) {
             displayName: member.employees.display_name as string,
             englishName: member.employees.english_name as string | null,
             email: member.employees.email as string | null,
-            avatar: member.employees.avatar as string | null,
+            avatar: member.employees.avatar_url as string | null,
             status: member.employees.status as string | null,
           }
         : null,

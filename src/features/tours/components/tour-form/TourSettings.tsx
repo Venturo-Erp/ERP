@@ -60,11 +60,7 @@ export function TourSettings({ newTour, setNewTour }: TourSettingsProps) {
 
     const roleIds = new Set(field.roles.map(r => r.id))
     return activeEmployees.filter(emp => {
-      // 員工的 role_id 在映射的職務裡
-      // role_id 優先讀頂層、fallback nested（2026-04-18 統一過渡期）
-      const empRoleId =
-        (emp as unknown as { role_id?: string }).role_id ||
-        (emp as unknown as EmployeeFull & { job_info?: { role_id?: string } }).job_info?.role_id
+      const empRoleId = (emp as unknown as { role_id?: string }).role_id
       return empRoleId && roleIds.has(empRoleId)
     })
   }

@@ -105,7 +105,7 @@ export function EmployeeForm({
     chinese_name: employee?.chinese_name || '',
     english_name: employee?.english_name || '',
     display_name: employee?.display_name || '',
-    email: employee?.personal_info?.email || employee?.email || '',
+    email: employee?.personal_info?.email || '',
     phone:
       (Array.isArray(employee?.personal_info?.phone)
         ? employee.personal_info.phone[0]
@@ -120,11 +120,7 @@ export function EmployeeForm({
     emergency_contact_relation: employee?.personal_info?.emergency_contact?.relationship || '',
     emergency_contact_phone: employee?.personal_info?.emergency_contact?.phone || '',
     emergency_contact_address: employee?.personal_info?.emergency_contact?.address || '',
-    // role_id 優先讀頂層、fallback nested（舊資料過渡期）
-    role_id:
-      ((employee as unknown as Record<string, unknown>)?.role_id as string) ||
-      employee?.job_info?.role_id ||
-      '',
+    role_id: ((employee as unknown as Record<string, unknown>)?.role_id as string) || '',
     base_salary: employee?.salary_info?.base_salary || 0,
   })
 
@@ -186,7 +182,7 @@ export function EmployeeForm({
         chinese_name: employee.chinese_name || '',
         english_name: employee.english_name || '',
         display_name: employee.display_name || '',
-        email: employee.personal_info?.email || employee.email || '',
+        email: employee.personal_info?.email || '',
         phone:
           (Array.isArray(employee.personal_info?.phone)
             ? employee.personal_info.phone[0]
@@ -201,10 +197,7 @@ export function EmployeeForm({
         emergency_contact_relation: employee.personal_info?.emergency_contact?.relationship || '',
         emergency_contact_phone: employee.personal_info?.emergency_contact?.phone || '',
         emergency_contact_address: employee.personal_info?.emergency_contact?.address || '',
-        role_id:
-          ((employee as unknown as Record<string, unknown>).role_id as string) ||
-          employee.job_info?.role_id ||
-          '',
+        role_id: ((employee as unknown as Record<string, unknown>).role_id as string) || '',
         base_salary: employee.salary_info?.base_salary || 0,
       })
       setAvatarPreview(employee.avatar_url || null)
