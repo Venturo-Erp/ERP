@@ -93,9 +93,10 @@ export function PaymentItemRow({
         const { useAuthStore } = await import('@/stores')
         const wsId = useAuthStore.getState().user?.workspace_id
         let query = supabase
-          .from('accounting_subjects')
+          .from('chart_of_accounts')
           .select('id, code, name')
-          .eq('type', 'revenue')
+          .eq('account_type', 'revenue')
+          .eq('is_active', true)
           .order('code')
         if (wsId) query = query.eq('workspace_id', wsId)
         const { data } = await query

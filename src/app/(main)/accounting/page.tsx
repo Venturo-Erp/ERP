@@ -4,10 +4,6 @@ import { Card } from '@/components/ui/card'
 import { FileText, BookOpen, BarChart3, TrendingUp, Calendar } from 'lucide-react'
 import Link from 'next/link'
 import { ContentPageLayout } from '@/components/layout/content-page-layout'
-import { useEffect, useState } from 'react'
-import { supabase } from '@/lib/supabase/client'
-import { toast } from 'sonner'
-import { logger } from '@/lib/utils/logger'
 
 const quickLinks = [
   {
@@ -53,50 +49,9 @@ const quickLinks = [
 ]
 
 export default function AccountingPage() {
-  const [isInitializing, setIsInitializing] = useState(false)
-
-  useEffect(() => {
-    // 自動檢查並初始化科目表
-    const checkAndInitialize = async () => {
-      try {
-        // 檢查科目表是否為空
-        const { data: accounts, error } = await supabase
-          .from('chart_of_accounts')
-          .select('id')
-          .limit(1)
-
-        if (error) {
-          logger.error('檢查科目表失敗:', error)
-          return
-        }
-
-        // 如果科目表為空，自動初始化
-        if (!accounts || accounts.length === 0) {
-          setIsInitializing(true)
-
-          const response = await fetch('/api/accounting/initialize', {
-            method: 'POST',
-          })
-
-          if (!response.ok) {
-            const error = await response.json()
-            throw new Error(error.error || '初始化失敗')
-          }
-
-          const result = await response.json()
-          // 初始化完成
-
-          setIsInitializing(false)
-        }
-      } catch (error) {
-        logger.error('自動初始化失敗:', error)
-        setIsInitializing(false)
-      }
-    }
-
-    checkAndInitialize()
-  }, [])
-
+  // 期初設定走 /accounting/opening-balances（尚未建、列在技術債）
+  // 原本進入此頁會自動觸發 /api/accounting/initialize 塞預設科目、
+  // 跟「明確啟用會計」的 vision 衝突、2026-04-23 拔掉。
   return (
     <ContentPageLayout title="會計系統">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

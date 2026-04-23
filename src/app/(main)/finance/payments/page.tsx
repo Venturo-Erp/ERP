@@ -136,12 +136,14 @@ export default function PaymentsPage() {
       key: 'receipt_amount',
       label: FinanceLabels.receiptAmount,
       sortable: true,
+      width: '115',
       render: value => <CurrencyCell amount={Number(value)} />,
     },
     {
       key: 'actual_amount',
       label: FinanceLabels.actualAmount,
       sortable: true,
+      width: '115',
       render: value => <CurrencyCell amount={Number(value) || 0} />,
     },
     {
@@ -155,14 +157,15 @@ export default function PaymentsPage() {
     {
       key: 'status',
       label: FinanceLabels.status,
-      width: '70',
+      width: '110',
       render: value => <StatusCell type="receipt" status={String(value)} />,
     },
     {
       key: 'actions',
       label: FinanceLabels.actions,
+      width: '220',
       render: (_, row) => (
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 whitespace-nowrap">
           {/* 待確認狀態：顯示核准和異常按鈕 */}
           {row.status === '0' && (
             <>
