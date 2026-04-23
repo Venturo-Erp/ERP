@@ -206,13 +206,6 @@ export const syncEmployeeSchema = z.object({
   access_token: z.string().optional(),
 })
 
-export const createEmployeeAuthSchema = z.object({
-  employee_number: z.string().min(1, '缺少員工編號'),
-  password: z.string().min(1, '缺少密碼'),
-  workspace_code: z.string().optional(),
-  email: z.string().email('Email 格式錯誤').optional(),
-})
-
 export const resetEmployeePasswordSchema = z.object({
   employee_id: z.string().min(1, '缺少員工 ID'),
   new_password: z.string().min(8, '密碼至少需要 8 個字元'),
