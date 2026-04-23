@@ -1,4 +1,5 @@
 import { captureException } from '@/lib/error-tracking'
+import { fetchWithTimeout } from '@/lib/external/fetch-with-timeout'
 /**
  * LinkPay API Route
  *
@@ -217,9 +218,9 @@ export async function POST(req: NextRequest) {
       return ApiError.database('建立 LinkPay 記錄失敗')
     }
 
-    // 呼叫台新銀行 API
+    // 呼叫台新銀行 API（含 8 秒 timeout、避免外部慢/掛拖死前端）
     try {
-      const response = await fetch(TAISHIN_API_URL, {
+      const response = await fetchWithTimeout(TAISHIN_API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(taishinRequest),

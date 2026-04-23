@@ -4,6 +4,7 @@
  */
 
 import { logger } from '@/lib/utils/logger'
+import { fetchWithTimeout } from '@/lib/external/fetch-with-timeout'
 import type {
   GenerateItineraryRequest,
   DailyItineraryDay,
@@ -250,7 +251,7 @@ export async function generateItineraryWithGemini(
     )
 
     try {
-      const response = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
+      const response = await fetchWithTimeout(`${GEMINI_API_URL}?key=${apiKey}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createHmac, timingSafeEqual } from 'crypto'
 import { getSupabaseAdminClient } from '@/lib/supabase/admin'
 import { logger } from '@/lib/utils/logger'
+import { fetchWithTimeout } from '@/lib/external/fetch-with-timeout'
 
 /**
  * 多租戶 LINE Webhook
@@ -115,7 +116,7 @@ interface LineConfig {
 
 /** 回覆訊息 */
 async function reply(config: LineConfig, replyToken: string, text: string) {
-  await fetch('https://api.line.me/v2/bot/message/reply', {
+  await fetchWithTimeout('https://api.line.me/v2/bot/message/reply', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -207,7 +208,7 @@ async function handleEmployeeBinding(
   const employee = employees[0]
 
   // 取得 LINE 用戶資料
-  const profileRes = await fetch(`https://api.line.me/v2/bot/profile/${lineUserId}`, {
+  const profileRes = await fetchWithTimeout(`https://api.line.me/v2/bot/profile/${lineUserId}`, {
     headers: { Authorization: `Bearer ${config.channel_access_token}` },
   })
   const profile = profileRes.ok ? await profileRes.json() : null

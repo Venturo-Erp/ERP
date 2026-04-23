@@ -4,6 +4,7 @@ import { successResponse, errorResponse, ErrorCode } from '@/lib/api/response'
 import { getServerAuth } from '@/lib/auth/server-auth'
 import { validateBody } from '@/lib/api/validation'
 import { generateImageSchema } from '@/lib/validations/api-schemas'
+import { fetchWithTimeout } from '@/lib/external/fetch-with-timeout'
 
 // 多 API Key 輪替機制
 const GEMINI_API_KEYS = [
@@ -129,7 +130,7 @@ async function tryGenerateWithKey(
   retryAfter?: number
 }> {
   try {
-    const response = await fetch(
+    const response = await fetchWithTimeout(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${apiKey}`,
       {
         method: 'POST',

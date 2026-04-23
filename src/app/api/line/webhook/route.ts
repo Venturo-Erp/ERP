@@ -4,6 +4,7 @@ import { logger } from '@/lib/utils/logger'
 import { handleAICustomerService } from '@/lib/line/ai-customer-service'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { withWebhookIdempotency } from '@/lib/webhook/idempotency'
+import { fetchWithTimeout } from '@/lib/external/fetch-with-timeout'
 
 /** LINE Webhook event type (minimal) */
 interface LineEvent {
@@ -35,7 +36,7 @@ async function getUserProfile(userId: string): Promise<{
   statusMessage: string | null
 } | null> {
   try {
-    const res = await fetch(`https://api.line.me/v2/bot/profile/${userId}`, {
+    const res = await fetchWithTimeout(`https://api.line.me/v2/bot/profile/${userId}`, {
       headers: { Authorization: `Bearer ${LINE_TOKEN}` },
     })
     if (res.ok) {
@@ -152,7 +153,7 @@ async function processFollowEvent(event: LineEvent) {
 
 async function getGroupName(groupId: string): Promise<string | null> {
   try {
-    const res = await fetch(`https://api.line.me/v2/bot/group/${groupId}/summary`, {
+    const res = await fetchWithTimeout(`https://api.line.me/v2/bot/group/${groupId}/summary`, {
       headers: { Authorization: `Bearer ${LINE_TOKEN}` },
     })
     if (res.ok) {
@@ -165,7 +166,7 @@ async function getGroupName(groupId: string): Promise<string | null> {
 
 async function getGroupMemberCount(groupId: string): Promise<number | null> {
   try {
-    const res = await fetch(`https://api.line.me/v2/bot/group/${groupId}/members/count`, {
+    const res = await fetchWithTimeout(`https://api.line.me/v2/bot/group/${groupId}/members/count`, {
       headers: { Authorization: `Bearer ${LINE_TOKEN}` },
     })
     if (res.ok) {
@@ -276,7 +277,7 @@ async function processCustomerBinding(event: LineEvent) {
     const customers = await findRes.json()
 
     if (!customers || customers.length === 0) {
-      await fetch('https://api.line.me/v2/bot/message/reply', {
+      await fetchWithTimeout('https://api.line.me/v2/bot/message/reply', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -308,7 +309,7 @@ async function processCustomerBinding(event: LineEvent) {
 
     const custName = customer.name || customerCode
 
-    await fetch('https://api.line.me/v2/bot/message/reply', {
+    await fetchWithTimeout('https://api.line.me/v2/bot/message/reply', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -367,7 +368,7 @@ async function processEmployeeBinding(event: LineEvent) {
 
     if (!employees || employees.length === 0) {
       // 員工不存在，回覆錯誤
-      await fetch('https://api.line.me/v2/bot/message/reply', {
+      await fetchWithTimeout('https://api.line.me/v2/bot/message/reply', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -398,7 +399,7 @@ async function processEmployeeBinding(event: LineEvent) {
       employee.chinese_name || employee.display_name || employee.english_name || employeeCode
 
     // 回覆成功
-    await fetch('https://api.line.me/v2/bot/message/reply', {
+    await fetchWithTimeout('https://api.line.me/v2/bot/message/reply', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -587,7 +588,7 @@ async function processClockIn(event: LineEvent): Promise<boolean> {
 
 /** LINE 回覆文字訊息 */
 async function replyText(replyToken: string, text: string) {
-  await fetch('https://api.line.me/v2/bot/message/reply', {
+  await fetchWithTimeout('https://api.line.me/v2/bot/message/reply', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -631,7 +632,7 @@ async function handleAIMessage(event: LineEvent) {
     )
 
     // 5. 回覆用戶
-    await fetch('https://api.line.me/v2/bot/message/reply', {
+    await fetchWithTimeout('https://api.line.me/v2/bot/message/reply', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

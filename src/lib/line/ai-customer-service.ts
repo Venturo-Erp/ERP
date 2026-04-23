@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { logger } from '@/lib/utils/logger'
 import { getAISetting } from '@/lib/ai-settings'
+import { fetchWithTimeout } from '@/lib/external/fetch-with-timeout'
 
 const GEMINI_API_URL =
   'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent'
@@ -18,13 +19,18 @@ const supabase = createClient(
  * 呼叫 Gemini API
  */
 async function callGemini(prompt: string): Promise<string> {
-  const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      contents: [{ parts: [{ text: prompt }] }],
-    }),
-  })
+  // 30s timeout (LLM 生成可能慢、但保護 LINE webhook 不被卡死)
+  const response = await fetchWithTimeout(
+    `${GEMINI_API_URL}?key=${GEMINI_API_KEY}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+      }),
+    },
+    30000
+  )
 
   if (!response.ok) {
     throw new Error(`Gemini API error: ${response.status}`)

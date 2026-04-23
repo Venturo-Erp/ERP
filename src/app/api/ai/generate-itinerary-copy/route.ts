@@ -7,6 +7,7 @@ import { NextRequest } from 'next/server'
 import { successResponse, errorResponse, ErrorCode } from '@/lib/api/response'
 import { getServerAuth } from '@/lib/auth/server-auth'
 import { logger } from '@/lib/utils/logger'
+import { fetchWithTimeout } from '@/lib/external/fetch-with-timeout'
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY
 const GEMINI_MODEL = 'gemini-2.5-flash'
@@ -69,7 +70,7 @@ ${dailySummary}
 
 回傳純JSON：{"subtitle":"副標題","description":"描述"}`
 
-    const response = await fetch(
+    const response = await fetchWithTimeout(
       `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`,
       {
         method: 'POST',

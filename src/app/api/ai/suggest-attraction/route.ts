@@ -14,6 +14,7 @@ import { checkApiUsage, updateApiUsage, API_LIMITS } from '@/lib/api-usage'
 import { getServerAuth } from '@/lib/auth/server-auth'
 import { validateBody } from '@/lib/api/validation'
 import { suggestAttractionSchema } from '@/lib/validations/api-schemas'
+import { fetchWithTimeout } from '@/lib/external/fetch-with-timeout'
 
 // Gemini API 設定
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY
@@ -130,7 +131,7 @@ ${missingFields.map(f => `- ${f}`).join('\n')}
 4. 介紹要用繁體中文，簡潔有吸引力`
 
     // 呼叫 Gemini API
-    const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+    const response = await fetchWithTimeout(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

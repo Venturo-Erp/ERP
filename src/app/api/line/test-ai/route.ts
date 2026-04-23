@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { fetchWithTimeout } from '@/lib/external/fetch-with-timeout'
 
 export async function GET() {
   const GEMINI_API_KEY = process.env.GEMINI_API_KEY
@@ -11,7 +12,7 @@ export async function GET() {
   }
 
   try {
-    const response = await fetch(
+    const response = await fetchWithTimeout(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
       {
         method: 'POST',

@@ -14,6 +14,7 @@ import { checkApiUsage, updateApiUsage, API_LIMITS } from '@/lib/api-usage'
 import { getServerAuth } from '@/lib/auth/server-auth'
 import { validateBody } from '@/lib/api/validation'
 import { editImageSchema } from '@/lib/validations/api-schemas'
+import { fetchWithTimeout } from '@/lib/external/fetch-with-timeout'
 
 // Gemini API 設定（複用多 Key 機制）
 const GEMINI_API_KEYS = [
@@ -340,7 +341,7 @@ async function tryEditImage(
 }> {
   try {
     // 使用 Gemini 2.0 Flash 進行圖片編輯
-    const response = await fetch(
+    const response = await fetchWithTimeout(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${apiKey}`,
       {
         method: 'POST',

@@ -8,6 +8,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { logger } from '@/lib/utils/logger'
+import { fetchWithTimeout } from '@/lib/external/fetch-with-timeout'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -157,7 +158,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 發送 LINE 訊息
-    const lineResponse = await fetch('https://api.line.me/v2/bot/message/push', {
+    const lineResponse = await fetchWithTimeout('https://api.line.me/v2/bot/message/push', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${LINE_CHANNEL_ACCESS_TOKEN}`,

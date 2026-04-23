@@ -3,6 +3,7 @@ import { getServerAuth } from '@/lib/auth/server-auth'
 import { getSupabaseAdminClient } from '@/lib/supabase/admin'
 import { dynamicFrom } from '@/lib/supabase/typed-client'
 import { logger } from '@/lib/utils/logger'
+import { fetchWithTimeout } from '@/lib/external/fetch-with-timeout'
 
 interface LineConfig {
   workspace_id: string
@@ -80,7 +81,7 @@ export async function POST(req: NextRequest) {
       }
 
       // 測試 token 是否有效
-      const testRes = await fetch('https://api.line.me/v2/bot/info', {
+      const testRes = await fetchWithTimeout('https://api.line.me/v2/bot/info', {
         headers: { Authorization: `Bearer ${channel_access_token}` },
       })
 
@@ -145,7 +146,7 @@ export async function POST(req: NextRequest) {
       const webhookUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/line/webhook/${targetWorkspaceId}`
 
       // 設定 webhook
-      const setRes = await fetch('https://api.line.me/v2/bot/channel/webhook/endpoint', {
+      const setRes = await fetchWithTimeout('https://api.line.me/v2/bot/channel/webhook/endpoint', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -159,7 +160,7 @@ export async function POST(req: NextRequest) {
       }
 
       // 測試 webhook
-      const testRes = await fetch('https://api.line.me/v2/bot/channel/webhook/test', {
+      const testRes = await fetchWithTimeout('https://api.line.me/v2/bot/channel/webhook/test', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

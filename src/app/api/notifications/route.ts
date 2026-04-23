@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerAuth } from '@/lib/auth/server-auth'
 import { getSupabaseAdminClient } from '@/lib/supabase/admin'
 import { logger } from '@/lib/utils/logger'
+import { fetchWithTimeout } from '@/lib/external/fetch-with-timeout'
 
 function from(table: string) {
   const supabase = getSupabaseAdminClient()
@@ -133,7 +134,7 @@ export async function POST(request: NextRequest) {
       if (token) {
         for (const lu of lineUsers) {
           try {
-            await fetch('https://api.line.me/v2/bot/message/push', {
+            await fetchWithTimeout('https://api.line.me/v2/bot/message/push', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
