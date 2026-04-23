@@ -118,11 +118,11 @@ export default tseslint.config(
       'no-restricted-syntax': [
         'error',
         {
-          // 直接用 *.permissions.includes(...)
+          // 直接用 *.permissions.{includes,some,find,filter,map}(...)
           selector:
-            'CallExpression[callee.property.name="includes"][callee.object.property.name="permissions"]',
+            'CallExpression[callee.property.name=/^(includes|some|find|filter|map|every)$/][callee.object.property.name="permissions"]',
           message:
-            '不准用 *.permissions.includes(...)。權限請走 useTabPermissions().canRead / canWrite — HR 為 SSOT',
+            '不准用 *.permissions.xxx(...) 查權限。請走 useTabPermissions().canRead / canWrite / canReadAny / canWriteAny — HR 為 SSOT',
         },
         {
           // 把 user.permissions 賦值給中介變數（常見繞過手法）

@@ -38,6 +38,7 @@ import { DatePicker } from '@/components/ui/date-picker'
 import { logger } from '@/lib/utils/logger'
 import { toast } from 'sonner'
 import { useAuthStore } from '@/stores'
+import { useTabPermissions } from '@/lib/permissions'
 import {
   useItineraries,
   createItinerary,
@@ -87,9 +88,9 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
     [allItineraryDays, tour.id]
   )
 
-  // 權限：是否可以編輯資料庫（match 'database' root or any 'database:*' tab permission）
-  const canEditDatabase =
-    currentUser?.permissions?.some(p => p === 'database' || p.startsWith('database:')) ?? false
+  // 權限：是否可以編輯資料庫（HR canWriteAny：任一 database tab 有寫入權）
+  const { canWriteAny } = useTabPermissions()
+  const canEditDatabase = canWriteAny('database')
 
   // State
   const [loading, setLoading] = useState(true)
