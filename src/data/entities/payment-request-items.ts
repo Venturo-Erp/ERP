@@ -12,8 +12,12 @@ export const paymentRequestItemEntity = createEntityHook<PaymentRequestItem>(
   'payment_request_items',
   {
     list: {
+      // 2026-04-23 移除 tour_request_id：DB schema 沒這個欄位（info_schema 驗證過）、
+      // SELECT 包含它會讓整個 query 回「column does not exist」、causing payment_request_items
+      // 永遠抓不到、請款單詳情全空。type 層 (finance.types.ts / base.types.ts) 暫保留此欄位
+      // 以免誤傷其他用途、未來如確認不需要可一併清除。
       select:
-        'id,request_id,item_number,category,supplier_id,supplier_name,description,tour_id,tour_request_id,quantity,unitprice,subtotal,payment_method,payment_method_id,custom_request_date,sort_order,workspace_id,created_at,created_by,updated_at,updated_by,advanced_by,advanced_by_name',
+        'id,request_id,item_number,category,supplier_id,supplier_name,description,tour_id,quantity,unitprice,subtotal,payment_method,payment_method_id,custom_request_date,sort_order,workspace_id,created_at,created_by,updated_at,updated_by,advanced_by,advanced_by_name',
       orderBy: { column: 'sort_order', ascending: true },
     },
     slim: {
