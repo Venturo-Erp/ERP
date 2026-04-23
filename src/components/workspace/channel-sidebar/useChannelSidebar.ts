@@ -1,25 +1,17 @@
 import { useState, useMemo, useEffect } from 'react'
-import { useAuthStore } from '@/stores/auth-store'
+import { useTabPermissions } from '@/lib/permissions'
 import type { Channel } from '@/stores/workspace-store'
 
 export function useChannelSidebar(channels: Channel[], searchQuery: string, channelFilter: string) {
-  const { user } = useAuthStore()
+  const { canWrite } = useTabPermissions()
 
   const [expandedSections, setExpandedSections] = useState({
     favorites: true,
     ungrouped: true,
   })
 
-  const canManageMembers = useMemo(() => {
-    if (!user) return false
-    const permissions = user.permissions || []
-    // admin role 透過 backfill 拿到 'workspace' 模組權限（無 tab、視為全管理）
-    return (
-      permissions.includes('workspace') ||
-      permissions.includes('workspace:manage_members') ||
-      permissions.includes('workspace:manage')
-    )
-  }, [user])
+  // workspace 模組無 tab、用 module-level 寫入權判定能否管理成員（admin 已 backfill）
+  const canManageMembers = useMemo(() => canWrite('workspace'), [canWrite])
 
   // 篩選頻道
   const filteredChannels = useMemo(() => {

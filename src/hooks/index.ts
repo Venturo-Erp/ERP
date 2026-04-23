@@ -10,7 +10,6 @@
  */
 
 // 通用 Hooks
-export { usePermissions } from './usePermissions'
 export { useEnterSubmit } from './useEnterSubmit'
 export { useCrudOperations } from './useCrudOperations'
 export { useDataFiltering } from './useDataFiltering'

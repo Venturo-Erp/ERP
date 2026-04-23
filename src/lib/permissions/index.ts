@@ -96,31 +96,6 @@ export function getModuleFromRoute(route: string): string | null {
   return null
 }
 
-/**
- * 根據路由檢查是否有權限
- * 權限格式：module_code 或 module_code:tab_code（例 'tours' 或 'tours:overview'）
- * admin role 已透過 backfill 拿到全部 module 權限、走同一條過濾邏輯
- */
-export function hasPermissionForRoute(
-  userPermissions: string[] | undefined,
-  route: string,
-  _isAdmin?: boolean
-): boolean {
-  if (!userPermissions || userPermissions.length === 0) return false
-
-  // 無需特殊權限的路由
-  const publicRoutes = ['/dashboard', '/profile']
-  if (publicRoutes.some(r => route.startsWith(r))) {
-    return true
-  }
-
-  const moduleCode = getModuleFromRoute(route)
-  if (!moduleCode) return false
-
-  // 檢查是否有該模組的任何權限（精確匹配 或 module:tab 前綴匹配）
-  return userPermissions.some(p => p === moduleCode || p.startsWith(`${moduleCode}:`))
-}
-
 export function getPermissionCategories(): string[] {
   return Array.from(new Set(FEATURE_PERMISSIONS.map(p => p.category)))
 }

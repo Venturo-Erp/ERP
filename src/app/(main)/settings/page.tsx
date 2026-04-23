@@ -1,6 +1,7 @@
 'use client'
 
 import { useAuthStore } from '@/stores/auth-store'
+import { useTabPermissions } from '@/lib/permissions'
 import { ContentPageLayout } from '@/components/layout/content-page-layout'
 import { Button } from '@/components/ui/button'
 import { User, LogOut, Lock } from 'lucide-react'
@@ -44,8 +45,9 @@ export default function SettingsPage() {
     }
   }, [searchParams, setShowPasswordSection])
 
-  const { isAdmin } = useAuthStore()
-  const hasSettingsAccess = isAdmin || user?.permissions?.includes('settings')
+  // HR settings 模組任一 tab 有讀權即顯示 tab 列（admin 已 backfill 自動 true）
+  const { canReadAny } = useTabPermissions()
+  const hasSettingsAccess = canReadAny('settings')
 
   const handleLogout = async () => {
     await logout()

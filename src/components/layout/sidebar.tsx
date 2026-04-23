@@ -30,7 +30,7 @@ import {
 import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useWorkspaceFeatures } from '@/lib/permissions'
+import { useWorkspaceFeatures, useTabPermissions } from '@/lib/permissions'
 import {
   ChevronRight,
   ChevronDown,
@@ -348,6 +348,7 @@ export function Sidebar() {
   const pathname = usePathname()
   const { user } = useAuthStore()
   const { isFeatureEnabled, enabledFeatures } = useWorkspaceFeatures()
+  const { canReadAny } = useTabPermissions()
   const [mounted, setMounted] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false) // 點擊固定展開
   const [isHovered, setIsHovered] = useState(false) // 滑鼠懸停暫時展開
@@ -407,8 +408,7 @@ export function Sidebar() {
     return pathname.startsWith(href)
   }
 
-  // 權限過濾（使用 useMemo 避免每次渲染時建立新陣列）
-  const userPermissions = useMemo(() => user?.permissions || [], [user?.permissions])
+  // 權限過濾：HR role_tab_permissions 為 SSOT、不再讀 user.permissions array
   const hiddenMenuItems = useMemo(() => user?.hidden_menu_items || [], [user?.hidden_menu_items])
   const preferredFeatures = useMemo(
     () => user?.preferred_features || [],
@@ -453,10 +453,9 @@ export function Sidebar() {
             return null
           }
           if (!item.requiredPermission) return item
-          // 精確比對或前綴比對（例如 requiredPermission='tours'，權限有 'tours:overview' 也算符合）
-          // admin role 透過 backfill 拿到所有 module 權限、走同一條過濾邏輯
-          const perm = item.requiredPermission
-          return userPermissions.some(p => p === perm || p.startsWith(`${perm}:`)) ? item : null
+          // HR canReadAny：模組層任一 tab 有讀取權即顯示
+          // admin role 已 backfill 全 module 權限、自動回 true
+          return canReadAny(item.requiredPermission) ? item : null
         })
         .filter((item): item is MenuItem => item !== null)
     }
@@ -467,7 +466,7 @@ export function Sidebar() {
     isAdmin,
     preferredFeatures,
     hiddenMenuItems,
-    userPermissions,
+    canReadAny,
     isFeatureEnabled,
     enabledFeatures,
   ])
@@ -477,10 +476,9 @@ export function Sidebar() {
       if (!user) return !item.requiredPermission
       if (isMenuItemHidden(item.href, hiddenMenuItems)) return false
       if (!item.requiredPermission) return true
-      const perm = item.requiredPermission
-      return userPermissions.some(p => p === perm || p.startsWith(`${perm}:`))
+      return canReadAny(item.requiredPermission)
     })
-  }, [user?.id, isAdmin, hiddenMenuItems, userPermissions])
+  }, [user?.id, isAdmin, hiddenMenuItems, canReadAny])
 
   // 渲染菜單項目
   const renderMenuItem = (item: MenuItem, isChild = false) => {

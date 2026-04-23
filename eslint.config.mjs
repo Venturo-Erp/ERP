@@ -90,6 +90,49 @@ export default tseslint.config(
       'no-var': 'error',
       'no-console': 'off', // 開發階段暫時允許
 
+      // =====================================================
+      // 權限系統 SSOT 守門（2026-04-23）
+      // 唯一權限來源 = role_tab_permissions（HR 職務管理）
+      // API：useTabPermissions().canRead / canWrite / canReadAny / canWriteAny
+      // =====================================================
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: '@/hooks/usePermissions',
+              message:
+                '已廢棄（讀 user.permissions array、繞過 HR）。改用 useTabPermissions from @/lib/permissions',
+            },
+          ],
+          patterns: [
+            {
+              group: ['**/lib/permissions/hooks'],
+              importNames: ['useRolePermissions'],
+              message:
+                'useRolePermissions 是空殼 hook（permissions 永遠 []、canWrite 永遠回 true）。改用 useTabPermissions',
+            },
+          ],
+        },
+      ],
+      'no-restricted-syntax': [
+        'error',
+        {
+          // 直接用 *.permissions.includes(...)
+          selector:
+            'CallExpression[callee.property.name="includes"][callee.object.property.name="permissions"]',
+          message:
+            '不准用 *.permissions.includes(...)。權限請走 useTabPermissions().canRead / canWrite — HR 為 SSOT',
+        },
+        {
+          // 把 user.permissions 賦值給中介變數（常見繞過手法）
+          selector:
+            'VariableDeclarator[init.property.name="permissions"][init.object.property.name="user"], VariableDeclarator[init.left.property.name="permissions"][init.left.object.property.name="user"]',
+          message:
+            '不准把 user.permissions 拿出來用。權限請走 useTabPermissions — HR 為 SSOT',
+        },
+      ],
+
       // 關閉與 Prettier 衝突或不需要的規則
       quotes: 'off',
       'no-useless-escape': 'off',

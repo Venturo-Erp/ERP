@@ -72,7 +72,6 @@ interface AuthState {
   refreshUserData: () => Promise<void>
   toggleSidebar: () => void
   setSidebarCollapsed: (collapsed: boolean) => void
-  checkPermission: (permission: string) => boolean
   setHasHydrated: (hasHydrated: boolean) => void
 }
 
@@ -185,12 +184,6 @@ export const useAuthStore = create<AuthState>()(
           logger.error('💥 Login validation error:', error)
           return { success: false, message: '系統錯誤，請稍後再試' }
         }
-      },
-
-      checkPermission: (permission: string) => {
-        const user = get().user
-        if (!user) return false
-        return user.permissions.some(p => p === permission || p.startsWith(`${permission}:`))
       },
 
       refreshUserData: async () => {
