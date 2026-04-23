@@ -45,7 +45,7 @@ export function CostTransferDialog({
   const { user } = useAuthStore()
   const { toast } = useToast()
   const workspaceId = useWorkspaceId()
-  const { generateRequestCode } = useRequestOperations()
+  const { generateRequestCodeAsync } = useRequestOperations()
   const [targetTourId, setTargetTourId] = useState('')
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set())
   const [transferring, setTransferring] = useState(false)
@@ -120,7 +120,7 @@ export function CostTransferDialog({
       )
       const pairId = crypto.randomUUID()
       const today = new Date().toISOString().split('T')[0]
-      const srcCode = generateRequestCode(sourceRequest.tourCode)
+      const srcCode = await generateRequestCodeAsync(sourceRequest.tourCode)
 
       // 2. 建 R_src（來源團、負金額）
       const srcPayload = {
@@ -186,7 +186,7 @@ export function CostTransferDialog({
       }
 
       // 4. 建 R_dst（目標團、正金額）
-      const dstCode = generateRequestCode(targetTour.code || '')
+      const dstCode = await generateRequestCodeAsync(targetTour.code || '')
       const dstPayload = {
         code: dstCode,
         request_number: dstCode,

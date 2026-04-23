@@ -7,17 +7,17 @@ import { EXPENSE_TYPE_CONFIG, CompanyExpenseType } from '@/stores/types/finance.
 import { recalculateExpenseStats } from '@/features/finance/payments/services/expense-core.service'
 import { REQUEST_OPERATIONS_LABELS } from '../../constants/labels'
 import { logger } from '@/lib/utils/logger'
+import { supabase } from '@/lib/supabase/client'
 
 export function useRequestOperations() {
   const { payment_requests, createPaymentRequest, addPaymentItems, deletePaymentRequest } =
     usePayments()
   const workspaceId = useWorkspaceId()
 
-  // 根據團號生成請款單編號：團號-I01, 團號-I02, ...
-  // I = Invoice (請款單)
+  // 根據團號預估請款單編號 (僅供 UI preview 用、可能不準)
+  // 真正建單要用 generateRequestCodeAsync (RPC + advisory lock 防 race)
   const generateRequestCode = useCallback(
     (tourCode: string) => {
-      // 找到該團已有的請款單數量
       const existingCount = payment_requests.filter(
         r => r.tour_code === tourCode || r.code?.startsWith(`${tourCode}-I`)
       ).length
@@ -26,6 +26,15 @@ export function useRequestOperations() {
     },
     [payment_requests]
   )
+
+  // 透過 DB RPC、advisory lock 防 race — 實際建單時用這個
+  const generateRequestCodeAsync = useCallback(async (tourCode: string): Promise<string> => {
+    const { data, error } = await supabase.rpc('generate_request_no', {
+      p_tour_code: tourCode,
+    })
+    if (error || !data) throw error ?? new Error('generate_request_no returned null')
+    return data as string
+  }, [])
 
   // Generate request number preview (舊方法，保留向下相容)
   const generateRequestNumber = useCallback(() => {
@@ -115,8 +124,8 @@ export function useRequestOperations() {
         // 團體請款
         if (!formData.tour_id) return null
 
-        // 生成請款單編號：團號-I01（或使用外部 override）
-        const requestCode = codeOverride || generateRequestCode(tourCode)
+        // 生成請款單編號 — 透過 RPC (advisory lock 防 race)、或用外部 override
+        const requestCode = codeOverride || (await generateRequestCodeAsync(tourCode))
 
         // Create payment request (明確傳入 workspace_id)
         const request = await createPaymentRequest({
@@ -174,7 +183,7 @@ export function useRequestOperations() {
       createPaymentRequest,
       addPaymentItems,
       deletePaymentRequest,
-      generateRequestCode,
+      generateRequestCodeAsync,
       generateCompanyRequestCode,
       workspaceId,
     ]
@@ -197,8 +206,8 @@ export function useRequestOperations() {
         const selectedTour = tours.find(t => t.id === tourId)
         if (!selectedTour) continue
 
-        // 生成請款單編號：團號-R01
-        const requestCode = generateRequestCode(selectedTour.code)
+        // 生成請款單編號 — 透過 RPC (advisory lock 防 race)
+        const requestCode = await generateRequestCodeAsync(selectedTour.code)
 
         // Create payment request (明確傳入 workspace_id)
         const request = await createPaymentRequest({
@@ -244,12 +253,19 @@ export function useRequestOperations() {
 
       return createdRequests
     },
-    [createPaymentRequest, addPaymentItems, deletePaymentRequest, generateRequestCode, workspaceId]
+    [
+      createPaymentRequest,
+      addPaymentItems,
+      deletePaymentRequest,
+      generateRequestCodeAsync,
+      workspaceId,
+    ]
   )
 
   return {
     generateRequestNumber,
-    generateRequestCode,
+    generateRequestCode, // sync preview (UI 用)
+    generateRequestCodeAsync, // RPC + advisory lock (真正建單用)
     generateCompanyRequestCode,
     createRequest,
     createBatchRequests,

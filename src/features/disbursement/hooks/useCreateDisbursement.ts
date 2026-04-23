@@ -33,38 +33,19 @@ function getNextThursday(): Date {
   return nextThursday
 }
 
-// 生成出納單號：DOYYMMDD-NNN（根據出帳日期，流水號從 001 開始）
+// 生成出納單號 — 透過 DB RPC、advisory lock 防 race
+// 原本 client side SELECT max + 1 已撞過 2 次 (DO260423-001/002 各 2 筆)
 async function generateDisbursementNumber(
-  _existingOrders: DisbursementOrder[],
+  workspaceId: string,
   disbursementDate?: string
 ): Promise<string> {
-  const date = disbursementDate ? new Date(disbursementDate) : new Date()
-  const yy = String(date.getFullYear()).slice(-2)
-  const mm = String(date.getMonth() + 1).padStart(2, '0')
-  const dd = String(date.getDate()).padStart(2, '0')
-  const prefix = `DO${yy}${mm}${dd}`
-
-  // 直接查 DB 取當天最大流水號、避免 SWR 快取 stale 造成 unique 撞號
-  // unique constraint 在 `code`、所以只查 code（先前用 .or() 在 PostgREST 的 `%` wildcard 可能沒正確轉譯、回空陣列、nextNum 永遠 1 → 撞號）
-  const [codeRes, orderRes] = await Promise.all([
-    supabase.from('disbursement_orders').select('code').like('code', `${prefix}-%`),
-    supabase.from('disbursement_orders').select('order_number').like('order_number', `${prefix}-%`),
-  ])
-  if (codeRes.error) throw codeRes.error
-  if (orderRes.error) throw orderRes.error
-
-  let nextNum = 1
-  const extractNum = (value: string | null | undefined) => {
-    const match = value?.match(/-(\d+)$/)
-    if (match) {
-      const num = parseInt(match[1], 10)
-      if (num >= nextNum) nextNum = num + 1
-    }
-  }
-  for (const row of codeRes.data ?? []) extractNum(row.code as string | null)
-  for (const row of orderRes.data ?? []) extractNum(row.order_number as string | null)
-
-  return `${prefix}-${String(nextNum).padStart(3, '0')}`
+  const dateParam = disbursementDate || new Date().toISOString().split('T')[0]
+  const { data, error } = await supabase.rpc('generate_disbursement_no', {
+    p_workspace_id: workspaceId,
+    p_disbursement_date: dateParam,
+  })
+  if (error || !data) throw error ?? new Error('generate_disbursement_no returned null')
+  return data as string
 }
 
 interface UseCreateDisbursementProps {
@@ -192,7 +173,8 @@ export function useCreateDisbursement({
       let data: { id: string; code?: string } | null = null
       let orderNumber = ''
       for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-        orderNumber = await generateDisbursementNumber(disbursement_orders, disbursementDate)
+        if (!user?.workspace_id) throw new Error('找不到 workspace_id、無法生成出納單號')
+        orderNumber = await generateDisbursementNumber(user.workspace_id, disbursementDate)
 
         const { data: inserted, error } = await dynamicFrom('disbursement_orders')
           .insert({
@@ -297,8 +279,9 @@ export function useCreateDisbursement({
         disbursement_date: disbursementDate,
       }
       if (dateChanged) {
+        if (!user?.workspace_id) throw new Error('找不到 workspace_id、無法生成出納單號')
         const newOrderNumber = await generateDisbursementNumber(
-          disbursement_orders,
+          user.workspace_id,
           disbursementDate
         )
         updatedFields = { ...updatedFields, order_number: newOrderNumber, code: newOrderNumber }
