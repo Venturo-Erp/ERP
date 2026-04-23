@@ -81,7 +81,7 @@ export function AddReceiptDialog({
   const isEditMode = !!editingReceipt
 
   // 是否為已確認狀態
-  const isConfirmed = editingReceipt?.status === '1'
+  const isConfirmed = editingReceipt?.status === 'confirmed'
   const isAbnormal = editingReceipt?.status === '2'
 
   // 權限判斷（HR 職務管理為單一標準）
@@ -795,7 +795,7 @@ export function AddReceiptDialog({
                           .eq('id', id)
                       })
                     await updateFunc(editingReceipt.id, {
-                      status: '1',
+                      status: 'confirmed',
                       actual_amount: totalActualAmount || totalAmount,
                     } as Partial<Receipt>)
                     await recalculateReceiptStats(

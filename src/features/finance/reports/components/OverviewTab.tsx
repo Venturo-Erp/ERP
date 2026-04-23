@@ -95,7 +95,7 @@ export function OverviewTab({ dateRange, granularity }: OverviewTabProps) {
 
     // 只算已確認的收款單（status='1'）才算收入
     const rangeReceipts = receipts.filter(r => {
-      if (r.status !== '1') return false
+      if (r.status !== 'confirmed') return false
       const d = (r.receipt_date || r.created_at)?.split('T')[0] || ''
       return d >= startDate && d <= endDate
     })
@@ -142,7 +142,7 @@ export function OverviewTab({ dateRange, granularity }: OverviewTabProps) {
     const rows: TransactionRow[] = []
 
     receipts.forEach(r => {
-      if (r.status !== '1') return // 只顯示已確認的收款
+      if (r.status !== 'confirmed') return // 只顯示已確認的收款
       const d = (r.receipt_date || r.created_at)?.split('T')[0] || ''
       if (d < startDate || d > endDate) return
       rows.push({
@@ -152,7 +152,7 @@ export function OverviewTab({ dateRange, granularity }: OverviewTabProps) {
         type: 'income',
         category: r.tour_id ? 'tour' : 'company',
         amount: r.actual_amount || r.receipt_amount || 0,
-        status: r.status === '1' ? '已確認' : '待確認',
+        status: r.status === 'confirmed' ? '已確認' : '待確認',
         tourCode: ((r as unknown as Record<string, unknown>).tour_code as string) || '',
         supplierName: '',
       })

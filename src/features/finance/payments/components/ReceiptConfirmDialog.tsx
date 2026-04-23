@@ -60,7 +60,7 @@ export function ReceiptConfirmDialog({
     RECEIPT_TYPE_OPTIONS.find(opt => opt.value === receipt.receipt_type)?.label ||
     RECEIPT_CONFIRM_DIALOG_LABELS.未知
 
-  const isConfirmed = receipt.status === '1'
+  const isConfirmed = receipt.status === 'confirmed'
 
   // 確認金額正確
   const handleConfirmCorrect = async () => {

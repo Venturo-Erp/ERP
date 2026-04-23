@@ -237,7 +237,7 @@ export function useReceiptMutations() {
           amount: item.amount,
           total_amount: item.amount,
           actual_amount: 0,
-          status: '0',
+          status: 'pending',
           batch_id: paymentItems.length > 1 && firstReceiptId ? firstReceiptId : null,
           receipt_account: item.receipt_account || null,
           email: item.email || null,

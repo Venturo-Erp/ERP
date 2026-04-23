@@ -71,7 +71,7 @@ export const TourOverview = React.memo(function TourOverview({
   const confirmedIncome = useMemo(
     () =>
       tourReceipts
-        .filter(r => r.status === '1')
+        .filter(r => r.status === 'confirmed')
         .reduce((sum, r) => sum + (Number(r.actual_amount) || Number(r.receipt_amount) || 0), 0),
     [tourReceipts]
   )

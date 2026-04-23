@@ -44,10 +44,10 @@ export default function FinancePage() {
   const totalReceivable = stats.total_income
   const totalPayable = stats.total_expense
   const netProfit = totalReceivable - totalPayable
-  // 計算待確認款項：status === '0' 的收款單金額總和
+  // 計算待確認款項：status === 'pending' 的收款單金額總和
   const pendingPayments = useMemo(() => {
     return receipts
-      .filter(r => r.status === '0')
+      .filter(r => r.status === 'pending')
       .reduce((sum, r) => sum + (r.receipt_amount || 0), 0)
   }, [receipts])
 

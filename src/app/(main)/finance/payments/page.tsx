@@ -176,7 +176,7 @@ export default function PaymentsPage() {
       render: (_, row) => (
         <div className="flex items-center gap-1 whitespace-nowrap">
           {/* 待確認狀態：顯示核准和異常按鈕 */}
-          {row.status === '0' && (
+          {row.status === 'pending' && (
             <>
               <Button
                 variant="ghost"
@@ -215,7 +215,7 @@ export default function PaymentsPage() {
             className="h-7 px-2 text-xs text-morandi-secondary hover:text-morandi-primary"
           >
             <Edit2 size={14} className="mr-1" />
-            {row.status === '1' ? FinanceLabels.view : FinanceLabels.edit}
+            {row.status === 'confirmed' ? FinanceLabels.view : FinanceLabels.edit}
           </Button>
         </div>
       ),

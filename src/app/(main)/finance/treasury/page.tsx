@@ -81,7 +81,7 @@ export default function TreasuryPage() {
     const totalExpense = monthPayments
       .filter(pr => pr.status === 'approved' || pr.status === 'paid')
       .reduce((sum, pr) => sum + (pr.amount || 0), 0)
-    const pendingReceipts = monthReceipts.filter(r => r.status === '0').length
+    const pendingReceipts = monthReceipts.filter(r => r.status === 'pending').length
     const pendingPayments = monthPayments.filter(pr => pr.status === 'pending').length
     const pendingDisbursements = monthDisbursements.filter(d => d.status === 'pending').length
 
@@ -107,7 +107,7 @@ export default function TreasuryPage() {
         description: `${r.receipt_number} ${r.tour_name || r.order_number || ''}`.trim(),
         type: 'income',
         amount: r.actual_amount || r.receipt_amount || 0,
-        status: r.status === '1' ? '已確認' : '待確認',
+        status: r.status === 'confirmed' ? '已確認' : '待確認',
         source: 'receipt',
       })
     })

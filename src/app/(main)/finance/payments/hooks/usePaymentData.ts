@@ -118,7 +118,7 @@ export function usePaymentData() {
         receipt_amount: item.amount,
         amount: item.amount,
         actual_amount: 0, // 待會計確認
-        status: '0', // 待確認
+        status: 'pending', // 待確認
         receipt_account: item.receipt_account || null,
         email: item.email || null,
         payment_name: item.payment_name || null,
@@ -176,7 +176,7 @@ export function usePaymentData() {
 
     await updateReceipt(receiptId, {
       actual_amount: actualAmount,
-      status: '1', // 已確認
+      status: 'confirmed', // 已確認
       notes: abnormalNote ? `${receipt?.notes || ''} ${abnormalNote}`.trim() : receipt?.notes,
       updated_by: user.id,
     })
@@ -247,7 +247,7 @@ export function usePaymentData() {
 
     // 檢查收款單是否已確認
     const receipt = receipts.find(r => r.id === receiptId)
-    if (receipt?.status === '1') {
+    if (receipt?.status === 'confirmed') {
       throw new Error(PAYMENT_DATA_LABELS.CONFIRMED_CANNOT_DELETE)
     }
 

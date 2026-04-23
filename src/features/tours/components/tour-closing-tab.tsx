@@ -137,7 +137,7 @@ export function TourClosingTab({ tour }: TourClosingTabProps) {
   const confirmedIncome = useMemo(
     () =>
       receipts
-        .filter(r => r.status === '1')
+        .filter(r => r.status === 'confirmed')
         .reduce((sum, r) => sum + (Number(r.actual_amount) || Number(r.receipt_amount) || 0), 0),
     [receipts]
   )
@@ -194,7 +194,7 @@ export function TourClosingTab({ tour }: TourClosingTabProps) {
         allocation_mode: 'single' as const,
         payment_items: [],
         total_amount: Number(r.receipt_amount) || Number(r.amount) || 0,
-        status: r.status === '1' ? ('received' as const) : ('pending' as const),
+        status: r.status === 'confirmed' ? ('received' as const) : ('pending' as const),
         created_by: r.created_by ?? '',
         updated_at: r.updated_at ?? '',
         created_at: r.created_at ?? '',

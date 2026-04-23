@@ -352,7 +352,7 @@ export function BatchReceiptDialog({ open, onOpenChange }: BatchReceiptDialogPro
           receipt_amount: allocation.allocated_amount,
           amount: allocation.allocated_amount,
           actual_amount: 0,
-          status: '0',
+          status: 'pending',
           notes: allocation.notes || null,
           created_by: user.id,
           updated_by: user.id,

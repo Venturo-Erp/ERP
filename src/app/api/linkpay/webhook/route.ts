@@ -157,7 +157,7 @@ export async function POST(req: NextRequest) {
       const { error: receiptError } = await supabase
         .from('receipts')
         .update({
-          // status: '0', // 保持待確認，不自動改成已確認
+          // status: 'pending', // 保持待確認，不自動改成已確認
           actual_amount: actualAmount,
           receipt_date: currentTime,
           updated_at: currentTime,
