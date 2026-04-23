@@ -407,17 +407,20 @@ export function AddRequestDialog({
 
   // Reset dirty state when switching requests
   //
-  // 2026-04-23 bug fix：加 setLocalItems([]) + prevDbItemsJsonRef.current = ''
-  // 原本：切換請款單時只 reset isDirty / deletedIds / newIds、忘記 reset localItems
-  // 造成：A 單加了未存的 item、切到 B → Sync effect 因 isDirty=true 跳過
-  // setLocalItems、但已把 prevDbItemsJsonRef 更新成 B 的 JSON、之後 Sync 永遠看成
-  // 「沒變」、B 的 items 永遠不會從 DB 載入、UI 顯示 A 的未存 items。
+  // 2026-04-23 bug fix：強制 sync effect 重載 DB items
+  // 原本：切換請款單時只 reset isDirty / deletedIds / newIds、忘記讓 sync 重載
+  // 造成：A 單加了未存的 item、切到 B → Sync effect 因 isDirty=true 跳過 setLocalItems、
+  // 但已把 prevDbItemsJsonRef 更新成 B 的 JSON、之後 Sync 永遠看成「沒變」、
+  // B 的 items 永遠不會從 DB 載入、UI 顯示 A 的未存 items。
+  //
+  // 修法：reset prevDbItemsJsonRef = ''、讓 sync effect 下一輪（isDirty=false 後）
+  // 看到 dbItemsJson !== ''、重新 setLocalItems(DB items)。不要直接 setLocalItems([])、
+  // 否則會跟 sync effect 首次 setLocalItems(items) 打架、永遠顯示空白。
   useEffect(() => {
     if (!isEditMode) return
     setIsDirty(false)
     setDeletedItemIds([])
     setNewItemIds([])
-    setLocalItems([])
     prevDbItemsJsonRef.current = ''
     setLocalPaymentMethodId(currentRequest?.payment_method_id || null)
   }, [isEditMode, selectedRequestId, currentRequest?.payment_method_id])
