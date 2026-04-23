@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     const { data: employee, error: empError } = await supabase
       .from('employees')
       .select(
-        'id, employee_number, display_name, english_name, email, avatar_url, status, supabase_user_id, workspace_id, role_id, job_info, created_at, updated_at, login_failed_count, login_locked_until'
+        'id, employee_number, display_name, english_name, avatar_url, status, supabase_user_id, workspace_id, role_id, job_info, created_at, updated_at, login_failed_count, login_locked_until'
       )
       .eq('workspace_id', workspace.id)
       .ilike('employee_number', username)
@@ -67,16 +67,22 @@ export async function POST(request: NextRequest) {
       return ApiError.unauthorized(`帳號已鎖定，請 ${remainingMinutes} 分鐘後再試`)
     }
 
-    // 4. 查詢 auth email（優先從 auth.users 取、fallback 用 employees.email、再 fallback 用內部規則）
-    let authEmail: string | undefined
-
-    if (employee.supabase_user_id) {
-      const { data: authUser } = await supabase.auth.admin.getUserById(employee.supabase_user_id)
-      authEmail = authUser?.user?.email ?? undefined
+    // 4. 從 auth.users 取得這位員工的登入 email（單一來源、不再 fallback）
+    if (!employee.supabase_user_id) {
+      logger.warn(
+        `Employee ${employee.employee_number}@${code} 缺少 supabase_user_id、無法登入`
+      )
+      return ApiError.unauthorized('帳號設定不完整、請聯絡管理員')
     }
 
+    const { data: authUser } = await supabase.auth.admin.getUserById(employee.supabase_user_id)
+    const authEmail = authUser?.user?.email
+
     if (!authEmail) {
-      authEmail = employee.email || `${code.toLowerCase()}_${username.toLowerCase()}@venturo.com`
+      logger.error(
+        `Auth user ${employee.supabase_user_id} (employee ${employee.employee_number}) 無 email、登入卡住`
+      )
+      return ApiError.unauthorized('帳號認證資料異常、請聯絡管理員')
     }
 
     // 5. 用 Supabase Auth 驗證密碼
