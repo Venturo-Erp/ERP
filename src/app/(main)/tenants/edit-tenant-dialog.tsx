@@ -4,25 +4,11 @@ import React, { useState, useEffect } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { logger } from '@/lib/utils/logger'
 import { useWorkspaceChannels } from '@/stores/workspace'
 import { LABELS } from './constants/labels'
-
-const WORKSPACE_TYPES = [
-  { value: 'travel_agency', label: LABELS.TYPE_TRAVEL_AGENCY },
-  { value: 'transportation', label: LABELS.TYPE_TRANSPORTATION },
-  { value: 'dmc', label: LABELS.TYPE_DMC },
-  { value: 'other', label: LABELS.TYPE_OTHER },
-] as const
 
 interface EditTenantDialogProps {
   open: boolean
@@ -31,7 +17,6 @@ interface EditTenantDialogProps {
     id: string
     name: string
     code?: string | null
-    type?: string | null
     max_employees?: number | null
   } | null
   onComplete: () => void
@@ -45,14 +30,12 @@ export function EditTenantDialog({
 }: EditTenantDialogProps) {
   const { updateWorkspace } = useWorkspaceChannels()
   const [name, setName] = useState('')
-  const [type, setType] = useState('')
   const [maxEmployees, setMaxEmployees] = useState('')
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     if (workspace && open) {
       setName(workspace.name)
-      setType(workspace.type || 'travel_agency')
       setMaxEmployees(workspace.max_employees != null ? String(workspace.max_employees) : '')
     }
   }, [workspace, open])
@@ -64,7 +47,6 @@ export function EditTenantDialog({
     try {
       await updateWorkspace(workspace.id, {
         name: name.trim(),
-        type,
         max_employees: maxEmployees ? parseInt(maxEmployees, 10) : null,
       } as Parameters<typeof updateWorkspace>[1])
       toast.success(LABELS.TOAST_EDIT_SUCCESS)
@@ -101,22 +83,6 @@ export function EditTenantDialog({
             <label className="text-sm font-medium text-morandi-primary">{LABELS.FIELD_CODE}</label>
             <Input value={workspace?.code || ''} disabled className="mt-1" />
             <p className="text-xs text-morandi-secondary mt-1">{LABELS.FIELD_CODE_HINT}</p>
-          </div>
-
-          <div>
-            <label className="text-sm font-medium text-morandi-primary">{LABELS.FIELD_TYPE}</label>
-            <Select value={type} onValueChange={setType}>
-              <SelectTrigger className="mt-1">
-                <SelectValue placeholder={LABELS.FIELD_TYPE_PLACEHOLDER} />
-              </SelectTrigger>
-              <SelectContent>
-                {WORKSPACE_TYPES.map(t => (
-                  <SelectItem key={t.value} value={t.value}>
-                    {t.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
           </div>
 
           <div>

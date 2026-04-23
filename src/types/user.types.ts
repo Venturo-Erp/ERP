@@ -97,12 +97,7 @@ export interface EmployeeFull {
   workspace_id?: string
   workspace_code?: string
   workspace_name?: string
-  workspace_type?:
-    | 'travel_agency'
-    | 'vehicle_supplier'
-    | 'guide_supplier'
-    | 'transportation'
-    | 'dmc'
+  workspace_type?: 'travel_agency'
   selected_workspace_id?: string
   pinyin?: string | null
   hidden_menu_items?: string[]

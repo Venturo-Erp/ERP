@@ -57,7 +57,6 @@ import {
   Wifi,
   FileSpreadsheet,
   ImageIcon,
-  Bus,
   CheckSquare,
   Archive,
   ClipboardList,
@@ -66,7 +65,6 @@ import {
   BookOpen,
   Megaphone,
   Mail,
-  Truck,
   Shield,
   LineChart,
   Gamepad2,
@@ -350,27 +348,6 @@ const localMenuItems: MenuItem[] = [
   { href: '/settings', label: COMP_LAYOUT_LABELS.設定, icon: Wrench },
 ]
 
-// 車行選單（遊覽車公司）
-const transportMenuItems: MenuItem[] = [
-  { href: '/dashboard', label: COMP_LAYOUT_LABELS.首頁, icon: House },
-  { href: '/supplier/trips', label: '車趟管理', icon: Truck }, // 新的車趟管理頁面
-  { href: '/database/fleet', label: COMP_LAYOUT_LABELS.車隊管理, icon: Bus },
-  {
-    href: '/finance',
-    label: COMP_LAYOUT_LABELS.財務系統,
-    icon: CurrencyCircleDollar,
-    children: [
-      { href: '/finance/payments', label: COMP_LAYOUT_LABELS.收款管理, icon: PhWallet },
-      { href: '/finance/requests', label: COMP_LAYOUT_LABELS.請款管理, icon: HandCoins },
-      { href: '/finance/settings', label: '財務設定', icon: Wrench },
-    ],
-  },
-  { href: '/hr', label: COMP_LAYOUT_LABELS.人資管理, icon: UserSquare },
-  { href: '/settings', label: COMP_LAYOUT_LABELS.設定, icon: Wrench },
-]
-
-// 旅行社完整選單（使用上面的 menuItems）
-
 const personalToolItems: MenuItem[] = []
 
 export function Sidebar() {
@@ -447,22 +424,8 @@ export function Sidebar() {
   // 新系統：使用 store.isAdmin
   const { isAdmin } = useAuthStore()
 
-  // 判斷租戶類型
-  const workspaceType = user?.workspace_type
-  const isLocal = workspaceType === 'dmc' || workspaceType === 'guide_supplier'
-  const isTransport = workspaceType === 'transportation' || workspaceType === 'vehicle_supplier'
-  const isTravelAgency = workspaceType === 'travel_agency' || (!isLocal && !isTransport)
-
   const visibleMenuItems = useMemo(() => {
     const workspaceCode = user?.workspace_code
-
-    // 車行使用簡化選單（車趟管理為主）
-    // admin 角色不受租戶類型限制、進入完整選單過濾邏輯
-    if (!isAdmin && isTransport) {
-      return transportMenuItems
-    }
-    // Local 和旅行社使用完整選單
-    // （Local 跟旅行社差不多，不需要簡化）
 
     const filterMenuByPermissions = (items: MenuItem[]): MenuItem[] => {
       if (!user) return items.filter(item => !item.requiredPermission)
@@ -507,9 +470,6 @@ export function Sidebar() {
   }, [
     user?.id,
     user?.workspace_code,
-    user?.workspace_type,
-    isLocal,
-    isTransport,
     isAdmin,
     preferredFeatures,
     hiddenMenuItems,
@@ -519,10 +479,6 @@ export function Sidebar() {
   ])
 
   const visiblePersonalToolItems = useMemo(() => {
-    // 供應商（Local/車行）不顯示個人工具
-    if (isLocal || isTransport) return []
-
-    // 簡化版篩選（個人工具不需要 restrictedFeature 或 preferredFeatures 檢查）
     return personalToolItems.filter(item => {
       if (!user) return !item.requiredPermission
       if (isMenuItemHidden(item.href, hiddenMenuItems)) return false
@@ -530,7 +486,7 @@ export function Sidebar() {
       const perm = item.requiredPermission
       return userPermissions.some(p => p === perm || p.startsWith(`${perm}:`))
     })
-  }, [user?.id, isLocal, isTransport, isAdmin, hiddenMenuItems, userPermissions])
+  }, [user?.id, isAdmin, hiddenMenuItems, userPermissions])
 
   // 渲染菜單項目
   const renderMenuItem = (item: MenuItem, isChild = false) => {

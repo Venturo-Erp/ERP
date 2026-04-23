@@ -18,13 +18,6 @@ import { logger } from '@/lib/utils/logger'
 import { useAuthStore } from '@/stores/auth-store'
 import { LABELS } from './constants/labels'
 
-const WORKSPACE_TYPES = [
-  { value: 'travel_agency', label: LABELS.TYPE_TRAVEL_AGENCY },
-  { value: 'transportation', label: LABELS.TYPE_TRANSPORTATION },
-  { value: 'dmc', label: LABELS.TYPE_DMC },
-  { value: 'other', label: LABELS.TYPE_OTHER },
-] as const
-
 interface CreateTenantDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -35,7 +28,6 @@ interface CreateTenantDialogProps {
 interface Step1Data {
   name: string
   code: string
-  type: string
   maxEmployees: string
 }
 
@@ -65,7 +57,7 @@ export function CreateTenantDialog({
   const [copied, setCopied] = useState(false)
   const [codeError, setCodeError] = useState('')
 
-  const [step1, setStep1] = useState<Step1Data>({ name: '', code: '', type: '', maxEmployees: '' })
+  const [step1, setStep1] = useState<Step1Data>({ name: '', code: '', maxEmployees: '' })
   const [step2, setStep2] = useState<Step2Data>({
     employeeNumber: 'E001',
     name: '',
@@ -79,7 +71,7 @@ export function CreateTenantDialog({
     setCreating(false)
     setCopied(false)
     setCodeError('')
-    setStep1({ name: '', code: '', type: '', maxEmployees: '' })
+    setStep1({ name: '', code: '', maxEmployees: '' })
     setStep2({ employeeNumber: 'E001', name: '', email: '', password: '12345678' })
     setLoginInfo(null)
   }, [])
@@ -144,7 +136,7 @@ export function CreateTenantDialog({
         body: JSON.stringify({
           workspaceName: step1.name,
           workspaceCode: step1.code,
-          workspaceType: step1.type || null,
+          workspaceType: 'travel_agency',
           maxEmployees: step1.maxEmployees ? parseInt(step1.maxEmployees, 10) : null,
           adminEmployeeNumber: step2.employeeNumber,
           adminName: step2.name,
@@ -258,27 +250,6 @@ export function CreateTenantDialog({
                 ) : (
                   <p className="text-xs text-morandi-muted mt-1">{LABELS.FIELD_CODE_HINT}</p>
                 )}
-              </div>
-
-              <div>
-                <label className="text-sm font-medium text-morandi-primary mb-2 block">
-                  {LABELS.FIELD_TYPE}
-                </label>
-                <Select
-                  value={step1.type}
-                  onValueChange={value => setStep1(prev => ({ ...prev, type: value }))}
-                >
-                  <SelectTrigger className="border-morandi-container/30">
-                    <SelectValue placeholder={LABELS.FIELD_TYPE_PLACEHOLDER} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {WORKSPACE_TYPES.map(t => (
-                      <SelectItem key={t.value} value={t.value}>
-                        {t.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
               </div>
 
               <div>

@@ -50,13 +50,6 @@ export const LABELS = {
   WORKSPACE_CODE_PLACEHOLDER: '例如：CORNER、DEMO（英文大寫）',
   WORKSPACE_CODE_INVALID: '公司代碼只能使用英文大寫字母',
   WORKSPACE_CODE_DUPLICATE: '此公司代碼已被使用',
-  WORKSPACE_TYPE_LABEL: '類型',
-  WORKSPACE_TYPE_PLACEHOLDER: '選擇工作空間類型',
-  WORKSPACE_TYPE_TRAVEL_AGENCY: '旅行社',
-  WORKSPACE_TYPE_TRANSPORTATION: '車公司',
-  WORKSPACE_TYPE_DMC: '地接社',
-  WORKSPACE_TYPE_OTHER: '其他',
-
   // Create Admin Dialog
   CREATE_ADMIN_TITLE: '建立第一位管理員',
   CREATE_ADMIN_DESC: '為新工作空間建立管理員帳號',

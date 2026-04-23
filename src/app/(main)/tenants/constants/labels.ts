@@ -13,7 +13,6 @@ export const LABELS = {
   // Table columns
   COL_NAME: '公司名稱',
   COL_CODE: '公司代碼',
-  COL_TYPE: '類型',
   COL_EMPLOYEE_COUNT: '員工數',
   COL_STATUS: '狀態',
   COL_CREATED_AT: '建立日期',
@@ -21,13 +20,6 @@ export const LABELS = {
   // Status
   STATUS_ACTIVE: '啟用',
   STATUS_INACTIVE: '停用',
-
-  // Workspace types
-  TYPE_TRAVEL_AGENCY: '旅行社',
-  TYPE_TRANSPORTATION: '車公司',
-  TYPE_DMC: '地接社',
-  TYPE_OTHER: '其他',
-  TYPE_UNKNOWN: '未分類',
 
   // Actions
   ADD_TENANT: '新增租戶',
@@ -47,8 +39,6 @@ export const LABELS = {
   FIELD_CODE_HINT: '用於登入識別，建立後無法修改',
   FIELD_CODE_INVALID: '公司代碼只能使用英文大寫字母',
   FIELD_CODE_DUPLICATE: '此公司代碼已被使用',
-  FIELD_TYPE: '類型',
-  FIELD_TYPE_PLACEHOLDER: '選擇公司類型',
   FIELD_MAX_EMPLOYEES: '員工帳號上限',
   FIELD_MAX_EMPLOYEES_PLACEHOLDER: '無限制',
   FIELD_MAX_EMPLOYEES_HINT: '設定此租戶可建立的最大員工數量，留空表示無限制',

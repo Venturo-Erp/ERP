@@ -23,13 +23,6 @@ type WorkspaceRow = Workspace & {
   admin_id: string | null
 }
 
-const WORKSPACE_TYPE_MAP: Record<string, string> = {
-  travel_agency: LABELS.TYPE_TRAVEL_AGENCY,
-  transportation: LABELS.TYPE_TRANSPORTATION,
-  dmc: LABELS.TYPE_DMC,
-  other: LABELS.TYPE_OTHER,
-}
-
 export default function TenantsPage() {
   const router = useRouter()
   const { updateWorkspace } = useWorkspaceChannels()
@@ -91,17 +84,6 @@ export default function TenantsPage() {
         width: '120px',
         render: value => (
           <span className="font-mono text-sm text-morandi-primary">{String(value || '')}</span>
-        ),
-      },
-      {
-        key: 'type',
-        label: LABELS.COL_TYPE,
-        sortable: true,
-        width: '100px',
-        render: value => (
-          <span className="text-sm">
-            {WORKSPACE_TYPE_MAP[String(value || '')] || LABELS.TYPE_UNKNOWN}
-          </span>
         ),
       },
       {

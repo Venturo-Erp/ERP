@@ -22,13 +22,6 @@ import { logger } from '@/lib/utils/logger'
 import { supabase } from '@/lib/supabase/client'
 import { LABELS } from '../constants/labels'
 
-const WORKSPACE_TYPES = [
-  { value: 'travel_agency', label: LABELS.WORKSPACE_TYPE_TRAVEL_AGENCY },
-  { value: 'transportation', label: LABELS.WORKSPACE_TYPE_TRANSPORTATION },
-  { value: 'dmc', label: LABELS.WORKSPACE_TYPE_DMC },
-  { value: 'other', label: LABELS.WORKSPACE_TYPE_OTHER },
-] as const
-
 interface CreateAdminForm {
   employeeNumber: string
   name: string
@@ -512,27 +505,6 @@ export default function WorkspacesPage() {
                 className={`border-morandi-container/30 font-mono ${codeError ? 'border-morandi-red' : ''}`}
               />
               {codeError && <p className="text-xs text-morandi-red mt-1">{codeError}</p>}
-            </div>
-
-            <div>
-              <label className="text-sm font-medium text-morandi-primary mb-2 block">
-                {LABELS.WORKSPACE_TYPE_LABEL}
-              </label>
-              <Select
-                value={newWorkspace.type}
-                onValueChange={value => setNewWorkspace(prev => ({ ...prev, type: value }))}
-              >
-                <SelectTrigger className="border-morandi-container/30">
-                  <SelectValue placeholder={LABELS.WORKSPACE_TYPE_PLACEHOLDER} />
-                </SelectTrigger>
-                <SelectContent>
-                  {WORKSPACE_TYPES.map(t => (
-                    <SelectItem key={t.value} value={t.value}>
-                      {t.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
             </div>
 
             <div>

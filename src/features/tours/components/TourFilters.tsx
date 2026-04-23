@@ -19,12 +19,7 @@ interface TourFiltersProps {
   onAddTour: () => void
   onAddProposal?: () => void
   onAddTemplate?: () => void
-  showReceivedTab?: boolean // Local/DMC 顯示「收到的委託」分頁
-  receivedCount?: number // 收到的委託數量
 }
-
-import { Inbox } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
 
 export const TourFilters: React.FC<TourFiltersProps> = ({
   searchQuery,
@@ -34,30 +29,15 @@ export const TourFilters: React.FC<TourFiltersProps> = ({
   onAddTour,
   onAddProposal,
   onAddTemplate,
-  showReceivedTab,
-  receivedCount,
 }) => {
-  // 基本 tabs（封存分頁已隱藏，需要時從 DB `archived=true` 還是能取到）
-  const baseTabs = [
+  // 封存分頁已隱藏（需要時從 DB archived=true 還是能取到）
+  const tabs = [
     { value: '待出發', label: TOUR_FILTERS.tab_active, icon: Calendar },
     { value: 'all', label: TOUR_FILTERS.tab_all, icon: BarChart3 },
     { value: '已結團', label: TOUR_FILTERS.tab_closed, icon: FileCheck },
     { value: 'proposal', label: TOUR_FILTERS.tab_proposals, icon: FileText },
     { value: 'template', label: TOUR_FILTERS.tab_templates, icon: Copy },
   ]
-
-  // Local/DMC 時加入「收到的委託」分頁
-  const tabs = showReceivedTab
-    ? [
-        {
-          value: 'received',
-          label:
-            receivedCount && receivedCount > 0 ? `收到的委託 (${receivedCount})` : '收到的委託',
-          icon: Inbox,
-        },
-        ...baseTabs,
-      ]
-    : baseTabs
 
   return (
     <ResponsiveHeader

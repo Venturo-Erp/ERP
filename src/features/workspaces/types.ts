@@ -3,7 +3,8 @@ import { WORKSPACES_LABELS } from './constants/labels'
  * Workspace Management Types
  */
 
-export type WorkspaceType = 'travel_agency' | 'vehicle_supplier' | 'guide_supplier'
+// 目前 ERP 只支援旅行社一種類型；未來擴充其他類型時、加在這個 union 即可。
+export type WorkspaceType = 'travel_agency'
 
 export interface WorkspaceWithDetails {
   id: string
@@ -30,6 +31,4 @@ export interface CreateWorkspaceData {
 
 export const WORKSPACE_TYPE_LABELS: Record<WorkspaceType, string> = {
   travel_agency: WORKSPACES_LABELS.旅行社,
-  vehicle_supplier: WORKSPACES_LABELS.車行,
-  guide_supplier: WORKSPACES_LABELS.領隊公司,
 }

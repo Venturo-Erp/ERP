@@ -40,12 +40,6 @@ export const ToursPage: React.FC = () => {
   const router = useRouter()
   const { user } = useAuthStore()
 
-  // 判斷是否為 Local/DMC
-  const isLocal = user?.workspace_type === 'dmc' || user?.workspace_type === 'guide_supplier'
-
-  // 收到的委託數量（Local 專用）
-  const [receivedCount, setReceivedCount] = useState(0)
-
   // Edit dialog state (using TourEditDialog instead of TourForm for edit mode)
   const [editDialogTour, setEditDialogTour] = useState<Tour | null>(null)
 
@@ -101,11 +95,6 @@ export const ToursPage: React.FC = () => {
     actions,
     handleSortChange,
   } = useToursPage()
-
-  // Local/DMC 查詢委託數量（2026-04-23：tour_requests + Local/DMC 整族砍除、stub 為 0）
-  useEffect(() => {
-    setReceivedCount(0)
-  }, [])
 
   const {
     itineraryDialogTour,
@@ -339,8 +328,6 @@ export const ToursPage: React.FC = () => {
         onAddTour={handleOpenTourDialog}
         onAddProposal={handleOpenProposalDialog}
         onAddTemplate={handleOpenTemplateDialog}
-        showReceivedTab={isLocal}
-        receivedCount={receivedCount}
       />
 
       <div className="flex-1 overflow-hidden flex flex-col">
