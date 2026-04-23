@@ -37,14 +37,14 @@ export async function GET() {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  // 取得所有 admin 職務 id（workspace_roles.is_admin = true）
+  // 取得所有擁有管理員資格的職務 id
   const { data: adminRoles } = await supabase
     .from('workspace_roles')
     .select('id')
     .eq('is_admin', true)
   const adminRoleIds = new Set((adminRoles || []).map(r => r.id))
 
-  // 批次查詢所有員工（排除機器人）— 用來計算每個 workspace 的員工數 + 管理員
+  // 批次查詢所有員工（排除機器人）— 用來計算每個 workspace 的員工數 + 找代表
   const { data: allEmployees } = await supabase
     .from('employees')
     .select('id, workspace_id, chinese_name, display_name, english_name, is_bot, role_id')
@@ -70,7 +70,7 @@ export async function GET() {
     if (!wsId) continue
     const entry = byWorkspace.get(wsId) || { count: 0, admin: null }
     entry.count += 1
-    // 找第一個 admin 當代表（依 workspace_roles.is_admin、SSOT）
+    // 找第一個擁有管理員資格的員工當代表（SSOT：workspace_roles.is_admin）
     if (!entry.admin && emp.role_id && adminRoleIds.has(emp.role_id)) {
       entry.admin = {
         id: emp.id,
@@ -98,13 +98,13 @@ export async function GET() {
  * POST /api/workspaces
  * 建立新租戶 + 初始化權限
  *
- * 注意：這是 Super Admin 操作，使用 service client
+ * 注意：這是平台管理操作、使用 service client
  *
  * 會自動：
  * 1. 建立租戶 (workspaces)
  * 2. 開啟基本功能 (workspace_features)
- * 3. 建立管理員角色 (workspace_roles)
- * 4. 設定管理員角色全開權限 (role_tab_permissions)
+ * 3. 建立系統主管角色 (workspace_roles)
+ * 4. 設定系統主管角色全開權限 (role_tab_permissions)
  */
 export async function POST(request: NextRequest) {
   const supabase = createServiceClient()
@@ -151,12 +151,12 @@ export async function POST(request: NextRequest) {
 
   await supabase.from('workspace_features').insert(featuresToInsert)
 
-  // 3. 建立管理員角色
+  // 3. 建立系統主管角色
   const { data: adminRole, error: roleError } = await supabase
     .from('workspace_roles')
     .insert({
       workspace_id: workspaceId,
-      name: '管理員',
+      name: '系統主管',
       description: '擁有所有權限',
       is_admin: true,
       sort_order: 1,
@@ -168,7 +168,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: roleError.message }, { status: 500 })
   }
 
-  // 4. 設定管理員角色全開權限（所有模組、所有分頁）
+  // 4. 設定系統主管角色全開權限（所有模組、所有分頁）
   const permissionsToInsert: {
     role_id: string
     module_code: string
@@ -218,7 +218,7 @@ export async function POST(request: NextRequest) {
     })
   }
 
-  // 6. 建立第一個管理員員工（必須要有一個員工，才能登入）
+  // 6. 建立第一個系統主管員工（必須要有一個員工，才能登入）
   if (adminName) {
     const { error: empError } = await supabase.from('employees').insert({
       workspace_id: workspaceId,
@@ -227,8 +227,8 @@ export async function POST(request: NextRequest) {
       display_name: adminName,
       email: adminEmail || null,
       roles: ['admin'],
-      role_id: adminRole.id, // 🔑 連結到剛建立的管理員角色（權限檢查用）
-      job_info: { role_id: adminRole.id, position: '管理員' },
+      role_id: adminRole.id, // 🔑 連結到剛建立的系統主管角色（權限檢查用）
+      job_info: { role_id: adminRole.id, position: '系統主管' },
       is_active: true,
       is_bot: false,
       must_change_password: true, // 首次登入強制改密碼
@@ -236,13 +236,13 @@ export async function POST(request: NextRequest) {
     if (empError) {
       // 員工建失敗不回滾（workspace 已建成），但 log 出來
 
-      console.error('建立管理員員工失敗:', empError)
+      console.error('建立系統主管員工失敗:', empError)
     }
   }
 
   return NextResponse.json({
     success: true,
     workspace,
-    message: '租戶建立完成，已開啟基本功能、建立管理員角色與第一個管理員員工',
+    message: '租戶建立完成，已開啟基本功能、建立系統主管角色與第一個系統主管員工',
   })
 }

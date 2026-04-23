@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
 
       if (count != null && count >= maxEmployees) {
         return NextResponse.json(
-          { message: `已達員工數量上限（${maxEmployees} 人），請升級方案或聯繫管理員` },
+          { message: `已達員工數量上限（${maxEmployees} 人），請升級方案或聯繫系統主管` },
           { status: 403 }
         )
       }

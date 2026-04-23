@@ -114,7 +114,7 @@ export function TimelineEditor({
               type="button"
               size="sm"
               onClick={() => setIsAttractionSelectorOpen(true)}
-              className="h-7 px-2 text-xs gap-1 bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+              className="h-7 px-2 text-xs gap-1 bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg"
             >
               <MapPin size={12} />
               {ITINERARY_DIALOG_LABELS.從景點庫選擇}

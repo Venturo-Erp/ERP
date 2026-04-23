@@ -278,7 +278,7 @@ WHERE table_schema='public' AND table_name='employee_permission_overrides'
 
 ## 7. 風險點自陳
 
-1. **Super admin 例外**：現行其他表 RLS 常 `OR is_super_admin()`（見 `20260110100000_fix_rls_null_workspace.sql` 慣例）、但本方案**沒加**、因為 pattern-map 規格就是純 `workspace_id =` 且 `is_super_admin()` 已被停用（`20260422170000` 註解）。若未來 super admin 需要跨租戶改 override、要另開 admin API 走 service role（同 workspaces 模式）。**目前採極簡**。
+1. **Super admin 例外**：現行其他表 RLS 常 `OR is_super_admin()`（見 `20260110100000_fix_rls_null_workspace.sql` 慣例）、但本方案**沒加**、因為 pattern-map 規格就是純 `workspace_id =` 且 `is_super_admin()` 已被停用（`20260422170000` 註解）。若未來 擁有平台管理資格的人 需要跨租戶改 override、要另開 admin API 走 service role（同 workspaces 模式）。**目前採極簡**。
 2. **`validate-login/route.ts` 用 service_role**、policy 收緊後**不受影響**、行為不變。✅
 3. **GET handler `createApiClient`**：policy 從全開改成租戶隔離、跨租戶 GET 從「能拿到」變「0 row」。若目前 UI 有靠這個漏洞看別家員工權限、會顯示空。合理行為、不算 regression。
 4. **`createApiClient` 54 caller**：本次不改其簽章、0 影響。

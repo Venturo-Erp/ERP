@@ -24,7 +24,7 @@ export interface TabPermission {
 
 /**
  * 功能權限配置（給設定頁顯示用）
- * 權限決策不靠這個、走 role_tab_permissions（permissions[]）+ workspace_roles.is_admin
+ * 權限決策不靠這個、統一從 role_tab_permissions 拿資格清單
  */
 export const FEATURE_PERMISSIONS: PermissionConfig[] = [
   { id: 'calendar', label: '行事曆', category: '全部', routes: ['/calendar'] },
@@ -64,8 +64,8 @@ const ROUTE_TO_MODULE: Record<string, string> = {
   '/customers': 'database', // 顧客在資料管理
 }
 
-// 平台超管專屬路由：HR 職務權限不適用、必須 isAdmin（workspace 級）才放行
-// /tenants：Venturo 超管專屬（商業敏感、不開放給一般租戶職務管理）
+// 平台管理資格專屬路由：HR 職務權限不適用、必須擁有平台管理資格才放行
+// /tenants：Venturo 平台內部功能（商業敏感、不開放給租戶職務管理）
 export const PLATFORM_ADMIN_ROUTES: readonly string[] = [
   '/tenants',
 ]

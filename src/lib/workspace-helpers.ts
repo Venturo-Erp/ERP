@@ -16,7 +16,7 @@ interface WorkspaceWithCode extends Workspace {
 
 /**
  * 取得當前使用者的 workspace_id
- * 所有用戶（含管理員）都回傳自己的 workspace_id
+ * 所有用戶（含系統主管）都回傳自己的 workspace_id
  *
  * @returns workspace_id (UUID) 或 null
  */
@@ -85,8 +85,8 @@ export function getCurrentWorkspace() {
 }
 
 /**
- * 檢查當前使用者是否為管理員
- * 直接使用 store.isAdmin
+ * 檢查當前使用者是否擁有管理員資格
+ * 從 store 讀
  *
  * @returns boolean
  */
@@ -97,7 +97,7 @@ export function isAdminUser(): boolean {
 
 /**
  * 檢查當前使用者是否可以管理指定的 workspace
- * 管理員只能管理自己所屬的 workspace
+ * 系統主管只能管理自己所屬的 workspace
  *
  * @param targetWorkspaceId - 目標 workspace ID
  * @returns boolean

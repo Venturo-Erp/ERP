@@ -8,7 +8,7 @@
 
 | 業務步驟 | 代碼實況 | 符合 | 差異 |
 |---|---|---|---|
-| OP 建收款單 | page.tsx:211 整頁 `if (!isAdmin)`、OP 不是 admin 根本進不來 | ❌ | 整頁 role-gate |
+| OP 建收款單 | page.tsx:211 整頁 `if (!isAdmin)`、OP 不擁有管理員資格 根本進不來 | ❌ | 整頁 role-gate |
 | 選 5 種付款方式 | payment_method + receipt_type 雙寫 + 四處映射 | 🟡 | 功能在、但三套欄位並存 |
 | 建單自動連動 | `recalculateReceiptStats` 回寫 `orders.payment_status` + tours 財務 | ⚠️ | William 明說 orders.payment_status 不該存 |
 | 旅遊團認列 | `tours.total_revenue` + `profit` 被寫 | ✅ | 設計對、只是是回寫欄位、未來若走「聚合即時算」要改 view |
@@ -20,12 +20,12 @@
 
 ### 違反原則 1（權限長在人身上）
 
-1. `page.tsx:211` 整頁 admin gate
+1. `page.tsx:211` 整頁 系統主管 gate
 2. `auth-store.ts:249` checkPermission 短路（/login 驗證已發現、本頁繼承）
 3. 4 個核心動作（建 / 核准 / 異常 / 刪）無 hasPermission 細分檢查
 
 **後果**：
-- 會計 / OP / 業務不是 admin → 連頁都進不來、整個「建單 → 核准」流程卡死
+- 會計 / OP / 業務不擁有管理員資格 → 連頁都進不來、整個「建單 → 核准」流程卡死
 - William 在 /hr/roles 設定「公司收款」權限 → 代碼**不查這個 key**
 
 ### 違反候選原則 3（衍生狀態不存欄位）

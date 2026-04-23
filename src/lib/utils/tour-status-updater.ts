@@ -1,9 +1,10 @@
 /**
  * 團狀態自動更新
- * 根據日期自動調整團狀態
+ * 根據日期自動調整團狀態（upcoming → ongoing → returned）
  */
 
 import { createClient } from '@supabase/supabase-js'
+import { TOUR_STATUS } from '@/lib/constants/status-maps'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -18,11 +19,10 @@ function calculateTourStatus(
   departureDate: string | null,
   returnDate: string | null
 ): string | null {
-  // 如果已經是「已結團」，不自動改
-  if (currentStatus === '已結團') return null
-
-  // 如果是提案階段，不自動改
-  if (currentStatus === '提案') return null
+  // 終點狀態、模板、提案都不自動改
+  if (currentStatus === TOUR_STATUS.CLOSED) return null
+  if (currentStatus === TOUR_STATUS.PROPOSAL) return null
+  if (currentStatus === TOUR_STATUS.TEMPLATE) return null
 
   const today = new Date()
   today.setHours(0, 0, 0, 0)
@@ -33,15 +33,14 @@ function calculateTourStatus(
   if (departure) departure.setHours(0, 0, 0, 0)
   if (returnDay) returnDay.setHours(0, 0, 0, 0)
 
-  // 判斷狀態
   if (returnDay && today > returnDay) {
-    return currentStatus !== '待結團' ? '待結團' : null
+    return currentStatus !== TOUR_STATUS.RETURNED ? TOUR_STATUS.RETURNED : null
   }
   if (departure && today >= departure) {
-    return currentStatus !== '已出發' ? '已出發' : null
+    return currentStatus !== TOUR_STATUS.ONGOING ? TOUR_STATUS.ONGOING : null
   }
   if (departure && today < departure) {
-    return currentStatus !== '待出發' ? '待出發' : null
+    return currentStatus !== TOUR_STATUS.UPCOMING ? TOUR_STATUS.UPCOMING : null
   }
 
   return null
@@ -54,12 +53,11 @@ export async function updateAllTourStatuses(): Promise<{ updated: number; errors
   const errors: string[] = []
   let updated = 0
 
-  // 查詢所有非已結團的團
+  // 查詢：排除 closed / proposal / template
   const { data: tours, error } = await supabase
     .from('tours')
     .select('id, code, status, departure_date, return_date')
-    .not('status', 'eq', '已結團')
-    .not('status', 'eq', '提案')
+    .not('status', 'in', `(${TOUR_STATUS.CLOSED},${TOUR_STATUS.PROPOSAL},${TOUR_STATUS.TEMPLATE})`)
 
   if (error) {
     return { updated: 0, errors: [error.message] }
@@ -81,7 +79,6 @@ export async function updateAllTourStatuses(): Promise<{ updated: number; errors
         errors.push(`${tour.code}: ${updateError.message}`)
       } else {
         updated++
-        // 狀態更新記錄
       }
     }
   }

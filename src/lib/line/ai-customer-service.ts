@@ -49,7 +49,7 @@ interface TourQueryResult {
 
 /**
  * 從訊息中提取意圖和關鍵字
- * 意圖提示詞從 DB 讀取（管理員可修改）
+ * 意圖提示詞從 DB 讀取（系統主管可修改）
  */
 async function analyzeIntent(
   message: string,
@@ -190,7 +190,7 @@ async function queryAttractions(
 
 /**
  * 生成 AI 回覆
- * 系統提示詞、字數限制、資料來源皆從 DB 讀取（管理員可在後台修改）
+ * 系統提示詞、字數限制、資料來源皆從 DB 讀取（系統主管可在後台修改）
  */
 async function generateAIResponse(
   platform: 'line' | 'messenger' | 'instagram',

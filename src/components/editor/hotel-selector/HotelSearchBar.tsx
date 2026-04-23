@@ -175,7 +175,7 @@ export function HotelSearchBar({
             type="button"
             onClick={onManualAdd}
             disabled={!manualHotelName.trim()}
-            className="bg-morandi-gold hover:bg-morandi-gold-hover text-white rounded-lg h-10 px-4 gap-1.5"
+            className="bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg rounded-lg h-10 px-4 gap-1.5"
           >
             <Plus size={16} />
             {COMP_EDITOR_LABELS.新增}

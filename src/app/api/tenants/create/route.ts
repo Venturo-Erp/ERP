@@ -3,7 +3,7 @@
  *
  * 功能：
  * 1. 建立 workspace
- * 2. 建立第一個管理員 (employee + auth + profile)
+ * 2. 建立第一個系統主管 (employee + auth + profile)
  * 3. 建立公告頻道
  * 4. Seed 基礎資料 (countries, cities)
  * 5. 建立 workspace bot
@@ -22,7 +22,7 @@ import { MODULES } from '@/lib/permissions/module-tabs'
 // 理由：Corner 是 Venturo 首家實客戶、職務權限由 William 手工調校過；
 // 跟 migration 20260422160000_sync_default_roles_from_corner.sql 同源。
 const CORNER_WORKSPACE_ID = '8ef05a74-1f87-48ab-afd3-9bfeb423935d'
-const DEFAULT_ROLE_NAMES = ['管理員', '業務', '會計', '助理'] as const
+const DEFAULT_ROLE_NAMES = ['系統主管', '業務', '會計', '助理'] as const
 
 interface CreateTenantRequest {
   // Workspace 資訊
@@ -31,7 +31,7 @@ interface CreateTenantRequest {
   workspaceType: string | null
   maxEmployees: number | null
 
-  // 第一個管理員資訊
+  // 第一個系統主管資訊
   adminEmployeeNumber: string
   adminName: string
   adminEmail: string
@@ -74,9 +74,9 @@ export async function POST(request: NextRequest) {
 
     // 🔒 權限檢查（兩層）：
     //   1) 員工所在 workspace 必須開啟「租戶管理」功能（workspace_features.tenants = true）
-    //   2) 員工必須是該 workspace 的 admin（workspace_roles.is_admin = true）
+    //   2) 員工必須擁有管理員資格（workspace_roles.is_admin = true）
     //
-    // 租戶管理是 Venturo 超管商業敏感功能、不走 role_tab_permissions（那個 tab 根本沒定義）
+    // 租戶管理是 Venturo 平台商業敏感功能、不走 role_tab_permissions（那個 tab 根本沒定義）
     // 原查詢 role_tab_permissions.settings.tenants 是 bug、settings.tenants tab 不存在於 module-tabs.ts
     const effectiveRoleId =
       currentEmployee.role_id ||
@@ -109,7 +109,7 @@ export async function POST(request: NextRequest) {
         `Permission denied for tenants/create: admin=${isWorkspaceAdmin}, feature=${hasTenantsFeature}, name=${employeeName}`
       )
       return errorResponse(
-        '只有已開啟「租戶管理」功能的 workspace 管理員可以建立租戶',
+        '您沒有此權限（需在已開啟「租戶管理」功能的 workspace 擁有管理員資格）',
         403,
         ErrorCode.FORBIDDEN
       )
@@ -222,7 +222,7 @@ export async function POST(request: NextRequest) {
     createdWorkspaceId = workspace.id
     logger.log(`Workspace created: ${workspace.id}`)
 
-    // 2. 建立第一個管理員 (employee)
+    // 2. 建立第一個系統主管 (employee)
     const { data: employee, error: empError } = await supabaseAdmin
       .from('employees')
       .insert({
@@ -232,21 +232,6 @@ export async function POST(request: NextRequest) {
         display_name: adminName,
         email: adminEmail.toLowerCase(),
         roles: ['admin'],
-        permissions: [
-          '*',
-          'todos',
-          'payments',
-          'requests',
-          'visas',
-          'calendar',
-          'workspace',
-          'quotes',
-          'tours',
-          'orders',
-          'customers',
-          'hr',
-        ], // 完整權限
-        is_active: true,
       })
       .select('id')
       .single()
@@ -254,7 +239,7 @@ export async function POST(request: NextRequest) {
     if (empError || !employee) {
       logger.error('Failed to create employee:', empError)
       await rollback('employee creation failed')
-      return errorResponse('建立管理員失敗', 500, ErrorCode.OPERATION_FAILED)
+      return errorResponse('建立系統主管失敗', 500, ErrorCode.OPERATION_FAILED)
     }
 
     createdEmployeeId = employee.id
@@ -281,7 +266,7 @@ export async function POST(request: NextRequest) {
       const msg = authError?.message || ''
       const userMsg = msg.includes('already been registered')
         ? `此 email（${authEmail}）已被其他帳號使用、請換一個`
-        : `建立管理員登入帳號失敗：${msg || 'unknown'}`
+        : `建立系統主管登入帳號失敗：${msg || 'unknown'}`
       return errorResponse(userMsg, 400, ErrorCode.OPERATION_FAILED)
     }
 
@@ -301,7 +286,7 @@ export async function POST(request: NextRequest) {
 
     logger.log(`Auth user created: ${authUser.user.id}, linked to employee ${employee.id}`)
 
-    // 5. 建立預設職務並設定管理員（權限必備、失敗必 rollback）
+    // 5. 建立預設職務並設定系統主管（權限必備、失敗必 rollback）
     // P001 收尾（2026-04-22）：職務權限模板從 Corner 複製、跟 migration 20260422160000 同源
     const { data: createdRoles, error: rolesError } = await supabaseAdmin
       .from('workspace_roles')
@@ -309,7 +294,7 @@ export async function POST(request: NextRequest) {
         DEFAULT_ROLE_NAMES.map(name => ({
           workspace_id: workspace.id,
           name,
-          is_admin: name === '管理員',
+          is_admin: name === '系統主管',
         }))
       )
       .select('id, name')
@@ -322,10 +307,10 @@ export async function POST(request: NextRequest) {
 
     logger.log(`Default roles created: ${createdRoles.length}`)
 
-    const adminRole = createdRoles.find(r => r.name === '管理員')
+    const adminRole = createdRoles.find(r => r.name === '系統主管')
     if (!adminRole) {
       await rollback('admin role missing after roles insert')
-      return errorResponse('建立管理員職務失敗', 500, ErrorCode.OPERATION_FAILED)
+      return errorResponse('建立系統主管職務失敗', 500, ErrorCode.OPERATION_FAILED)
     }
 
     const { error: setRoleError } = await supabaseAdmin
@@ -336,7 +321,7 @@ export async function POST(request: NextRequest) {
     if (setRoleError) {
       logger.error('Failed to set admin role_id:', setRoleError)
       await rollback('set admin role_id failed')
-      return errorResponse('綁定管理員職務失敗', 500, ErrorCode.OPERATION_FAILED)
+      return errorResponse('綁定系統主管職務失敗', 500, ErrorCode.OPERATION_FAILED)
     }
 
     // 6. 從 Corner 模板複製 role_tab_permissions（權限表、失敗必 rollback）
@@ -539,7 +524,7 @@ export async function POST(request: NextRequest) {
       login: {
         workspaceCode: newWorkspaceCode,
         employeeNumber: adminEmployeeNumber,
-        password: adminPassword, // 僅用於顯示給管理員，不要儲存
+        password: adminPassword, // 僅用於顯示給系統主管，不要儲存
       },
     })
   } catch (error) {

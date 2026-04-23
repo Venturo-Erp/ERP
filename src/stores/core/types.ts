@@ -92,8 +92,8 @@ export interface StoreConfig {
   /** 直接寫入模式（預設 true） */
   fastInsert?: boolean
   /** 是否依 workspace 隔離資料（預設 false）
-   * 設為 true 時，fetchAll 會自動過濾 workspace_id
-   * Super Admin 可以跨 workspace 查詢
+   * 設為 true 時、fetchAll 會自動過濾 workspace_id
+   * 擁有平台管理資格時可以跨 workspace 查詢
    */
   workspaceScoped?: boolean
   /** 列表查詢的最大筆數（預設 1000，防止全表掃描） */

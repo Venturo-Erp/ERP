@@ -55,7 +55,7 @@ function DeleteButton() {
       buttonId: 'delete-tour',
       isVisible: canDelete,
       isDisabled: false,
-      expectedVisible: true,  // 如果你預期管理員應該看到
+      expectedVisible: true,  // 如果你預期系統主管應該看到
       reason: !canDelete ? `role=${user?.role}` : undefined,
     });
   }, [user, canDelete]);

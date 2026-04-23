@@ -478,7 +478,7 @@ VALUES ('總部辦公室', 'Venturo 總部工作空間', '🏢', true);
 export const FEATURE_PERMISSIONS: PermissionConfig[] = [
   {
     id: 'admin',
-    label: '系統管理員',
+    label: '系統系統主管',
     category: '全部',
     routes: ['*'],
     description: '擁有系統所有權限',

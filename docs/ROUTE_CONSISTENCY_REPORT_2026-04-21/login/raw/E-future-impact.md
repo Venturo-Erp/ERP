@@ -22,7 +22,7 @@
 ✅ **員工觀點**：
 - 一個 workspace 內可有多角色（admin, tour_leader, sales 等）
 - 權限已通用化（module:tab 格式、支援部分覆寫）
-- 多 workspace 支援（Super Admin 可切換）
+- 多 workspace 支援（擁有平台管理資格的人 可切換）
 
 ❌ **多租戶外部角色觀點**：
 - `workspace_type` 已定義（travel_agency / vehicle_supplier / guide_supplier / transportation / dmc）但登入邏輯**不區分**
@@ -92,7 +92,7 @@
 未來：
 - **員工**：role_tab_permissions（保持）
 - **供應商**：無 role 概念、需要「供應商角色」表（新建）
-  - 旅遊業 Agent：「帳戶管理員」「查詢員」
+  - 旅遊業 Agent：「帳戶系統主管」「查詢員」
   - Loco：「調度員」「團隊負責人」
   - 飯店/餐廳：「訂單處理」「主管」
 

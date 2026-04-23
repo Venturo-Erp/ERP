@@ -103,7 +103,7 @@ export function TemplateSelector({
       const { data, error } = await supabase
         .from('tours')
         .select(
-          'id, code, name, location, departure_date, return_date, status, current_participants, max_participants, workspace_id, archived, contract_archived_date, tour_type, outbound_flight, return_flight, is_deleted, confirmed_requirements, locked_itinerary_id, itinerary_id, quote_id, locked_quote_id, tour_leader_id, controller_id, country_id, price, selling_price_per_person, total_cost, total_revenue, profit, contract_status, description, days_count, created_at, created_by, updated_at, updated_by'
+          'id, code, name, location, departure_date, return_date, status, current_participants, max_participants, workspace_id, archived, contract_archived_date, outbound_flight, return_flight, is_deleted, confirmed_requirements, locked_itinerary_id, itinerary_id, quote_id, locked_quote_id, tour_leader_id, controller_id, country_id, price, selling_price_per_person, total_cost, total_revenue, profit, contract_status, description, days_count, created_at, created_by, updated_at, updated_by'
         )
         .eq('id', id)
         .single()
@@ -369,7 +369,7 @@ export function TemplateSelector({
           <Button
             onClick={handleStart}
             disabled={!selectedStyle || isGenerating || isLoading}
-            className="bg-morandi-gold hover:bg-morandi-gold-hover text-white gap-2"
+            className="bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg gap-2"
           >
             {isGenerating ? (
               <>

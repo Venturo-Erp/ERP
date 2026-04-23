@@ -32,7 +32,7 @@ export interface ModuleDefinition {
 
 // 模組與分頁定義（順序與側邊欄一致）
 // 註：首頁（dashboard）為個人工作空間（筆記 / 打卡 / widget 偏好）、不受職務權限控管
-// 註：租戶管理（tenants）為 Venturo 超管內部功能、不開放給租戶職務管理
+// 註：租戶管理（tenants）為 Venturo 平台內部功能、不開放給租戶職務管理
 export const MODULES: ModuleDefinition[] = [
   {
     code: 'calendar',

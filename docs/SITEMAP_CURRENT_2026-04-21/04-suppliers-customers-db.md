@@ -121,7 +121,7 @@
 #### /database/suppliers
 **Route**: `/database/suppliers`  
 **頁面標題**: 供應商主檔管理  
-**做什麼**: 系統管理員維護合作供應商黃頁（司機行、酒店、餐廳、導遊等），對應 Database 外包組件化  
+**做什麼**: 系統系統主管維護合作供應商黃頁（司機行、酒店、餐廳、導遊等），對應 Database 外包組件化  
 **主要資料對象**: `suppliers` 表（合作供應商基本資料）  
 **主要動作**: 新增/編輯/刪除供應商主檔  
 **明顯紅旗**: 無明顯
@@ -145,7 +145,7 @@
 #### /database/workspaces
 **Route**: `/database/workspaces`  
 **頁面標題**: 工作區管理（帳號組織）  
-**做什麼**: 系統管理員管理旅行社、地接、供應商等不同角色的登入帳號組織（workspace 多租戶）  
+**做什麼**: 系統系統主管管理旅行社、地接、供應商等不同角色的登入帳號組織（workspace 多租戶）  
 **主要資料對象**: `workspaces` 表  
 **主要動作**: 新增/編輯/刪除 workspace、設定權限  
 **明顯紅旗**: 無明顯
@@ -177,7 +177,7 @@
 #### /database/archive-management
 **Route**: `/database/archive-management`  
 **頁面標題**: 檔案歸檔管理  
-**做什麼**: 系統管理員管理已歸檔的團務，可還原或永久刪除  
+**做什麼**: 系統系統主管管理已歸檔的團務，可還原或永久刪除  
 **主要資料對象**: `tours`（archived=true）、涉及 `channels`、`tour_itinerary_items`、`tour_confirmation_sheets`、`pnrs`、`calendar_events`、`tour_quotes` 關聯清理  
 **主要動作**: 還原歸檔團、永久刪除團（含關聯資料清理）  
 **明顯紅旗**: 依賴函式 checkTourDependencies，永刪前檢查是否有阻斷者（e.g. 已驗證訂單）；大量級聯刪除（DELETE 多表），需謹慎確認無誤

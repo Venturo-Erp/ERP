@@ -364,7 +364,7 @@ export function CustomerDialog({
               <Button
                 onClick={handleSave}
                 disabled={saving || !isDirty}
-                className="gap-1.5 bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+                className="gap-1.5 bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg"
               >
                 <Save size={14} />
                 {saving ? L.btn_saving : L.btn_confirm}
@@ -378,7 +378,7 @@ export function CustomerDialog({
               </Button>
               <Button
                 onClick={() => onModeChange?.('edit')}
-                className="gap-1.5 bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+                className="gap-1.5 bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg"
               >
                 <Edit size={14} />
                 {L.btn_edit}

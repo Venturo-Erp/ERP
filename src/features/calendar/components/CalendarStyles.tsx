@@ -44,10 +44,9 @@ export function CalendarStyles() {
         background-color: color-mix(in srgb, var(--background) 40%, transparent);
         padding: 0.75rem 1rem;
         font-weight: 700;
-        font-size: 11px;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        color: color-mix(in srgb, var(--morandi-primary) 60%, transparent);
+        font-size: 14px;
+        letter-spacing: 0.05em;
+        color: var(--morandi-primary);
         border-color: var(--morandi-container);
         border-bottom-width: 1px;
       }
@@ -298,9 +297,9 @@ export function CalendarStyles() {
       }
 
       .fc .fc-timegrid-slot-label {
-        font-size: 11px;
-        color: color-mix(in srgb, var(--morandi-primary) 50%, transparent);
-        font-weight: 500;
+        font-size: 12px;
+        color: var(--morandi-primary);
+        font-weight: 600;
         padding: 0 8px;
       }
 

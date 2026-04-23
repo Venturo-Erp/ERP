@@ -286,7 +286,7 @@ export default function RolesPage() {
   // 刪除職務
   const handleDeleteRole = async (role: Role) => {
     if (role.is_admin) {
-      toast({ title: '無法刪除管理員角色', variant: 'destructive' })
+      toast({ title: '無法刪除系統主管角色', variant: 'destructive' })
       return
     }
 
@@ -432,7 +432,7 @@ export default function RolesPage() {
           <div className="p-8 text-center rounded-lg border border-morandi-border bg-morandi-surface">
             <Shield className="h-12 w-12 mx-auto text-morandi-red mb-4" />
             <p className="text-morandi-secondary">
-              權限不足,只有管理員能進入職務管理
+              權限不足,只有系統主管能進入職務管理
             </p>
           </div>
         </div>
@@ -544,7 +544,7 @@ export default function RolesPage() {
                     onClick={handleSavePermissions}
                     disabled={saving}
                     size="sm"
-                    className="h-8 bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+                    className="h-8 bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg"
                   >
                     {saving ? (
                       <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
@@ -586,7 +586,7 @@ export default function RolesPage() {
               {selectedRole?.is_admin && (
                 <div className="p-4 border-t border-border bg-morandi-bg/30">
                   <p className="text-sm text-morandi-secondary text-center">
-                    管理員角色擁有所有權限，無法修改
+                    系統主管角色擁有所有權限，無法修改
                   </p>
                 </div>
               )}
@@ -633,7 +633,7 @@ export default function RolesPage() {
               <Button
                 onClick={handleCreateRole}
                 disabled={saving || !editingRole.name}
-                className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+                className="bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg"
               >
                 {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                 建立

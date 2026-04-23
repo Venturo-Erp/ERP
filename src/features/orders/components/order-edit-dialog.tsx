@@ -157,7 +157,7 @@ export function OrderEditDialog({ open, onOpenChange, order, level = 2 }: OrderE
             <Button
               type="submit"
               disabled={!formData.contact_person || isSubmitting}
-              className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+              className="bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg"
             >
               {isSubmitting ? COMP_ORDERS_LABELS.儲存中 : COMP_ORDERS_LABELS.儲存}
             </Button>

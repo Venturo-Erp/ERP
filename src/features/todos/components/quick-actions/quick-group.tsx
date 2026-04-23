@@ -346,7 +346,7 @@ export function QuickGroup({ onSubmit }: QuickGroupProps) {
         disabled={
           submitting || !newTour.name.trim() || !newTour.departure_date || !newTour.return_date
         }
-        className="w-full bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+        className="w-full bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg"
       >
         <Users size={16} className="mr-2" />
         {submitting ? '建立中...' : newOrder.contact_person ? '建立旅遊團 & 訂單' : '建立旅遊團'}

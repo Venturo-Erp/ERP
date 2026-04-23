@@ -13,6 +13,7 @@ import useSWR from 'swr'
 import { supabase } from '@/lib/supabase/client'
 import { Tour } from '@/stores/types'
 import { logger } from '@/lib/utils/logger'
+import { TOUR_STATUS } from '@/lib/constants/status-maps'
 
 // Extended type for unclosed tour with calculated fields
 export interface UnclosedTourData extends Tour {
@@ -64,16 +65,14 @@ export function useUnclosedTours(): UseUnclosedToursResult {
       const { data: tours, error: queryError } = await supabase
         .from('tours')
         .select(
-          'id, code, name, status, departure_date, return_date, closing_status, total_revenue, total_cost, profit, current_participants, controller_id, workspace_id'
+          'id, code, name, status, departure_date, return_date, total_revenue, total_cost, profit, current_participants, controller_id, workspace_id'
         )
         // return_date must exist and be before cutoff
         .not('return_date', 'is', null)
         .lte('return_date', cutoffDateStr)
-        // Not closed
-        .neq('closing_status', 'closed')
-        .neq('status', '已結團')
-        // Not cancelled
-        .neq('status', '取消')
+        // Not closed、不是封存（取消走 archived 維度）
+        .neq('status', TOUR_STATUS.CLOSED)
+        .neq('archived', true)
         .limit(500)
         // Order by return_date (oldest first)
         .order('return_date', { ascending: true })

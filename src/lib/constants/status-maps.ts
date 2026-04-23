@@ -4,49 +4,65 @@
  */
 
 // ============================================
-// 旅遊團狀態對照表（已改為中文直接儲存）
+// 旅遊團狀態對照表（DB 存英文、UI 顯示中文）
 // ============================================
 
 /**
- * Tour Lifecycle 狀態列表（簡化版）
+ * Tour Lifecycle 狀態列表（6 個值）
  *
- * 生命週期: 提案 → 進行中 → 結案
- *              ↓
- *        (解鎖回提案)
+ * 生命週期: template → proposal → upcoming → ongoing → returned → closed
+ * 取消走封存維度（archived=true, archive_reason='cancelled'）、不是狀態
+ * 封存是獨立欄位、跟狀態正交
  */
 export const TOUR_STATUS_LIST = [
-  '開團', // 可編輯行程
-  '待出發', // 已確認出團，行程鎖定
-  '已結團', // 團結束，結算獎金
-  '取消', // 已取消
+  'template',
+  'proposal',
+  'upcoming',
+  'ongoing',
+  'returned',
+  'closed',
 ] as const
 
 export type TourStatusValue = (typeof TOUR_STATUS_LIST)[number]
 
 /**
  * 旅遊團狀態常數 - 避免魔法字串
- * 使用方式: TOUR_STATUS.PROPOSAL 代替 '開團'
  */
 export const TOUR_STATUS = {
-  /** 提案階段 - 可編輯行程 */
-  PROPOSAL: '開團',
-  /** 進行中 - 已確認出團，行程鎖定 */
-  IN_PROGRESS: '待出發',
-  /** 結案 - 團結束，結算獎金 */
-  CLOSED: '已結團',
-  /** 已取消 */
-  CANCELLED: '取消',
+  TEMPLATE: 'template',
+  PROPOSAL: 'proposal',
+  UPCOMING: 'upcoming',
+  ONGOING: 'ongoing',
+  RETURNED: 'returned',
+  CLOSED: 'closed',
 } as const satisfies Record<string, TourStatusValue>
 
 /**
- * 判斷團是否已鎖定（不可自由編輯）
+ * 狀態值 → 中文顯示 label
  */
-export function isTourLocked(status: string | null): boolean {
-  return status === TOUR_STATUS.IN_PROGRESS || status === TOUR_STATUS.CLOSED
+export const TOUR_STATUS_LABELS: Record<TourStatusValue, string> = {
+  template: '模板',
+  proposal: '提案',
+  upcoming: '待出發',
+  ongoing: '進行中',
+  returned: '未結團',
+  closed: '已結團',
 }
 
 /**
- * 判斷團是否可進入確認流程（確認出團）
+ * 判斷團是否已鎖定（不可自由編輯）
+ * 鎖定時機：出發之後（ongoing / returned / closed）
+ */
+export function isTourLocked(status: string | null): boolean {
+  return (
+    status === TOUR_STATUS.ONGOING ||
+    status === TOUR_STATUS.RETURNED ||
+    status === TOUR_STATUS.CLOSED
+  )
+}
+
+/**
+ * 判斷團是否可進入開團流程（proposal → upcoming）
  */
 export function canConfirmTour(status: string | null): boolean {
   return status === TOUR_STATUS.PROPOSAL
@@ -206,10 +222,12 @@ export type VisaStatusValue = (typeof VISA_STATUS_MAP)[VisaStatusKey]
 // ============================================
 
 /**
- * 取得旅遊團狀態的顯示（已為中文，直接回傳）
+ * 取得旅遊團狀態的中文顯示（英文值 → 中文 label）
+ * 過渡期：DB 若仍存中文值、fallback 直接回傳原字串。
  */
-export function getTourStatusLabel(status: TourStatusValue | string): string {
-  return status
+export function getTourStatusLabel(status: string | null | undefined): string {
+  if (!status) return ''
+  return TOUR_STATUS_LABELS[status as TourStatusValue] ?? status
 }
 
 /**

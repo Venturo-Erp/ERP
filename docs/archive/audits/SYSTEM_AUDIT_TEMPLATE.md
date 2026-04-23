@@ -1040,8 +1040,8 @@ rejected（退件）
 
 | 角色       | ID            | 說明                   |
 | ---------- | ------------- | ---------------------- |
-| 超級管理員 | `super_admin` | 所有權限，跨 workspace |
-| 管理員     | `admin`       | workspace 內所有權限   |
+| 擁有平台管理資格的人 | `super_admin` | 所有權限，跨 workspace |
+| 系統主管     | `系統主管`       | workspace 內所有權限   |
 | 領隊       | `tour_leader` | 管理自己帶的團         |
 | 業務       | `sales`       | 報價單、客戶、訂單     |
 | 會計       | `accountant`  | 財務、付款、會計       |
@@ -1091,7 +1091,7 @@ rejected（退件）
 | 公開頻道 | `public`                          | 所有成員可見，自由加入 |
 | 私密頻道 | `private`                         | 需邀請加入             |
 | 直接訊息 | `direct`                          | 一對一聊天             |
-| 公告頻道 | `public` + `is_announcement=true` | 僅管理員可發言         |
+| 公告頻道 | `public` + `is_announcement=true` | 僅系統主管可發言         |
 
 #### 頻道操作按鈕對照表
 
@@ -1221,7 +1221,7 @@ TourRequestsPage (主頁面)
 │   ├── 月份切換控制組
 │   ├── 按鈕: 今天
 │   ├── 視圖切換按鈕組 (月/週/日)
-│   ├── Workspace 篩選 [僅超級管理員]
+│   ├── Workspace 篩選 [僅擁有平台管理資格的人]
 │   ├── 按鈕: 生日名單 (Cake)
 │   ├── 按鈕: 顯示設定 (Settings)
 │   └── 按鈕: 新增事項 (Plus)

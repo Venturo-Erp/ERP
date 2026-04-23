@@ -312,7 +312,7 @@ export async function searchFlightAction(
 
   if (!apiKey) {
     logger.error('❌ AeroDataBox API key is not configured.')
-    return { error: 'API 金鑰未設定，請聯絡管理員。' }
+    return { error: 'API 金鑰未設定，請聯絡系統主管。' }
   }
 
   // 清理航班號碼（移除空格）
@@ -421,7 +421,7 @@ export async function searchAirportDeparturesAction(
 
   if (!apiKey) {
     logger.error('❌ AeroDataBox API key is not configured.')
-    return { error: 'API 金鑰未設定，請聯絡管理員。' }
+    return { error: 'API 金鑰未設定，請聯絡系統主管。' }
   }
 
   // 驗證日期格式 (YYYY-MM-DD)
@@ -479,7 +479,7 @@ export async function searchAirportDeparturesAction(
           return { error: '本月查詢額度已用完，請下個月再試。' }
         }
         if (response.status === 401 || response.status === 403) {
-          return { error: 'API 金鑰無效或已過期，請聯絡管理員。' }
+          return { error: 'API 金鑰無效或已過期，請聯絡系統主管。' }
         }
         return { error: `查詢失敗 (${response.status})，請稍後再試。` }
       }
@@ -557,7 +557,7 @@ export async function searchAirportArrivalsAction(
 
   if (!apiKey) {
     logger.error('❌ AeroDataBox API key is not configured.')
-    return { error: 'API 金鑰未設定，請聯絡管理員。' }
+    return { error: 'API 金鑰未設定，請聯絡系統主管。' }
   }
 
   const fromTime = `${date}T00:00`
@@ -588,7 +588,7 @@ export async function searchAirportArrivalsAction(
         return { error: '本月查詢額度已用完，請下個月再試。' }
       }
       if (response.status === 401 || response.status === 403) {
-        return { error: 'API 金鑰無效或已過期，請聯絡管理員。' }
+        return { error: 'API 金鑰無效或已過期，請聯絡系統主管。' }
       }
       return { error: `查詢失敗 (${response.status})，請稍後再試。` }
     }

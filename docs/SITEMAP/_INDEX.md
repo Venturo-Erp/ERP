@@ -36,7 +36,7 @@ Last updated：2026-04-22 深夜（**v1.4 強迫症深掘第二輪**：在 4 路
 ### 1. 權限長在人身上、不是頭銜上
 **來自**：/login 驗證（2026-04-22）
 
-**原則**：管理員 = 預設權限多的 role、**不是 bypass key**。API 應該查 `hasPermission(user, action)`、不是 `if (user.isAdmin)`。
+**原則**：系統主管 = 預設權限多的 role、**不是 bypass key**。API 應該查 `hasPermission(user, action)`、不是 `if (user.isAdmin)`。
 
 **違反樣態**（要警覺）：
 - 後端 API 直接用 `isAdmin` 當大鎖

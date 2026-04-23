@@ -22,7 +22,7 @@ import type { Tour } from '@/stores/types'
 export const tourEntity = createEntityHook<Tour>('tours', {
   list: {
     select:
-      'id,code,name,departure_date,return_date,status,location,current_participants,max_participants,price,profit,total_cost,total_revenue,archived,is_active,contract_status,contract_completed,contract_template,contract_archived_date,controller_id,country_id,airport_code,itinerary_id,quote_id,locked_at,locked_by,locked_itinerary_id,locked_itinerary_version,locked_quote_id,locked_quote_version,last_unlocked_at,last_unlocked_by,closing_date,closing_status,closed_by,enable_checkin,workspace_id,created_at,created_by,updated_at,updated_by',
+      'id,code,name,departure_date,return_date,status,location,current_participants,max_participants,price,profit,total_cost,total_revenue,archived,is_active,contract_status,contract_completed,contract_template,contract_archived_date,controller_id,country_id,airport_code,itinerary_id,quote_id,locked_at,locked_by,locked_itinerary_id,locked_itinerary_version,locked_quote_id,locked_quote_version,last_unlocked_at,last_unlocked_by,closing_date,closed_by,enable_checkin,workspace_id,created_at,created_by,updated_at,updated_by',
     orderBy: {
       column: 'departure_date',
       ascending: false,
@@ -58,7 +58,6 @@ export function useToursForCalendar(dateRange: DateRange | null): ListResult<Tou
   const isAdmin = useAuthStore(state => state.isAdmin)
 
   const isReady = hasHydrated && isAuthenticated && !!user?.id
-  // 新系統：使用 isAdmin
   const userRole = isAdmin ? ('admin' as UserRole) : ('staff' as UserRole)
   const workspaceId = user?.workspace_id
 

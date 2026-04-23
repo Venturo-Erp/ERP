@@ -175,7 +175,7 @@ export function usePermissions() {
 **違反設計**：✅ 命中
 - `isAdmin` 直接短路返回 true（line 284, 294）
 - 未檢查 workspace features 或 role permissions
-- **但**：這在 hooks 層是預期行為（admin 不受限）；問題在 API 層是否也這樣做
+- **但**：這在 hooks 層是預期行為（系統主管不受限）；問題在 API 層是否也這樣做
 
 **檢查 API 層**:
 - `accept/route.ts` — 無 isAdmin 檢查、只用 RLS（`eq('id', requestId)` 由 RLS 過濾）✓
@@ -268,7 +268,7 @@ const publicPaths = [
 - ✅ `/api/tours/by-code/[code]` — **不在公開清單**，但無 auth 檢查、用 service_role key
 
 **紅旗**：
-- `by-code/route.ts:15-17` 用 `SUPABASE_SERVICE_ROLE_KEY`（admin 權限）且無認證
+- `by-code/route.ts:15-17` 用 `SUPABASE_SERVICE_ROLE_KEY`（系統主管權限）且無認證
   - 雖然只回傳公開欄位，但任何人都能查詢任何 tour
   - 若隱私要求「尚未發佈的團不該被公開查」，這是洞
 

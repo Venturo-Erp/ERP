@@ -36,9 +36,9 @@
 ```typescript
 // ❌ 錯誤：在多處定義相同的權限列表
 // file1.ts
-const permissions = ['admin', 'user', ...]
+const permissions = ['系統主管', '員工', ...]
 // file2.ts
-const permissions = ['admin', 'user', ...] // 重複定義
+const permissions = ['系統主管', '員工', ...] // 重複定義
 ```
 
 ### 2. 安全預設原則 (Secure by Default)
@@ -164,7 +164,7 @@ export const useSupplierStore = createStore<Supplier>('suppliers', 'S')
 
 1. 這個資料是屬於特定公司/部門的嗎？ → 需要 `workspaceScoped: true`
 2. 這個資料是全系統共享的配置嗎？ → 不需要隔離
-3. Super Admin 需要跨 workspace 查看嗎？ → `canCrossWorkspace` 會自動處理
+3. 擁有平台管理資格的人 需要跨 workspace 查看嗎？ → `canCrossWorkspace` 會自動處理
 
 ---
 
@@ -805,7 +805,7 @@ Itineraries            →   行程展示
 ### 修改權限
 
 - [ ] 只修改 `permissions.ts`（不要在多處定義）
-- [ ] 測試 Super Admin 能跨 workspace
+- [ ] 測試 擁有平台管理資格的人 能跨 workspace
 - [ ] 測試一般用戶只能看到自己 workspace
 
 ### 提交前檢查

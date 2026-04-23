@@ -42,7 +42,7 @@ function SortableWidget({ id, widget }: { id: string; widget: (typeof AVAILABLE_
     <div
       ref={setNodeRef}
       style={style}
-      className={`${widget.span === 2 ? 'md:col-span-2' : ''} touch-none`}
+      className={`h-full min-h-0 ${widget.span === 2 ? 'md:col-span-2' : ''} touch-none`}
       {...attributes}
       {...listeners}
     >
@@ -58,7 +58,6 @@ export function DashboardClient() {
   const [isLoading, setIsLoading] = useState(true)
   const { activeWidgets, toggleWidget, reorderWidgets, isLoading: widgetsLoading } = useWidgets()
 
-  // 新系統：使用 isAdmin
   const { isAdmin } = useAuthStore()
 
   // 過濾可渲染的 widgets（過濾掉沒權限的）
@@ -68,7 +67,7 @@ export function DashboardClient() {
       if (!widget) return false
       // 沒有權限限制的 widget 所有人都看得到
       if (!widget.requiredPermission) return true
-      // admin_only 只有超級管理員看得到
+      // admin_only：需要管理員資格才看得到
       if (widget.requiredPermission === 'admin_only') {
         return isAdmin
       }
@@ -130,7 +129,7 @@ export function DashboardClient() {
       headerActions={
         <WidgetSettingsDialog activeWidgets={activeWidgets} onToggleWidget={toggleWidget} />
       }
-      contentClassName="flex-1 overflow-auto min-h-0"
+      contentClassName="flex-1 overflow-visible min-h-0 flex flex-col"
     >
       {filteredActiveWidgets.length === 0 ? (
         <Card className="p-12 text-center border-morandi-gold/20 shadow-sm rounded-2xl bg-card">
@@ -149,12 +148,14 @@ export function DashboardClient() {
       ) : (
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext items={filteredActiveWidgets} strategy={rectSortingStrategy}>
-            <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
-              {filteredActiveWidgets.map(widgetId => {
-                const widget = AVAILABLE_WIDGETS.find(w => w.id === widgetId)
-                if (!widget) return null
-                return <SortableWidget key={widget.id} id={widget.id} widget={widget} />
-              })}
+            <div className="@container flex-1 min-h-0">
+              <div className="grid grid-cols-1 @md:grid-cols-2 @5xl:grid-cols-3 @min-[1500px]:grid-cols-4 grid-rows-2 auto-rows-fr gap-6 h-full">
+                {filteredActiveWidgets.map(widgetId => {
+                  const widget = AVAILABLE_WIDGETS.find(w => w.id === widgetId)
+                  if (!widget) return null
+                  return <SortableWidget key={widget.id} id={widget.id} widget={widget} />
+                })}
+              </div>
             </div>
           </SortableContext>
         </DndContext>

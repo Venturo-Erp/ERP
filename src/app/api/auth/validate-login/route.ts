@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
       logger.warn(
         `Employee ${employee.employee_number}@${code} 缺少 supabase_user_id、無法登入`
       )
-      return ApiError.unauthorized('帳號設定不完整、請聯絡管理員')
+      return ApiError.unauthorized('帳號設定不完整、請聯絡系統主管')
     }
 
     const { data: authUser } = await supabase.auth.admin.getUserById(employee.supabase_user_id)
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
       logger.error(
         `Auth user ${employee.supabase_user_id} (employee ${employee.employee_number}) 無 email、登入卡住`
       )
-      return ApiError.unauthorized('帳號認證資料異常、請聯絡管理員')
+      return ApiError.unauthorized('帳號認證資料異常、請聯絡系統主管')
     }
 
     // 5. 用 Supabase Auth 驗證密碼
@@ -131,7 +131,7 @@ export async function POST(request: NextRequest) {
     const roleId = (employee as Record<string, unknown>).role_id as string | undefined
 
     if (roleId) {
-      // 查職務是否為管理員
+      // 查職務是否擁有管理員資格
       const { data: role } = await supabase
         .from('workspace_roles')
         .select('is_admin')
@@ -140,7 +140,7 @@ export async function POST(request: NextRequest) {
 
       isAdmin = role?.is_admin || false
 
-      // 不管是不是管理員，都從 role_tab_permissions 讀取權限
+      // 權限決策統一從 role_tab_permissions 拿資格清單
       const { data: tabPerms } = await supabase
         .from('role_tab_permissions')
         .select('module_code, tab_code, can_read, can_write')

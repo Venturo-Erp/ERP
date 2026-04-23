@@ -261,9 +261,9 @@ SELECT COUNT(*) - COUNT(workspace_id) as null_count
 FROM todos;
 ```
 
-### 2. Super Admin 跨 workspace 查詢
+### 2. 擁有平台管理資格的人 跨 workspace 查詢
 
-**需求**: Super Admin 可能需要查看所有 workspace 的資料
+**需求**: 擁有平台管理資格的人 可能需要查看所有 workspace 的資料
 
 **當前實作**: `getCurrentWorkspaceFilter()` 返回 null 時不過濾
 

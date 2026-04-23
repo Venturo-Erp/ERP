@@ -26,7 +26,7 @@
 
 **根因**：DB RLS 寫得對（`is_super_admin() OR 同 workspace`），但應用層用 service_role 繞 RLS、又沒補應用層 auth guard。這正是原則 3 警戒的「單點防禦打穿」。
 
-**修法**：應用層補 `if (!isSuperAdmin(caller) && caller.workspace_id !== targetWorkspaceId) return 403`；或乾脆不用 service client、讓 RLS 擋。
+**修法**：應用層補 `if (!isPlatformAdminCapability(caller) && caller.workspace_id !== targetWorkspaceId) return 403`；或乾脆不用 service client、讓 RLS 擋。
 
 ---
 
@@ -51,7 +51,7 @@
 **SSOT 破碎面**：
 - 層 1 開關：`workspace_features.enabled`（租戶管理頁改）
 - 層 2 權限：`role_tab_permissions`（HR 改 role 權限）
-- **關閉 feature 不會 cascade 清掉 role permission**（設計：重開要 admin 重勾）
+- **關閉 feature 不會 cascade 清掉 role permission**（設計：重開要 系統主管重勾）
 
 **安全意涵分層**：
 
@@ -59,10 +59,10 @@
 |---|---|---|---|
 | Feature 關、role perm 沒清 | **越權放行** | 擋住 | layer 2 單層 = fail-OPEN |
 | `role_tab_permissions` 誤寫 / SQL 注入 | **越權放行** | feature 關還擋 | layer 2 單層 blast radius 擴大 |
-| Feature 重開、admin 還沒重勾 | **拒絕**（安全預設） | 拒絕 | 一致 |
+| Feature 重開、系統主管還沒重勾 | **拒絕**（安全預設） | 拒絕 | 一致 |
 
 **我的立場（回應 William 傾向「使用端單層、只看 role permission」）**：
-- **NO**，拿掉 workspace feature 那層、等於放棄租戶邊界擋板。威脅模型：若 `role_tab_permissions` 被惡意寫入（SQL 注入 / 管理員錯誤 / 內部惡意 / bug 生出過寬的 row）、單層會**全站擴散**；雙層會被 feature 開關擋在租戶邊界。
+- **NO**，拿掉 workspace feature 那層、等於放棄租戶邊界擋板。威脅模型：若 `role_tab_permissions` 被惡意寫入（SQL 注入 / 系統主管錯誤 / 內部惡意 / bug 生出過寬的 row）、單層會**全站擴散**；雙層會被 feature 開關擋在租戶邊界。
 - **正確走法**：把「feature off → role perm 自動 revoke」做成 **DB trigger（層 3）**，但 **不要刪掉使用端的雙層判斷**。Trigger 保證 data consistency（SSOT），雙層保證 runtime defense-in-depth。**SSOT ≠ 單層檢查**；SSOT 是「這個租戶該有什麼權限」只有一個真相來源（= feature 開關 + role perm 的交集），檢查的點可以多個。
 
 ---
@@ -91,11 +91,11 @@
 
 ### P-SEC-05 · 員工能自改 `role_id`（/hr 已發現）→ 整合後的安全意涵（William 問題 5）
 
-**威脅**：任一員工能 UPDATE 自己的 `employees.role_id` → 改成 admin role → 下次登入 JWT 就是 admin。
+**威脅**：任一員工能 UPDATE 自己的 `employees.role_id` → 改成 系統主管職務 → 下次登入 JWT 就擁有管理員資格。
 
 **整合後**（層 1 MODULE_REGISTRY + 層 3 cascade trigger）：
-- **更危險**：若整合後仍沒堵這個洞、自改 role_id + cascade trigger 自動同步 = 員工自己把自己變 admin 速度更快
-- **更安全**：若整合時順手做「`employees.role_id` UPDATE 加 policy：僅 admin 可改別人、無人可改自己」→ 借整合機會關洞
+- **更危險**：若整合後仍沒堵這個洞、自改 role_id + cascade trigger 自動同步 = 員工自己把自己變系統主管 速度更快
+- **更安全**：若整合時順手做「`employees.role_id` UPDATE 加 policy：僅 系統主管可改別人、無人可改自己」→ 借整合機會關洞
 
 **結論**：整合本身中性、關鍵看有沒有順手修。建議整合 PR 的 checklist 裡硬性加一條「employees role_id UPDATE policy 檢查」。
 
@@ -127,7 +127,7 @@
 ## 演進建議（優先級）
 
 ### P0 · 本週必修（Critical）
-1. **`PUT /api/permissions/features` 補 auth guard**：檢查 caller 是 super_admin 或 same-workspace admin
+1. **`PUT /api/permissions/features` 補 auth guard**：檢查 caller 是 平台管理資格或同 workspace 系統主管
 2. **`employees.role_id` UPDATE policy 加自改擋板**：`can_update_role_id(target_employee)` predicate
 3. **`workspace_features` INSERT policy 加 is_admin 檢查**
 

@@ -11,6 +11,7 @@ import { supabase } from '@/lib/supabase/client'
 import { invalidateTours } from '@/data'
 import { useTourStore } from '@/stores'
 import { TOUR_SERVICE_LABELS } from '../constants/labels'
+import { TOUR_STATUS } from '@/lib/constants/status-maps'
 
 class TourService extends BaseService<Tour & BaseEntity> {
   protected resourceName = 'tours'
@@ -193,35 +194,16 @@ class TourService extends BaseService<Tour & BaseEntity> {
       return tour
     }
 
-    // 簡化版狀態轉換邏輯
-    // 提案 → 進行中 → 結案
-    //          ↓
-    //    (解鎖回提案)
+    // 狀態轉換規則（6 狀態單向流水線）
+    // template → proposal → upcoming → ongoing → returned → closed
+    // 取消走封存（archived=true, archive_reason='cancelled'）、不是狀態轉換
     const ALLOWED_STATUS_TRANSITIONS: Record<string, string[]> = {
-      // 英文狀態值（新規範）
-      proposed: ['draft', 'cancelled'],
-      draft: ['published', 'cancelled'],
-      published: ['departed', 'cancelled', 'draft'],
-      departed: ['completed'],
-      completed: ['archived'],
-      cancelled: ['draft'],
-      archived: [],
-      // 相容舊中文狀態值
-      [TOUR_SERVICE_LABELS.STATUS_PROPOSAL]: [
-        TOUR_SERVICE_LABELS.STATUS_ACTIVE,
-        TOUR_SERVICE_LABELS.STATUS_CANCELLED,
-        'draft',
-        'cancelled',
-      ],
-      [TOUR_SERVICE_LABELS.STATUS_ACTIVE]: [
-        TOUR_SERVICE_LABELS.STATUS_CLOSED,
-        TOUR_SERVICE_LABELS.STATUS_CANCELLED,
-        TOUR_SERVICE_LABELS.STATUS_PROPOSAL,
-        'completed',
-        'cancelled',
-      ],
-      [TOUR_SERVICE_LABELS.STATUS_CLOSED]: [],
-      [TOUR_SERVICE_LABELS.STATUS_CANCELLED]: [],
+      [TOUR_STATUS.TEMPLATE]: [TOUR_STATUS.PROPOSAL], // 複製
+      [TOUR_STATUS.PROPOSAL]: [TOUR_STATUS.UPCOMING], // 開團
+      [TOUR_STATUS.UPCOMING]: [TOUR_STATUS.ONGOING], // 自動：出發日到
+      [TOUR_STATUS.ONGOING]: [TOUR_STATUS.RETURNED], // 自動：回程日過
+      [TOUR_STATUS.RETURNED]: [TOUR_STATUS.CLOSED], // 結案按鈕
+      [TOUR_STATUS.CLOSED]: [], // 終點
     }
 
     const allowedTransitions = ALLOWED_STATUS_TRANSITIONS[currentStatus || ''] || []
@@ -234,15 +216,11 @@ class TourService extends BaseService<Tour & BaseEntity> {
 
     const result = await this.update(tour_id, {
       status: newStatus,
-      // 可以在這裡記錄狀態變更的原因和時間
       updated_at: this.now(),
     })
 
-    // 當旅遊團結案或取消時，自動封存相關頻道
-    if (
-      newStatus === TOUR_SERVICE_LABELS.STATUS_CLOSED ||
-      newStatus === TOUR_SERVICE_LABELS.STATUS_CANCELLED
-    ) {
+    // 結案時自動封存頻道
+    if (newStatus === TOUR_STATUS.CLOSED) {
       await this.archiveTourChannel(tour_id)
     }
 

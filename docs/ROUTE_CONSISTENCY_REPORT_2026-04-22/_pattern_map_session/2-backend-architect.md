@@ -23,13 +23,13 @@
 
 ### 🟡 可能 by design 但該限寫（共 6 張）
 
-讀可全域、寫入要限租戶或 admin：
+讀可全域、寫入要限租戶或系統主管：
 
 | Table | 理由 |
 |---|---|
 | `wishlist_templates` / `wishlist_template_items` | 有 workspace_id + created_by — 模板共享可行、但寫入應限建立者租戶 |
 | `todo_columns` | 有 workspace_id — 應綁租戶 |
-| `workspace_attendance_settings` / `workspace_notification_settings` / `workspace_bonus_defaults` | 租戶級設定、SELECT 若為 admin 頁合理、但 `USING: true` 意味他租戶也能讀 → 修 |
+| `workspace_attendance_settings` / `workspace_notification_settings` / `workspace_bonus_defaults` | 租戶級設定、SELECT 若為系統主管頁合理、但 `USING: true` 意味他租戶也能讀 → 修 |
 
 ### 🔴 絕對漏鎖（租戶 / 員工 / 個資 / 訊息 / 計酬）共 45 張
 
@@ -222,7 +222,7 @@ DROP POLICY IF EXISTS employee_permission_overrides_delete ON public.employee_pe
 
 ### P022 一併處理（pattern-map 遺留項）
 
-既然動 schema、建議同 migration 加：UPDATE policy 的 `WITH CHECK workspace_id = get_current_user_workspace()`——防止 admin 把某員工 override 的 workspace_id 改掉逃租戶（同 P010 role_tab_permissions 修法）。
+既然動 schema、建議同 migration 加：UPDATE policy 的 `WITH CHECK workspace_id = get_current_user_workspace()`——防止系統主管把某員工 override 的 workspace_id 改掉逃租戶（同 P010 role_tab_permissions 修法）。
 
 ---
 

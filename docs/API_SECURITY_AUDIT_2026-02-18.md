@@ -112,7 +112,7 @@
 - **所有路由都有 try-catch 錯誤處理**（get-employee-data 已修復）
 - **LinkPay webhook 有完整的 MAC 簽名驗證**
 - **Bot API 有 secret 驗證**
-- **管理員操作有角色檢查**（admin-reset-password）
+- **系統主管操作有角色檢查**（admin-reset-password）
 - **Workspace 隔離**（channel members 有 workspace 交叉檢查）
 - **敏感資料不外洩**（settings/env 只回傳 isConfigured，不回傳值）
 

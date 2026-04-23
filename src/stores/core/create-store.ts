@@ -65,7 +65,7 @@ function getCurrentUserContext(): { workspaceId: string | null; userRole: UserRo
       const parsed = JSON.parse(authData)
       const user = parsed?.state?.user
       const isAdmin = parsed?.state?.isAdmin
-      // 新系統：使用 permissions 判斷管理員
+      // 新系統：使用 permissions 判斷系統主管
       const userRole = isAdmin ? ('admin' as UserRole) : ('staff' as UserRole)
       return {
         workspaceId: user?.workspace_id || null,
@@ -197,7 +197,7 @@ export function createStore<T extends BaseEntity>(
               if (!isValidUUID(workspaceId)) {
                 throw new Error(`Invalid workspace ID format: ${workspaceId}`)
               }
-              // 一般使用者或 Super Admin 預設模式：過濾到自己的 workspace
+              // 預設模式：過濾到自己的 workspace（不論是否擁有平台管理資格）
               query = query.or(`workspace_id.eq.${workspaceId},workspace_id.is.null`)
             }
           }

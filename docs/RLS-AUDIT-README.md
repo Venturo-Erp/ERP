@@ -173,7 +173,7 @@ CREATE POLICY "workspace_isolation"
 ```sql
 CREATE POLICY "accounting_only"
   ON payment_requests FOR SELECT USING (
-    (SELECT role FROM auth.users WHERE id = auth.uid()) IN ('admin', 'accounting')
+    (SELECT role FROM auth.users WHERE id = auth.uid()) IN ('系統主管', '會計')
   );
 ```
 
@@ -207,7 +207,7 @@ CREATE POLICY "tenant_isolation"
 
 - [ ] 工作室隔離正確 (workspace_id)
 - [ ] 租戶隔離有效 (若為多租戶)
-- [ ] 權限過濾正確 (admin vs staff)
+- [ ] 權限過濾正確 （系統主管 vs 員工）
 - [ ] 沒有過度寬鬆的策略 (如 AS (TRUE))
 - [ ] 效能合理 (有適當的索引)
 

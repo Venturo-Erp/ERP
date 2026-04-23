@@ -9,6 +9,7 @@ import type { OrderFormData } from '@/features/orders/components/add-order-form'
 import { TourBasicInfo, TourSettings, TourOrderSection } from './tour-form'
 import { Input } from '@/components/ui/input'
 import { TOUR_FORM } from '../constants'
+import { TOUR_STATUS } from '@/lib/constants/status-maps'
 
 interface TourFormShellProps {
   isOpen: boolean
@@ -39,14 +40,15 @@ export function TourFormShell({
   isFromProposal,
 }: TourFormShellProps) {
   // SSOT：航班屬於旅遊團「行程編輯」分頁，開團時不再選填航班
-  const isProposalOrTemplate = newTour.tour_type === 'proposal' || newTour.tour_type === 'template'
+  const isProposalOrTemplate =
+    newTour.status === TOUR_STATUS.PROPOSAL || newTour.status === TOUR_STATUS.TEMPLATE
 
   // 決定標題
   const getTitle = () => {
     if (mode === 'edit') return TOUR_FORM.title_edit
     if (isFromProposal) return TOUR_FORM.title_convert
-    if (newTour.tour_type === 'proposal') return TOUR_FORM.title_create_proposal
-    if (newTour.tour_type === 'template') return TOUR_FORM.title_create_template
+    if (newTour.status === TOUR_STATUS.PROPOSAL) return TOUR_FORM.title_create_proposal
+    if (newTour.status === TOUR_STATUS.TEMPLATE) return TOUR_FORM.title_create_template
     return TOUR_FORM.title_create
   }
 
@@ -60,9 +62,9 @@ export function TourFormShell({
           ? TOUR_FORM.submit_convert_with_order
           : TOUR_FORM.submit_convert
     }
-    if (newTour.tour_type === 'proposal')
+    if (newTour.status === TOUR_STATUS.PROPOSAL)
       return submitting ? TOUR_FORM.submit_creating : TOUR_FORM.submit_create_proposal
-    if (newTour.tour_type === 'template')
+    if (newTour.status === TOUR_STATUS.TEMPLATE)
       return submitting ? TOUR_FORM.submit_creating : TOUR_FORM.submit_create_template
     return submitting
       ? TOUR_FORM.submit_creating
@@ -194,7 +196,7 @@ export function TourFormShell({
           <Button
             onClick={onSubmit}
             disabled={isSubmitDisabled()}
-            className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+            className="bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg"
           >
             {getSubmitLabel()}
           </Button>

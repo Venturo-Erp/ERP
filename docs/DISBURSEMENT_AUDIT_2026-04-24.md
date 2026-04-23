@@ -584,7 +584,7 @@ grep -r "CREATE TRIGGER\|CREATE VIEW\|CREATE FUNCTION" /supabase/migrations
      const { canWrite } = useTabPermissions()
      if (!canWrite('finance', 'disbursement')) return <UnauthorizedPage />
      ```
-   - **風險**: 現在缺少寫權限的按鈕層檢查，admin 可能被迫給過寬的「財務讀」權限
+   - **風險**: 現在缺少寫權限的按鈕層檢查，系統主管可能被迫給過寬的「財務讀」權限
    - **估算**: 10 分鐘
 
 #### P1 — HIGH（1 週內解決）

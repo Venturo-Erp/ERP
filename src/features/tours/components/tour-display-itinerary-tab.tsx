@@ -49,6 +49,7 @@ import {
   Globe,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { TOUR_STATUS } from '@/lib/constants/status-maps'
 import { toast } from 'sonner'
 import { logger } from '@/lib/utils/logger'
 
@@ -593,7 +594,7 @@ export function TourDisplayItineraryTab({ tour }: TourDisplayItineraryTabProps) 
 
           {/* 狀態 */}
           {linkedItinerary && (
-            <Badge variant={linkedItinerary.status === '待出發' ? 'default' : 'secondary'}>
+            <Badge variant={linkedItinerary.status === TOUR_STATUS.UPCOMING ? 'default' : 'secondary'}>
               {linkedItinerary.status || '草稿'}
             </Badge>
           )}

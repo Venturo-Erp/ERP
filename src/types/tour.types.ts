@@ -442,8 +442,7 @@ export interface Tour extends BaseEntity {
   contract_archived_date?: string | null // 合約封存日期
   envelope_records?: string | null // 信封記錄
 
-  // 結團相關欄位
-  closing_status?: string | null // 結團狀態：open(進行中), closing(結團中), closed(已結團)
+  // 結團相關欄位（closing_status 已移除 2026-04-23、結案真相看 status='closed'）
   closing_date?: string | null // 結團日期
   closed_by?: string | null // 結團操作人員 ID
 
@@ -496,27 +495,20 @@ export interface Tour extends BaseEntity {
 // ============================================
 
 /**
- * TourStatus - 旅遊團狀態（中文）
+ * TourStatus - 旅遊團狀態（英文 SSOT、DB 儲存格式）
  *
- * 生命週期流程:
- * 開團 → 待出發 → 已出發 → 待結團 → 已結團
- *                                      ↓
- *                                    取消
+ * 生命週期：template → proposal → upcoming → ongoing → returned → closed
+ * 取消走封存維度（archived=true、archive_reason='cancelled'）、不是狀態。
  *
- * - 開團：可編輯行程
- * - 待出發：已確認出團，行程鎖定
- * - 已出發：團已出發
- * - 待結團：等待結算
- * - 已結團：團結束，結算獎金
- * - 取消：已取消
+ * UI 顯示中文由 @/lib/constants/status-maps 的 TOUR_STATUS_LABELS 翻譯。
  */
 export type TourStatus =
-  | '開團' // 可編輯行程
-  | '待出發' // 已確認出團，行程鎖定
-  | '已出發' // 團已出發
-  | '待結團' // 等待結算
-  | '已結團' // 團結束，結算獎金
-  | '取消' // 已取消
+  | 'template' // 模板：可被複製、不會出發
+  | 'proposal' // 提案：詢價階段、無團號
+  | 'upcoming' // 待出發：已開團、有團號、出發日未到
+  | 'ongoing' // 進行中：出發日已到、回程日未過
+  | 'returned' // 未結團：回程日已過、還沒按結案
+  | 'closed' // 已結團：按了結案按鈕、發獎金
 
 /**
  * ContractStatus - 合約狀態（英文）

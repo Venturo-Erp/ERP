@@ -10,7 +10,7 @@
 
 PR-1d 本身「只動前端」、**沒引入新的跨租戶提權**（workspace RLS + 後端 API 大多已守 workspace_id）、但有兩個致命面：
 
-1. 🔴 **admin 權限下降會把 `/tenants`、`/ai-bot`、`/workspace`（付費功能）直接白屏** — Corner admin 現在可進、PR-1d 後會被擋、業務當機。
+1. 🔴 **系統主管權限下降會把 `/tenants`、`/ai-bot`、`/workspace`（付費功能）直接白屏** — Corner 系統主管 現在可進、PR-1d 後會被擋、業務當機。
 2. 🔴 **PR-1a 加的 `if (workspaceFeatures.loading) return true` 是「載入期放行」** — 搭配 `canEdit` 也放行、造成「連續快點」的 TOCTOU 寫入窗口；加上後端 write API 多半沒檢 `role_tab_permissions`、這個 loading bypass 是跨越「UI 唯一防線」的現成入口。
 
 多防線已塌的是 **HR 審批 / 公告 / 會計科目** 三條：後端 API 完全不查 `role_tab_permissions`、一旦前端放行、任何 session 就能改。PR-1d 沒讓它變糟、但**沒讓它變好、拔 isAdmin 後「看似有權限系統」的安全感更需戳破**。
@@ -24,19 +24,19 @@ PR-1d 本身「只動前端」、**沒引入新的跨租戶提權**（workspace 
 **命中點**：
 - B1 `/accounting/layout.tsx` 改 `canAccess('/accounting')`
 - B2 `/database/layout.tsx` 改 `canAccess('/database')`
-- 擴散風險：ModuleGuard 拔 admin bypass（A6）後、所有 `PREMIUM_FEATURE_CODES` 中的模組會改走 `isRouteAvailable` → `isFeatureEnabled` → 付費大開關 `premium_enabled`
+- 擴散風險：ModuleGuard 拔 系統主管 bypass（A6）後、所有 `PREMIUM_FEATURE_CODES` 中的模組會改走 `isRouteAvailable` → `isFeatureEnabled` → 付費大開關 `premium_enabled`
 
 **攻擊情境 / 實際影響**（非攻擊、是 self-DoS）：
 - `workspace_features.premium_enabled` 在 `/api/tenants/create` 預設 `false`（見 `src/app/api/tenants/create/route.ts:149`）。
 - `features.ts` 裡 `workspace` / `ai_bot` / `accounting` / `tenants` 都列 `PREMIUM_FEATURE_CODES`（`src/lib/permissions/hooks.ts:24-38`）。
 - `isFeatureEnabled` 對 premium 回傳 `premiumEnabled && featureOn`（hooks.ts:147-149）。
-- Corner workspace **當前 premium_enabled 狀態未驗證**（我沒下 DB、只能從代碼推）— 如果 premium_enabled=false、PR-1d 一上線、Corner admin 進 `/accounting`、`/tenants`、`/ai-bot` 通通變「無權限」。
-- **最關鍵**：`settings.tenants` tab **根本不在 `MODULES` 裡面**（module-tabs.ts 只有 personal/company）、也不在 `20260422150000_backfill_admin_role_tab_permissions.sql` 的 VALUES 清單裡（只 seed 了 `settings.personal` / `settings.company`）。即使 Corner admin role 有 `is_admin=true`、也沒有 `role_tab_permissions(module='settings', tab='tenants', can_write=true)` 這筆 row。`/api/tenants/create`、`/api/workspaces/[id]` DELETE、`/api/permissions/features` PUT 全部 403。
+- Corner workspace **當前 premium_enabled 狀態未驗證**（我沒下 DB、只能從代碼推）— 如果 premium_enabled=false、PR-1d 一上線、Corner 系統主管 進 `/accounting`、`/tenants`、`/ai-bot` 通通變「無權限」。
+- **最關鍵**：`settings.tenants` tab **根本不在 `MODULES` 裡面**（module-tabs.ts 只有 personal/company）、也不在 `20260422150000_backfill_admin_role_tab_permissions.sql` 的 VALUES 清單裡（只 seed 了 `settings.personal` / `settings.company`）。即使 Corner 系統主管職務 有 `is_admin=true`、也沒有 `role_tab_permissions(module='settings', tab='tenants', can_write=true)` 這筆 row。`/api/tenants/create`、`/api/workspaces/[id]` DELETE、`/api/permissions/features` PUT 全部 403。
 
 **修法補強（CRITICAL 必做、阻斷上線）**：
-1. PR-1d 進下一步前、**先下 DB 指令驗 Corner admin 的 `role_tab_permissions` 是否有 `settings/tenants/can_write=true` 這筆**；沒有就先補 migration。
+1. PR-1d 進下一步前、**先下 DB 指令驗 Corner 系統主管 的 `role_tab_permissions` 是否有 `settings/tenants/can_write=true` 這筆**；沒有就先補 migration。
 2. `module-tabs.ts` MODULES 增一個 `settings.tenants` tab（或明確宣告「tenants 是 system-level、另有管道」、不走 module-tabs seed）；把 backfill migration 加一行 `('settings', 'tenants')` 補齊。
-3. 驗 `workspaces.premium_enabled` 在 Corner 是 true；否則把 ModuleGuard 的 admin bypass 保留（A6 不在 PR-1d 拔）。
+3. 驗 `workspaces.premium_enabled` 在 Corner 是 true；否則把 ModuleGuard 的 系統主管 bypass 保留（A6 不在 PR-1d 拔）。
 4. 寫 e2e：Corner / JINGYAO / YUFEN 三租戶 admin 登入、依序點 /tenants、/ai-bot、/accounting、/database、/hr/roles 不得被擋。
 
 ---
@@ -63,8 +63,8 @@ PR-1d 本身「只動前端」、**沒引入新的跨租戶提權**（workspace 
 3. `canEdit` 也同樣放行、對 `/api/roles/[roleId]/tab-permissions` PUT 可改自己的 role 變 super、持久化。
 4. 幫兇條件：feature cache 失效時（`invalidateFeatureCache()` 被叫、hooks.ts:54）會重 fetch、再開一個 loading 窗口。
 
-情境 B（非 admin 直接打後端）：
-- PR-1d 只動前端、後端原本就不查 role、非 admin 本來就能 POST `/api/accounting/vouchers/create`。這不是 PR-1d 新增的、但 PR-1d 讓前端的「`if (!isAdmin) return <UnauthorizedPage />`」變弱、使用者體感「會計頁我進得去、表示我有權限」、**會降低對後端 API 的警覺**、擴大實際被打穿的風險。
+情境 B（沒有系統主管資格 直接打後端）：
+- PR-1d 只動前端、後端原本就不查 role、沒有系統主管資格 本來就能 POST `/api/accounting/vouchers/create`。這不是 PR-1d 新增的、但 PR-1d 讓前端的「`if (!isAdmin) return <UnauthorizedPage />`」變弱、使用者體感「會計頁我進得去、表示我有權限」、**會降低對後端 API 的警覺**、擴大實際被打穿的風險。
 
 **修法補強**：
 1. **立即**：PR-1d 不動 `canEdit` 的 loading 放行（只保留 canAccess 給 UX 防閃）；`canEdit` loading 期間應回 `false` 或 `undefined`，UI 顯 disabled 不是「看起來可以點但打過去會炸」。
@@ -107,11 +107,11 @@ PR-1d 本身「只動前端」、**沒引入新的跨租戶提權**（workspace 
 **影響**：
 - ModuleGuard 的職責是 workspace-level feature gate（有沒有買某模組）、不是 role-level permission。
 - PR-1d 規劃沒列 ModuleGuard 為 A 類短路、但 senior-dev 若順手拔、會造成：Corner workspace 若沒買某個 premium module（ai_bot / fleet / local / supplier_portal / esims / accounting / tenants）、admin 進該路由會被踢到 /unauthorized。
-- 跟 S1 是同一根問題（admin 權限「降到」workspace_features 層），但 ModuleGuard 拔掉的影響更大：它是 /(main) layout 附近的 guard、錯了全站受影響。
+- 跟 S1 是同一根問題（系統主管權限「降到」workspace_features 層），但 ModuleGuard 拔掉的影響更大：它是 /(main) layout 附近的 guard、錯了全站受影響。
 
 **修法補強**：
-1. **PR-1d 明確不動 ModuleGuard**；ModuleGuard 的 admin bypass 是「workspace 層級的 sales-safety」、該由付費大開關（billing）決定、不由 role 決定。
-2. 或改成：`if (isAdmin && premium_enabled) { setChecked(true); return }` — 仍允許 admin bypass、但前提是該 workspace 有付費、避免「不付費也能 admin 跳進所有功能」的漏洞（這屬於另一個商業層問題、不是 PR-1d 要修的、但要講清楚）。
+1. **PR-1d 明確不動 ModuleGuard**；ModuleGuard 的 系統主管 bypass 是「workspace 層級的 sales-safety」、該由付費大開關（billing）決定、不由 role 決定。
+2. 或改成：`if (isAdmin && premium_enabled) { setChecked(true); return }` — 仍允許 系統主管 bypass、但前提是該 workspace 有付費、避免「不付費也能 admin 跳進所有功能」的漏洞（這屬於另一個商業層問題、不是 PR-1d 要修的、但要講清楚）。
 
 ---
 
@@ -206,14 +206,14 @@ PR-1d 本身「只動前端」、**沒引入新的跨租戶提權**（workspace 
 
 ---
 
-## admin 權限下降風險清單
+## 系統主管權限下降風險清單
 
-1. **`/tenants` 路由**（SEVERE、必爆）：`settings.tenants` 不在 MODULES、不在 backfill、Corner admin 的 role_tab_permissions **沒有這筆**；PR-1d 一改前端守門、admin 進不去。搭配 `/api/tenants/create`、`/api/workspaces/[id]` DELETE、`/api/permissions/features` PUT 的 server guard 也 fail。
-2. **`/ai-bot` 路由**（依 premium_enabled 狀態）：ai_bot 是 PREMIUM_FEATURE；若 workspace 未開付費大開關、admin 自己也進不去。
+1. **`/tenants` 路由**（SEVERE、必爆）：`settings.tenants` 不在 MODULES、不在 backfill、Corner 系統主管 的 role_tab_permissions **沒有這筆**；PR-1d 一改前端守門、admin 進不去。搭配 `/api/tenants/create`、`/api/workspaces/[id]` DELETE、`/api/permissions/features` PUT 的 server guard 也 fail。
+2. **`/ai-bot` 路由**（依 premium_enabled 狀態）：ai_bot 是 PREMIUM_FEATURE；若 workspace 未開付費大開關、系統主管自己也進不去。
 3. **`/workspace` 頻道路由**：workspace 本身是 premium feature、同上。
 4. **`/accounting` / `/database`**（依 Corner workspace 當前 state）：不是 premium、但要 `role_tab_permissions` 有對應 row。P001 backfill 已處理、有 54 rows、**理論 OK 但要 e2e 驗一次**。
-5. **`/hr/roles`**（B 類）：admin 能進、canAccess OK；但權限編輯時 render 依賴 isAdmin flag（見 hr/roles/page.tsx:386, 400, 408）、拔掉 isAdmin 後那個「admin 鎖死全開」的視覺狀態不見、可能讓 admin 誤把自己的權限關掉（UX bug、不是 security）。
-6. **`/calendar` workspace switcher**（A 類）：非 admin 看不到選單、拔 isAdmin 後仍看不到（靠 workspaces.length > 0）、但語意飄移；不致命。
+5. **`/hr/roles`**（B 類）：admin 能進、canAccess OK；但權限編輯時 render 依賴 isAdmin flag（見 hr/roles/page.tsx:386, 400, 408）、拔掉 isAdmin 後那個「admin 鎖死全開」的視覺狀態不見、可能讓系統主管 誤把自己的權限關掉（UX bug、不是 security）。
+6. **`/calendar` workspace switcher**（A 類）：沒有系統主管資格 看不到選單、拔 isAdmin 後仍看不到（靠 workspaces.length > 0）、但語意飄移；不致命。
 
 ---
 
@@ -222,7 +222,7 @@ PR-1d 本身「只動前端」、**沒引入新的跨租戶提權**（workspace 
 ### Blocker（PR-1d merge 前必備）
 
 - **e2e `tests/e2e/admin-can-enter-all-routes.spec.ts`**：
-  Corner admin / JINGYAO admin 兩人、依序訪問 `/tenants`、`/ai-bot`、`/accounting`、`/database`、`/hr/roles`、`/finance/settings`、`/finance/requests`、`/finance/treasury`、`/finance/travel-invoice`、`/finance/reports`、`/workspace`、`/calendar`；期待：不閃 UnauthorizedPage、不 redirect to /unauthorized、render 主要內容。
+  Corner 系統主管 / JINGYAO admin 兩人、依序訪問 `/tenants`、`/ai-bot`、`/accounting`、`/database`、`/hr/roles`、`/finance/settings`、`/finance/requests`、`/finance/treasury`、`/finance/travel-invoice`、`/finance/reports`、`/workspace`、`/calendar`；期待：不閃 UnauthorizedPage、不 redirect to /unauthorized、render 主要內容。
 - **unit test `src/lib/permissions/__tests__/hasPermissionForRoute.test.ts`**：
   - admin=true 且 permissions=[] 時、access 任何路由應 true（或 false、取決於最終 contract）
   - admin=false 且 permissions=['accounting:vouchers'] 時、access `/accounting` 應 true
@@ -238,12 +238,12 @@ PR-1d 本身「只動前端」、**沒引入新的跨租戶提權**（workspace 
 ### 短期（P001-B 或 independent issue）
 
 - **寫 API-level role guard 測試**（API BFLA suite）：
-  - 非 admin role 打 `/api/accounting/vouchers/create` POST、應 403
-  - 非 admin role 打 `/api/roles/[roleId]/tab-permissions` PUT、應 403
-  - 非 admin role 打 `/api/hr/approval` POST、應 403
+  - 非 系統主管職務 打 `/api/accounting/vouchers/create` POST、應 403
+  - 非 系統主管職務 打 `/api/roles/[roleId]/tab-permissions` PUT、應 403
+  - 非 系統主管職務 打 `/api/hr/approval` POST、應 403
   - 這四支是 S2 列的高危寫 API、**目前 CI 不會抓到**。
 - **RLS 測試**：
-  - announcements insert 走 non-admin session、目前會成功（RLS `WITH CHECK (true)`）、測試應 fail → 迫使 policy 收緊。
+  - announcements insert 走 沒有系統主管資格 session、目前會成功（RLS `WITH CHECK (true)`）、測試應 fail → 迫使 policy 收緊。
 
 ### 長期（pattern P008 / P007 合流）
 
@@ -254,6 +254,6 @@ PR-1d 本身「只動前端」、**沒引入新的跨租戶提權**（workspace 
 
 ## 給主席彙整的三行話
 
-1. 🔴 S1 先驗 DB：Corner admin 在 `role_tab_permissions` 有沒有 `settings.tenants` 跟所有 54 row；沒有先補。ModuleGuard 的 admin bypass 在 PR-1d **不動**（搭 S4）。
+1. 🔴 S1 先驗 DB：Corner 系統主管 在 `role_tab_permissions` 有沒有 `settings.tenants` 跟所有 54 row；沒有先補。ModuleGuard 的 系統主管 bypass 在 PR-1d **不動**（搭 S4）。
 2. 🔴 S2 PR-1a 的 canEdit loading 放行**拿掉**、canAccess 保留即可；後端寫 API（accounting / roles / hr/approval / suppliers）延 P001-B 補 role 守門。
 3. 🟠 S5 B1/B2 layout 硬 coded 寫 `canAccess('/accounting')`、不傳 pathname；加 `hasPermissionForRoute` input normalize。

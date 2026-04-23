@@ -20,7 +20,7 @@ Scope：今晚 11 commit 引入的副作用 + SaaS 未來隱患
 - **狀態**：⚠️ 未來隱患、非當前炸點
 
 ### ✅ 預期內（行為不變）
-- 非 admin（業務/會計/助理）：原本就靠 role_tab_permissions 查、拔短路後無異
+- 沒有系統主管資格（業務/會計/助理）：原本就靠 role_tab_permissions 查、拔短路後無異
 - `auth-store.checkPermission`（L246–249）：仍讀 user.permissions、短路只是拔 isAdmin 直通
 
 ---
@@ -78,8 +78,8 @@ Scope：今晚 11 commit 引入的副作用 + SaaS 未來隱患
 
 ### requireTenantAdmin（P003-A）
 - 檢查 `role_tab_permissions.settings.tenants.can_write`
-- **合規性**：Corner admin 在 tenants/create seed 時會自動補這個權限、合理
-- **風險**：非 Corner 的新租戶 admin 若沒這個 key、打不開自己的 feature 設定頁（需驗）
+- **合規性**：Corner 系統主管 在 tenants/create seed 時會自動補這個權限、合理
+- **風險**：非 Corner 的新租戶系統主管 若沒這個 key、打不開自己的 feature 設定頁（需驗）
 
 ### workspaces/[id] GET（P003-H）
 - 自己 workspace 直通、跨租戶才需 canManageTenants
@@ -124,7 +124,7 @@ Scope：今晚 11 commit 引入的副作用 + SaaS 未來隱患
 | 20260422150000 ON CONFLICT 語義 | ❓ 需人工確認 | 🟡 |
 | 20260422160000 反向放寬風險 | ❓ 需人工確認（JINGYAO/YUFEN/TESTUX 客製權限）| 🟡 |
 | amadeus_totp_secret 讀取漏洞 | ❓ 需確認 SELECT 白名單 | 🟡 |
-| requireTenantAdmin 新租戶 admin 打不開 feature | ❓ 需實測 | 🟡 |
+| requireTenantAdmin 新租戶系統主管 打不開 feature | ❓ 需實測 | 🟡 |
 | sync-employee 雞生蛋 | ❓ 需 curl 實測 | 🟡 |
 | SaaS workspace type 無業務隔離 | 🔴 未來隱患 | 🔴 |
 | SaaS feature_code 無 namespace | 🔴 未來隱患 | 🔴 |

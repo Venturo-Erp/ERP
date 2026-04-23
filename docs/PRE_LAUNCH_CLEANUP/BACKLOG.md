@@ -73,7 +73,7 @@
 
 - [x] **`'current_user'` literal 殘留 2 處**（S）
   - 改 API 從 `auth.data.employeeId` 取、client 不再傳 operatedBy
-- [x] **`/tools/reset-db` 無 admin guard**（S）
+- [x] **`/tools/reset-db` 無 系統主管 guard**（S）
 - [x] **`/login` 漏檢 `is_active=false`**（S）
 - [x] type-check 0 錯
 
@@ -104,14 +104,14 @@
 - [ ] 列 role_tab_permissions 表現況（目前有哪些 key）
 
 **執行**：
-- [x] **Batch 1**：Finance 6 頁 admin guard（payments/requests/travel-invoice/reports/settings/treasury、2026-04-21）
+- [x] **Batch 1**：Finance 6 頁 系統主管 guard（payments/requests/travel-invoice/reports/settings/treasury、2026-04-21）
   - 簡化版：`useAuthStore.isAdmin` + `UnauthorizedPage`、避開 useTabPermissions async race
 - [x] **Batch 2**：Accounting layout guard（一次 cover /accounting 10 頁、admin-only）
-- [ ] **Batch 3**：HR admin 頁（payroll / reports / settings / deductions、需 William 確認哪些 admin only）
+- [ ] **Batch 3**：HR 系統主管 頁（payroll / reports / settings / deductions、需 William 確認哪些 admin only）
 - [ ] **Batch 4**：Settings admin 頁（workspaces / modules / receipt-test）
 - [x] **Batch 5**：Database 管理頁 layout guard（2026-04-21、9 頁 cover：archive/attractions/company-assets/constants/fleet/suppliers/tour-leaders/transportation-rates/workspaces）
 - [ ] **tour_leader 權限 scope 邏輯**（員工→full、客戶→self_only）— Wave 2 後期
-- [ ] **非 admin 細顆粒權限 migrate 到 canRead/canWrite**（Wave 2 最後階段、用 role_tab_permissions）
+- [ ] **沒有系統主管資格 細顆粒權限 migrate 到 canRead/canWrite**（Wave 2 最後階段、用 role_tab_permissions）
 
 ---
 

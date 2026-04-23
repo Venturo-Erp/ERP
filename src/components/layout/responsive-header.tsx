@@ -177,7 +177,7 @@ export const ResponsiveHeader = memo(function ResponsiveHeader(props: Responsive
                 value={props.searchTerm || ''}
                 onChange={e => props.onSearchChange?.(e.target.value)}
                 placeholder={props.searchPlaceholder || COMP_LAYOUT_LABELS.搜尋_2}
-                className="block w-full text-sm h-10 px-4 pr-10 text-morandi-primary bg-card rounded-lg border border-transparent appearance-none focus:border-border focus:outline-none focus:ring-1 focus:ring-morandi-gold/40 placeholder:text-morandi-secondary/50"
+                className="block w-full text-sm h-10 px-4 pr-10 text-morandi-primary bg-gradient-to-br from-card to-morandi-container/20 rounded-lg border border-morandi-gold/30 appearance-none shadow-md hover:shadow-lg focus:border-morandi-gold/50 focus:outline-none focus:ring-1 focus:ring-morandi-gold/40 focus:shadow-lg transition-all placeholder:text-morandi-secondary placeholder:font-medium"
               />
               <div className="absolute top-2.5 right-3">
                 {props.searchTerm ? (
@@ -315,7 +315,7 @@ export const ResponsiveHeader = memo(function ResponsiveHeader(props: Responsive
             <button
               onClick={props.onAdd}
               data-create-box
-              className="bg-morandi-gold hover:bg-morandi-gold-hover text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center transition-colors"
+              className="bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg px-4 py-2 rounded-lg text-sm font-medium flex items-center transition-all"
             >
               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path

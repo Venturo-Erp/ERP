@@ -168,7 +168,7 @@ export function CustomerMatchDialog({
           {(currentPerson?.matchedCustomers.length ?? 0) === 0 && (
             <Button
               onClick={onAddNew}
-              className="bg-morandi-gold hover:bg-morandi-gold-hover text-white gap-2"
+              className="bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg gap-2"
             >
               <Plus size={16} />
               {CL.btn_add_to_crm}
@@ -426,7 +426,7 @@ export function AddCustomerFormDialog({
           </Button>
           <Button
             onClick={onSave}
-            className="bg-morandi-gold hover:bg-morandi-gold-hover text-white gap-2"
+            className="bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg gap-2"
           >
             <Save size={16} />
             {FL.btn_save}

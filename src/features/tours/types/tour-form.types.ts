@@ -1,0 +1,48 @@
+import { Tour } from '@/stores/types'
+
+export interface NewTourData {
+  name: string
+  tour_service_type?:
+    | 'flight'
+    | 'flight_hotel'
+    | 'hotel'
+    | 'car_service'
+    | 'tour_group'
+    | 'visa'
+    | 'esim'
+  days_count?: number | null
+
+  // 核心表架構：統一欄位命名
+  countryId?: string
+  countryName?: string
+  countryCode?: string
+
+  cityCode: string
+  cityName?: string
+
+  customCountry?: string
+  customLocation?: string
+  customCityCode?: string
+  departure_date: string
+  return_date: string
+  price: number
+  status: Tour['status']
+  isSpecial: boolean
+  max_participants: number
+  description?: string
+  enable_checkin?: boolean
+  controller_id?: string
+  role_assignments?: Record<string, string>
+  department_id?: string
+}
+
+export interface TourExtraFields {
+  addOns: boolean
+  refunds: boolean
+  customFields: Array<{ id: string; name: string }>
+}
+
+export interface DeleteConfirmState {
+  isOpen: boolean
+  tour: Tour | null
+}

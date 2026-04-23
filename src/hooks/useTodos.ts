@@ -96,7 +96,7 @@ export function useTodos() {
     const now = new Date().toISOString()
 
     // 自動注入 workspace_id（如果未提供）
-    // 使用 hook 已計算好的 workspaceId，確保 Super Admin 也能正確取得
+    // 使用 hook 已計算好的 workspaceId、確保擁有平台管理資格的呼叫者也能正確取得
     const workspace_id = (todoData as { workspace_id?: string }).workspace_id || workspaceId
 
     const newTodo = {

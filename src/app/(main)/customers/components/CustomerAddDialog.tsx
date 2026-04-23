@@ -224,7 +224,7 @@ export function CustomerAddDialog({
           <Button
             onClick={handleAddManually}
             disabled={!newCustomer.name.trim() || !newCustomer.phone.trim()}
-            className="w-full bg-morandi-gold hover:bg-morandi-gold-hover text-white gap-2"
+            className="w-full bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg gap-2"
           >
             <Plus size={16} />
             {L.btn_add_manual}
@@ -274,7 +274,7 @@ export function CustomerAddDialog({
             <Button
               onClick={passportUpload.processFiles}
               disabled={passportUpload.isUploading}
-              className="w-full bg-morandi-gold hover:bg-morandi-gold-hover text-white gap-2"
+              className="w-full bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg gap-2"
             >
               <Upload size={16} />
               {passportUpload.isUploading

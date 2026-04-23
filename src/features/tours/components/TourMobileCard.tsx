@@ -8,6 +8,7 @@ import { format } from 'date-fns'
 import { zhTW } from 'date-fns/locale'
 import { CurrencyCell } from '@/components/table-cells'
 import { TOUR_MOBILE_CARD } from '../constants'
+import { TOUR_STATUS, getTourStatusLabel } from '@/lib/constants/status-maps'
 
 interface TourMobileCardProps {
   tour: Tour
@@ -16,11 +17,12 @@ interface TourMobileCardProps {
 }
 
 export function TourMobileCard({ tour: tourProp, onClick, getStatusColor }: TourMobileCardProps) {
-  // Cast tour to ensure proper types
   const tour = tourProp as Tour & Record<string, unknown>
 
-  // 狀態值（已為中文）
-  const statusValue = String(tour.status || 'proposed')
+  // 原始 DB 值（英文、用於 getStatusColor 查色）
+  const statusValue = String(tour.status || TOUR_STATUS.PROPOSAL)
+  // UI 顯示用中文
+  const statusLabel = getTourStatusLabel(statusValue)
 
   return (
     <div
@@ -52,7 +54,7 @@ export function TourMobileCard({ tour: tourProp, onClick, getStatusColor }: Tour
             getStatusColor(statusValue) as string
           )}
         >
-          {statusValue}
+          {statusLabel}
         </span>
       </div>
 

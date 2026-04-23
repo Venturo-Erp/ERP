@@ -70,7 +70,7 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
     const fetchData = async () => {
       setLoading(true)
 
-      // 取得租戶資料（API 會回傳員工人數與管理員資訊，透過 service_client 繞過 RLS）
+      // 取得租戶資料（API 會回傳員工人數與系統主管資訊，透過 service_client 繞過 RLS）
       const wsRes = await fetch(`/api/workspaces/${id}`)
       if (!wsRes.ok) {
         toast({ title: '找不到租戶', variant: 'destructive' })
@@ -178,7 +178,7 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
   }
 
   // 付費加購清單 = 付費模組 + 免費模組裡的付費 tab、統一平列
-  // 'tenants' 為 Venturo 超管內部功能、不在租戶功能清單露出
+  // 'tenants' 為 Venturo 平台內部功能、不在租戶功能清單露出
   const INTERNAL_FEATURES = new Set(['tenants'])
 
   // 1. 付費的整個模組（會計、頻道等）
@@ -237,7 +237,7 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
         <Button
           onClick={handleSave}
           disabled={saving}
-          className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+          className="bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg"
         >
           {saving ? (
             <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -288,7 +288,7 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
           </div>
         </div>
 
-        {/* 管理員卡片 */}
+        {/* 系統主管卡片 */}
         <div
           className="rounded-[24px] p-6"
           style={{
@@ -300,13 +300,13 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Users className="h-4 w-4 text-morandi-gold" />
-              <h3 className="font-semibold text-morandi-primary">管理員資訊</h3>
+              <h3 className="font-semibold text-morandi-primary">系統主管資訊</h3>
             </div>
             <span className="text-sm text-morandi-secondary">{employeeCount} 位員工</span>
           </div>
           <div className="grid grid-cols-3 gap-6">
             <div>
-              <div className="text-sm text-morandi-secondary mb-1">管理員</div>
+              <div className="text-sm text-morandi-secondary mb-1">系統主管</div>
               <div className="font-semibold text-morandi-primary">{adminName || '未指定'}</div>
             </div>
             <div>
@@ -320,7 +320,7 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
                 className="border-morandi-gold text-morandi-gold hover:bg-morandi-gold/10"
                 onClick={async () => {
                   if (!workspace?.admin_id) {
-                    await showAlert('找不到此租戶的管理員', 'error')
+                    await showAlert('找不到此租戶的負責人', 'error')
                     return
                   }
                   // 預設密碼至少 8 字元（API 驗證最低長度）
@@ -347,7 +347,7 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
                       return
                     }
                     await showAlert(
-                      `已重設管理員「${adminName || ''}」的密碼為\n\n${defaultPw}\n\n請通知該管理員使用此密碼登入、並盡快修改。`,
+                      `已重設系統主管「${adminName || ''}」的密碼為\n\n${defaultPw}\n\n請通知該系統主管使用此密碼登入、並盡快修改。`,
                       'success'
                     )
                   } catch (err) {

@@ -3,7 +3,7 @@
 **當前階段**：**Wave 6 完全收尾**（B7 回滾後淨 109 條）+ Wave 2 Batch 5 + Wave 9 /tours 分頁 + Post-Launch retention policy 題加入 BACKLOG
 **上次 session 結束時間**：2026-04-21 09:54
 **下一步**（新紅線下可自主）：
-- Wave 2 Batch 3：HR admin 頁（payroll/reports/settings/deductions、需 William 確認 scope）
+- Wave 2 Batch 3：HR 系統主管 頁（payroll/reports/settings/deductions、需 William 確認 scope）
 - Wave 2 Batch 4：Settings admin 頁（workspaces/modules、可能有普通員工用，需 William 確認）
 - Wave 8：狀態值中英（A8 plan、需 William 決策範圍）
 - Wave 3 剩：well-known-ids.ts 替換現有 hardcode（需 William 確認哪處保留 seed）
@@ -18,7 +18,7 @@
 | 1a | ✅ 完成 | 4 條 CHECK |
 | 1b | ✅ 完成 | 103 條 FK index |
 | 1c | ✅ 完成 | 4 條 DROP 重複 index |
-| 2 Batch 1 | ✅ 完成 | Finance 6 頁 admin guard |
+| 2 Batch 1 | ✅ 完成 | Finance 6 頁 系統主管 guard |
 | 2 Batch 2 | ✅ 完成 | Accounting layout guard（10 頁 cover）|
 | 2.5 | ✅ 完成 | 28 張 NO FORCE RLS |
 | 3 LOGAN | ✅ 完成 | 1 bug 修 + well-known-ids.ts 骨架 |
@@ -33,7 +33,7 @@
 | 6 Batch 7 | ⏪ 回滾 | 原改 12 條 → 09:54 SSOT 指正後全回 CASCADE、交 Post-Launch retention policy |
 | 6 Batch 8 | ✅ 完成 | 6 條 auth.users 跨 domain (accounting×2/tour_expenses/employees/private_messages×2) RESTRICT |
 | 6 Batch 9 | ✅ 完成 | 6 條小群財務/審計 (linkpay_logs/invoice_orders/opening_balances/accounting_transactions(account)/payroll_records(period)/file_audit_logs) RESTRICT |
-| 2 Batch 5 | ✅ 完成 | Database 管理頁 layout admin guard（9 頁 cover） |
+| 2 Batch 5 | ✅ 完成 | Database 管理頁 layout 系統主管 guard（9 頁 cover） |
 | 9 /tours 分頁 | ✅ 完成 | 接上 TablePagination、用 useToursPage.totalCount + currentPage |
 
 **Wave 6 淨值**：109 條 CASCADE → RESTRICT（原 121、B7 回滾 12）。**核心全部收尾**。剩 121 條保留 CASCADE 合理（74 workspaces + auth.users 14 GDPR + traveler_profiles 12 GDPR 對齊 + pnr 11 unit + composition 小群 + header-detail pattern 等）。

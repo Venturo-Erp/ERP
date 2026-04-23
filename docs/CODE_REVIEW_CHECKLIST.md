@@ -41,7 +41,7 @@
 1. authStore (登入時)
    └── 包含 workspace_id, workspace_code
 2. workspaceStore (app 啟動時)
-   └── 提供 workspace 列表給 Super Admin
+   └── 提供 workspace 列表給 擁有平台管理資格的人
 3. 其他業務 stores (進入頁面時)
 ```
 

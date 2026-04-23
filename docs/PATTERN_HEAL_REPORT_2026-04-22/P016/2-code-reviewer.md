@@ -57,8 +57,8 @@ pattern map v1.2 寫「`is_super_admin()` 已停用」。選項：
 **1.3 service_role 繞 RLS**（🟡）
 只要 A3 守住就行。FORCE RLS 帶進來、service_role 也被擋、登入炸。migration 頂註解強調。
 
-**1.4 Corner admin 跨租戶刪**（🟡）
-現 `requireTenantAdmin` 檢查 `settings.tenants.can_write`、技術上能跨租戶刪。業務題留給 William：Corner admin 是否 = Venturo 平台超管？若未來多租戶自管、要升 `requirePlatformAdmin`。這次不擴、但 code 留 TODO。
+**1.4 Corner 系統主管 跨租戶刪**（🟡）
+現 `requireTenantAdmin` 檢查 `settings.tenants.can_write`、技術上能跨租戶刪。業務題留給 William：Corner 系統主管 是否 = Venturo 平台平台管理資格？若未來多租戶自管、要升 `requirePlatformAdmin`。這次不擴、但 code 留 TODO。
 
 ### 2. 測試覆蓋
 

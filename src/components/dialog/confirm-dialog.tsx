@@ -44,7 +44,7 @@ const TYPE_CONFIG = {
     icon: Info,
     iconColor: 'text-morandi-blue',
     titleColor: 'text-morandi-primary',
-    buttonClass: 'bg-morandi-gold hover:bg-morandi-gold-hover text-white',
+    buttonClass: 'bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg',
     detailsBg: 'bg-morandi-blue/5 border-morandi-blue/20',
   },
 }

@@ -66,7 +66,7 @@
 
 | 編號 | 問題 | v3.0 親查狀態 |
 |---|---|---|
-| 1 | 整頁 admin 大鎖（page.tsx:211 if !isAdmin）| ✅ **P001 PR-1c 修完落地**：page.tsx:213 改 `if (!canViewFinance) return UnauthorizedPage`；canViewFinance = hasModulePermission(userPermissions, 'finance') OR 'accounting'；OP/業務/會計都能進、不再卡死 |
+| 1 | 整頁 系統主管大鎖（page.tsx:211 if !isAdmin）| ✅ **P001 PR-1c 修完落地**：page.tsx:213 改 `if (!canViewFinance) return UnauthorizedPage`；canViewFinance = hasModulePermission(userPermissions, 'finance') OR 'accounting'；OP/業務/會計都能進、不再卡死 |
 | 2 | 原則 4 違反（雙寫冗餘欄位）| 🔴 仍在；recalculateReceiptStats 仍會回寫 orders.payment_status / paid_amount / remaining_amount + tours.total_revenue / profit；待確認金額仍無地方拿 |
 | 3 | LinkPay webhook 跨租戶 | 🟡 低風險可接受；MAC 簽章 + 金額驗證 + RLS 三層防、receipt_number 是業務級主鍵、攻擊面小；補一層 workspace 檢查可加分但非必須 |
 | 4 | payment_method_id NOT NULL 但代碼不寫 | ✅ **之謎結案**：DB_TRUTH 親查 `is_nullable=YES`、FK 是 SET NULL（不是 RESTRICT、不是 NOT NULL）；sitemap 文字錯了；createReceipt 寫 null 或 '' 都不會 FK violation；資料品質瑕疵但非當機 |
@@ -99,9 +99,9 @@
 ### 🔴 1. 權限模型重複中 /login + /hr 同樣地雷
 
 - **你說的**：權限吃 hr role 的「公司收款」、進頁看、進來後各動作再分細權限
-- **代碼實際**：整頁 `if (!isAdmin)` 一刀擋、會計不是 admin **連頁都進不來**、更別提按核准
+- **代碼實際**：整頁 `if (!isAdmin)` 一刀擋、會計不擁有管理員資格 **連頁都進不來**、更別提按核准
 - **後果**：
-    - OP / 業務 / 會計三個角色、如果他們在 /hr 被設為非 admin、打開這頁就是 **UnauthorizedPage**、整個「建單 → 核准」流程卡死
+    - OP / 業務 / 會計三個角色、如果他們在 /hr 被設為沒有系統主管資格、打開這頁就是 **UnauthorizedPage**、整個「建單 → 核准」流程卡死
     - 你在 /hr/roles 替「會計」設「公司收款」權限 → 代碼完全不看這個 key
 - **跟其他頁關聯**：`useAuthStore.checkPermission` 本身就有 `if (isAdmin) return true` 短路（/login 驗證已發現）、就算 page.tsx 改成 `hasPermission`、只要 admin 短路還在、isAdmin 仍是萬能通行證
 - **修的順序**：先改 `useAuthStore` 的短路、再改 `page.tsx:211`、再補 4 個動作的權限 key（`finance.payments.view` / `create` / `confirm` / `approve_abnormal` / `delete`）
@@ -265,4 +265,4 @@
 1. **`/tours/[id]`** — 旅遊團財務頁、直接看 `tours.total_revenue` / `profit` 回來怎麼用；驗「聚合即時算」原則能不能適用
 2. **`/orders`** — `orders.payment_status` 冗餘的直接受害者；驗這頁會不會讀過期值
 3. **`/accounting/*`** — 驗 `trigger_auto_post_receipt` 是不是在做這邊的工作、有沒有 orphan 對帳紀錄
-4. **`/finance/requests`** 或 **`/finance/treasury`** — 本路由群組其他頁、也可能有 admin 大鎖 + 聚合冗餘
+4. **`/finance/requests`** 或 **`/finance/treasury`** — 本路由群組其他頁、也可能有 系統主管大鎖 + 聚合冗餘

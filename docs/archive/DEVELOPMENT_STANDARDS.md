@@ -143,7 +143,7 @@ interface User {
   id: string
   name: string
   email: string | null
-  role: 'admin' | 'user'
+  role: '系統主管' | 'user'
   createdAt: Date
 }
 

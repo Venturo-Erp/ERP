@@ -90,7 +90,7 @@ CREATE TRIGGER update_employees_updated_at
 -- RLS (Row Level Security)
 ALTER TABLE employees ENABLE ROW LEVEL SECURITY;
 
--- 管理員可以查看所有員工
+-- 系統主管可以查看所有員工
 CREATE POLICY "Admins can do everything" ON employees
   FOR ALL USING (
     EXISTS (
@@ -122,7 +122,7 @@ CREATE POLICY "Employees can update own profile" ON employees
 ### 4. 初始資料
 
 ```sql
--- 建立預設管理員帳號
+-- 建立預設系統主管帳號
 -- 密碼: admin123 (需要使用 bcrypt 加密)
 INSERT INTO employees (
   employee_number,
@@ -133,11 +133,11 @@ INSERT INTO employees (
   job_info
 ) VALUES (
   'admin',
-  '系統管理員',
+  '系統系統主管',
   'Administrator',
   '$2a$10$YourBcryptHashHere', -- 使用 bcrypt 加密的 'admin123'
   ARRAY['admin'],
-  '{"department": "管理部", "position": "系統管理員"}'::JSONB
+  '{"department": "管理部", "position": "系統系統主管"}'::JSONB
 );
 ```
 

@@ -30,7 +30,7 @@ export function EventDetailDialog({
 
   if (!event) return null
 
-  // 檢查是否可以編輯或刪除（只有建立者或管理員可以）
+  // 檢查是否可以編輯或刪除（只有建立者或系統主管可以）
   const canEditOrDelete = () => {
     // 旅遊團、生日事件不能編輯或刪除
     if (event.extendedProps?.type === 'tour' || event.extendedProps?.type === 'birthday') {
@@ -42,7 +42,7 @@ export function EventDetailDialog({
       return true // 已經過濾只顯示自己的
     }
 
-    // 公司事項：只有建立者或管理員可以
+    // 公司事項：只有建立者或系統主管可以
     if (event.extendedProps?.type === 'company') {
       const isCreator = event.extendedProps?.created_by === user?.id
       const isAdmin = useAuthStore.getState().isAdmin

@@ -96,7 +96,7 @@ export function OrderSelectDialog({ isOpen, orders, onClose, onSelect }: OrderSe
           <Button
             onClick={handleConfirm}
             disabled={!selectedOrderId}
-            className="bg-morandi-gold hover:bg-morandi-gold-hover text-white gap-2"
+            className="bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg gap-2"
           >
             <Check size={16} />
             {COMP_ORDERS_LABELS.選擇訂單}

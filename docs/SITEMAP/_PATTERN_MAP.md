@@ -111,20 +111,20 @@ npm run check:patterns P001 P020  # 只跑指定
 | | `src/app/(main)/settings/components/WorkspaceSwitcher.tsx` | L16 | workspace 切換器 |
 
 - **PR-1a 已修確認 ✅**（grep 親驗 0 處）：`auth-store.ts:249` / `permissions/hooks.ts:284,293` / `usePermissions.ts` 9 個 bool
-- **PR-1c 已修確認 ✅**：`/finance/payments/page.tsx:213` 改 canViewFinance（但 finance 其餘 5 個子頁沒一起改 — finance 模組整體還是 admin 大鎖）
+- **PR-1c 已修確認 ✅**：`/finance/payments/page.tsx:213` 改 canViewFinance（但 finance 其餘 5 個子頁沒一起改 — finance 模組整體還擁有管理員資格 大鎖）
 - **影響評估**（業務話）：
-  - 🔴 高：accounting/database 整 layout + finance/{requests,treasury,reports,settings,travel-invoice} 5 個子頁都還是 admin 大鎖、會計 / 業務 / 助理職務在這 7 個地方都進不去、跟 PR-1c 修 finance/payments 形成「半通半不通」狀態
+  - 🔴 高：accounting/database 整 layout + finance/{requests,treasury,reports,settings,travel-invoice} 5 個子頁都還擁有管理員資格 大鎖、會計 / 業務 / 助理職務在這 7 個地方都進不去、跟 PR-1c 修 finance/payments 形成「半通半不通」狀態
   - 🟡 中：useTabPermissions / ModuleGuard / sidebar 的 isAdmin 短路是「hook 層本身對 admin 失效」、API 層雖有 role_tab_permissions 兜底、但「權限長在人身上」原則沒落地
   - 🟢 低：WorkspaceSwitcher 是 UI 顯示細節
 - **修法**（PR-1d 範圍擴大）：
   - 7 個整頁/layout 改查模組 permission（accounting/database/finance.requests 等）
-  - 4 處 useTabPermissions + ModuleGuard + index.ts 拔短路（admin role 已 PR-1a backfill 過、可直接走真正 permission flow）
+  - 4 處 useTabPermissions + ModuleGuard + index.ts 拔短路（系統主管職務 已 PR-1a backfill 過、可直接走真正 permission flow）
   - 4 處 sidebar 顯示短路改菜單動態過濾
 - **估時**：PR-1d 約 1 人日（17 處改、有測 spec 守門）
 
 **幕僚會議摘要**（2026-04-22 4 位：senior-dev / code-reviewer / minimal-change / security）：
 - senior-dev 原方案 2 人週 Phase A/B/C（完整 action-key）→ 被 3 位否決
-- code-reviewer 抓 3 致命漏（F1 老 admin 白屏 / F2 action-key schema 無法表達 / F3 loading 閃 UnauthorizedPage）
+- code-reviewer 抓 3 致命漏（F1 老 系統主管白屏 / F2 action-key schema 無法表達 / F3 loading 閃 UnauthorizedPage）
 - minimal-change 判 P001 真實 scope < 2 人日、8 項否決丟其他 pattern
 - security 🔴 CRITICAL：`employees.create` 等 action-key 現行 role_tab_permissions schema（只有 module × tab × CRUD）**無法表達**、必須延到 schema 擴張
 - 主席收斂：採 minimal-change + security 聯合勝出、只做拔短路 + backfill、後端 4 API 延
@@ -134,18 +134,18 @@ npm run check:patterns P001 P020  # 只跑指定
 - 2026-04-22 10:50：pattern-heal 4 幕僚會議（senior-dev / code-reviewer / minimal-change / security）、主席收斂 PR-1a/1b/1c 方案、William 拍板「修復」
 - 2026-04-22 11:10：PR-1a 落地：
   - migration `20260422150000_backfill_admin_role_tab_permissions.sql` 套到線上 DB（Supabase ref wzvwmawpkapcmkfmkvav）
-  - 4 個 workspace 的管理員 role 從 14-24 row → 68-74 row（> 54 目標、含舊殘留無害）
+  - 4 個 workspace 的系統主管 role 從 14-24 row → 68-74 row（> 54 目標、含舊殘留無害）
   - 前端 3 處 isAdmin 短路移除（auth-store.ts:249、permissions/hooks.ts:284/293、usePermissions.ts 九 bool）
   - canAccess/canEdit 加 `if (workspaceFeatures.loading) return true` 避免閃 UnauthorizedPage
   - e2e `tests/e2e/admin-login-permissions.spec.ts` 守門新增
   - type-check ✅ 0 錯誤、gitnexus detect_changes LOW risk（2 個 usePermissions 符合預期）
   - 狀態 🔵 → 🟠
-- 2026-04-22 11:30：William 手測 Corner 管理員登入 5 個主項目全過 ✅、PR-1a 驗收通過
+- 2026-04-22 11:30：William 手測 Corner 系統主管登入 5 個主項目全過 ✅、PR-1a 驗收通過
 - 2026-04-22 11:40：PR-1c 落地：
   - `src/app/(main)/finance/payments/page.tsx:211` — `if (!isAdmin) return UnauthorizedPage` → 改用 `usePermissions().canViewFinance`、會計/財務職務可進、純業務仍擋
   - `src/features/tours/components/tour-itinerary-tab.tsx:91` — `canEditDatabase = isAdmin || ...` → 純 permission 比對（match 'database' root 或 'database:*' tab）
   - type-check ✅ 0 錯誤
-- **等 William 手測 PR-1c**（Corner 管理員點 /finance/payments 仍能進 + 點 /tours 某團行程 Tab 仍能編輯）
+- **等 William 手測 PR-1c**（Corner 系統主管點 /finance/payments 仍能進 + 點 /tours 某團行程 Tab 仍能編輯）
 - 2026-04-22 11:55：William 指示「補其他 workspace 的業務/會計/助理職務權限、以 Corner 為模板」（屬 P007 scope、pattern-heal 代執行）
   - migration `20260422160000_sync_default_roles_from_corner.sql` 套到線上 DB
   - JINGYAO / YUFEN / TESTUX 的 業務 / 會計 / 助理 以 Corner 為範本 UPSERT（UPSERT 模式、保留他們既有額外權限）
@@ -158,8 +158,8 @@ npm run check:patterns P001 P020  # 只跑指定
   - Fallback：若 Corner 職務不存在、warn log + skip（不 rollback、admin 仍可 log in，僅無預設權限）
   - 變動量 -245/+65 lines（淨省 180）、type-check ✅ 0 錯誤、gitnexus detect_changes MEDIUM（預期範圍）
 - 2026-04-22 12:17：**e2e 驗收通過 🟢**
-  - `scripts/test-tenants-create-seed.mjs` 一次性腳本：建 TESTAUTH workspace + 管理員（帶 Corner 管理員權限）→ Playwright 以 TESTAUTH 管理員登入 → 取 session cookies → 帶 cookies POST `/api/tenants/create` 建 TESTSEED → 查 4 職務 row 數 → 全 DELETE CASCADE 清乾淨
-  - 結果：管理員 74/74、業務 40/40、會計 26/26、助理 32/32 全對齊 Corner
+  - `scripts/test-tenants-create-seed.mjs` 一次性腳本：建 TESTAUTH workspace + 系統主管（帶 Corner 系統主管權限）→ Playwright 以 TESTAUTH 系統主管登入 → 取 session cookies → 帶 cookies POST `/api/tenants/create` 建 TESTSEED → 查 4 職務 row 數 → 全 DELETE CASCADE 清乾淨
+  - 結果：系統主管 74/74、業務 40/40、會計 26/26、助理 32/32 全對齊 Corner
   - 對 Corner/JINGYAO/YUFEN/TESTUX 零影響、DB 清乾淨（殘留檢查 0）
 - P001-B（後端 4 API create-employee-auth / reset-employee-password / admin-reset-password / change-password）延 P008 統一 policy 函式時一併做；middleware 已擋在門外（P002）、攻擊面已降
 
@@ -210,7 +210,7 @@ npm run check:patterns P001 P020  # 只跑指定
   - type-check ✅
 - 2026-04-22 下午：**P003-C 🟢** `reset-employee-password` 跨租戶重設密碼漏洞修復
   - 原本只查 isAdmin、拿 body.employee_id 重設密碼、沒驗目標員工 workspace
-  - 攻擊情境：Corner admin 拿 JINGYAO 員工的 UUID 打這支、成功重設 JINGYAO 員工密碼
+  - 攻擊情境：Corner 系統主管 拿 JINGYAO 員工的 UUID 打這支、成功重設 JINGYAO 員工密碼
   - 修法：查目標 employee.workspace_id、必須等於 auth.data.workspaceId、否則 403
   - type-check ✅
 - 2026-04-22 下午：**P003-D 🟢** `admin-reset-password` 跨租戶漏洞修復
@@ -341,7 +341,7 @@ npm run check:patterns P001 P020  # 只跑指定
 | 對應原則 | 2 |
 | 業務翻譯 | 租戶關掉一個功能、職務設定裡的權限資料還留著；要靠使用端雙層檢查擋、資料本身不乾淨 |
 | 命中（本次新挖） | workspace_features + role_tab_permissions 兩表無 trigger、無 FK cascade；關 feature 只是 update enabled=false、相關 role_tab_permissions.can_read 不動 |
-| 統一修法 | DB AFTER UPDATE trigger on workspace_features：enabled: true → false 時、DELETE role_tab_permissions WHERE 對應 module/tab。William 拍板：feature 重開時**不**自動恢復（admin 重勾）。注意：trigger 必須檢查 workspace_id 防跨租戶污染（幕僚 3 警告）。 |
+| 統一修法 | DB AFTER UPDATE trigger on workspace_features：enabled: true → false 時、DELETE role_tab_permissions WHERE 對應 module/tab。William 拍板：feature 重開時**不**自動恢復（系統主管重勾）。注意：trigger 必須檢查 workspace_id 防跨租戶污染（幕僚 3 警告）。 |
 | 估時 | 1.5 人日（資深工程 04）但依賴 P007 層 1 先做 |
 | 優先級 | 🟡 上線後短期（依賴 P007） |
 | 狀態 | 🔵 發現 |
@@ -533,7 +533,7 @@ npm run check:patterns P001 P020  # 只跑指定
 | 業務翻譯 | 這張表是「某員工的特殊權限加掛」、但**沒有 workspace_id 欄位**、加上 4 條 RLS 規則全部零條件（讀/寫/刪/新增都放行）→ 任何員工可以對別家公司員工的權限加掛做任意操作。是 v2.0 Agent F 就點名「USING:true 完全無過濾」的那張、沒升格 pattern、沒人動、至今仍在 |
 | 命中（已驗） | `employee_permission_overrides` 表 |
 | 對比組 | `employee_route_overrides` 同概念、policy 正確（自己看自己 + service_role）— 同概念兩表強度不一 |
-| 威脅 | 攻擊門檻低：普通 authenticated 員工 → 用 supabase-js `from('employee_permission_overrides').insert(...)` → 幫自己加「管理員」權限 bypass、或改別人的 |
+| 威脅 | 攻擊門檻低：普通 authenticated 員工 → 用 supabase-js `from('employee_permission_overrides').insert(...)` → 幫自己加「系統主管」權限 bypass、或改別人的 |
 | 統一修法 | 3-stage migration：(1) 加 `workspace_id` nullable 欄 + FK → workspaces(id) CASCADE (2) `UPDATE` 從 employees JOIN 回填 (3) `ALTER` NOT NULL + 重寫 4 條 policy 為 `workspace_id = get_current_user_workspace()` + `WITH CHECK` 同；**同步** `src/app/api/employees/[employeeId]/permission-overrides/route.ts:57-64` PUT insert 加 `workspace_id: auth.data.workspaceId` |
 | 估時 | 0.8 人日（migration + backfill + 代碼同步 + 新 e2e spec）|
 | 優先級 | 🔴 上線前必改（舊債）|
@@ -628,11 +628,11 @@ SELECT tablename, policyname, cmd, qual, with_check FROM pg_policies WHERE table
 |---|---|
 | ID | P022 |
 | 對應原則 | 1 + 3 |
-| 業務翻譯 | `/api/employees/任意員工ID/permission-overrides` 是「員工個人權限加掛」API、整支 route.ts 78 行**沒有任何身份檢查**（沒 getServerAuth、沒 isAdmin、沒 workspace 對齊）；後端用 cookie session client 想靠 RLS 兜底、但 employee_permission_overrides 表的 RLS 4 條 policy 全部 USING:true（P018）等於沒鎖 — **應用層 + DB 層雙層裸奔、任何登入用戶可以打 PUT 幫自己加管理員權限或刪別家公司員工的權限** |
+| 業務翻譯 | `/api/employees/任意員工ID/permission-overrides` 是「員工個人權限加掛」API、整支 route.ts 78 行**沒有任何身份檢查**（沒 getServerAuth、沒 isAdmin、沒 workspace 對齊）；後端用 cookie session client 想靠 RLS 兜底、但 employee_permission_overrides 表的 RLS 4 條 policy 全部 USING:true（P018）等於沒鎖 — **應用層 + DB 層雙層裸奔、任何登入用戶可以打 PUT 幫自己加系統主管權限或刪別家公司員工的權限** |
 | 命中（已驗）| `src/app/api/employees/[employeeId]/permission-overrides/route.ts` 全 78 行；DB `employee_permission_overrides` 4 條 USING:true policy（P018）|
 | 攻擊演練 | `curl -X PUT https://erp/api/employees/<別家任一員工ID>/permission-overrides -H 'Cookie: <自己登入的session>' -d '{"overrides":[{"module_code":"finance","tab_code":null,"override_type":"grant"}]}'` → 200 OK、別家員工得到 finance 權限。同理可給自己加任何模組權限 |
 | 為什麼 v3.0 沒抓到 | v3.0 raw report Agent F 點名 `employee_permission_overrides` USING:true、但沒順著爬 API 端點、所以 P018 升 pattern 但 API 漏網。本次 v1.4 強迫症深掘 grep 「workspace\|tenant\|requireTenantAdmin\|getServerAuth\|auth\.data」結果空、才發現 |
-| 統一修法 | 兩件事一起做（DB 修不夠、API 也要修）：(1) **API 層**：route.ts 加 `getServerAuth` + `requireTenantAdmin` 或 `hasPermission(user, 'employees.manage_overrides')` + 驗 `target employee.workspace_id === auth.data.workspaceId`（防 Corner admin 改別家員工）；(2) **DB 層**：跟 P018 一起做、加 workspace_id 欄位 + 重寫 4 條 policy 為 workspace tenant scoped；(3) 寫 e2e spec 守門 |
+| 統一修法 | 兩件事一起做（DB 修不夠、API 也要修）：(1) **API 層**：route.ts 加 `getServerAuth` + `requireTenantAdmin` 或 `hasPermission(user, 'employees.manage_overrides')` + 驗 `target employee.workspace_id === auth.data.workspaceId`（防 Corner 系統主管 改別家員工）；(2) **DB 層**：跟 P018 一起做、加 workspace_id 欄位 + 重寫 4 條 policy 為 workspace tenant scoped；(3) 寫 e2e spec 守門 |
 | 估時 | API 層 0.5 人日、DB 層跟 P018 一起 0.8 人日、合計 1.3 人日 |
 | 優先級 | 🔴 **CRITICAL 上線前必改**（提權漏洞、CWE-269）|
 | 狀態 | 🟢 **API 層完成**（2026-04-22 v1.6 detector 對帳）：route.ts 加 `requireHrEmployeesAdmin`（getServerAuth + can_write 權限 + workspace 一致性）、detector 綠。DB 層另由 P018 追蹤（仍紅）|
@@ -820,7 +820,7 @@ scripts/pattern-detectors/check-feature-consistency.mjs
 | 2026-04-22 | 1.1 | **P010 修完 🟢**。pattern-heal 執行、migration 20260422140000 已套到線上 DB。分布改為 5🔴 / 5🟡 / 4🟢 **+ 1🟢 已完成** | pattern-heal skill |
 | 2026-04-22 | 1.2 | **/login v3.0 覆盤接力、pattern-map 第二輪**。6 幕僚會診 DB 層 4 條新/遺留紅色、合併為 P016 P017 P018 + 全站掃新增 P019（USING:true 83 張表分類）。現況 8🔴（5 舊 + P016/P017 部分/P018）+ 5🟡 + 4🟢 + 5🟢 完成（P001-P004 + P010）+ P019 待分類。v2.0 三項盲點（4-policy 抽樣、RLS disabled 全站掃、per-route 點名不自動升格）交幕僚 5 產演進建議、已寫入本檔與 skill meta | pattern-map v2 |
 | 2026-04-22 | 1.3 | **4 路由並行重驗（/login + /hr + /tours + /finance/payments）**。重大修正：(a) **P001 從 🟢 → 🟠 部分**、親查 grep 發現 useTabPermissions 4 處 + sidebar 1 處 + useChannelSidebar 1 處共 6 處 isAdmin 短路 PR-1a 沒涵蓋；(b) **新加 P020**（tour_members ALL `authenticated` policy 與 cmd-specific 並存、Postgres 多 policy OR 讓嚴格守門失效）；(c) **新加 P021**（tour_destinations / tour_leaders 無 workspace_id + 全 USING:true、屬 P019 ❓ 子家族待拍板「公版 vs 租戶」）；(d) **P019 名單修正**（workspace_roles / workspace_job_roles / tour_role_assignments 親查 DB 證實有 workspace 守門、不在紅 45 張）；(e) **finance/payments DB 層全綠**（receipts / linkpay_logs / payment_methods / payment_requests / orders 4 條 policy 都有 workspace_id filter）；(f) **payment_method_id 之謎結案**（DB 真相 nullable、FK SET NULL、不是 NOT NULL）；(g) /login agent 兩處錯報（useTabPermissions 短路說已拔、admin-reset-password 說已廢）親查更正 | pattern-map v3 |
-| 2026-04-22 | 1.4 | **強迫症深掘第二輪（William 要求挖到無錯）**。重大新發現：(a) **P001 17 處 isAdmin 短路完整盤**（不是 6 處）— 含 accounting/database 兩 layout + finance/{requests,treasury,reports,settings,travel-invoice} 5 子頁整頁大鎖、useTabPermissions + ModuleGuard + permissions/index 等 hook 層、sidebar/mobile-sidebar/channel-sidebar/WorkspaceSwitcher 4 處 UI 層；(b) **P020 全站盤完成 — 18 張表 effective 失守**（不只 tour_members、含薪資 3 張 / 旅遊團獎金支出 2 張 / 需求單 4 張 / 系統與租戶設定 3 張 / bot/magic/wishlist/customer_inquiries/itinerary_permissions 等）；(c) **P020 13 張命名錯置**（policyname 寫 "Service role full access" 但 USING/CHECK 都是 true、明顯複製貼上錯誤、屬高度可疑技術債）；(d) **新加 P022 CRITICAL**：`/api/employees/[employeeId]/permission-overrides` 整 route.ts 78 行 0 守門 + employee_permission_overrides 表 4 條 USING:true（P018）= 雙層裸奔、任何登入用戶可幫自己加管理員權限（CWE-269 提權）；(e) **P017 / P016 落地驗親查全綠**（_migrations / rate_limits / ref_cities / workspaces 4 條 policy 都對）；(f) **P010 親查證實正確**（role_tab_permissions ALL policy = service_role 是設計、不是漏）；(g) create-employee-auth P003-E 親查守門完整（agent 報告對）| pattern-map v4 |
+| 2026-04-22 | 1.4 | **強迫症深掘第二輪（William 要求挖到無錯）**。重大新發現：(a) **P001 17 處 isAdmin 短路完整盤**（不是 6 處）— 含 accounting/database 兩 layout + finance/{requests,treasury,reports,settings,travel-invoice} 5 子頁整頁大鎖、useTabPermissions + ModuleGuard + permissions/index 等 hook 層、sidebar/mobile-sidebar/channel-sidebar/WorkspaceSwitcher 4 處 UI 層；(b) **P020 全站盤完成 — 18 張表 effective 失守**（不只 tour_members、含薪資 3 張 / 旅遊團獎金支出 2 張 / 需求單 4 張 / 系統與租戶設定 3 張 / bot/magic/wishlist/customer_inquiries/itinerary_permissions 等）；(c) **P020 13 張命名錯置**（policyname 寫 "Service role full access" 但 USING/CHECK 都是 true、明顯複製貼上錯誤、屬高度可疑技術債）；(d) **新加 P022 CRITICAL**：`/api/employees/[employeeId]/permission-overrides` 整 route.ts 78 行 0 守門 + employee_permission_overrides 表 4 條 USING:true（P018）= 雙層裸奔、任何登入用戶可幫自己加系統主管權限（CWE-269 提權）；(e) **P017 / P016 落地驗親查全綠**（_migrations / rate_limits / ref_cities / workspaces 4 條 policy 都對）；(f) **P010 親查證實正確**（role_tab_permissions ALL policy = service_role 是設計、不是漏）；(g) create-employee-auth P003-E 親查守門完整（agent 報告對）| pattern-map v4 |
 | 2026-04-22 | 1.5 | **解「為什麼會忘」流程漏洞**。建 `scripts/pattern-detectors/check-all.mjs` 8 個 detector + `npm run check:patterns`、把每個有 detector 的 pattern 加 `detector` 欄位、跑一次 baseline（4 紅 4 綠 + 1 informational）。從此「修完」必須 detector 通過、不准只看標籤；agent 重驗時 prompt 強制要求跑 detector。Schema 升 1.1（加 detector 欄位）。順手修 dotfiles `.zshrc` 過期 `SUPABASE_ACCESS_TOKEN`（從 sbp_ae47 改 sbp_ddbc、原來 env 失效就是這次 fetch 403 的根因）| detector framework v1 |
 
 **P020 修復紀錄（2026-04-22 v1.6 第一批）**：

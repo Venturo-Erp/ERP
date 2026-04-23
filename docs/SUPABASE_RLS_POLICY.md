@@ -14,7 +14,7 @@
 
 - ✅ **業務資料表格**：啟用 RLS + Workspace 隔離
 - ✅ **基礎資料表格**：禁用 RLS（全公司共用）
-- ✅ **Super Admin**：可跨 Workspace 存取
+- ✅ **擁有平台管理資格的人**：可跨 Workspace 存取
 
 ---
 
@@ -75,10 +75,10 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 ```
 
-### 檢查是否為 Super Admin
+### 檢查是否為 擁有平台管理資格的人
 
 ```sql
--- 函數：檢查是否為超級管理員
+-- 函數：檢查是否為擁有平台管理資格的人
 CREATE OR REPLACE FUNCTION is_super_admin()
 RETURNS boolean AS $$
 BEGIN
@@ -219,7 +219,7 @@ WHERE schemaname = 'public'
 1. 確認當前用戶的 `workspace_id` 正確
 2. 使用 API Route（Service Role）繞過 RLS 進行偵錯
 
-### 錯誤 3: Super Admin 無法存取其他 Workspace
+### 錯誤 3: 擁有平台管理資格的人 無法存取其他 Workspace
 
 **原因**: `is_super_admin()` 函數未正確設定
 
@@ -238,7 +238,7 @@ WHERE supabase_user_id = auth.uid();
 | 角色             | 權限範圍                      |
 | ---------------- | ----------------------------- |
 | **一般員工**     | 只能存取自己 Workspace 的資料 |
-| **Super Admin**  | 可存取所有 Workspace 的資料   |
+| **擁有平台管理資格的人**  | 可存取所有 Workspace 的資料   |
 | **Service Role** | 繞過 RLS（僅限後端 API）      |
 
 ### 前端存取
@@ -248,7 +248,7 @@ WHERE supabase_user_id = auth.uid();
 const { data } = await supabase.from('orders').select('*')
 // 結果：只有自己 Workspace 的訂單
 
-// Super Admin：RLS 允許看所有
+// 擁有平台管理資格的人：RLS 允許看所有
 // is_super_admin() 返回 true，可看所有 Workspace
 ```
 
@@ -276,7 +276,7 @@ const { data } = await supabaseAdmin.from('employees').select('*')
 - [ ] 是否包含 `workspace_id` 欄位？
 - [ ] 是否啟用 RLS？
 - [ ] 是否建立 SELECT/INSERT/UPDATE/DELETE 策略？
-- [ ] 是否包含 Super Admin 例外？
+- [ ] 是否包含 擁有平台管理資格的人 例外？
 - [ ] 是否建立 `workspace_id` 索引？
 
 ### 建立新的基礎資料表格時
@@ -298,5 +298,5 @@ const { data } = await supabaseAdmin.from('employees').select('*')
 
 - ✅ 業務資料表格：啟用 RLS + Workspace 隔離
 - ✅ 基礎資料表格：禁用 RLS
-- ✅ Super Admin 可跨 Workspace 存取
+- ✅ 擁有平台管理資格的人 可跨 Workspace 存取
 - ✅ API Route 使用 Service Role 可繞過 RLS

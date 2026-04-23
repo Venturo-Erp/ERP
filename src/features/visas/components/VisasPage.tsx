@@ -309,7 +309,7 @@ export default function VisasPage() {
         { label: '首頁', href: '/dashboard' },
         { label: '簽證管理', href: '/visas' },
       ]}
-      headerActions={
+      customActions={
         <div className="flex items-center gap-3">
           {canManageVisas && selectedRows.length > 0 ? (
             <div className="flex items-center gap-2">
@@ -325,7 +325,7 @@ export default function VisasPage() {
                   disabled={!buttonAvailability.submit}
                   className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
                     buttonAvailability.submit
-                      ? 'bg-morandi-gold hover:bg-morandi-gold-hover text-white'
+                      ? 'bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg'
                       : 'bg-morandi-container text-morandi-secondary/50 cursor-not-allowed'
                   }`}
                   title={VISAS_LABELS.LABEL_6162}
@@ -338,9 +338,9 @@ export default function VisasPage() {
                     batchOps.setIsPickupDialogOpen(true)
                   }}
                   disabled={!buttonAvailability.pickup}
-                  className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                  className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all ${
                     buttonAvailability.pickup
-                      ? 'bg-morandi-green hover:bg-morandi-green/90 text-white'
+                      ? 'bg-gradient-to-br from-morandi-green/70 to-morandi-green text-white hover:from-morandi-green hover:to-morandi-green/90 shadow-md hover:shadow-lg'
                       : 'bg-morandi-container text-morandi-secondary/50 cursor-not-allowed'
                   }`}
                   title={VISAS_LABELS.LABEL_9841}
@@ -350,9 +350,9 @@ export default function VisasPage() {
                 <button
                   onClick={() => setIsReturnDialogOpen(true)}
                   disabled={!buttonAvailability.return}
-                  className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                  className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all ${
                     buttonAvailability.return
-                      ? 'bg-morandi-primary hover:bg-morandi-primary/90 text-white'
+                      ? 'bg-gradient-to-br from-morandi-primary/70 to-morandi-primary text-white hover:from-morandi-primary hover:to-morandi-primary/90 shadow-md hover:shadow-lg'
                       : 'bg-morandi-container text-morandi-secondary/50 cursor-not-allowed'
                   }`}
                   title={VISAS_LABELS.LABEL_9271}
@@ -365,9 +365,9 @@ export default function VisasPage() {
                     batchOps.setIsRejectDialogOpen(true)
                   }}
                   disabled={!buttonAvailability.reject}
-                  className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                  className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all ${
                     buttonAvailability.reject
-                      ? 'bg-morandi-red hover:bg-morandi-red/90 text-white'
+                      ? 'bg-gradient-to-br from-morandi-red/70 to-morandi-red text-white hover:from-morandi-red hover:to-morandi-red/90 shadow-md hover:shadow-lg'
                       : 'bg-morandi-container text-morandi-secondary/50 cursor-not-allowed'
                   }`}
                   title={VISAS_LABELS.LABEL_2198}
@@ -408,7 +408,7 @@ export default function VisasPage() {
                       await fetchTours() // 按需載入 tours
                       setIsDialogOpen(true)
                     }}
-                    className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+                    className="bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg"
                   >
                     {VISAS_LABELS.ADD_2407}
                   </Button>

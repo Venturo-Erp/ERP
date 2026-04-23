@@ -174,24 +174,24 @@ export function CalculatorWidget() {
   return (
     <div className="h-full">
       <div className="h-full rounded-2xl border border-border/70 shadow-lg backdrop-blur-md transition-all duration-300 hover:shadow-lg hover:border-border/80 bg-gradient-to-br from-morandi-container/30 via-card to-morandi-gold/5">
-        <div className="p-5 space-y-4 h-full flex flex-col">
+        <div className="p-4 space-y-3 h-full flex flex-col overflow-y-auto">
           {/* Header with Icon */}
           <div className="flex items-start justify-between">
-            <div className="flex items-start gap-3">
+            <div className="flex items-start gap-2">
               <div
                 className={cn(
-                  'rounded-full p-2.5 text-white shadow-lg shadow-black/10',
+                  'rounded-full p-2 text-white shadow-sm shadow-black/10',
                   'bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60',
-                  'ring-2 ring-border/50 ring-offset-1 ring-offset-background/20'
+                  'ring-1 ring-border/50'
                 )}
               >
-                <Calculator className="w-5 h-5 drop-shadow-sm" />
+                <Calculator className="w-4 h-4 drop-shadow-sm" />
               </div>
               <div className="flex-1">
                 <p className="text-sm font-semibold text-morandi-primary leading-tight tracking-wide">
                   {DASHBOARD_LABELS.calculator}
                 </p>
-                <p className="text-xs text-morandi-secondary/90 mt-1.5 leading-relaxed">
+                <p className="text-xs text-morandi-secondary/90 mt-1 leading-relaxed">
                   {DASHBOARD_LABELS.calculatorDescription}
                 </p>
               </div>
@@ -209,12 +209,12 @@ export function CalculatorWidget() {
             </label>
           </div>
 
-          {/* Display Area */}
+          {/* Display Area — 算式 + 結果同一行、自動填滿剩餘高度 */}
           <div
-            className="rounded-xl bg-card/70 p-4 shadow-md border border-border/40 cursor-text min-h-[100px] flex flex-col justify-end"
+            className="rounded-xl bg-card/70 p-3 shadow-md border border-border/40 cursor-text flex items-center gap-3 flex-1 min-h-[48px]"
             onClick={() => inputRef.current?.focus()}
           >
-            {/* 算式輸入（小字灰色） */}
+            {/* 算式輸入（左、小字灰色） */}
             <input
               ref={inputRef}
               type="text"
@@ -224,24 +224,24 @@ export function CalculatorWidget() {
               onPaste={handlePaste}
               onKeyDown={handleKeyDown}
               autoComplete="off"
-              className="w-full bg-transparent border-none outline-none text-right font-mono text-sm text-morandi-secondary/80 mb-1 placeholder:text-morandi-muted/40 font-medium"
+              className="flex-1 min-w-0 bg-transparent border-none outline-none font-mono text-sm text-morandi-secondary/80 placeholder:text-morandi-muted/40 font-medium"
               placeholder={DASHBOARD_LABELS.inputExpression}
             />
-            {/* 即時結果（大字黑色） */}
-            <div className="text-right text-3xl font-bold text-morandi-primary font-mono tracking-tight">
+            {/* 即時結果（右、大字黑色） */}
+            <div className="text-right text-2xl font-bold text-morandi-primary font-mono tracking-tight shrink-0">
               {displayResult}
             </div>
           </div>
 
           {/* Quick Buttons */}
-          <div className="grid grid-cols-4 gap-2 flex-shrink-0">
+          <div className="grid grid-cols-4 gap-1 flex-shrink-0">
             {['7', '8', '9', '/'].map(btn => (
               <Button
                 key={btn}
                 variant="outline"
                 size="sm"
                 onClick={() => handleButtonClick(btn)}
-                className="h-10 text-base font-bold bg-card border-2 border-morandi-gold/30 text-morandi-primary hover:bg-morandi-gold/10 hover:border-morandi-gold/50 shadow-sm hover:shadow-md transition-all rounded-xl"
+                className="h-8 text-xs font-bold bg-gradient-to-br from-card to-morandi-container/30 border border-morandi-gold/30 text-morandi-primary hover:from-morandi-gold/10 hover:to-morandi-gold/20 hover:border-morandi-gold/50 shadow-sm hover:shadow-md transition-all rounded-xl"
               >
                 {btn}
               </Button>
@@ -252,7 +252,7 @@ export function CalculatorWidget() {
                 variant="outline"
                 size="sm"
                 onClick={() => handleButtonClick(btn)}
-                className="h-10 text-base font-bold bg-card border-2 border-morandi-gold/30 text-morandi-primary hover:bg-morandi-gold/10 hover:border-morandi-gold/50 shadow-sm hover:shadow-md transition-all rounded-xl"
+                className="h-8 text-xs font-bold bg-gradient-to-br from-card to-morandi-container/30 border border-morandi-gold/30 text-morandi-primary hover:from-morandi-gold/10 hover:to-morandi-gold/20 hover:border-morandi-gold/50 shadow-sm hover:shadow-md transition-all rounded-xl"
               >
                 {btn}
               </Button>
@@ -263,7 +263,7 @@ export function CalculatorWidget() {
                 variant="outline"
                 size="sm"
                 onClick={() => handleButtonClick(btn)}
-                className="h-10 text-base font-bold bg-card border-2 border-morandi-gold/30 text-morandi-primary hover:bg-morandi-gold/10 hover:border-morandi-gold/50 shadow-sm hover:shadow-md transition-all rounded-xl"
+                className="h-8 text-xs font-bold bg-gradient-to-br from-card to-morandi-container/30 border border-morandi-gold/30 text-morandi-primary hover:from-morandi-gold/10 hover:to-morandi-gold/20 hover:border-morandi-gold/50 shadow-sm hover:shadow-md transition-all rounded-xl"
               >
                 {btn}
               </Button>
@@ -274,7 +274,7 @@ export function CalculatorWidget() {
                 variant="outline"
                 size="sm"
                 onClick={() => handleButtonClick(btn)}
-                className="h-10 text-base font-bold bg-card border-2 border-morandi-gold/30 text-morandi-primary hover:bg-morandi-gold/10 hover:border-morandi-gold/50 shadow-sm hover:shadow-md transition-all rounded-xl"
+                className="h-8 text-xs font-bold bg-gradient-to-br from-card to-morandi-container/30 border border-morandi-gold/30 text-morandi-primary hover:from-morandi-gold/10 hover:to-morandi-gold/20 hover:border-morandi-gold/50 shadow-sm hover:shadow-md transition-all rounded-xl"
               >
                 {btn}
               </Button>
@@ -283,14 +283,14 @@ export function CalculatorWidget() {
               variant="outline"
               size="sm"
               onClick={() => handleButtonClick('+')}
-              className="h-10 text-base font-bold bg-card border-2 border-morandi-gold/30 text-morandi-primary hover:bg-morandi-gold/10 hover:border-morandi-gold/50 shadow-sm hover:shadow-md transition-all rounded-xl"
+              className="h-8 text-xs font-bold bg-gradient-to-br from-card to-morandi-container/30 border border-morandi-gold/30 text-morandi-primary hover:from-morandi-gold/10 hover:to-morandi-gold/20 hover:border-morandi-gold/50 shadow-sm hover:shadow-md transition-all rounded-xl"
             >
               +
             </Button>
             <Button
               size="sm"
               onClick={() => handleButtonClick('=')}
-              className="h-10 text-base font-bold bg-morandi-gold text-white hover:bg-morandi-gold-hover shadow-md hover:shadow-lg transition-all rounded-xl"
+              className="h-8 text-xs font-bold bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg transition-all rounded-xl"
             >
               =
             </Button>
@@ -298,7 +298,7 @@ export function CalculatorWidget() {
               variant="outline"
               size="sm"
               onClick={() => handleButtonClick('C')}
-              className="h-10 text-sm font-semibold col-span-2 bg-card border-2 border-morandi-gold/30 text-morandi-primary hover:bg-status-danger-bg hover:text-status-danger hover:border-status-danger shadow-sm hover:shadow-md transition-all rounded-xl"
+              className="h-8 text-xs font-semibold col-span-2 bg-gradient-to-br from-card to-morandi-container/30 border border-morandi-gold/30 text-morandi-primary hover:from-status-danger-bg hover:to-status-danger-bg hover:text-status-danger hover:border-status-danger shadow-sm hover:shadow-md transition-all rounded-xl"
             >
               {DASHBOARD_LABELS.clear}
             </Button>

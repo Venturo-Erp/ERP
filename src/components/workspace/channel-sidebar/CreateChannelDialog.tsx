@@ -48,8 +48,6 @@ export function CreateChannelDialog({
   const { items: employees } = useEmployeesSlim()
   const { workspaces, loadWorkspaces } = useWorkspaceStore()
 
-  // 新系統：使用 isAdmin
-
   // 載入工作空間資料（employees 由 SWR 自動載入）
   useEffect(() => {
     if (isOpen && isAdmin && workspaces.length === 0) {
@@ -162,7 +160,7 @@ export function CreateChannelDialog({
             </p>
           </div>
 
-          {/* 超級管理員專用：頻道範圍選擇 */}
+          {/* 需要管理員資格：頻道範圍選擇 */}
           {isAdmin && onChannelScopeChange && (
             <div>
               <label className="block text-sm font-medium text-morandi-primary mb-2">
@@ -206,8 +204,8 @@ export function CreateChannelDialog({
               </div>
               <p className="text-xs text-morandi-secondary mt-1">
                 {channelScope === 'workspace'
-                  ? COMP_WORKSPACE_LABELS.只能邀請同分公司的成員
-                  : COMP_WORKSPACE_LABELS.可以邀請所有分公司的成員}
+                  ? COMP_WORKSPACE_LABELS.只能邀請同公司的成員
+                  : COMP_WORKSPACE_LABELS.可以邀請所有公司的成員}
               </p>
             </div>
           )}

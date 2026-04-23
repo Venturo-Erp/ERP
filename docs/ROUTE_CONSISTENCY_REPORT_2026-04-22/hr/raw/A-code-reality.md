@@ -19,7 +19,7 @@
   - 46 個模組（calendar, workspace, todos, tours, orders, finance, accounting, hr…）
   - 每模組多個分頁（tab）
   - 每 tab 有 can_read / can_write toggle
-  - Admin 職務的權限鎖死全開（禁用 toggle）
+  - 系統主管職務的權限鎖死全開（禁用 toggle）
 
 ### 職務權限儲存與呈現
 - **定義來源**：`src/lib/permissions/module-tabs.ts` 硬編陣列（46 個模組 + N 個 tab）

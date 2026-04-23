@@ -32,6 +32,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { AddOrderForm, OrderFormData } from '@/features/orders/components/add-order-form'
 import { createOrder } from '@/data/entities/orders'
 import { toast } from 'sonner'
+import { TOUR_STATUS } from '@/lib/constants/status-maps'
+import { logger } from '@/lib/utils/logger'
 
 import { supabase } from '@/lib/supabase/client'
 
@@ -216,6 +218,35 @@ export const ToursPage: React.FC = () => {
     actions: actions as unknown as TourStoreActions,
   })
 
+  // 開團轉換（提案 → 正式團）
+  const handleConvertTour = useCallback((tour: Tour) => {
+    setConvertDialogTour(tour)
+  }, [])
+
+  // 複製模板 → 新提案（status='proposal'、清空團號與日期）
+  const handleCopyTemplate = useCallback(
+    async (tour: Tour) => {
+      try {
+        const { id: _id, created_at: _c, updated_at: _u, ...rest } = tour
+        await actions.create({
+          ...rest,
+          name: `${tour.name} (副本)`,
+          status: TOUR_STATUS.PROPOSAL,
+          code: '',
+          departure_date: null,
+          return_date: null,
+          archived: false,
+          archive_reason: null,
+        } as Omit<Tour, 'id' | 'created_at' | 'updated_at'>)
+        toast.success('已複製為新提案')
+      } catch (err) {
+        logger.error('複製模板失敗', err)
+        toast.error('複製失敗')
+      }
+    },
+    [actions]
+  )
+
   const { renderActions } = useTourActionButtons({
     quotes,
     activeStatusTab,
@@ -232,6 +263,8 @@ export const ToursPage: React.FC = () => {
     onCloseTour: openClosingDialog,
     onOpenArchiveDialog: openArchiveDialog,
     onOpenRequirementsDialog: undefined,
+    onConvertTour: handleConvertTour,
+    onCopyTemplate: handleCopyTemplate,
   })
 
   // 點擊整列導航到詳情頁面
@@ -252,15 +285,14 @@ export const ToursPage: React.FC = () => {
   const handleOpenProposalDialog = useCallback(() => {
     setNewTour({
       name: '',
-      tour_type: 'proposal',
-      countryId: '', // 🔧 核心表架構
-      countryName: '', // 🔧 核心表架構
-      countryCode: '', // 🔧 核心表架構
+      countryId: '',
+      countryName: '',
+      countryCode: '',
       cityCode: '',
       departure_date: '',
       return_date: '',
       price: 0,
-      status: '待出發',
+      status: TOUR_STATUS.PROPOSAL,
       isSpecial: false,
       max_participants: 20,
       description: '',
@@ -272,26 +304,20 @@ export const ToursPage: React.FC = () => {
   const handleOpenTemplateDialog = useCallback(() => {
     setNewTour({
       name: '',
-      tour_type: 'template',
-      countryId: '', // 🔧 核心表架構
-      countryName: '', // 🔧 核心表架構
-      countryCode: '', // 🔧 核心表架構
+      countryId: '',
+      countryName: '',
+      countryCode: '',
       cityCode: '',
       departure_date: '',
       return_date: '',
       price: 0,
-      status: '待出發',
+      status: TOUR_STATUS.TEMPLATE,
       isSpecial: false,
       max_participants: 20,
       description: '',
     })
     openDialog('create')
   }, [setNewTour, openDialog])
-
-  // 開團轉換（提案/模板 → 正式團）
-  const handleConvertTour = useCallback((tour: Tour) => {
-    setConvertDialogTour(tour)
-  }, [])
 
   const handleConvertConfirm = useCallback(
     async (

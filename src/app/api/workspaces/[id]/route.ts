@@ -10,7 +10,7 @@ const CORNER_WORKSPACE_ID = '8ef05a74-1f87-48ab-afd3-9bfeb423935d'
 
 /**
  * GET /api/workspaces/[workspaceId]
- * 取得租戶詳情（含員工人數、管理員資訊）
+ * 取得租戶詳情（含員工人數、系統主管資訊）
  *
  * 存取規則（P003-H 2026-04-22）：
  * - 自己 workspace：任何登入用戶都可讀（UI 需要拿自己公司的 premium_enabled 等）
@@ -64,7 +64,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     return NextResponse.json({ error: '找不到租戶' }, { status: 404 })
   }
 
-  // 取得這個 workspace 的 admin 職務 id（workspace_roles.is_admin = true）
+  // 取得這個 workspace 中擁有管理員資格的職務 id
   const { data: adminRoles } = await supabase
     .from('workspace_roles')
     .select('id')
@@ -93,9 +93,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     created_at: string
   }>
 
-  // 找第一個 admin（依 workspace_roles.is_admin、SSOT）
+  // 找第一個擁有管理員資格的員工（SSOT：workspace_roles.is_admin）
   const adminEmployee =
-    realEmployees.find(e => e.role_id && adminRoleIds.has(e.role_id)) || realEmployees[0] // fallback：沒 admin 就取第一個員工
+    realEmployees.find(e => e.role_id && adminRoleIds.has(e.role_id)) || realEmployees[0] // fallback：沒人擁有管理員資格就取第一個員工
 
   const adminName = adminEmployee
     ? adminEmployee.display_name ||

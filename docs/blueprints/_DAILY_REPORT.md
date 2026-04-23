@@ -93,7 +93,7 @@
 
 ### Wake 2026-04-18 06:10 · Stage-B /tools ✅
 - **產出**: `docs/blueprints/03-tools.md`（v1.0、11 節、含 3 子路由 flight/hotel/reset-db）
-- **新卡點**: 2 📋（flight/hotel 使用模式、權限矩陣）+ 1 🔴 P0（reset-db 無 admin guard、違反 INV-A02）
+- **新卡點**: 2 📋（flight/hotel 使用模式、權限矩陣）+ 1 🔴 P0（reset-db 無 系統主管 guard、違反 INV-A02）
 - **可 Stage C 修**: reset-db guard（🟢、3 行 code 可解）
 - **d=1 影響**: 無
 - **時間**: ~15 分
@@ -126,7 +126,7 @@
 - **下一決策**: A 全做 / B 單條示範 / C 明天做
 
 ### Wake 2026-04-18 ≥ 09:17 · ⏸ PAUSED (same)
-- **前台已完成**: capability flags rollback ✅、MODULES 擴展 4 個資格 tab ✅、seed 3 workspace 預設權限 ✅、admin 下拉資格可解鎖 ✅、useEligibleEmployees hook 建立 ✅、add-order-form 改用 hook ✅、/hr/roles 左右獨立滾動 ✅
+- **前台已完成**: capability flags rollback ✅、MODULES 擴展 4 個資格 tab ✅、seed 3 workspace 預設權限 ✅、系統主管下拉資格可解鎖 ✅、useEligibleEmployees hook 建立 ✅、add-order-form 改用 hook ✅、/hr/roles 左右獨立滾動 ✅
 - **剩餘**: 建團團控下拉、代墊款下拉、order-edit-dialog 可能也要改
 - **架構定論**: 權限矩陣 + 下拉資格 tab（Permission-Based RBAC、符合 Odoo/NetSuite）
 

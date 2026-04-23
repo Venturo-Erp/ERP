@@ -126,7 +126,7 @@ export function PreferredFeaturesSettings() {
     if (user?.preferred_features) {
       setSelectedFeatures(user.preferred_features)
     } else {
-      // 沒有設定時，預設全部顯示（管理員）
+      // 沒有設定時，預設全部顯示
       const userPermissions = user?.permissions || []
       const { isAdmin: storeIsAdmin } = useAuthStore.getState()
       if (storeIsAdmin) {
@@ -204,7 +204,7 @@ export function PreferredFeaturesSettings() {
   const handleResetToDefaults = () => {
     if (!user) return
 
-    // 新系統：管理員給全部功能，其他人給基本功能
+    // 擁有管理員資格給全部功能、其他人給基本功能
     const { isAdmin } = useAuthStore.getState()
     const defaultFeatures = isAdmin
       ? AVAILABLE_FEATURES.map(f => f.id)

@@ -13,8 +13,8 @@
 ### F1. Admin backfill 漏洞——老租戶可能 0 permissions，拔短路後整站白屏
 
 **觀察**：
-- `20260422000000_check_and_seed_admin_roles.sql` **只補了「管理員職務」本身**（`workspace_roles` 有 is_admin=true 的 row）、**沒有 seed `role_tab_permissions`**（見 migration L44-52、只 INSERT workspace_roles 不 INSERT permissions）。
-- `workspaces/route.ts:164-197` 新租戶走完整流程（建 admin role + 全 MODULES seed permissions）、但這條路徑**只對未來新租戶生效**。
+- `20260422000000_check_and_seed_admin_roles.sql` **只補了「系統主管職務」本身**（`workspace_roles` 有 is_admin=true 的 row）、**沒有 seed `role_tab_permissions`**（見 migration L44-52、只 INSERT workspace_roles 不 INSERT permissions）。
+- `workspaces/route.ts:164-197` 新租戶走完整流程（建 系統主管職務 + 全 MODULES seed permissions）、但這條路徑**只對未來新租戶生效**。
 - 歷史 workspace 若透過 2026-04-22 之前的老 API 建立（或手動建 role）、很可能**只有 workspace_role.is_admin=true、但 role_tab_permissions 空白**。登入時 validate-login:160-175 從 `role_tab_permissions` 讀 permissions、老 admin 會拿到 `permissions: []`、`isAdmin: true`。
 - 現況靠 `checkPermission` 和 `canAccess`/`canEdit` 的 `if (isAdmin) return true` 短路救、**拔掉短路**後、老 admin 的 `user.permissions` 是空陣列、sidebar 所有項目過不了 `hasModulePermission` → **整個左選單空白、進每個模組都 UnauthorizedPage**。
 
@@ -22,7 +22,7 @@
 
 **建議**：
 1. **Migration 必須雙 seed**：補一支 migration、為所有 `is_admin=true` 的 role、對齊 MODULES 全開 `role_tab_permissions`（UPSERT 不覆蓋已存在）。
-2. 在部署 P001 前、跑 `SELECT wr.id, wr.name, wr.workspace_id, COUNT(rtp.id) FROM workspace_roles wr LEFT JOIN role_tab_permissions rtp ON rtp.role_id = wr.id WHERE wr.is_admin = true GROUP BY wr.id HAVING COUNT(rtp.id) = 0;` 確認孤兒 admin role 數為 0、否則中止。
+2. 在部署 P001 前、跑 `SELECT wr.id, wr.name, wr.workspace_id, COUNT(rtp.id) FROM workspace_roles wr LEFT JOIN role_tab_permissions rtp ON rtp.role_id = wr.id WHERE wr.is_admin = true GROUP BY wr.id HAVING COUNT(rtp.id) = 0;` 確認孤兒 系統主管職務 數為 0、否則中止。
 3. 部署順序：**先 backfill → 再部署前端拔短路**。反過來順序直接線上爆炸。
 
 ---
@@ -38,9 +38,9 @@
 
 **建議**：
 1. 設計兩條路、二選一：
-   - **A. 保留 `is_admin` 語義化檢查**：後端敏感 API 改成 `if (!user.is_admin && !hasPermission(user, 'hr:manage_auth')) return 403`——admin 走第一條、非 admin 走細分權限。這不是 bypass key、是把「管理員 = 有高權限 tab」寫成可讀的 OR。
+   - **A. 保留 `is_admin` 語義化檢查**：後端敏感 API 改成 `if (!user.is_admin && !hasPermission(user, 'hr:manage_auth')) return 403`——admin 走第一條、沒有系統主管資格 走細分權限。這不是 bypass key、是把「系統主管 = 有高權限 tab」寫成可讀的 OR。
    - **B. 擴充 MODULES 加 `hr.manage_auth` / `hr.reset_password` 等 tab**、validate-login backfill 補資料、再完全拔掉後端的 `isAdmin` 判斷。
-2. 選哪條 senior-dev 要明講、**不能默默選**（Think Before Coding 原則）。我個人建議 A、因為符合 William 的「管理員 = 預設權限多的 role」心智模型、且不必動 MODULES 常數。
+2. 選哪條 senior-dev 要明講、**不能默默選**（Think Before Coding 原則）。我個人建議 A、因為符合 William 的「系統主管 = 預設權限多的 role」心智模型、且不必動 MODULES 常數。
 
 ---
 
@@ -108,7 +108,7 @@ canConfirmReceipts: isAdmin || hasModulePermission(userPermissions, 'finance'), 
 **觀察**：
 - validate-login:212 回傳 `isAdmin` 給前端、auth-store.ts:127 存成 `state.isAdmin`。
 - 拔掉 hooks.ts:284、hooks.ts:293、auth-store.ts:249 的 `if (isAdmin) return true` 後、前端 state.isAdmin 變成只有 UI 展示用（例如「顯示一顆紅色 admin 徽章」）、**但 store 裡還能被任何地方讀**。
-- grep 結果：`isAdmin` 在 src 下有 **228 個命中點**。這些點大部分是合法 UI 顯示（/hr/missed-clock 選單隱藏非 admin 項目、/calendar 顯示 workspace 切換）、但藏著幾個危險的：
+- grep 結果：`isAdmin` 在 src 下有 **228 個命中點**。這些點大部分是合法 UI 顯示（/hr/missed-clock 選單隱藏沒有系統主管資格 項目、/calendar 顯示 workspace 切換）、但藏著幾個危險的：
   - `src/app/(main)/accounting/layout.tsx:13` `if (!isAdmin) return <UnauthorizedPage />` — 整個會計模組大鎖
   - `src/app/(main)/database/layout.tsx:14` 同上
   - `src/app/(main)/tools/reset-db/page.tsx:115` reset-db 整頁
@@ -124,13 +124,13 @@ canConfirmReceipts: isAdmin || hasModulePermission(userPermissions, 'finance'), 
 
 ---
 
-### N4. finance/payments 改完後、非 admin 會看到空白 ListPageLayout
+### N4. finance/payments 改完後、沒有系統主管資格 會看到空白 ListPageLayout
 
 **觀察**：
-- page.tsx:211 `if (!isAdmin) return <UnauthorizedPage />` 改掉後、非 admin 會進入 ListPageLayout。
+- page.tsx:211 `if (!isAdmin) return <UnauthorizedPage />` 改掉後、沒有系統主管資格 會進入 ListPageLayout。
 - 但 hooks.ts:34-37（usePermissions.canViewReceipts）回 false → `receipts` 載不到？要查 usePaymentData 是否用 canViewReceipts 擋 query。若**沒擋、receipts 會正常載入**（靠 RLS 擋）、那 UI 正常。若**有擋、會空白**（Empty state、不是 UnauthorizedPage）。
 - 目前 UnauthorizedPage 是正確 UX、空白 list 不是。若 P001 拔掉這行、必須補：`if (!canAccess('finance/payments')) return <UnauthorizedPage />`。
-- **細節**：page.tsx:211 在 columns 定義之後、**columns 裡若有用 user 相關的東西（例如 `row.created_by` 顯示邏輯）、非 admin 進來會不會炸**？快看一下、columns 是純 row 欄位渲染、沒用 user、應該安全。
+- **細節**：page.tsx:211 在 columns 定義之後、**columns 裡若有用 user 相關的東西（例如 `row.created_by` 顯示邏輯）、沒有系統主管資格 進來會不會炸**？快看一下、columns 是純 row 欄位渲染、沒用 user、應該安全。
 
 **風險等級**：🟡 Suggestion
 
@@ -144,15 +144,15 @@ canConfirmReceipts: isAdmin || hasModulePermission(userPermissions, 'finance'), 
 
 **觀察**：
 - create-employee-auth:95-127 的邏輯：`isCornerAdmin = isAdmin && currentUserWorkspaceCode === 'CORNER'`、只有 Corner workspace 的 admin 能建新租戶。
-- 這是**跨租戶授權**、不是一般權限。若要改 hasPermission、key 要叫什麼？`tenants:create`？但 MODULES 裡 `tenants` 模組**不存在**（module-tabs.ts:33 註解明寫「租戶管理（tenants）為 Venturo 超管內部功能、不開放給租戶職務管理」）。
-- 若 hasPermission 拿不到對應 key、所有人 403、Corner 也不能建新租戶——**Venturo 超管流程斷**。
+- 這是**跨租戶授權**、不是一般權限。若要改 hasPermission、key 要叫什麼？`tenants:create`？但 MODULES 裡 `tenants` 模組**不存在**（module-tabs.ts:33 註解明寫「租戶管理（tenants）為 Venturo 平台管理資格內部功能、不開放給租戶職務管理」）。
+- 若 hasPermission 拿不到對應 key、所有人 403、Corner 也不能建新租戶——**Venturo 平台管理資格流程斷**。
 
-**風險等級**：🟡 Suggestion（屬於跨租戶超管授權、架構特殊）
+**風險等級**：🟡 Suggestion（屬於跨租戶平台管理資格授權、架構特殊）
 
 **建議**：
 1. create-employee-auth 不走一般 hasPermission、保留特殊路徑：`if (!isCornerAdmin) return 403`。這是合理的特化。
 2. `reset-employee-password` / `admin-reset-password` 走一般 hasPermission、因為是單租戶內的 admin 動作。
-3. 把這個邊界明確寫進 P001 修法文件：**跨租戶超管授權是獨立語義、不走 hasPermission**。
+3. 把這個邊界明確寫進 P001 修法文件：**跨租戶平台管理資格授權是獨立語義、不走 hasPermission**。
 
 ---
 
@@ -162,15 +162,15 @@ canConfirmReceipts: isAdmin || hasModulePermission(userPermissions, 'finance'), 
 
 - `tests/e2e/` 沒有任何 permissions / admin login 之後的測試。P001 動 auth-store、hooks、usePermissions 三個核心 hook、**沒測試 = 沒安全網**。
 - 建議**最低測試**：e2e 優先於 unit、寫一支 `tests/e2e/admin-login-permissions.spec.ts`、測：
-  1. 老 admin 登入後 sidebar 有項目（F1 偵測器）
-  2. 非 admin 不能看 /accounting（N3 偵測器）
-  3. 非 admin 打 `/api/auth/reset-employee-password` 回 403（F2 偵測器）
+  1. 老 系統主管登入後 sidebar 有項目（F1 偵測器）
+  2. 沒有系統主管資格 不能看 /accounting（N3 偵測器）
+  3. 沒有系統主管資格 打 `/api/auth/reset-employee-password` 回 403（F2 偵測器）
 - 這一支測試完整覆蓋 P001 三個致命漏洞、**P001 部署前必寫**。
 
 ### O2. P010 依賴確認——新 RLS 不影響 P001 的登入
 
 - validate-login 用 service_role、P010 新 policy 不生效。✅
-- 登入後 `/api/permissions/check` / `/api/roles/[roleId]/tab-permissions` 用 user JWT、走 P010 新 policy。影響面：hr/roles 頁、非 admin 看別家 role → 空結果、正確 UX。✅
+- 登入後 `/api/permissions/check` / `/api/roles/[roleId]/tab-permissions` 用 user JWT、走 P010 新 policy。影響面：hr/roles 頁、沒有系統主管資格 看別家 role → 空結果、正確 UX。✅
 - 沒看到「雞生蛋」問題。P010 已於 2026-04-22 套到線上、P001 可安全在其之後做。
 
 ### O3. `employees.supabase_user_id` 尚未同步時的 role 讀取
@@ -185,7 +185,7 @@ canConfirmReceipts: isAdmin || hasModulePermission(userPermissions, 'finance'), 
 | 項 | 評語 |
 |---|---|
 | **C**lean | 🟡 拔 3 處短路的修改本身乾淨、但會揭露 usePermissions.ts 9 個 bool 的假區分（N2）、需要註解標記 |
-| **A**uth | 🔴 F2 是 auth 大洞（4 API key 遷移沒想好）、F1 是 auth 資料洞（老 admin backfill 缺）、N5 是 auth 特化邊界（跨租戶超管） |
+| **A**uth | 🔴 F2 是 auth 大洞（4 API key 遷移沒想好）、F1 是 auth 資料洞（老 admin backfill 缺）、N5 是 auth 特化邊界（跨租戶平台管理資格） |
 | **R**edundant | 🟡 N3 還有 4+ 處 layout.tsx 用 isAdmin、必須一起拔否則只修半條根 |
 | **D**ependencies | 🟢 P010 ✅ 已完成、無雞生蛋；🟡 P011（JWT 時間差）P015（0 測試）是 P001 的上游債、P001 部署前該先點掉 |
 
@@ -203,4 +203,4 @@ canConfirmReceipts: isAdmin || hasModulePermission(userPermissions, 'finance'), 
 
 ## 給主席的 < 200 字摘要
 
-P001 修法方向對、但隱 3 致命漏：(F1) `20260422_check_and_seed_admin_roles` 只補 admin role 不補 permissions、老 admin 拔短路後整站白屏、migration 要改雙 seed 並先部署；(F2) 4 個後端 API 的權限 key（`employees.create`/`reset_password`）MODULES 沒定義、所有人 403、建議 admin 走 `is_admin` 快速 OR、不完全拔後端 isAdmin；(F3) canAccess 沒 loading 態、feature fetch 的 1 秒空窗會閃 UnauthorizedPage。5 個應注意：N1 冒號 vs 點分隔符、N2 usePermissions 9 個 bool 假區分、N3 還有 4+ 個 layout.tsx 用 isAdmin 要一起拔、N4 finance/payments 替換後 UnauthorizedPage 保留、N5 Corner 建新租戶跨租戶超管是特化路徑。P010 ✅ 不影響登入；P001 真正的上游債是 P015 零測試、部署前必補 1 支 e2e。
+P001 修法方向對、但隱 3 致命漏：(F1) `20260422_check_and_seed_admin_roles` 只補 系統主管職務 不補 permissions、老 admin 拔短路後整站白屏、migration 要改雙 seed 並先部署；(F2) 4 個後端 API 的權限 key（`employees.create`/`reset_password`）MODULES 沒定義、所有人 403、建議 admin 走 `is_admin` 快速 OR、不完全拔後端 isAdmin；(F3) canAccess 沒 loading 態、feature fetch 的 1 秒空窗會閃 UnauthorizedPage。5 個應注意：N1 冒號 vs 點分隔符、N2 usePermissions 9 個 bool 假區分、N3 還有 4+ 個 layout.tsx 用 isAdmin 要一起拔、N4 finance/payments 替換後 UnauthorizedPage 保留、N5 Corner 建新租戶跨租戶平台管理資格是特化路徑。P010 ✅ 不影響登入；P001 真正的上游債是 P015 零測試、部署前必補 1 支 e2e。

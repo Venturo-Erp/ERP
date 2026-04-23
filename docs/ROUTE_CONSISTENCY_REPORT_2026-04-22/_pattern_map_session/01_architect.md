@@ -68,7 +68,7 @@ MODULE_REGISTRY: {
 
 ### P-ARCH-03 · 狀態遷移無 cascade、SSOT 在邊界被沖刷 🟡
 **現況描述**
-關 feature 時（`workspace_features.enabled = false`）、`role_tab_permissions` 不 cascade 清除。重開 feature、舊的 role 授權自動「復活」。這違反 William 的意圖（「重開要 admin 重勾」）。也讓 `workspace_features` 不是 SSOT——它只是「當前閘門」、role 權限是獨立保留的舊資料。
+關 feature 時（`workspace_features.enabled = false`）、`role_tab_permissions` 不 cascade 清除。重開 feature、舊的 role 授權自動「復活」。這違反 William 的意圖（「重開要 系統主管重勾」）。也讓 `workspace_features` 不是 SSOT——它只是「當前閘門」、role 權限是獨立保留的舊資料。
 
 **影響檔案**
 - DB：`workspace_features`、`role_tab_permissions`
@@ -77,7 +77,7 @@ MODULE_REGISTRY: {
 **修法建議**
 層 3（William 方案）正解。我補一個細節：
 - Trigger `AFTER UPDATE OF enabled ON workspace_features WHEN NEW.enabled = false` → `DELETE FROM role_tab_permissions WHERE workspace_id = NEW.workspace_id AND module_code 屬於此 feature`
-- **不**做對稱 trigger（重開不自動 grant），符合 William「admin 重勾」語意
+- **不**做對稱 trigger（重開不自動 grant），符合 William「系統主管重勾」語意
 - 寫一個 SQL function `features_owned_by(feature_code)` 返回該 feature 涵蓋的 module_code list——此 function 的真相來自 MODULE_REGISTRY export 出來的 seed（CI 時校對）
 
 **優先級** 🟡（等 P-ARCH-01 完再做）**估時** 2h
@@ -86,7 +86,7 @@ MODULE_REGISTRY: {
 
 ### P-ARCH-04 · JWT 是快照、無失效機制 🟡
 **現況描述**
-`validate-login` 簽 JWT 時一次讀 `role_tab_permissions` 灌進 `user.permissions`，之後每次請求都拿舊快照。admin 剛關 feature、使用者還在 session 內、JWT 不會重簽——前端靠 `isFeatureEnabled`（realtime 查 workspace_features）擋、但如果改了 P-ARCH-02 變成「只看 role permission」、JWT 的舊資料就失效無感。
+`validate-login` 簽 JWT 時一次讀 `role_tab_permissions` 灌進 `user.permissions`，之後每次請求都拿舊快照。系統主管剛關 feature、使用者還在 session 內、JWT 不會重簽——前端靠 `isFeatureEnabled`（realtime 查 workspace_features）擋、但如果改了 P-ARCH-02 變成「只看 role permission」、JWT 的舊資料就失效無感。
 
 **影響檔案**
 - `src/app/api/auth/validate-login/route.ts:141-200`

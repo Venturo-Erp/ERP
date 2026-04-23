@@ -30,7 +30,7 @@ export const userStoreHelpers = {
    * 員工編號生成
    * 新格式: E001-E999 (無辦公室前綴)
    * 例如: E001, E002...E999
-   * E000 為超級管理員保留
+   * E000 為平台管理資格保留
    *
    * 向後相容舊格式: TP-E001, TC-E001
    */
@@ -89,7 +89,7 @@ export const userStoreHelpers = {
     const maxSequence = existingSequences.length > 0 ? Math.max(...existingSequences) : 0
     let nextSequence = maxSequence + 1
 
-    // 跳過 E000（超級管理員保留）
+    // 跳過 E000（平台管理資格保留）
     if (nextSequence === 0) {
       nextSequence = 1
     }

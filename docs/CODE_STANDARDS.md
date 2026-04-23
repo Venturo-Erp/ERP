@@ -103,7 +103,7 @@ function CustomerPage() {
 ```typescript
 // ❌ 錯誤：嵌套太深
 if (user) {
-  if (user.role === 'admin') {
+  if (user.role === '系統主管') {
     if (user.workspace) {
       if (user.workspace.active) {
         // 做某事
@@ -114,7 +114,7 @@ if (user) {
 
 // ✅ 正確：提前返回（Early Return）
 if (!user) return
-if (user.role !== 'admin') return
+if (user.role !== '系統主管') return
 if (!user.workspace) return
 if (!user.workspace.active) return
 
@@ -152,7 +152,7 @@ function createUser(params: CreateUserParams) {}
 createUser({
   name: 'John',
   email: 'john@example.com',
-  role: 'admin',
+  role: '系統主管',
   workspace: 'abc',
   department: 'IT',
   active: true,
@@ -227,7 +227,7 @@ interface User {
   id: string
   name: string
   email: string
-  role: 'admin' | 'user' | 'viewer' // 使用聯合類型，不是 string
+  role: '系統主管' | 'user' | 'viewer' // 使用聯合類型，不是 string
   workspace: Workspace // 使用接口，不是 any
   createdAt: string // 或 Date
   updatedAt: string

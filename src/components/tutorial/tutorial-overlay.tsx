@@ -244,7 +244,7 @@ export function TutorialOverlay({
               <Link
                 href={step.href}
                 className={cn(
-                  'h-8 px-3 text-xs bg-morandi-gold hover:bg-morandi-gold-hover text-white gap-1 rounded-md flex items-center justify-center font-medium',
+                  'h-8 px-3 text-xs bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg gap-1 rounded-md flex items-center justify-center font-medium',
                   step.canSkip ? 'flex-1' : 'w-full'
                 )}
               >
@@ -256,7 +256,7 @@ export function TutorialOverlay({
                 size="sm"
                 onClick={onNext}
                 className={cn(
-                  'h-8 text-xs bg-morandi-gold hover:bg-morandi-gold-hover text-white gap-1',
+                  'h-8 text-xs bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg gap-1',
                   step.canSkip ? 'flex-1' : 'w-full'
                 )}
               >

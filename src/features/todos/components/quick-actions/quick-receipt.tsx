@@ -404,7 +404,7 @@ export function QuickReceipt({ onSubmit, defaultTourId, defaultOrderId }: QuickR
       <Button
         onClick={handleSave}
         disabled={!selectedOrderId || !paymentItem.amount || paymentItem.amount === 0}
-        className="w-full bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+        className="w-full bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg"
       >
         <ReceiptIcon size={16} className="mr-2" />
         {BUTTON_LABELS.create}

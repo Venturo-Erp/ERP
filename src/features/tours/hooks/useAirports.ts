@@ -234,7 +234,7 @@ export function useAirports(options: UseAirportsOptions = {}) {
     []
   )
 
-  // Stage 1：ref_airports 全域化後，usage_count 寫入需 super admin；
+  // Stage 1：ref_airports 全域化後、usage_count 寫入需擁有平台管理資格；
   // 一般業務的「常用」計次會在 Stage 1.5 以 workspace_airports overlay 表重做。
   // 目前保留 markAsUsed 介面為 no-op，避免破壞呼叫端。
   const markAsUsed = useCallback(async (_iataCode: string) => {

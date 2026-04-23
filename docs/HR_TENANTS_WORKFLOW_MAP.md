@@ -28,9 +28,9 @@
 workspace_roles（職務表）
 ├── id: UUID（主鍵）
 ├── workspace_id: UUID → workspaces.id（租戶隔離）
-├── name: TEXT（例："管理員"、"業務"、"會計"、"助理"）
+├── name: TEXT（例："系統主管"、"業務"、"會計"、"助理"）
 ├── description: TEXT（職務說明）
-├── is_admin: BOOLEAN（是否為超級管理員）
+├── is_admin: BOOLEAN（是否為擁有平台管理資格的人）
 ├── sort_order: INT（排序）
 ├── created_at / updated_at
 
@@ -111,14 +111,14 @@ API 回傳新職務（id / name / description / is_admin / sort_order）
 ├─ 有 tab 的模組（10 個）：tours、orders、finance、accounting、hr、database、settings
 │   例：tours (14 tab：overview / orders / members / itinerary ... + 3 個下拉資格)
 └─ 特殊：「下拉資格」tab（isEligibility=true）
-    └─ admin 也可個別取消（例：老闆不想 CEO 出現在「代墊款人」下拉）
+    └─ 系統主管也可個別取消（例：老闆不想 CEO 出現在「代墊款人」下拉）
 ```
 
 操作方式：
 - **模組層級**（第 130-178 行）：勾「可讀取」/「可寫入」→ toggle 該模組全部分頁
 - **分頁層級**（第 180-203 行）：展開模組 → 勾每個分頁
 - **Admin 的特殊性**（第 315 行 `isAdmin = selectedRole?.is_admin`）：
-  - Admin 職務的開關被 disabled（`disabled={isAdmin}`）
+  - 系統主管職務的開關被 disabled（`disabled={isAdmin}`）
   - 但「下拉資格」tab 可以個別取消（`adminCanEdit = tab.isEligibility === true`）
 
 點「儲存」按鈕：
@@ -175,7 +175,7 @@ EmployeeForm 組件 (/src/features/hr/components/EmployeeForm.tsx)
    - 不是 CSV 匯入。
 
 3. **新租戶建立時**（特殊邏輯）：
-   - 新租戶的預設職務（管理員、業務、會計、助理）會**複製 Corner 租戶的模板**。
+   - 新租戶的預設職務（系統主管、業務、會計、助理）會**複製 Corner 租戶的模板**。
    - 證據：`/src/app/api/tenants/create/route.ts:326-381`
    - 邏輯：
      ```
@@ -185,10 +185,10 @@ EmployeeForm 組件 (/src/features/hr/components/EmployeeForm.tsx)
      ```
    - 這樣新租戶的「業務」職務一建出來就帶 Corner 業務的權限模板。
 
-4. **Admin 職務的 backfill**：
+4. **系統主管職務的 backfill**：
    - Migration `20260422150000_backfill_admin_role_tab_permissions.sql`：
-   - 背景：舊系統 admin 因前端短路、role_tab_permissions 沒填完整（只 14-24 row）。
-   - P001 Phase A 新系統不再短路 → admin 需要完整 54 個 row（6 無 tab 模組 + 48 個 tab）。
+   - 背景：舊系統 系統主管因前端短路、role_tab_permissions 沒填完整（只 14-24 row）。
+   - P001 Phase A 新系統不再短路 → 系統主管需要完整 54 個 row（6 無 tab 模組 + 48 個 tab）。
    - 修法：對所有 is_admin=true 的 role、UPSERT 完整 54 row、can_read/can_write 都 true。
 
 ---
@@ -201,7 +201,7 @@ EmployeeForm 組件 (/src/features/hr/components/EmployeeForm.tsx)
 
 操作流程：
 ```
-HR admin 在「員工管理」頁新增員工
+HR 系統主管 在「員工管理」頁新增員工
   ├─ EmployeeForm 出現
   ├─ 必填：名字、員工編號
   ├─ 選填：職務下拉（預設空白）
@@ -210,7 +210,7 @@ HR admin 在「員工管理」頁新增員工
 如果沒選職務 → role_id = NULL → 員工登入後無任何模組權限（白屏除非給直接 isAdmin 短路、但新系統已拔掉）
 ```
 
-管理員也可事後修改：編輯員工 → 改職務。
+系統主管也可事後修改：編輯員工 → 改職務。
 
 **程式碼證據**：`/src/app/(main)/hr/page.tsx:45-57`（loadRoles、但新建員工時的預設邏輯在 EmployeeForm）
 
@@ -226,7 +226,7 @@ HR admin 在「員工管理」頁新增員工
 - 員工如果想知道「自己有啥權限」，只能從「能用啥功能」反推。
 - 沒有「設定 → 我的權限」之類的頁面。
 
-職務管理（`/hr/roles`）**只有 admin 能進**。員工進不了（第 421 行權限檢查）。
+職務管理（`/hr/roles`）**只有系統主管能進**。員工進不了（第 421 行權限檢查）。
 
 ---
 
@@ -271,17 +271,17 @@ HR admin 在「員工管理」頁新增員工
 
 ---
 
-### A.7 Admin（超級管理員）vs 一般職務
+### A.7 系統主管（擁有平台管理資格的人）vs 一般職務
 
 #### `workspace_roles.is_admin` 的效果
 
 **只有** `is_admin = true` 的職務有特殊待遇：
 
-1. **無法刪除**（第 287-291 行：`if (role.is_admin) { toast('無法刪除管理員角色'); return }`）
+1. **無法刪除**（第 287-291 行：`if (role.is_admin) { toast('無法刪除系統主管角色'); return }`）
 
 2. **職務管理 UI 層**：
-   - Admin 職務的 can_read / can_write 開關 disabled（第 355 行 `disabled={isAdmin}`）
-   - Admin 職務自動呈現為「全開」（第 353-361 行）
+   - 系統主管職務的 can_read / can_write 開關 disabled（第 355 行 `disabled={isAdmin}`）
+   - 系統主管職務自動呈現為「全開」（第 353-361 行）
    - 但「下拉資格」tab 可以個別取消（第 384-385 行 `adminCanEdit = tab.isEligibility === true`）
 
 3. **權限檢查層**（驗證登入時）：
@@ -290,42 +290,42 @@ HR admin 在「員工管理」頁新增員工
    - **但新系統不再有「isAdmin 短路」**：admin 也要讀 role_tab_permissions（第 144-161 行）
 
 4. **`role_tab_permissions` 自動 backfill**：
-   - 新 workspace 建立時（`tenants/create`），4 個預設職務（包括「管理員」）會從 Corner 複製 role_tab_permissions。
+   - 新 workspace 建立時（`tenants/create`），4 個預設職務（包括「系統主管」）會從 Corner 複製 role_tab_permissions。
    - Migration backfill：所有 is_admin=true 的職務補完 54 個 row（全開）。
 
-#### Admin Role 的權限初始化時機
+#### 系統主管職務的權限初始化時機
 
-**新租戶建立** → admin 職務權限來自 **Corner 模板**
+**新租戶建立** → 系統主管職務權限來自 **Corner 模板**
 
 流程（`/src/app/api/tenants/create/route.ts:288-381`）：
 ```
-1. 建 4 個預設 workspace_roles（含 is_admin: name === '管理員'）
+1. 建 4 個預設 workspace_roles（含 is_admin: name === '系統主管'）
 2. 查 Corner workspace 的 4 個同名角色
 3. 查 Corner 的 role_tab_permissions（所有行）
 4. 對應名稱 → 複製到新 workspace 新職務
    - map by role name（都是「業務」、「會計」等）
    - INSERT INTO role_tab_permissions（新 role_id、新 permissions）
-5. Corner 的「管理員」職務是全開的（已由 migration backfill）
-   → 新租戶的「管理員」也是全開（直接複製）
+5. Corner 的「系統主管」職務是全開的（已由 migration backfill）
+   → 新租戶的「系統主管」也是全開（直接複製）
 ```
 
-**Migration 時機**（針對既有租戶的 admin）：`20260422150000` → 對所有現存 admin role upsert 54 個全開 row。
+**Migration 時機**（針對既有租戶的系統主管）：`20260422150000` → 對所有現存 系統主管職務 upsert 54 個全開 row。
 
-**新建租戶的 admin**：由 `tenants/create` 直接從 Corner copy（不需再跑 migration）。
+**新建租戶的系統主管**：由 `tenants/create` 直接從 Corner copy（不需再跑 migration）。
 
 ---
 
 ## B. 租戶管理（Tenants）
 
-### B.1 誰會用「租戶管理」？Venturo 超管？還是每個租戶老闆？
+### B.1 誰會用「租戶管理」？Venturo 平台管理資格？還是每個租戶老闆？
 
 ❓ **租戶管理的用戶級別是什麼？**
 
-**答**：**Venturo 超管 + 被賦予「租戶管理」功能權限的租戶員工**
+**答**：**Venturo 平台管理資格 + 被賦予「租戶管理」功能權限的租戶員工**
 
 具體：
 ```
-1. Venturo 超管（平台管理員）
+1. Venturo 平台管理資格（平台系統主管）
    - 在 Venturo 的「管理後台」（假想存在的另一套系統）
    - 建租戶、查所有租戶、修改租戶設定、刪租戶
    - 證據：tenants/create API 的權限檢查（見 B.2）
@@ -366,7 +366,7 @@ if (!feature?.enabled) {
 流程（從 UI 層）：
 
 ```
-Venturo 超管（已登入一個 workspace、有「租戶管理」權限）
+Venturo 平台管理資格（已登入一個 workspace、有「租戶管理」權限）
   ↓ 進 /tenants 頁面
   ↓ 點「+ 新增租戶」按鈕（建立租戶 Dialog）
   ↓ Step 1：輸入租戶資訊
@@ -374,9 +374,9 @@ Venturo 超管（已登入一個 workspace、有「租戶管理」權限）
       - 租戶代號（例："JINGYAO"，必須大寫英文）
       - 最大員工數（選填）
       - 租戶類型（預設 "travel_agency"）
-  ↓ Step 2：輸入第一個管理員資訊
+  ↓ Step 2：輸入第一個系統主管資訊
       - 員工編號（預設 "E001"）
-      - 管理員名字（例："陳建宏"）
+      - 系統主管名字（例："陳建宏"）
       - Email（選填，可自動生成）
       - 密碼（例："12345678"）
   ↓ Step 3：點「建立」
@@ -384,7 +384,7 @@ Venturo 超管（已登入一個 workspace、有「租戶管理」權限）
       ↓ API 執行「建新租戶」的 10 步驟（見 B.3）
       ↓ 返回登入資訊（workspaceCode、員工編號、密碼）
   ↓ Step 4：「複製登入資訊」的 Card 展示
-      ↓ 超管複製資訊、手動告訴新租戶老闆
+      ↓ 平台管理資格複製資訊、手動告訴新租戶老闆
       ↓ 新租戶老闆用這些資訊登入 → 開始設定自己的職務、員工等
 
 ```
@@ -428,16 +428,16 @@ INSERT INTO workspaces {
 }
 ```
 
-**Step 2-4：建第一個管理員（employee + auth + 綁定）**（第 209-286 行）
-- CREATE employees row（employee_number = "E001"、roles = ['admin']、permissions 已廢除、role_id 暫空）
+**Step 2-4：建第一個系統主管（employee + auth + 綁定）**（第 209-286 行）
+- CREATE employees row（employee_number = "E001"、roles = ['系統主管']、permissions 已廢除、role_id 暫空）
 - CREATE auth.users row（email、password、user_metadata 存 workspace_id / employee_id）
 - UPDATE employees.supabase_user_id = auth_user_id
 
 **Step 5：建 4 個預設職務**（第 288-325 行）
 ```sql
 INSERT INTO workspace_roles × 4 {
-  name: "管理員" / "業務" / "會計" / "助理"
-  is_admin: true if name === "管理員" else false
+  name: "系統主管" / "業務" / "會計" / "助理"
+  is_admin: true if name === "系統主管" else false
   workspace_id: <new_workspace_id>
 }
 
@@ -447,7 +447,7 @@ INSERT INTO workspace_roles × 4 {
 **Step 6：從 Corner 複製 role_tab_permissions（權限模板）**（第 326-381 行）
 ```
 1. 查 Corner 的 4 個同名職務 ID
-   WHERE workspace_code = 'CORNER' AND name IN ('管理員', '業務', '會計', '助理')
+   WHERE workspace_code = 'CORNER' AND name IN ('系統主管', '業務', '會計', '助理')
 2. 查 Corner 職務的 role_tab_permissions（所有行）
 3. 對應名稱 → 複製到新職務
    INSERT INTO role_tab_permissions × N {
@@ -456,8 +456,8 @@ INSERT INTO workspace_roles × 4 {
    }
 
 💡 所以新租戶的「業務」一建出來就有 Corner 業務的權限
-   新租戶的「管理員」一建出來就有 Corner 管理員的權限（全開 54 row）
-   這樣可以避免「新租戶管理員登入後白屏」的 bug
+   新租戶的「系統主管」一建出來就有 Corner 系統主管的權限（全開 54 row）
+   這樣可以避免「新租戶系統主管登入後白屏」的 bug
 ```
 
 **Step 7：初始化 workspace_features（功能開關）**（第 383-454 行）
@@ -490,7 +490,7 @@ INSERT INTO workspace_roles × 4 {
     "code": "JINGYAO",
     "name": "京遙旅行社"
   },
-  "admin": {
+  "系統主管": {
     "employee_id": "...",
     "employee_number": "E001"
   },
@@ -506,14 +506,14 @@ INSERT INTO workspace_roles × 4 {
 
 ### B.4 新租戶預設職務與初始化時機
 
-**預設職務名稱**：`DEFAULT_ROLE_NAMES = ['管理員', '業務', '會計', '助理']`（第 25 行）
+**預設職務名稱**：`DEFAULT_ROLE_NAMES = ['系統主管', '業務', '會計', '助理']`（第 25 行）
 
 **初始化時機**：`tenants/create` 的 Step 5-6
 
 - Step 5：建 4 個 workspace_roles（沒有任何權限行）
 - Step 6：複製 Corner 的 role_tab_permissions → 新職務有權限
 - 預設老闆是誰？**建租戶時指定的那個人**（adminName / adminEmployeeNumber）
-  - 自動分配給「管理員」職務（第 315-324 行）
+  - 自動分配給「系統主管」職務（第 315-324 行）
 
 **預設職務的權限來自哪裡**？**Corner 租戶**（第 326-381 行的 CORNER_WORKSPACE_ID）
 
@@ -579,18 +579,18 @@ INSERT INTO workspace_roles × 4 {
 
 ---
 
-### B.6 Venturo 超管 vs 租戶老闆的區別
+### B.6 Venturo 平台管理資格 vs 租戶老闆的區別
 
 #### `isAdmin` 的兩層含義
 
 ```
 1. 職務層：workspace_roles.is_admin = true
-   ├─ 老闆的職務（管理員）通常設 is_admin=true
+   ├─ 老闆的職務（系統主管）通常設 is_admin=true
    ├─ 小員工的職務（業務）設 is_admin=false
    └─ 用途：UI 層判斷「要不要 disable 權限開關」
 
-2. 平台層：Venturo 系統不區分「Venturo 超管」vs「租戶老闆」
-   ├─ 都是「某個租戶的管理員」
+2. 平台層：Venturo 系統不區分「Venturo 平台管理資格」vs「租戶老闆」
+   ├─ 都是「某個租戶的系統主管」
    ├─ 只要該租戶有 workspace_features.tenants = true
    └─ 且員工職務有 role_tab_permissions.settings.tenants.can_write
        → 就可以建租戶
@@ -615,14 +615,14 @@ if (effectiveRoleId) {
 }
 ```
 
-#### 「Venturo 超管」概念在 code 裡怎麼表達
+#### 「Venturo 平台管理資格」概念在 code 裡怎麼表達
 
 **答**：**沒有明確的 `platform_admin` 欄位**。而是：
 
 ```
 Venturo 架構（推測）：
 ├─ 有一個「Venturo 內部租戶」（推測就是 Corner 或類似）
-├─ 該租戶的某個員工（通常叫「系統管理員」或「Venturo 管理員」）
+├─ 該租戶的某個員工（通常叫「系統系統主管」或「Venturo 系統主管」）
 ├─ 職務 is_admin=true
 ├─ role_tab_permissions.settings.tenants.can_write=true
 └─ 然後就可以建租戶、看所有租戶、修改所有租戶
@@ -636,7 +636,7 @@ Code 證據：
 **未來改進**（P009+）：
 - 可以考慮加 `workspaces.created_by` FK → employees
 - 或 `platform_admins` 表
-- 但目前用「某租戶某員工有租戶管理權」來代理「Venturo 超管」
+- 但目前用「某租戶某員工有租戶管理權」來代理「Venturo 平台管理資格」
 
 ---
 
@@ -649,7 +649,7 @@ Code 證據：
 1. **建職務**（workspace_roles）→ 4 個預設
 2. **複製權限**（role_tab_permissions）→ 從 Corner
 3. **初始化功能開關**（workspace_features）→ 免費全開、付費關
-4. **建管理員員工** → 分配給「管理員」職務
+4. **建系統主管員工** → 分配給「系統主管」職務
 
 ### C.2 「租戶管理」功能的權限設定
 
@@ -678,7 +678,7 @@ Code 證據：
 - 但 API 權限檢查會查 `role_tab_permissions.settings.tenants`
 - 這表示「租戶管理」權限**硬寫在 API 層**、不在 HR 職務管理 UI 裡編輯
 
-**為什麼**？租戶管理是 Venturo 超管功能、不開放給普通租戶編輯（只開放給 Venturo 系統管理員）
+**為什麼**？租戶管理是 Venturo 平台管理資格功能、不開放給普通租戶編輯（只開放給 Venturo 系統系統主管）
 
 ### C.3 「資料每個租戶一份」vs「職務模板共用」的分工
 
@@ -733,7 +733,7 @@ JINGYAO 租戶的員工也看不到 CORNER 的員工
   ├─ 模組內分頁級（tours.overview、tours.orders 等）各自設定
   ├─ 可讀 / 可寫分開控制
   ├─ 下拉資格（誰能出現在哪個下拉）也在同一套系統管理
-  └─ Admin 職務自動全開、但下拉資格可手動調整
+  └─ 系統主管職務自動全開、但下拉資格可手動調整
 
 實作上：
   - 職務管理 UI 的複雜度來自「所有 module × tab 組合」的矩陣
@@ -745,7 +745,7 @@ JINGYAO 租戶的員工也看不到 CORNER 的員工
 #### 2. 租戶管理 = 多客戶隔離系統
 
 ```
-Venturo 超管（或有租戶管理權的員工）
+Venturo 平台管理資格（或有租戶管理權的員工）
   ↓
 建租戶（workspaces）
   ↓
@@ -753,12 +753,12 @@ Venturo 超管（或有租戶管理權的員工）
   - 4 個預設職務（from Corner 模板）
   - 職務權限（from Corner template）
   - 功能開關（免費全開、付費關）
-  - 第一個管理員（可登入、可管理租戶內部）
+  - 第一個系統主管（可登入、可管理租戶內部）
   ↓
 新租戶老闆登入
   ↓
 在自己租戶內：
-  - 管理員工
+  - 系統主管工
   - 調整職務權限
   - 開啟付費功能
   ↓
@@ -813,7 +813,7 @@ HR 建新員工
 ✅ **員工 = 分配給某個職務**（employees.role_id）  
 ✅ **權限 = 職務的細節行（role_tab_permissions）**  
 ✅ **租戶 = 獨立的系統實例**（workspace_id 隔離所有資料）  
-✅ **Admin 職務 = 全開但可調整下拉資格**  
+✅ **系統主管職務 = 全開但可調整下拉資格**  
 ✅ **職務模板 = 新租戶從 Corner 複製**  
 ✅ **權限檢查 = 3 層（驗證 → 路由 → API）**  
 
@@ -821,33 +821,33 @@ HR 建新員工
 
 ## E. 完整流程圖
 
-### E.1 Venturo 超管建新租戶 → 員工登入 → 看到權限頁面
+### E.1 Venturo 平台管理資格建新租戶 → 員工登入 → 看到權限頁面
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│ PHASE 1: 超管建租戶                                              │
+│ PHASE 1: 平台管理資格建租戶                                              │
 └─────────────────────────────────────────────────────────────────┘
 
-  Venturo 超管（有租戶管理權限）
+  Venturo 平台管理資格（有租戶管理權限）
     ↓ 進 /tenants 頁
     ↓ 點「新增租戶」
     ↓ Step 1: 輸入「京遙 / JINGYAO」
-    ↓ Step 2: 輸入第一個管理員「陳建宏 / E001 / password」
+    ↓ Step 2: 輸入第一個系統主管「陳建宏 / E001 / password」
     ↓ Step 3: 點「建立」
       ↓ POST /api/tenants/create
       ├─1. CREATE workspaces { name: "京遙", code: "JINGYAO", ... }
       ├─2. CREATE employees { workspace_id, employee_number: "E001", ... }
       ├─3. CREATE auth.users { email, password, user_metadata }
       ├─4. UPDATE employees.supabase_user_id = auth_user_id
-      ├─5. INSERT workspace_roles × 4 { 管理員, 業務, 會計, 助理 }
+      ├─5. INSERT workspace_roles × 4 { 系統主管, 業務, 會計, 助理 }
       ├─6. FROM CORNER SELECT role_tab_permissions
       │   → INSERT role_tab_permissions × N （新 role_id 對應）
       ├─7. INSERT workspace_features × 20+ （免費全開、付費關）
       ├─8. INSERT channels { name: "公告", ... }
       ├─9. FROM CORNER SELECT countries → INSERT × N
       └─10. setup workspace bot
-    ↓ 返回 { workspace, admin, login }
-    ↓ 超管複製登入資訊 → 手工告訴新老闆
+    ↓ 返回 { workspace, 系統主管, login }
+    ↓ 平台管理資格複製登入資訊 → 手工告訴新老闆
 
 ┌─────────────────────────────────────────────────────────────────┐
 │ PHASE 2: 租戶老闆登入 + 設定職務權限                              │
@@ -859,8 +859,8 @@ HR 建新員工
       ├─ SELECT * FROM workspaces WHERE code = 'JINGYAO'
       ├─ SELECT * FROM employees WHERE workspace_id = ?, employee_number = 'E001'
       ├─ 驗證密碼
-      ├─ SELECT workspace_roles WHERE id = employees.role_id（管理員）
-      ├─ SELECT role_tab_permissions WHERE role_id = 管理員職務 ID
+      ├─ SELECT workspace_roles WHERE id = employees.role_id（系統主管）
+      ├─ SELECT role_tab_permissions WHERE role_id = 系統主管職務 ID
       ├─ 建 permissions[] = [ "tours:overview", "tours:orders", ..., "finance:payments", ... ]
       └─ 返回 { employee, workspace, isAdmin: true, permissions: [...] }
     ↓ authStore.setUser({ user: employee, permissions: [...], isAdmin: true })
@@ -1004,7 +1004,7 @@ HR 建新員工
 - [ ] 老闆建職務後、必須**手動進職務管理頁**設定權限（不是自動全開）
 - [ ] `role_tab_permissions` 一次更新就是「刪舊 + 插新」（not upsert one by one）
 - [ ] 新員工的 `role_id` 預設 = NULL、必須 HR 分配、或老闆在員工編輯時設定
-- [ ] Admin 職務自動全開（UI 層 disabled + migration backfill）、但下拉資格可手動調
+- [ ] 系統主管職務自動全開（UI 層 disabled + migration backfill）、但下拉資格可手動調
 - [ ] 新租戶的職務權限**從 Corner 複製**、不是預設白開
 - [ ] 租戶管理只有「有 settings.tenants.can_write」的員工能做
 - [ ] 新員工登入 → validate-login 讀 role_tab_permissions → 建 permissions[] → 存 authStore

@@ -50,7 +50,7 @@ export const SyncToItineraryDialog: React.FC<SyncToItineraryDialogProps> = ({
           <Button
             type="submit"
             disabled={diffs.length === 0}
-            className="bg-morandi-gold hover:bg-morandi-gold-hover text-white gap-2"
+            className="bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg gap-2"
           >
             <RefreshCw size={16} />
             {SYNC_TO_ITINERARY_DIALOG_LABELS.確認同步}

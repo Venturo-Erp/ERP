@@ -104,7 +104,7 @@ hr.deductions             — 扣款（admin / HR）
 hr.reports                — 人資報表（admin / HR）
 hr.settings               — HR 設定（admin）
 hr.announcements          — 公告（admin / HR）
-hr.attendance             — 打卡紀錄（全員看自己、admin 看全部）
+hr.attendance             — 打卡紀錄（全員看自己、系統主管看全部）
 hr.my-attendance          — 個人打卡（全員）
 hr.my-leave               — 個人請假（全員）
 hr.my-payslip             — 個人薪資（全員）

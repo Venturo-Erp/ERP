@@ -15,7 +15,8 @@ export type URL = string
 // ==================== Supabase 表格型別映射 ====================
 
 export type Employee = Database['public']['Tables']['employees']['Row']
-export type Tour = Database['public']['Tables']['tours']['Row']
+// Tour 的 canonical source 在 @/types/tour.types（手寫 interface、含業務註解與衍生型別）
+export type { Tour } from './tour.types'
 export type Order = Database['public']['Tables']['orders']['Row']
 export type Customer = Database['public']['Tables']['customers']['Row']
 export type Member = Database['public']['Tables']['members']['Row']

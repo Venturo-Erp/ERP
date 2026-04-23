@@ -78,7 +78,7 @@
 
 | 層級                | 表                                                  | 擁有者          | 寫入權限         | 性質             |
 | ------------------- | --------------------------------------------------- | --------------- | ---------------- | ---------------- |
-| **L1 全球參考**     | `ref_countries`、`ref_airports`、`ref_destinations` | 平台（Venturo） | super admin only | 客觀世界事實     |
+| **L1 全球參考**     | `ref_countries`、`ref_airports`、`ref_destinations` | 平台（Venturo） | 擁有平台管理資格的人 only | 客觀世界事實     |
 | **L2 租戶 overlay** | `workspace_countries`（第一版只有啟用開關）         | 該租戶          | 該租戶           | 啟用範圍         |
 | **L3 租戶業務**     | `tours`、`itineraries` 等既有表                     | 該租戶          | 該租戶           | 引用 L1 的自然鍵 |
 
@@ -157,7 +157,7 @@
 | ---- | ------------------------------------------------------------- |
 | 1.1  | 建 `ref_destinations` 表（schema 如第三節所述，含多語言欄位） |
 | 1.2  | 建立 short_alias unique index，避開 IATA 命名空間             |
-| 1.3  | RLS：SELECT 任何 authenticated user；其餘只限 super admin     |
+| 1.3  | RLS：SELECT 任何 authenticated user；其餘只限 擁有平台管理資格的人     |
 
 #### 1B：搬家假 IATA
 
@@ -175,7 +175,7 @@
 | 1.8  | 刪除其他 2 個 workspace 的重複資料                                                        | 總列數 87           |
 | 1.9  | DROP `workspace_id` 欄位                                                                  | schema check        |
 | 1.10 | 重寫 RLS：任何 authenticated user 可 SELECT；INSERT/UPDATE/DELETE 只限 `is_super_admin()` | 一般帳號 write 失敗 |
-| 1.11 | 廢除 `/api/airports` 的 POST（或加 super admin 守門）                                     | 403 on non-admin    |
+| 1.11 | 廢除 `/api/airports` 的 POST（或加 擁有平台管理資格的人 守門）                                     | 403 on 沒有系統主管資格    |
 
 #### 1D：UI / query 層配合
 
@@ -338,7 +338,7 @@
 | ------------------------------------------------------ | ------- | ------------------------------------------------------ |
 | `cities` / `regions` 拆成 `ref_cities` / `ref_regions` | ❌ 不做 | 避免雪球；FK 改指向即可                                |
 | 景點 / 飯店 / 餐廳 UI 重構                             | ❌ 另案 | 不同軌道，等 SSOT 穩了再處理                           |
-| 租戶自訂機場能力（`/api/airports` POST）               | ❌ 廢除 | 只有 super admin 能動 ref                              |
+| 租戶自訂機場能力（`/api/airports` POST）               | ❌ 廢除 | 只有 擁有平台管理資格的人 能動 ref                              |
 | 交通節點擴充（火車站、港口、客運站）                   | ⏸️ 預留 | `ref_transit_hubs` 概念已留，第一版只啟用 airport type |
 | 多語言欄位灌值                                         | ⏸️ 選填 | Phase 1 只填繁中 + 英文，其他語言等需要時 API 補       |
 | Google Maps API 整合                                   | ⏸️ 另案 | BUSINESS_MAP 已規劃但非本次範圍                        |

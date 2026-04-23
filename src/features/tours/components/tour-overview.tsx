@@ -24,6 +24,7 @@ import { cn } from '@/lib/utils'
 import { COMP_TOURS_LABELS } from '../constants/labels'
 import { useTourChannelOperations, TourStoreActions } from './TourChannelOperations'
 import { logger } from '@/lib/utils/logger'
+import { getTourStatusLabel } from '@/lib/constants/status-maps'
 
 interface TourOverviewProps {
   tour: Tour
@@ -236,7 +237,7 @@ export const TourOverview = React.memo(function TourOverview({
                 getStatusBadge(tour.status ?? '')
               )}
             >
-              {tour.status}
+              {getTourStatusLabel(tour.status)}
             </span>
           </div>
         </div>

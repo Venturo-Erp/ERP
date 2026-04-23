@@ -22,7 +22,7 @@
 - 但代碼端：`WorkspacesManagePage.tsx:77` 用 anon client（`supabase.from('workspaces').delete()`）、是 super_admin 身份下的 RLS 擋板放行才會過。
 
 ### Migration SQL 草稿
-**前提**：如果 pattern 是 audit stale，實際 policy 已經對、不動 DB、只更新 `_PATTERN_MAP.md` 狀態。如果 William 要**再收一層**（例如「必須是該 workspace 自己的 admin 才能刪自家，其他人一律不准」），用下面：
+**前提**：如果 pattern 是 audit stale，實際 policy 已經對、不動 DB、只更新 `_PATTERN_MAP.md` 狀態。如果 William 要**再收一層**（例如「必須是該 workspace 自己的系統主管 才能刪自家，其他人一律不准」），用下面：
 
 ```sql
 -- 先看現況（務必手動跑、確認再往下）：
@@ -32,7 +32,7 @@ FROM pg_policy WHERE polrelid = 'public.workspaces'::regclass;
 BEGIN;
   DROP POLICY IF EXISTS "workspaces_delete" ON public.workspaces;
 
-  -- 選項 A（建議、符合 William 模型：super_admin 才能刪）：維持原狀、純正名
+  -- 選項 A（建議、符合 William 模型：super_系統主管才能刪）：維持原狀、純正名
   CREATE POLICY "workspaces_delete" ON public.workspaces
     FOR DELETE TO authenticated
     USING (is_super_admin());
@@ -66,7 +66,7 @@ COMMIT;
 
 ### 測試守門
 - `tests/e2e/login-api.spec.ts`（動 workspaces RLS 必跑、CLAUDE.md 紅線）。
-- 新增 `tests/e2e/workspaces-delete.spec.ts`：登入 non-super-admin → DELETE /workspaces → 應 403。
+- 新增 `tests/e2e/workspaces-delete.spec.ts`：登入 沒有平台管理資格 → DELETE /workspaces → 應 403。
 
 ---
 
@@ -305,8 +305,8 @@ COMMIT;
 - `tests/e2e/login-api.spec.ts`（RLS 變動必跑）
 - `tests/e2e/admin-login-permissions.spec.ts`（若不存在、**必須新建**）
 - 新建 `tests/e2e/permission-overrides.spec.ts`：
-  - admin 可在自家 workspace CRUD override
-  - 非 admin 不能 write、可以 read 自己
+  - 系統主管可在自家 workspace CRUD override
+  - 沒有系統主管資格 不能 write、可以 read 自己
   - 跨 workspace SELECT 回空
 
 ---

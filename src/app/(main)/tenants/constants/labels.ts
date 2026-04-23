@@ -44,14 +44,14 @@ export const LABELS = {
   FIELD_MAX_EMPLOYEES_HINT: '設定此租戶可建立的最大員工數量，留空表示無限制',
 
   // Dialog - Step 2
-  STEP2_TITLE: '第一位管理員',
-  STEP2_DESC: '為新租戶建立管理員帳號',
+  STEP2_TITLE: '第一位系統主管',
+  STEP2_DESC: '為新租戶建立系統主管帳號',
   FIELD_EMPLOYEE_NUMBER: '員工編號',
   FIELD_ADMIN_NAME: '姓名',
   FIELD_ADMIN_NAME_REQUIRED: '*',
-  FIELD_ADMIN_NAME_PLACEHOLDER: '管理員姓名',
+  FIELD_ADMIN_NAME_PLACEHOLDER: '系統主管姓名',
   FIELD_EMAIL: '登入 Email',
-  FIELD_EMAIL_PLACEHOLDER: '管理員的真實 Email',
+  FIELD_EMAIL_PLACEHOLDER: '系統主管的真實 Email',
   FIELD_EMAIL_HINT: '用於建立系統登入帳號',
   FIELD_PASSWORD: '密碼',
   FIELD_PASSWORD_PLACEHOLDER: '登入密碼',
@@ -83,9 +83,9 @@ export const LABELS = {
 
   // Toast messages
   TOAST_WORKSPACE_CREATED: '工作空間已建立',
-  TOAST_ADMIN_CREATED: '管理員帳號已建立',
+  TOAST_ADMIN_CREATED: '系統主管帳號已建立',
   TOAST_CREATE_FAILED: '建立租戶失敗',
-  TOAST_ADMIN_FAILED: '建立管理員失敗',
+  TOAST_ADMIN_FAILED: '建立系統主管失敗',
   TOAST_TOGGLE_SUCCESS_ACTIVE: '已啟用',
   TOAST_TOGGLE_SUCCESS_INACTIVE: '已停用',
   TOAST_TOGGLE_FAILED: '狀態切換失敗',

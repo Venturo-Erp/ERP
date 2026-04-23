@@ -4,6 +4,7 @@ import { useCallback, useRef } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useTourPageState } from './useTourPageState'
 import { useEmployeesSlim } from '@/data'
+import { TOUR_STATUS } from '@/lib/constants/status-maps'
 
 interface UseToursFormReturn {
   handleOpenCreateDialog: (fromQuoteId?: string) => Promise<void>
@@ -35,7 +36,7 @@ export function useToursForm({ state, openDialog }: UseToursFormParams): UseTour
         departure_date: '',
         return_date: '',
         price: 0,
-        status: '待出發',
+        status: TOUR_STATUS.UPCOMING,
         isSpecial: false,
         max_participants: 20,
         description: '',

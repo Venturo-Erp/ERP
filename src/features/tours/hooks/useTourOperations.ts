@@ -13,6 +13,7 @@ import { createOrder } from '@/data/entities/orders'
 import { supabase } from '@/lib/supabase/client'
 import { useAuthStore } from '@/stores/auth-store'
 import { TOUR_OPERATIONS_LABELS } from '../constants/labels'
+import { TOUR_STATUS } from '@/lib/constants/status-maps'
 import {
   checkTourDependencies,
   deleteTourEmptyOrders,
@@ -87,7 +88,7 @@ export function useTourOperations(params: UseTourOperationsParams) {
   const handleAddTour = useCallback(
     async (newTour: NewTourData, newOrder: Partial<OrderFormData>, fromQuoteId?: string) => {
       const isProposalOrTemplate =
-        newTour.tour_type === 'proposal' || newTour.tour_type === 'template'
+        newTour.status === TOUR_STATUS.PROPOSAL || newTour.status === TOUR_STATUS.TEMPLATE
 
       // 提案/模板只需要名稱，正式團需要日期
       if (!isProposalOrTemplate) {
@@ -145,7 +146,7 @@ export function useTourOperations(params: UseTourOperationsParams) {
 
         if (isProposalOrTemplate) {
           // 提案/模板：用 DRAFT- 前綴的臨時編號
-          const prefix = newTour.tour_type === 'proposal' ? 'PROP' : 'TMPL'
+          const prefix = newTour.status === TOUR_STATUS.PROPOSAL ? 'PROP' : 'TMPL'
           code = `${prefix}-${Date.now().toString(36).toUpperCase()}`
         } else {
           // 正式團：驗證城市代碼（團號需要 3 碼英文城市代碼）
@@ -188,16 +189,17 @@ export function useTourOperations(params: UseTourOperationsParams) {
           countryId = newTour.countryId // ✅ 直接使用
         }
 
+        // 建新團：status 就是真相（正式團預設 upcoming、提案/模板按使用者選擇）
+        const defaultStatus = isProposalOrTemplate ? newTour.status : TOUR_STATUS.UPCOMING
         const tourData = {
           name: newTour.name,
-          tour_type: newTour.tour_type || 'official',
           days_count: isProposalOrTemplate ? newTour.days_count || null : null,
           // SSOT：location 是已廢棄欄位，新團不寫入；目的地由 country_id + airport_code 衍生
           country_id: countryId,
           airport_code: cityCode || undefined,
           departure_date: isProposalOrTemplate ? null : newTour.departure_date,
           return_date: isProposalOrTemplate ? null : newTour.return_date,
-          status: newTour.status,
+          status: defaultStatus,
           price: newTour.price,
           max_participants: newTour.max_participants,
           code,
@@ -446,8 +448,8 @@ export function useTourOperations(params: UseTourOperationsParams) {
 
   /**
    * handleConvertToOfficial - 將提案/模板轉為正式團
-   * - 提案：直接更新 tour_type='official'，填入日期，產生團號
-   * - 模板：複製一份新團，tour_type='official'，填入日期，產生團號（模板保留）
+   * - 提案：直接更新 status='upcoming'，填入日期，產生團號
+   * - 模板：複製一份新團 status='upcoming'（模板保留）
    */
   const handleConvertToOfficial = useCallback(
     async (
@@ -470,27 +472,25 @@ export function useTourOperations(params: UseTourOperationsParams) {
 
         let tourId = tour.id
 
-        if (tour.tour_type === 'proposal') {
+        if (tour.status === TOUR_STATUS.PROPOSAL) {
           // 提案 → 直接更新
           await actions.update(tour.id, {
-            tour_type: 'official',
             departure_date,
             return_date,
             code,
-            status: '待出發',
+            status: TOUR_STATUS.UPCOMING,
           } as Partial<Tour>)
         } else {
           // 模板 → 複製一份新團（用 unknown 繞過嚴格型別，實際欄位由 Supabase 驗證）
           const newTourData = {
             name: tour.name,
             // SSOT：location 是已廢棄的舊欄位，新團不再寫入
-            country_id: tour.country_id || null, // ✅ 保留國家
-            airport_code: tour.airport_code || null, // ✅ 保留機場代碼
-            tour_type: 'official' as const,
+            country_id: tour.country_id || null,
+            airport_code: tour.airport_code || null,
             departure_date,
             return_date,
             code,
-            status: '待出發' as const,
+            status: TOUR_STATUS.UPCOMING,
             contract_status: 'pending' as const,
             price: tour.price || 0,
             max_participants: tour.max_participants || 20,

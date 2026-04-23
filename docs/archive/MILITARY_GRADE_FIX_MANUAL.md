@@ -335,7 +335,7 @@ END $$;
 CREATE POLICY "itineraries_select_policy"
 ON itineraries FOR SELECT TO authenticated
 USING (
-  -- Super Admin 可以看所有
+  -- 擁有平台管理資格的人 可以看所有
   EXISTS (
     SELECT 1 FROM employees
     WHERE employees.id = auth.uid()
@@ -482,7 +482,7 @@ npm run test
 # - [ ] 城市選擇器正常運作
 # - [ ] Itineraries 只顯示自己 workspace 的資料
 # - [ ] 新增/編輯 itinerary 正常
-# - [ ] Super Admin 可以看到所有 workspace 的資料
+# - [ ] 擁有平台管理資格的人 可以看到所有 workspace 的資料
 # - [ ] 一般用戶無法看到其他 workspace 的資料
 ```
 
@@ -540,7 +540,7 @@ describe('軍事級別修復驗證', () => {
       // 測試邏輯
     })
 
-    it('Super Admin 可以看到所有 workspace 的資料', async () => {
+    it('擁有平台管理資格的人 可以看到所有 workspace 的資料', async () => {
       // 測試邏輯
     })
   })
@@ -568,7 +568,7 @@ describe('軍事級別修復驗證', () => {
 | 3. 新增行程                      | workspace_id 自動設為 A   | [ ]  |
 | 4. 登出，以 Workspace B 用戶登入 | 成功登入                  | [ ]  |
 | 5. 查看行程列表                  | 只顯示 Workspace B 的行程 | [ ]  |
-| 6. 登出，以 Super Admin 登入     | 成功登入                  | [ ]  |
+| 6. 登出，以 擁有平台管理資格的人 登入     | 成功登入                  | [ ]  |
 | 7. 查看行程列表                  | 顯示所有 workspace 的行程 | [ ]  |
 
 #### 測試 3: 審計追蹤
@@ -693,7 +693,7 @@ WHERE tablename = 'itineraries';
 
 - RLS 未啟用 -> `ALTER TABLE itineraries ENABLE ROW LEVEL SECURITY;`
 - 策略錯誤 -> 重新執行遷移腳本
-- 用戶為 Super Admin -> 這是正常行為
+- 用戶為 擁有平台管理資格的人 -> 這是正常行為
 
 #### 問題：新增行程時 workspace_id 為 NULL
 

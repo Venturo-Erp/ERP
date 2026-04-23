@@ -183,7 +183,7 @@ Guard with `canRead('operational', tab)` / `canWrite('operational', tab)`:
 
 **Verification**
 - [ ] Run `tests/e2e/login-api.spec.ts` after each batch
-- [ ] No guest/non-admin can access guarded pages
+- [ ] No guest/沒有系統主管資格 can access guarded pages
 - [ ] Admin can still access all pages
 
 ---

@@ -21,7 +21,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   const { data, error } = await supabase
     .from('tours')
     .select(
-      'id, code, name, location, departure_date, return_date, status, current_participants, max_participants, tour_type'
+      'id, code, name, location, departure_date, return_date, status, current_participants, max_participants'
     )
     .eq('code', code)
     .eq('is_deleted', false)

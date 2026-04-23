@@ -110,7 +110,7 @@ export function NotesSection({ todo, onUpdate }: NotesSectionProps) {
                       onUpdate({ notes: newNotes })
                       setEditingNoteIndex(null)
                     }}
-                    className="bg-morandi-gold hover:bg-morandi-gold-hover text-white h-7 text-xs gap-1.5"
+                    className="bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg h-7 text-xs gap-1.5"
                   >
                     <Save size={12} />
                     {BUTTON_LABELS.save}

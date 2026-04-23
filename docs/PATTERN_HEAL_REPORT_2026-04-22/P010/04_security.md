@@ -12,7 +12,7 @@
 
 ### 1. Defense in depth 加強還是削弱？→ **加強、但仍單層**
 
-原狀：`/api/roles/[roleId]/tab-permissions` GET/PUT（`src/app/api/roles/[roleId]/tab-permissions/route.ts`）**整支沒有任何 auth / workspace / role check**，沒驗 session、沒驗 `roleId` 屬於哪個 workspace、沒驗呼叫者是 admin。100% 依賴 RLS。而 RLS 又全開（`USING: true`）→ **零層防禦、全世界可讀寫**。
+原狀：`/api/roles/[roleId]/tab-permissions` GET/PUT（`src/app/api/roles/[roleId]/tab-permissions/route.ts`）**整支沒有任何 auth / workspace / role check**，沒驗 session、沒驗 `roleId` 屬於哪個 workspace、沒驗呼叫者擁有管理員資格。100% 依賴 RLS。而 RLS 又全開（`USING: true`）→ **零層防禦、全世界可讀寫**。
 
 修後：DB 層嚴（EXISTS 聯查）、API 層仍 0 檢查。這是**單層 RLS**，不是 defense in depth。但至少從「0 層」升到「1 層」。修法本身**加強**、沒削弱。
 
@@ -26,8 +26,8 @@
 |---|---|---|---|
 | `validate-login/route.ts` | 161 | SELECT（讀自己登入帳號的權限） | ✅ 透過 employee_number + password 驗身分、workspace 綁在 employee 上 |
 | `tenants/create/route.ts` | 79 | SELECT（驗 can_write settings/tenants） | ✅ 先驗 session、讀當前 user 的 role_id、再查 → 邏輯對 |
-| `tenants/create/route.ts` | 483 | INSERT（新建租戶 seed admin role 權限） | ✅ 新 workspace、新 role_id、不污染其他租戶 |
-| `workspaces/route.ts` | 197 | INSERT（建租戶 seed admin role） | ⚠️ 需確認呼叫者身分檢查（未逐行讀）、但輸入同樣綁新 workspaceId |
+| `tenants/create/route.ts` | 483 | INSERT（新建租戶 seed 系統主管職務 權限） | ✅ 新 workspace、新 role_id、不污染其他租戶 |
+| `workspaces/route.ts` | 197 | INSERT（建租戶 seed 系統主管職務） | ⚠️ 需確認呼叫者身分檢查（未逐行讀）、但輸入同樣綁新 workspaceId |
 | `tenants/seed-base-data/route.ts` | ~31 | SELECT | ⚠️ 需逐行驗 |
 
 **本次 P010 不改 service_role 使用邏輯、也不需要**。修完 RLS 後 service_role 仍可繞、但這 5 處的上游都有 workspace 綁定或建立時自決 workspaceId，**不構成跨租戶洩漏新風險**。
@@ -51,7 +51,7 @@
 - 新 RLS 擋得住嗎？**擋不住**。因為 `roleId` 確實屬於 X、EXISTS 回 true、UPDATE 通過。
 - 為什麼擋不住？因為 API 層沒檢查「呼叫者是否為 admin / 是否有權改自己 role 的權限矩陣」。
 
-這是 **P001（admin 萬能）+ P003（API 無角色驗證）+ P015（無測試）複合病**、不是 P010 獨有。**P010 做完只修了「跨租戶讀寫」、沒修「租戶內越權」**。
+這是 **P001（系統主管萬能）+ P003（API 無角色驗證）+ P015（無測試）複合病**、不是 P010 獨有。**P010 做完只修了「跨租戶讀寫」、沒修「租戶內越權」**。
 
 **Out of scope、但必須在 pattern-map 註記**：修完 P010 後、`/api/roles/[roleId]/tab-permissions` 仍有 **privilege escalation via self-edit** 漏洞、風險等級 High、必須 P003 補 API 層 `canManageRoles` 檢查。
 
@@ -97,7 +97,7 @@ DoS 面：此 API 本來就非公開、只 session 後可達、rate limit 不是
 | 5 個 service_role 點加「呼叫者 workspace 一致性」驗證 | P003 | 每個 API 都要逐行改、blast radius 大 |
 | Audit log trigger on `role_tab_permissions` | P009 | 獨立設計決策、trigger schema 要先定 |
 | RLS integration test / privilege escalation test | P015 | 測試基礎建設獨立事 |
-| 租戶內「非 admin 不能改自己 role 權限」API 層檢查 | P001 + P003 | 需先定義 `canManageRoles` 授權模型 |
+| 租戶內「沒有系統主管資格 不能改自己 role 權限」API 層檢查 | P001 + P003 | 需先定義 `canManageRoles` 授權模型 |
 
 ---
 

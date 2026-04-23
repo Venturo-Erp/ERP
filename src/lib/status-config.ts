@@ -214,48 +214,48 @@ export const STATUS_CONFIGS: Record<StatusType, Record<string, StatusConfig>> = 
     },
   },
 
-  // 團體狀態
+  // 團體狀態（key = DB 英文值、label = UI 中文顯示）
   tour: {
-    開團: {
+    template: {
+      color: 'text-morandi-muted',
+      label: '模板',
+      icon: FileText,
+      bgColor: 'bg-morandi-container',
+      borderColor: 'border-morandi-muted/30',
+    },
+    proposal: {
       color: 'text-morandi-gold',
-      label: '開團',
+      label: '提案',
       icon: FileText,
       bgColor: 'bg-morandi-gold/10',
       borderColor: 'border-morandi-gold/30',
     },
-    待出發: {
+    upcoming: {
       color: 'text-morandi-green',
       label: '待出發',
       icon: Truck,
       bgColor: 'bg-morandi-green/10',
       borderColor: 'border-morandi-green/30',
     },
-    已出發: {
+    ongoing: {
       color: 'text-morandi-green',
-      label: '已出發',
+      label: '進行中',
       icon: Truck,
       bgColor: 'bg-morandi-green/10',
       borderColor: 'border-morandi-green',
     },
-    待結團: {
+    returned: {
       color: 'text-morandi-red',
-      label: '待結團',
+      label: '未結團',
       icon: Clock,
       bgColor: 'bg-morandi-red/10',
       borderColor: 'border-morandi-red/30',
     },
-    已結團: {
+    closed: {
       color: 'text-morandi-secondary',
       label: '已結團',
       icon: FileCheck,
       bgColor: 'bg-morandi-container',
-      borderColor: 'border-morandi-muted/30',
-    },
-    取消: {
-      color: 'text-morandi-muted',
-      label: '已取消',
-      icon: XCircle,
-      bgColor: 'bg-morandi-red/10',
       borderColor: 'border-morandi-muted/30',
     },
     default: {

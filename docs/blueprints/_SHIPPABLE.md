@@ -53,7 +53,7 @@ cron Stage D 之後執行：
 ### 03 · `/tools/*`
 - [ ] `/tools/flight-itinerary` 可產班機行程 PDF
 - [ ] `/tools/hotel-voucher` 可產飯店 voucher PDF
-- [!] `/tools/reset-db` 必 admin、業務誤點擋下
+- [!] `/tools/reset-db` 必 系統主管、業務誤點擋下
 - [!] 無資料時按「產生」→ 提示、不 crash
 
 ### 04 · `/quotes` 列表

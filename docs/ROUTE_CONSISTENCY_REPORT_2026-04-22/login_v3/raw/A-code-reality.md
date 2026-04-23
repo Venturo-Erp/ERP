@@ -45,9 +45,9 @@
 - 職責：保留端點兼容、實際清除由前端 supabase.auth.signOut() + SSR 自動清 cookies
 - **修法**：無（已簡化成純 placeholder、自家 JWT 時代舊邏輯已移除）
 
-### 4. admin-reset-password — 管理員重設員工密碼
+### 4. admin-reset-password — 系統主管重設員工密碼
 - **src/app/api/auth/admin-reset-password/route.ts** — 2026-04-22 未動（邏輯完整）
-- 職責：驗 getServerAuth() + 管理員權限 → 生成新密碼 → 更新 Supabase Auth
+- 職責：驗 getServerAuth() + 系統主管權限 → 生成新密碼 → 更新 Supabase Auth
 - 關鍵：`checkIsAdmin()` 讀 role_id（優先 top-level、fallback job_info.role_id）→ 查 workspace_roles.is_admin；rate limit 5/min
 - **修法**：無
 
@@ -65,8 +65,8 @@
 
 ### 7. create-employee-auth — 建立員工帳號
 - **src/app/api/auth/create-employee-auth/route.ts** — 2026-04-22 未動（邏輯完整）
-- 職責：管理員新增員工時建 Supabase Auth 帳號
-- 關鍵：getServerAuth() + checkIsAdmin()；檢查租戶是否為新租戶（無 auth 員工 → 種子人 admin 開全權）
+- 職責：系統主管新增員工時建 Supabase Auth 帳號
+- 關鍵：getServerAuth() + checkIsAdmin()；檢查租戶是否為新租戶（無 auth 員工 → 種子人系統主管 開全權）
 - **修法**：無
 
 ### 8. get-employee-data — 取員工資料（配合登入）
@@ -102,7 +102,7 @@
 ## API 資源層
 
 - **src/app/api/workspaces/[id]/route.ts** — 2026-04-22 動過（P003-H：跨租戶讀守門）
-  - 職責：GET 租戶詳情（含員工人數、admin 名稱）
+  - 職責：GET 租戶詳情（含員工人數、系統主管名稱）
   - 關鍵：getServerAuth()；自家 workspace 任何登入用戶可讀、跨租戶需「租戶管理」權限
   - **修法**：P003-H，原無租戶邊界檢查、任何登入用戶可讀任一家租戶詳情；改走 requireTenantAdmin() 同 P003-A 邏輯
 
@@ -125,16 +125,16 @@
 
 ## 資料庫 Migration（5 支 2026-04-22 新增）
 
-- **20260422000000_check_and_seed_admin_roles.sql** — 驗證 admin role 存在、否則種子
+- **20260422000000_check_and_seed_admin_roles.sql** — 驗證 系統主管職務 存在、否則種子
 - **20260422130000_add_amadeus_totp_to_employees.sql** — 新增 Amadeus TOTP 欄位（無關 login）
 - **20260422140000_fix_role_tab_permissions_rls.sql** — 修 role_tab_permissions RLS（P003-A 前置）
-- **20260422150000_backfill_admin_role_tab_permissions.sql** — 預填 admin role 所有 module:tab 權限（P001 Phase A 配套）
+- **20260422150000_backfill_admin_role_tab_permissions.sql** — 預填 系統主管職務 所有 module:tab 權限（P001 Phase A 配套）
 - **20260422160000_sync_default_roles_from_corner.sql** — 從 Corner workspace 複製預設職務（P001 收尾）
 
 ## E2E 測試
 
 - **tests/e2e/admin-login-permissions.spec.ts** — 2026-04-22 新增（P001 Phase A 配套）
-  - 職責：驗證 admin 登入後 permissions 非空、包含所有必需 module + tab key
+  - 職責：驗證 系統主管登入後 permissions 非空、包含所有必需 module + tab key
   - 關鍵：loginAsAdmin()、檢查 isAdmin=true、permissions.length > 40、涵蓋 13 個 MODULES + 10 個關鍵 module:tab
   - **修法**：新增（守門 backfill migration + validate-login 邏輯不退化）
 
@@ -144,7 +144,7 @@
 
 | 修法 | 檔案數 | 主要檔案 | 目的 |
 |------|--------|---------|------|
-| **P001：拔 isAdmin 短路** | 6 | auth-store.ts, usePermissions.ts, migrations | 管理員判定改走 role_tab_permissions |
+| **P001：拔 isAdmin 短路** | 6 | auth-store.ts, usePermissions.ts, migrations | 系統主管判定改走 role_tab_permissions |
 | **P002：middleware 改白名單** | 1 | middleware.ts | 收緊公開路由、敏感 API 改精確列舉 |
 | **P003-A/B/C/D/E/H/I：跨租戶守門** | 9 | 4 支 auth API + 1 permissions + 1 workspaces + migrations | 防止跨租戶資料竊取 |
 | **e2e 測試** | 1 | admin-login-permissions.spec.ts | 守門 P001 backfill + validate-login 邏輯 |

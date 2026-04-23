@@ -6,23 +6,22 @@ export function useCalendarNavigation() {
   const calendarRef = useRef<FullCalendar>(null)
   const [currentDate, setCurrentDate] = useState(new Date())
 
-  // 月份切換
+  // 讓 FullCalendar 自己依當前視圖決定要切一月/一週/一天、我們不猜
   const handlePrevMonth = () => {
-    const newDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1)
-    setCurrentDate(newDate)
     calendarRef.current?.getApi().prev()
   }
 
   const handleNextMonth = () => {
-    const newDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1)
-    setCurrentDate(newDate)
     calendarRef.current?.getApi().next()
   }
 
   const handleToday = () => {
-    const today = new Date()
-    setCurrentDate(today)
     calendarRef.current?.getApi().today()
+  }
+
+  // 由 FullCalendar 的 datesSet callback 呼叫、同步中間顯示的月份 label
+  const syncCurrentDate = (date: Date) => {
+    setCurrentDate(date)
   }
 
   // 格式化當前月份
@@ -36,6 +35,7 @@ export function useCalendarNavigation() {
     handlePrevMonth,
     handleNextMonth,
     handleToday,
+    syncCurrentDate,
     getCurrentMonthYear,
   }
 }

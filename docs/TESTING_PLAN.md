@@ -41,7 +41,7 @@ These require a real or test Supabase database:
 - Create employee auth account
 - Validate login with correct/incorrect credentials
 - Change password → verify old password invalid
-- Admin reset password → verify new password works
+- 系統主管密碼重設 → verify new password works
 
 ## Prerequisites for Integration Tests
 

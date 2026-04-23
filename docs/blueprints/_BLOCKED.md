@@ -76,8 +76,8 @@ _（cron 寫入）_
 ### [2026-04-18 06:10] /tools/reset-db · 發現於 Stage B
 - **類型**: 🔴 P0 資安缺陷
 - **Blueprint**: `docs/blueprints/03-tools.md` ADR-T1
-- **問題**: `/tools/reset-db` 無 admin guard、任何登入者可清本機 IndexedDB
-- **違反**: INV-A02 Settings/開發工具必 admin
+- **問題**: `/tools/reset-db` 無 系統主管 guard、任何登入者可清本機 IndexedDB
+- **違反**: INV-A02 Settings/開發工具必系統主管
 - **位置**: `src/app/(main)/tools/reset-db/page.tsx`
 - **修法**: page 開頭加 `if (!isAdmin) redirect('/unauthorized')` + 加二次確認
 - **狀態**: Stage C 可直接修（🟢、不動 DB、不需業務決策）
@@ -96,15 +96,15 @@ _（cron 寫入）_
 ### [07:10] /hr/roles · 預設職務模板
 - **類型**: 📋 業務決策
 - **Blueprint**: `docs/blueprints/16-hr-roles.md` §2
-- **問題**: 目前建新 workspace 時沒預設職務、admin 要手動建
+- **問題**: 目前建新 workspace 時沒預設職務、系統主管要手動建
 - **需要**: 是否要預設 3-5 個（業務 / 會計 / 領隊 / 助理 / 行政）？
 
 ### [07:10] /hr/roles · HR 主管權限
 - **類型**: 📋 業務決策
 - **Blueprint**: `docs/blueprints/16-hr-roles.md` §4
-- **問題**: 只有 admin 能管職務、還是 HR 主管也能？
+- **問題**: 只有系統主管能管職務、還是 HR 主管也能？
 
-### [07:10] /hr/roles · 無 admin guard
+### [07:10] /hr/roles · 無 系統主管 guard
 - **類型**: 🔴 P0 資安
 - **Blueprint**: `docs/blueprints/16-hr-roles.md` ADR-R3
 - **違反**: INV-A02

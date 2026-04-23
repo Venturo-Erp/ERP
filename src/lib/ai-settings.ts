@@ -1,7 +1,7 @@
 /**
  * AI 設定讀取工具
  * 從 ai_settings 表讀取可配置的設定
- * 管理員可在後台修改，不需要改 code
+ * 系統主管可在後台修改，不需要改 code
  */
 
 import { createClient } from '@supabase/supabase-js'

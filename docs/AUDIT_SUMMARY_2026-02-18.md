@@ -28,7 +28,7 @@
 - Rate limiting middleware
 - CSP headers 強化
 - 移除 `/api/debug` 公開路徑
-- Admin 密碼重設權限檢查修復
+- 系統主管密碼重設權限檢查修復
 
 ### 批次 2：輸入驗證 (Zod)
 
@@ -109,7 +109,7 @@
 
 ### 🟠 高 (High) — 資料錯誤或安全風險
 
-6. **Admin 密碼重設缺權限檢查** — 任何登入用戶可重設密碼
+6. **系統主管密碼重設缺權限檢查** — 任何登入用戶可重設密碼
 7. **結案報表欄位錯誤** — `supplier_type` 應為 `request_type`
 8. **order_members 不存在欄位** — insert/update 會靜默失敗
 9. **DB query 引用不存在欄位** (~10 處) — 查詢結果不正確

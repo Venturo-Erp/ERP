@@ -18,12 +18,12 @@
 
 ### A1 `src/components/layout/mobile-sidebar.tsx:260` — `if (isAdmin) return item`
 - 判定：✅ **可改**
-- 具體改什麼行：**只刪 L259-260 這兩行**（註解 `// 管理員有所有權限` + `if (isAdmin) return item`）。L261 `return userPermissions.includes(item.requiredPermission) ? item : null` 保留、已是正確 fallback。
+- 具體改什麼行：**只刪 L259-260 這兩行**（註解 `// 系統主管有所有權限` + `if (isAdmin) return item`）。L261 `return userPermissions.includes(item.requiredPermission) ? item : null` 保留、已是正確 fallback。
 - 絕對不可順手改：
   - ❌ 刪 `isAdmin` state / destructure（其他地方可能還在用、grep 該檔全文確認孤兒才刪）
   - ❌ 重寫 `filterMenuByPermissions` 整支
   - ❌ 改 useMemo deps 陣列風格
-- 理由：admin role 已 PR-1a backfill 過、走 `userPermissions.includes(...)` 等價正確。
+- 理由：系統主管職務 已 PR-1a backfill 過、走 `userPermissions.includes(...)` 等價正確。
 
 ---
 
@@ -60,14 +60,14 @@
 
 ### A5-A8 `src/lib/permissions/useTabPermissions.tsx:80,97,113,122` — 4 處 `if (isAdmin) return true`
 - 判定：✅ **可改（4 處同時動）**
-- 具體改什麼行：**只刪每個 useCallback 裡的 `if (isAdmin) return true` 與其上一行註解 `// 管理員擁有所有權限`**（共 4 組、每組 2 行）。
+- 具體改什麼行：**只刪每個 useCallback 裡的 `if (isAdmin) return true` 與其上一行註解 `// 系統主管擁有所有權限`**（共 4 組、每組 2 行）。
 - 絕對不可順手改：
   - ❌ 不可刪 L33 `const [isAdmin, setIsAdmin] = useState(false)`——L55 的 `setIsAdmin(true)` 還在寫、且 L131 return 物件還 export isAdmin 給消費者
   - ❌ 不可刪 L54-58 的 admin shortcut fetch 路徑（那是 API 層設計、不是前端短路）
   - ❌ 不可改 4 個 useCallback deps 陣列（`[permissions, isAdmin]`）──isAdmin 還在 return 物件裡、消費者可能讀
   - ❌ 不可移除 return 物件裡的 `isAdmin`（grep 消費者前禁動）
   - ❌ 不可把 `canRead`/`canWrite`/`canReadAny`/`canWriteAny` 4 函式抽成 helper（CLAUDE.md 原則 2、4 次重複才抽）
-- 理由：admin role 已 backfill、`permissions` array 對 admin 也完整、fallback 等價正確。但 `isAdmin` state 本身要保留給消費者、避免造成 useTabPermissions consumer 的 breakage（超出本 PR 範圍）。
+- 理由：系統主管職務 已 backfill、`permissions` array 對 admin 也完整、fallback 等價正確。但 `isAdmin` state 本身要保留給消費者、避免造成 useTabPermissions consumer 的 breakage（超出本 PR 範圍）。
 
 ---
 
@@ -200,10 +200,10 @@
   - ❌ 不可刪 L27 的第二個 `if (!isAdmin) return null`（return component null 的那個、語意不同、是顯示控制）
   - ❌ 不可移除 L11 的 `isAdmin` destructure（L16、L24、L27 全都還在用）
 - 理由（DEFER 依據）：
-  - L16 是 useEffect 內 early-return、不等於「頁面大鎖」——它只是「admin 才載 workspaces 列表」的優化
-  - L27 的 `return null` 才是顯示控制、但這屬於 UI 元件本身的業務含義（「這元件本來就是 admin-only 工具」）、拔了得重新定義這元件給誰用
-  - 本 PR 範圍是「細權限取代 admin 大鎖」；WorkspaceSwitcher 目前是跨租戶切換器、業務語意就是只給 super admin 用、硬改 canAccess 等於**改變產品行為**、不是拔短路
-  - 建議 DEFER 到 admin dashboard / super admin tooling 的獨立 PR
+  - L16 是 useEffect 內 early-return、不等於「頁面大鎖」——它只是「系統主管才載 workspaces 列表」的優化
+  - L27 的 `return null` 才是顯示控制、但這屬於 UI 元件本身的業務含義（「這元件本來就擁有管理員資格-only 工具」）、拔了得重新定義這元件給誰用
+  - 本 PR 範圍是「細權限取代 系統主管大鎖」；WorkspaceSwitcher 目前是跨租戶切換器、業務語意就是只給 擁有平台管理資格的人 用、硬改 canAccess 等於**改變產品行為**、不是拔短路
+  - 建議 DEFER 到 admin dashboard / 擁有平台管理資格的人 tooling 的獨立 PR
 
 ---
 
@@ -224,13 +224,13 @@
 
 ## DEFER 清單（本 PR 不要做）
 
-1. **`src/components/layout/sidebar.tsx:522` 空 if 塊** — 刪了會改變 admin 走 transportMenuItems 分支的控制流、是 sidebar 重構議題、非 P001 拔短路。DEFER 到 sidebar 重構 PR。
+1. **`src/components/layout/sidebar.tsx:522` 空 if 塊** — 刪了會改變系統主管 走 transportMenuItems 分支的控制流、是 sidebar 重構議題、非 P001 拔短路。DEFER 到 sidebar 重構 PR。
 
 2. **`src/lib/permissions/index.ts:114` `hasPermissionForRoute` 的 isAdmin 短路** — 被 `auth-guard.tsx` 的 `checkAuth` / `usePermissionCheck` 兩處呼叫、參與全站 AuthGuard 執行流（GitNexus AuthGuard → GetModuleFromRoute step 3/4）、影響面橫跨所有受保護路由。屬 P002 / P008 後端統一 policy 範圍、不在前端拔短路 scope。DEFER。
 
-3. **`src/components/guards/ModuleGuard.tsx:49` admin 跳過檢查** — 掛在 `/(main)/layout.tsx` 全域根節點、所有主框架路由都過它。拔了會讓 admin 走 `isRouteAvailable(pathname)` 查 workspace_features、但 admin 的 features 是否涵蓋所有路由**尚未驗**（features table ≠ role_tab_permissions backfill）。一行改動 = 全站 admin 可能閃 `/unauthorized`。DEFER 到獨立「workspace_features × isAdmin 一致性驗」的 PR。
+3. **`src/components/guards/ModuleGuard.tsx:49` admin 跳過檢查** — 掛在 `/(main)/layout.tsx` 全域根節點、所有主框架路由都過它。拔了會讓系統主管 走 `isRouteAvailable(pathname)` 查 workspace_features、但 admin 的 features 是否涵蓋所有路由**尚未驗**（features table ≠ role_tab_permissions backfill）。一行改動 = 全站 admin 可能閃 `/unauthorized`。DEFER 到獨立「workspace_features × isAdmin 一致性驗」的 PR。
 
-4. **`WorkspaceSwitcher.tsx:16` useEffect 內 `if (!isAdmin) return`** — 這元件業務語意本身就是「super admin 跨租戶切換器」、L16 是載資料的優化、L27 是顯示控制、拔了等於改變產品定義。建議 DEFER 到 super admin tooling PR。
+4. **`WorkspaceSwitcher.tsx:16` useEffect 內 `if (!isAdmin) return`** — 這元件業務語意本身就是「擁有平台管理資格的人 跨租戶切換器」、L16 是載資料的優化、L27 是顯示控制、拔了等於改變產品定義。建議 DEFER 到 擁有平台管理資格的人 tooling PR。
 
 ---
 
@@ -263,7 +263,7 @@
 **Follow-up PR 建議**：
 - PR-1e（sidebar 重構）：處理 A2 空 if
 - PR-P008 相關：處理 A9（lib）、A10（ModuleGuard）
-- PR-super-admin：處理 B8 WorkspaceSwitcher
+- PR-平台管理資格：處理 B8 WorkspaceSwitcher
 
 ---
 

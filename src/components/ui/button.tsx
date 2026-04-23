@@ -9,12 +9,20 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-primary text-primary-foreground hover:bg-primary/90',
+        // 主 CTA：飽和金漸層 + shadow、用於「儲存 / 確認 / 下單」等重要動作
+        default:
+          'bg-gradient-to-br from-morandi-gold to-morandi-gold-hover text-white hover:from-morandi-gold-hover hover:to-morandi-gold shadow-sm hover:shadow-md',
+        // 危險動作：維持原樣、避免誤傷刪除類按鈕視覺強度
         destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
-        outline: 'border border-input bg-background hover:bg-accent hover:text-accent-foreground',
+        // Outline：加輕漸層底 + 金色邊、跟 default 搭配有層次
+        outline:
+          'border border-morandi-gold/30 bg-gradient-to-br from-background to-morandi-container/20 hover:from-morandi-gold/10 hover:to-morandi-gold/20 hover:border-morandi-gold/50 text-morandi-primary',
         secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
         ghost: 'hover:bg-accent hover:text-accent-foreground',
         link: 'text-primary underline-offset-4 hover:underline',
+        // Soft：柔和漸層、給次要/非主 CTA、跟 dashboard widget 按鈕同一套配方
+        soft:
+          'bg-gradient-to-br from-card to-morandi-container/30 border border-morandi-gold/30 text-morandi-primary hover:from-morandi-gold/10 hover:to-morandi-gold/20 hover:border-morandi-gold/50 shadow-sm hover:shadow-md',
         // Morandi 色系常用組合（避免各檔案手寫 className）
         'morandi-gold':
           'text-morandi-gold border border-morandi-gold/50 hover:bg-morandi-gold/10 hover:border-morandi-gold',

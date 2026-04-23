@@ -196,7 +196,7 @@ export function FlightRouteSearchDialog({
                   type="button"
                   onClick={handleSearch}
                   disabled={loading || !origin}
-                  className="w-full h-9 bg-morandi-gold hover:bg-morandi-gold-hover text-white gap-1"
+                  className="w-full h-9 bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg gap-1"
                 >
                   {loading ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}
                   查詢

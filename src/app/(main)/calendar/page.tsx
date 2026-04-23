@@ -58,8 +58,14 @@ export default function CalendarPage() {
     selectedWorkspaceId,
     onWorkspaceFilterChange,
   } = useCalendarEvents()
-  const { calendarRef, handlePrevMonth, handleNextMonth, handleToday, getCurrentMonthYear } =
-    useCalendarNavigation()
+  const {
+    calendarRef,
+    handlePrevMonth,
+    handleNextMonth,
+    handleToday,
+    syncCurrentDate,
+    getCurrentMonthYear,
+  } = useCalendarNavigation()
 
   const {
     eventDetailDialog,
@@ -93,9 +99,9 @@ export default function CalendarPage() {
     <>
       <ContentPageLayout
         title={CALENDAR_LABELS.PAGE_TITLE}
-        headerActions={
+        customActions={
           <div className="flex items-center gap-3">
-            {/* 月份切換 */}
+            {/* 月份切換（點中間 = 回今天） */}
             <div className="flex items-center gap-2 bg-card border border-border rounded-lg shadow-sm">
               <Button
                 variant="ghost"
@@ -105,9 +111,14 @@ export default function CalendarPage() {
               >
                 ←
               </Button>
-              <span className="text-sm font-semibold text-morandi-primary min-w-[120px] text-center px-2">
+              <button
+                type="button"
+                onClick={handleToday}
+                title={CALENDAR_LABELS.TODAY}
+                className="text-sm font-semibold text-morandi-primary min-w-[120px] text-center px-2 py-1.5 hover:text-morandi-gold hover:bg-morandi-container/30 rounded transition-all cursor-pointer"
+              >
                 {getCurrentMonthYear()}
-              </span>
+              </button>
               <Button
                 variant="ghost"
                 size="sm"
@@ -117,15 +128,6 @@ export default function CalendarPage() {
                 →
               </Button>
             </div>
-
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleToday}
-              className="h-9 border-morandi-gold/30 bg-card text-morandi-gold hover:bg-morandi-gold hover:border-morandi-gold hover:text-white transition-all shadow-sm font-medium rounded-lg"
-            >
-              {CALENDAR_LABELS.TODAY}
-            </Button>
 
             {/* 視圖切換按鈕 */}
             <div className="flex items-center bg-card border border-border rounded-lg shadow-sm overflow-hidden">
@@ -179,33 +181,13 @@ export default function CalendarPage() {
               </Button>
             </div>
 
-            {/* 超級管理員專用：Workspace 篩選器 */}
-            {isAdmin && workspaces && workspaces.length > 0 && (
-              <Select
-                value={selectedWorkspaceId || 'all'}
-                onValueChange={value => onWorkspaceFilterChange(value === 'all' ? null : value)}
-              >
-                <SelectTrigger className="h-9 w-[140px] shadow-sm">
-                  <Building2 size={14} className="mr-1.5 text-morandi-blue" />
-                  <SelectValue placeholder={CALENDAR_LABELS.ALL_WORKSPACES} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">{CALENDAR_LABELS.ALL_WORKSPACES}</SelectItem>
-                  {workspaces.map((ws: { id: string; name: string }) => (
-                    <SelectItem key={ws.id} value={ws.id}>
-                      {ws.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
 
             {/* 生日名單按鈕 */}
             <Button
               variant="outline"
               size="sm"
               onClick={() => setBirthdayDialogOpen(true)}
-              className="h-9 px-3 gap-1.5 border-border hover:bg-morandi-container/50 hover:border-morandi-gold/50 transition-all rounded-lg text-morandi-secondary hover:text-morandi-gold"
+              className="h-9 px-3 gap-1.5 bg-card border border-border shadow-sm hover:bg-morandi-container/50 hover:border-morandi-gold/50 transition-all rounded-lg text-morandi-secondary hover:text-morandi-gold"
               title={CALENDAR_LABELS.VIEW_BIRTHDAY_LIST}
             >
               <Cake size={16} />
@@ -220,7 +202,7 @@ export default function CalendarPage() {
                 const today = getTodayString()
                 setAddEventDialog({ open: true, selectedDate: today })
               }}
-              className="h-9 bg-morandi-gold hover:bg-morandi-gold-hover text-white shadow-sm hover:shadow-md transition-all font-medium rounded-lg"
+              className="h-9 bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg transition-all font-medium rounded-lg"
             >
               <Plus size={16} className="mr-1.5" />
               {CALENDAR_LABELS.ADD_EVENT}
@@ -240,7 +222,10 @@ export default function CalendarPage() {
               onEventClick={handleEventClick}
               onMoreLinkClick={info => handleMoreLinkClick(info, filteredEvents)}
               onEventDrop={handleEventDrop}
-              onDatesSet={onDatesChange}
+              onDatesSet={info => {
+                syncCurrentDate(info.view.currentStart)
+                onDatesChange(info)
+              }}
             />
           </div>
         </div>

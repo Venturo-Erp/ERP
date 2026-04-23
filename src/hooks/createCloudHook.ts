@@ -34,7 +34,6 @@ function getCurrentUserContext(): { workspaceId: string | null; userRole: UserRo
       const parsed = JSON.parse(authData)
       const user = parsed?.state?.user
       const isAdmin = parsed?.state?.isAdmin
-      // 新系統：使用 isAdmin 判斷
       const userRole = isAdmin ? 'admin' : 'staff'
       return {
         workspaceId: user?.workspace_id || null,

@@ -133,7 +133,6 @@ function getCurrentUserContext(): {
       const parsed = JSON.parse(authData)
       const user = parsed?.state?.user
       const isAdmin = parsed?.state?.isAdmin
-      // 新系統：使用 isAdmin 判斷
       const userRole = isAdmin ? 'admin' : 'staff'
       return {
         workspaceId: user?.workspace_id || null,
@@ -210,7 +209,6 @@ export function createEntityHook<T extends BaseEntity>(
     const isAuthenticated = useAuthStore(state => state.isAuthenticated)
     const hasHydrated = useAuthStore(state => state._hasHydrated)
 
-    // 新系統：使用 isAdmin
     const isAdmin = useAuthStore(state => state.isAdmin)
 
     return {

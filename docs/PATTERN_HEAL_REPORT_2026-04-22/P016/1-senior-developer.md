@@ -330,7 +330,7 @@ const handleSubmit = useCallback(async () => {
     }
 
     await alert(
-      `公司「${formData.name}」已建立，管理員帳號為 ${formData.admin_employee_number}`,
+      `公司「${formData.name}」已建立，系統主管帳號為 ${formData.admin_employee_number}`,
       'success'
     )
     resetForm()
@@ -368,8 +368,8 @@ npm run type-check
 
 2. **新增 workspaces DELETE 權限 spec**：`tests/e2e/workspaces-delete.spec.ts`
    - case 1：一般員工（無 `tenants.can_write`）呼叫 DELETE → 預期 403
-   - case 2：Corner admin 呼叫 DELETE 自己 workspace 但底下有員工 → 預期 409
-   - case 3：Corner admin 建空 workspace → 呼叫 DELETE → 預期 200、DB 真的刪掉
+   - case 2：Corner 系統主管 呼叫 DELETE 自己 workspace 但底下有員工 → 預期 409
+   - case 3：Corner 系統主管 建空 workspace → 呼叫 DELETE → 預期 200、DB 真的刪掉
    - case 4：未登入呼叫 DELETE → 預期 401
    - case 5：直接在 client `supabase.from('workspaces').delete()` → 預期被 RLS 擋（0 rows affected）
 
@@ -388,10 +388,10 @@ npm run type-check
 1. Migration 先跑（Vercel deploy 前 Supabase push）。
 2. Build 成功後 Vercel 部署新版 Next.js（新 DELETE handler + UI fetch）。
 3. 驗證清單：
-   - `/database/workspaces` 頁刪除按鈕實際操作一次（Corner admin 身分）
+   - `/database/workspaces` 頁刪除按鈕實際操作一次（Corner 系統主管 身分）
    - 開 DevTools network、確認打的是 `/api/workspaces/[id]` DELETE、不是 Supabase PostgREST
    - 登入 spec 仍 pass（workspaces FORCE RLS 沒被誤開）
-   - 直接用非 admin 帳號在 browser console `supabase.from('workspaces').delete().eq('id', '某個空 workspace')` → 預期 0 rows / RLS 擋
+   - 直接用沒有系統主管資格 帳號在 browser console `supabase.from('workspaces').delete().eq('id', '某個空 workspace')` → 預期 0 rows / RLS 擋
 
 **回滾策略**：
 - 如果 API DELETE 出包、可先緊急 patch migration、policy 臨時放寬成 `USING (EXISTS (SELECT 1 FROM employees WHERE id = auth.uid() AND roles @> ARRAY['admin']))` 擋 80% 情境、不重開 `USING (true)`。

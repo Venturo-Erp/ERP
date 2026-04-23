@@ -541,7 +541,7 @@ export function PageListSidebar({
                   ? selectedMemoItemIds.length === 0
                   : selectedSeasonIds.length === 0 && selectedInfoItemIds.length === 0
               }
-              className="bg-morandi-gold hover:bg-morandi-gold-hover text-white gap-1"
+              className="bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg gap-1"
             >
               <Check size={14} />
               {DESIGNER_LABELS.ADD_1813}

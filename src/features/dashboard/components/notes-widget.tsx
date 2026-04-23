@@ -53,23 +53,23 @@ export function NotesWidget() {
   return (
     <div className="h-full">
       <div className="h-full rounded-2xl border border-border/70 shadow-lg backdrop-blur-md transition-all duration-300 hover:shadow-lg hover:border-border/80 bg-gradient-to-br from-morandi-gold/10 via-card to-status-warning-bg flex flex-col">
-        <div className="p-5 pb-3 flex-shrink-0">
+        <div className="p-4 pb-3 flex-shrink-0">
           <div className="flex items-start justify-between mb-3">
-            <div className="flex items-start gap-3">
+            <div className="flex items-start gap-2">
               <div
                 className={cn(
-                  'rounded-full p-2.5 text-white shadow-lg shadow-black/10',
+                  'rounded-full p-2 text-white shadow-sm shadow-black/10',
                   'bg-gradient-to-br from-morandi-gold/60 to-status-warning-bg/60',
-                  'ring-2 ring-border/50 ring-offset-1 ring-offset-background/20'
+                  'ring-1 ring-border/50'
                 )}
               >
-                <Clipboard className="w-5 h-5 drop-shadow-sm" />
+                <Clipboard className="w-4 h-4 drop-shadow-sm" />
               </div>
               <div className="flex-1">
                 <p className="text-sm font-semibold text-morandi-primary leading-tight tracking-wide">
                   {DASHBOARD_LABELS.LABEL_2502}
                 </p>
-                <p className="text-xs text-morandi-secondary/90 mt-1.5 leading-relaxed">
+                <p className="text-xs text-morandi-secondary/90 mt-1 leading-relaxed">
                   {DASHBOARD_LABELS.LABEL_9180}
                 </p>
               </div>

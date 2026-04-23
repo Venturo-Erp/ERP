@@ -274,7 +274,7 @@ export function ImagePositionEditor({ image, onSave, onClose }: ImagePositionEdi
         <Button
           type="button"
           onClick={() => onSave(position)}
-          className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+          className="bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg"
         >
           <Check size={16} className="mr-1" />
           {COMP_EDITOR_LABELS.LABEL_4550}

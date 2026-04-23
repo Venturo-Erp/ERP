@@ -263,7 +263,7 @@ curl -s -X POST "https://api.supabase.com/v1/projects/pfqvdacxowpgfamuvnsn/datab
 ### RBAC 角色
 
 ```
-super_admin > admin > controller > sales/accountant/assistant > tour_leader > staff
+平台管理資格 > 系統主管 > 團控 > 業務/會計/助理 > 領隊 > 一般員工
 ```
 
 ### 新 API 必做

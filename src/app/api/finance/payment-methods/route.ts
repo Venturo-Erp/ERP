@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
   const type = searchParams.get('type') // 'receipt' | 'payment'
   const includeInactive = searchParams.get('include_inactive') === 'true'
 
-  // 明確用 workspace_id 過濾（super admin 的 RLS 會放行全部，所以不能只靠 RLS）
+  // 明確用 workspace_id 過濾（擁有平台管理資格時 RLS 會放行全部、所以不能只靠 RLS）
   const workspaceId = await getCurrentWorkspaceId()
   let query = supabase
     .from('payment_methods')

@@ -10,7 +10,7 @@ status: 等 William 拍板（階段 1 vs 階段 2 vs DEFER）
 
 ## 一句話
 
-**原本以為是 19 處短路直接刪、拔了才發現底下權限系統缺 3 塊基建；直接拔會讓 Corner 管理員自己被系統擋在外面。建議 Plan C：先補底盤、再拔前端。**
+**原本以為是 19 處短路直接刪、拔了才發現底下權限系統缺 3 塊基建；直接拔會讓 Corner 系統主管自己被系統擋在外面。建議 Plan C：先補底盤、再拔前端。**
 
 ## 4 幕僚立場整理
 
@@ -19,13 +19,13 @@ status: 等 William 拍板（階段 1 vs 階段 2 vs DEFER）
 | Senior Dev | 預設修法可行、4 點有爭議（A2 空 if / A5 admin 是否有 manage_members / A11 保守版 / B8 不該套 canAccess） | 偏激進 |
 | Code Reviewer | **3 致命落差** — F1 useRolePermissions 空殼、F2 useTabPermissions fetch 的 admin early return、F3 B8 降 granularity | 偏保守（否決多處） |
 | Minimal-Change | 13 可改 / 3 小心 / 3 DEFER（A2 空 if、A11 hasPermissionForRoute、A6 ModuleGuard）；禁 FinanceGate 抽象；不准順手刪 isAdmin destructure | 最保守 |
-| Security | **2 CRITICAL** — S1 settings.tenants/premium 沒 seed 會 admin 白屏、S2 canEdit loading 放行 + 後端寫 API 無 role guard = TOCTOU 可提權 | 紅線最硬 |
+| Security | **2 CRITICAL** — S1 settings.tenants/premium 沒 seed 會 系統主管白屏、S2 canEdit loading 放行 + 後端寫 API 無 role guard = TOCTOU 可提權 | 紅線最硬 |
 
 ## 合流：3 塊底盤缺失（拔前端之前必補）
 
 ### 1. admin 的 permission row 沒補齊（S1 CRITICAL）
 - `20260422150000` backfill 漏 `settings.tenants` 與付費 module（ai_bot / workspace / customers 等）
-- 拔 isAdmin 短路後、Corner admin 進 `/tenants` 會被自己的 RBAC 擋
+- 拔 isAdmin 短路後、Corner 系統主管 進 `/tenants` 會被自己的 RBAC 擋
 - **阻斷上線**、必修
 
 ### 2. `useRolePermissions` 是空殼（F1 CRITICAL）
@@ -42,7 +42,7 @@ status: 等 William 拍板（階段 1 vs 階段 2 vs DEFER）
 
 ## 次要問題（可階段 2 一起修）
 
-- **B8 WorkspaceSwitcher 不是 RBAC、是平台級 admin 功能**（跨租戶切換）— 維持 `isAdmin` 檢查、detector 加例外；3 位幕僚一致
+- **B8 WorkspaceSwitcher 不是 RBAC、是平台管理資格 功能**（跨租戶切換）— 維持 `isAdmin` 檢查、detector 加例外；3 位幕僚一致
 - **A2 sidebar:522 空 if 塊** — 改 `if (isTransport && !isAdmin)` 語意一致消 pattern，或直接 DEFER（minimal-change 傾向 DEFER）
 - **5 個 finance page 不准抽 FinanceGate 共用元件**（Surgical）
 - **不准順手刪 isAdmin destructure / import**（Surgical）
@@ -67,7 +67,7 @@ status: 等 William 拍板（階段 1 vs 階段 2 vs DEFER）
 - 補 `settings.tenants` + premium module permission row（新 migration）
 - `useRolePermissions` 實作：真查 `role_tab_permissions`
 - `useTabPermissions` fetch 改：admin 也走正常 fetch 不 early return
-- 新增測試：admin 能進 `/tenants` / 非 admin 被正確擋
+- 新增測試：admin 能進 `/tenants` / 沒有系統主管資格 被正確擋
 
 **階段 2（階段 1 驗收後、~1 人日）**：拔 19 處短路
 - 11 處 hook 短路：A1, A3-A5, A6, A7-A10, A11（minimal-change 建議 A11 保守版僅刪 if）

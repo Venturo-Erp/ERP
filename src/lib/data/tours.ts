@@ -11,6 +11,7 @@ import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { getServerAuth } from '@/lib/auth/server-auth'
 import type { Tour } from '@/stores/types'
 import { logger } from '@/lib/utils/logger'
+import { TOUR_STATUS } from '@/lib/constants/status-maps'
 
 // ============================================
 // 型別定義
@@ -66,16 +67,13 @@ export async function getPaginatedTours({
     .eq('workspace_id', wsId) // 🔒 Workspace 過濾
     .order('departure_date', { ascending: false })
 
-  // 狀態篩選
+  // 狀態篩選（closed 跟 archived 分開：archived 是獨立欄位、closed 是 status 的終點）
   if (status === 'archived') {
-    // 已封存（已結案）
-    query = query.eq('closing_status', 'closed')
+    query = query.eq('archived', true)
   } else if (status !== 'all') {
-    // 特定狀態（排除已結案）
-    query = query.neq('closing_status', 'closed').eq('status', status)
+    query = query.eq('status', status).neq('archived', true)
   } else {
-    // 全部（排除已結案）
-    query = query.neq('closing_status', 'closed')
+    query = query.neq('status', TOUR_STATUS.CLOSED).neq('archived', true)
   }
 
   // 分頁
@@ -115,7 +113,7 @@ export async function getTourById(id: string, workspaceId?: string): Promise<Tou
   const { data, error } = await supabase
     .from('tours')
     .select(
-      'id, code, name, location, departure_date, return_date, status, current_participants, max_participants, workspace_id, archived, contract_archived_date, tour_type, outbound_flight, return_flight, is_deleted, confirmed_requirements, locked_itinerary_id, itinerary_id, quote_id, locked_quote_id, tour_leader_id, controller_id, country_id, price, selling_price_per_person, total_cost, total_revenue, profit, contract_status, description, days_count, created_at, created_by, updated_at, updated_by'
+      'id, code, name, location, departure_date, return_date, status, current_participants, max_participants, workspace_id, archived, contract_archived_date, outbound_flight, return_flight, is_deleted, confirmed_requirements, locked_itinerary_id, itinerary_id, quote_id, locked_quote_id, tour_leader_id, controller_id, country_id, price, selling_price_per_person, total_cost, total_revenue, profit, contract_status, description, days_count, created_at, created_by, updated_at, updated_by'
     )
     .eq('id', id)
     .eq('workspace_id', wsId) // 🔒 Workspace 過濾
@@ -150,10 +148,10 @@ export async function getActiveToursForSelect(limit = 100, workspaceId?: string)
   const { data, error } = await supabase
     .from('tours')
     .select(
-      'id, code, name, departure_date, return_date, location, status, closing_status, current_participants, max_participants, workspace_id'
+      'id, code, name, departure_date, return_date, location, status, current_participants, max_participants, workspace_id'
     )
     .eq('workspace_id', wsId) // 🔒 Workspace 過濾
-    .neq('closing_status', 'closed')
+    .neq('status', TOUR_STATUS.CLOSED)
     .order('departure_date', { ascending: false })
     .limit(limit)
 

@@ -106,7 +106,7 @@
 建立 `PermanentRealtimeSubscriptions` 組件，在 `MainLayout` 中永久訂閱：
 
 1. **user_roles** - 使用者權限
-   - 管理員變更權限 → 立即通知使用者 → 2 秒後自動重新整理
+   - 系統主管變更權限 → 立即通知使用者 → 2 秒後自動重新整理
    - INSERT/UPDATE/DELETE 都會通知
 
 2. **workspaces** - 工作空間設定
@@ -342,7 +342,7 @@ useEffect(() => {
 **新增功能**：
 
 ```typescript
-// ✅ 管理員變更權限 → 使用者立即收到通知
+// ✅ 系統主管變更權限 → 使用者立即收到通知
 realtimeManager.subscribe({
   table: 'user_roles',
   filter: `user_id=eq.${user.id}`,
@@ -391,13 +391,13 @@ realtimeManager.subscribe({
 
 #### Test Case 5: 新增權限
 
-- [ ] 威廉（管理員）：新增雅萍的「財務管理」權限
+- [ ] 威廉（系統主管）：新增雅萍的「財務管理」權限
 - [ ] 雅萍：正在線上
 - [ ] 預期結果：雅萍立即收到通知，2 秒後頁面重新整理 ✅
 
 #### Test Case 6: 離線權限更新
 
-- [ ] 威廉（管理員）：新增雅萍的「財務管理」權限
+- [ ] 威廉（系統主管）：新增雅萍的「財務管理」權限
 - [ ] 雅萍：離線
 - [ ] 雅萍：下次登入
 - [ ] 預期結果：載入最新權限，看到新功能 ✅

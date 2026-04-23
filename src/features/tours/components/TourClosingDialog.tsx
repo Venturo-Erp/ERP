@@ -31,6 +31,7 @@ import { calculateFullProfit } from '@/features/tours/services/profit-calculatio
 import { supabase } from '@/lib/supabase/client'
 import { TOURS_LABELS } from './constants/labels'
 import { TOUR_CLOSING_LABELS, TOUR_SERVICE_LABELS } from '../constants/labels'
+import { TOUR_STATUS } from '@/lib/constants/status-maps'
 
 interface TourClosingDialogProps {
   open: boolean
@@ -149,10 +150,9 @@ export function TourClosingDialog({ open, onOpenChange, tour, onSuccess }: TourC
         })
       }
 
-      // 3. 更新團狀態為結案
+      // 3. 更新團狀態為結案（status=closed 唯一真相、closing_status 欄位停用）
       await updateTour(tour.id, {
-        status: TOUR_SERVICE_LABELS.STATUS_CLOSED,
-        closing_status: 'closed',
+        status: TOUR_STATUS.CLOSED,
         closing_date: now,
         updated_at: now,
       })
@@ -335,7 +335,7 @@ export function TourClosingDialog({ open, onOpenChange, tour, onSuccess }: TourC
           <Button
             onClick={() => setShowConfirmation(true)}
             disabled={isSubmitting}
-            className="bg-morandi-gold hover:bg-morandi-gold-hover text-white gap-2"
+            className="bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg gap-2"
           >
             <Check size={16} />
             {isSubmitting ? TOURS_LABELS.PROCESSING : TOURS_LABELS.CONFIRM_CLOSE}
@@ -359,7 +359,7 @@ export function TourClosingDialog({ open, onOpenChange, tour, onSuccess }: TourC
                 setShowConfirmation(false)
                 handleClose()
               }}
-              className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+              className="bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg"
             >
               {TOURS_LABELS.CONFIRM_CLOSE}
             </Button>

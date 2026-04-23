@@ -97,15 +97,15 @@
 ### 8. 設定 - Workspaces （多分公司）
 **Route**: /settings/workspaces  
 **標題**: Workspace 管理  
-**做什麼**: 超級管理員建立和管理多個 workspace（分公司、分支），每個可設類型、建立首位管理員、上傳大小章  
+**做什麼**: 擁有平台管理資格的人建立和管理多個 workspace（分公司、分支），每個可設類型、建立首位系統主管、上傳大小章  
 **主要資料對象**: workspaces, employees, profiles, workspace_channels  
 **主要動作**: 
 - 新增 Workspace（需驗證代號唯一性）
-- 建立首位管理員帳號
+- 建立首位系統主管帳號
 - 顯示登入憑證（複製到剪貼板）
 - 上傳大小章、切換 workspace 狀態
 **紅旗**:
-- 流程複雜：新增 → 建立管理員 → 建立公告頻道 → 嘗試建立 bot，步驟多易出錯
+- 流程複雜：新增 → 建立系統主管 → 建立公告頻道 → 嘗試建立 bot，步驟多易出錯
 - 權限隔離在前端（「使用前端過濾實現資料隔離」），不應只依賴前端
 - 登入憑證顯示後無加密，若有截圖分享風險
 
@@ -127,7 +127,7 @@
 ### 10. 設定 - Modules （模組授權）
 **Route**: /settings/modules  
 **標題**: 設定（無 Tab，獨立頁）  
-**做什麼**: 管理員啟用 / 停用租戶級的高級模組（會計、庫存、BI），設定到期日  
+**做什麼**: 系統主管啟用 / 停用租戶級的高級模組（會計、庫存、BI），設定到期日  
 **主要資料對象**: workspace_modules, workspaces  
 **主要動作**: 
 - 啟用模組 + 設定到期日期
@@ -209,7 +209,7 @@
 - 進度訊息顯示（步驟 1-4）
 - 成功後重新整理頁面
 **紅旗**:
-- **危險操作，需要管理員權限守護** ✓（已檢查 isAdmin）
+- **危險操作，需要系統主管權限守護** ✓（已檢查 isAdmin）
 - 成功後直接 reload，無法無縫繼續工作
 - 如果在多 tab 狀態執行，可能導致資料不一致
 - **未見完整的防誤觸機制**（沒有二次確認碼或進階驗證）
@@ -241,10 +241,10 @@
 ### 18. Calendar （行事曆）
 **Route**: /calendar  
 **標題**: (由 CALENDAR_LABELS 決定，推測「行事曆」或類似)  
-**做什麼**: 企業行事曆，支援月/週/日視圖，員工可新增/編輯/刪除事件，超級管理員可跨 workspace 檢視  
+**做什麼**: 企業行事曆，支援月/週/日視圖，員工可新增/編輯/刪除事件，擁有平台管理資格的人可跨 workspace 檢視  
 **主要資料對象**: 
 - calendar_events
-- workspaces （超級管理員過濾）
+- workspaces （擁有平台管理資格的人過濾）
 - employees （頻繁 lookup 名字）
 **主要動作**: 
 - 月 / 週 / 日 視圖切換
@@ -253,7 +253,7 @@
 - 編輯 / 刪除事件
 - 拖曳事件改日期
 - 生日名單 Dialog
-- Workspace 篩選（超級管理員）
+- Workspace 篩選（擁有平台管理資格的人）
 **紅旗**:
 - 大量 Hook 邏輯分散（useCalendarEvents, useCalendarNavigation, useEventOperations, useMoreEventsDialog），本地化程度高
 - 依賴外部 calendar library（FullCalendar），SSR: false 會有 hydration issue

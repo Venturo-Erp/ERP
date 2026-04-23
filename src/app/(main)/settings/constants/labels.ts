@@ -19,14 +19,7 @@ export const LABELS = {
 
   // Workspaces Page
   WORKSPACE_MANAGEMENT: '工作空間管理',
-  WORKSPACE_MANAGEMENT_DESC: '管理多分公司設定，實現資料隔離（台北公司 vs 台中分公司）',
   ADD_WORKSPACE: '新增工作空間',
-  DATA_ISOLATION_TITLE: '什麼是資料隔離？',
-  DATA_ISOLATION_DESC: '工作空間可以確保不同分公司的資料獨立管理：',
-  DATA_ISOLATION_POINT1: '• 台北員工預設看到台北的旅遊團、訂單、客戶',
-  DATA_ISOLATION_POINT2: '• 台中員工預設看到台中的旅遊團、訂單、客戶',
-  DATA_ISOLATION_POINT3: '• 系統管理員可以切換工作空間查看所有資料',
-  DATA_ISOLATION_POINT4: '• 員工資料、航空公司、飯店等主檔仍然全公司共享',
   NO_DESCRIPTION: '無描述',
   STATUS_ACTIVE: '啟用',
   STATUS_INACTIVE: '停用',
@@ -38,7 +31,7 @@ export const LABELS = {
   ADD_WORKSPACE_TITLE: '新增工作空間',
   WORKSPACE_NAME_LABEL: '名稱',
   WORKSPACE_NAME_REQUIRED: '*',
-  WORKSPACE_NAME_PLACEHOLDER: '例如：台北總公司、台中分公司',
+  WORKSPACE_NAME_PLACEHOLDER: '例如：本公司、門市',
   WORKSPACE_DESCRIPTION_LABEL: '說明',
   WORKSPACE_DESCRIPTION_PLACEHOLDER: '簡短說明此工作空間',
   CANCEL: '取消',
@@ -51,18 +44,18 @@ export const LABELS = {
   WORKSPACE_CODE_INVALID: '公司代碼只能使用英文大寫字母',
   WORKSPACE_CODE_DUPLICATE: '此公司代碼已被使用',
   // Create Admin Dialog
-  CREATE_ADMIN_TITLE: '建立第一位管理員',
-  CREATE_ADMIN_DESC: '為新工作空間建立管理員帳號',
+  CREATE_ADMIN_TITLE: '建立第一位系統主管',
+  CREATE_ADMIN_DESC: '為新工作空間建立系統主管帳號',
   ADMIN_EMPLOYEE_NUMBER_LABEL: '員工編號',
   ADMIN_NAME_LABEL: '姓名',
   ADMIN_NAME_REQUIRED: '*',
-  ADMIN_NAME_PLACEHOLDER: '管理員姓名',
+  ADMIN_NAME_PLACEHOLDER: '系統主管姓名',
   ADMIN_PASSWORD_LABEL: '密碼',
   ADMIN_PASSWORD_PLACEHOLDER: '登入密碼',
   CREATING_ADMIN: '建立中...',
-  CREATE_ADMIN_BTN: '建立管理員',
-  ADMIN_CREATED_SUCCESS: '管理員帳號已建立',
-  ADMIN_CREATION_FAILED: '建立管理員失敗',
+  CREATE_ADMIN_BTN: '建立系統主管',
+  ADMIN_CREATED_SUCCESS: '系統主管帳號已建立',
+  ADMIN_CREATION_FAILED: '建立系統主管失敗',
 
   // Login Info Card
   LOGIN_INFO_TITLE: '帳號建立完成',
@@ -85,7 +78,7 @@ export const LABELS = {
 
   // Empty State
   NO_WORKSPACE_TITLE: '尚未建立工作空間',
-  NO_WORKSPACE_DESC: '開始建立第一個工作空間以啟用多分公司管理',
+  NO_WORKSPACE_DESC: '開始建立第一個工作空間',
 
   // Account Settings
   ACCOUNT_SECURITY: '帳號安全',
@@ -146,8 +139,6 @@ export const LABELS = {
   HIDDEN_ITEMS_COUNT: '目前隱藏 {count} 個選單項目',
 
   // Permissions Page
-  CROSS_WORKSPACE_PERMISSIONS: '跨分公司權限管理',
-  PERMISSIONS_MANAGEMENT_DESC: '管理員工的跨分公司資料存取權限',
   FEATURE_DISABLED: '功能已停用',
   FEATURE_DISABLED_DESC: '此功能已根據系統架構決策停用',
   DISABLE_REASONS: '停用原因：',
@@ -323,18 +314,6 @@ export const OTHER_SETTINGS_LABELS = {
   NOTIFICATION_VALUE: '系統通知：開啟',
   BACKUP_SETTING: '資料備份',
   BACKUP_VALUE: '自動備份：每日凌晨 2:00',
-}
-
-export const PERMISSION_LABELS = {
-  TITLE: '權限管理',
-  CROSS_BRANCH_PERMISSION: '跨分公司權限',
-  PERM_1: '授權特定員工跨分公司查看資料',
-  PERM_2: '設定不同權限等級（查看、編輯、刪除、財務）',
-  PERM_3: '設定權限過期時間（可選）',
-  PERM_4: '隨時撤銷權限',
-  PERMISSION_SETTINGS: '權限設定',
-
-  MANAGE_9542: '授權管理員查看或管理其他分公司的資料（例如：台北管理員可查看台中的旅遊團）',
 }
 
 export const PREFERRED_FEATURES_LABELS = {

@@ -181,7 +181,7 @@ export function TeamSettingsTab() {
             size="sm"
             onClick={() => openFieldDialog()}
             disabled={isLoading}
-            className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+            className="bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg"
           >
             <Plus className="h-4 w-4 mr-1" />
             新增欄位
@@ -372,7 +372,7 @@ export function TeamSettingsTab() {
             <Button
               onClick={handleSaveField}
               disabled={savingField || !fieldForm.name.trim()}
-              className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+              className="bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg"
             >
               {savingField && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               {editingField ? '更新' : '建立'}

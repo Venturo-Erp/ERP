@@ -257,7 +257,7 @@ export function ActivitiesSection({
             onClick={() => onOpenAttractionSelector(dayIndex)}
             size="xs"
             variant="default"
-            className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+            className="bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg"
           >
             {COMP_EDITOR_LABELS.SELECT_1031}
           </Button>

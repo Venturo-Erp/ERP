@@ -217,7 +217,7 @@ export function FlightInfoSection({
                 size="sm"
                 onClick={handleGenerateDailyItinerary}
                 disabled={!onGenerateDailyItinerary}
-                className="bg-morandi-gold hover:bg-morandi-gold-hover text-white text-xs gap-1"
+                className="bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg text-xs gap-1"
               >
                 <CalendarPlus size={14} />
                 自動產生 {tripDays} 天行程

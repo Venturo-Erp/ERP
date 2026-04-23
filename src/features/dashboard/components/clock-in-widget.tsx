@@ -75,17 +75,17 @@ export function ClockInWidget() {
   return (
     <div className="h-full">
       <div className="h-full rounded-2xl border border-border/70 shadow-lg backdrop-blur-md transition-all duration-300 hover:shadow-lg hover:border-border/80 bg-gradient-to-br from-muted via-card to-morandi-container/30">
-        <div className="p-5 space-y-4 h-full flex flex-col">
+        <div className="p-4 space-y-3 h-full flex flex-col">
           {/* Header */}
-          <div className="flex items-start gap-3">
+          <div className="flex items-start gap-2">
             <div
               className={cn(
-                'rounded-full p-2.5 text-white shadow-lg shadow-black/10',
-                'bg-gradient-to-br from-morandi-gold/80 to-morandi-gold',
-                'ring-2 ring-border/50 ring-offset-1 ring-offset-background/20'
+                'rounded-full p-2 text-white shadow-sm shadow-black/10',
+                'bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60',
+                'ring-1 ring-border/50'
               )}
             >
-              <LogIn className="w-5 h-5 drop-shadow-sm" />
+              <LogIn className="w-4 h-4 drop-shadow-sm" />
             </div>
             <div className="flex-1">
               <p className="text-sm font-semibold text-morandi-primary leading-tight tracking-wide">
@@ -133,8 +133,8 @@ export function ClockInWidget() {
               className={cn(
                 'flex-1 rounded-xl transition-all duration-200 font-semibold',
                 hasClockedIn
-                  ? 'bg-morandi-green/10 border-2 border-morandi-green/30 text-morandi-green'
-                  : 'bg-morandi-gold text-white hover:bg-morandi-gold-hover shadow-md hover:shadow-lg'
+                  ? 'bg-gradient-to-br from-morandi-green/10 to-morandi-green/20 border border-morandi-green/30 text-morandi-green'
+                  : 'bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg'
               )}
             >
               {hasClockedIn ? '已上班' : '上班'}
@@ -146,10 +146,10 @@ export function ClockInWidget() {
               className={cn(
                 'flex-1 rounded-xl transition-all duration-200 font-semibold',
                 hasClockedOut
-                  ? 'bg-morandi-gold/10 border-2 border-morandi-gold/30 text-morandi-gold'
+                  ? 'bg-gradient-to-br from-morandi-gold/10 to-morandi-gold/20 border border-morandi-gold/30 text-morandi-gold'
                   : hasClockedIn
-                    ? 'bg-card/90 border-2 border-border/60 text-morandi-primary hover:bg-morandi-gold hover:text-white hover:shadow-md'
-                    : 'bg-card/90 border-2 border-border/60 text-morandi-muted'
+                    ? 'bg-gradient-to-br from-card to-morandi-container/30 border border-border/60 text-morandi-primary hover:from-morandi-gold hover:to-morandi-gold-hover hover:text-white hover:shadow-md'
+                    : 'bg-gradient-to-br from-card to-morandi-container/20 border border-border/60 text-morandi-muted'
               )}
             >
               {hasClockedOut ? '已下班' : '下班'}

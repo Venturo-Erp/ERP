@@ -72,7 +72,7 @@ export function useCalendarEvents() {
   // 載入已核准的請假資料（2026-04-23：leave_requests 表砍除、stub 為空陣列）
   const leaveRequests: LeaveRequest[] = []
 
-  // Workspace 篩選狀態（只有管理員能用）
+  // Workspace 篩選狀態（只有系統主管能用）
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string | null>(null)
   const { isAdmin } = useAuthStore.getState()
 
@@ -225,7 +225,7 @@ export function useCalendarEvents() {
     return (calendarEvents || [])
       .filter(event => {
         if (event.visibility !== 'company') return false
-        // 超級管理員且有選擇特定 workspace，則只顯示該 workspace 的事項
+        // 擁有管理員資格且有選擇特定 workspace，則只顯示該 workspace 的事項
         if (isAdmin && selectedWorkspaceId) {
           return (event as CalendarEvent).workspace_id === selectedWorkspaceId
         }
@@ -388,7 +388,7 @@ export function useCalendarEvents() {
     allEvents,
     // 日期範圍變更處理（給 FullCalendar 的 datesSet 使用）
     onDatesChange: handleDatesChange,
-    // Workspace 篩選相關（只有超級管理員可用）
+    // Workspace 篩選相關（需要管理員資格）
     isAdmin,
     workspaces,
     selectedWorkspaceId,

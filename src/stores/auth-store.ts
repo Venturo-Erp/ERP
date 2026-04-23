@@ -16,7 +16,7 @@ interface WorkspaceInfo {
 
 /**
  * 從 EmployeeRow + workspace 資訊 構建全站用 EmployeeFull
- * 權限決策來源：role_tab_permissions（permissions[]）+ workspace_roles.is_admin
+ * 權限決策統一從 role_tab_permissions 拿資格清單
  */
 function buildUserFromEmployee(
   employeeData: EmployeeRow,

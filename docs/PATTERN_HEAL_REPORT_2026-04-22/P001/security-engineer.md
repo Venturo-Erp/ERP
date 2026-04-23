@@ -9,7 +9,7 @@ Reviewer：Security Engineer（security-engineer 靈魂）
 
 ## TL;DR
 
-P001 目前的「提案修法」（移 isAdmin 短路 + 4 API 改 hasPermission + 管理員 role 預填全權限）**不是安全修復、是架構重構**。修完攻擊面**幾乎沒降**、但會新引入 **2 個 HIGH 和 1 個 CRITICAL** 風險（lockout + schema 不匹配 + 跨頁未收斂）。上線前若照目前描述直接動手、會當場把生產環境的員工管理 API 全部擊倒。必須加前置條件再動。
+P001 目前的「提案修法」（移 isAdmin 短路 + 4 API 改 hasPermission + 系統主管 role 預填全權限）**不是安全修復、是架構重構**。修完攻擊面**幾乎沒降**、但會新引入 **2 個 HIGH 和 1 個 CRITICAL** 風險（lockout + schema 不匹配 + 跨頁未收斂）。上線前若照目前描述直接動手、會當場把生產環境的員工管理 API 全部擊倒。必須加前置條件再動。
 
 ---
 
@@ -34,7 +34,7 @@ P001 目前的「提案修法」（移 isAdmin 短路 + 4 API 改 hasPermission 
 ### 1.2 降級攻擊面未變（CRITICAL 等級的認知陷阱）
 
 - **修前**：攻擊者拿到 admin JWT = 完全控制一個 workspace
-- **修後**：攻擊者拿到 admin JWT = 管理員 role → 預填全權限 → 仍完全控制一個 workspace
+- **修後**：攻擊者拿到 admin JWT = 系統主管 role → 預填全權限 → 仍完全控制一個 workspace
 
 **P001 沒有降低 blast radius、只換了內部決策路徑**。這是 refactor、不是 mitigation。如果團隊以為「改了就變安全」而放鬆其他防線（例如 2FA 延後、JWT TTL 不縮）、就是被自己騙。
 
@@ -75,7 +75,7 @@ P001 目前的「提案修法」（移 isAdmin 短路 + 4 API 改 hasPermission 
 
 **修正建議**：
 1. **Option A（推薦）**：P001 先只做 tab 級 — `hasPermission(user, 'hr', 'employees', 'write')` 作為四個 API 的門檻、延後 action 級到 P008（policy 函式統一入口）時一併處理
-2. **Option B**：擴張 schema 加 `role_action_permissions(role_id, module_code, action_key, allowed)`；seeding 預填 admin role 全部 action；但這大幅超出 P001 scope
+2. **Option B**：擴張 schema 加 `role_action_permissions(role_id, module_code, action_key, allowed)`；seeding 預填 系統主管職務 全部 action；但這大幅超出 P001 scope
 3. **絕對不可**：硬上 action key 而沒 migration 預填 — 會立刻鎖死生產
 
 ### 2.2 🔴 HIGH：migration 順序錯 → lockout window
@@ -90,7 +90,7 @@ P001 目前的「提案修法」（移 isAdmin 短路 + 4 API 改 hasPermission 
 ```
 
 **正確順序（必須）**：
-1. **先** migration：確保每個 admin role 在 `role_tab_permissions` 有對應 `(hr, employees, can_read=true, can_write=true)` 等全套 row。寫一個 idempotent SQL：對每個 `workspace_roles.is_admin=true` 的 role、INSERT ON CONFLICT DO NOTHING 全部 MODULES / tabs。
+1. **先** migration：確保每個 系統主管職務 在 `role_tab_permissions` 有對應 `(hr, employees, can_read=true, can_write=true)` 等全套 row。寫一個 idempotent SQL：對每個 `workspace_roles.is_admin=true` 的 role、INSERT ON CONFLICT DO NOTHING 全部 MODULES / tabs。
 2. **再** 部署代碼（移 isAdmin 短路）
 3. **回滾計劃**：migration 要有 `down.sql`、代碼要有 feature flag 可即時切回 isAdmin 短路（安全網）
 
@@ -98,9 +98,9 @@ P001 目前的「提案修法」（移 isAdmin 短路 + 4 API 改 hasPermission 
 
 ### 2.3 🟡 MEDIUM：跨租戶污染（trigger + seeding）
 
-- P001 修法要求「管理員 role 預填全權限」。如果走 DB trigger（例如 AFTER INSERT on workspace_roles）、必須 `SECURITY INVOKER` + 內部過濾 `workspace_id`、否則 admin role 建立 trigger 可能被利用污染別 workspace 的 role_tab_permissions。
+- P001 修法要求「系統主管 role 預填全權限」。如果走 DB trigger（例如 AFTER INSERT on workspace_roles）、必須 `SECURITY INVOKER` + 內部過濾 `workspace_id`、否則 系統主管職務 建立 trigger 可能被利用污染別 workspace 的 role_tab_permissions。
 - P010 已修 role_tab_permissions RLS（service_role + 同 workspace）、但**不守 trigger**（trigger 內 DML 不走 RLS 檢查）。
-- P009（feature cascade trigger）未修、跟 P001 預填衝突：admin role 預填全部 tab permission → feature 關掉某模組 → role_tab_permissions 資料還在 → 下次 feature 重開、admin 自動有權（可能是 desired、但要 William 拍板）。
+- P009（feature cascade trigger）未修、跟 P001 預填衝突：系統主管職務 預填全部 tab permission → feature 關掉某模組 → role_tab_permissions 資料還在 → 下次 feature 重開、admin 自動有權（可能是 desired、但要 William 拍板）。
 
 **建議**：P001 的 seeding 邏輯用 **application-layer function**（在 `/api/workspaces/create` 裡呼叫）、**不寫 DB trigger**。原因：
 - trigger 繞 RLS、跨租戶風險大
@@ -141,11 +141,11 @@ P001 如果自己在 4 API 硬 code permission key（例如 `'hr.employees.write
    - admin 登入 → 進 `/finance/payments` → 建收款單成功
    - admin 登入 → 進 `/hr/roles` → 改某 role 權限成功
    - **判定**：改前改後行為一致、不得回歸
-2. **非 admin 正向測試**（HIGH）
+2. **沒有系統主管資格 正向測試**（HIGH）
    - 建一個「會計」role、賦予 `(finance, payments, can_read, can_write)`
    - 該 role 員工登入 → 進 /finance/payments → 建收款成功
    - 該 role 員工 → 進 /hr/employees → 403
-3. **非 admin 反向測試**（HIGH）
+3. **沒有系統主管資格 反向測試**（HIGH）
    - 「OP」role 只有 `(hr, employees, can_read=true, can_write=false)`
    - 直接 POST `/api/auth/employees/create-employee-auth` → 應 403
    - （不能靠 UI 隱藏按鈕、要直接打 API）

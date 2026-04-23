@@ -24,29 +24,34 @@ import {
 } from './status-maps'
 
 describe('TOUR_STATUS constants', () => {
-  it('has 4 statuses', () => {
-    expect(TOUR_STATUS_LIST).toHaveLength(4)
+  it('has 6 statuses', () => {
+    expect(TOUR_STATUS_LIST).toHaveLength(6)
   })
   it('contains expected values', () => {
-    expect(TOUR_STATUS.PROPOSAL).toBe('開團')
-    expect(TOUR_STATUS.IN_PROGRESS).toBe('待出發')
-    expect(TOUR_STATUS.CLOSED).toBe('已結團')
-    expect(TOUR_STATUS.CANCELLED).toBe('取消')
+    expect(TOUR_STATUS.TEMPLATE).toBe('template')
+    expect(TOUR_STATUS.PROPOSAL).toBe('proposal')
+    expect(TOUR_STATUS.UPCOMING).toBe('upcoming')
+    expect(TOUR_STATUS.ONGOING).toBe('ongoing')
+    expect(TOUR_STATUS.RETURNED).toBe('returned')
+    expect(TOUR_STATUS.CLOSED).toBe('closed')
   })
 })
 
 describe('isTourLocked', () => {
-  it('returns true for 進行中', () => {
-    expect(isTourLocked('待出發')).toBe(true)
+  it('returns true for ongoing', () => {
+    expect(isTourLocked('ongoing')).toBe(true)
   })
-  it('returns true for 結案', () => {
-    expect(isTourLocked('已結團')).toBe(true)
+  it('returns true for returned', () => {
+    expect(isTourLocked('returned')).toBe(true)
   })
-  it('returns false for 提案', () => {
-    expect(isTourLocked('開團')).toBe(false)
+  it('returns true for closed', () => {
+    expect(isTourLocked('closed')).toBe(true)
   })
-  it('returns false for 取消', () => {
-    expect(isTourLocked('取消')).toBe(false)
+  it('returns false for upcoming', () => {
+    expect(isTourLocked('upcoming')).toBe(false)
+  })
+  it('returns false for proposal', () => {
+    expect(isTourLocked('proposal')).toBe(false)
   })
   it('returns false for null', () => {
     expect(isTourLocked(null)).toBe(false)
@@ -54,11 +59,11 @@ describe('isTourLocked', () => {
 })
 
 describe('canConfirmTour', () => {
-  it('returns true for 提案', () => {
-    expect(canConfirmTour('開團')).toBe(true)
+  it('returns true for proposal', () => {
+    expect(canConfirmTour('proposal')).toBe(true)
   })
-  it('returns false for 進行中', () => {
-    expect(canConfirmTour('待出發')).toBe(false)
+  it('returns false for upcoming', () => {
+    expect(canConfirmTour('upcoming')).toBe(false)
   })
   it('returns false for null', () => {
     expect(canConfirmTour(null)).toBe(false)
@@ -66,9 +71,17 @@ describe('canConfirmTour', () => {
 })
 
 describe('getTourStatusLabel', () => {
-  it('returns the status directly', () => {
-    expect(getTourStatusLabel('開團')).toBe('開團')
+  it('maps English status to Chinese label', () => {
+    expect(getTourStatusLabel('proposal')).toBe('提案')
+    expect(getTourStatusLabel('upcoming')).toBe('待出發')
+    expect(getTourStatusLabel('ongoing')).toBe('進行中')
+    expect(getTourStatusLabel('returned')).toBe('未結團')
+    expect(getTourStatusLabel('closed')).toBe('已結團')
+    expect(getTourStatusLabel('template')).toBe('模板')
+  })
+  it('fallbacks to raw value for unknown', () => {
     expect(getTourStatusLabel('待出發')).toBe('待出發')
+    expect(getTourStatusLabel(null)).toBe('')
   })
 })
 

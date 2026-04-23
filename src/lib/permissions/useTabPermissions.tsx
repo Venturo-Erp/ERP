@@ -44,8 +44,7 @@ export function useTabPermissions() {
         }
         const roleData = await roleRes.json()
 
-        // is_admin 保留為 audit/UI flag、但權限決策一律走 role_tab_permissions
-        // admin role 已 backfill 全 module/tab 權限、見 20260422150000_backfill_admin_role_tab_permissions.sql
+        // 權限決策統一從 role_tab_permissions 拿資格清單；admin 全開是因為 backfill 灌了全部資格（20260422150000_backfill_admin_role_tab_permissions.sql）
         setIsAdmin(roleData.is_admin === true)
 
         // 取得角色的分頁權限

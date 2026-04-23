@@ -338,7 +338,7 @@ icon: Sparkles as unknown,  // LucideIcon 類型問題
 - restrictedFeature: 功能限制（某些 workspace 不可見）
 - hiddenMenuItems: 用戶自訂隱藏
 - preferredFeatures: 用戶偏好功能
-- isSuperAdmin: 超級管理員繞過限制
+- isPlatformAdminCapability: 擁有平台管理資格的人繞過限制
 - isSupplierWorkspace: 供應商專用簡化選單
 ```
 
@@ -1117,7 +1117,7 @@ class OrderService extends BaseService<Order & BaseEntity> {
 | ------ | ---- | --------------------------------------- |
 | **道** | ✅   | 財務正確從屬於團/訂單，編號依附團號     |
 | C      | ⚠️   | 有 placeholder 代碼、useEffect 依賴問題 |
-| A      | ✅   | 角色權限控制完善（會計/管理員）         |
+| A      | ✅   | 角色權限控制完善（會計/系統主管）         |
 | R      | ⚠️   | 使用 browser alert 而非 UI 組件         |
 | D      | ⚠️   | 收款頁面載入過多資料                    |
 
@@ -1169,7 +1169,7 @@ class OrderService extends BaseService<Order & BaseEntity> {
 
 - ✅ 動態載入對話框，減少初始 bundle
 - ✅ URL 參數整合（從訂單頁快速收款）
-- ✅ 角色權限控制（批量確認需會計/管理員）
+- ✅ 角色權限控制（批量確認需會計/系統主管）
 - ✅ 進階搜尋功能
 - ✅ Excel 匯出功能
 

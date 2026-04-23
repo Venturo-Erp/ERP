@@ -5,6 +5,7 @@ import { Tour } from '@/stores/types'
 import { City } from '@/stores/region-store'
 import { NewTourData, TourExtraFields, DeleteConfirmState } from '../types'
 import { OrderFormData } from '@/features/orders/components/add-order-form'
+import { TOUR_STATUS } from '@/lib/constants/status-maps'
 
 export function useTourPageState() {
   // Selected tour
@@ -18,7 +19,7 @@ export function useTourPageState() {
   const [expandedRows, setExpandedRows] = useState<string[]>([])
 
   // 每次進入預設「待出發」、不記憶上次的 tab（William 2026-04-21 決策）
-  const [activeStatusTab, setActiveStatusTab] = useState('待出發')
+  const [activeStatusTab, setActiveStatusTab] = useState<string>(TOUR_STATUS.UPCOMING)
   const [viewMode, setViewMode] = useState<'card' | 'list'>('list')
   const [searchQuery, setSearchQuery] = useState('')
   const [deleteConfirm, setDeleteConfirm] = useState<DeleteConfirmState>({

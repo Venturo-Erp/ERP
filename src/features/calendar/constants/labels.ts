@@ -9,7 +9,7 @@ export const CALENDAR_LABELS = {
   MONTH_VIEW: '月視圖',
   WEEK_VIEW: '週視圖',
   DAY_VIEW: '日視圖',
-  ALL_WORKSPACES: '全部分公司',
+  ALL_WORKSPACES: '全部公司',
   VIEW_BIRTHDAY_LIST: '查看生日名單',
   ADD_EVENT: '新增事項',
 

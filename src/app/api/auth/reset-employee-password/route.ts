@@ -9,7 +9,7 @@ import { validateBody } from '@/lib/api/validation'
 import { resetEmployeePasswordSchema } from '@/lib/validations/api-schemas'
 
 /**
- * 檢查員工是否為管理員或超級管理員
+ * 檢查員工是否擁有管理員資格
  */
 async function checkIsAdmin(employeeId: string): Promise<boolean> {
   const adminClient = getSupabaseAdminClient()
@@ -36,7 +36,7 @@ async function checkIsAdmin(employeeId: string): Promise<boolean> {
 /**
  * 重設員工密碼 API
  * 只更新 Supabase Auth 密碼（不更新 password_hash）
- * 🔒 安全修復 2026-02-19：需要管理員權限
+ * 🔒 安全修復 2026-02-19：需要管理員資格
  */
 export async function POST(request: NextRequest) {
   try {
@@ -50,10 +50,10 @@ export async function POST(request: NextRequest) {
       return errorResponse('請先登入', 401, ErrorCode.UNAUTHORIZED)
     }
 
-    // 🔒 管理員權限檢查
+    // 🔒 檢查是否擁有管理員資格
     const isAdmin = await checkIsAdmin(auth.data.employeeId)
     if (!isAdmin) {
-      return errorResponse('需要管理員權限', 403, ErrorCode.FORBIDDEN)
+      return errorResponse('您沒有此權限', 403, ErrorCode.FORBIDDEN)
     }
 
     const validation = await validateBody(request, resetEmployeePasswordSchema)
@@ -74,8 +74,8 @@ export async function POST(request: NextRequest) {
     }
 
     // 🔒 P003-C（2026-04-22）：只能重設同 workspace 員工的密碼
-    //   原本只查 isAdmin、沒驗 target employee 的 workspace、
-    //   Corner admin 可以打這支重設 JINGYAO 員工的密碼。
+    //   原本只驗管理員資格、沒驗 target employee 的 workspace、
+    //   Corner 系統主管可以打這支重設 JINGYAO 員工的密碼。
     if (employee.workspace_id !== auth.data.workspaceId) {
       logger.error('跨租戶重設密碼嘗試', {
         caller_workspace: auth.data.workspaceId,

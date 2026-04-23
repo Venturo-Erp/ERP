@@ -69,6 +69,7 @@ import {
   type AccommodationChange,
 } from './itinerary/AccommodationChangeDialog'
 import { ResourceDetailDialog } from '@/components/resource-panel/ResourceDetailDialog'
+import { TOUR_STATUS } from '@/lib/constants/status-maps'
 
 interface TourItineraryTabProps {
   tour: Tour
@@ -836,7 +837,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
         // 寫空字串而非省略是為了相容 schema 型別。
         country: '',
         city: '',
-        status: '開團' as const,
+        status: TOUR_STATUS.PROPOSAL,
         features: [],
         focus_cards: [],
         daily_itinerary: displayDailyItinerary,
@@ -1120,7 +1121,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
             <Button
               size="sm"
               onClick={handlePrint}
-              className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+              className="bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg"
             >
               <Printer className="w-4 h-4 mr-1" />
               {TOUR_ITINERARY_TAB_LABELS.列印}
@@ -1374,7 +1375,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                           size="sm"
                           onClick={handleSave}
                           disabled={saving || !title.trim()}
-                          className="h-8 px-3 text-xs bg-morandi-gold hover:bg-morandi-gold-hover text-white gap-1"
+                          className="h-8 px-3 text-xs bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg gap-1"
                         >
                           {saving ? (
                             <Loader2 className="w-3 h-3 animate-spin" />

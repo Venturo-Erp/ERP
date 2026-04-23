@@ -49,13 +49,7 @@ import { calculateFullProfit } from '../services/profit-calculation.service'
 import { useAuthStore } from '@/stores'
 import { supabase } from '@/lib/supabase/client'
 import { usePaymentMethodsCached } from '@/data/hooks'
-
-// === 結案狀態 ===
-const CLOSING_STATUS_MAP: Record<string, { label: string; color: string }> = {
-  open: { label: '進行中', color: 'bg-morandi-gold/20 text-morandi-gold' },
-  closing: { label: '結團中', color: 'bg-morandi-gold/20 text-morandi-gold' },
-  closed: { label: '已結團', color: 'bg-morandi-green/20 text-morandi-green' },
-}
+import { TOUR_STATUS } from '@/lib/constants/status-maps'
 
 interface TourClosingTabProps {
   tour: Tour
@@ -164,29 +158,31 @@ export function TourClosingTab({ tour }: TourClosingTabProps) {
   const confirmedProfit = confirmedIncome - totalExpense
   const estimatedProfit = estimatedIncome - totalExpense
 
-  // 結案狀態
-  const closingStatus = tour.closing_status ?? 'open'
-  const statusInfo = CLOSING_STATUS_MAP[closingStatus] ?? CLOSING_STATUS_MAP.open
+  // 結案狀態（真相來源 = tour.status）
+  const isClosed = tour.status === TOUR_STATUS.CLOSED
+  const statusInfo = isClosed
+    ? { label: '已結團', color: 'bg-morandi-green/20 text-morandi-green' }
+    : { label: '進行中', color: 'bg-morandi-gold/20 text-morandi-gold' }
   const [statusUpdating, setStatusUpdating] = useState(false)
 
   const handleToggleClosingStatus = useCallback(async () => {
-    const nextStatus = closingStatus === 'closed' ? 'open' : 'closed'
+    const nextStatus = isClosed ? TOUR_STATUS.RETURNED : TOUR_STATUS.CLOSED
     setStatusUpdating(true)
     try {
       await updateTour(tour.id, {
-        closing_status: nextStatus,
-        ...(nextStatus === 'closed'
+        status: nextStatus,
+        ...(nextStatus === TOUR_STATUS.CLOSED
           ? { closing_date: new Date().toISOString() }
           : { closing_date: null }),
       })
-      toast.success(nextStatus === 'closed' ? '已標記為結團' : '已重新開啟團')
+      toast.success(nextStatus === TOUR_STATUS.CLOSED ? '已標記為結團' : '已重新開啟團')
     } catch (err) {
       logger.error('更新結案狀態失敗', err)
       toast.error('狀態更新失敗')
     } finally {
       setStatusUpdating(false)
     }
-  }, [closingStatus, tour.id])
+  }, [isClosed, tour.id])
 
   // PDF 生成
   const handleGeneratePDF = async () => {
@@ -308,23 +304,23 @@ export function TourClosingTab({ tour }: TourClosingTabProps) {
             生成結案報告 PDF
           </Button>
           <Button
-            variant={closingStatus === 'closed' ? 'outline' : 'default'}
+            variant={isClosed ? 'outline' : 'default'}
             onClick={handleToggleClosingStatus}
             disabled={statusUpdating}
             className={
-              closingStatus === 'closed'
+              isClosed
                 ? ''
-                : 'bg-morandi-gold hover:bg-morandi-gold-hover text-white'
+                : 'bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg'
             }
           >
             {statusUpdating ? (
               <Loader2 className="h-4 w-4 animate-spin mr-2" />
-            ) : closingStatus === 'closed' ? (
+            ) : isClosed ? (
               <Unlock className="h-4 w-4 mr-2" />
             ) : (
               <Lock className="h-4 w-4 mr-2" />
             )}
-            {closingStatus === 'closed' ? '重新開啟' : '標記結團'}
+            {isClosed ? '重新開啟' : '標記結團'}
           </Button>
         </div>
       </div>

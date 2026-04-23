@@ -194,7 +194,7 @@ export function isMenuItemHidden(href: string, hiddenMenuItems: string[]): boole
 
 ### 測試案例 1：隱藏功能
 
-1. 登入系統（超級管理員）
+1. 登入系統（擁有平台管理資格的人）
 2. 前往「設定」→「選單設定」
 3. 關閉「旅遊團」「報價單」「會計」
 4. 點選「儲存設定」

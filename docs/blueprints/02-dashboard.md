@@ -12,7 +12,7 @@
 
 ### 服務對象
 - 所有登入員工（每人每天第一眼看到的頁）
-- admin 看得比業務多（`admin_only` widgets）
+- 系統主管看得比業務多（`admin_only` widgets）
 
 ### 解決什麼
 - ✅ 每個角色的「快速入口」（業務看到常用計算機 + 匯率、會計看到打卡 + 航班）
@@ -90,7 +90,7 @@ sequenceDiagram
 
 | 角色 | 看 dashboard | admin_only widgets |
 |--|--|--|
-| admin | ✅ | ✅ 全 |
+| 系統主管 | ✅ | ✅ 全 |
 | 業務 | ✅ | ❌ |
 | 會計 | ✅ | ❌ |
 | partner | ✅ 看自己 workspace 資料 | ❌ |

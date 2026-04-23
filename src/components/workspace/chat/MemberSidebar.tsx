@@ -160,7 +160,7 @@ export function MemberSidebar({ isOpen }: MemberSidebarProps) {
               {currentUserRole === 'owner'
                 ? COMP_WORKSPACE_LABELS.擁有者
                 : currentUserRole === 'admin'
-                  ? COMP_WORKSPACE_LABELS.管理員
+                  ? COMP_WORKSPACE_LABELS.系統主管
                   : currentUserRole === 'manager'
                     ? COMP_WORKSPACE_LABELS.經理
                     : currentUserRole === 'member'

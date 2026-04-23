@@ -268,7 +268,7 @@ export function CustomerVerifyDialog({
                       type="button"
                       onClick={handleReOcr}
                       disabled={isRecognizing}
-                      className="flex items-center gap-1.5 px-2 py-1 text-xs bg-morandi-gold hover:bg-morandi-gold-hover text-white rounded disabled:opacity-50 transition-colors"
+                      className="flex items-center gap-1.5 px-2 py-1 text-xs bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg rounded disabled:opacity-50 transition-colors"
                     >
                       <RefreshCw size={12} className={isRecognizing ? 'animate-spin' : ''} />
                       {isRecognizing ? t('passport.recognizing') : t('passport.reRecognize')}
@@ -407,7 +407,7 @@ export function CustomerVerifyDialog({
             <Button
               onClick={handleSave}
               disabled={isSaving}
-              className="bg-morandi-gold hover:bg-morandi-gold-hover text-white gap-2"
+              className="bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg gap-2"
             >
               <Check size={16} />
               {isSaving ? t('common.saving') : t('common.confirm')}

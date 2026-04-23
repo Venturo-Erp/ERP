@@ -223,7 +223,7 @@ const toggleDialog = useCallback((key: keyof DialogState) => {
    ```typescript
    // 提取 ROLE_LABELS, STATUS_LABELS 到組件外
    const ROLE_LABELS = {
-     admin: '管理員',
+     admin: '系統主管',
      member: '成員',
      guest: '訪客',
    } as const

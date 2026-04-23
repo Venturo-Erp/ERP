@@ -17,7 +17,7 @@ export const LABELS = {
   LOGIN_BUTTON_LOADING: '登入中...',
 
   // 欄位提示
-  CODE_HINT: '公司代號請向管理員索取',
+  CODE_HINT: '公司代號請向系統主管索取',
 
   // 錯誤訊息
   ERROR_ENTER_CODE: '請輸入公司代號',

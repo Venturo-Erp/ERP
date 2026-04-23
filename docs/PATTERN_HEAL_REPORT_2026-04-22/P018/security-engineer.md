@@ -168,7 +168,7 @@ test('service_role validate-login 仍可讀（不受 RLS 影響）', async () =>
 
 ## 10. 殘存威脅一句話（翻給主席 / William）
 
-> 「修完 P018、**別家公司員工完全碰不到我們的權限資料**；但**同公司內任何登入員工還能透過 `/api/employees/[任意 ID]/permission-overrides` 幫自己或同事加管理員權限**，這是 P022 的工、下一輪處理。」
+> 「修完 P018、**別家公司員工完全碰不到我們的權限資料**；但**同公司內任何登入員工還能透過 `/api/employees/[任意 ID]/permission-overrides` 幫自己或同事加系統主管權限**，這是 P022 的工、下一輪處理。」
 
 ## 修完 P018 威脅矩陣（STRIDE 收斂）
 

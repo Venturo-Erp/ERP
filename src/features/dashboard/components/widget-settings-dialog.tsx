@@ -22,7 +22,6 @@ interface WidgetSettingsDialogProps {
 }
 
 export function WidgetSettingsDialog({ activeWidgets, onToggleWidget }: WidgetSettingsDialogProps) {
-  // 新系統：使用 isAdmin
   const { isAdmin } = useAuthStore()
 
   // 過濾可見的 widgets
@@ -30,7 +29,7 @@ export function WidgetSettingsDialog({ activeWidgets, onToggleWidget }: WidgetSe
     return AVAILABLE_WIDGETS.filter(widget => {
       // 沒有權限限制的 widget 所有人都看得到
       if (!widget.requiredPermission) return true
-      // admin_only 只有超級管理員看得到
+      // admin_only：需要管理員資格才看得到
       if (widget.requiredPermission === 'admin_only') {
         return isAdmin
       }
@@ -44,7 +43,7 @@ export function WidgetSettingsDialog({ activeWidgets, onToggleWidget }: WidgetSe
         <Button
           variant="outline"
           size="sm"
-          className="gap-2 bg-card border-morandi-gold/20 hover:border-morandi-gold transition-all rounded-xl"
+          className="gap-2 bg-gradient-to-br from-card to-morandi-container/30 border border-morandi-gold/30 text-morandi-primary hover:from-morandi-gold/10 hover:to-morandi-gold/20 hover:border-morandi-gold/50 shadow-md hover:shadow-lg transition-all rounded-xl"
         >
           <Settings className="h-4 w-4" />
           {DASHBOARD_LABELS.SETTINGS_4196}

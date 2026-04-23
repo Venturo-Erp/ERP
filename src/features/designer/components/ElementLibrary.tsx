@@ -201,7 +201,7 @@ export function ElementLibrary({
                     <Button
                       variant="default"
                       size="sm"
-                      className="w-full mt-2 gap-2 bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+                      className="w-full mt-2 gap-2 bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg"
                       onClick={onAddTimelinePoint}
                     >
                       <Plus size={14} />

@@ -57,7 +57,7 @@
 - [ ] 或用 email `testux_e001@venturo.com` 也能登入
 - [ ] 進 `/hr` → 看到 3 個員工（E001/E002/E003）
 - [ ] 點「新增員工」→ 試新增 E004 → **應被擋**、顯示「已達員工數量上限（3 人）」錯誤
-- [ ] 進 `/hr/roles` → 看到 4 個職務（管理員/業務/會計/助理）
+- [ ] 進 `/hr/roles` → 看到 4 個職務（系統主管/業務/會計/助理）
 - [ ] 點「業務」→ 勾幾個權限 → 儲存 → **應成功、重讀後權限還在**
 
 ### 階段 B：開團流程
@@ -79,8 +79,8 @@
 
 ### 階段 D：測試租戶建立（若明天要上線新租戶）
 
-- [ ] 用 Corner / 富順 等 Super Admin 帳號進 `/tenants` → 「新增租戶」
-- [ ] 填 code（如 TEST2）/ 名稱 / max_employees / 管理員帳密
+- [ ] 用 Corner / 富順 等 擁有平台管理資格的人 帳號進 `/tenants` → 「新增租戶」
+- [ ] 填 code（如 TEST2）/ 名稱 / max_employees / 系統主管帳密
 - [ ] 送出 → 應成功建出 workspace + 4 職務 + 預設權限
 - [ ] 登入新租戶的 E001 → 流程 A → B → C 應都能跑
 
@@ -159,7 +159,7 @@ DELETE FROM workspaces WHERE code = 'TESTUX' CASCADE;
 - UI 測試（3 核心頁的 Playwright golden path）
 - Amadeus / AI / V-Cert 實作
 - 景點資料庫 Phase 2
-- 使用手冊（你選 Partner 管理員版）
+- 使用手冊（你選 Partner 系統主管版）
 - 無用欄位 + SSOT 缺漏 audit
 
 ---

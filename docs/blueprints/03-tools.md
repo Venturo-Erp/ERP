@@ -62,7 +62,7 @@
 
 ## 4. 權限矩陣
 
-| 子頁 | admin | 業務 | 會計 |
+| 子頁 | 系統主管 | 業務 | 會計 |
 |--|--|--|--|
 | /tools/flight-itinerary | ✅ | ✅ | ❌ ✅ 決定 2026-04-18 |
 | /tools/hotel-voucher | ✅ | ✅ | ❌ ✅ 決定 2026-04-18 |
@@ -71,7 +71,7 @@
 **✅ 決定 2026-04-18**：會計不需要 voucher 工具（William 確認「會計不會用、業務才會用」）
 
 引用 INVARIANT：
-- **INV-A02 Settings/開發工具必 admin** — reset-db 違反、下輪 Stage C 自動補
+- **INV-A02 Settings/開發工具必系統主管** — reset-db 違反、下輪 Stage C 自動補
 - **INV-A03 RLS 不當唯一防線** — tools 無 RLS 可靠、全靠 route guard
 
 📋 **待 William 確認**：會計該不該看 voucher 工具？
@@ -106,14 +106,14 @@
 
 ## 6. 設計決策（ADR）
 
-### ADR-T1 · reset-db 目前無 admin guard（🔴 P0）
-**違反 INVARIANT**：**INV-A02 Settings/開發工具必 admin**
+### ADR-T1 · reset-db 目前無 系統主管 guard（🔴 P0）
+**違反 INVARIANT**：**INV-A02 Settings/開發工具必系統主管**
 **原因**：歷史、當時可能開發用沒想到正式環境會被普通用戶看到
 **動作**：下輪 Stage C 補 `isAdmin` guard（🟢、不動 DB、不需業務決策）
 **建議配套**（可選）：
 - 二次確認（輸入「DELETE」才能執行）
 - 只在 `NODE_ENV === 'development'` 顯示整個頁
-- 移到 `/settings/dev-tools/reset-db`（admin 設定區）
+- 移到 `/settings/dev-tools/reset-db`（系統主管設定區）
 
 ### ADR-T2 · flight/hotel 結構 99% 相同、可抽 template
 **現狀**：兩個 page.tsx + 兩個 Corner*Component 各自獨立、但 pattern 完全一樣（useState / Dialog / Print / sample data）
@@ -169,7 +169,7 @@
 
 | # | 問題 | 違反 INV | 層級 |
 |--|--|--|--|
-| 1 | `/tools/reset-db` 無 admin guard | INV-A02 | 🔴 P0、🟢 下輪 Stage C 可自動修 |
+| 1 | `/tools/reset-db` 無 系統主管 guard | INV-A02 | 🔴 P0、🟢 下輪 Stage C 可自動修 |
 | 2 | reset-db 無二次確認 | — | 🟡 UX |
 | 3 | SAMPLE_DATA_1/2 硬編（flight 1 組 + hotel 2 組）| — | 📋 業務確認是否半成品 |
 | 4 | flight/hotel 99% 結構重複 | — | 🟡 第二輪可抽 template |
@@ -187,7 +187,7 @@
 - 會計該不該進？
 
 ### Step 2 · 下輪 Stage C（🟢 可自動）
-- #1 **reset-db 加 `isAdmin` guard**（3 行 code、非 admin redirect `/unauthorized`）
+- #1 **reset-db 加 `isAdmin` guard**（3 行 code、沒有系統主管資格 redirect `/unauthorized`）
 - #2 reset-db 加二次確認（輸入「DELETE」才執行）
 
 ### Step 3 · 業務確認後再做
@@ -210,4 +210,4 @@
 ---
 
 ## 變更歷史
-- 2026-04-18 v1.0：cron auto-gen、1 🔴 P0（reset-db admin guard）+ 3 📋（業務使用模式確認）
+- 2026-04-18 v1.0：cron auto-gen、1 🔴 P0（reset-db 系統主管 guard）+ 3 📋（業務使用模式確認）

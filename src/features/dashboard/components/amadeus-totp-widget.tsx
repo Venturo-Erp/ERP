@@ -134,17 +134,17 @@ export function AmadeusTotpWidget() {
   return (
     <div className="h-full">
       <div className="h-full rounded-2xl border border-border/70 shadow-lg backdrop-blur-md transition-all duration-300 hover:shadow-lg hover:border-border/80 bg-gradient-to-br from-muted via-card to-morandi-container/30">
-        <div className="p-5 space-y-4 h-full flex flex-col">
+        <div className="p-4 space-y-3 h-full flex flex-col">
           {/* Header */}
-          <div className="flex items-start gap-3">
+          <div className="flex items-start gap-2">
             <div
               className={cn(
-                'rounded-full p-2.5 text-white shadow-lg shadow-black/10',
+                'rounded-full p-2 text-white shadow-sm shadow-black/10',
                 'bg-gradient-to-br from-morandi-blue/80 to-morandi-blue',
-                'ring-2 ring-border/50 ring-offset-1 ring-offset-background/20'
+                'ring-1 ring-border/50'
               )}
             >
-              <Shield className="w-5 h-5 drop-shadow-sm" />
+              <Shield className="w-4 h-4 drop-shadow-sm" />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-morandi-primary leading-tight tracking-wide">

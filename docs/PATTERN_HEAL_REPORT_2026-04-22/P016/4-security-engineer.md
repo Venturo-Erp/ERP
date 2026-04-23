@@ -56,7 +56,7 @@ API 內 `createServiceClient()` → `getSupabaseAdminClient()` 拿的是 server-
 
 ### ⚠️ 業務確認需求
 William 要**明確確認**以下假設：
-- Corner admin 可以刪除任何客戶 workspace（包括付費客戶的生產資料）。
+- Corner 系統主管 可以刪除任何客戶 workspace（包括付費客戶的生產資料）。
 - 這是 Corner 作為「平台運營方」的合理權限、還是應該多一層「客戶同意」？
 - 若要分級、建議**第二階段**加 `workspace.can_be_deleted_by_platform` flag 或「軟刪除 + 30 天真實刪除」。**目前版本先擋住 P016、延後考慮**。
 
@@ -100,7 +100,7 @@ const rateLimited = await checkRateLimit(request, 'workspaces-delete', 10, 60_00
 if (rateLimited) return rateLimited
 ```
 - 基礎設施已存在（`src/app/api/auth/change-password/route.ts:19` 是範例）。
-- 防：攻擊者拿到 Corner admin 帳號後一秒刪 20 個 workspace。
+- 防：攻擊者拿到 Corner 系統主管 帳號後一秒刪 20 個 workspace。
 - 加一行、幾乎零成本、**建議上線前補**。
 
 ### ⚠️ 強烈建議加 Audit Log（敏感操作必留痕）
@@ -154,7 +154,7 @@ curl -X DELETE https://venturo.../api/workspaces/<uuid> \
 # 預期：403 '沒有租戶管理權限'
 ```
 
-**測 3 — Corner admin 刪空 workspace**（happy path）：
+**測 3 — Corner 系統主管 刪空 workspace**（happy path）：
 ```bash
 # 先 create 一個空 workspace
 curl -X DELETE https://venturo.../api/workspaces/<空 workspace uuid> \
@@ -162,7 +162,7 @@ curl -X DELETE https://venturo.../api/workspaces/<空 workspace uuid> \
 # 預期：200 { success: true, workspace: {...} }、DB 真的刪掉。
 ```
 
-**測 4 — Corner admin 刪非空 workspace**（防呆）：
+**測 4 — Corner 系統主管 刪非空 workspace**（防呆）：
 ```bash
 curl -X DELETE https://venturo.../api/workspaces/<有員工的 uuid> \
   -H "Cookie: <corner admin session>"
@@ -201,8 +201,8 @@ curl -X DELETE https://venturo.../api/workspaces/<有員工的 uuid> \
 |---|-----|---------|------|
 | 1 | 一般員工 `supabase.from('workspaces').delete()` | 0 rows affected、no error | RLS `USING (false)` |
 | 2 | 一般員工 fetch `/api/workspaces/[id]` DELETE | 403 `沒有租戶管理權限` | `requireTenantAdmin` |
-| 3 | Corner admin fetch 刪空 workspace | 200、DB 真刪 | happy path |
-| 4 | Corner admin fetch 刪有員工 workspace | 409 `還有 N 位員工` | 防呆 |
+| 3 | Corner 系統主管 fetch 刪空 workspace | 200、DB 真刪 | happy path |
+| 4 | Corner 系統主管 fetch 刪有員工 workspace | 409 `還有 N 位員工` | 防呆 |
 | 5* | 快速連打 DELETE 20 次 | 第 11 次起 429 | Rate Limit（若實作） |
 | 6* | 未登入 fetch | 307 to /login | Middleware |
 

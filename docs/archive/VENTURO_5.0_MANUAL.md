@@ -1767,7 +1767,7 @@ test('should create and manage tour', async ({ page }) => {
 
 > **設計原則**：
 >
-> - **管理員**：自動擁有全部權限（勾選時自動全選）
+> - **系統主管**：自動擁有全部權限（勾選時自動全選）
 > - **其他角色**：可自訂權限組合（保留彈性）
 > - **角色可擴充**：未來可新增自訂角色
 
@@ -1775,7 +1775,7 @@ test('should create and manage tour', async ({ page }) => {
 
 | 角色       | 旅遊團  | 訂單    | 客戶    | 財務    | 報價    | 系統設定 | 說明     |
 | ---------- | ------- | ------- | ------- | ------- | ------- | -------- | -------- |
-| **管理員** | ✅ 全部 | ✅ 全部 | ✅ 全部 | ✅ 全部 | ✅ 全部 | ✅ 全部  | 自動全選 |
+| **系統主管** | ✅ 全部 | ✅ 全部 | ✅ 全部 | ✅ 全部 | ✅ 全部 | ✅ 全部  | 自動全選 |
 | **經理**   | CRUD    | CRUD    | CRUD    | RU      | CRUD    | R        | 可自訂   |
 | **業務**   | RU      | CRUD    | CRUD    | R       | CRUD    | -        | 可自訂   |
 | **會計**   | R       | R       | R       | CRUD    | R       | -        | 可自訂   |
@@ -1790,7 +1790,7 @@ test('should create and manage tour', async ({ page }) => {
 ```typescript
 export type Permission =
   // 系統權限
-  | 'admin' // 管理員（自動擁有全部權限）
+  | 'admin' // 系統主管（自動擁有全部權限）
 
   // 功能模組權限（可自由組合）
   | 'quotes' // 報價單
@@ -1824,9 +1824,9 @@ export type Permission =
 **目前實作**（參考 `src/lib/permissions.ts`）：
 
 ```typescript
-// 管理員檢查
+// 系統主管檢查
 export function hasPermissionForRoute(userPermissions: string[], pathname: string): boolean {
-  // 管理員有所有權限
+  // 系統主管有所有權限
   if (userPermissions.includes('admin')) {
     return true
   }
@@ -1874,11 +1874,11 @@ const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
 **當前實作**（參考 `src/components/hr/tabs/permissions-tab.tsx`）：
 
 ```typescript
-// 管理員自動全選權限
+// 系統主管自動全選權限
 const handlePermissionToggle = (permissionId: string) => {
   if (!isEditing) return
 
-  // 如果勾選管理員，自動全選所有權限
+  // 如果勾選系統主管，自動全選所有權限
   if (permissionId === 'admin') {
     const isAdminSelected = selectedPermissions.includes('admin')
     if (!isAdminSelected) {
@@ -1889,7 +1889,7 @@ const handlePermissionToggle = (permissionId: string) => {
     return
   }
 
-  // 如果取消勾選任何權限，自動取消管理員
+  // 如果取消勾選任何權限，自動取消系統主管
   setSelectedPermissions(prev => {
     const newPermissions = prev.includes(permissionId)
       ? prev.filter(id => id !== permissionId)
@@ -1936,7 +1936,7 @@ function TourActions({ tour }: { tour: Tour }) {
 
 **當前實作**：
 
-- ✅ 管理員自動全權限
+- ✅ 系統主管自動全權限
 - ✅ 功能模組級權限（14種）
 - ✅ UI 自動全選/取消邏輯
 - ✅ 路由權限檢查
@@ -4278,7 +4278,7 @@ const employee = employees.find(emp => emp.employeeNumber === employeeNumber)
 
 #### 2. init-admin-user.ts
 
-**問題**: 初始化管理員寫入錯誤的資料庫
+**問題**: 初始化系統主管寫入錯誤的資料庫
 
 **修復前**:
 
@@ -4298,7 +4298,7 @@ const existingUsers = await localDB.getAll<User>('users')
 await localDB.create<User>('users', adminUser)
 ```
 
-**影響**: 管理員資料正確寫入 VenturoLocalDB
+**影響**: 系統主管資料正確寫入 VenturoLocalDB
 
 ---
 
@@ -4929,7 +4929,7 @@ function createTourChannel(tour: Tour) {
     members: [
       tour.salesPersonId, // 業務
       tour.assistantId, // 助理
-      'william-uuid', // 威廉（系統管理員）
+      'william-uuid', // 威廉（系統系統主管）
     ],
     isArchived: tour.status === '結案',
   }

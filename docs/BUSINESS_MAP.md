@@ -188,7 +188,7 @@
 **服務流程：**
 
 1. 租戶申請 + 付費
-2. 租戶授權（LINE 管理員 / FB Business Manager）
+2. 租戶授權（LINE 系統主管 / FB Business Manager）
 3. **我們後台手動設定**（無前台 UI）
 4. 上線運作
 5. 每月收款

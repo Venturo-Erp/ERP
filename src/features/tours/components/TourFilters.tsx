@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Calendar, FileCheck, MapPin, BarChart3, Archive, Plus, FileText, Copy } from 'lucide-react'
 import { TOUR_FILTERS } from '../constants'
+import { TOUR_STATUS } from '@/lib/constants/status-maps'
 
 interface TourFiltersProps {
   searchQuery: string
@@ -32,11 +33,11 @@ export const TourFilters: React.FC<TourFiltersProps> = ({
 }) => {
   // 封存分頁已隱藏（需要時從 DB archived=true 還是能取到）
   const tabs = [
-    { value: '待出發', label: TOUR_FILTERS.tab_active, icon: Calendar },
+    { value: TOUR_STATUS.UPCOMING, label: TOUR_FILTERS.tab_active, icon: Calendar },
     { value: 'all', label: TOUR_FILTERS.tab_all, icon: BarChart3 },
-    { value: '已結團', label: TOUR_FILTERS.tab_closed, icon: FileCheck },
-    { value: 'proposal', label: TOUR_FILTERS.tab_proposals, icon: FileText },
-    { value: 'template', label: TOUR_FILTERS.tab_templates, icon: Copy },
+    { value: TOUR_STATUS.CLOSED, label: TOUR_FILTERS.tab_closed, icon: FileCheck },
+    { value: TOUR_STATUS.PROPOSAL, label: TOUR_FILTERS.tab_proposals, icon: FileText },
+    { value: TOUR_STATUS.TEMPLATE, label: TOUR_FILTERS.tab_templates, icon: Copy },
   ]
 
   return (
@@ -56,7 +57,7 @@ export const TourFilters: React.FC<TourFiltersProps> = ({
           <DropdownMenuTrigger asChild>
             <button
               type="button"
-              className="bg-morandi-gold hover:bg-morandi-gold-hover text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center transition-colors"
+              className="bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg px-4 py-2 rounded-lg text-sm font-medium flex items-center transition-all"
             >
               <Plus className="w-4 h-4 mr-2" />
               新增專案

@@ -365,7 +365,7 @@ const { data: bonusRequests } = await supabase
 
 - 結團後 `closing_status = 'closed'`
 - 已結團的團體會移到「封存」分頁
-- 管理員可以解鎖（將 closed 改回 open）
+- 系統主管可以解鎖（將 closed 改回 open）
 
 ### 4. 會計拋轉時機
 

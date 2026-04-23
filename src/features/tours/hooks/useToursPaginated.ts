@@ -23,11 +23,13 @@ import { deleteTour as deleteTourEntity } from '@/data'
 import { useAuthStore } from '@/stores/auth-store'
 import { formatDate } from '@/lib/utils/format-date'
 import { TOUR_SERVICE_LABELS, TOURS_ADVANCED_LABELS } from '../constants/labels'
+import { TOUR_STATUS } from '@/lib/constants/status-maps'
 
 export interface UseToursPaginatedParams {
   page: number
   pageSize: number
-  status?: string // 'all' | 'planning' | 'confirmed' | 'in_progress' | 'completed' | 'archived'
+  // 'all' | 'template' | 'proposal' | 'upcoming' | 'ongoing' | 'returned' | 'closed' | 'archived'
+  status?: string
   search?: string
   sortBy?: string
   sortOrder?: 'asc' | 'desc'
@@ -55,7 +57,9 @@ function buildSwrKey(params: UseToursPaginatedParams): string {
 export function useToursPaginated(params: UseToursPaginatedParams): UseToursPaginatedResult {
   const { page, pageSize, status, search, sortOrder = 'desc' } = params
   const defaultSort =
-    status === 'proposal' || status === 'template' ? 'created_at' : 'departure_date'
+    status === TOUR_STATUS.PROPOSAL || status === TOUR_STATUS.TEMPLATE
+      ? 'created_at'
+      : 'departure_date'
   const sortBy = params.sortBy || defaultSort
 
   // Auth check - 只用於寫入操作，讀取不需要等待 hydration
@@ -80,50 +84,52 @@ export function useToursPaginated(params: UseToursPaginatedParams): UseToursPagi
       let query = supabase
         .from('tours')
         .select(
-          'id, code, name, location, country_id, airport_code, status, departure_date, return_date, price, selling_price_per_person, max_participants, current_participants, total_revenue, total_cost, profit, archived, is_active, quote_id, itinerary_id, controller_id, closing_status, workspace_id, created_at, tour_type, days_count',
+          'id, code, name, location, country_id, airport_code, status, departure_date, return_date, price, selling_price_per_person, max_participants, current_participants, total_revenue, total_cost, profit, archived, is_active, quote_id, itinerary_id, controller_id, workspace_id, created_at, days_count',
           { count: 'exact' }
         )
         .eq('is_deleted', false) // 過濾已刪除的團
         .range(from, to) // ✅ Server-side pagination
         .order(sortBy, { ascending: sortOrder === 'asc' })
 
-      // ✅ Server-side status filtering
-      // 「待出發 / 進行中 / 已完成」狀態**不存 DB**、完全由 departure_date / return_date 計算（SSOT）
-      // 時區問題記入 BACKLOG 後續處理、目前用 UTC today（與 UI 計算一致、避免分類 vs 顯示不同步）
+      // ✅ Server-side status filtering（過渡期：tour_type 欄位即將 DB migration 併進 status）
+      // 「upcoming / ongoing / returned」顯示層可再用 departure_date / return_date 細分
       const todayStr = new Date().toISOString().split('T')[0]
 
-      if (status === 'proposal') {
-        // 提案分頁：只顯示 tour_type=proposal
-        query = query.eq('tour_type', 'proposal').neq('archived', true)
-      } else if (status === 'template') {
-        // 模板分頁：只顯示 tour_type=template
-        query = query.eq('tour_type', 'template').neq('archived', true)
+      if (status === TOUR_STATUS.PROPOSAL) {
+        query = query.eq('status', TOUR_STATUS.PROPOSAL).neq('archived', true)
+      } else if (status === TOUR_STATUS.TEMPLATE) {
+        query = query.eq('status', TOUR_STATUS.TEMPLATE).neq('archived', true)
       } else if (status === 'archived') {
-        // 封存分頁
+        // 封存是獨立欄位、不是 status 值
         query = query.eq('archived', true)
-      } else if (status === '待出發') {
-        // 待出發：還沒結束的團（包含進行中）— return_date >= today
+      } else if (status === TOUR_STATUS.UPCOMING) {
+        // 待出發：正式團、回程日未過
         query = query
           .gte('return_date', todayStr)
           .neq('archived', true)
           .not('code', 'like', 'VISA%')
           .not('code', 'like', 'ESIM%')
-          .or('tour_type.eq.official,tour_type.is.null')
-      } else if (status === '已結團') {
-        // 已結團：回程日期已過 — return_date < today
+          .in('status', [TOUR_STATUS.UPCOMING, TOUR_STATUS.ONGOING])
+      } else if (status === TOUR_STATUS.CLOSED) {
+        // 已結團：回程日已過
         query = query
           .lt('return_date', todayStr)
           .neq('archived', true)
           .not('code', 'like', 'VISA%')
           .not('code', 'like', 'ESIM%')
-          .or('tour_type.eq.official,tour_type.is.null')
+          .in('status', [TOUR_STATUS.RETURNED, TOUR_STATUS.CLOSED])
       } else {
         // 'all' 或其他 tab：排除封存、工具團、提案/模板
         query = query
           .neq('archived', true)
           .not('code', 'like', 'VISA%')
           .not('code', 'like', 'ESIM%')
-          .or('tour_type.eq.official,tour_type.is.null')
+          .in('status', [
+            TOUR_STATUS.UPCOMING,
+            TOUR_STATUS.ONGOING,
+            TOUR_STATUS.RETURNED,
+            TOUR_STATUS.CLOSED,
+          ])
       }
 
       // ✅ Server-side search
@@ -354,7 +360,7 @@ export function useTourDetailsPaginated(tourId: string | null) {
       const { data, error: queryError } = await supabase
         .from('tours')
         .select(
-          'id, code, name, location, departure_date, return_date, status, current_participants, max_participants, workspace_id, archived, contract_archived_date, tour_type, outbound_flight, return_flight, is_deleted, confirmed_requirements, locked_itinerary_id, itinerary_id, quote_id, locked_quote_id, tour_leader_id, controller_id, country_id, price, selling_price_per_person, total_cost, total_revenue, profit, contract_status, description, days_count, created_at, created_by, updated_at, updated_by'
+          'id, code, name, location, departure_date, return_date, status, current_participants, max_participants, workspace_id, archived, contract_archived_date, outbound_flight, return_flight, is_deleted, confirmed_requirements, locked_itinerary_id, itinerary_id, quote_id, locked_quote_id, tour_leader_id, controller_id, country_id, price, selling_price_per_person, total_cost, total_revenue, profit, contract_status, description, days_count, created_at, created_by, updated_at, updated_by'
         )
         .eq('id', tourId)
         .single()

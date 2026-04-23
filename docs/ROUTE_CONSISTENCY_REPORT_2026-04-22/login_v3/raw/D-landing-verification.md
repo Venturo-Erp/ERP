@@ -11,9 +11,9 @@
 **整體評估**：⚠️ **部分落地**
 
 - 代碼修法 94% 落地（P001-P003 代碼層改動完成、migration 正確）
-- 關鍵業務場景 70% 驗證（P001 拔短路完成、但 admin/非-admin 邊界需實測）
+- 關鍵業務場景 70% 驗證（P001 拔短路完成、但 系統主管/沒有系統主管資格 邊界需實測）
 - 安全漏洞 8/9 修補（P003-A~I 全閉、P003-B 遺留 1 雞生蛋問題需驗證）
-- 最大隱患：**P001 前端拔短路後、非 admin 使用者進不進得了頁面**（role_tab_permissions 預填數vs需要數的對齊狀況不明）
+- 最大隱患：**P001 前端拔短路後、沒有系統主管資格 使用者進不進得了頁面**（role_tab_permissions 預填數vs需要數的對齊狀況不明）
 
 ---
 
@@ -27,13 +27,13 @@
 - **usePermissions.ts:42**：保留 `isAdmin` 暴露但標記 `@deprecated`、hook 本身未用它做決策
 
 #### ⚠️ 業務場景驗證不足
-1. **Admin 白屏風險**：
+1. **系統主管白屏風險**：
    - Migration 20260422150000 理論上填了 54 row（48 tab + 6 無 tab 模組）
-   - 但 pattern-map 紀錄 Corner admin 現況是 74 row（> 54、含舊殘留）
+   - 但 pattern-map 紀錄 Corner 系統主管 現況是 74 row（> 54、含舊殘留）
    - **問題**：没有驗證 UI 每個頁面對應的 tab permission key 是否全在這 54-74 row 裡
-   - **場景**：admin 登入後點 /tours → 需要 `tours:*` 或個別 tab permission → 如果 role_tab_permissions 漏 `tours:overview` → 頁面黑屏但非預期
+   - **場景**：系統主管登入後點 /tours → 需要 `tours:*` 或個別 tab permission → 如果 role_tab_permissions 漏 `tours:overview` → 頁面黑屏但非預期
 
-2. **非 admin 權限對齊**：
+2. **沒有系統主管資格 權限對齊**：
    - Pattern-map 宣稱 Migration 20260422160000 後、JINGYAO/YUFEN/TESTUX 的 業務/會計/助理 已同步 Corner 模板
    - 但列出的行數指標（業務 40→45/48/40）沒有逐 workspace 驗證每個職務的 row 是否完整
    - **場景**：JINGYAO 業務 45 row vs Corner 業務 40 row，多出 5 row 是哪 5 個？是補充的還是冗餘的？
@@ -214,7 +214,7 @@
 - 所有 `is_admin=true` 的 workspace_roles
   - 插入 54 row（48 module×tab + 6 無 tab 模組）
   - ON CONFLICT 覆蓋（確保 can_read/write = true）
-- 預檢驗證（第 123-154）：每個 admin role 應有 ≥ 54 row、若不足則 EXCEPTION abort
+- 預檢驗證（第 123-154）：每個 系統主管職務 應有 ≥ 54 row、若不足則 EXCEPTION abort
 
 - **風險點**：模組清單在 migration 硬 coded（第 31-101），與 src/lib/permissions/module-tabs.ts 必須同步
   - 查 pattern-map：「MODULES 變動時、此 migration 需重跑或建 cron 同步」
@@ -244,7 +244,7 @@
 
 ### 原則對照
 1. **原則 1：權限長在人身上、不是頭銜上**
-   - ✅ P001 拔短路後確實改了、但 **未實測 admin/非-admin 使用者實際進頁面的行為**
+   - ✅ P001 拔短路後確實改了、但 **未實測 系統主管/沒有系統主管資格 使用者實際進頁面的行為**
 
 2. **原則 2：職務是身份卡、全系統統一**
    - ✅ role_tab_permissions 現已當唯一 SSOT（P001/P010 都繞著它）
@@ -260,7 +260,7 @@
 
 ### 🔴 高風險（需人工驗證）
 
-1. **P001 非 admin 白屏**：
+1. **P001 沒有系統主管資格 白屏**：
    - 代碼改了、但沒驗 role_tab_permissions 預填的 row 數是否包含每個功能頁面需要的 tab
    - 需跑 E2E：JINGYAO 業務帳號登入 → 進 /tours → 點行程表 tab → 檢查是否可見
 
@@ -273,11 +273,11 @@
 3. **P003-H 跨租戶查 workspace info**：
    - 修法無誤、但權限檢查的 role_tab_permissions.settings.tenants.can_write 本身要用 P010 RLS 擋
    - 邏輯鏈：`GET /api/workspaces/[id]` → 查 role_tab_permissions → 讀側 RLS 應該已擋（P010 新 SELECT policy）
-   - 驗收：Corner admin 能查別的 workspace、非 admin 訪問別的 workspace 回 403
+   - 驗收：Corner 系統主管 能查別的 workspace、沒有系統主管資格 訪問別的 workspace 回 403
 
 4. **模組清單同步**：
    - P001 migration 硬 coded 54 個模組 × tab
-   - 若後續新增模組忘了同步、admin 會缺權限
+   - 若後續新增模組忘了同步、系統主管會缺權限
    - **建議**：在 CI/pre-commit 加檢查「module-tabs.ts 的模組數 === migration 期望數」
 
 ### 🟢 低風險
@@ -292,7 +292,7 @@
 | 項目 | 狀態 | 備註 |
 |------|------|------|
 | **P001 代碼層** | ✅ 落地 | 3 處短路已拔、canAccess/canEdit 改雙檢查 |
-| **P001 業務層** | ❓ 部分驗證 | Admin 預填邏輯對、但非 admin 進頁面未實測 |
+| **P001 業務層** | ❓ 部分驗證 | 系統主管預填邏輯對、但沒有系統主管資格 進頁面未實測 |
 | **P002 Middleware** | ✅ 完全落地 | 精確白名單建立、5 敏感 API 已不裸奔 |
 | **P003-A Features** | ✅ 完全落地 | 租戶管理權限檢查已加 |
 | **P003-B sync-employee** | ✅ 代碼完全 | 修法 + 跨租戶檢查全、但 token timing 文件不足 |
@@ -307,7 +307,7 @@
 1. **P003-B 登入流文件**：在 sync-employee/route.ts 或 auth-store.ts 加註「signInWithPassword 後 session cookie 應就位」
 2. **P001 預填驗證**：建立 test/admin-role-permissions.test.ts 驗證 54 row 涵蓋所有功能頁面的 tab
 3. **模組常數 CI check**：pre-commit 驗證 module-tabs.ts 長度 === migration 期望長度
-4. **P003-H 權限鏈路測試**：role_tab_permissions RLS 改後、補一支 e2e 驗「admin 查 workspace、非 admin 得 403」
+4. **P003-H 權限鏈路測試**：role_tab_permissions RLS 改後、補一支 e2e 驗「系統主管查 workspace、沒有系統主管資格 得 403」
 
 ---
 

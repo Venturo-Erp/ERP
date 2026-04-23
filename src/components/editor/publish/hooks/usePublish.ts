@@ -10,6 +10,8 @@ import { generateUUID } from '@/lib/utils/uuid'
 import { logger } from '@/lib/utils/logger'
 import { alert } from '@/lib/ui/alert-dialog'
 import { stripHtml } from '@/lib/utils/string-utils'
+import { TOUR_STATUS } from '@/lib/constants/status-maps'
+import type { TourStatus } from '@/types/tour.types'
 // syncItineraryToQuote 已移除 — 報價單直接讀核心表
 
 interface PublishButtonData extends Partial<TourFormData> {
@@ -81,7 +83,7 @@ export function usePublish({
     // 顯示時請從 tour 直接讀。寫空字串而非 null 是為了相容 schema 型別。
     country: '',
     city: '',
-    status: (data.status || '開團') as '開團' | '待出發',
+    status: (data.status || TOUR_STATUS.PROPOSAL) as TourStatus,
     outbound_flight: data.outboundFlight,
     return_flight: data.returnFlight,
     features: data.features,

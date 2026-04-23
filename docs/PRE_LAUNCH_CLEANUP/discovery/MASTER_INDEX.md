@@ -24,7 +24,7 @@
 | REDIRECT_ONLY | 10 |
 
 **工期修正**：S-M → **L-XL**（不是 migrate、是從零建 90 頁 guard）
-**執行策略**：分 4 batch 依風險（finance 13 → HR admin 11 → settings 7 → 操作 21）
+**執行策略**：分 4 batch 依風險（finance 13 → HR 系統主管 11 → settings 7 → 操作 21）
 
 **Detail**：`discovery/A1_all_routes_guard.md`
 

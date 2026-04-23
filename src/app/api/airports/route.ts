@@ -4,8 +4,8 @@ import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { getServerAuth } from '@/lib/auth/server-auth'
 import { ApiError } from '@/lib/api/response'
 
-// Stage 1（ref data SSOT 重構）：ref_airports 為全域表，
-// 新增機場只允許 super admin（平台層）操作。一般業務遇到缺的機場應回報平台。
+// Stage 1（ref data SSOT 重構）：ref_airports 為全域表、
+// 新增機場僅允許擁有平台管理資格的呼叫者操作。一般業務遇到缺的機場應回報平台。
 export async function POST(req: NextRequest) {
   const auth = await getServerAuth()
   if (!auth.success) {
@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
   const { data: isSuperAdmin, error: rpcError } = await ssr.rpc('is_super_admin')
   if (rpcError || !isSuperAdmin) {
     return NextResponse.json(
-      { error: '僅平台管理員可新增全域機場，請聯絡 super admin' },
+      { error: '您沒有此權限（新增全域機場需要平台管理資格）' },
       { status: 403 }
     )
   }

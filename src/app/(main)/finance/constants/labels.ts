@@ -60,6 +60,7 @@ export const FinanceLabels = {
   paymentMethod: '收款方式',
   actions: '操作',
   edit: '編輯',
+  view: '檢視',
   createReceiptFailedPrefix: '建立收款單失敗',
   createReceiptFailedTitle: '建立收款單失敗',
 }
@@ -125,53 +126,6 @@ export const BATCH_CONFIRM_LABELS = {
   CONFIRM_N_RECEIPTS: (count: number) => `確認 ${count} 筆收款`,
   SELECTED_STATS: (selected: number, total: number) => `已選擇 ${selected} / ${total} 筆`,
   TOTAL_PREFIX: '總計：',
-}
-
-export const CREATE_RECEIPT_LABELS = {
-  TITLE: '新增收款單',
-  BASIC_INFO: '基本資訊',
-  PAYMENT_ITEMS: '收款項目',
-  TOTAL_AMOUNT: '總收款金額',
-
-  SELECT_1269: '選擇團體 *',
-  SELECT_8066: '請先選擇團體',
-  NO_ORDERS: '此團體沒有訂單',
-  SELECT_ORDER_PLACEHOLDER: '請選擇訂單...',
-  SUBMITTING: '處理中...',
-  SAVE_RECEIPT: '儲存收款單',
-  SELECT_8775: '選擇訂單 *',
-  LABEL_6150: '待收金額',
-  ADD_2089: '新增項目',
-  CANCEL: '取消',
-  REMAINING_PREFIX: '待收: ',
-}
-
-export const PAYMENT_ITEM_LABELS = {
-  ITEM_TITLE: '收款項目',
-  PAYMENT_METHOD: '收款方式 *',
-  AMOUNT: '金額 *',
-  TRANSACTION_DATE: '收款日期 *',
-  PAYER_NAME: '付款人姓名',
-  REMARKS: '備註',
-  HANDLER: '經手人',
-  HANDLING_FEE: '手續費',
-  AUTH_CODE: '授權碼',
-
-  PLEASE_ENTER_3984: '請輸入金額',
-  OPTIONAL: '選填',
-  LABEL_6186: '付款截止日 *',
-  LABEL_4673: '付款名稱（客戶看到的）',
-  EXAMPLE_4757: '例如：峇里島五日遊 - 尾款',
-  PLEASE_ENTER_2071: '請輸入經手人姓名',
-  LABEL_7063: '匯入帳戶 *',
-  PLEASE_SELECT_578: '請選擇匯入帳戶',
-  LABEL_1988: '選填，如有手續費',
-  LABEL_1306: '卡號後四碼',
-  PLEASE_ENTER_1445: '請輸入授權碼',
-  LABEL_9924: '支票號碼',
-  PLEASE_ENTER_8853: '請輸入支票號碼',
-  LABEL_7421: '開票銀行',
-  PLEASE_ENTER_2131: '請輸入銀行名稱',
 }
 
 export const TOUR_PNL_LABELS = {

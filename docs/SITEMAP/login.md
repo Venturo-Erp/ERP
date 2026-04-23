@@ -24,7 +24,7 @@ Raw reports：
 - **現在**：員工登入系統
 - **未來**：SaaS 多廠商（旅遊業 Agent / 地接 Loco / 遊覽車 / 飯店 / 餐廳）
 - **登入方式**：每家公司一組 workspace code、員工用該公司代號 + 自家帳密登入、不分角色類型
-- **權限設計**：權限長在人身上、不是頭銜上。管理員 = 預設權限多、不是萬能通行證
+- **權限設計**：權限長在人身上、不是頭銜上。系統主管 = 預設權限多、不是萬能通行證
 - **使用情境**：第一次登入、忘記密碼
 - **不會有**：工作空間切換
 
@@ -45,7 +45,7 @@ Raw reports：
 - **API 家族**：9 個 `/api/auth/*` endpoint（其中 4 支今晚加跨租戶守門）+ `/api/permissions/features`（今晚加 `requireTenantAdmin`）+ `/api/workspaces/[id]`（今晚加「自己直通、跨租戶需租戶管理」）
 - **Middleware**：今晚從「`/api/auth/*` 整組公開」改「EXACT_PUBLIC_PATHS 精確白名單 + PREFIX_PUBLIC_PATHS」、4 支敏感 auth API 不再裸奔
 - **前端權限**：`auth-store.ts:249` / `permissions/hooks.ts:284/293` / `usePermissions.ts` 九 bool 今晚全部拔 isAdmin 短路、改走 role_tab_permissions
-- **Backfill migration**（20260422150000 + 160000）：admin role 預填所有 MODULES×tabs、其他 3 家 workspace 的業務/會計/助理從 Corner 同步
+- **Backfill migration**（20260422150000 + 160000）：系統主管職務 預填所有 MODULES×tabs、其他 3 家 workspace 的業務/會計/助理從 Corner 同步
 - **Session**：Supabase JWT 1 小時；rememberMe 仍未接；cookie maxAge 未定義
 - **Rate limit**：validate-login 10 req/min、change-password 5 req/min
 
@@ -70,7 +70,7 @@ Raw reports：
 
 **風險評級**：🟡 中（API 層 role_tab_permissions 二次驗大部分撐住、但 admin 改 role permission 後 useTabPermissions 仍直通、原則 1「權限長在人身上」hook 層仍有缺口）
 
-**修法**：PR-1d、拔這 6 處短路、改查 role_tab_permissions（admin role 已 PR-1a backfill 補滿）
+**修法**：PR-1d、拔這 6 處短路、改查 role_tab_permissions（系統主管職務 已 PR-1a backfill 補滿）
 
 ---
 
@@ -78,7 +78,7 @@ Raw reports：
 
 | ID | 原問題 | 修法 | 狀態 |
 |---|---|---|---|
-| P001 | 權限模型違背（admin 萬能通行證、前後端皆是）| 前端拔短路 + admin role 補齊 role_tab_permissions | ✅ |
+| P001 | 權限模型違背（系統主管萬能通行證、前後端皆是）| 前端拔短路 + 系統主管職務 補齊 role_tab_permissions | ✅ |
 | P002 | Middleware `/api/auth/*` 整組公開 | 改精確白名單（EXACT + PREFIX）| ✅ |
 | P003-B | sync-employee 可跨租戶綁帳號 | 查目標 employee workspace、body 對齊、拒覆蓋已綁 | ✅ |
 | P004 | 28 張 FORCE RLS + service_role 衝突 | Wave 2.5 全部 NO FORCE（pg_class 驗 0 張）| ✅ |
@@ -176,7 +176,7 @@ Raw reports：
 - **migration 20260422150000 ON CONFLICT 語義**：是 DO NOTHING 還是 DO UPDATE？重跑會不會覆蓋人為調整
 - **migration 20260422160000 反向放寬風險**：JINGYAO/YUFEN/TESTUX 客製「更嚴格」權限有沒有被 Corner 寬鬆預填放寬
 - **amadeus_totp_secret 讀取**：確認所有前端 SELECT employees 不用 `*`、用明確欄位清單
-- **非 admin 跨路由視野**：JINGYAO 業務登入 /tours 能看到所有該看的 tab？role_tab_permissions 74 row 是否真的覆蓋所有路由需要的 tab key？
+- **沒有系統主管資格 跨路由視野**：JINGYAO 業務登入 /tours 能看到所有該看的 tab？role_tab_permissions 74 row 是否真的覆蓋所有路由需要的 tab key？
 
 ---
 
@@ -233,15 +233,15 @@ Raw reports：
 |---|---|
 | 清除 employees.permissions / roles 舊欄位（cleanup-council 任務）| v3.0 F-5 |
 | Quick-login token 加設備綁定 | v2.0 遺留 |
-| 非 admin 跨路由視野矩陣驗證（4 職務 × 關鍵路由）| v3.0 回歸驗證 |
+| 沒有系統主管資格 跨路由視野矩陣驗證（4 職務 × 關鍵路由）| v3.0 回歸驗證 |
 | SaaS workspace type 業務隔離設計 | v3.0 未來隱患 |
 
 ---
 
 ## 下一個相關路由建議
 
-1. **`/dashboard`** — /login 驗證發現 28 張 FORCE RLS 表已全關、但 dashboard widget 調用的 API（workspaces/[id] 等）今晚加守門、需驗 Corner admin 登入後 widget 正常載入
-2. **`/tenants`**（租戶管理）— 本頁今晚 e2e smoke 過、但 requireTenantAdmin 邏輯需驗新租戶 admin 第一次進能否打開 feature 設定
+1. **`/dashboard`** — /login 驗證發現 28 張 FORCE RLS 表已全關、但 dashboard widget 調用的 API（workspaces/[id] 等）今晚加守門、需驗 Corner 系統主管 登入後 widget 正常載入
+2. **`/tenants`**（租戶管理）— 本頁今晚 e2e smoke 過、但 requireTenantAdmin 邏輯需驗新租戶系統主管 第一次進能否打開 feature 設定
 3. **`/hr/roles`** — 權限模型本體、v2.0 已驗（有 isAdmin 短路地雷）、今晚拔短路後要覆盤
 4. **`/finance/payments`** — v2.0 已驗、新原則 4（狀態是真相、數字從狀態算）未修、跟 /login P001 同病配套修
 

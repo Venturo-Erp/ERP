@@ -203,7 +203,7 @@ export function HotelSelector({
           <Button
             onClick={handleConfirm}
             disabled={selectedIds.size === 0}
-            className="bg-morandi-gold hover:bg-morandi-gold-hover text-white rounded-xl min-w-[120px]"
+            className="bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg rounded-xl min-w-[120px]"
           >
             新增飯店 ({selectedIds.size})
           </Button>

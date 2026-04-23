@@ -244,7 +244,7 @@ export function TourEditDialog({ isOpen, onClose, tour, onSuccess }: TourEditDia
                 !formData.departure_date ||
                 !formData.return_date
               }
-              className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+              className="bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg"
             >
               {submitting ? COMP_TOURS_LABELS.儲存中 : COMP_TOURS_LABELS.儲存變更}
             </Button>

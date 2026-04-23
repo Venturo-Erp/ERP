@@ -24,7 +24,7 @@
 - [x] Rate limiting middleware 已加上
 - [x] CSP headers 強化
 - [x] `/api/debug` 公開路徑已移除
-- [x] Admin 密碼重設權限檢查已修復（原本任何登入用戶可重設）
+- [x] 系統主管密碼重設權限檢查已修復（原本任何登入用戶可重設）
 - [x] 44 個 API routes 全部有認證保護
 - [x] 31+ API routes 有 Zod schema 輸入驗證
 - [x] RLS：除 `_migrations` 外所有表已啟用

@@ -72,5 +72,5 @@ export function withWorkspaceId<T extends Record<string, unknown>>(
 
 // ============================================
 // 跨 Workspace 功能已移除（2026-04-02）
-// 所有用戶（包括管理員）都只能看到自己 workspace 的資料
+// 所有用戶（包括系統主管）都只能看到自己 workspace 的資料
 // ============================================

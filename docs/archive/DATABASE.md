@@ -456,7 +456,7 @@ ALTER TABLE employees ENABLE ROW LEVEL SECURITY;
 ### Policy 範例
 
 ```sql
--- 管理員可以查看所有旅遊團
+-- 系統主管可以查看所有旅遊團
 CREATE POLICY "Admins can view all tours" ON tours
   FOR SELECT USING (
     EXISTS (

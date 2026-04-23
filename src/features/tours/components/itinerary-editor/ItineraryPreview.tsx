@@ -67,7 +67,7 @@ export function ItineraryPreview({
               <Button
                 size="sm"
                 onClick={onPrint}
-                className="h-7 text-[11px] gap-1 bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+                className="h-7 text-[11px] gap-1 bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg"
               >
                 <Printer size={12} />
                 {PRINTABLE_QUICK_QUOTE_LABELS.列印}
@@ -259,7 +259,7 @@ export function ItineraryPreviewContent({
           <Button
             size="sm"
             onClick={onPrint}
-            className="h-7 text-[11px] gap-1 bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+            className="h-7 text-[11px] gap-1 bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg"
           >
             <Printer size={12} />
             {PRINTABLE_QUICK_QUOTE_LABELS.列印}

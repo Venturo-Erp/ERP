@@ -464,7 +464,7 @@ export const MessageInput = memo(function MessageInput({
             }}
             placeholder={
               isDisabled
-                ? COMP_WORKSPACE_LABELS.只有管理員才能在此頻道發言
+                ? COMP_WORKSPACE_LABELS.只有系統主管才能在此頻道發言
                 : `傳送訊息給 ${displayChannelName}...`
             }
             className="w-full min-h-[40px] max-h-[120px] px-3 py-2 pr-10 bg-card border border-morandi-container rounded-md resize-none text-sm focus:outline-none focus:border-morandi-gold transition-colors disabled:bg-muted disabled:cursor-not-allowed"
@@ -493,7 +493,7 @@ export const MessageInput = memo(function MessageInput({
         <Button
           type="submit"
           disabled={(!value.trim() && attachedFiles.length === 0) || uploadingFiles || isDisabled}
-          className="bg-morandi-gold hover:bg-morandi-gold-hover text-white disabled:opacity-50 disabled:cursor-not-allowed"
+          className="bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {uploadingFiles ? (
             <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />

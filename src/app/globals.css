@@ -68,13 +68,13 @@
   --public-accent: #002366; /* 藍色強調 */
   --public-muted: #c0b090; /* 金棕 */
 
-  /* 漸層色（莫蘭迪金系列） */
-  --gradient-gold-light: #d4c5a9;
-  --gradient-gold-mid: #c9b896;
-  --gradient-gold-dark: #bfad87;
+  /* 漸層色（莫蘭迪金系列）— 拉開對比讓漸層明顯可見 */
+  --gradient-gold-light: #e6d9bf;
+  --gradient-gold-mid: #c9aa7c;
+  --gradient-gold-dark: #a8875d;
   --gradient-brown-light: #d4c4a8;
-  --gradient-brown-mid: #b5986a;
-  --gradient-brown-dark: #a08968;
+  --gradient-brown-mid: #8b6d4a;
+  --gradient-brown-dark: #6f5538;
   --gradient-primary-dark: #4a4540;
 
   /* 行事曆狀態色 */

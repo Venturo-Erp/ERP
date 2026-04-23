@@ -275,12 +275,12 @@ const canEdit =
     tour.status !== 'cancelled' &&
     !isLoading &&
     !isSaving &&
-    user.role === 'admin') ||
+    user.role === '系統主管') ||
   user.id === tour.created_by
 
 // ✅ 正確：拆解條件，清楚易懂
 const isTourEditable = tour?.status === 'proposal' || tour?.status === 'confirmed'
-const hasPermission = user.role === 'admin' || user.id === tour?.created_by
+const hasPermission = user.role === '系統主管' || user.id === tour?.created_by
 const isNotBusy = !isLoading && !isSaving
 
 const canEdit = isTourEditable && hasPermission && isNotBusy

@@ -29,10 +29,11 @@ import { logger } from '@/lib/utils/logger'
 import { stripHtml } from '@/lib/utils/string-utils'
 import { DOCUMENTS_LABELS } from './constants/labels'
 import { getWorkspaceTagline } from '@/lib/workspace-helpers'
+import { TOUR_STATUS } from '@/lib/constants/status-maps'
 
 // 判斷是否為已確認版本（狀態為結案）
 function isConfirmedItinerary(itinerary: Itinerary): boolean {
-  return itinerary.status === '已結團'
+  return itinerary.status === TOUR_STATUS.CLOSED
 }
 
 interface ItineraryVersionPickerProps {

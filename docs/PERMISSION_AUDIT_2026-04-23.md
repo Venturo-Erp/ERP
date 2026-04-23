@@ -155,7 +155,7 @@ UI 層的權限檢查目前並存三套：
 
 **子頁面**
 - 現況：所有子頁面均無自己的 gate，完全仰賴 layout。
-- 注意：P001 PR-1d audit 曾警告若 database 之下包含 `/database/workspaces`（平台級 admin）、要在子頁再加 admin。實際檢查下來 **`workspaces` 路由目前不存在**（layout 註解寫覆蓋 9 個但檔案只有 6 個），所以眼下沒此風險；但若未來真的恢復 `/database/workspaces` 必須雙層 gate。
+- 注意：P001 PR-1d audit 曾警告若 database 之下包含 `/database/workspaces`（平台管理資格）、要在子頁再加系統主管 gate。實際檢查下來 **`workspaces` 路由目前不存在**（layout 註解寫覆蓋 9 個但檔案只有 6 個），所以眼下沒此風險；但若未來真的恢復 `/database/workspaces` 必須雙層 gate。
 
 **dialog 層：`src/features/attractions/components/AttractionsDialog.tsx:14,54-55`**
 - 現況：
@@ -238,7 +238,7 @@ UI 層的權限檢查目前並存三套：
 
 #### /settings/components/WorkspaceSwitcher.tsx:5,13-14
 - 現況：`canWrite('settings', 'company')` ✅ 已走 useTabPermissions
-- 注意：P001 PR-1d audit 主張這個是「平台級 admin 功能」應該保留 isAdmin，不該用 workspace tab。目前 code 已經改成 settings.company 寫入權 — 如果 admin role backfill 正確這個 OK；如果 HR 給某 workspace 用戶開 `settings.company` 寫入，那他就能看到跨 workspace 切換卡。**請 William 確認這個選擇是否符合預期**。
+- 注意：P001 PR-1d audit 主張這個是「平台管理資格 功能」應該保留 isAdmin，不該用 workspace tab。目前 code 已經改成 settings.company 寫入權 — 如果 系統主管職務 backfill 正確這個 OK；如果 HR 給某 workspace 用戶開 `settings.company` 寫入，那他就能看到跨 workspace 切換卡。**請 William 確認這個選擇是否符合預期**。
 
 #### /settings/appearance、/settings/bot-line、/settings/menu、/settings/modules、/settings/receipt-test
 - 現況：**全部無 gate** ❌
@@ -248,11 +248,11 @@ UI 層的權限檢查目前並存三套：
   - `settings.bot-line`（LINE 打卡機器人）
   - `settings.menu`（側邊欄客製）
   - `settings.modules`（租戶功能開關）
-  - `settings.receipt-test`（測試頁，可能不需要 gate，或只給 admin）
+  - `settings.receipt-test`（測試頁，可能不需要 gate，或只給系統主管）
 
-#### /tenants、/tenants/[id]（超管）
+#### /tenants、/tenants/[id]（平台管理資格）
 - 現況：**無 gate** ❌
-- module-tabs.ts 註解：「租戶管理（tenants）為 Venturo 超管內部功能、不開放給租戶職務管理」
+- module-tabs.ts 註解：「租戶管理（tenants）為 Venturo 平台管理資格內部功能、不開放給租戶職務管理」
 - 建議：保留純 `isAdmin` 或引入 `isPlatformAdmin` 概念（與 P001 PR-1d 結論一致）。**不該走 useTabPermissions**。
 
 ---
@@ -284,20 +284,20 @@ UI 層的權限檢查目前並存三套：
 
 ### `isAdmin` 非權限 gate 的合理使用（保留、不改）
 
-這些使用 `isAdmin` 的地方**不是**權限 gate，而是「平台超管 only」或「UI 功能差異」，建議保留：
+這些使用 `isAdmin` 的地方**不是**權限 gate，而是「平台平台管理資格 only」或「UI 功能差異」，建議保留：
 
 | 檔案 | 用途 |
 | --- | --- |
-| `src/app/(main)/calendar/page.tsx:56,183` | 跨 workspace 篩選器（僅超管可見） |
+| `src/app/(main)/calendar/page.tsx:56,183` | 跨 workspace 篩選器（僅平台管理資格可見） |
 | `src/components/workspace/channel-sidebar/CreateChannelDialog.tsx:47,55,166` | 建立頻道時的跨 workspace scope 選項 |
-| `src/components/workspace/channel-chat/useChannelChat.ts:50,188`、`ChatMessages.tsx`、`ChannelList.tsx` 等 | 「公告頻道只有 admin 能發訊息」— 聊天室邏輯、非權限 gate |
+| `src/components/workspace/channel-chat/useChannelChat.ts:50,188`、`ChatMessages.tsx`、`ChannelList.tsx` 等 | 「公告頻道只有系統主管能發訊息」— 聊天室邏輯、非權限 gate |
 | `src/components/workspace/chat/MessageInput.tsx:26,55,83` | 同上 |
-| `src/features/calendar/components/EventDetailDialog.tsx:48-49` | 公司事項編輯檢查（creator 或 admin） |
-| `src/features/calendar/hooks/useCalendarEvents.ts:77,82,229,277,392` | 超管看全部 workspace 行事曆 |
+| `src/features/calendar/components/EventDetailDialog.tsx:48-49` | 公司事項編輯檢查（creator 或系統主管） |
+| `src/features/calendar/hooks/useCalendarEvents.ts:77,82,229,277,392` | 平台管理資格看全部 workspace 行事曆 |
 | `src/features/dashboard/components/DashboardClient.tsx:62,73`、`widget-settings-dialog.tsx:26,35` | `admin_only` widget 的顯示切換 |
 | `src/components/layout/sidebar.tsx:419,467,483` | 側邊欄 menu 整體過濾（底層用 `user.permissions` 前綴比對） |
 
-這些「不是 HR 職務管理能設定的概念」：跨 workspace、公告頻道、超管 dashboard widget 等。
+這些「不是 HR 職務管理能設定的概念」：跨 workspace、公告頻道、平台管理資格 dashboard widget 等。
 
 ---
 
@@ -343,13 +343,13 @@ UI 層的權限檢查目前並存三套：
 3. **清掉 `usePermissions` 和 `isAccountant`**：
    - `ReceiptConfirmDialog`、`AddRequestDialog`、`AdvanceListCard`、`OrderListCard`、`useChannelSidebar`、`settings/page`
 
-4. **module-tabs.ts 新增上表 6 個 tab + 對應 migration 把 admin role 的 `can_read` / `can_write` backfill 開啟**（呼應 P001 PR-1d §9「未來新增 tab 的 CI 守門」擔心的坑）。
+4. **module-tabs.ts 新增上表 6 個 tab + 對應 migration 把 系統主管職務 的 `can_read` / `can_write` backfill 開啟**（呼應 P001 PR-1d §9「未來新增 tab 的 CI 守門」擔心的坑）。
 
 5. **終態**：`src/hooks/usePermissions.ts` 整支刪除；`src/lib/permissions/hooks.ts` 的 `useRolePermissions`（空殼）與 `canAccess` 要嘛填真資料要嘛刪掉。
 
 ### 與 P001 PR-1d audit 的交集
 
-`docs/PATTERN_HEAL_REPORT_2026-04-22/P001-PR-1d/code-reviewer.md` 的 F1 / F3 finding 指出：若 PR-1d 用 `canAccess()` / `canViewFinance` 替代 admin gate 會擴權。本次稽核證實：
+`docs/PATTERN_HEAL_REPORT_2026-04-22/P001-PR-1d/code-reviewer.md` 的 F1 / F3 finding 指出：若 PR-1d 用 `canAccess()` / `canViewFinance` 替代 系統主管 gate 會擴權。本次稽核證實：
 - `finance/payments` 目前仍用 `canViewFinance`（未隨 PR-1d 改掉）。
 - `useRolePermissions` 空殼沒修，所以 `AttractionsDialog` 的 `readOnly` 一直是 false。
-- `useTabPermissions` 已由 PR-1a 補好 backfill（admin 54 個 row）；本報告建議的「改用 useTabPermissions.canRead/canWrite」方向與 PR-1d audit 結論一致。
+- `useTabPermissions` 已由 PR-1a 補好 backfill（系統主管 54 個 row）；本報告建議的「改用 useTabPermissions.canRead/canWrite」方向與 PR-1d audit 結論一致。

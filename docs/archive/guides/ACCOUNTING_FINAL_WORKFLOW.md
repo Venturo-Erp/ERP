@@ -311,7 +311,7 @@ COMMENT ON COLUMN public.tours.closing_date IS '結團日期';
 4. **權限控制**
    - 一般員工：可建立傳票
    - 會計主管：可過帳傳票
-   - Super Admin：可作廢傳票
+   - 擁有平台管理資格的人：可作廢傳票
 
 ---
 

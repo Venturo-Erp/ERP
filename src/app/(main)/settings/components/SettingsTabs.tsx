@@ -20,7 +20,7 @@ export function SettingsTabs() {
   const router = useRouter()
   const { isAdmin } = useAuthStore()
 
-  // 依權限過濾 — 非管理員看不到公司設定
+  // 依權限過濾 — 沒有管理員資格看不到公司設定
   const tabs = ALL_TABS.filter(tab => !tab.adminOnly || isAdmin)
 
   const getActiveTab = () => {

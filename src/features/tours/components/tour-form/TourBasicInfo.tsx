@@ -19,6 +19,7 @@ import { supabase } from '@/lib/supabase/client'
 import { logger } from '@/lib/utils/logger'
 import type { NewTourData } from '../../types'
 import { TOUR_BASIC_INFO } from '../../constants'
+import { TOUR_STATUS } from '@/lib/constants/status-maps'
 
 interface TourBasicInfoProps {
   newTour: NewTourData
@@ -26,7 +27,8 @@ interface TourBasicInfoProps {
 }
 
 export function TourBasicInfo({ newTour, setNewTour }: TourBasicInfoProps) {
-  const isProposalOrTemplate = newTour.tour_type === 'proposal' || newTour.tour_type === 'template'
+  const isProposalOrTemplate =
+    newTour.status === TOUR_STATUS.PROPOSAL || newTour.status === TOUR_STATUS.TEMPLATE
   const { isFeatureEnabled, loading: featuresLoading } = useWorkspaceFeatures()
   const hasDepartments = isFeatureEnabled('departments')
   const { items: departments = [] } = useDepartments()

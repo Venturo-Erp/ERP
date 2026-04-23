@@ -10,7 +10,7 @@
 | # | 模組 | 頁數 | 核心概念 | 主要紅旗 |
 |---|---|---|---|---|
 | 01 | [會計 + 財務](./01-accounting-finance.md) | 24 | 會計 = 傳票記帳；財務 = 請款收款；金流雙軌但**同步機制不明** | 未完成功能多（checks 空陣列、vouchers 反沖函數空）；傳票 vs 收付款單同步邏輯模糊 |
-| 02 | [人資](./02-hr.md) | 16 | my-* 員工自助 vs 非 my-* 管理後台、權限分離乾淨 | payslip / roles 欄位並存過渡期（2026-04-18 未完）；missed-clock / overtime 管理員判斷複製貼上 |
+| 02 | [人資](./02-hr.md) | 16 | my-* 員工自助 vs 非 my-* 管理後台、權限分離乾淨 | payslip / roles 欄位並存過渡期（2026-04-18 未完）；missed-clock / overtime 系統主管判斷複製貼上 |
 | 03 | [業務核心](./03-biz-core.md) | 10 | inquiries（詢價）→ customized-tours（客製模板）→ tours（成行）→ orders（訂單） | 客製景點庫無 useMemo；tab 參數未驗證；PNR 匯入邏輯未抽 hook |
 | 04 | [供應商 + 客戶 + 資料庫](./04-suppliers-customers-db.md) | 19 | database/* = 主檔黃頁、supplier/* = 工作檯；customers/companies = B2B 客戶、workspaces = 多租戶帳號 | attractions 曾崩潰硬限 100 筆；archive 級聯刪除複雜；transportation-rates 硬編 500 筆 |
 | 05 | [基礎建設](./05-infra-settings.md) | 20 | settings / tools / design 三套分工**有疊層**；design 實際已廢棄重導 | receipt-test 硬編樣本上線；flight-itinerary / hotel-voucher 是設計驗證工具不是生產頁；tools/reset-db 危險但無二次驗證；settings/company 一頁塞太多職能 |
@@ -60,7 +60,7 @@
 **模式**：防護用 config 做的多、用 schema/driver 做的少。
 
 ### E. 「程式碼重複」
-- missed-clock / overtime 兩個檔都手刻「找管理員」查詢
+- missed-clock / overtime 兩個檔都手刻「找系統主管」查詢
 - settings/company 一頁含基本資料 + 部門 + 團控 + 旅行屬性
 - ImageUploadField 在多頁重複實作
 

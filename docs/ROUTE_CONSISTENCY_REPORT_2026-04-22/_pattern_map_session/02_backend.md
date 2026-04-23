@@ -64,7 +64,7 @@
 
 ### 建議 A：不合表、但建立 SSOT 中介表（推薦）
 
-**不建議**把兩表合成一張（不同生命週期、不同 actor：workspace owner 開 feature vs role admin 設 permission）。
+**不建議**把兩表合成一張（不同生命週期、不同 actor：workspace owner 開 feature vs role 系統主管 設 permission）。
 
 **建議**：新增一張 `module_registry` 當 SSOT、取代兩本常數檔：
 

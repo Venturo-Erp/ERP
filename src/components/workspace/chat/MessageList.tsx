@@ -167,7 +167,6 @@ export const MessageList = forwardRef<HTMLDivElement, MessageListProps>(function
                       item.data.author?.display_name || getEmployeeName(item.data.created_by)
                     }
                     currentUserId={currentUserId || ''}
-                    userRole="admin"
                     onCreatePayment={onCreatePayment || (() => {})}
                     onDelete={onDeleteAdvanceList || (() => {})}
                   />
@@ -181,7 +180,6 @@ export const MessageList = forwardRef<HTMLDivElement, MessageListProps>(function
                       item.data.author?.display_name || getEmployeeName(item.data.created_by)
                     }
                     currentUserId={currentUserId || ''}
-                    userRole="admin"
                     onCreateReceipt={onCreateReceipt || (() => {})}
                   />
                 )

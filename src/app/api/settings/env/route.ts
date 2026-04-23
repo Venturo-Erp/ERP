@@ -5,7 +5,7 @@ import { ApiError, successResponse } from '@/lib/api/response'
 /**
  * API 設定資訊端點
  * 🔒 安全修復 2026-01-12：
- * - 需要管理員權限
+ * - 需要管理員資格
  * - 只顯示是否已設定，不暴露實際值
  */
 
@@ -81,10 +81,10 @@ export async function GET() {
     return ApiError.unauthorized('請先登入')
   }
 
-  // 🔒 管理員權限檢查：查詢員工的職務是否為 admin
+  // 🔒 檢查員工的職務是否擁有管理員資格
   const isAdmin = await checkAdminPermission(auth.data.employeeId)
   if (!isAdmin) {
-    return ApiError.forbidden('需要管理員權限')
+    return ApiError.forbidden('您沒有此權限')
   }
 
   const googleVisionUsage = await getGoogleVisionUsage()

@@ -32,9 +32,9 @@ const { error } = await supabase
 **CWE / OWASP**：
 - CWE-284 Improper Access Control
 - CWE-285 Improper Authorization
-- OWASP API Security Top 10 2023 — **API5: Broken Function Level Authorization**（刪 workspace 是管理員級功能、卻對 authenticated 全開放）
+- OWASP API Security Top 10 2023 — **API5: Broken Function Level Authorization**（刪 workspace 擁有管理員資格級功能、卻對 authenticated 全開放）
 
-**攻擊門檻**：**極低**。任何一個合法登入的員工（連 admin 都不用）、知道目標 workspace id（從 URL / 邀請連結可拿）、單行 supabase-js 調用即可。若 anon key 被抓包、連登入都不用。
+**攻擊門檻**：**極低**。任何一個合法登入的員工（連系統主管都不用）、知道目標 workspace id（從 URL / 邀請連結可拿）、單行 supabase-js 調用即可。若 anon key 被抓包、連登入都不用。
 
 ---
 
@@ -108,24 +108,24 @@ const { data } = await supabase
   .select('*')
 // 拿到跨租戶所有員工的個別權限覆蓋
 
-// 2. 再寫：給自己加管理員覆蓋
+// 2. 再寫：給自己加系統主管覆蓋
 await supabase.from('employee_permission_overrides').insert({
   employee_id: '<my-own-employee-id>',
-  permission: 'admin.full_access',  // 或該系統定義的提權 key
+  permission: 'systemmaster.full_access',  // 或該系統定義的提權 key
   granted: true,
 })
-// 下一次 JWT refresh / 重登 → 我就是 admin
+// 下一次 JWT refresh / 重登 → 我就擁有管理員資格
 
 // 3. 跨租戶提權：給 B 公司某員工設我方的 token
 await supabase.from('employee_permission_overrides').insert({
   employee_id: '<victim-employee-at-other-company>',
-  permission: 'admin.full_access',
+  permission: 'systemmaster.full_access',
   granted: true,
 })
-// 他下次登入變 admin、攻擊者控制他的帳號做事
+// 他下次登入變系統主管、攻擊者控制他的帳號做事
 ```
 
-**爆炸半徑**：這是**所有權限系統的最後一道個人覆蓋**、USING:true 等於告訴每個登入用戶「你可以自己任命自己當 admin」。比 Pattern A（刪 workspace）更陰險、因為 A 是一鎚定音可被發現、D 是悄悄提權長期潛伏。
+**爆炸半徑**：這是**所有權限系統的最後一道個人覆蓋**、USING:true 等於告訴每個登入用戶「你可以自己任命自己當系統主管」。比 Pattern A（刪 workspace）更陰險、因為 A 是一鎚定音可被發現、D 是悄悄提權長期潛伏。
 
 **CWE / OWASP**：
 - CWE-269 Improper Privilege Management
@@ -175,7 +175,7 @@ await supabase.from('employee_permission_overrides').insert({
 | 4 | **B · _migrations** | 🟠 High | 單行 SQL | 任一 authenticated 員工 | 情報洩漏（輔助其他攻擊）|
 
 **排序邏輯**：
-- **D 第一**：提權後攻擊者擁有所有後續攻擊的 token、並且**難以發現**（普通員工變 admin 不會有 alert）
+- **D 第一**：提權後攻擊者擁有所有後續攻擊的 token、並且**難以發現**（普通員工變系統主管 不會有 alert）
 - **A 第二**：破壞力最大、但一刪即明顯、客戶第一時間就發現、reputational 炸但可 restore backup
 - **C 第三**：rate limit 被繞 = 所有 auth endpoint 對 brute-force 裸奔
 - **B 第四**：info disclosure、本身不直接傷害、但是所有攻擊的偵察教科書
@@ -216,7 +216,7 @@ CREATE POLICY "epo_write" ON public.employee_permission_overrides FOR ALL TO aut
 ```
 
 **為什麼這兩張是紅線**：
-- D 讓普通員工能提權自己變 admin、所有其他權限控制形同虛設
+- D 讓普通員工能提權自己變系統主管、所有其他權限控制形同虛設
 - A 讓普通員工能一鍵刪除整間公司、這是 existential risk
 
 ### 完整修（🟠 High、上線後 1-2 週內補）
@@ -246,6 +246,6 @@ WHERE schemaname = 'public' AND qual = 'true';
 
 這 4 條是 **P003（API 層）在 DB 層的鏡像**、**同一個病縱深防禦的另一半**。P003 修完只代表 L1 擋住正常流量、但 Supabase 架構下、**任何人都能用前端 anon key 直打 PostgREST 繞過 L1**、此時 L3 RLS 是最後一道牆、USING:true = 牆不存在。
 
-優先度：**D（permission_overrides 提權）> A（workspaces_delete）> C（rate_limits）> B（_migrations）**。4 條的攻擊門檻**都是一行 supabase-js 調用、普通登入員工即可**、不需要 admin 或 service_role。
+優先度：**D（permission_overrides 提權）> A（workspaces_delete）> C（rate_limits）> B（_migrations）**。4 條的攻擊門檻**都是一行 supabase-js 調用、普通登入員工即可**、不需要系統主管或 service_role。
 
 **上線前最小必修**：D + A（防存在級災難）。C + B 上線後 1-2 週內補（但 migration 本身 < 20 行、沒理由拖）。**強烈建議上線前對 `pg_policies WHERE qual='true'` 全掃一次**、這 4 張只是露出來的冰山。

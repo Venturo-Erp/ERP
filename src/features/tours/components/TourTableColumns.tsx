@@ -12,6 +12,7 @@ import { DateCell } from '@/components/table-cells'
 import { TOUR_TABLE } from '../constants'
 import { getStatusConfig } from '@/lib/status-config'
 import { useTourDisplayResolver } from '../utils/tour-display'
+import { TOUR_STATUS } from '@/lib/constants/status-maps'
 
 interface UseTourTableColumnsParams {
   ordersByTourId?: Map<string, { sales_person: string | null; assistant: string | null }>
@@ -81,11 +82,11 @@ export function useTourTableColumns({ ordersByTourId }: UseTourTableColumnsParam
           let actualStatus = tour.status || ''
 
           if (tour.departure_date && tour.return_date) {
-            if (actualStatus === '待出發' && tour.departure_date <= today) {
-              actualStatus = '進行中'
+            if (actualStatus === TOUR_STATUS.UPCOMING && tour.departure_date <= today) {
+              actualStatus = TOUR_STATUS.ONGOING
             }
-            if (actualStatus === '進行中' && tour.return_date < today) {
-              actualStatus = '已完成'
+            if (actualStatus === TOUR_STATUS.ONGOING && tour.return_date < today) {
+              actualStatus = TOUR_STATUS.RETURNED
             }
           }
 
@@ -99,7 +100,7 @@ export function useTourTableColumns({ ordersByTourId }: UseTourTableColumnsParam
                 config.borderColor
               )}
             >
-              {actualStatus}
+              {config.label}
             </span>
           )
         },

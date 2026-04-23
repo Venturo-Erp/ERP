@@ -54,7 +54,7 @@ Buffer：0.3d（回歸 + type-check + code review）
 
 **背景**：剛 push 完、Vercel 正在部署、William 狀態好、單核心工作流允許 1 條今晚再推的低風險 commit。
 
-### 推薦 #1（強推）：**Pattern A — `workspaces_delete` 加 admin guard**
+### 推薦 #1（強推）：**Pattern A — `workspaces_delete` 加 系統主管 guard**
 
 - **風險**：極低。改一條 RLS policy、不動 schema、不動 code、不動前端
 - **收益**：極高。關掉 multi-tenant 系統最危險的一顆按鈕、v3.0 覆盤清單 -1
@@ -141,7 +141,7 @@ Buffer：0.3d（回歸 + type-check + code review）
 
 ## Top 3 今晚就該修
 
-1. **🥇 Pattern A — `workspaces_delete` USING:true 加 admin guard**（2-3h、極低風險、關掉 multi-tenant 最危險按鈕、v3.0 覆盤清單 -1）
+1. **🥇 Pattern A — `workspaces_delete` USING:true 加 系統主管 guard**（2-3h、極低風險、關掉 multi-tenant 最危險按鈕、v3.0 覆盤清單 -1）
 2. **🥈 Pattern C — `_migrations` 加 RLS + super_admin only**（1-2h、順手清掉資訊洩漏點、與 #1 同 mental model 可連做）
 3. **🥉 α 類 25 張 ref_* 表一次性標 ADR「by design USING:true」**（30 分鐘寫 ADR + 更新 `_PATTERN_MAP.md`、未來 audit 自動跳過、心理包袱 -25 張）
 

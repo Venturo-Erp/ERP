@@ -5,6 +5,7 @@
 
 import { supabase } from '@/lib/supabase/client'
 import { logger } from '@/lib/utils/logger'
+import { TOUR_STATUS } from '@/lib/constants/status-maps'
 import type {
   DateRange,
   MetricResult,
@@ -29,7 +30,9 @@ export class AnalyticsService {
     try {
       let query = supabase
         .from('tours')
-        .select('id, status, total_revenue, total_cost, current_participants, departure_date')
+        .select(
+          'id, status, total_revenue, total_cost, current_participants, departure_date, archived, archive_reason'
+        )
         .eq('workspace_id', this.workspaceId)
 
       if (dateRange) {
@@ -49,9 +52,12 @@ export class AnalyticsService {
 
       return {
         totalTours: toursData.length,
-        activeTours: toursData.filter(t => t.status === '待出發').length,
-        completedTours: toursData.filter(t => t.status === '已結團').length,
-        cancelledTours: toursData.filter(t => t.status === '取消').length,
+        activeTours: toursData.filter(t => t.status === TOUR_STATUS.UPCOMING).length,
+        completedTours: toursData.filter(t => t.status === TOUR_STATUS.CLOSED).length,
+        // 取消已改為封存維度（archive_reason='cancelled'）
+        cancelledTours: toursData.filter(
+          t => t.archived === true && t.archive_reason === 'cancelled'
+        ).length,
         totalParticipants,
         averageGroupSize: toursData.length > 0 ? totalParticipants / toursData.length : 0,
         totalRevenue,

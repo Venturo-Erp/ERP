@@ -11,7 +11,7 @@ import { createServerClient } from '@supabase/ssr'
  * // 不需要加 .eq('workspace_id', ...) ！
  * // RLS 會自動過濾
  *
- * 如果需要繞過 RLS（例如 super admin 操作）：
+ * 如果需要繞過 RLS（例如平台管理操作）：
  * const supabase = createServiceClient()
  */
 
@@ -47,7 +47,7 @@ export async function createApiClient() {
 
 /**
  * Service Role Client（繞過 RLS）
- * - 只在特殊情況使用（如：建立租戶、super admin 操作）
+ * - 只在特殊情況使用（如：建立租戶、平台管理操作）
  * - 必須手動處理 workspace_id
  */
 export function createServiceClient() {

@@ -413,7 +413,6 @@ export function Sidebar() {
     [user?.preferred_features]
   )
 
-  // 新系統：使用 store.isAdmin
   const { isAdmin } = useAuthStore()
 
   const visibleMenuItems = useMemo(() => {

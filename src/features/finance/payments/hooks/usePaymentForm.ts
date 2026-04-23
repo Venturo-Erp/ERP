@@ -33,7 +33,8 @@ export function usePaymentForm() {
         .from('tours')
         .select('id, code, name')
         .eq('workspace_id', workspaceId)
-        .or('tour_type.is.null,tour_type.eq.official')
+        // 正式團 = status 非 proposal / template
+        .in('status', ['upcoming', 'ongoing', 'returned', 'closed'])
         .or('archived.is.null,archived.eq.false')
         .or('is_deleted.is.null,is_deleted.eq.false')
         .is('deleted_at', null)

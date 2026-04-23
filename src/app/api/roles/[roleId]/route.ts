@@ -3,7 +3,7 @@ import { createApiClient } from '@/lib/supabase/api-client'
 
 /**
  * DELETE /api/roles/[roleId]
- * 刪除角色（管理員角色擋下）
+ * 刪除角色（系統主管角色擋下）
  */
 export async function DELETE(
   request: NextRequest,
@@ -12,7 +12,7 @@ export async function DELETE(
   const { roleId } = await params
   const supabase = await createApiClient()
 
-  // 檢查是否為管理員角色
+  // 檢查職務是否擁有管理員資格
   const { data: role } = await supabase
     .from('workspace_roles')
     .select('is_admin')
@@ -20,7 +20,7 @@ export async function DELETE(
     .single()
 
   if (role?.is_admin) {
-    return NextResponse.json({ error: '無法刪除管理員角色' }, { status: 400 })
+    return NextResponse.json({ error: '無法刪除擁有管理員資格的職務' }, { status: 400 })
   }
 
   const { error } = await supabase.from('workspace_roles').delete().eq('id', roleId)

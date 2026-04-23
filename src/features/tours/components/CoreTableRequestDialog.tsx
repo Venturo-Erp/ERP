@@ -384,7 +384,7 @@ export function CoreTableRequestDialog({
       logger.error('產生需求單失敗:', err)
       toast({
         title: '產生失敗',
-        description: '請重試或聯繫系統管理員',
+        description: '請重試或聯繫系統系統主管',
         variant: 'destructive',
       })
     } finally {
