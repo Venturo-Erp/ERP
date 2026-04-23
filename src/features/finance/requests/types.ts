@@ -41,14 +41,6 @@ export interface RequestItem {
   accounting_subject_name?: string | null // 會計科目名稱（顯示用）
 }
 
-export interface NewItemFormData {
-  category: PaymentRequestItem['category']
-  supplier_id: string
-  description: string
-  unit_price: number
-  quantity: number
-}
-
 import { REQUEST_TYPE_LABELS } from '../constants/labels'
 
 export const statusLabels: Record<'pending' | 'confirmed' | 'billed', string> = {
