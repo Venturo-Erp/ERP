@@ -168,29 +168,6 @@ export async function POST(request: NextRequest) {
           }
         })
 
-      // 取得個人覆寫（表尚未建立時跳過）
-      try {
-        const { data: overrides } = await supabase
-          .from('employee_permission_overrides' as 'employees') // 型別 workaround
-          .select('module_code, tab_code, override_type')
-          .eq('employee_id', employee.id)
-
-        ;(
-          overrides as
-            | { module_code: string; tab_code: string | null; override_type: string }[]
-            | null
-        )?.forEach(o => {
-          const permKey = o.tab_code ? `${o.module_code}:${o.tab_code}` : o.module_code
-          if (o.override_type === 'grant') {
-            permSet.add(permKey)
-          } else if (o.override_type === 'revoke') {
-            permSet.delete(permKey)
-          }
-        })
-      } catch {
-        // 表不存在時跳過
-      }
-
       rolePermissions = Array.from(permSet)
     }
 

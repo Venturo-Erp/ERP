@@ -4967,44 +4967,6 @@ export type Database = {
           },
         ]
       }
-      employee_permission_overrides: {
-        Row: {
-          created_at: string | null
-          employee_id: string
-          id: string
-          module_code: string
-          override_type: string
-          tab_code: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          employee_id: string
-          id?: string
-          module_code: string
-          override_type: string
-          tab_code?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          employee_id?: string
-          id?: string
-          module_code?: string
-          override_type?: string
-          tab_code?: string | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: 'employee_permission_overrides_employee_id_fkey'
-            columns: ['employee_id']
-            isOneToOne: false
-            referencedRelation: 'employees'
-            referencedColumns: ['id']
-          },
-        ]
-      }
       employees: {
         Row: {
           attendance: Json | null

@@ -5,7 +5,7 @@
  *
  * mode:
  * - 'self': 員工自己編輯（只有基本資料）
- * - 'hr': HR 管理（基本資料 + 權限 + 薪資）
+ * - 'hr': HR 管理（基本資料 + 薪資）
  */
 
 import React, { useState, useRef, useEffect } from 'react'
@@ -37,11 +37,6 @@ import { mutate as globalMutate } from 'swr'
 import { invalidate_cache_pattern } from '@/lib/cache/indexeddb-cache'
 import { useWorkspaceFeatures } from '@/lib/permissions'
 import { useWorkspaceRoles } from '@/data/hooks'
-import {
-  ModulePermissionTable,
-  type TabPermission,
-  type PermissionOverride,
-} from './ModulePermissionTable'
 
 // 職務類型（從 API 取得）
 interface Role {
@@ -60,7 +55,7 @@ interface EmployeeFormProps {
   onPasswordChange?: () => void
 }
 
-type TabType = 'basic' | 'permissions' | 'salary'
+type TabType = 'basic' | 'salary'
 
 export function EmployeeForm({
   employeeId,
@@ -93,10 +88,8 @@ export function EmployeeForm({
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [activeTab, setActiveTab] = useState<TabType>('basic')
 
-  // 從 API 載入的職務列表和權限
+  // 從 API 載入的職務列表
   const [roles, setRoles] = useState<Role[]>([])
-  const [roleTabPermissions, setRoleTabPermissions] = useState<TabPermission[]>([])
-  const [personalOverrides, setPersonalOverrides] = useState<PermissionOverride[]>([])
 
   // 團務職務（workspace_job_roles）
   // 2026-04-18 移除：jobRoles / selectedJobRoles（原 employee_job_roles 多對多、ADR-R2 Option A 改單一職務）
@@ -132,48 +125,6 @@ export function EmployeeForm({
       setRoles(cachedRoles as Role[])
     }
   }, [cachedRoles])
-
-  // 當選擇職務時，載入該職務的分頁權限
-  useEffect(() => {
-    if (!formData.role_id) {
-      setRoleTabPermissions([])
-      return
-    }
-
-    const fetchPermissions = async () => {
-      try {
-        const res = await fetch(`/api/roles/${formData.role_id}/tab-permissions`)
-        if (res.ok) {
-          const data = await res.json()
-          setRoleTabPermissions(data)
-        }
-      } catch (err) {
-        logger.error('載入權限失敗:', err)
-      }
-    }
-    fetchPermissions()
-  }, [formData.role_id])
-
-  // 載入員工的個人覆寫
-  useEffect(() => {
-    if (!employeeId) {
-      setPersonalOverrides([])
-      return
-    }
-
-    const fetchOverrides = async () => {
-      try {
-        const res = await fetch(`/api/employees/${employeeId}/permission-overrides`)
-        if (res.ok) {
-          const data = await res.json()
-          setPersonalOverrides(data)
-        }
-      } catch (err) {
-        logger.error('載入個人覆寫失敗:', err)
-      }
-    }
-    fetchOverrides()
-  }, [employeeId])
 
   // 當 employee 資料更新時，同步更新 formData
   useEffect(() => {
@@ -304,22 +255,6 @@ export function EmployeeForm({
         )
       }
 
-      // 2026-04-18 移除：employee_job_roles 多對多儲存邏輯（ADR-R2 Option A 改單一職務、role_id 已在 payload 頂層）
-
-      // 儲存員工的個人覆寫
-      if (isEditMode && employeeId) {
-        const overridesToSave = personalOverrides.filter(o => o.override_type)
-        try {
-          await fetch(`/api/employees/${employeeId}/permission-overrides`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ overrides: overridesToSave }),
-          })
-        } catch (err) {
-          logger.warn('更新員工覆寫失敗:', err)
-        }
-      }
-
       await alertSuccess(isEditMode ? '更新成功' : '員工建立成功')
       onSubmit()
     } catch (error) {
@@ -333,7 +268,6 @@ export function EmployeeForm({
   // 根據 mode 決定顯示哪些分頁
   const allTabs = [
     { key: 'basic' as const, label: '基本資料', icon: User, showIn: ['hr', 'self'] },
-    { key: 'permissions' as const, label: '職務權限', icon: Shield, showIn: ['hr'] },
     { key: 'salary' as const, label: '薪資設定', icon: DollarSign, showIn: ['hr'] },
   ]
   const tabs = allTabs.filter(t => t.showIn.includes(mode))
@@ -624,39 +558,6 @@ export function EmployeeForm({
                     </div>
                   </div>
                 </div>
-              </div>
-            )}
-
-            {/* 職務權限 */}
-            {activeTab === 'permissions' && (
-              <div className="space-y-5">
-                {/* 顯示目前職務 */}
-                <div className="flex items-center gap-3 pb-4 border-b border-border">
-                  <span className="text-sm text-morandi-secondary">目前職務：</span>
-                  <span className="px-3 py-1 bg-morandi-gold/20 text-morandi-primary font-medium rounded-lg">
-                    {selectedRole?.name || '尚未設定'}
-                  </span>
-                  {selectedRole?.is_admin && (
-                    <span className="text-xs text-morandi-green bg-morandi-green/10 px-2 py-0.5 rounded">
-                      管理員擁有所有權限
-                    </span>
-                  )}
-                </div>
-
-                {/* 權限列表（使用共用組件） */}
-                {formData.role_id ? (
-                  <ModulePermissionTable
-                    mode="employee"
-                    rolePermissions={roleTabPermissions}
-                    overrides={personalOverrides}
-                    onOverridesChange={setPersonalOverrides}
-                    maxHeight="400px"
-                  />
-                ) : (
-                  <div className="text-center py-8 text-morandi-secondary">
-                    請先在「基本資料」選擇職務
-                  </div>
-                )}
               </div>
             )}
 
