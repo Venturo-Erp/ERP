@@ -83,7 +83,6 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/stores/auth-store'
-import { isMenuItemHidden } from '@/lib/constants/menu-items'
 import { isFeatureAvailable, RestrictedFeature } from '@/lib/feature-restrictions'
 import { COMP_LAYOUT_LABELS } from './constants/labels'
 
@@ -409,7 +408,6 @@ export function Sidebar() {
   }
 
   // 權限過濾：HR role_tab_permissions 為 SSOT、不再讀 user.permissions array
-  const hiddenMenuItems = useMemo(() => user?.hidden_menu_items || [], [user?.hidden_menu_items])
   const preferredFeatures = useMemo(
     () => user?.preferred_features || [],
     [user?.preferred_features]
@@ -426,8 +424,6 @@ export function Sidebar() {
 
       return items
         .map(item => {
-          if (isMenuItemHidden(item.href, hiddenMenuItems)) return null
-
           // 🔧 檢查租戶功能權限（workspace_features）
           if (item.requiredPermission) {
             if (!isFeatureEnabled(item.requiredPermission)) {
@@ -465,7 +461,6 @@ export function Sidebar() {
     user?.workspace_code,
     isAdmin,
     preferredFeatures,
-    hiddenMenuItems,
     canReadAny,
     isFeatureEnabled,
     enabledFeatures,
@@ -474,11 +469,10 @@ export function Sidebar() {
   const visiblePersonalToolItems = useMemo(() => {
     return personalToolItems.filter(item => {
       if (!user) return !item.requiredPermission
-      if (isMenuItemHidden(item.href, hiddenMenuItems)) return false
       if (!item.requiredPermission) return true
       return canReadAny(item.requiredPermission)
     })
-  }, [user?.id, isAdmin, hiddenMenuItems, canReadAny])
+  }, [user?.id, isAdmin, canReadAny])
 
   // 渲染菜單項目
   const renderMenuItem = (item: MenuItem, isChild = false) => {

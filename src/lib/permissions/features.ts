@@ -117,8 +117,6 @@ export const FEATURES: FeatureDefinition[] = [
       '/settings',
       '/settings/company',
       '/settings/roles',
-      '/settings/menu',
-      '/settings/appearance',
       '/settings/modules',
     ],
   },

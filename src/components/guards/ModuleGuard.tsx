@@ -32,7 +32,6 @@ const ALWAYS_ALLOWED_EXACT = new Set([
   '/dashboard',
   '/settings',
   '/settings/personal',
-  '/settings/appearance',
 ])
 
 const ALWAYS_ALLOWED_PREFIXES = ['/dashboard/']
@@ -63,7 +62,7 @@ export function ModuleGuard({ children }: ModuleGuardProps) {
       return
     }
 
-    // 平台超管專屬：/tenants、/hr/settings、/settings/{menu,modules,receipt-test}
+    // 平台超管專屬：/tenants、/hr/settings、/settings/modules
     if (isPlatformAdminRoute(pathname)) {
       if (!isAdmin) {
         router.replace('/unauthorized')
