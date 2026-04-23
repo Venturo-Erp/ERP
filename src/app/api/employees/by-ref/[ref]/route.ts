@@ -13,7 +13,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   let { data, error } = await supabase
     .from('employees')
     .select(
-      'id, employee_number, display_name, english_name, email, avatar, status, workspace_id, job_info, is_active'
+      'id, employee_number, display_name, english_name, email, avatar, status, workspace_id, job_info'
     )
     .eq('employee_number', ref)
     .single()
@@ -23,7 +23,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     const result = await supabase
       .from('employees')
       .select(
-        'id, employee_number, display_name, english_name, email, avatar, status, workspace_id, job_info, is_active'
+        'id, employee_number, display_name, english_name, email, avatar, status, workspace_id, job_info'
       )
       .eq('display_name', ref)
       .single()

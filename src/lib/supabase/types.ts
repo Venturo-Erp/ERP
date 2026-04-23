@@ -5204,7 +5204,6 @@ export type Database = {
           hidden_menu_items: string[] | null
           id: string
           id_number: string | null
-          is_active: boolean | null
           job_info: Json | null
           job_title: string | null
           last_login_at: string | null
@@ -5245,7 +5244,6 @@ export type Database = {
           hidden_menu_items?: string[] | null
           id?: string
           id_number?: string | null
-          is_active?: boolean | null
           job_info?: Json | null
           job_title?: string | null
           last_login_at?: string | null
@@ -5286,7 +5284,6 @@ export type Database = {
           hidden_menu_items?: string[] | null
           id?: string
           id_number?: string | null
-          is_active?: boolean | null
           job_info?: Json | null
           job_title?: string | null
           last_login_at?: string | null

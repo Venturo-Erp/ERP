@@ -261,7 +261,7 @@ export const useAuthStore = create<AuthState>()(
           const { data, error } = await supabase
             .from('employees')
             .select(
-              'id, employee_number, display_name, english_name, email, avatar, status, workspace_id, job_info, is_active, created_at, updated_at'
+              'id, employee_number, display_name, english_name, email, avatar, status, workspace_id, job_info, created_at, updated_at'
             )
             .eq('id', currentUser.id)
             .maybeSingle()

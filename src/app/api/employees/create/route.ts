@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
         .from('employees')
         .select('*', { count: 'exact', head: true })
         .eq('workspace_id', currentUser.workspace_id)
-        .eq('is_active', true)
+        .neq('status', 'terminated')
 
       if (count != null && count >= maxEmployees) {
         return NextResponse.json(
@@ -81,7 +81,6 @@ export async function POST(request: NextRequest) {
         ...employeeData,
         workspace_id: currentUser.workspace_id,
         supabase_user_id: authUser.user.id,
-        is_active: true,
         must_change_password: true,
       })
       .select('id, employee_number')
