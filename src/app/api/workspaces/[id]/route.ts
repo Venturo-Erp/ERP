@@ -64,11 +64,19 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     return NextResponse.json({ error: '找不到租戶' }, { status: 404 })
   }
 
+  // 取得這個 workspace 的 admin 職務 id（workspace_roles.is_admin = true）
+  const { data: adminRoles } = await supabase
+    .from('workspace_roles')
+    .select('id')
+    .eq('workspace_id', workspaceId)
+    .eq('is_admin', true)
+  const adminRoleIds = new Set((adminRoles || []).map(r => r.id))
+
   // 查真人員工（排除機器人）
   const { data: employees } = await supabase
     .from('employees')
     .select(
-      'id, employee_number, chinese_name, display_name, english_name, roles, is_bot, created_at'
+      'id, employee_number, chinese_name, display_name, english_name, role_id, is_bot, created_at'
     )
     .eq('workspace_id', workspaceId)
     .or('is_bot.is.null,is_bot.eq.false')
@@ -80,14 +88,14 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     chinese_name: string | null
     display_name: string | null
     english_name: string | null
-    roles: string[] | null
+    role_id: string | null
     is_bot: boolean | null
     created_at: string
   }>
 
-  // 找第一個 admin
+  // 找第一個 admin（依 workspace_roles.is_admin、SSOT）
   const adminEmployee =
-    realEmployees.find(e => Array.isArray(e.roles) && e.roles.includes('admin')) || realEmployees[0] // fallback：沒 admin 就取第一個員工
+    realEmployees.find(e => e.role_id && adminRoleIds.has(e.role_id)) || realEmployees[0] // fallback：沒 admin 就取第一個員工
 
   const adminName = adminEmployee
     ? adminEmployee.display_name ||

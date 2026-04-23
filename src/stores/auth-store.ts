@@ -1,69 +1,30 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { EmployeeFull } from './types'
-// generateToken, AuthPayload 已移除 — 不再需要舊的 token 格式
 import { logger } from '@/lib/utils/logger'
 import type { UserRole } from '@/lib/rbac-config'
 import type { Database } from '@/lib/supabase/types'
 import { ensureAuthSync, resetAuthSyncState } from '@/lib/auth/auth-sync'
 
-/**
- * Supabase Employee Row 類型
- * 直接從 Database 類型推斷，確保與資料庫結構一致
- */
 type EmployeeRow = Database['public']['Tables']['employees']['Row']
 
-// mergePermissionsWithRoles 已移除（2026-04-02）
-// 權限完全由 role_tab_permissions + JWT 決定，不再讀 employees.roles/permissions
-
-/**
- * 查詢 workspace 資訊
- * @param workspaceId - Workspace ID
- * @returns Workspace 資訊 (code, name, type)
- */
-async function fetchWorkspaceInfo(
-  workspaceId: string | null | undefined
-): Promise<{ code?: string; name?: string; type?: EmployeeFull['workspace_type'] }> {
-  if (!workspaceId) return {}
-
-  try {
-    const { supabase } = await import('@/lib/supabase/client')
-    const { data: workspace } = await supabase
-      .from('workspaces')
-      .select('code, name, type')
-      .eq('id', workspaceId)
-      .single()
-
-    if (workspace) {
-      return {
-        code: workspace.code || workspace.name?.substring(0, 2).toUpperCase(),
-        name: workspace.name || undefined,
-        type: (workspace.type as EmployeeFull['workspace_type']) || undefined,
-      }
-    }
-  } catch (wsError) {
-    logger.warn('⚠️ Failed to fetch workspace info:', wsError)
-  }
-  return {}
+interface WorkspaceInfo {
+  code?: string
+  name?: string
+  type?: EmployeeFull['workspace_type']
 }
 
 /**
- * 從 EmployeeRow 構建 EmployeeFull 物件
- * @param employeeData - 員工資料
- * @param workspaceInfo - Workspace 資訊
- * @param options - 額外選項
+ * 從 EmployeeRow + workspace 資訊 構建全站用 EmployeeFull
+ * 權限決策來源：role_tab_permissions（permissions[]）+ workspace_roles.is_admin
  */
-
 function buildUserFromEmployee(
   employeeData: EmployeeRow,
-  workspaceInfo: { code?: string; name?: string; type?: EmployeeFull['workspace_type'] },
-  options?: { mustChangePassword?: boolean; rolePermissions?: string[]; isAdmin?: boolean }
+  workspaceInfo: WorkspaceInfo,
+  options?: { mustChangePassword?: boolean; rolePermissions?: string[] }
 ): EmployeeFull {
   const userRoles = (employeeData.roles || []) as UserRole[]
-  // 權限完全由 JWT（role_tab_permissions）決定
   const mergedPermissions = options?.rolePermissions || []
-  // 管理員標記：從 JWT 的 is_admin 取得（不再靠 permissions.includes('*')）
-  const isAdminFlag = options?.isAdmin || false
 
   return {
     id: employeeData.id,
@@ -106,8 +67,7 @@ interface AuthState {
   validateLogin: (
     username: string,
     password: string,
-    workspaceId?: string,
-    rememberMe?: boolean
+    code?: string
   ) => Promise<{ success: boolean; message?: string; needsSetup?: boolean }>
   refreshUserData: () => Promise<void>
   toggleSidebar: () => void
@@ -115,9 +75,6 @@ interface AuthState {
   checkPermission: (permission: string) => boolean
   setHasHydrated: (hasHydrated: boolean) => void
 }
-
-// Cookie 已改為 httpOnly（server-side 設定），前端不再需要讀寫 auth-token cookie
-// setSecureCookie / getAuthTokenFromCookie 已移除
 
 export const useAuthStore = create<AuthState>()(
   persist(
@@ -130,7 +87,6 @@ export const useAuthStore = create<AuthState>()(
 
       setUser: (user, adminFlag?: boolean) => {
         const isAuthenticated = !!user
-        // isAdmin 由 JWT 的 is_admin 決定，不再從 permissions 推斷
         const isAdmin = adminFlag ?? get().isAdmin ?? false
         set({ user, isAuthenticated, isAdmin })
       },
@@ -162,12 +118,7 @@ export const useAuthStore = create<AuthState>()(
         })
       },
 
-      validateLogin: async (
-        username: string,
-        password: string,
-        code?: string,
-        rememberMe: boolean = true
-      ) => {
+      validateLogin: async (username, password, code) => {
         try {
           if (!code) {
             return { success: false, message: '請輸入辦公室或廠商代號' }
@@ -177,26 +128,29 @@ export const useAuthStore = create<AuthState>()(
 
           const { supabase } = await import('@/lib/supabase/client')
 
-          // 1. 呼叫 validate-login 驗證密碼並取得真實 auth email
+          // 1. 呼叫 validate-login 驗證密碼、取回 employee + workspace + permissions + auth email
           const validateResponse = await fetch('/api/auth/validate-login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, password, code }),
           })
-
           const validateResult = await validateResponse.json()
 
           if (!validateResult.success) {
             const errMsg = validateResult.error || validateResult.message
             logger.warn(`⚠️ 登入驗證失敗: ${errMsg}`)
-            return {
-              success: false,
-              message: errMsg || '帳號或密碼錯誤',
-            }
+            return { success: false, message: errMsg || '帳號或密碼錯誤' }
           }
 
-          // 2. 用真實 auth email 建立客戶端 Supabase session
-          const authEmail = (validateResult.data?.authEmail ?? validateResult.authEmail) as string
+          const { employee, workspace, authEmail, permissions, isAdmin } = validateResult.data as {
+            employee: EmployeeRow
+            workspace: { id: string; code: string; name: string | null; type: string | null }
+            authEmail: string
+            permissions: string[]
+            isAdmin: boolean
+          }
+
+          // 2. 用 auth email 在 client 建立 Supabase session
           const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
             email: authEmail,
             password,
@@ -204,38 +158,28 @@ export const useAuthStore = create<AuthState>()(
 
           if (authError || !authData) {
             logger.warn(`⚠️ Supabase Auth 登入失敗: ${authError?.message}`)
-            return {
-              success: false,
-              message: '帳號或密碼錯誤',
-            }
+            return { success: false, message: '帳號或密碼錯誤' }
           }
-
-          const employeeData = (validateResult.data?.employee ??
-            validateResult.employee) as EmployeeRow
 
           // 3. 確保 Auth 同步（處理 RLS 所需的 supabase_user_id）
           await ensureAuthSync({
-            employeeId: employeeData.id,
-            workspaceId: employeeData.workspace_id ?? undefined,
+            employeeId: employee.id,
+            workspaceId: employee.workspace_id ?? undefined,
           })
 
-          // 4. 查詢 workspace 資訊並構建 EmployeeFull 物件
-          const workspaceInfo = await fetchWorkspaceInfo(employeeData.workspace_id)
+          // 4. 構建 EmployeeFull
+          const user = buildUserFromEmployee(
+            employee,
+            {
+              code: workspace.code,
+              name: workspace.name ?? undefined,
+              type: (workspace.type as EmployeeFull['workspace_type']) ?? undefined,
+            },
+            { rolePermissions: permissions }
+          )
 
-          // 5. 權限從 validate-login API 的 response body 取得（server-side 已計算好）
-          // Cookie 已由 server-side 的 Set-Cookie header 設定（httpOnly）
-          const rolePermissions = (validateResult.data?.permissions ?? []) as string[]
-          const jwtIsAdmin = (validateResult.data?.isAdmin ?? false) as boolean
-
-          const user = buildUserFromEmployee(employeeData, workspaceInfo, {
-            rolePermissions,
-            isAdmin: jwtIsAdmin,
-          })
-
-          get().setUser(user, jwtIsAdmin)
-
-          logger.log(`✅ 登入成功: ${employeeData.display_name} (admin: ${jwtIsAdmin})`)
-
+          get().setUser(user, isAdmin)
+          logger.log(`✅ 登入成功: ${employee.display_name} (admin: ${isAdmin})`)
           return { success: true }
         } catch (error) {
           logger.error('💥 Login validation error:', error)
@@ -279,18 +223,17 @@ export const useAuthStore = create<AuthState>()(
             return
           }
 
-          // 查詢 workspace 資訊，失敗則保留原有值
-          const fetchedWorkspaceInfo = await fetchWorkspaceInfo(employeeData.workspace_id)
-          const workspaceInfo = {
-            code: fetchedWorkspaceInfo.code || currentUser.workspace_code,
-            name: fetchedWorkspaceInfo.name || currentUser.workspace_name,
-            type: fetchedWorkspaceInfo.type || currentUser.workspace_type,
-          }
-
-          // 保留現有的權限（從登入時的 JWT 取得），不要被 refreshUserData 覆蓋
-          const updatedUser = buildUserFromEmployee(employeeData, workspaceInfo, {
-            rolePermissions: currentUser.permissions,
-          })
+          // 保留現有 workspace 資訊（workspace 本身極少變、登入時已寫入）
+          // 保留現有權限（從登入時的 JWT 取得、refreshUserData 不重算）
+          const updatedUser = buildUserFromEmployee(
+            employeeData,
+            {
+              code: currentUser.workspace_code,
+              name: currentUser.workspace_name,
+              type: currentUser.workspace_type,
+            },
+            { rolePermissions: currentUser.permissions }
+          )
           get().setUser(updatedUser)
         } catch (error) {
           logger.error('💥 Error refreshing user data:', error)

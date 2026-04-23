@@ -37,10 +37,17 @@ export async function GET() {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
+  // 取得所有 admin 職務 id（workspace_roles.is_admin = true）
+  const { data: adminRoles } = await supabase
+    .from('workspace_roles')
+    .select('id')
+    .eq('is_admin', true)
+  const adminRoleIds = new Set((adminRoles || []).map(r => r.id))
+
   // 批次查詢所有員工（排除機器人）— 用來計算每個 workspace 的員工數 + 管理員
   const { data: allEmployees } = await supabase
     .from('employees')
-    .select('id, workspace_id, chinese_name, display_name, english_name, is_bot, roles')
+    .select('id, workspace_id, chinese_name, display_name, english_name, is_bot, role_id')
     .or('is_bot.is.null,is_bot.eq.false')
 
   // 建立 workspace_id → 員工清單的 map
@@ -57,14 +64,14 @@ export async function GET() {
     chinese_name: string | null
     display_name: string | null
     english_name: string | null
-    roles: string[] | null
+    role_id: string | null
   }>) {
     const wsId = emp.workspace_id
     if (!wsId) continue
     const entry = byWorkspace.get(wsId) || { count: 0, admin: null }
     entry.count += 1
-    // 找第一個 admin 當代表
-    if (!entry.admin && Array.isArray(emp.roles) && emp.roles.includes('admin')) {
+    // 找第一個 admin 當代表（依 workspace_roles.is_admin、SSOT）
+    if (!entry.admin && emp.role_id && adminRoleIds.has(emp.role_id)) {
       entry.admin = {
         id: emp.id,
         name: emp.display_name || emp.chinese_name || emp.english_name || '',

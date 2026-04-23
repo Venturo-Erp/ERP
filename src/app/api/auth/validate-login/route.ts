@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     // 1. 查詢 workspace（統一大寫）
     const { data: workspace, error: wsError } = await supabase
       .from('workspaces')
-      .select('id, code')
+      .select('id, code, name, type')
       .eq('code', code.trim().toUpperCase())
       .maybeSingle()
 
@@ -34,28 +34,15 @@ export async function POST(request: NextRequest) {
       return ApiError.validation('找不到此代號')
     }
 
-    // 2. 查詢員工（大小寫不敏感）
-    // 支援兩種登入：員工編號（E001）或 email（amin@xxx.com）
-    const isEmail = username.includes('@')
-    const selectFields =
-      'id, employee_number, display_name, english_name, email, avatar_url, status, password_hash, supabase_user_id, workspace_id, role_id, job_info, created_at, updated_at, login_failed_count, login_locked_until'
-
-    const lookupResult = isEmail
-      ? await supabase
-          .from('employees')
-          .select(selectFields)
-          .eq('workspace_id', workspace.id)
-          .ilike('email', username)
-          .maybeSingle()
-      : await supabase
-          .from('employees')
-          .select(selectFields)
-          .eq('workspace_id', workspace.id)
-          .ilike('employee_number', username)
-          .maybeSingle()
-
-    const employee = lookupResult.data
-    const empError = lookupResult.error
+    // 2. 查詢員工（員工編號、大小寫不敏感）
+    const { data: employee, error: empError } = await supabase
+      .from('employees')
+      .select(
+        'id, employee_number, display_name, english_name, email, avatar_url, status, supabase_user_id, workspace_id, role_id, job_info, created_at, updated_at, login_failed_count, login_locked_until'
+      )
+      .eq('workspace_id', workspace.id)
+      .ilike('employee_number', username)
+      .maybeSingle()
 
     if (empError) {
       logger.error('Employee query error:', empError)
@@ -78,7 +65,7 @@ export async function POST(request: NextRequest) {
       return ApiError.unauthorized(`帳號已鎖定，請 ${remainingMinutes} 分鐘後再試`)
     }
 
-    // 4. 查詢 auth email（優先從 auth.users 取，fallback 用 employees.email）
+    // 4. 查詢 auth email（優先從 auth.users 取、fallback 用 employees.email、再 fallback 用內部規則）
     let authEmail: string | undefined
 
     if (employee.supabase_user_id) {
@@ -86,13 +73,8 @@ export async function POST(request: NextRequest) {
       authEmail = authUser?.user?.email ?? undefined
     }
 
-    if (!authEmail && employee.email) {
-      authEmail = employee.email
-    }
-
-    // fallback：向後兼容舊帳號
     if (!authEmail) {
-      authEmail = `${code.toLowerCase()}_${username.toLowerCase()}@venturo.com`
+      authEmail = employee.email || `${code.toLowerCase()}_${username.toLowerCase()}@venturo.com`
     }
 
     // 5. 用 Supabase Auth 驗證密碼
@@ -132,8 +114,8 @@ export async function POST(request: NextRequest) {
         .eq('id', employee.id)
     }
 
-    // 6. 回傳員工資料（不含密碼）+ auth email
-    const { password_hash: _, ...employeeData } = employee
+    // 6. 回傳員工資料 + auth email（SELECT 已不含 password_hash）
+    const employeeData = employee
 
     // 7. 從職務系統取得權限（統一用 role_tab_permissions）
     let rolePermissions: string[] = []
@@ -176,8 +158,12 @@ export async function POST(request: NextRequest) {
       success: true,
       data: {
         employee: employeeData,
-        workspaceId: workspace.id,
-        workspaceCode: workspace.code,
+        workspace: {
+          id: workspace.id,
+          code: workspace.code,
+          name: workspace.name,
+          type: workspace.type,
+        },
         authEmail,
         permissions: rolePermissions,
         isAdmin,
