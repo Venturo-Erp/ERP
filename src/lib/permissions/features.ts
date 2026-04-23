@@ -80,7 +80,6 @@ export const FEATURES: FeatureDefinition[] = [
       '/database/tour-leaders',
       '/database/transportation-rates',
       '/database/company-assets',
-      '/database/workspaces',
     ],
   },
   {

@@ -30,8 +30,10 @@ export async function POST(request: NextRequest) {
       return ApiError.internal('系統錯誤')
     }
 
+    // 安全考量：找不到 workspace 時、回與帳密錯誤相同訊息、避免被列舉公司代號
+    // TODO(future): 重新評估登入錯誤訊息策略、可能分「可公開代號」vs「不可列舉代號」兩種 workspace
     if (!workspace) {
-      return ApiError.validation('找不到此代號')
+      return ApiError.unauthorized('公司代號、帳號或密碼錯誤，請確認後再試')
     }
 
     // 2. 查詢員工（員工編號、大小寫不敏感）
@@ -50,7 +52,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (!employee) {
-      return ApiError.unauthorized('帳號或密碼錯誤')
+      return ApiError.unauthorized('公司代號、帳號或密碼錯誤，請確認後再試')
     }
 
     // 3. 檢查帳號狀態
@@ -103,7 +105,7 @@ export async function POST(request: NextRequest) {
 
       await supabase.from('employees').update(updateData).eq('id', employee.id)
 
-      return ApiError.unauthorized('帳號或密碼錯誤')
+      return ApiError.unauthorized('公司代號、帳號或密碼錯誤，請確認後再試')
     }
 
     // 登入成功：重置失敗計數

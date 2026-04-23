@@ -54,15 +54,6 @@ const databaseModules = [
     color: 'bg-morandi-red',
     count: 0,
   },
-  {
-    id: 'workspaces',
-    title: DATABASE_LABELS.MODULE_WORKSPACES,
-    description: DATABASE_LABELS.MODULE_WORKSPACES_DESC,
-    icon: Building,
-    href: '/database/workspaces',
-    color: 'bg-morandi-primary',
-    count: 0,
-  },
 ]
 
 export default function DatabasePage() {

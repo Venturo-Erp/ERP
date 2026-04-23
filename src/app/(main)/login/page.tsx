@@ -117,6 +117,7 @@ export default function LoginPage() {
             autoFocus
             className="login-input uppercase"
           />
+          <p className="text-[11px] text-morandi-muted mt-1 ml-1">{LABELS.CODE_HINT}</p>
           <input
             type="text"
             value={username}

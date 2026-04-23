@@ -27,6 +27,4 @@ export const DATABASE_LABELS = {
   MODULE_ASSETS_DESC: '管理公司 Logo、大小章、插圖等資源',
   MODULE_ARCHIVE: '封存資料管理',
   MODULE_ARCHIVE_DESC: '管理已封存的旅遊團、行程表，可還原或永久刪除',
-  MODULE_WORKSPACES: '公司管理',
-  MODULE_WORKSPACES_DESC: '管理公司帳號、新增公司與管理員',
 }

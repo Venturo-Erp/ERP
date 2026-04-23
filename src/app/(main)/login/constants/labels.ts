@@ -16,10 +16,13 @@ export const LABELS = {
   LOGIN_BUTTON: '登入',
   LOGIN_BUTTON_LOADING: '登入中...',
 
+  // 欄位提示
+  CODE_HINT: '公司代號請向管理員索取',
+
   // 錯誤訊息
   ERROR_ENTER_CODE: '請輸入公司代號',
   ERROR_ENTER_USERNAME: '請輸入帳號',
-  ERROR_INVALID_CREDENTIALS: '帳號或密碼錯誤',
+  ERROR_INVALID_CREDENTIALS: '公司代號、帳號或密碼錯誤，請確認後再試',
   ERROR_SYSTEM: '系統錯誤，請稍後再試',
   SESSION_EXPIRED: '登入已過期，請重新登入',
 }

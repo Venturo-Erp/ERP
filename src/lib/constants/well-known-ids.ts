@@ -4,7 +4,7 @@
  * 目的：集中管理 well-known 的 UUID / ID，避免散落 hardcode。
  * 原則：
  * - 環境敏感值（Corner WS ID、LINE Bot ID）走 env var、env 沒設則 throw（不 silent fallback）
- * - 系統固定值（VENTURO 機器人、Logan AI）直接寫死（不會變）
+ * - 系統固定值（VENTURO 機器人）直接寫死（不會變）
  * - UUID 格式在 startup 驗證（避免 typo）
  *
  * Wave 3 進行中：現有 hardcode 逐步替換到這裡。
@@ -20,16 +20,6 @@
  * DB: employees where employee_number='BOT001'
  */
 export const VENTURO_BOT_ID = '00000000-0000-0000-0000-000000000001' as const
-
-/**
- * Logan AI employee（內部 AI 助理）
- * DB: employees where employee_number='LOGAN'
- *
- * ⚠️ 歷史錯誤：`src/lib/logan/logan-service.ts` 之前 export 的 LOGAN_ID=000001
- * 實際上 000001 是 VENTURO 機器人、000002 才是 Logan AI
- * cron/sync-logan-knowledge/route.ts 寫入用的是 000002（對）
- */
-export const LOGAN_AI_ID = '00000000-0000-0000-0000-000000000002' as const
 
 // ============================================================
 // 租戶相關 ID（env-driven、fail-fast if missing）
@@ -91,5 +81,4 @@ export function assertUUID(v: string, name = 'value'): void {
 
 // Startup validation
 assertUUID(VENTURO_BOT_ID, 'VENTURO_BOT_ID')
-assertUUID(LOGAN_AI_ID, 'LOGAN_AI_ID')
 assertUUID(CORNER_WORKSPACE_ID, 'CORNER_WORKSPACE_ID')
