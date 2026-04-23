@@ -14,7 +14,6 @@ const fetcher = async (url: string): Promise<WorkspaceRole[]> => {
 
 /**
  * SWR hook for fetching workspace roles with caching.
- * Replaces direct fetch('/api/permissions/roles') calls.
  */
 export function useWorkspaceRoles() {
   const workspaceId = useAuthStore(state => state.user?.workspace_id)
@@ -23,7 +22,7 @@ export function useWorkspaceRoles() {
 
   const { data, isLoading } = useSWR<WorkspaceRole[]>(
     key,
-    () => fetcher('/api/permissions/roles'),
+    () => fetcher('/api/roles'),
     { revalidateOnFocus: false }
   )
 

@@ -44,7 +44,7 @@ export default function HRPage() {
     // 載入職務列表
     const loadRoles = async () => {
       try {
-        const res = await fetch('/api/permissions/roles')
+        const res = await fetch('/api/roles')
         if (res.ok) {
           const data = await res.json()
           setRolesData(data)
