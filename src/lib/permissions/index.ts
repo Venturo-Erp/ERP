@@ -4,10 +4,6 @@ export * from './hooks'
 export * from './module-tabs'
 export * from './useTabPermissions'
 
-// ====================
-// 兼容舊系統的導出
-// ====================
-
 export interface PermissionConfig {
   id: string
   label: string
@@ -17,27 +13,8 @@ export interface PermissionConfig {
 }
 
 /**
- * 系統權限配置（兼容舊版）
- */
-export const SYSTEM_PERMISSIONS: PermissionConfig[] = [
-  {
-    id: 'admin',
-    label: '超級管理員',
-    category: '全部',
-    routes: ['*'],
-    description: '擁有系統最高權限，包含所有功能',
-  },
-  {
-    id: 'admin',
-    label: '系統管理員',
-    category: '全部',
-    routes: ['*'],
-    description: '擁有系統所有權限（含系統管理功能）',
-  },
-]
-
-/**
- * 功能權限配置（兼容舊版）
+ * 功能權限配置（給設定頁顯示用）
+ * 權限決策不靠這個、走 role_tab_permissions（permissions[]）+ workspace_roles.is_admin
  */
 export const FEATURE_PERMISSIONS: PermissionConfig[] = [
   { id: 'calendar', label: '行事曆', category: '全部', routes: ['/calendar'] },
@@ -53,8 +30,6 @@ export const FEATURE_PERMISSIONS: PermissionConfig[] = [
   { id: 'design', label: '設計', category: '付費', routes: ['/design'] },
   { id: 'fleet', label: '車隊管理', category: '企業', routes: ['/fleet', '/supplier/trips'] },
 ]
-
-const ALL_PERMISSIONS = [...SYSTEM_PERMISSIONS, ...FEATURE_PERMISSIONS]
 
 /**
  * 路由到模組的對應表
@@ -98,10 +73,8 @@ function getModuleFromRoute(route: string): string | null {
 
 /**
  * 根據路由檢查是否有權限
- *
- * 支援兩種權限格式：
- * 1. 舊格式：permission_id（如 'tours', 'finance'）
- * 2. 新格式：module_code 或 module_code:tab_code（如 'tours:overview', 'finance:payments'）
+ * 權限格式：module_code 或 module_code:tab_code（例 'tours' 或 'tours:overview'）
+ * admin role 已透過 backfill 拿到全部 module 權限、走同一條過濾邏輯
  */
 export function hasPermissionForRoute(
   userPermissions: string[] | undefined,
@@ -110,69 +83,23 @@ export function hasPermissionForRoute(
 ): boolean {
   if (!userPermissions || userPermissions.length === 0) return false
 
-  // 權限決策一律走 userPermissions（admin role 已 backfill 全權）
-  // _isAdmin 參數保留供舊 caller 簽名相容、不再短路
-
   // 無需特殊權限的路由
   const publicRoutes = ['/dashboard', '/profile']
   if (publicRoutes.some(r => route.startsWith(r))) {
     return true
   }
 
-  // 從路由取得模組代碼
   const moduleCode = getModuleFromRoute(route)
-  if (!moduleCode) {
-    // 未知路由，檢查舊格式權限
-    for (const perm of ALL_PERMISSIONS) {
-      for (const permRoute of perm.routes) {
-        if (permRoute === '*' || route.startsWith(permRoute)) {
-          if (userPermissions.includes(perm.id)) {
-            return true
-          }
-        }
-      }
-    }
-    return false
-  }
+  if (!moduleCode) return false
 
-  // 新格式：檢查是否有該模組的任何權限
-  // 例如有 'tours' 或 'tours:overview' 或 'tours:orders' 都算有 tours 模組權限
-  for (const perm of userPermissions) {
-    // 完全匹配模組（無分頁的模組）
-    if (perm === moduleCode) {
-      return true
-    }
-    // 匹配 module:tab 格式
-    if (perm.startsWith(`${moduleCode}:`)) {
-      return true
-    }
-  }
-
-  // 兼容舊格式：檢查舊的權限 ID
-  for (const perm of ALL_PERMISSIONS) {
-    for (const permRoute of perm.routes) {
-      if (permRoute === '*' || route.startsWith(permRoute)) {
-        if (userPermissions.includes(perm.id)) {
-          return true
-        }
-      }
-    }
-  }
-
-  return false
+  // 檢查是否有該模組的任何權限（精確匹配 或 module:tab 前綴匹配）
+  return userPermissions.some(p => p === moduleCode || p.startsWith(`${moduleCode}:`))
 }
 
-/**
- * 取得權限分類（兼容舊版）
- */
 export function getPermissionCategories(): string[] {
-  const categories = new Set(ALL_PERMISSIONS.map(p => p.category))
-  return Array.from(categories)
+  return Array.from(new Set(FEATURE_PERMISSIONS.map(p => p.category)))
 }
 
-/**
- * 根據分類取得權限（兼容舊版）
- */
 export function getPermissionsByCategory(category: string): PermissionConfig[] {
-  return ALL_PERMISSIONS.filter(p => p.category === category)
+  return FEATURE_PERMISSIONS.filter(p => p.category === category)
 }

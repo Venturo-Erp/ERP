@@ -74,8 +74,8 @@ export type {
 // 財務常數
 export { EXPENSE_TYPE_CONFIG } from './finance.types'
 
-// 系統功能權限清單 - 從統一配置自動生成
-export { SYSTEM_PERMISSIONS, FEATURE_PERMISSIONS } from '@/lib/permissions'
+// 功能權限清單（給設定頁顯示用）
+export { FEATURE_PERMISSIONS } from '@/lib/permissions'
 
 // Store 工具型別（重新導出）
 export type { CreateInput, UpdateInput } from '../core/types'
