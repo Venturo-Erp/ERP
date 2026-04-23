@@ -4,7 +4,10 @@ import { ValidationError } from '@/core/errors/app-errors'
 import { logger } from '@/lib/utils/logger'
 import { getRequiredWorkspaceId } from '@/lib/workspace-context'
 import { supabase } from '@/lib/supabase/client'
+import type { Database } from '@/lib/supabase/types'
 import { invalidatePaymentRequests, invalidatePaymentRequestItems } from '@/data'
+
+type PaymentRequestInsert = Database['public']['Tables']['payment_requests']['Insert']
 import { PAYMENTS_LABELS } from '../constants/labels'
 import { recalculateExpenseStats } from '@/features/finance/payments/services/expense-core.service'
 
@@ -30,7 +33,7 @@ class PaymentRequestService extends BaseService<PaymentRequest> {
         logger.log('Creating payment_request with data:', insertData)
         const { data, error } = await supabase
           .from('payment_requests')
-          .insert(insertData)
+          .insert(insertData as unknown as PaymentRequestInsert)
           .select()
           .single()
         if (error) {
@@ -75,7 +78,7 @@ class PaymentRequestService extends BaseService<PaymentRequest> {
     const { data, error } = await supabase
       .from('payment_request_items')
       .select(
-        'id, request_id, description, quantity, unitprice, subtotal, category, tour_id, tour_request_id, supplier_id, supplier_name, sort_order, item_number, notes, payment_method, payment_method_id, advanced_by, advanced_by_name, confirmation_item_id, custom_request_date, workspace_id, created_at, created_by, updated_at, updated_by'
+        'id, request_id, description, quantity, unitprice, subtotal, category, tour_id, supplier_id, supplier_name, sort_order, item_number, notes, payment_method, payment_method_id, advanced_by, advanced_by_name, confirmation_item_id, custom_request_date, workspace_id, created_at, created_by, updated_at, updated_by'
       )
       .order('sort_order', { ascending: true })
       .limit(5000)
@@ -110,7 +113,7 @@ class PaymentRequestService extends BaseService<PaymentRequest> {
     const { data, error } = await supabase
       .from('payment_request_items')
       .select(
-        'id, request_id, description, quantity, unitprice, subtotal, category, tour_id, tour_request_id, supplier_id, supplier_name, sort_order, item_number, notes, payment_method, payment_method_id, advanced_by, advanced_by_name, confirmation_item_id, custom_request_date, workspace_id, created_at, created_by, updated_at, updated_by'
+        'id, request_id, description, quantity, unitprice, subtotal, category, tour_id, supplier_id, supplier_name, sort_order, item_number, notes, payment_method, payment_method_id, advanced_by, advanced_by_name, confirmation_item_id, custom_request_date, workspace_id, created_at, created_by, updated_at, updated_by'
       )
       .eq('request_id', requestId)
       .order('sort_order', { ascending: true })
@@ -162,7 +165,6 @@ class PaymentRequestService extends BaseService<PaymentRequest> {
       subtotal: itemData.unit_price * itemData.quantity,
       notes: itemData.notes,
       sort_order: itemData.sort_order,
-      tour_request_id: itemData.tour_request_id || null, // 關聯需求單
       payment_method_id: itemData.payment_method_id || null,
       // SSOT：item 不存日期、parent payment_requests.request_date 才是唯一真相
       // （form 仍可用 custom_request_date 做建立時的多日期分拆、但永遠不落地）
@@ -239,7 +241,6 @@ class PaymentRequestService extends BaseService<PaymentRequest> {
         subtotal: itemData.unit_price * itemData.quantity,
         notes: itemData.notes,
         sort_order: itemData.sort_order,
-        tour_request_id: itemData.tour_request_id || null,
         payment_method_id: itemData.payment_method_id || null,
         // SSOT：item 不存日期、parent.request_date 才是真相（見 addItem 同欄位說明）
         custom_request_date: null,
@@ -292,7 +293,7 @@ class PaymentRequestService extends BaseService<PaymentRequest> {
     const { data: existingItem, error: fetchError } = await supabase
       .from('payment_request_items')
       .select(
-        'id, request_id, description, quantity, unitprice, subtotal, category, tour_id, tour_request_id, supplier_id, supplier_name, sort_order, item_number, notes, payment_method, payment_method_id, advanced_by, advanced_by_name, confirmation_item_id, custom_request_date, workspace_id, created_at, created_by, updated_at, updated_by'
+        'id, request_id, description, quantity, unitprice, subtotal, category, tour_id, supplier_id, supplier_name, sort_order, item_number, notes, payment_method, payment_method_id, advanced_by, advanced_by_name, confirmation_item_id, custom_request_date, workspace_id, created_at, created_by, updated_at, updated_by'
       )
       .eq('id', itemId)
       .single()
@@ -418,7 +419,7 @@ class PaymentRequestService extends BaseService<PaymentRequest> {
     const { data, error } = await supabase
       .from('payment_request_items')
       .select(
-        'id, request_id, description, quantity, unitprice, subtotal, category, tour_id, tour_request_id, supplier_id, supplier_name, sort_order, item_number, notes, payment_method, payment_method_id, advanced_by, advanced_by_name, confirmation_item_id, custom_request_date, workspace_id, created_at, created_by, updated_at, updated_by'
+        'id, request_id, description, quantity, unitprice, subtotal, category, tour_id, supplier_id, supplier_name, sort_order, item_number, notes, payment_method, payment_method_id, advanced_by, advanced_by_name, confirmation_item_id, custom_request_date, workspace_id, created_at, created_by, updated_at, updated_by'
       )
       .eq('request_id', requestId)
       .eq('category', category)

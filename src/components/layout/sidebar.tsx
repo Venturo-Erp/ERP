@@ -219,12 +219,6 @@ const menuItems: MenuItem[] = [
     icon: ReadCvLogo,
     requiredPermission: 'visas',
   },
-  {
-    href: '/design',
-    label: COMP_LAYOUT_LABELS.設計,
-    icon: PhPalette,
-    requiredPermission: 'design',
-  },
   // 合約管理和確認單管理已整合到團的操作中，不需要獨立入口
   // { href: '/contracts', label: '合約管理', icon: FileSignature, requiredPermission: 'contracts' },
   // { href: '/confirmations', label: '確認單管理', icon: CircleDot, requiredPermission: 'confirmations' },

@@ -2,7 +2,11 @@ import { formatDate } from '@/lib/utils/format-date'
 import { BaseService, StoreOperations } from '@/core/services/base.service'
 import { DisbursementOrder, PaymentRequest } from '@/stores/types'
 import { supabase } from '@/lib/supabase/client'
+import type { Database } from '@/lib/supabase/types'
 import { invalidateDisbursementOrders, invalidatePaymentRequests } from '@/data'
+
+type DisbursementOrderInsert = Database['public']['Tables']['disbursement_orders']['Insert']
+type DisbursementOrderUpdate = Database['public']['Tables']['disbursement_orders']['Update']
 
 const DO_COLS =
   'id, order_number, status, payment_request_ids, amount, payment_method, bank_account, confirmed_by, confirmed_at, notes, workspace_id, created_at, created_by, updated_at, disbursement_date, pdf_url, code'
@@ -25,7 +29,7 @@ class DisbursementOrderService extends BaseService<DisbursementOrder> {
         const { id, created_at, updated_at, ...createData } = order
         const { data, error } = await supabase
           .from('disbursement_orders')
-          .insert(createData)
+          .insert(createData as unknown as DisbursementOrderInsert)
           .select()
           .single()
         if (error) throw new Error(error.message)
@@ -33,7 +37,10 @@ class DisbursementOrderService extends BaseService<DisbursementOrder> {
         return data as unknown as DisbursementOrder
       },
       update: async (id: string, data: Partial<DisbursementOrder>) => {
-        const { error } = await supabase.from('disbursement_orders').update(data).eq('id', id)
+        const { error } = await supabase
+          .from('disbursement_orders')
+          .update(data as unknown as DisbursementOrderUpdate)
+          .eq('id', id)
         if (error) throw new Error(error.message)
         await invalidateDisbursementOrders()
       },

@@ -5,7 +5,6 @@ import { useChannelsStore } from './channels-store'
 import { useChatStore } from './chat-store'
 import { useMembersStore } from './members-store'
 import { useWidgetsStore } from './widgets-store'
-import { useCanvasStore } from './canvas-store'
 
 // Re-export all types
 export * from './types'
@@ -15,7 +14,6 @@ export { useChannelsStore } from './channels-store'
 export { useChatStore } from './chat-store'
 export { useMembersStore } from './members-store'
 export { useWidgetsStore } from './widgets-store'
-export { useCanvasStore } from './canvas-store'
 
 /**
  * Selective subscription hooks - use these for better performance
@@ -136,29 +134,6 @@ export const useWorkspaceWidgets = () => {
 }
 
 /**
- * Hook for canvas and documents
- * Use this when component only needs canvas/document functionality
- */
-export const useWorkspaceCanvas = () => {
-  const canvasStore = useCanvasStore()
-  return {
-    // State
-    personalCanvases: canvasStore.personalCanvases,
-    richDocuments: canvasStore.richDocuments,
-    activeCanvasTab: canvasStore.activeCanvasTab,
-
-    // Actions
-    createPersonalCanvas: canvasStore.createPersonalCanvas,
-    loadPersonalCanvases: canvasStore.loadPersonalCanvases,
-    setActiveCanvasTab: canvasStore.setActiveCanvasTab,
-    loadRichDocuments: canvasStore.loadRichDocuments,
-    createRichDocument: canvasStore.createRichDocument,
-    updateRichDocument: canvasStore.updateRichDocument,
-    deleteRichDocument: canvasStore.deleteRichDocument,
-  }
-}
-
-/**
  * Unified workspace store hook - LEGACY, maintains backward compatibility
  * For new code, prefer using the selective hooks above for better performance
  * This combines all workspace stores into a single interface
@@ -168,7 +143,6 @@ export const useWorkspaceStore = () => {
   const chatStore = useChatStore()
   const membersStore = useMembersStore()
   const widgetsStore = useWidgetsStore()
-  const canvasStore = useCanvasStore()
 
   return {
     // Workspaces & Channels
@@ -250,19 +224,6 @@ export const useWorkspaceStore = () => {
     shareOrderList: widgetsStore.shareOrderList,
     updateOrderReceiptStatus: widgetsStore.updateOrderReceiptStatus,
     loadSharedOrderLists: widgetsStore.loadSharedOrderLists,
-
-    // Canvas & Documents
-    personalCanvases: canvasStore.personalCanvases,
-    richDocuments: canvasStore.richDocuments,
-    activeCanvasTab: canvasStore.activeCanvasTab,
-
-    createPersonalCanvas: canvasStore.createPersonalCanvas,
-    loadPersonalCanvases: canvasStore.loadPersonalCanvases,
-    setActiveCanvasTab: canvasStore.setActiveCanvasTab,
-    loadRichDocuments: canvasStore.loadRichDocuments,
-    createRichDocument: canvasStore.createRichDocument,
-    updateRichDocument: canvasStore.updateRichDocument,
-    deleteRichDocument: canvasStore.deleteRichDocument,
 
     // Combined state
     loading: channelsStore.loading || widgetsStore.loading,

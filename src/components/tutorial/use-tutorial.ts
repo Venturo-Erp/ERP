@@ -86,7 +86,7 @@ export function useTutorial() {
           .eq('id', user.id)
           .single(),
       ])
-      setWorkspace(ws as WorkspaceData)
+      setWorkspace(ws as unknown as WorkspaceData)
       setEmployeeCount(count || 0)
       setCurrentEmployee((me as CurrentEmployee) || null)
     } catch (err) {

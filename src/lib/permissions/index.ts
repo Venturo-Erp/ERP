@@ -27,7 +27,6 @@ export const FEATURE_PERMISSIONS: PermissionConfig[] = [
   { id: 'hr', label: '人資', category: '管理', routes: ['/hr'] },
   { id: 'settings', label: '設定', category: '管理', routes: ['/settings'] },
   { id: 'customers', label: '顧客管理', category: '付費', routes: ['/customers'] },
-  { id: 'design', label: '設計', category: '付費', routes: ['/design'] },
   { id: 'fleet', label: '車隊管理', category: '企業', routes: ['/fleet', '/supplier/trips'] },
 ]
 
@@ -50,7 +49,6 @@ const ROUTE_TO_MODULE: Record<string, string> = {
   '/dashboard': 'dashboard',
   '/itinerary': 'itinerary',
   '/visas': 'visas',
-  '/design': 'design',
   '/office': 'office',
   '/customers': 'database', // 顧客在資料管理
 }

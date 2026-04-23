@@ -25,7 +25,6 @@ const PREMIUM_FEATURE_CODES = [
   'workspace',
   'customers',
   'itinerary',
-  'design',
   'office',
   'ai_bot',
   'fleet',

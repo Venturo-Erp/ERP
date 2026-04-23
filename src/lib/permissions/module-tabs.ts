@@ -147,12 +147,6 @@ export const MODULES: ModuleDefinition[] = [
     tabs: [],
   },
   {
-    code: 'design',
-    name: '設計工具',
-    description: '手冊、行銷素材',
-    tabs: [],
-  },
-  {
     code: 'office',
     name: '文件管理',
     description: '文件編輯與儲存',

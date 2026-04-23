@@ -172,7 +172,7 @@ export class ReportBuilder {
     let query = supabase
       .from('orders')
       .select(
-        'id, code, order_number, tour_id, tour_name, customer_id, status, total_amount, paid_amount, remaining_amount, payment_status, contact_person, contact_phone, contact_email, sales_person, assistant, member_count, adult_count, child_count, infant_count, total_people, notes, identity_options, is_active, workspace_id, created_at, created_by, updated_at, updated_by'
+        'id, code, order_number, tour_id, tour_name, customer_id, status, total_amount, paid_amount, remaining_amount, payment_status, contact_person, contact_phone, contact_email, sales_person, assistant, member_count, adult_count, notes, identity_options, is_active, workspace_id, created_at, created_by, updated_at, updated_by'
       )
       .eq('workspace_id', this.workspaceId)
       .limit(500)

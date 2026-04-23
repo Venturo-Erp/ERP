@@ -161,7 +161,7 @@ function AccommodationForm({ todo, onUpdate, onClose }: FormProps) {
         const requestDate = new Date().toISOString().split('T')[0]
         const requestNumber = `PR${Date.now()}`
 
-        await supabase.from('payment_requests').insert({
+        const insertData = {
           code: requestNumber,
           request_number: requestNumber,
           tour_id: formData.tourId || null,
@@ -173,7 +173,8 @@ function AccommodationForm({ todo, onUpdate, onClose }: FormProps) {
           status: 'pending',
           request_type: formData.paymentStatus === 'advanced' ? '員工代墊' : '供應商支出',
           request_date: requestDate,
-        })
+        }
+        await supabase.from('payment_requests').insert(insertData as never)
 
         toast.success('已建立請款單')
       }

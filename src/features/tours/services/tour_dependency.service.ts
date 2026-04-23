@@ -61,7 +61,6 @@ export async function deleteTourConfigurationData(tourId: string): Promise<void>
     supabase.from('designer_drafts').delete().eq('tour_id', tourId),
     supabase.from('members').delete().eq('tour_id', tourId),
     supabase.from('tour_addons').delete().eq('tour_id', tourId),
-    supabase.from('tour_bonus_settings').delete().eq('tour_id', tourId),
     supabase.from('tour_custom_cost_fields').delete().eq('tour_id', tourId),
     supabase.from('tour_departure_data').delete().eq('tour_id', tourId),
     supabase.from('tour_documents').delete().eq('tour_id', tourId),

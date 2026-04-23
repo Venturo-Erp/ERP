@@ -327,7 +327,6 @@ export async function POST(request: NextRequest) {
     // 付費功能（預設關閉）
     const premiumFeatures = [
       'accounting',
-      'design',
       'office',
       'bot_line',
       'bot_telegram',

@@ -170,14 +170,6 @@ export const FEATURES: FeatureDefinition[] = [
   //   category: 'premium',
   //   routes: ['/quotes', '/quotes/[id]', '/quotes/quick/[id]'],
   // },
-  {
-    code: 'design',
-    name: '設計工具',
-    description: '手冊設計、行銷素材',
-    category: 'premium',
-    routes: ['/design'],
-  },
-
   // ===== 進階功能（付費）- AI & 機器人管理 =====
   {
     code: 'ai_bot',

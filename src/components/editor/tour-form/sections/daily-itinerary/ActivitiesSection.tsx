@@ -145,7 +145,7 @@ export function ActivitiesSection({
 
       const { data, error } = await supabase
         .from('attractions')
-        .insert(newAttraction)
+        .insert(newAttraction as never)
         .select()
         .single()
 

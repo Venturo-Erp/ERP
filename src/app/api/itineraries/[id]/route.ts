@@ -211,7 +211,6 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       coverStyle: itinerary.cover_style,
       flightStyle: itinerary.flight_style,
       itineraryStyle: itinerary.itinerary_style,
-      price: itinerary.price,
       priceNote: itinerary.price_note,
       country: itinerary.country,
       city: itinerary.city,
@@ -231,7 +230,6 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       showHotels: itinerary.show_hotels,
       // 詳細團費
       showPricingDetails: itinerary.show_pricing_details,
-      pricingDetails: itinerary.pricing_details,
       // 價格方案：優先讀 itinerary.price_tiers（編輯器自存），fallback 到 quote.tier_pricings
       priceTiers:
         (itinerary as { price_tiers?: unknown }).price_tiers ||
