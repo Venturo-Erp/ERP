@@ -41,7 +41,14 @@ export default function OrdersPage() {
       order.tour_name?.includes(ORDERS_PAGE_LABELS.ESIM_TOUR)
     if (isVisaOrEsim) return false
 
-    const matchesFilter = statusFilter === 'all' || order.payment_status === statusFilter
+    // 改用金額算、不再依賴 payment_status enum (SSOT 簡化、收多少錢才是事實)
+    const paid = order.paid_amount ?? 0
+    const total = order.total_amount ?? 0
+    const matchesFilter =
+      statusFilter === 'all' ||
+      (statusFilter === 'unpaid' && paid <= 0) ||
+      (statusFilter === 'partial' && paid > 0 && paid < total) ||
+      (statusFilter === 'paid' && paid >= total && total > 0)
 
     const searchLower = searchQuery.toLowerCase()
     const matchesSearch =

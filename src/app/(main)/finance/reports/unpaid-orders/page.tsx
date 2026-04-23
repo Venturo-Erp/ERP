@@ -57,6 +57,8 @@ export default function UnpaidOrdersPage() {
   async function fetchData() {
     try {
       setLoading(true)
+      // 改用金額算未收款 (paid_amount < total_amount) 取代 payment_status enum filter
+      // payment_status 已被廢棄、SSOT 是 paid_amount / total_amount 兩個數字
       const { data: orders, error } = await supabase
         .from('orders')
         .select(
@@ -68,7 +70,6 @@ export default function UnpaidOrdersPage() {
         `
         )
         .eq('workspace_id', workspace_id!)
-        .in('payment_status', ['unpaid', 'partial', 'pending_deposit'])
         .eq('is_active', true)
         .not('status', 'in', '("cancelled","expired")')
         .order('created_at', { ascending: false })
@@ -76,26 +77,34 @@ export default function UnpaidOrdersPage() {
       if (error) throw error
 
       const today = new Date()
-      const mapped: UnpaidOrder[] = (orders ?? []).map(o => {
-        const tour = Array.isArray(o.tours) ? o.tours[0] : o.tours
-        const depDate = tour?.departure_date ? new Date(tour.departure_date) : null
-        const daysSince = depDate ? Math.floor((today.getTime() - depDate.getTime()) / 86400000) : 0
-        return {
-          id: o.id,
-          code: o.code,
-          order_number: o.order_number ?? o.code,
-          contact_person: o.contact_person,
-          tour_code: tour?.code ?? '',
-          tour_name: tour?.name ?? '',
-          departure_date: tour?.departure_date ?? '',
-          total_amount: o.total_amount ?? 0,
-          paid_amount: o.paid_amount ?? 0,
-          remaining_amount: o.remaining_amount ?? 0,
-          payment_status: o.payment_status ?? 'unpaid',
-          status: o.status ?? '',
-          days_since_departure: daysSince,
-        }
-      })
+      const mapped: UnpaidOrder[] = (orders ?? [])
+        .filter(o => (o.paid_amount ?? 0) < (o.total_amount ?? 0))
+        .map(o => {
+          const tour = Array.isArray(o.tours) ? o.tours[0] : o.tours
+          const depDate = tour?.departure_date ? new Date(tour.departure_date) : null
+          const daysSince = depDate
+            ? Math.floor((today.getTime() - depDate.getTime()) / 86400000)
+            : 0
+          // 衍生 status 給 UI 用、不再依賴 DB payment_status
+          const paid = o.paid_amount ?? 0
+          const total = o.total_amount ?? 0
+          const derivedStatus = paid <= 0 ? 'unpaid' : paid < total ? 'partial' : 'paid'
+          return {
+            id: o.id,
+            code: o.code,
+            order_number: o.order_number ?? o.code,
+            contact_person: o.contact_person,
+            tour_code: tour?.code ?? '',
+            tour_name: tour?.name ?? '',
+            departure_date: tour?.departure_date ?? '',
+            total_amount: total,
+            paid_amount: paid,
+            remaining_amount: o.remaining_amount ?? total - paid,
+            payment_status: derivedStatus,
+            status: o.status ?? '',
+            days_since_departure: daysSince,
+          }
+        })
 
       setData(mapped)
     } catch (err) {

@@ -138,17 +138,6 @@ export const TourOverview = React.memo(function TourOverview({
           color: 'text-morandi-gold',
         },
         {
-          title: COMP_TOURS_LABELS.付款狀態,
-          value: order.payment_status || '-',
-          icon: order.payment_status === 'paid' ? CheckCircle : AlertCircle,
-          color:
-            order.payment_status === 'paid'
-              ? 'text-morandi-green'
-              : order.payment_status === 'partial'
-                ? 'text-morandi-gold'
-                : 'text-morandi-red',
-        },
-        {
           title: COMP_TOURS_LABELS.已付金額,
           amount: order.paid_amount ?? 0,
           icon: Wallet,
