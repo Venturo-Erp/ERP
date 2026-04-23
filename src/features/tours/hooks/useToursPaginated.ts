@@ -295,33 +295,21 @@ export function useToursPaginated(params: UseToursPaginatedParams): UseToursPagi
     await invalidateAllPaginatedQueries()
   }
 
-  // Generate tour code
+  // Generate tour code — 透過 DB RPC、advisory lock 防 race
   const generateTourCode = async (cityCode: string, date: Date): Promise<string> => {
-    const workspaceCode = getCurrentWorkspaceCode()
-    if (!workspaceCode) {
+    const workspaceId = user?.workspace_id
+    if (!workspaceId) {
       throw new Error(TOUR_SERVICE_LABELS.CANNOT_GET_WORKSPACE)
     }
-
-    // Get existing tour codes to avoid duplicates
-    const { data: existingTours } = await supabase.from('tours').select('code')
-
-    const code = generateTourCodeUtil(
-      workspaceCode,
-      cityCode.toUpperCase(),
-      date.toISOString(),
-      existingTours || []
-    )
-
-    // Check for duplicates and try next letter
-    const exists = (existingTours || []).some(t => t.code === code)
-    if (exists) {
-      const dateStr = formatDate(date).replace(/-/g, '').slice(2)
-      const lastChar = code.slice(-1)
-      const nextChar = String.fromCharCode(lastChar.charCodeAt(0) + 1)
-      return `${cityCode}${dateStr}${nextChar}`
+    const { data: code, error } = await supabase.rpc('generate_tour_code', {
+      p_workspace_id: workspaceId,
+      p_city_code: cityCode.toUpperCase(),
+      p_departure_date: date.toISOString().split('T')[0],
+    })
+    if (error || !code) {
+      throw error ?? new Error('generate_tour_code returned null')
     }
-
-    return code
+    return code as string
   }
 
   // Loading state - 簡化：只看 SWR 的 isLoading

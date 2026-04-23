@@ -11132,6 +11132,14 @@ export type Database = {
       }
       generate_confirmation_token: { Args: never; Returns: string }
       generate_receipt_no: { Args: { p_tour_id: string }; Returns: string }
+      generate_tour_code: {
+        Args: {
+          p_city_code: string
+          p_departure_date: string
+          p_workspace_id: string
+        }
+        Returns: string
+      }
       generate_voucher_no: {
         Args: { p_voucher_date?: string; p_workspace_id: string }
         Returns: string

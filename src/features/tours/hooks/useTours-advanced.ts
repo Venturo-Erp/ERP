@@ -8,7 +8,7 @@ import { Tour } from '@/stores/types'
 import { PageRequest, UseEntityResult } from '@/core/types/common'
 import { BaseEntity } from '@/core/types/common'
 import { generateTourCode as generateTourCodeUtil } from '@/stores/utils/code-generator'
-import { getCurrentWorkspaceCode } from '@/lib/workspace-helpers'
+import { getCurrentWorkspaceCode, getCurrentWorkspaceId } from '@/lib/workspace-helpers'
 import { generateUUID } from '@/lib/utils/uuid'
 import type { Database } from '@/lib/supabase/types'
 import { logger } from '@/lib/utils/logger'
@@ -293,32 +293,22 @@ export function useTourDetails(tour_id: string) {
     return data as Tour
   }
 
-  const generateTourCode = async (cityCode: string, date: Date, isSpecial?: boolean) => {
-    const workspaceCode = getCurrentWorkspaceCode()
-    if (!workspaceCode) {
+  const generateTourCode = async (cityCode: string, date: Date, _isSpecial?: boolean) => {
+    const workspaceId = getCurrentWorkspaceId()
+    if (!workspaceId) {
       throw new Error(TOUR_SERVICE_LABELS.CANNOT_GET_WORKSPACE)
     }
 
-    // 獲取現有 tours 來避免重複
-    const { data: existingTours } = await supabase.from('tours').select('code')
-
-    const code = generateTourCodeUtil(
-      workspaceCode,
-      cityCode.toUpperCase(),
-      date.toISOString(),
-      existingTours || []
-    )
-
-    // 檢查是否重複，嘗試下一個字母
-    const exists = (existingTours || []).some(t => t.code === code)
-    if (exists) {
-      const dateStr = formatDate(date).replace(/-/g, '').slice(2)
-      const lastChar = code.slice(-1)
-      const nextChar = String.fromCharCode(lastChar.charCodeAt(0) + 1)
-      return `${cityCode}${dateStr}${nextChar}`
+    // 透過 DB RPC、advisory lock 防 race
+    const { data: code, error } = await supabase.rpc('generate_tour_code', {
+      p_workspace_id: workspaceId,
+      p_city_code: cityCode.toUpperCase(),
+      p_departure_date: date.toISOString().split('T')[0],
+    })
+    if (error || !code) {
+      throw error ?? new Error('generate_tour_code returned null')
     }
-
-    return code
+    return code as string
   }
 
   return {

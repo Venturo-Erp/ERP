@@ -4,7 +4,7 @@ import { Tour } from '@/stores/types'
 import { logger } from '@/lib/utils/logger'
 import { ValidationError } from '@/core/errors/app-errors'
 import { generateTourCode as generateTourCodeUtil } from '@/stores/utils/code-generator'
-import { getCurrentWorkspaceCode } from '@/lib/workspace-helpers'
+import { getCurrentWorkspaceCode, getCurrentWorkspaceId } from '@/lib/workspace-helpers'
 // workspace_id is now auto-set by DB trigger
 import { BaseEntity } from '@/core/types/common'
 import { supabase } from '@/lib/supabase/client'
@@ -95,39 +95,23 @@ class TourService extends BaseService<Tour & BaseEntity> {
   async generateTourCode(
     cityCode: string,
     date: Date,
-    isSpecial: boolean = false
+    _isSpecial: boolean = false
   ): Promise<string> {
-    // 取得當前 workspace code (用於向後相容，新格式不需要)
-    const workspaceCode = getCurrentWorkspaceCode()
-    if (!workspaceCode) {
+    const workspaceId = getCurrentWorkspaceId()
+    if (!workspaceId) {
       throw new Error(TOUR_SERVICE_LABELS.CANNOT_GET_WORKSPACE)
     }
 
-    // 直接從 DB 查同日期同城市的現有團號，避免快取不一致導致重複
-    const dateStr = formatDate(date).replace(/-/g, '').slice(2) // YYMMDD
-    const prefix = `${cityCode.toUpperCase()}${dateStr}`
-    const { data: existingTours } = await supabase
-      .from('tours')
-      .select('code')
-      .like('code', `${prefix}%`)
-
-    // 使用統一的 code generator
-    const code = generateTourCodeUtil(
-      workspaceCode,
-      cityCode.toUpperCase(),
-      date.toISOString(),
-      existingTours || []
-    )
-
-    // 雙重檢查：確保生成的團號不存在
-    const exists = await this.isTourCodeExists(code)
-    if (exists) {
-      const lastChar = code.slice(-1)
-      const nextChar = String.fromCharCode(lastChar.charCodeAt(0) + 1)
-      return `${prefix}${nextChar}`
+    // 透過 DB RPC、advisory lock 防 race
+    const { data, error } = await supabase.rpc('generate_tour_code', {
+      p_workspace_id: workspaceId,
+      p_city_code: cityCode.toUpperCase(),
+      p_departure_date: date.toISOString().split('T')[0],
+    })
+    if (error || !data) {
+      throw error ?? new Error('generate_tour_code returned null')
     }
-
-    return code
+    return data as string
   }
 
   // 檢查團體是否可以取消
