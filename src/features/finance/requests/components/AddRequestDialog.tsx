@@ -916,7 +916,6 @@ export function AddRequestDialog({
               description: item.title,
               unit_price: selectedRequestItems[item.id]?.amount || 0,
               quantity: 1,
-              tour_request_id: item.id, // 關聯到需求單
             }))
         }
 

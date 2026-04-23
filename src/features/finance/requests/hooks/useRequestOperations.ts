@@ -100,7 +100,6 @@ export function useRequestOperations() {
               quantity: item.quantity,
               notes: '',
               sort_order: i + 1,
-              tour_request_id: item.tour_request_id || null,
               advanced_by: item.advanced_by || null,
               advanced_by_name: item.advanced_by_name || null,
             }))
@@ -153,7 +152,6 @@ export function useRequestOperations() {
               quantity: item.quantity,
               notes: '',
               sort_order: i + 1,
-              tour_request_id: item.tour_request_id || null,
               advanced_by: item.advanced_by || null,
               advanced_by_name: item.advanced_by_name || null,
             }))
@@ -230,7 +228,6 @@ export function useRequestOperations() {
               quantity: item.quantity,
               notes: '',
               sort_order: i + 1,
-              tour_request_id: item.tour_request_id || null,
             }))
           )
         } catch (itemError) {
