@@ -64,7 +64,7 @@ class PaymentRequestService extends BaseService<PaymentRequest> {
     const { data, error } = await supabase
       .from('payment_requests')
       .select(
-        'id, code, request_number, request_type, request_category, request_date, amount, total_amount, status, tour_id, tour_code, tour_name, order_id, order_number, supplier_id, supplier_name, expense_type, accounting_subject_id, notes, items, batch_id, budget_warning, is_special_billing, created_by, created_by_name, approved_by, approved_at, paid_by, paid_at, workspace_id, created_at, updated_at, updated_by'
+        'id, code, request_number, request_type, request_category, request_date, amount, total_amount, status, tour_id, tour_code, tour_name, order_id, order_number, supplier_id, supplier_name, expense_type, accounting_subject_id, notes, batch_id, budget_warning, is_special_billing, created_by, created_by_name, approved_by, approved_at, paid_by, paid_at, workspace_id, created_at, updated_at, updated_by, items:payment_request_items(*)'
       )
       .order('created_at', { ascending: false })
       .limit(1000)
@@ -463,7 +463,7 @@ class PaymentRequestService extends BaseService<PaymentRequest> {
     const { data, error } = await supabase
       .from('payment_requests')
       .select(
-        'id, code, request_number, request_type, request_category, request_date, amount, total_amount, status, tour_id, tour_code, tour_name, order_id, order_number, supplier_id, supplier_name, expense_type, accounting_subject_id, notes, items, batch_id, budget_warning, is_special_billing, created_by, created_by_name, approved_by, approved_at, paid_by, paid_at, workspace_id, created_at, updated_at, updated_by'
+        'id, code, request_number, request_type, request_category, request_date, amount, total_amount, status, tour_id, tour_code, tour_name, order_id, order_number, supplier_id, supplier_name, expense_type, accounting_subject_id, notes, batch_id, budget_warning, is_special_billing, created_by, created_by_name, approved_by, approved_at, paid_by, paid_at, workspace_id, created_at, updated_at, updated_by, items:payment_request_items(*)'
       )
       .eq('status', 'pending')
       .order('created_at', { ascending: false })
@@ -480,7 +480,7 @@ class PaymentRequestService extends BaseService<PaymentRequest> {
     const { data, error } = await supabase
       .from('payment_requests')
       .select(
-        'id, code, request_number, request_type, request_category, request_date, amount, total_amount, status, tour_id, tour_code, tour_name, order_id, order_number, supplier_id, supplier_name, expense_type, accounting_subject_id, notes, items, batch_id, budget_warning, is_special_billing, created_by, created_by_name, approved_by, approved_at, paid_by, paid_at, workspace_id, created_at, updated_at, updated_by'
+        'id, code, request_number, request_type, request_category, request_date, amount, total_amount, status, tour_id, tour_code, tour_name, order_id, order_number, supplier_id, supplier_name, expense_type, accounting_subject_id, notes, batch_id, budget_warning, is_special_billing, created_by, created_by_name, approved_by, approved_at, paid_by, paid_at, workspace_id, created_at, updated_at, updated_by, items:payment_request_items(*)'
       )
       .eq('status', 'billed')
       .order('created_at', { ascending: false })
@@ -497,7 +497,7 @@ class PaymentRequestService extends BaseService<PaymentRequest> {
     const { data, error } = await supabase
       .from('payment_requests')
       .select(
-        'id, code, request_number, request_type, request_category, request_date, amount, total_amount, status, tour_id, tour_code, tour_name, order_id, order_number, supplier_id, supplier_name, expense_type, accounting_subject_id, notes, items, batch_id, budget_warning, is_special_billing, created_by, created_by_name, approved_by, approved_at, paid_by, paid_at, workspace_id, created_at, updated_at, updated_by'
+        'id, code, request_number, request_type, request_category, request_date, amount, total_amount, status, tour_id, tour_code, tour_name, order_id, order_number, supplier_id, supplier_name, expense_type, accounting_subject_id, notes, batch_id, budget_warning, is_special_billing, created_by, created_by_name, approved_by, approved_at, paid_by, paid_at, workspace_id, created_at, updated_at, updated_by, items:payment_request_items(*)'
       )
       .eq('tour_id', tourId)
       .order('created_at', { ascending: false })
@@ -514,7 +514,7 @@ class PaymentRequestService extends BaseService<PaymentRequest> {
     const { data, error } = await supabase
       .from('payment_requests')
       .select(
-        'id, code, request_number, request_type, request_category, request_date, amount, total_amount, status, tour_id, tour_code, tour_name, order_id, order_number, supplier_id, supplier_name, expense_type, accounting_subject_id, notes, items, batch_id, budget_warning, is_special_billing, created_by, created_by_name, approved_by, approved_at, paid_by, paid_at, workspace_id, created_at, updated_at, updated_by'
+        'id, code, request_number, request_type, request_category, request_date, amount, total_amount, status, tour_id, tour_code, tour_name, order_id, order_number, supplier_id, supplier_name, expense_type, accounting_subject_id, notes, batch_id, budget_warning, is_special_billing, created_by, created_by_name, approved_by, approved_at, paid_by, paid_at, workspace_id, created_at, updated_at, updated_by, items:payment_request_items(*)'
       )
       .eq('order_id', orderId)
       .order('created_at', { ascending: false })
