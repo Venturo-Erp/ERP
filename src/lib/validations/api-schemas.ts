@@ -218,11 +218,6 @@ export const resetEmployeePasswordSchema = z.object({
   new_password: z.string().min(8, '密碼至少需要 8 個字元'),
 })
 
-export const adminResetPasswordSchema = z.object({
-  email: z.string().min(1, '缺少電子郵件'),
-  new_password: z.string().min(6, '密碼至少需要 6 個字元'),
-})
-
 export const validateLoginSchema = z.object({
   username: z.string().min(1, '請填寫帳號'),
   password: z.string().min(1, '請填寫密碼'),

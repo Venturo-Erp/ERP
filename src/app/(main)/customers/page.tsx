@@ -7,7 +7,6 @@
  * - CustomerAddDialog: 新增顧客（手動 + OCR）
  * - CustomerVerifyDialog: 驗證/編輯顧客
  * - CustomerDetailDialog: 顧客詳情
- * - ResetPasswordDialog: 重置密碼
  */
 
 import { useState, useMemo, useCallback } from 'react'
@@ -41,7 +40,6 @@ import { useRouter } from 'next/navigation'
 import {
   CustomerAddDialog,
   CustomerDialog,
-  ResetPasswordDialog,
   ImportCustomersDialog,
 } from './components'
 import { CUSTOMER_PAGE_LABELS as L, CUSTOMER_IMPORT_LABELS } from './constants/labels'
@@ -85,7 +83,6 @@ export default function CustomersPage() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [isCustomerDialogOpen, setIsCustomerDialogOpen] = useState(false)
   const [customerDialogMode, setCustomerDialogMode] = useState<'view' | 'edit'>('view')
-  const [isResetPasswordDialogOpen, setIsResetPasswordDialogOpen] = useState(false)
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false)
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
   const [lineBindingCustomer, setLineBindingCustomer] = useState<Customer | null>(null)
@@ -471,13 +468,6 @@ export default function CustomersPage() {
             await updateCustomer(selectedCustomer.id, data as Partial<Customer>)
           }
         }}
-      />
-
-      {/* 重置密碼對話框 */}
-      <ResetPasswordDialog
-        open={isResetPasswordDialogOpen}
-        onOpenChange={setIsResetPasswordDialogOpen}
-        customer={selectedCustomer}
       />
 
       {/* 批次匯入對話框 */}

@@ -60,20 +60,6 @@ export interface CustomerVerifyDialogProps {
   onUpdateCustomer: (id: string, data: Partial<UpdateCustomerData>) => Promise<void>
 }
 
-export interface CustomerDetailDialogProps {
-  isOpen: boolean
-  customer: Customer | null
-  onClose: () => void
-  onEdit: (customer: Customer) => void
-  onResetPassword: () => void
-}
-
-export interface ResetPasswordDialogProps {
-  isOpen: boolean
-  customer: Customer | null
-  onClose: () => void
-}
-
 // 初始狀態
 export const INITIAL_NEW_CUSTOMER: NewCustomerFormData = {
   name: '',
