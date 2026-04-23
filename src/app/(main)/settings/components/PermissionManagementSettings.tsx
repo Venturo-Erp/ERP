@@ -1,6 +1,6 @@
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Shield, Building2, ArrowRight } from 'lucide-react'
+import { Shield } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { PERMISSION_LABELS } from '../constants/labels'
 
@@ -15,28 +15,6 @@ export function PermissionManagementSettings() {
       </div>
 
       <div className="space-y-4">
-        {/* Workspace 管理 */}
-        <div className="p-6 border border-border rounded-lg bg-card hover:bg-accent/5 transition-colors">
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-2">
-                <Building2 className="h-5 w-5 text-morandi-blue" />
-                <h3 className="font-medium">{PERMISSION_LABELS.BRANCH_MANAGEMENT}</h3>
-              </div>
-              <p className="text-sm text-morandi-secondary mb-3">{PERMISSION_LABELS.MANAGE_2715}</p>
-            </div>
-
-            <Button
-              variant="outline"
-              onClick={() => router.push('/settings/workspaces')}
-              className="ml-4 gap-2"
-            >
-              <span>{PERMISSION_LABELS.MANAGE_BRANCHES}</span>
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-
         {/* 跨分公司權限 */}
         <div className="p-6 border border-border rounded-lg bg-card hover:bg-accent/5 transition-colors">
           <div className="flex items-start justify-between">

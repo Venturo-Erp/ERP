@@ -327,8 +327,6 @@ export const OTHER_SETTINGS_LABELS = {
 
 export const PERMISSION_LABELS = {
   TITLE: '權限管理',
-  BRANCH_MANAGEMENT: '分公司管理',
-  MANAGE_BRANCHES: '管理分公司',
   CROSS_BRANCH_PERMISSION: '跨分公司權限',
   PERM_1: '授權特定員工跨分公司查看資料',
   PERM_2: '設定不同權限等級（查看、編輯、刪除、財務）',
@@ -336,7 +334,6 @@ export const PERMISSION_LABELS = {
   PERM_4: '隨時撤銷權限',
   PERMISSION_SETTINGS: '權限設定',
 
-  MANAGE_2715: '管理所有分公司（台北、台中等），建立新分公司、查看員工分佈',
   MANAGE_9542: '授權管理員查看或管理其他分公司的資料（例如：台北管理員可查看台中的旅遊團）',
 }
 

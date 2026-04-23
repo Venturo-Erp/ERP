@@ -72,7 +72,6 @@ export const BREADCRUMB_CONFIG: Record<string, BreadcrumbConfig> = {
 
   // ========== 設定 ==========
   '/settings': { label: '設定', parent: '/' },
-  '/settings/workspaces': { label: '工作區設定', parent: '/settings' },
   '/settings/permissions': { label: '權限設定', parent: '/settings' },
   '/settings/menu': { label: '選單設定', parent: '/settings' },
   '/settings/modules': { label: '模組設定', parent: '/settings' },

@@ -121,7 +121,6 @@ export const FEATURES: FeatureDefinition[] = [
       '/settings/appearance',
       '/settings/modules',
       '/settings/bot-line',
-      '/settings/workspaces',
     ],
   },
 
