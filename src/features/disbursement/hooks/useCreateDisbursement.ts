@@ -13,6 +13,7 @@ import {
   updateDisbursementOrder as updateDisbursementOrderApi,
   invalidateDisbursementOrders,
   invalidatePaymentRequests,
+  usePaymentRequestItems,
 } from '@/data'
 import { supabase } from '@/lib/supabase/client'
 import { useAuthStore } from '@/stores/auth-store'
@@ -80,6 +81,7 @@ export function useCreateDisbursement({
 }: UseCreateDisbursementProps) {
   // 使用 @/data hooks（SWR 自動載入）
   const { items: disbursement_orders } = useDisbursementOrders()
+  const { items: paymentRequestItems } = usePaymentRequestItems()
   const user = useAuthStore(state => state.user)
 
   const isEditMode = !!editingOrder
@@ -128,12 +130,23 @@ export function useCreateDisbursement({
     })
   }, [pendingRequests, searchTerm, dateFilter, statusFilter])
 
-  // 選中的總金額
+  // 選中的總金額（扣掉成本轉移：transferred_from_tour_id 的 items 不算實際出帳金額）
   const selectedAmount = useMemo(() => {
     return pendingRequests
       .filter(r => selectedRequestIds.includes(r.id))
-      .reduce((sum, r) => sum + (r.amount || 0), 0)
-  }, [pendingRequests, selectedRequestIds])
+      .reduce((sum, r) => {
+        const transferredSum = paymentRequestItems
+          .filter(i => {
+            const item = i as unknown as Record<string, unknown>
+            return item.request_id === r.id && item.transferred_from_tour_id
+          })
+          .reduce((s, i) => {
+            const item = i as unknown as Record<string, unknown>
+            return s + ((item.subtotal as number) || 0)
+          }, 0)
+        return sum + (r.amount || 0) - transferredSum
+      }, 0)
+  }, [pendingRequests, selectedRequestIds, paymentRequestItems])
 
   // 切換選擇
   const toggleSelect = useCallback((requestId: string) => {
