@@ -10414,6 +10414,24 @@ export type Database = {
           },
         ]
       }
+      webhook_idempotency_keys: {
+        Row: {
+          idempotency_key: string
+          processed_at: string
+          source: string
+        }
+        Insert: {
+          idempotency_key: string
+          processed_at?: string
+          source: string
+        }
+        Update: {
+          idempotency_key?: string
+          processed_at?: string
+          source?: string
+        }
+        Relationships: []
+      }
       workspace_attendance_settings: {
         Row: {
           allow_missed_clock_request: boolean

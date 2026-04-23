@@ -17,6 +17,7 @@ import { getSupabaseAdminClient } from '@/lib/supabase/admin'
 import { verifyWebhookSignature, type TaishinWebhookParams } from '@/lib/linkpay/signature'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { successResponse, errorResponse, ApiError, ErrorCode } from '@/lib/api/response'
+import { withWebhookIdempotency } from '@/lib/webhook/idempotency'
 
 // ============================================
 // 型別定義
@@ -67,6 +68,11 @@ export async function POST(req: NextRequest) {
       return ApiError.missingField('order_no')
     }
 
+    // ============================================
+    // 步驟 3-6 包在冪等保護裡
+    // 同一個 order_no 重發 (台新銀行 retry) 第二次起回 200 略過
+    // ============================================
+    return await withWebhookIdempotency('linkpay', order_no, async () => {
     // 解析收款單號（order_no 格式：{receiptNumber}R{timestamp}，已移除 - 和 _）
     const receiptNumber = order_no.split('R')[0]
     const isSuccess = ret_code === '00'
@@ -89,7 +95,7 @@ export async function POST(req: NextRequest) {
         order_no,
         error: findError,
       })
-      return ApiError.notFound('LinkPay 記錄')
+      return { status: 404, body: { ok: false, error: 'LinkPay 記錄不存在' } }
     }
 
     // ============================================
@@ -113,7 +119,7 @@ export async function POST(req: NextRequest) {
           difference: Math.abs(webhookAmount - expectedAmount),
           tolerance,
         })
-        return ApiError.validation('金額驗證失敗')
+        return { status: 400, body: { ok: false, error: '金額驗證失敗' } }
       }
     }
 
@@ -184,8 +190,9 @@ export async function POST(req: NextRequest) {
       })
     }
 
-    // 回應台新銀行（必須回應成功，否則會重複通知）
-    return successResponse(null)
+      // 回應台新銀行（必須回應成功，否則會重複通知）
+      return { status: 200, body: { success: true } }
+    })
   } catch (error) {
     logger.error('[LinkPay Webhook] 處理過程發生錯誤', {
       error: error instanceof Error ? error.message : error,

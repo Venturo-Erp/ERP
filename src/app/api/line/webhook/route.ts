@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createHmac, timingSafeEqual } from 'crypto'
+import { createHmac, timingSafeEqual, createHash } from 'crypto'
 import { logger } from '@/lib/utils/logger'
 import { handleAICustomerService } from '@/lib/line/ai-customer-service'
 import { checkRateLimit } from '@/lib/rate-limit'
+import { withWebhookIdempotency } from '@/lib/webhook/idempotency'
 
 /** LINE Webhook event type (minimal) */
 interface LineEvent {
@@ -664,6 +665,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ status: 'error', message: 'invalid signature' }, { status: 401 })
     }
 
+    // 冪等保護：用 raw body 的 SHA-256 當 key
+    // LINE 對同一 webhook 重發時 body 完全相同、第二次起會被 skip
+    const idempotencyKey = createHash('sha256').update(rawBody).digest('hex')
+    return await withWebhookIdempotency('line', idempotencyKey, async () => {
     const body = JSON.parse(rawBody)
     const events = body.events || []
 
@@ -719,7 +724,8 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    return NextResponse.json({ status: 'ok' })
+      return { status: 200, body: { status: 'ok' } }
+    })
   } catch (error) {
     logger.error('[LINE] Webhook error:', error)
     return NextResponse.json({ status: 'error' }, { status: 500 })

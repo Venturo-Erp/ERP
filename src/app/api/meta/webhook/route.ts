@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createHmac, timingSafeEqual } from 'crypto'
+import { createHmac, timingSafeEqual, createHash } from 'crypto'
 import { createClient } from '@supabase/supabase-js'
 import { logger } from '@/lib/utils/logger'
 import { handleAICustomerService } from '@/lib/line/ai-customer-service'
+import { withWebhookIdempotency } from '@/lib/webhook/idempotency'
 
 // Message ID 去重（防止 Meta 重送 webhook 導致重複回覆）
 const processedMessages = new Set<string>()
@@ -133,6 +134,11 @@ export async function POST(request: NextRequest) {
       // return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
     }
 
+    // 冪等保護：用 raw body 的 SHA-256 當 key
+    // Meta 重發同一 webhook body 不變、第二次起會被 skip
+    // 同時保留 in-memory processedMessages dedup 當第二道防線 (single instance 內快取)
+    const idempotencyKey = createHash('sha256').update(rawBody).digest('hex')
+    return await withWebhookIdempotency('meta', idempotencyKey, async () => {
     const body = JSON.parse(rawBody)
     const object = body.object
 
@@ -156,7 +162,8 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    return NextResponse.json({ status: 'ok' })
+      return { status: 200, body: { status: 'ok' } }
+    })
   } catch (error) {
     logger.error('Meta webhook error:', error)
     return NextResponse.json({ status: 'ok' })
