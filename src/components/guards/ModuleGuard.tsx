@@ -6,7 +6,7 @@
  *   1. workspace_features — workspace 等級「有沒有買這個功能」
  *   2. role_tab_permissions（HR）— 個人職務「能不能看這個模組」
  *
- * HR 是權限 SSOT。除 PLATFORM_ADMIN_ROUTES（平台管理資格專屬）外、所有路由統一吃此處。
+ * HR 是權限 SSOT。除 PLATFORM_CAPABILITY_ROUTES（平台管理資格專屬）外、所有路由統一吃此處。
  */
 
 import { useEffect, useState } from 'react'
@@ -14,7 +14,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import {
   useWorkspaceFeatures,
   useTabPermissions,
-  isPlatformAdminRoute,
+  isPlatformCapabilityRoute,
   getModuleFromRoute,
 } from '@/lib/permissions'
 import { useAuthStore } from '@/stores'
@@ -63,7 +63,7 @@ export function ModuleGuard({ children }: ModuleGuardProps) {
     }
 
     // 平台管理資格專屬：/tenants（Venturo 平台商業敏感功能）
-    if (isPlatformAdminRoute(pathname)) {
+    if (isPlatformCapabilityRoute(pathname)) {
       if (!isAdmin) {
         router.replace('/unauthorized')
         return

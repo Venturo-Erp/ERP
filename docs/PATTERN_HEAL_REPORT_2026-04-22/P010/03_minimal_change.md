@@ -87,7 +87,7 @@
 - **Q3：`COMMENT ON POLICY` 算不算順手改？**
   - A：不算。它是「文件化新建 policy」、是建立動作的一部分、不是修改無關代碼。保留。
 - **Q4：`service_role` 例外到底要不要加？**
-  - A：要。系統後台維護（seed / migration script / admin dashboard）需要 bypass、這是必要的、不是順手加的。
+  - A：要。系統後台維護（seed / migration script / 系統主管 dashboard）需要 bypass、這是必要的、不是順手加的。
 
 結論：**已經是最小集合**、不能再縮。
 

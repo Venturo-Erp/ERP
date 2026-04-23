@@ -120,7 +120,7 @@ CREATE POLICY employee_permission_overrides_delete
 **必寫 spec**：`tests/e2e/permission-overrides-rls.spec.ts`
 
 ```ts
-// 沙箱：Tenant A（員工 A1 / admin Aadmin）、Tenant B（員工 B1）
+// 沙箱：Tenant A（員工 A1 / 系統主管 Aadmin）、Tenant B（員工 B1）
 test('跨租戶 SELECT 擋住', async () => {
   loginAs(A1)
   const { data } = await supabase
@@ -156,8 +156,8 @@ test('API PUT 跨租戶 target employee 仍回 success（P022 殘留、待修）
 })
 
 test('service_role validate-login 仍可讀（不受 RLS 影響）', async () => {
-  const admin = createServiceClient()
-  const { data } = await admin.from('employee_permission_overrides').select('*').limit(1)
+  const 系統主管 = createServiceClient()
+  const { data } = await 系統主管.from('employee_permission_overrides').select('*').limit(1)
   expect(data).not.toBeNull()
 })
 ```

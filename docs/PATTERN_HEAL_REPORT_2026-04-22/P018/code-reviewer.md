@@ -127,7 +127,7 @@ await supabase.from('employee_permission_overrides').delete().eq('employee_id', 
 ### 8. 🟡 測試覆蓋 — e2e 守門必加、建議 2 個 spec
 
 **必加**：
-- `tests/e2e/permission-overrides-tenant-isolation.spec.ts` — 建 2 個 workspace A/B、各建 admin + employee、A admin 嘗試 PUT `/api/employees/<B 的 employeeId>/permission-overrides` → 預期：policy 擋、INSERT 回 0 rows 或 error、PUT response 成功但 DB 無 row（因為 policy 讓 DELETE 刪 0 row + INSERT 因 WITH CHECK 失敗）。
+- `tests/e2e/permission-overrides-tenant-isolation.spec.ts` — 建 2 個 workspace A/B、各建 系統主管 + employee、A 系統主管 嘗試 PUT `/api/employees/<B 的 employeeId>/permission-overrides` → 預期：policy 擋、INSERT 回 0 rows 或 error、PUT response 成功但 DB 無 row（因為 policy 讓 DELETE 刪 0 row + INSERT 因 WITH CHECK 失敗）。
 
 - 簡化版：直接在 DB 用 A 的 JWT 做 `INSERT INTO employee_permission_overrides (employee_id, workspace_id, ...) VALUES (<B 員工>, <B workspace>, ...)` → 預期 policy 擋、回 42501 或 0 rows affected。
 
@@ -139,10 +139,10 @@ await supabase.from('employee_permission_overrides').delete().eq('employee_id', 
 ### 9. 🟡 邊界條件 — 空陣列與跨租戶攻擊
 
 - **空 overrides 陣列**：`overrides.filter(...).length === 0` → 不 INSERT、直接 return success。修法不改這邏輯 → 無影響。
-- **跨租戶攻擊（payload 層）**：攻擊者 PUT `/api/employees/<B 公司員工>/permission-overrides` body `{ overrides: [{ module: 'admin', override_type: 'grant' }] }`：
+- **跨租戶攻擊（payload 層）**：攻擊者 PUT `/api/employees/<B 公司員工>/permission-overrides` body `{ overrides: [{ module: '系統主管', override_type: 'grant' }] }`：
   - DELETE 階段：policy 擋、0 rows deleted（原本 B 的 overrides 安全）。
   - INSERT 階段：`workspace_id: auth.data.workspaceId`（A 的 workspace）+ `employee_id: <B 員工>` → WITH CHECK `workspace_id = get_current_user_workspace()` pass（**是 A 的 workspace、通過**）→ **row 被寫進去了、workspace_id=A、employee_id=B 員工**。
-  - 然後 B 員工登入、validate-login 用 `.eq('employee_id', employee.id)` 撈 overrides、拿到這條 workspace_id=A 的 row → permSet 加了 admin → **B 員工取得 系統主管權限**。
+  - 然後 B 員工登入、validate-login 用 `.eq('employee_id', employee.id)` 撈 overrides、拿到這條 workspace_id=A 的 row → permSet 加了 系統主管 → **B 員工取得 系統主管權限**。
 
 **⚠️ 這是 P018 修法的漏洞**：P018 只驗 `workspace_id = 當前 user workspace`、沒驗 `employee_id 屬於當前 user workspace`。修 P018 沒修掉這個。
 

@@ -65,7 +65,7 @@ pattern map v1.2 寫「`is_super_admin()` 已停用」。選項：
 幕僚 1 必附 e2e（或計畫）：
 - T1 無登入 → 401
 - T2 一般員工 → 403
-- T3 tenant admin 刪空殼 → 200
+- T3 tenant 系統主管 刪空殼 → 200
 - T4 有員工 → 409
 - T5 有 active tours → 409
 - T6 刪 Corner → 403/409
@@ -105,7 +105,7 @@ CREATE POLICY "workspaces_delete" ON public.workspaces
 
 **5.2 AddWorkspaceDialog rollback 選型**（🔴 關鍵）
 - A：改 `is_active=false`（soft）+ cleanup ticket → 髒資料、但簡單
-- B：改走新 DELETE API → **會被自己的 guard 409 擋**（剛建的 workspace 有 1 個 admin 員工）
+- B：改走新 DELETE API → **會被自己的 guard 409 擋**（剛建的 workspace 有 1 個 系統主管 員工）
 - C：保留 supabase client 直連 → 🔴 client 拿不到 service_role、現行 policy 擋死
 
 **推薦 A**、簡單、14 天內補 cleanup job。幕僚 1 選 B 且沒想到 guard 衝突 → 🔴 必退。

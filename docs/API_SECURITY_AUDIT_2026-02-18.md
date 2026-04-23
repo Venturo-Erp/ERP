@@ -31,7 +31,7 @@
 | ----------------------------------- | --------------- | ------------------------------- | --------------- | ---------------- |
 | `/api/ai/edit-image`                | POST            | getServerAuth                   | API usage limit | ✅               |
 | `/api/ai/suggest-attraction`        | POST            | getServerAuth                   | API usage limit | ✅               |
-| `/api/auth/admin-reset-password`    | POST            | getServerAuth + admin check     | ✅ 5/min        | ✅               |
+| `/api/auth/admin-reset-password`    | POST            | getServerAuth + 系統主管 check     | ✅ 5/min        | ✅               |
 | `/api/auth/create-employee-auth`    | POST            | getServerAuth                   | ❌              | ✅               |
 | `/api/auth/reset-employee-password` | POST            | getServerAuth                   | ❌              | ✅               |
 | `/api/fetch-image`                  | POST            | getServerAuth                   | ❌              | ✅               |

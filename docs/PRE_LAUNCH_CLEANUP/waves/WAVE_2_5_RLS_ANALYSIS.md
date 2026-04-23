@@ -37,7 +37,7 @@ channel_members
 esims
 ```
 
-**🟢 低（admin 操作為主）**：
+**🟢 低（系統主管 操作為主）**：
 ```
 michelin_restaurants / premium_experiences
 payment_request_items

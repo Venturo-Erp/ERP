@@ -11,7 +11,7 @@ import { resetEmployeePasswordSchema } from '@/lib/validations/api-schemas'
 /**
  * 檢查員工是否擁有管理員資格
  */
-async function checkIsAdmin(employeeId: string): Promise<boolean> {
+async function hasAdminCapability(employeeId: string): Promise<boolean> {
   const adminClient = getSupabaseAdminClient()
   const { data: employee, error } = await adminClient
     .from('employees')
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 🔒 檢查是否擁有管理員資格
-    const isAdmin = await checkIsAdmin(auth.data.employeeId)
+    const isAdmin = await hasAdminCapability(auth.data.employeeId)
     if (!isAdmin) {
       return errorResponse('您沒有此權限', 403, ErrorCode.FORBIDDEN)
     }

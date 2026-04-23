@@ -122,7 +122,7 @@ VALUES (
   'XX'  -- 2 字母代碼
 );
 
--- 2. 建立第一位員工（admin）
+-- 2. 建立第一位員工（系統主管）
 INSERT INTO public.employees (
   id,
   workspace_id,

@@ -18,7 +18,7 @@
 | HAS_HARDCODE | 5 |
 | PARTIAL | 5 |
 | NO_GUARD 🔴（財務/法律） | 54 |
-| NO_GUARD 🟡（admin 類） | 19 |
+| NO_GUARD 🟡（系統主管 類） | 19 |
 | NO_GUARD 🟢（操作類） | 21 |
 | PERSONAL（my-*） | 7 |
 | REDIRECT_ONLY | 10 |

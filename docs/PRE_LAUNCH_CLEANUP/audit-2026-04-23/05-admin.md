@@ -163,7 +163,7 @@
 
 ## 跨模組 Pattern 候選
 
-### 🔵 Admin Guard Pattern
+### 🔵 系統主管 Guard Pattern
 ```typescript
 // 現在（散彈槍）：每頁都 `const isAdmin = useAuthStore(...)`
 // 建議：統一提煉

@@ -33,14 +33,14 @@ P001 目前的「提案修法」（移 isAdmin 短路 + 4 API 改 hasPermission 
 
 ### 1.2 降級攻擊面未變（CRITICAL 等級的認知陷阱）
 
-- **修前**：攻擊者拿到 admin JWT = 完全控制一個 workspace
-- **修後**：攻擊者拿到 admin JWT = 系統主管 role → 預填全權限 → 仍完全控制一個 workspace
+- **修前**：攻擊者拿到 系統主管 JWT = 完全控制一個 workspace
+- **修後**：攻擊者拿到 系統主管 JWT = 系統主管 role → 預填全權限 → 仍完全控制一個 workspace
 
 **P001 沒有降低 blast radius、只換了內部決策路徑**。這是 refactor、不是 mitigation。如果團隊以為「改了就變安全」而放鬆其他防線（例如 2FA 延後、JWT TTL 不縮）、就是被自己騙。
 
 **真正降低攻擊面需要（不在 P001 scope、但必須寫入 roadmap）**：
 1. 敏感動作（建員工、重設密碼、改 role）強制 **step-up authentication**（重新輸密碼或 TOTP）
-2. Admin JWT **TTL 縮短至 15 分鐘**（目前 1 小時、配 refresh token）
+2. 系統主管 JWT **TTL 縮短至 15 分鐘**（目前 1 小時、配 refresh token）
 3. 敏感 API 加 **audit log with tamper-evident storage**（WORM / append-only）
 4. 最終 **WebAuthn / passkey** 取代純密碼
 
@@ -68,8 +68,8 @@ P001 目前的「提案修法」（移 isAdmin 短路 + 4 API 改 hasPermission 
 
 **如果直接套用 `hasPermission(user, 'employees.reset_password')`**：
 - 查 role_tab_permissions 永遠查不到這個 key
-- **所有用戶（含 admin）都無法重設密碼**
-- /login 流程在「忘記密碼」就死、admin 也救不了
+- **所有用戶（含 系統主管）都無法重設密碼**
+- /login 流程在「忘記密碼」就死、系統主管 也救不了
 
 **嚴重度**：CRITICAL（production outage 級）
 
@@ -85,7 +85,7 @@ P001 目前的「提案修法」（移 isAdmin 短路 + 4 API 改 hasPermission 
 ```
 危險順序：
   ① 部署代碼（移 isAdmin 短路）→ admin 還沒拿到新 role_tab_permissions
-  ② 生產 admin 立刻全部 403
+  ② 生產 系統主管 立刻全部 403
   ③ 手忙腳亂
 ```
 
@@ -94,13 +94,13 @@ P001 目前的「提案修法」（移 isAdmin 短路 + 4 API 改 hasPermission 
 2. **再** 部署代碼（移 isAdmin 短路）
 3. **回滾計劃**：migration 要有 `down.sql`、代碼要有 feature flag 可即時切回 isAdmin 短路（安全網）
 
-**守門測試**：e2e 必須覆蓋「admin 用戶登入 → 進入 hr/employees → 點新增 → 成功」。沒這支 e2e、不准 merge。
+**守門測試**：e2e 必須覆蓋「系統主管 用戶登入 → 進入 hr/employees → 點新增 → 成功」。沒這支 e2e、不准 merge。
 
 ### 2.3 🟡 MEDIUM：跨租戶污染（trigger + seeding）
 
 - P001 修法要求「系統主管 role 預填全權限」。如果走 DB trigger（例如 AFTER INSERT on workspace_roles）、必須 `SECURITY INVOKER` + 內部過濾 `workspace_id`、否則 系統主管職務 建立 trigger 可能被利用污染別 workspace 的 role_tab_permissions。
 - P010 已修 role_tab_permissions RLS（service_role + 同 workspace）、但**不守 trigger**（trigger 內 DML 不走 RLS 檢查）。
-- P009（feature cascade trigger）未修、跟 P001 預填衝突：系統主管職務 預填全部 tab permission → feature 關掉某模組 → role_tab_permissions 資料還在 → 下次 feature 重開、admin 自動有權（可能是 desired、但要 William 拍板）。
+- P009（feature cascade trigger）未修、跟 P001 預填衝突：系統主管職務 預填全部 tab permission → feature 關掉某模組 → role_tab_permissions 資料還在 → 下次 feature 重開、系統主管 自動有權（可能是 desired、但要 William 拍板）。
 
 **建議**：P001 的 seeding 邏輯用 **application-layer function**（在 `/api/workspaces/create` 裡呼叫）、**不寫 DB trigger**。原因：
 - trigger 繞 RLS、跨租戶風險大
@@ -116,9 +116,9 @@ P001 目前的「提案修法」（移 isAdmin 短路 + 4 API 改 hasPermission 
 - 後端拒絕執行
 - 用戶體驗：「按了沒反應」、容易誤以為是 bug
 
-**對 admin 降權場景**（業務要求：admin 被降成 OP）：
-- 1 小時內 admin 在前端仍看到「建員工」按鈕、點了才發現被擋
-- 這 1 小時內 admin JWT 若被竊（P001 之前提過攻擊面沒降）、攻擊者**仍可用舊 JWT 執行部分動作**（因為有些動作可能只走前端檢查）
+**對 系統主管 降權場景**（業務要求：系統主管 被降成 OP）：
+- 1 小時內 系統主管 在前端仍看到「建員工」按鈕、點了才發現被擋
+- 這 1 小時內 系統主管 JWT 若被竊（P001 之前提過攻擊面沒降）、攻擊者**仍可用舊 JWT 執行部分動作**（因為有些動作可能只走前端檢查）
 
 **建議**：P011 **必須跟 P001 同時發**、不能延後。`permissions_version` claim 加上 + role 改權限時 bump + auth-sync 比對不一致強制 refresh。
 
@@ -136,10 +136,10 @@ P001 如果自己在 4 API 硬 code permission key（例如 `'hr.employees.write
 
 ### 3.1 必跑 e2e（建議寫進 `tests/e2e/`）
 
-1. **admin 回歸測試**（CRITICAL）
-   - admin 登入 → 進 `/hr/employees` → 新增員工成功
-   - admin 登入 → 進 `/finance/payments` → 建收款單成功
-   - admin 登入 → 進 `/hr/roles` → 改某 role 權限成功
+1. **系統主管 回歸測試**（CRITICAL）
+   - 系統主管 登入 → 進 `/hr/employees` → 新增員工成功
+   - 系統主管 登入 → 進 `/finance/payments` → 建收款單成功
+   - 系統主管 登入 → 進 `/hr/roles` → 改某 role 權限成功
    - **判定**：改前改後行為一致、不得回歸
 2. **沒有系統主管資格 正向測試**（HIGH）
    - 建一個「會計」role、賦予 `(finance, payments, can_read, can_write)`
@@ -150,23 +150,23 @@ P001 如果自己在 4 API 硬 code permission key（例如 `'hr.employees.write
    - 直接 POST `/api/auth/employees/create-employee-auth` → 應 403
    - （不能靠 UI 隱藏按鈕、要直接打 API）
 4. **lockout 防禦**（CRITICAL）
-   - 部署新 migration 後、**全租戶至少 1 個 admin 能正常操作**（查 `SELECT COUNT(*) FROM workspace_roles WHERE is_admin=true GROUP BY workspace_id HAVING COUNT(*) < 1` 應為 0 rows）
-   - 若有租戶沒 admin、部署擋住
+   - 部署新 migration 後、**全租戶至少 1 個 系統主管 能正常操作**（查 `SELECT COUNT(*) FROM workspace_roles WHERE is_admin=true GROUP BY workspace_id HAVING COUNT(*) < 1` 應為 0 rows）
+   - 若有租戶沒 系統主管、部署擋住
 5. **JWT 延遲測試**（MEDIUM、P011 配套）
-   - admin A 改 admin B 的 role 從 admin 降成 OP
+   - 系統主管 A 改 系統主管 B 的 role 從 系統主管 降成 OP
    - B 用舊 JWT（未 refresh）打 `/api/auth/employees/create-employee-auth`
    - **應 403**（如果 P011 沒修、會 200、是 bug）
 
 ### 3.2 必手測
 
-1. **生產資料 smoke test**（在 staging）：每個租戶至少一個 admin、登入 + 執行「建員工 / 重設密碼 / 改 role」三動作、全綠才部署
+1. **生產資料 smoke test**（在 staging）：每個租戶至少一個 系統主管、登入 + 執行「建員工 / 重設密碼 / 改 role」三動作、全綠才部署
 2. **rollback 演練**：migration + 代碼能在 5 分鐘內回退、不留髒資料
 3. **audit log 確認**：所有 permission-gated API 的成功 / 失敗呼叫寫入 log、含 actor_id / target / action / result
 
 ### 3.3 不得上線的 red flag
 
 - [ ] migration 沒有 idempotent / 沒 down.sql
-- [ ] 任一 admin 帳號在 staging 測失敗
+- [ ] 任一 系統主管 帳號在 staging 測失敗
 - [ ] P011 沒同時修（JWT 時間差是展示 / 執行不一致的幫兇）
 - [ ] P002 沒同時修（middleware 仍放行 /api/auth/\*、P001 的檢查等於只有一層）
 - [ ] 沒有 feature flag 可快速 rollback 到 isAdmin 短路

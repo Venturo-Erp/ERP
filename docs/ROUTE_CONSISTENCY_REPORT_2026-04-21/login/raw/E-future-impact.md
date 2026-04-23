@@ -20,7 +20,7 @@
 
 ### 承載現況
 ✅ **員工觀點**：
-- 一個 workspace 內可有多角色（admin, tour_leader, sales 等）
+- 一個 workspace 內可有多角色（系統主管, tour_leader, sales 等）
 - 權限已通用化（module:tab 格式、支援部分覆寫）
 - 多 workspace 支援（擁有平台管理資格的人 可切換）
 

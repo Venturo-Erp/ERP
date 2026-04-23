@@ -93,7 +93,7 @@
 3. /api/suppliers/* - 無任何權限檢查
 4. /api/airports/* - 無任何權限檢查
 5. /api/shared-data/* - 無任何權限檢查
-6. /api/system/* - 僅部分有 admin 檢查
+6. /api/system/* - 僅部分有 系統主管 檢查
 ```
 
 ### 2.3 審計欄位設定

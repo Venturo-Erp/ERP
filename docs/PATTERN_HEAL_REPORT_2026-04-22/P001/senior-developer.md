@@ -44,8 +44,8 @@ checkPermission: (permission: string) => {
 
 **動的檔**：`src/stores/auth-store.ts`
 **前後行為對比**：
-- 前：admin 任何 permission key 都 return true、`user.permissions` 形同虛設
-- 後：admin 的 `user.permissions` 在 Phase A 補齊後含所有 key、結果等價但經過查表；沒有系統主管資格 行為完全不變
+- 前：系統主管 任何 permission key 都 return true、`user.permissions` 形同虛設
+- 後：系統主管 的 `user.permissions` 在 Phase A 補齊後含所有 key、結果等價但經過查表；沒有系統主管資格 行為完全不變
 
 ### 3.2 `src/lib/permissions/hooks.ts:284, 293` — `usePermissions.canAccess/canEdit`
 
@@ -65,7 +65,7 @@ const canAccess = useCallback(
 ```
 
 **動的檔**：`src/lib/permissions/hooks.ts`
-**前後行為對比**：admin 經過 feature 開關 + role permission 查詢兩層、`workspace_features` 關掉的 feature 系統主管也進不去（符合業務意圖——租戶沒買這個功能、系統主管也不該看到）。
+**前後行為對比**：系統主管 經過 feature 開關 + role permission 查詢兩層、`workspace_features` 關掉的 feature 系統主管也進不去（符合業務意圖——租戶沒買這個功能、系統主管也不該看到）。
 
 ### 3.3 `src/hooks/usePermissions.ts:34-48` — 舊版 permission bool 短路
 
@@ -95,7 +95,7 @@ return {
 const userPerms = await getEmployeePermissions(auth.data.employeeId)
 const canCreateEmp = userPerms.includes('hr.employees.create')
 
-// 新租戶第一個系統主管：仍保留 CORNER admin 特例（這是跨租戶 bootstrap、屬 P003 範圍）
+// 新租戶第一個系統主管：仍保留 CORNER 系統主管 特例（這是跨租戶 bootstrap、屬 P003 範圍）
 if (isNewTenant) {
   const isCornerAdmin = userPerms.includes('_system.cross_tenant_admin')
   if (!isCornerAdmin) return errorResponse('建立新租戶需要 CORNER 的系統主管權限', 403, ...)
@@ -166,7 +166,7 @@ const canEditDatabase = canWrite('database', null) // module-level、不指定 t
 
 1. **統一 seed 邏輯為一個 function**（不動 DB schema、只重構代碼）：
    ```
-   src/lib/workspace/seed-admin-permissions.ts
+   src/lib/workspace/seed-系統主管-permissions.ts
      export function buildAdminPermissionRows(roleId, workspaceId) → Row[]
        - 遍歷 MODULES 常數（module-tabs.ts）
        - 每個 module × 每個 tab 都給 can_read: true, can_write: true
@@ -174,7 +174,7 @@ const canEditDatabase = canWrite('database', null) // module-level、不指定 t
    ```
    兩條建 workspace 路徑都改用這個 function。
 
-2. **補歷史 workspace 的 系統主管職務**：一次性腳本 `scripts/backfill-admin-permissions.mjs`（非 migration、冪等、可重跑）：
+2. **補歷史 workspace 的 系統主管職務**：一次性腳本 `scripts/backfill-系統主管-permissions.mjs`（非 migration、冪等、可重跑）：
    ```
    - 查所有 workspace_roles WHERE is_admin = true
    - 對每個 系統主管職務 執行 upsert buildAdminPermissionRows()
@@ -204,7 +204,7 @@ const canEditDatabase = canWrite('database', null) // module-level、不指定 t
 ### 為什麼 B 在 C 前
 **後端是最後防線、先守住才放心拆前端短路**。如果順序倒裝、Phase C 先拿掉前端 `isAdmin` 短路：
 - 情境 1（B 未做）：前端 hook 查 permissions 展示「沒權限」、但敏感 API 還在看 `isAdmin`、雙層不一致、用戶可能 UI 看不到按鈕但 curl 打 API 還是通
-- 情境 2（B 先做 C 後做）：API 守住、前端短路還在 → admin 照樣可以看到按鈕、但後端攔截、至少不會誤觸發
+- 情境 2（B 先做 C 後做）：API 守住、前端短路還在 → 系統主管 照樣可以看到按鈕、但後端攔截、至少不會誤觸發
 情境 2 明顯比情境 1 安全。所以 B 在 C 前。
 
 ### 為什麼 C 最後且獨立
@@ -221,20 +221,20 @@ const canEditDatabase = canWrite('database', null) // module-level、不指定 t
 
 ### Phase A 驗收
 - `npm run type-check` ✅
-- 跑 `scripts/backfill-admin-permissions.mjs --dry-run` → 輸出 diff、William 確認要 upsert 的 row 數合理
+- 跑 `scripts/backfill-系統主管-permissions.mjs --dry-run` → 輸出 diff、William 確認要 upsert 的 row 數合理
 - 正式跑後、SQL 直查 `SELECT COUNT(*) FROM role_tab_permissions WHERE role_id IN (SELECT id FROM workspace_roles WHERE is_admin)` → 每個 workspace 的 系統主管職務 權限數量 ≥ MODULES 展開的總數
-- e2e：以 admin 身分登入 Corner / JINGYAO / YUFEN、檢查 /hr/roles 顯示系統主管 role 所有 toggle 都打勾
+- e2e：以 系統主管 身分登入 Corner / JINGYAO / YUFEN、檢查 /hr/roles 顯示系統主管 role 所有 toggle 都打勾
 
 ### Phase B 驗收
 - `npm run type-check` ✅
-- **新增 unit test**（補 P015 缺口）：`src/lib/auth/__tests__/permissions-server.test.ts` 覆蓋 `getEmployeePermissions` 3 種情境（admin 補齊 / 一般 role 精確 / 覆蓋 override 生效）
+- **新增 unit test**（補 P015 缺口）：`src/lib/auth/__tests__/permissions-server.test.ts` 覆蓋 `getEmployeePermissions` 3 種情境（系統主管 補齊 / 一般 role 精確 / 覆蓋 override 生效）
 - **新增 API test**：`tests/api/auth-create-employee.test.ts` 覆蓋「系統主管職務 能建 / 助理 role 不能建 / 助理被勾 `hr.employees.create` 後能建」
 - 手測：以「助理」登入、打 /api/auth/create-employee-auth → 應 403；系統主管登入 → 應 200
 
 ### Phase C 驗收
 - `npm run type-check` ✅
 - **e2e**：
-  - admin 進 /finance/payments 看到整頁（同現行）
+  - 系統主管 進 /finance/payments 看到整頁（同現行）
   - 會計（`finance.payments.read` 勾了）進 /finance/payments 看到列表、確認按鈕按 role 細分
   - 業務（沒勾 finance）進 /finance/payments 看到 UnauthorizedPage
 - `gitnexus_detect_changes` 確認改動範圍在預期內（40+ 檔案中的 7 核心點 + 2-3 個 shared hook）
@@ -256,8 +256,8 @@ const canEditDatabase = canWrite('database', null) // module-level、不指定 t
 | **系統主管 role 漏 seed 某個 key** | Phase A 依賴人工確保 buildAdminPermissionRows 跟 MODULES / ACTION_KEYS 同步 | 寫 detector 腳本（pattern-map §自動偵測第一支）定期掃 |
 | **40+ 檔案 grep 到 isAdmin 有遺漏** | gitnexus 報 LOW risk 但索引可能 stale（pattern-map 註明） | Phase C 前全檔 grep、列清單、每檔 review；保留非決策用的 isAdmin（顯示標籤）不刪 |
 | **Key 格式分隔符 `.` vs `:` 混用** | validate-login:171 目前簽進 JWT 的是 `module:tab` 格式、但 hooks.ts:177 用 `${module}.${tab}` | 本次統一用 `.`（pattern-map P008 推薦）、但要改 validate-login 的 permSet 組 key 的地方、並一次性跑一個 migration 把既有 employee_permission_overrides 的 key 改過來；這會擴大本次 scope、**建議延後到 P008 做**、本 PR 維持現格式、只在新增的 action key 一律用 `.` |
-| **old `useTabPermissions` 有自己的 admin short-circuit** | 第 54 行 `if (roleData.is_admin) { setIsAdmin(true); setPermissions([]) }` 會讓系統主管 的 permissions 設成空陣列 | Phase C 改：admin 也 fetch 完整 permissions、不要空陣列、`isAdmin` 只作 audit flag |
-| **validate-login JWT 沒 permissions_version** | 改了 role_tab_permissions 後、線上 admin 要 1 小時才重登取新權限（P011） | 本次不修 P011、但 Phase A backfill 後建議 William 讓所有系統主管手動重登一次 |
+| **old `useTabPermissions` 有自己的 系統主管 short-circuit** | 第 54 行 `if (roleData.is_admin) { setIsAdmin(true); setPermissions([]) }` 會讓系統主管 的 permissions 設成空陣列 | Phase C 改：admin 也 fetch 完整 permissions、不要空陣列、`isAdmin` 只作 audit flag |
+| **validate-login JWT 沒 permissions_version** | 改了 role_tab_permissions 後、線上 系統主管 要 1 小時才重登取新權限（P011） | 本次不修 P011、但 Phase A backfill 後建議 William 讓所有系統主管手動重登一次 |
 
 ### William 必須親自手測
 

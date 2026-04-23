@@ -68,7 +68,7 @@ const { data, error } = await supabase
      .eq('code', profitAccountCode)
    ```
 
-3. 新租戶上線流程在 tenant 設定頁加「會計科目設定」UI（由 admin 確認或選擇預設方案）
+3. 新租戶上線流程在 tenant 設定頁加「會計科目設定」UI（由 系統主管 確認或選擇預設方案）
 
 **為什麼是 RED**：不做的話，第二個租戶一定踩坑。
 

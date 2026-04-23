@@ -30,7 +30,7 @@
 
 **觀察**：
 - `get_current_user_workspace()` 我沒讀到定義（migrations 只看到使用、沒看到 CREATE FUNCTION），從命名和行為推測：**從 JWT claims 讀 workspace_id**（Supabase 常見做法）。
-- 情境：User 今日 09:00 被 admin 移出 workspace X（`employees.workspace_id` 改成 null 或 Y）、但他的 JWT 在 10:00 才會 refresh。這段 1 hr 內：
+- 情境：User 今日 09:00 被 系統主管 移出 workspace X（`employees.workspace_id` 改成 null 或 Y）、但他的 JWT 在 10:00 才會 refresh。這段 1 hr 內：
   - `get_current_user_workspace()` 回 **JWT 裡的舊 X**（不是 DB 最新值）。
   - 新 policy 下、他還能讀 X 的 `role_tab_permissions`。
 - **不一致風險**：前端 UI 用 `useAuthStore.currentUser.workspace_id`（從 DB/API 讀）顯示 Y、但 DB 查詢用 JWT 的 X。使用者看到 Y 的頁面、但 permission 資料來自 X → 空結果或亂跳。

@@ -59,7 +59,7 @@ Raw reports：
 
 | 檔案 | 位置 | 函式 | 影響 |
 |---|---|---|---|
-| `src/lib/permissions/useTabPermissions.tsx` | L80 | `canRead` | finance/hr/tours 等頁查讀權限時 admin 跳過 |
+| `src/lib/permissions/useTabPermissions.tsx` | L80 | `canRead` | finance/hr/tours 等頁查讀權限時 系統主管 跳過 |
 | `src/lib/permissions/useTabPermissions.tsx` | L97 | `canWrite` | 寫權限同上 |
 | `src/lib/permissions/useTabPermissions.tsx` | L113 | `canReadAny` | 模組讀權限同上 |
 | `src/lib/permissions/useTabPermissions.tsx` | L122 | `canWriteAny` | 模組寫權限同上 |
@@ -68,7 +68,7 @@ Raw reports：
 
 **為什麼 PR-1a 沒抓到**：PR-1a 的 scope 是 `auth-store.ts:249` / `permissions/hooks.ts:284,293` / `usePermissions.ts` 9 bool（已親驗 ✅ 拔乾淨）。useTabPermissions 是另一個獨立 hook、PR-1a scope 沒列、屬「同病不同檔、批次清不夠廣」的工作分配漏。
 
-**風險評級**：🟡 中（API 層 role_tab_permissions 二次驗大部分撐住、但 admin 改 role permission 後 useTabPermissions 仍直通、原則 1「權限長在人身上」hook 層仍有缺口）
+**風險評級**：🟡 中（API 層 role_tab_permissions 二次驗大部分撐住、但 系統主管 改 role permission 後 useTabPermissions 仍直通、原則 1「權限長在人身上」hook 層仍有缺口）
 
 **修法**：PR-1d、拔這 6 處短路、改查 role_tab_permissions（系統主管職務 已 PR-1a backfill 補滿）
 
@@ -194,7 +194,7 @@ Raw reports：
 - rememberMe UI/API/DB/Cookie **四層不對齊** ❌
 
 ### 安全實作
-- ✅ Admin client per-request（符合 CLAUDE.md 紅線）
+- ✅ 系統主管 client per-request（符合 CLAUDE.md 紅線）
 - ✅ Rate limit 覆蓋完整
 - ⚠️ Rate limit RPC 失敗 fallback in-memory、多實例可繞（v2.0 遺留）
 - ⚠️ 錯誤訊息不統一（帳號枚舉攻擊面、v2.0 遺留）

@@ -183,7 +183,7 @@ COMMIT;
 | 3 | `api/permissions/check/route.ts:13` | `createApiClient()` | ✅ 走 RLS | 跟 #2 同；user 查自己 workspace 的 role 權限 OK；查到別家 role_id 會回空（預期）|
 | 4 | `api/tenants/create/route.ts:43,78,483` | `getSupabaseAdminClient()` | ❌（service_role） | line 78 權限檢查、line 483 seed 新租戶 default permissions，全走 service_role policy，不受影響 |
 
-結論：新 RLS **只影響** `createApiClient()` 的前台呼叫（#2、#3），且正是我們要擋的跨租戶存取。後端 admin 流程全數綠燈。
+結論：新 RLS **只影響** `createApiClient()` 的前台呼叫（#2、#3），且正是我們要擋的跨租戶存取。後端 系統主管 流程全數綠燈。
 
 ---
 

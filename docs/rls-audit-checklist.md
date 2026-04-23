@@ -297,7 +297,7 @@ CREATE POLICY "users_can_read_own_tenant_data"
 ```sql
 CREATE POLICY "only_admin_can_delete"
   ON receipts FOR DELETE USING (
-    (SELECT role FROM auth.users WHERE id = auth.uid()) = 'admin'
+    (SELECT role FROM auth.users WHERE id = auth.uid()) = '系統主管'
   );
 ```
 

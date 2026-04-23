@@ -96,7 +96,7 @@ CREATE POLICY "Admins can do everything" ON employees
     EXISTS (
       SELECT 1 FROM employees
       WHERE id = auth.uid()::UUID
-      AND 'admin' = ANY(permissions)
+      AND '系統主管' = ANY(permissions)
     )
   );
 
@@ -132,7 +132,7 @@ INSERT INTO employees (
   permissions,
   job_info
 ) VALUES (
-  'admin',
+  '系統主管',
   '系統系統主管',
   'Administrator',
   '$2a$10$YourBcryptHashHere', -- 使用 bcrypt 加密的 'admin123'

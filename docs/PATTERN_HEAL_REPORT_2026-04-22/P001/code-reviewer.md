@@ -2,7 +2,7 @@
 
 ## 身份宣告
 
-我是 **Code Reviewer**。任務是挑 P001 修法的錯、找漏、找邊界條件、找副作用、檢查 P010 相依。**不重寫、不動代碼**。已讀 `_PATTERN_MAP.md`（P001 + P010）、`_INDEX.md`（原則 1、3）、`DB_TRUTH.md` 內 `role_tab_permissions` / `workspace_roles` 段、P010 幕僚 4 份會議紀錄、P001 精確命中點全部原始碼（auth-store.ts、hooks.ts、usePermissions.ts、4 個 API、finance/payments page.tsx、tour-itinerary-tab.tsx），以及 `20260422000000_check_and_seed_admin_roles.sql` + `workspaces/route.ts` 的 admin seeding 流程。
+我是 **Code Reviewer**。任務是挑 P001 修法的錯、找漏、找邊界條件、找副作用、檢查 P010 相依。**不重寫、不動代碼**。已讀 `_PATTERN_MAP.md`（P001 + P010）、`_INDEX.md`（原則 1、3）、`DB_TRUTH.md` 內 `role_tab_permissions` / `workspace_roles` 段、P010 幕僚 4 份會議紀錄、P001 精確命中點全部原始碼（auth-store.ts、hooks.ts、usePermissions.ts、4 個 API、finance/payments page.tsx、tour-itinerary-tab.tsx），以及 `20260422000000_check_and_seed_admin_roles.sql` + `workspaces/route.ts` 的 系統主管 seeding 流程。
 
 整體印象：**方向對、但隱藏 3 個致命漏洞、5 個該注意、若照 senior-dev 描述的最小修法會有老租戶直接白屏的風險**。
 
@@ -10,7 +10,7 @@
 
 ## 🔴 致命漏洞（上線前必擋）
 
-### F1. Admin backfill 漏洞——老租戶可能 0 permissions，拔短路後整站白屏
+### F1. 系統主管 backfill 漏洞——老租戶可能 0 permissions，拔短路後整站白屏
 
 **觀察**：
 - `20260422000000_check_and_seed_admin_roles.sql` **只補了「系統主管職務」本身**（`workspace_roles` 有 is_admin=true 的 row）、**沒有 seed `role_tab_permissions`**（見 migration L44-52、只 INSERT workspace_roles 不 INSERT permissions）。
@@ -32,19 +32,19 @@
 **觀察**：
 - validate-login:170-175 把 `role_tab_permissions` 組成 `${module}:${tab}` 或純 `${module}`、塞進 `user.permissions`。
 - 4 個後端 API 若改 `hasPermission(user, action)`、**action 要叫什麼 key**？若是 `employees.create` / `employees.reset_password` / `employees.admin_reset`——這些 key 在 MODULES (`module-tabs.ts:36`) 的 tabs 陣列**完全沒定義**、自然也不會在 `role_tab_permissions` 裡。
-- 後果：**連合法 admin 都過不了 hasPermission 檢查**（因為 permissions 陣列裡根本沒這個字串）、所有 4 個 API 回 403、建員工 / 重設密碼 / 建租戶全部炸。
+- 後果：**連合法 系統主管 都過不了 hasPermission 檢查**（因為 permissions 陣列裡根本沒這個字串）、所有 4 個 API 回 403、建員工 / 重設密碼 / 建租戶全部炸。
 
 **風險等級**：🔴 Blocker
 
 **建議**：
 1. 設計兩條路、二選一：
-   - **A. 保留 `is_admin` 語義化檢查**：後端敏感 API 改成 `if (!user.is_admin && !hasPermission(user, 'hr:manage_auth')) return 403`——admin 走第一條、沒有系統主管資格 走細分權限。這不是 bypass key、是把「系統主管 = 有高權限 tab」寫成可讀的 OR。
+   - **A. 保留 `is_admin` 語義化檢查**：後端敏感 API 改成 `if (!user.is_admin && !hasPermission(user, 'hr:manage_auth')) return 403`——系統主管 走第一條、沒有系統主管資格 走細分權限。這不是 bypass key、是把「系統主管 = 有高權限 tab」寫成可讀的 OR。
    - **B. 擴充 MODULES 加 `hr.manage_auth` / `hr.reset_password` 等 tab**、validate-login backfill 補資料、再完全拔掉後端的 `isAdmin` 判斷。
 2. 選哪條 senior-dev 要明講、**不能默默選**（Think Before Coding 原則）。我個人建議 A、因為符合 William 的「系統主管 = 預設權限多的 role」心智模型、且不必動 MODULES 常數。
 
 ---
 
-### F3. UPDATE policy 的 role_id 跨租戶搬移已被 P010 防住——但 P001 新的 hasPermission 邏輯在前端預設阻斷 admin 登入一秒
+### F3. UPDATE policy 的 role_id 跨租戶搬移已被 P010 防住——但 P001 新的 hasPermission 邏輯在前端預設阻斷 系統主管 登入一秒
 
 **觀察**（P010 依賴）：
 - P010 新 RLS 靠 `EXISTS(workspace_roles.workspace_id = get_current_user_workspace())`、而 `get_current_user_workspace()` 從 **JWT claims** 讀。
@@ -143,7 +143,7 @@ canConfirmReceipts: isAdmin || hasModulePermission(userPermissions, 'finance'), 
 ### N5. validate-login 的 isAdmin 依賴 workspace_roles.is_admin、但新的後端 API 若統一 hasPermission、卡 Corner 建新租戶流程
 
 **觀察**：
-- create-employee-auth:95-127 的邏輯：`isCornerAdmin = isAdmin && currentUserWorkspaceCode === 'CORNER'`、只有 Corner workspace 的 admin 能建新租戶。
+- create-employee-auth:95-127 的邏輯：`isCornerAdmin = isAdmin && currentUserWorkspaceCode === 'CORNER'`、只有 Corner workspace 的 系統主管 能建新租戶。
 - 這是**跨租戶授權**、不是一般權限。若要改 hasPermission、key 要叫什麼？`tenants:create`？但 MODULES 裡 `tenants` 模組**不存在**（module-tabs.ts:33 註解明寫「租戶管理（tenants）為 Venturo 平台管理資格內部功能、不開放給租戶職務管理」）。
 - 若 hasPermission 拿不到對應 key、所有人 403、Corner 也不能建新租戶——**Venturo 平台管理資格流程斷**。
 
@@ -151,7 +151,7 @@ canConfirmReceipts: isAdmin || hasModulePermission(userPermissions, 'finance'), 
 
 **建議**：
 1. create-employee-auth 不走一般 hasPermission、保留特殊路徑：`if (!isCornerAdmin) return 403`。這是合理的特化。
-2. `reset-employee-password` / `admin-reset-password` 走一般 hasPermission、因為是單租戶內的 admin 動作。
+2. `reset-employee-password` / `admin-reset-password` 走一般 hasPermission、因為是單租戶內的 系統主管 動作。
 3. 把這個邊界明確寫進 P001 修法文件：**跨租戶平台管理資格授權是獨立語義、不走 hasPermission**。
 
 ---
@@ -160,7 +160,7 @@ canConfirmReceipts: isAdmin || hasModulePermission(userPermissions, 'finance'), 
 
 ### O1. P015 零測試覆蓋是 P001 的真正地雷
 
-- `tests/e2e/` 沒有任何 permissions / admin login 之後的測試。P001 動 auth-store、hooks、usePermissions 三個核心 hook、**沒測試 = 沒安全網**。
+- `tests/e2e/` 沒有任何 permissions / 系統主管 login 之後的測試。P001 動 auth-store、hooks、usePermissions 三個核心 hook、**沒測試 = 沒安全網**。
 - 建議**最低測試**：e2e 優先於 unit、寫一支 `tests/e2e/admin-login-permissions.spec.ts`、測：
   1. 老 系統主管登入後 sidebar 有項目（F1 偵測器）
   2. 沒有系統主管資格 不能看 /accounting（N3 偵測器）
@@ -185,7 +185,7 @@ canConfirmReceipts: isAdmin || hasModulePermission(userPermissions, 'finance'), 
 | 項 | 評語 |
 |---|---|
 | **C**lean | 🟡 拔 3 處短路的修改本身乾淨、但會揭露 usePermissions.ts 9 個 bool 的假區分（N2）、需要註解標記 |
-| **A**uth | 🔴 F2 是 auth 大洞（4 API key 遷移沒想好）、F1 是 auth 資料洞（老 admin backfill 缺）、N5 是 auth 特化邊界（跨租戶平台管理資格） |
+| **A**uth | 🔴 F2 是 auth 大洞（4 API key 遷移沒想好）、F1 是 auth 資料洞（老 系統主管 backfill 缺）、N5 是 auth 特化邊界（跨租戶平台管理資格） |
 | **R**edundant | 🟡 N3 還有 4+ 處 layout.tsx 用 isAdmin、必須一起拔否則只修半條根 |
 | **D**ependencies | 🟢 P010 ✅ 已完成、無雞生蛋；🟡 P011（JWT 時間差）P015（0 測試）是 P001 的上游債、P001 部署前該先點掉 |
 

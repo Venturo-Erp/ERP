@@ -72,7 +72,7 @@
 **現狀**：🔴 目前全未加、cron Stage C 自動補預設 guard。
 **例外**：`/finance/reports/*` 暫允許業務讀（待 William 確認）。
 
-### INV-A02 · Settings 路由必 admin
+### INV-A02 · Settings 路由必 系統主管
 **規則**：`/settings/*`（除 `/settings/appearance`、`/settings/menu` 個人設定）必 `isAdmin`。
 **理由**：改系統設定影響全域。
 **現狀**：待驗證、cron 掃時標註。

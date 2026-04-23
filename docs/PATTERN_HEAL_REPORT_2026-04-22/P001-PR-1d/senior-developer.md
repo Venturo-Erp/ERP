@@ -10,7 +10,7 @@
 
 ### A1 `src/components/layout/mobile-sidebar.tsx:260`
 
-- **業務效果**：手機選單過濾時、admin 不再無條件看到所有 item，需要跟 `user.permissions` 一致。系統主管職務 在 DB 已被 backfill 預設全 tab 權限，所以體感不變；若老闆在 /hr/roles 關掉 admin 的某模組，admin 手機端就看不到了（符合 SSOT）。
+- **業務效果**：手機選單過濾時、系統主管 不再無條件看到所有 item，需要跟 `user.permissions` 一致。系統主管職務 在 DB 已被 backfill 預設全 tab 權限，所以體感不變；若老闆在 /hr/roles 關掉 系統主管 的某模組，系統主管 手機端就看不到了（符合 SSOT）。
 - **old_string**:
 ```
         if (!item.requiredPermission) return item
@@ -47,7 +47,7 @@ const visibleMenuItems = useMemo(() => {
   }
 ```
 - **爭議**：這個 if 本身不是 bypass、而是「**讓系統主管 跳過 isTransport 分支、看到完整選單**」的語意旗。detector 命中它是因為模式匹配，但邏輯上它只是分支控制。
-- **我的傾向**：**保留** admin 跳過 transport 選單的行為、但改寫形式避免 detector 命中。
+- **我的傾向**：**保留** 系統主管 跳過 transport 選單的行為、但改寫形式避免 detector 命中。
 - **old_string**:
 ```
     // 擁有平台管理資格的人 看到所有功能（開發需要）
@@ -62,19 +62,19 @@ const visibleMenuItems = useMemo(() => {
 ```
 - **new_string**:
 ```
-    // 車行用簡化選單（車趟管理為主）；admin 不受租戶類型限制、看完整選單
+    // 車行用簡化選單（車趟管理為主）；系統主管 不受租戶類型限制、看完整選單
     if (isTransport && !isAdmin) {
       return transportMenuItems
     }
 ```
 - **理由**：語意完全一致（系統主管看全選單、沒有系統主管資格 車行看 transport）、形式上消除 `if (isAdmin)` pattern、detector 不再命中。
-- **移交 reviewer 確認**：admin 該不該跳過 transport 選單？這其實也是一種 bypass（只是不是權限 bypass、是「租戶類型」bypass）。如果徹底 RBAC 化、應該用「workspace_features 有 tours」而不是 isAdmin 來判斷。但這超出 PR-1d 範圍、屬於 follow-up。
+- **移交 reviewer 確認**：系統主管 該不該跳過 transport 選單？這其實也是一種 bypass（只是不是權限 bypass、是「租戶類型」bypass）。如果徹底 RBAC 化、應該用「workspace_features 有 tours」而不是 isAdmin 來判斷。但這超出 PR-1d 範圍、屬於 follow-up。
 
 ---
 
 ### A3 `src/components/layout/sidebar.tsx:565`
 
-- **業務效果**：桌面主選單過濾、admin 不再 bypass requiredPermission 比對。與 A1 同原理。
+- **業務效果**：桌面主選單過濾、系統主管 不再 bypass requiredPermission 比對。與 A1 同原理。
 - **old_string**:
 ```
           if (!item.requiredPermission) return item
@@ -97,7 +97,7 @@ const visibleMenuItems = useMemo(() => {
 
 ### A4 `src/components/layout/sidebar.tsx:596`
 
-- **業務效果**：個人工具過濾、admin 不再 bypass。
+- **業務效果**：個人工具過濾、系統主管 不再 bypass。
 - **old_string**:
 ```
       if (!item.requiredPermission) return true
@@ -140,13 +140,13 @@ const visibleMenuItems = useMemo(() => {
   }, [user])
 ```
 - **理由**：刪 bypass、同時清 deps 的 `isAdmin` 跟第 13 行 `const isAdmin = useAuthStore(...)` 變孤兒、要一起清（checkbox 1、2、3）。
-- **⚠ 風險**：若 DB 裡 系統主管職務 的 `user.permissions` 不含 `workspace:manage_members`、admin 會無法管頻道成員。**需驗證 系統主管職務 的 user_permissions 是否有這兩個 permission**（不在 tab_permissions 範圍、可能被 backfill 漏掉）。**移交 reviewer/minimal-change**。
+- **⚠ 風險**：若 DB 裡 系統主管職務 的 `user.permissions` 不含 `workspace:manage_members`、系統主管 會無法管頻道成員。**需驗證 系統主管職務 的 user_permissions 是否有這兩個 permission**（不在 tab_permissions 範圍、可能被 backfill 漏掉）。**移交 reviewer/minimal-change**。
 
 ---
 
 ### A6 `src/components/guards/ModuleGuard.tsx:49`
 
-- **業務效果**：ModuleGuard 不再 系統主管 bypass、一律走 `isRouteAvailable(pathname)`。admin 的 workspace_features 應已開全部、不會擋。
+- **業務效果**：ModuleGuard 不再 系統主管 bypass、一律走 `isRouteAvailable(pathname)`。系統主管 的 workspace_features 應已開全部、不會擋。
 - **old_string**:
 ```
     // 擁有平台管理資格的人 跳過檢查
@@ -270,7 +270,7 @@ const visibleMenuItems = useMemo(() => {
 
 ### A11 `src/lib/permissions/index.ts:114` — hasPermissionForRoute
 
-- **業務效果**：Server-side 路由權限檢查函式、admin 不再 bypass、一律走 module:tab 比對。admin 的 user_permissions 應含 `*` 或各模組代碼；若 backfill 漏掉會報 false。
+- **業務效果**：Server-side 路由權限檢查函式、系統主管 不再 bypass、一律走 module:tab 比對。系統主管 的 user_permissions 應含 `*` 或各模組代碼；若 backfill 漏掉會報 false。
 - **old_string**:
 ```
 export function hasPermissionForRoute(
@@ -322,7 +322,7 @@ import { useAuthStore } from '@/stores'
 import { UnauthorizedPage } from '@/components/unauthorized-page'
 
 /**
- * Accounting 模組 admin-only guard
+ * Accounting 模組 系統主管-only guard
  * 覆蓋 /accounting 所有子路由（page / accounts / checks / period-closing / reports / vouchers）
  * Wave 2 Batch 2 · 2026-04-21
  */
@@ -350,7 +350,7 @@ export default function AccountingLayout({ children }: { children: React.ReactNo
   return <>{children}</>
 }
 ```
-- **理由**：整個會計家族受單一 layout 守門、canAccess 會同時檢查 workspace_features 有 accounting（對非企業客戶隱藏）+ role.tab_permissions 有 accounting 讀權限。admin 預設會過、沒有系統主管資格 在 /hr/roles 被開 accounting 也會過、SSOT 成立。
+- **理由**：整個會計家族受單一 layout 守門、canAccess 會同時檢查 workspace_features 有 accounting（對非企業客戶隱藏）+ role.tab_permissions 有 accounting 讀權限。系統主管 預設會過、沒有系統主管資格 在 /hr/roles 被開 accounting 也會過、SSOT 成立。
 
 ---
 
@@ -365,7 +365,7 @@ import { useAuthStore } from '@/stores'
 import { UnauthorizedPage } from '@/components/unauthorized-page'
 
 /**
- * Database 模組 admin-only guard
+ * Database 模組 系統主管-only guard
  * 覆蓋 /database 全部 9 個子路由（archive-management / attractions / company-assets /
  *   constants / fleet / suppliers / tour-leaders / transportation-rates / workspaces）
  * Wave 2 Batch 5 · 2026-04-21
@@ -482,8 +482,8 @@ export default function DatabaseLayout({ children }: { children: React.ReactNode
 
 ### B8 `src/app/(main)/settings/components/WorkspaceSwitcher.tsx:16` — 爭議
 
-- **檔案本質**：「跨租戶切換器」—— 讓擁有平台管理資格的人切到別家租戶視角看資料。**這不是普通路由權限、是「跨 workspace 視角」特權**。business sense 上、只有 Venturo 本家的擁有平台管理資格的人能用、租戶端 admin 不該能用。
-- **為什麼改 canAccess 不對**：`canAccess('/settings/workspaces')` 或類似路由、對租戶端 admin 會回 true（只要他 role 有 settings 權限），但業務上租戶端 admin 不該切看別家資料。
+- **檔案本質**：「跨租戶切換器」—— 讓擁有平台管理資格的人切到別家租戶視角看資料。**這不是普通路由權限、是「跨 workspace 視角」特權**。business sense 上、只有 Venturo 本家的擁有平台管理資格的人能用、租戶端 系統主管 不該能用。
+- **為什麼改 canAccess 不對**：`canAccess('/settings/workspaces')` 或類似路由、對租戶端 系統主管 會回 true（只要他 role 有 settings 權限），但業務上租戶端 系統主管 不該切看別家資料。
 - **我的傾向**：**保留 isAdmin 檢查、但語意重標為「平台管理資格 only feature」、並 refactor 成一個明確命名的判斷**。
 - **建議 new_string**（保留 isAdmin、不改行為、但加註釋讓 detector 放心、或以變數重命名）：
   - 選項 1（最小動）：**保留 isAdmin**，在 detector exception list 加入此檔
@@ -518,11 +518,11 @@ export function WorkspaceSwitcher() {
 
 1. **A2（sidebar.tsx:522 空 if 塊）**：我改寫為 `if (isTransport && !isAdmin)`、語意一致但消除 pattern。**根本問題**擁有管理員資格 跳過 transport 選單這件事本身也是一種 bypass（只是繞租戶類型、不是繞 RBAC）；真正的修法應該用 workspace_features 判斷、但超出 PR-1d 範圍。**建議標 follow-up**。
 
-2. **A5（useChannelSidebar）**：系統主管職務 是否有 `workspace:manage_members` 或 `workspace:manage` 這兩個 permission？不在今天 backfill migration 範圍內、若缺會導致 admin 無法管頻道成員。**請 reviewer 查 DB 或多補一條 migration**。
+2. **A5（useChannelSidebar）**：系統主管職務 是否有 `workspace:manage_members` 或 `workspace:manage` 這兩個 permission？不在今天 backfill migration 範圍內、若缺會導致 系統主管 無法管頻道成員。**請 reviewer 查 DB 或多補一條 migration**。
 
 3. **A11（hasPermissionForRoute）**：改簽章（移掉 `isAdmin?` 參數）vs. 保守改法（僅刪 if 塊、保留死參）。**建議保守改法**、避免改動呼叫端、簽章清理開 follow-up。
 
-4. **B8（WorkspaceSwitcher）**：這是 platform-admin feature gate、不是 RBAC bypass。建議用變數重命名方式（`canSwitchWorkspace = isAdmin`）讓語意清楚、或加入 detector exception。**不該用 canAccess 取代**。
+4. **B8（WorkspaceSwitcher）**：這是 platform-系統主管 feature gate、不是 RBAC bypass。建議用變數重命名方式（`canSwitchWorkspace = isAdmin`）讓語意清楚、或加入 detector exception。**不該用 canAccess 取代**。
 
 ---
 

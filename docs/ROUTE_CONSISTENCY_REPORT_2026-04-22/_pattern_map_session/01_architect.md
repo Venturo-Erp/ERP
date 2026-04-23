@@ -58,7 +58,7 @@ MODULE_REGISTRY: {
 **修法建議**
 層 2（William 方案）+ 我加一條：
 - 建 `src/lib/permissions/policy.ts`、導出 `canAccessTab(user, moduleCode, tabCode): Decision`
-- Decision 回 `{allowed: bool, reason: 'feature_off'|'role_deny'|'admin'|'ok'}`——可觀測
+- Decision 回 `{allowed: bool, reason: 'feature_off'|'role_deny'|'系統主管'|'ok'}`——可觀測
 - 消費端**只呼叫 policy**，不再自己 AND
 - 統一 key 分隔符（選一個、`.` 或 `:`，我建議 `.` 跟 DB 一致）
 

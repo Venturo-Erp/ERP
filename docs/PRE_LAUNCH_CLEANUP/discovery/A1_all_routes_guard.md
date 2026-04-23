@@ -6,7 +6,7 @@
 
 Scanned all **121 page.tsx** routes under `/src/app/(main)/`. Result: **90 pages have ZERO permission guard** (74% of codebase).
 
-Critical finding: Finance, HR, and admin pages are completely open to any logged-in user. Accounting module (10 pages) also unprotected—no access controls despite handling sensitive financial data.
+Critical finding: Finance, HR, and 系統主管 pages are completely open to any logged-in user. Accounting module (10 pages) also unprotected—no access controls despite handling sensitive financial data.
 
 | Category | Count |
 |--|--|
@@ -137,7 +137,7 @@ Guard with `canRead('finance', tab)` / `canWrite('finance', tab)`:
 
 **Why first**: Highest legal/compliance risk. Any user can currently create invoices, approve payments, generate financial statements.
 
-### Batch 2: 🟡 HR Admin (11 pages) — HIGH PRIORITY
+### Batch 2: 🟡 HR 系統主管 (11 pages) — HIGH PRIORITY
 Guard with `canRead('hr', tab)` / `canWrite('hr', tab)`:
 - hr/payroll, hr/settings, hr/reports, hr/training, hr/deductions, hr/leave, hr/attendance
 - hr/roles (already has `!isAdmin` → replace with `useTabPermissions`)
@@ -146,7 +146,7 @@ Guard with `canRead('hr', tab)` / `canWrite('hr', tab)`:
 
 **Why second**: Salary visibility, role assignment, disciplinary records. Sensitive but less legal exposure than finance.
 
-### Batch 3: 🟡 Admin/Settings (7 pages)
+### Batch 3: 🟡 系統主管/Settings (7 pages)
 Guard with `canRead('settings', tab)` / `canWrite('settings', tab)`:
 - settings/page, settings/company, settings/workspaces, database/workspaces
 - tools/reset-db (already has `!isAdmin` → replace with `useTabPermissions`)
@@ -176,7 +176,7 @@ Guard with `canRead('operational', tab)` / `canWrite('operational', tab)`:
 
 **Phase A3**
 - [ ] Update 11 HR pages (Batch 2)
-- [ ] Update 7 admin pages (Batch 3)
+- [ ] Update 7 系統主管 pages (Batch 3)
 
 **Phase A4**
 - [ ] Update 21 operational pages (Batch 4)
@@ -184,7 +184,7 @@ Guard with `canRead('operational', tab)` / `canWrite('operational', tab)`:
 **Verification**
 - [ ] Run `tests/e2e/login-api.spec.ts` after each batch
 - [ ] No guest/沒有系統主管資格 can access guarded pages
-- [ ] Admin can still access all pages
+- [ ] 系統主管 can still access all pages
 
 ---
 

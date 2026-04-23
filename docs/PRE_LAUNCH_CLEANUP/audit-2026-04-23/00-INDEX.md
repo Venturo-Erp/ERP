@@ -3,7 +3,7 @@
 **掃描日期**：2026-04-23
 **掃描範圍**：56 個 page.tsx + 95 個 API route + 506 個 migration + ~32 萬行 TS/TSX
 **方法**：6 場 Explore agent 接力、不並行、純報告不動手
-**6 份模組報告**：`01-accounting.md` / `02-finance.md` / `03-database.md` / `04-business-core.md` / `05-admin.md` / `06-peripherals.md`
+**6 份模組報告**：`01-accounting.md` / `02-finance.md` / `03-database.md` / `04-business-core.md` / `05-系統主管.md` / `06-peripherals.md`
 
 ---
 
@@ -23,13 +23,13 @@
 
 ### ① Tenants Create API 寫死已砍的 `employees.permissions` 欄位
 **影響**：**新建租戶直接失敗 → 新客戶無法開通**
-**位置**：`05-admin.md` §1、`src/app/api/tenants/create/route.ts` L235-248
+**位置**：`05-系統主管.md` §1、`src/app/api/tenants/create/route.ts` L235-248
 **原因**：DB 2026-04-23 已 DROP 該欄位、但 API 還在 `INSERT employees (permissions, ...)` → FK/column error
 **修法**：S、改 API 不再寫 permissions、改走 role_tab_permissions seed
 
 ### ② `database.types.ts` 仍有舊欄位（`is_active`、`permissions`）
 **影響**：TypeScript 說有 / SQL 說沒有 → runtime 選擇性地 silent fail
-**位置**：`05-admin.md` §2
+**位置**：`05-系統主管.md` §2
 **修法**：S、`npm run db:types` regen
 
 ### ③ Accounting `checks` 頁面整頁是 stub
@@ -104,7 +104,7 @@
 | 2 | 報表/統計 `supabase.from().select()` 同樣 query 3 處 copy-paste | accounting (3 報表)、finance reports | `src/hooks/<domain>/use<Entity>ByDateRange.ts` |
 | 3 | CRUD Dialog + list + create/edit/delete hook 幾乎一樣 | database (5 處)、tours、orders、customers | `src/hooks/createEntityCrud()` factory |
 | 4 | Status machine 分散各處（tour / order / quote / payment / request） | business-core、finance | `src/lib/state-machines/` |
-| 5 | Admin guard 檢查在每頁每 API 重抄（isAdmin / checkIsAdmin / hasPermission 3 種並存） | admin、finance、accounting、tours | `src/lib/auth/withAdminGuard.ts` middleware |
+| 5 | Admin guard 檢查在每頁每 API 重抄（isAdmin / checkIsAdmin / hasPermission 3 種並存） | 系統主管、finance、accounting、tours | `src/lib/auth/withAdminGuard.ts` middleware |
 | 6 | Floating point 容差 `0.01` 硬編 3 處 | accounting (3 處)、finance 可能也有 | `src/lib/erp/constants.ts` `DECIMAL_TOLERANCE` |
 
 另外兩個「重複 schema 邏輯」值得 Post-Launch 規劃：
@@ -180,7 +180,7 @@ Wave 0-6 已經修掉很多問題、目前這些是**健康的護城河**、動 
 | 2 | Finance 財務 | [`02-finance.md`](./02-finance.md) | 192 |
 | 3 | Database 基礎資料 | [`03-database.md`](./03-database.md) | 291 |
 | 4 | 業務核心 | [`04-business-core.md`](./04-business-core.md) | 270 |
-| 5 | 管理區 | [`05-admin.md`](./05-admin.md) | 229 |
+| 5 | 管理區 | [`05-系統主管.md`](./05-系統主管.md) | 229 |
 | 6 | 週邊工具 | [`06-peripherals.md`](./06-peripherals.md) | 492 |
 | - | **總計** | | **1911 行報告** |
 

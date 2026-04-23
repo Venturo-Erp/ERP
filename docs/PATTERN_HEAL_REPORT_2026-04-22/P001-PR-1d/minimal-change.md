@@ -33,7 +33,7 @@
 - 絕對不可順手改：
   - ❌ 不要「順手清掉空 if」──這是技術債、但不在 P001 修法範圍
   - ❌ 不要「順便重組 visibleMenuItems useMemo」
-- 理由：L522-524 是空 if+註解（「直接進入完整選單過濾邏輯」）、刪了以後 L525 的 `else if (isTransport) return transportMenuItems` 會對整個函式造成**控制流改變**（admin 改走 transportMenuItems 分支、炸掉車行 admin 體驗）。這是 sidebar 整體重構的議題、不是 P001 拔短路。建議 DEFER 到 sidebar 重構 PR。
+- 理由：L522-524 是空 if+註解（「直接進入完整選單過濾邏輯」）、刪了以後 L525 的 `else if (isTransport) return transportMenuItems` 會對整個函式造成**控制流改變**（系統主管 改走 transportMenuItems 分支、炸掉車行 系統主管 體驗）。這是 sidebar 整體重構的議題、不是 P001 拔短路。建議 DEFER 到 sidebar 重構 PR。
 
 ---
 
@@ -43,7 +43,7 @@
 - 絕對不可順手改：
   - ❌ 不可刪 L509 的 `const { isAdmin } = useAuthStore()`——L522（A2 DEFER）、L579/L596（A4）、L600 useMemo deps 都還在用
   - ❌ 不可改 prefix-match 的寫法
-- 理由：prefix-match fallback 對 admin backfilled role 等價正確。
+- 理由：prefix-match fallback 對 系統主管 backfilled role 等價正確。
 
 ---
 
@@ -63,7 +63,7 @@
 - 具體改什麼行：**只刪每個 useCallback 裡的 `if (isAdmin) return true` 與其上一行註解 `// 系統主管擁有所有權限`**（共 4 組、每組 2 行）。
 - 絕對不可順手改：
   - ❌ 不可刪 L33 `const [isAdmin, setIsAdmin] = useState(false)`——L55 的 `setIsAdmin(true)` 還在寫、且 L131 return 物件還 export isAdmin 給消費者
-  - ❌ 不可刪 L54-58 的 admin shortcut fetch 路徑（那是 API 層設計、不是前端短路）
+  - ❌ 不可刪 L54-58 的 系統主管 shortcut fetch 路徑（那是 API 層設計、不是前端短路）
   - ❌ 不可改 4 個 useCallback deps 陣列（`[permissions, isAdmin]`）──isAdmin 還在 return 物件裡、消費者可能讀
   - ❌ 不可移除 return 物件裡的 `isAdmin`（grep 消費者前禁動）
   - ❌ 不可把 `canRead`/`canWrite`/`canReadAny`/`canWriteAny` 4 函式抽成 helper（CLAUDE.md 原則 2、4 次重複才抽）
@@ -93,8 +93,8 @@
   - ❌ 不可順便把 ALWAYS_ALLOWED 陣列重排
 - 理由（DEFER 依據）：
   - `ModuleGuard` 掛在 `src/app/(main)/layout.tsx` 全域根節點、所有 /(main)/* 路由都經過它
-  - admin 若拔掉這個短路、會走 `isRouteAvailable(pathname)`（來自 `useWorkspaceFeatures`）、admin 的 workspace features 是否涵蓋所有路由**沒有驗過**（features table ≠ role_tab_permissions backfill）
-  - 風險 > 收益：一行改動 = 全站 admin 可能閃 `/unauthorized`
+  - 系統主管 若拔掉這個短路、會走 `isRouteAvailable(pathname)`（來自 `useWorkspaceFeatures`）、系統主管 的 workspace features 是否涵蓋所有路由**沒有驗過**（features table ≠ role_tab_permissions backfill）
+  - 風險 > 收益：一行改動 = 全站 系統主管 可能閃 `/unauthorized`
   - 建議 DEFER 到「workspace_features × isAdmin」一致性驗過後的獨立 PR
 
 ---
@@ -106,7 +106,7 @@
   - ❌ 不可刪 L13 `const isAdmin = useAuthStore(state => state.isAdmin)`——L22 useMemo deps 還在用（⚠️ 嚴格說 L22 deps 的 `isAdmin` 在拔短路後變 unused、允許一起清；但這是「你造成的孤兒」才清、先確認 type-check + linter 抓到才動）
   - ❌ 不可改 `canManageMembers` useMemo deps 陣列
   - ❌ 不可「順便把 workspace:manage_members / workspace:manage 的 OR 改成 helper」
-- 理由：admin 已有 `workspace:manage_members` permission backfill、fallback 等價。
+- 理由：系統主管 已有 `workspace:manage_members` permission backfill、fallback 等價。
 
 ---
 
@@ -196,14 +196,14 @@
 - 判定：🔴 **DEFER**（候選、主席可再議）
 - 具體改什麼行：本 PR **不動**、或至少 **不套 canAccess 改法**。
 - 絕對不可順手改：
-  - ❌ 不可把 `if (!isAdmin) return` 改成 `if (!canAccess('workspace:switch')) return`——`canAccess('workspace:switch')` 這個 permission key 不一定存在、硬換會讓「admin 以外永遠拿不到」
+  - ❌ 不可把 `if (!isAdmin) return` 改成 `if (!canAccess('workspace:switch')) return`——`canAccess('workspace:switch')` 這個 permission key 不一定存在、硬換會讓「系統主管 以外永遠拿不到」
   - ❌ 不可刪 L27 的第二個 `if (!isAdmin) return null`（return component null 的那個、語意不同、是顯示控制）
   - ❌ 不可移除 L11 的 `isAdmin` destructure（L16、L24、L27 全都還在用）
 - 理由（DEFER 依據）：
   - L16 是 useEffect 內 early-return、不等於「頁面大鎖」——它只是「系統主管才載 workspaces 列表」的優化
   - L27 的 `return null` 才是顯示控制、但這屬於 UI 元件本身的業務含義（「這元件本來就擁有管理員資格-only 工具」）、拔了得重新定義這元件給誰用
   - 本 PR 範圍是「細權限取代 系統主管大鎖」；WorkspaceSwitcher 目前是跨租戶切換器、業務語意就是只給 擁有平台管理資格的人 用、硬改 canAccess 等於**改變產品行為**、不是拔短路
-  - 建議 DEFER 到 admin dashboard / 擁有平台管理資格的人 tooling 的獨立 PR
+  - 建議 DEFER 到 系統主管 dashboard / 擁有平台管理資格的人 tooling 的獨立 PR
 
 ---
 
@@ -228,7 +228,7 @@
 
 2. **`src/lib/permissions/index.ts:114` `hasPermissionForRoute` 的 isAdmin 短路** — 被 `auth-guard.tsx` 的 `checkAuth` / `usePermissionCheck` 兩處呼叫、參與全站 AuthGuard 執行流（GitNexus AuthGuard → GetModuleFromRoute step 3/4）、影響面橫跨所有受保護路由。屬 P002 / P008 後端統一 policy 範圍、不在前端拔短路 scope。DEFER。
 
-3. **`src/components/guards/ModuleGuard.tsx:49` admin 跳過檢查** — 掛在 `/(main)/layout.tsx` 全域根節點、所有主框架路由都過它。拔了會讓系統主管 走 `isRouteAvailable(pathname)` 查 workspace_features、但 admin 的 features 是否涵蓋所有路由**尚未驗**（features table ≠ role_tab_permissions backfill）。一行改動 = 全站 admin 可能閃 `/unauthorized`。DEFER 到獨立「workspace_features × isAdmin 一致性驗」的 PR。
+3. **`src/components/guards/ModuleGuard.tsx:49` 系統主管 跳過檢查** — 掛在 `/(main)/layout.tsx` 全域根節點、所有主框架路由都過它。拔了會讓系統主管 走 `isRouteAvailable(pathname)` 查 workspace_features、但 系統主管 的 features 是否涵蓋所有路由**尚未驗**（features table ≠ role_tab_permissions backfill）。一行改動 = 全站 系統主管 可能閃 `/unauthorized`。DEFER 到獨立「workspace_features × isAdmin 一致性驗」的 PR。
 
 4. **`WorkspaceSwitcher.tsx:16` useEffect 內 `if (!isAdmin) return`** — 這元件業務語意本身就是「擁有平台管理資格的人 跨租戶切換器」、L16 是載資料的優化、L27 是顯示控制、拔了等於改變產品定義。建議 DEFER 到 擁有平台管理資格的人 tooling PR。
 
@@ -244,7 +244,7 @@
 | A4 sidebar.tsx:596 | `if (isAdmin) return true` | ⚠️（配合 A2 DEFER） |
 | A5-A8 useTabPermissions.tsx:80/97/113/122 | 4 處 `if (isAdmin) return true` | ✅（4 處統一、禁抽 helper） |
 | A9 permissions/index.ts:114 | `hasPermissionForRoute` 內短路 | 🔴 DEFER |
-| A10 ModuleGuard.tsx:49 | admin 跳過 guard | 🔴 DEFER |
+| A10 ModuleGuard.tsx:49 | 系統主管 跳過 guard | 🔴 DEFER |
 | A11 useChannelSidebar.ts:17 | `if (isAdmin) return true` | ✅ |
 | B1 accounting/layout.tsx:13 | layout 大鎖 | ✅ |
 | B2 database/layout.tsx:14 | layout 大鎖 | ✅ |

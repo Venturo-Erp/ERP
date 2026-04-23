@@ -19,7 +19,7 @@ PR-1d 本身「只動前端」、**沒引入新的跨租戶提權**（workspace 
 
 ## 🔴 CRITICAL 發現
 
-### S1: `/tenants` / `/ai-bot` / `/workspace` 三類路由 PR-1d 後 admin 會白屏（權限下降 CRITICAL）
+### S1: `/tenants` / `/ai-bot` / `/workspace` 三類路由 PR-1d 後 系統主管 會白屏（權限下降 CRITICAL）
 
 **命中點**：
 - B1 `/accounting/layout.tsx` 改 `canAccess('/accounting')`
@@ -37,7 +37,7 @@ PR-1d 本身「只動前端」、**沒引入新的跨租戶提權**（workspace 
 1. PR-1d 進下一步前、**先下 DB 指令驗 Corner 系統主管 的 `role_tab_permissions` 是否有 `settings/tenants/can_write=true` 這筆**；沒有就先補 migration。
 2. `module-tabs.ts` MODULES 增一個 `settings.tenants` tab（或明確宣告「tenants 是 system-level、另有管道」、不走 module-tabs seed）；把 backfill migration 加一行 `('settings', 'tenants')` 補齊。
 3. 驗 `workspaces.premium_enabled` 在 Corner 是 true；否則把 ModuleGuard 的 系統主管 bypass 保留（A6 不在 PR-1d 拔）。
-4. 寫 e2e：Corner / JINGYAO / YUFEN 三租戶 admin 登入、依序點 /tenants、/ai-bot、/accounting、/database、/hr/roles 不得被擋。
+4. 寫 e2e：Corner / JINGYAO / YUFEN 三租戶 系統主管 登入、依序點 /tenants、/ai-bot、/accounting、/database、/hr/roles 不得被擋。
 
 ---
 
@@ -91,7 +91,7 @@ PR-1d 本身「只動前端」、**沒引入新的跨租戶提權**（workspace 
 **影響**：
 - AuthGuard 是整個 /(main) 路由群組的上游入口、hasPermissionForRoute 回 false 會 `router.push('/unauthorized')`。
 - 拔 isAdmin 短路後、admin 走 `userPermissions`（登入時從 `role_tab_permissions` 轉成 `module:tab` 字串陣列、見 validate-login/route.ts:159）。
-- 風險窗口：login → validate-login API 要跑一次、才把 permissions 塞進 user。登入完成但 JWT 尚未刷新那幾毫秒若有路由跳轉、permissions 為空、hasPermissionForRoute 第一行 `if (!userPermissions || userPermissions.length === 0) return false` 會直接把 admin 踢到 /unauthorized。
+- 風險窗口：login → validate-login API 要跑一次、才把 permissions 塞進 user。登入完成但 JWT 尚未刷新那幾毫秒若有路由跳轉、permissions 為空、hasPermissionForRoute 第一行 `if (!userPermissions || userPermissions.length === 0) return false` 會直接把 系統主管 踢到 /unauthorized。
 
 **修法補強**：
 1. hasPermissionForRoute 第一行改：`if (!userPermissions) return false; if (userPermissions.length === 0 && !isAdmin) return false`（保留對 admin 的寬容度）、或直接在 AuthGuard 加 permissions loading state、跟 canAccess 同步。
@@ -106,12 +106,12 @@ PR-1d 本身「只動前端」、**沒引入新的跨租戶提權**（workspace 
 
 **影響**：
 - ModuleGuard 的職責是 workspace-level feature gate（有沒有買某模組）、不是 role-level permission。
-- PR-1d 規劃沒列 ModuleGuard 為 A 類短路、但 senior-dev 若順手拔、會造成：Corner workspace 若沒買某個 premium module（ai_bot / fleet / local / supplier_portal / esims / accounting / tenants）、admin 進該路由會被踢到 /unauthorized。
+- PR-1d 規劃沒列 ModuleGuard 為 A 類短路、但 senior-dev 若順手拔、會造成：Corner workspace 若沒買某個 premium module（ai_bot / fleet / local / supplier_portal / esims / accounting / tenants）、系統主管 進該路由會被踢到 /unauthorized。
 - 跟 S1 是同一根問題（系統主管權限「降到」workspace_features 層），但 ModuleGuard 拔掉的影響更大：它是 /(main) layout 附近的 guard、錯了全站受影響。
 
 **修法補強**：
 1. **PR-1d 明確不動 ModuleGuard**；ModuleGuard 的 系統主管 bypass 是「workspace 層級的 sales-safety」、該由付費大開關（billing）決定、不由 role 決定。
-2. 或改成：`if (isAdmin && premium_enabled) { setChecked(true); return }` — 仍允許 系統主管 bypass、但前提是該 workspace 有付費、避免「不付費也能 admin 跳進所有功能」的漏洞（這屬於另一個商業層問題、不是 PR-1d 要修的、但要講清楚）。
+2. 或改成：`if (isAdmin && premium_enabled) { setChecked(true); return }` — 仍允許 系統主管 bypass、但前提是該 workspace 有付費、避免「不付費也能 系統主管 跳進所有功能」的漏洞（這屬於另一個商業層問題、不是 PR-1d 要修的、但要講清楚）。
 
 ---
 
@@ -150,19 +150,19 @@ PR-1d 本身「只動前端」、**沒引入新的跨租戶提權**（workspace 
 
 ---
 
-### S7: `hasPermissionForRoute` 的 `publicRoutes` 白名單 + admin 短路拔後、舊格式權限仍放行（MED）
+### S7: `hasPermissionForRoute` 的 `publicRoutes` 白名單 + 系統主管 短路拔後、舊格式權限仍放行（MED）
 
 **命中點**：`src/lib/permissions/index.ts:127-138` 的 legacy fallback。
 
 **影響**：拔掉 isAdmin 短路後、仍有兩條「通往 true」的 fallback：
-1. 舊格式權限 `perm.id === 'admin'`（SYSTEM_PERMISSIONS 定義）、若 user.permissions 含字串 `'admin'`、依 routes `['*']` 任何路由都回 true。
+1. 舊格式權限 `perm.id === '系統主管'`（SYSTEM_PERMISSIONS 定義）、若 user.permissions 含字串 `'系統主管'`、依 routes `['*']` 任何路由都回 true。
 2. 若 user.permissions 含 `'tours'`（舊格式）、依 FEATURE_PERMISSIONS 的 routes 比對也會放行。
 
-這是 **隱形提權路徑**：攻擊者如果能透過任何 path（例：自訂 role name= 'admin'、或打 `/api/roles` PUT 塞 name）影響 user.permissions 陣列、就能拿到 `'admin'` 或 `'*'`。
+這是 **隱形提權路徑**：攻擊者如果能透過任何 path（例：自訂 role name= '系統主管'、或打 `/api/roles` PUT 塞 name）影響 user.permissions 陣列、就能拿到 `'系統主管'` 或 `'*'`。
 
 **修法補強**：
 - 前端 hasPermissionForRoute 把 legacy ALL_PERMISSIONS 分支刪掉、只走 `role_tab_permissions` 路徑（與後端對齊）。
-- 或在 validate-login/route.ts:159 的 permissions 陣列構建時、**明確禁止** `'admin'` / `'*'` 字串出現在 permissions（白名單 strict）。
+- 或在 validate-login/route.ts:159 的 permissions 陣列構建時、**明確禁止** `'系統主管'` / `'*'` 字串出現在 permissions（白名單 strict）。
 
 ---
 
@@ -182,7 +182,7 @@ PR-1d 本身「只動前端」、**沒引入新的跨租戶提權**（workspace 
 
 ### S9: isAdmin 三條管道仍在（JWT / Zustand / DB role.is_admin）、PR-1d 沒降這個（LOW、已知 debt）
 
-**影響**：PR-1d 只動前端短路、`useAuthStore(s => s.isAdmin)` 依然活著、A 類剩下的零星 `isAdmin &&` UI 裝飾（calendar workspace switch、profile admin badge、sidebar 展開 workspaces）仍依 JWT。未來若 JWT claim 被偽造（middleware 已用 Supabase session 驗、可信）、還有第二條路（zustand 持久化的 user.isAdmin）、第三條（DB role.is_admin）。**pattern-map P011 已記、不屬 PR-1d scope**。
+**影響**：PR-1d 只動前端短路、`useAuthStore(s => s.isAdmin)` 依然活著、A 類剩下的零星 `isAdmin &&` UI 裝飾（calendar workspace switch、profile 系統主管 badge、sidebar 展開 workspaces）仍依 JWT。未來若 JWT claim 被偽造（middleware 已用 Supabase session 驗、可信）、還有第二條路（zustand 持久化的 user.isAdmin）、第三條（DB role.is_admin）。**pattern-map P011 已記、不屬 PR-1d scope**。
 
 ---
 
@@ -208,11 +208,11 @@ PR-1d 本身「只動前端」、**沒引入新的跨租戶提權**（workspace 
 
 ## 系統主管權限下降風險清單
 
-1. **`/tenants` 路由**（SEVERE、必爆）：`settings.tenants` 不在 MODULES、不在 backfill、Corner 系統主管 的 role_tab_permissions **沒有這筆**；PR-1d 一改前端守門、admin 進不去。搭配 `/api/tenants/create`、`/api/workspaces/[id]` DELETE、`/api/permissions/features` PUT 的 server guard 也 fail。
+1. **`/tenants` 路由**（SEVERE、必爆）：`settings.tenants` 不在 MODULES、不在 backfill、Corner 系統主管 的 role_tab_permissions **沒有這筆**；PR-1d 一改前端守門、系統主管 進不去。搭配 `/api/tenants/create`、`/api/workspaces/[id]` DELETE、`/api/permissions/features` PUT 的 server guard 也 fail。
 2. **`/ai-bot` 路由**（依 premium_enabled 狀態）：ai_bot 是 PREMIUM_FEATURE；若 workspace 未開付費大開關、系統主管自己也進不去。
 3. **`/workspace` 頻道路由**：workspace 本身是 premium feature、同上。
 4. **`/accounting` / `/database`**（依 Corner workspace 當前 state）：不是 premium、但要 `role_tab_permissions` 有對應 row。P001 backfill 已處理、有 54 rows、**理論 OK 但要 e2e 驗一次**。
-5. **`/hr/roles`**（B 類）：admin 能進、canAccess OK；但權限編輯時 render 依賴 isAdmin flag（見 hr/roles/page.tsx:386, 400, 408）、拔掉 isAdmin 後那個「admin 鎖死全開」的視覺狀態不見、可能讓系統主管 誤把自己的權限關掉（UX bug、不是 security）。
+5. **`/hr/roles`**（B 類）：系統主管 能進、canAccess OK；但權限編輯時 render 依賴 isAdmin flag（見 hr/roles/page.tsx:386, 400, 408）、拔掉 isAdmin 後那個「admin 鎖死全開」的視覺狀態不見、可能讓系統主管 誤把自己的權限關掉（UX bug、不是 security）。
 6. **`/calendar` workspace switcher**（A 類）：沒有系統主管資格 看不到選單、拔 isAdmin 後仍看不到（靠 workspaces.length > 0）、但語意飄移；不致命。
 
 ---
@@ -222,10 +222,10 @@ PR-1d 本身「只動前端」、**沒引入新的跨租戶提權**（workspace 
 ### Blocker（PR-1d merge 前必備）
 
 - **e2e `tests/e2e/admin-can-enter-all-routes.spec.ts`**：
-  Corner 系統主管 / JINGYAO admin 兩人、依序訪問 `/tenants`、`/ai-bot`、`/accounting`、`/database`、`/hr/roles`、`/finance/settings`、`/finance/requests`、`/finance/treasury`、`/finance/travel-invoice`、`/finance/reports`、`/workspace`、`/calendar`；期待：不閃 UnauthorizedPage、不 redirect to /unauthorized、render 主要內容。
+  Corner 系統主管 / JINGYAO 系統主管 兩人、依序訪問 `/tenants`、`/ai-bot`、`/accounting`、`/database`、`/hr/roles`、`/finance/settings`、`/finance/requests`、`/finance/treasury`、`/finance/travel-invoice`、`/finance/reports`、`/workspace`、`/calendar`；期待：不閃 UnauthorizedPage、不 redirect to /unauthorized、render 主要內容。
 - **unit test `src/lib/permissions/__tests__/hasPermissionForRoute.test.ts`**：
-  - admin=true 且 permissions=[] 時、access 任何路由應 true（或 false、取決於最終 contract）
-  - admin=false 且 permissions=['accounting:vouchers'] 時、access `/accounting` 應 true
+  - 系統主管=true 且 permissions=[] 時、access 任何路由應 true（或 false、取決於最終 contract）
+  - 系統主管=false 且 permissions=['accounting:vouchers'] 時、access `/accounting` 應 true
   - path `/accounting/../tenants` normalize 測試
 - **DB 驗證 script**：
   ```
@@ -233,7 +233,7 @@ PR-1d 本身「只動前端」、**沒引入新的跨租戶提權**（workspace 
   FROM workspace_roles wr LEFT JOIN role_tab_permissions rtp ON rtp.role_id = wr.id
   WHERE wr.is_admin = true GROUP BY 1,2;
   ```
-  預期每個 admin 有 ≥ 54 row；**外加**必查有沒有 `(module='settings', tab='tenants')` 這筆（backfill 目前沒 seed）。
+  預期每個 系統主管 有 ≥ 54 row；**外加**必查有沒有 `(module='settings', tab='tenants')` 這筆（backfill 目前沒 seed）。
 
 ### 短期（P001-B 或 independent issue）
 

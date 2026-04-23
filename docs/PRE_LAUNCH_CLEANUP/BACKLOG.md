@@ -106,9 +106,9 @@
 **執行**：
 - [x] **Batch 1**：Finance 6 頁 系統主管 guard（payments/requests/travel-invoice/reports/settings/treasury、2026-04-21）
   - 簡化版：`useAuthStore.isAdmin` + `UnauthorizedPage`、避開 useTabPermissions async race
-- [x] **Batch 2**：Accounting layout guard（一次 cover /accounting 10 頁、admin-only）
-- [ ] **Batch 3**：HR 系統主管 頁（payroll / reports / settings / deductions、需 William 確認哪些 admin only）
-- [ ] **Batch 4**：Settings admin 頁（workspaces / modules / receipt-test）
+- [x] **Batch 2**：Accounting layout guard（一次 cover /accounting 10 頁、系統主管-only）
+- [ ] **Batch 3**：HR 系統主管 頁（payroll / reports / settings / deductions、需 William 確認哪些 系統主管 only）
+- [ ] **Batch 4**：Settings 系統主管 頁（workspaces / modules / receipt-test）
 - [x] **Batch 5**：Database 管理頁 layout guard（2026-04-21、9 頁 cover：archive/attractions/company-assets/constants/fleet/suppliers/tour-leaders/transportation-rates/workspaces）
 - [ ] **tour_leader 權限 scope 邏輯**（員工→full、客戶→self_only）— Wave 2 後期
 - [ ] **沒有系統主管資格 細顆粒權限 migrate 到 canRead/canWrite**（Wave 2 最後階段、用 role_tab_permissions）
@@ -293,7 +293,7 @@ A3 agent 修正：dead UI 實際只 2 個真 dead（`BatchReceiptConfirmDialog` 
     - `receipt_number_format` / `invoice_number_format`：編號 pattern
     - `default_tax_rate`：5% / 免稅 / 其他
     - `default_payment_method_id`：預設付款方式（取代目前 AddRequestDialog 硬寫的 UUID）
-  - **建一個 `/settings/financial` 頁面**：租戶 admin 可調上述所有設定
+  - **建一個 `/settings/financial` 頁面**：租戶 系統主管 可調上述所有設定
   - **Code 層全改查 workspace config**、不再 hardcode Corner 規則
   - **背景**：2026-04-21 改「請款預設週四→今天」時發現這 pattern、應該集中處理
 
@@ -336,7 +336,7 @@ A3 agent 修正：dead UI 實際只 2 個真 dead（`BatchReceiptConfirmDialog` 
 | orders 5 人數欄位 | 5 | **合併為 1（SSOT）**、真相來源是 order_members count |
 | 狀態值中英 | 8 | **上線前全英統一 + CHECK constraint** |
 | 權限系統方向 | 2 | **全站走 hasPermission**、不再 hardcode isAdmin；後台勾權限、code 只問 key |
-| `/hr/roles` 改職務權限 | 2 | 走 hasPermission（走 admin key、不 hardcode）|
+| `/hr/roles` 改職務權限 | 2 | 走 hasPermission（走 系統主管 key、不 hardcode）|
 | archive_empty_tables 184 表 | 1 | **重做盤點**（純讀 code+migration、不動 DB）、分三類：真死 / 未啟用 / 偶爾用 |
 | dead_data_cleanup_DRAFT | — | **上線前不動** 12144 列 ref_airports_backup |
 | create_ref_cities | B 後期 | **要**、Phase B 後期建（純建新表零風險） |

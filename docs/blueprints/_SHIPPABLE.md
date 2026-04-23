@@ -140,7 +140,7 @@ cron Stage D 之後執行：
 - [ ] 月 / 週 / 日 view 切換
 - [ ] 點事件可跳 tour / customer
 - [ ] 新增事件、拖放
-- [!] Admin 切 workspace filter → leave_requests 跟著切
+- [!] 系統主管 切 workspace filter → leave_requests 跟著切
 - [!] 大量事件時月 view 不卡
 
 ### 15 · `/channel`

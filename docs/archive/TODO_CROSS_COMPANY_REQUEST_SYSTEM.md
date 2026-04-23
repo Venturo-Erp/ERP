@@ -83,7 +83,7 @@
 
 ### 4.2 Workspace 類型管理
 
-- [ ] Super admin 可設定 workspace 類型
+- [ ] Super 系統主管 可設定 workspace 類型
 - [ ] 不同類型顯示不同功能選單
 
 ---

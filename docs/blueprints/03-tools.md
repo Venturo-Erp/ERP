@@ -38,9 +38,9 @@
 
 ### reset-db
 ```
-[admin 打開頁] → [按 Reset] → [二次確認] → 刪 VenturoOfflineDB + venturo-db → 重新載入
+[系統主管 打開頁] → [按 Reset] → [二次確認] → 刪 VenturoOfflineDB + venturo-db → 重新載入
 ```
-🔴 **目前無 admin 檢查、無二次確認**
+🔴 **目前無 系統主管 檢查、無二次確認**
 
 ---
 

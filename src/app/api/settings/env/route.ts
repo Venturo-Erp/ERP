@@ -52,7 +52,7 @@ async function getGeminiUsage(): Promise<string | undefined> {
   return getApiUsage('gemini', 1500) // 每分鐘 60 次，保守估算每日 50 次 × 30 天
 }
 
-async function checkAdminPermission(employeeId: string): Promise<boolean> {
+async function hasAdminCapability(employeeId: string): Promise<boolean> {
   const adminClient = getSupabaseAdminClient()
   const { data: employee } = await adminClient
     .from('employees')
@@ -82,7 +82,7 @@ export async function GET() {
   }
 
   // 🔒 檢查員工的職務是否擁有管理員資格
-  const isAdmin = await checkAdminPermission(auth.data.employeeId)
+  const isAdmin = await hasAdminCapability(auth.data.employeeId)
   if (!isAdmin) {
     return ApiError.forbidden('您沒有此權限')
   }

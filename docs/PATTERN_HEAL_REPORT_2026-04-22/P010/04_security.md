@@ -49,7 +49,7 @@
 情境：User A（workspace X、role=業務）呼叫 `PUT /api/roles/[A 自己 role_id]/tab-permissions`，送入 body 把自己 role 的 `settings/tenants` 設為 `can_write: true`（原本沒給）。
 
 - 新 RLS 擋得住嗎？**擋不住**。因為 `roleId` 確實屬於 X、EXISTS 回 true、UPDATE 通過。
-- 為什麼擋不住？因為 API 層沒檢查「呼叫者是否為 admin / 是否有權改自己 role 的權限矩陣」。
+- 為什麼擋不住？因為 API 層沒檢查「呼叫者是否為 系統主管 / 是否有權改自己 role 的權限矩陣」。
 
 這是 **P001（系統主管萬能）+ P003（API 無角色驗證）+ P015（無測試）複合病**、不是 P010 獨有。**P010 做完只修了「跨租戶讀寫」、沒修「租戶內越權」**。
 
@@ -91,7 +91,7 @@ DoS 面：此 API 本來就非公開、只 session 後可達、rate limit 不是
 
 | 項目 | 對應 pattern | 原因 |
 |---|---|---|
-| `/api/roles/[roleId]/tab-permissions` 加 session / admin 檢查 | P003 | 是 TS code 改動、P010 scope 是 DB only |
+| `/api/roles/[roleId]/tab-permissions` 加 session / 系統主管 檢查 | P003 | 是 TS code 改動、P010 scope 是 DB only |
 | `employee_permission_overrides` 同類 RLS 修復 | P022（下次 pattern-heal） | 同病不同表、獨立 migration、獨立回歸測試 |
 | JWT permissions_version / 短 TTL / session invalidation | P011 | 影響所有 workspace RLS、架構級改動 |
 | 5 個 service_role 點加「呼叫者 workspace 一致性」驗證 | P003 | 每個 API 都要逐行改、blast radius 大 |
@@ -117,4 +117,4 @@ DoS 面：此 API 本來就非公開、只 session 後可達、rate limit 不是
 
 ## 回傳摘要（< 200 字）
 
-P010 威脅模型上**強烈支持、必須做**（從 0 層防禦升到 1 層 RLS、擋住任何登入員工跨租戶讀寫權限矩陣的 critical 漏洞）。但 scope 必須**嚴格鎖死**：只動 DB policy、不動 API code、不順手修 `employee_permission_overrides` / JWT / audit log / API 驗證。修完**仍有三個殘留風險**、都 out of scope 但必須 pattern-map 記錄：(1) 租戶內越權（User 改自己 role 權限、須 P003 補 API 層 admin check）；(2) 5 個 service_role 點無呼叫者 workspace 驗證（須 P003）；(3) JWT 時間差（須 P011）。上線前 P010 + P022 + P003 + P015 四個缺一不可、P011 + P009 上線後一個月內補齊。本次 PR security 面 approve、僅加一條 `pg_policies` snapshot dump 到 migration log、其他不順手做。
+P010 威脅模型上**強烈支持、必須做**（從 0 層防禦升到 1 層 RLS、擋住任何登入員工跨租戶讀寫權限矩陣的 critical 漏洞）。但 scope 必須**嚴格鎖死**：只動 DB policy、不動 API code、不順手修 `employee_permission_overrides` / JWT / audit log / API 驗證。修完**仍有三個殘留風險**、都 out of scope 但必須 pattern-map 記錄：(1) 租戶內越權（User 改自己 role 權限、須 P003 補 API 層 系統主管 check）；(2) 5 個 service_role 點無呼叫者 workspace 驗證（須 P003）；(3) JWT 時間差（須 P011）。上線前 P010 + P022 + P003 + P015 四個缺一不可、P011 + P009 上線後一個月內補齊。本次 PR security 面 approve、僅加一條 `pg_policies` snapshot dump 到 migration log、其他不順手做。

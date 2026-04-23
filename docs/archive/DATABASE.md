@@ -462,7 +462,7 @@ CREATE POLICY "Admins can view all tours" ON tours
     EXISTS (
       SELECT 1 FROM employees
       WHERE id = auth.uid()::UUID
-      AND 'admin' = ANY(permissions)
+      AND '系統主管' = ANY(permissions)
     )
   );
 

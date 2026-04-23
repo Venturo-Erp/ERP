@@ -84,7 +84,7 @@ return user.workspace_id || null
 #### 已查證的隔離點
 - ✅ 登入後 workspace_id 正確存入 Store（employee.workspace_id）
 - ✅ 後續查詢用 getWorkspaceFilterForQuery() 自動帶 workspace 過濾
-- ✅ Admin 無法跨 workspace（line 99-100 明確停用）
+- ✅ 系統主管 無法跨 workspace（line 99-100 明確停用）
 
 #### 隔離缺口
 - ⚠️ **localStorage 污染風險**：

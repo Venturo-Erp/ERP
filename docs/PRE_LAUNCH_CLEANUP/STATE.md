@@ -4,7 +4,7 @@
 **上次 session 結束時間**：2026-04-21 09:54
 **下一步**（新紅線下可自主）：
 - Wave 2 Batch 3：HR 系統主管 頁（payroll/reports/settings/deductions、需 William 確認 scope）
-- Wave 2 Batch 4：Settings admin 頁（workspaces/modules、可能有普通員工用，需 William 確認）
+- Wave 2 Batch 4：Settings 系統主管 頁（workspaces/modules、可能有普通員工用，需 William 確認）
 - Wave 8：狀態值中英（A8 plan、需 William 決策範圍）
 - Wave 3 剩：well-known-ids.ts 替換現有 hardcode（需 William 確認哪處保留 seed）
 **等待 William**：無

@@ -60,8 +60,8 @@ William 要**明確確認**以下假設：
 - 這是 Corner 作為「平台運營方」的合理權限、還是應該多一層「客戶同意」？
 - 若要分級、建議**第二階段**加 `workspace.can_be_deleted_by_platform` flag 或「軟刪除 + 30 天真實刪除」。**目前版本先擋住 P016、延後考慮**。
 
-### 🟢 Self-delete 風險（admin 刪自家）
-- Tenant admin 刪自家 workspace = 自願蒸發、**不是安全漏洞、是 UX/防呆問題**。
+### 🟢 Self-delete 風險（系統主管 刪自家）
+- Tenant 系統主管 刪自家 workspace = 自願蒸發、**不是安全漏洞、是 UX/防呆問題**。
 - 幕僚 1 已在 UI 加 confirm、API 加 409「還有員工」擋呆。
 - **建議**：UI 若刪自家 workspace、額外彈二次確認「這會登出所有員工、刪除當前登入帳號」。
 
@@ -158,14 +158,14 @@ curl -X DELETE https://venturo.../api/workspaces/<uuid> \
 ```bash
 # 先 create 一個空 workspace
 curl -X DELETE https://venturo.../api/workspaces/<空 workspace uuid> \
-  -H "Cookie: <corner admin session>"
+  -H "Cookie: <corner 系統主管 session>"
 # 預期：200 { success: true, workspace: {...} }、DB 真的刪掉。
 ```
 
 **測 4 — Corner 系統主管 刪非空 workspace**（防呆）：
 ```bash
 curl -X DELETE https://venturo.../api/workspaces/<有員工的 uuid> \
-  -H "Cookie: <corner admin session>"
+  -H "Cookie: <corner 系統主管 session>"
 # 預期：409 '此公司還有 N 位員工、無法刪除'
 ```
 

@@ -355,4 +355,4 @@ Pattern 4 rollback 後、若要 re-apply、重跑 migration 就會再 JOIN emplo
 
 ## < 200 字摘要
 
-Pattern 1 很可能 audit stale（現況就是 `is_super_admin()`、不是 USING:true）、先查證真偽再決定動不動。Pattern 2 和 3 是純防守增強、零代碼風險、先做當熱身。Pattern 4 最大、要加 `workspace_id` 欄、回填用 JOIN employees 可 100% 還原、RLS 4 policy 全重寫、同時需改 `permission-overrides/route.ts` PUT 的 INSERT payload 加 workspace_id、type-gen regenerate、migration 和 code 必須同 PR 同時上。順序：2 → 3 → 1 → 4。Rollback 都 < 3 分鐘、Pattern 4 復原可重跑 backfill 不丟資料。守門必跑 `login-api.spec.ts`（紅線）+ 新增 `permission-overrides.spec.ts`（跨租戶 + admin-only CRUD 各三情境）。
+Pattern 1 很可能 audit stale（現況就是 `is_super_admin()`、不是 USING:true）、先查證真偽再決定動不動。Pattern 2 和 3 是純防守增強、零代碼風險、先做當熱身。Pattern 4 最大、要加 `workspace_id` 欄、回填用 JOIN employees 可 100% 還原、RLS 4 policy 全重寫、同時需改 `permission-overrides/route.ts` PUT 的 INSERT payload 加 workspace_id、type-gen regenerate、migration 和 code 必須同 PR 同時上。順序：2 → 3 → 1 → 4。Rollback 都 < 3 分鐘、Pattern 4 復原可重跑 backfill 不丟資料。守門必跑 `login-api.spec.ts`（紅線）+ 新增 `permission-overrides.spec.ts`（跨租戶 + 系統主管-only CRUD 各三情境）。

@@ -471,7 +471,7 @@ if (hasPermission('tour:edit')) {
 系統使用 RBAC (Role-Based Access Control)：
 
 - **super_admin**: 完整權限，可跨 workspace
-- **admin**: workspace 內完整權限
+- **系統主管**: workspace 內完整權限
 - **manager**: 業務管理權限
 - **sales**: 銷售相關權限
 - **accountant**: 財務權限
@@ -937,7 +937,7 @@ DB Layer      → 資料持久化
 
 **角色定義**:
 
-- admin: 完整權限
+- 系統主管: 完整權限
 - manager: 業務 + 部分財務
 - sales: 旅遊 + 訂單 + 客戶
 - accountant: 財務專用
@@ -1715,7 +1715,7 @@ test('should create and manage tour', async ({ page }) => {
   await page.goto('http://localhost:3000')
 
   // 登入
-  await page.fill('[data-testid="username"]', 'admin')
+  await page.fill('[data-testid="username"]', '系統主管')
   await page.fill('[data-testid="password"]', 'password')
   await page.click('[data-testid="login-btn"]')
 
@@ -1790,7 +1790,7 @@ test('should create and manage tour', async ({ page }) => {
 ```typescript
 export type Permission =
   // 系統權限
-  | 'admin' // 系統主管（自動擁有全部權限）
+  | '系統主管' // 系統主管（自動擁有全部權限）
 
   // 功能模組權限（可自由組合）
   | 'quotes' // 報價單
@@ -1827,7 +1827,7 @@ export type Permission =
 // 系統主管檢查
 export function hasPermissionForRoute(userPermissions: string[], pathname: string): boolean {
   // 系統主管有所有權限
-  if (userPermissions.includes('admin')) {
+  if (userPermissions.includes('系統主管')) {
     return true
   }
 
@@ -1843,7 +1843,7 @@ export function hasPermissionForRoute(userPermissions: string[], pathname: strin
 
 // lib/auth.ts
 export function hasPermission(userPermissions: string[], requiredPermission: string): boolean {
-  return userPermissions.includes('admin') || userPermissions.includes(requiredPermission)
+  return userPermissions.includes('系統主管') || userPermissions.includes(requiredPermission)
 }
 ```
 
@@ -1852,7 +1852,7 @@ export function hasPermission(userPermissions: string[], requiredPermission: str
 ```typescript
 // 角色基礎權限配置
 const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
-  admin: ['*'], // 所有權限
+  系統主管: ['*'], // 所有權限
 
   manager: [
     'tour:create',
@@ -1879,8 +1879,8 @@ const handlePermissionToggle = (permissionId: string) => {
   if (!isEditing) return
 
   // 如果勾選系統主管，自動全選所有權限
-  if (permissionId === 'admin') {
-    const isAdminSelected = selectedPermissions.includes('admin')
+  if (permissionId === '系統主管') {
+    const isAdminSelected = selectedPermissions.includes('系統主管')
     if (!isAdminSelected) {
       setSelectedPermissions(SYSTEM_PERMISSIONS.map(p => p.id))
     } else {
@@ -1895,8 +1895,8 @@ const handlePermissionToggle = (permissionId: string) => {
       ? prev.filter(id => id !== permissionId)
       : [...prev, permissionId]
 
-    if (prev.includes('admin') && !newPermissions.includes(permissionId)) {
-      return newPermissions.filter(id => id !== 'admin')
+    if (prev.includes('系統主管') && !newPermissions.includes(permissionId)) {
+      return newPermissions.filter(id => id !== '系統主管')
     }
 
     return newPermissions
@@ -4276,7 +4276,7 @@ const employee = employees.find(emp => emp.employeeNumber === employeeNumber)
 
 ---
 
-#### 2. init-admin-user.ts
+#### 2. init-系統主管-user.ts
 
 **問題**: 初始化系統主管寫入錯誤的資料庫
 

@@ -85,17 +85,6 @@ export function getCurrentWorkspace() {
 }
 
 /**
- * 檢查當前使用者是否擁有管理員資格
- * 從 store 讀
- *
- * @returns boolean
- */
-export function isAdminUser(): boolean {
-  const { isAdmin } = useAuthStore.getState()
-  return isAdmin
-}
-
-/**
  * 檢查當前使用者是否可以管理指定的 workspace
  * 系統主管只能管理自己所屬的 workspace
  *

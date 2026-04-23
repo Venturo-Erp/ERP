@@ -208,7 +208,7 @@
 
 ---
 
-### P001 配套 — Admin 權限預填
+### P001 配套 — 系統主管 權限預填
 
 #### ✅ Migration 20260422150000 落地
 - 所有 `is_admin=true` 的 workspace_roles
@@ -218,7 +218,7 @@
 
 - **風險點**：模組清單在 migration 硬 coded（第 31-101），與 src/lib/permissions/module-tabs.ts 必須同步
   - 查 pattern-map：「MODULES 變動時、此 migration 需重跑或建 cron 同步」
-  - 當前狀態：如果新增模組忘了加進 migration，admin 就會缺權限
+  - 當前狀態：如果新增模組忘了加進 migration，系統主管 就會缺權限
 
 #### 結論：✅ Migration 落地 / ⚠️ 需定期同步模組清單（已被 pattern-map 記錄）
 

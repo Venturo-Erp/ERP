@@ -217,7 +217,7 @@ function getSupabase() {
   return supabase
 }
 ```
-違反 CLAUDE.md 規則：「Admin client 必須 per-request、不准 singleton」（L18）。
+違反 CLAUDE.md 規則：「系統主管 client 必須 per-request、不准 singleton」（L18）。
 
 **為什麼是問題**：
 - 3 處都改會漏

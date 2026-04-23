@@ -41,9 +41,9 @@ finance/treasury           金庫（公帳 / 現金）
 settings/appearance        外觀（個人、可開放）
 settings/bot-line          LINE bot 設定
 settings/menu              選單（個人）
-settings/modules           模組開關（admin only）
+settings/modules           模組開關（系統主管 only）
 settings/receipt-test      收據測試
-settings/workspaces        工作空間（admin only）
+settings/workspaces        工作空間（系統主管 only）
 ```
 
 **🟡 HR 類（個人資料）**：
@@ -81,36 +81,36 @@ finance.payments          — 收款管理
 finance.requests          — 請款管理
 finance.travel-invoice    — 代轉發票（寫權限 = 能按批次開立 = 法律責任）
 finance.reports           — 財務報表
-finance.settings          — 財務設定（admin）
-finance.treasury          — 金庫（admin 或 finance manager）
+finance.settings          — 財務設定（系統主管）
+finance.treasury          — 金庫（系統主管 或 finance manager）
 ```
 
-### Settings（admin 為主）
+### Settings（系統主管 為主）
 ```
-settings.company          — 公司資料（admin）
-settings.modules          — 模組開關（admin）
-settings.workspaces       — 工作空間（admin）
-settings.bot-line         — LINE bot 設定（admin）
+settings.company          — 公司資料（系統主管）
+settings.modules          — 模組開關（系統主管）
+settings.workspaces       — 工作空間（系統主管）
+settings.bot-line         — LINE bot 設定（系統主管）
 settings.appearance       — 個人外觀（全員）
 settings.menu             — 個人選單（全員）
-settings.receipt-test     — 測試工具（admin）
+settings.receipt-test     — 測試工具（系統主管）
 ```
 
 ### HR
 ```
-hr.roles                  — 職務管理（admin）
-hr.payroll                — 薪資管理（admin / HR manager）
-hr.deductions             — 扣款（admin / HR）
-hr.reports                — 人資報表（admin / HR）
-hr.settings               — HR 設定（admin）
-hr.announcements          — 公告（admin / HR）
+hr.roles                  — 職務管理（系統主管）
+hr.payroll                — 薪資管理（系統主管 / HR manager）
+hr.deductions             — 扣款（系統主管 / HR）
+hr.reports                — 人資報表（系統主管 / HR）
+hr.settings               — HR 設定（系統主管）
+hr.announcements          — 公告（系統主管 / HR）
 hr.attendance             — 打卡紀錄（全員看自己、系統主管看全部）
 hr.my-attendance          — 個人打卡（全員）
 hr.my-leave               — 個人請假（全員）
 hr.my-payslip             — 個人薪資（全員）
-hr.leave                  — 請假管理（admin / HR 審）
-hr.overtime               — 加班（全員申請、admin 審）
-hr.missed-clock           — 漏刷卡（全員申請、admin 審）
+hr.leave                  — 請假管理（系統主管 / HR 審）
+hr.overtime               — 加班（全員申請、系統主管 審）
+hr.missed-clock           — 漏刷卡（全員申請、系統主管 審）
 hr.clock-in               — 打卡按鈕（全員）
 hr.training               — 訓練（全員）
 ```
@@ -141,7 +141,7 @@ tools.hotel-voucher       — 住宿憑證工具（全員）
    if (!canRead('finance', 'travel-invoice')) return <Unauthorized />
    ```
 3. 原本的 `isAdmin` hardcode 換成 key-based
-4. admin 後台 UI 可勾每個 role 能看哪些 key（若 UI 還沒做、先用 SQL 設）
+4. 系統主管 後台 UI 可勾每個 role 能看哪些 key（若 UI 還沒做、先用 SQL 設）
 5. E2E 測試：不同 role 登入、確認擋/放正確
 
 工期：M-L（26 頁逐一加 guard、但 pattern 一致、快）

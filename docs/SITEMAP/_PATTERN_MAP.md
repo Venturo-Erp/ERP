@@ -34,7 +34,7 @@ npm run check:patterns P001 P020  # 只跑指定
 本次更新：**2026-04-22 深夜 v1.3（/login + /hr + /tours + /finance/payments 4 路由並行重驗）**。
 - **P001 從 🟢 → 🟠 部分**：4 路由重驗親查代碼發現 `useTabPermissions.tsx` 4 處 + `sidebar.tsx:596` + `useChannelSidebar.ts:17` 共 **6 處 isAdmin 短路** PR-1a 沒涵蓋（PR-1a scope 是 `auth-store.ts:249` / `permissions/hooks.ts:284,293` / `usePermissions.ts` 9 bool、那 3 處確實已修）
 - **新 P020**：`tour_members` ALL `auth.role()='authenticated'` policy 與 cmd-specific 4 條 workspace EXISTS 並存、PostgreSQL RLS 多 policy 是 OR、effective 結果是「任何登入者可讀寫該表」、cmd-specific 形同虛設
-- **新 P021**：`tour_destinations` / `tour_leaders` 兩張無 workspace_id 欄、4 條 policy 全 USING:true（讀寫刪都放）、屬於 P019 ❓「公版 vs 租戶」待拍板家族但比 ref_* 嚴重（ref_* 至少寫入 admin only）
+- **新 P021**：`tour_destinations` / `tour_leaders` 兩張無 workspace_id 欄、4 條 policy 全 USING:true（讀寫刪都放）、屬於 P019 ❓「公版 vs 租戶」待拍板家族但比 ref_* 嚴重（ref_* 至少寫入 系統主管 only）
 - **P019 名單修正**（重驗親查 DB 實證）：`workspace_roles` ✅ 全 4 條 workspace_id filter（不在紅 45 張）/ `workspace_job_roles` ✅ 4 條 employees JOIN tenant scoped（不是孤兒、是 tenant scoped、僅前端代碼遷出沒人用）/ `tour_role_assignments` ✅ 4 條 EXISTS workspace（不在紅 45 張）
 - **finance/payments DB 層全綠**：receipts / linkpay_logs / payment_methods / payment_requests / orders 4 條 policy 都有 workspace_id filter（不在 P019 紅 45 張）
 - **payment_method_id 之謎結案**：DB 真相 `is_nullable=YES`、FK SET NULL（不是 NOT NULL）— sitemap 文字錯了
@@ -102,7 +102,7 @@ npm run check:patterns P001 P020  # 只跑指定
 | | `src/app/(main)/finance/travel-invoice/page.tsx` | L49 | 進不了旅遊發票 |
 | | `src/app/(main)/finance/treasury/page.tsx` | L135 | 進不了金庫管理 |
 | | `src/app/(main)/finance/reports/page.tsx` | L96 | 進不了財務報表 |
-| **權限 hook 短路** | `src/lib/permissions/useTabPermissions.tsx` | L80, 97, 113, 122 | 4 個權限檢查函式 admin 跳過細權限 |
+| **權限 hook 短路** | `src/lib/permissions/useTabPermissions.tsx` | L80, 97, 113, 122 | 4 個權限檢查函式 系統主管 跳過細權限 |
 | | `src/lib/permissions/index.ts` | L114 | 共用 lib 的 isAdmin 短路 |
 | | `src/components/guards/ModuleGuard.tsx` | L49 | 模組守衛短路 |
 | **UI 顯示層短路** | `src/components/layout/sidebar.tsx` | L522, 565, 596 | sidebar 三處 isAdmin 短路 |
@@ -155,7 +155,7 @@ npm run check:patterns P001 P020  # 只跑指定
   - `src/app/api/tenants/create/route.ts` 2.5 節重寫：移除 ~240 行 hardcoded 4 職務 permissions、改成查 Corner 4 個預設職務 + 複製其 role_tab_permissions 到新租戶
   - 跟 migration 20260422160000 同源邏輯（Corner 是 SSOT 模板）、不再雙份定義
   - 新增模組常數 `CORNER_WORKSPACE_ID` / `DEFAULT_ROLE_NAMES`
-  - Fallback：若 Corner 職務不存在、warn log + skip（不 rollback、admin 仍可 log in，僅無預設權限）
+  - Fallback：若 Corner 職務不存在、warn log + skip（不 rollback、系統主管 仍可 log in，僅無預設權限）
   - 變動量 -245/+65 lines（淨省 180）、type-check ✅ 0 錯誤、gitnexus detect_changes MEDIUM（預期範圍）
 - 2026-04-22 12:17：**e2e 驗收通過 🟢**
   - `scripts/test-tenants-create-seed.mjs` 一次性腳本：建 TESTAUTH workspace + 系統主管（帶 Corner 系統主管權限）→ Playwright 以 TESTAUTH 系統主管登入 → 取 session cookies → 帶 cookies POST `/api/tenants/create` 建 TESTSEED → 查 4 職務 row 數 → 全 DELETE CASCADE 清乾淨
@@ -218,7 +218,7 @@ npm run check:patterns P001 P020  # 只跑指定
   - 修法：從 employees 反查 target 的 workspace_id（用 supabase_user_id）、必須等於登入者 workspace、否則 403
   - type-check ✅
 - 2026-04-22 下午：**P003-E 🟢** `create-employee-auth` existing tenant 分支跨租戶漏洞修復
-  - 原本只查 isAdmin、body.workspace_code 隨便填都過、JINGYAO admin 可在 Corner 建員工
+  - 原本只查 isAdmin、body.workspace_code 隨便填都過、JINGYAO 系統主管 可在 Corner 建員工
   - 修法：existing-tenant 分支加 `workspace_code === currentUserWorkspaceCode` 檢查、不符 403
   - new-tenant 分支邏輯不動（isCornerAdmin only、已對）
   - type-check ✅
@@ -246,7 +246,7 @@ npm run check:patterns P001 P020  # 只跑指定
 |---|---|
 | ID | P004 |
 | 對應原則 | 3 |
-| 業務翻譯 | 有 28 張重要表把安全鎖得太緊、連公司自己的 admin API 都讀不到 |
+| 業務翻譯 | 有 28 張重要表把安全鎖得太緊、連公司自己的 系統主管 API 都讀不到 |
 | 命中（歷史） | 28 張表（tour_itinerary_items、confirmations、files、folders、visas 等） |
 | 統一修法 | WAVE_2_5 方案 A：全部改 NO FORCE |
 | 估時 | ~~1 人週~~ **Wave 2.5 已完成（2026-04-21）** |
@@ -601,7 +601,7 @@ SELECT tablename, policyname, cmd, qual FROM pg_policies WHERE tablename = 'tour
 | 業務翻譯 | 兩張表（旅遊團目的地 / 領隊資料）沒有 workspace_id 欄、4 條 RLS policy 全部「誰都能讀寫刪改」、業務員可隨意動別家公司的領隊資料、可亂塞團目的地 |
 | 命中（已驗）| `tour_destinations`（4 條 policy 全 USING:true / WITH CHECK:true、無 workspace_id 欄）；`tour_leaders`（SELECT/DELETE USING:true、INSERT/UPDATE 任意 authenticated 可改、無 workspace_id 欄）|
 | 對比 ref_* 家族 | ref_countries / ref_airports 等：SELECT USING:true（公開可讀）但 INSERT/UPDATE/DELETE 限 `is_super_admin()` — **比 P021 嚴格**。tour_destinations / tour_leaders 連寫入都沒鎖、跨租戶任意污染 |
-| 待 William 拍板的根本問題 | (a) **公版**：類似 ref_* 全公司共用、若 yes 則應改成 「SELECT public read + 寫入 admin only」一律齊 ref_* 家族 ；(b) **租戶私有**：應加 workspace_id 欄 + tenant scoped policy、各家公司各自管自己的領隊和目的地池 |
+| 待 William 拍板的根本問題 | (a) **公版**：類似 ref_* 全公司共用、若 yes 則應改成 「SELECT public read + 寫入 系統主管 only」一律齊 ref_* 家族 ；(b) **租戶私有**：應加 workspace_id 欄 + tenant scoped policy、各家公司各自管自己的領隊和目的地池 |
 | 統一修法（依拍板）| (a) 公版方向：DROP USING:true policy、CREATE 新 4 條（SELECT public、INSERT/UPDATE/DELETE is_super_admin）；(b) 租戶方向：3-stage migration（加 workspace_id 欄 → backfill → NOT NULL + 重寫 policy）|
 | 估時 | (a) 0.3 人日；(b) 0.8 人日 |
 | 優先級 | 🔴 上線前必改（兩種拍板方向都不能維持現狀）|
@@ -676,7 +676,7 @@ SELECT cmd, qual, with_check FROM pg_policies WHERE tablename = 'employee_permis
 
 #### 📋 P019 分類 ADR（2026-04-22 晚間、來源：幕僚 2 backend-architect）
 
-**✅ By design 全域可讀（13 張、不改）** — SELECT `USING:true` 正確、寫入應限 admin：
+**✅ By design 全域可讀（13 張、不改）** — SELECT `USING:true` 正確、寫入應限 系統主管：
 
 - `ref_airports` / `ref_countries` / `ref_destinations`（已 `is_super_admin()` 寫入、✅ 齊整）
 - `ref_cities`（本次 P017 修完、已齊一 ref_* 家族）

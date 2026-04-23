@@ -477,7 +477,7 @@ VALUES ('總部辦公室', 'Venturo 總部工作空間', '🏢', true);
 ```typescript
 export const FEATURE_PERMISSIONS: PermissionConfig[] = [
   {
-    id: 'admin',
+    id: '系統主管',
     label: '系統系統主管',
     category: '全部',
     routes: ['*'],
