@@ -135,7 +135,50 @@ export async function POST(request: NextRequest) {
 
     logger.log(`Creating tenant: ${newWorkspaceCode} (${workspaceName})`)
 
-    // ========== 開始建立租戶 ==========
+    // ========== 開始建立租戶（原子性：任何 critical 步驟失敗、一律 rollback） ==========
+
+    // 追蹤已建立資源、失敗時反向清理
+    let createdWorkspaceId: string | null = null
+    let createdEmployeeId: string | null = null
+    let createdAuthUserId: string | null = null
+
+    async function rollback(reason: string) {
+      logger.warn(`Rolling back tenant creation: ${reason}`)
+      // 反向清理；不依賴 FK cascade（不確定每張表都有設）
+      if (createdAuthUserId) {
+        const { error } = await supabaseAdmin.auth.admin.deleteUser(createdAuthUserId)
+        if (error) logger.error('Rollback deleteUser failed:', error)
+      }
+      if (createdWorkspaceId) {
+        const { data: wsRoles } = await supabaseAdmin
+          .from('workspace_roles')
+          .select('id')
+          .eq('workspace_id', createdWorkspaceId)
+        const wsRoleIds = (wsRoles ?? []).map(r => r.id)
+        if (wsRoleIds.length > 0) {
+          await supabaseAdmin.from('role_tab_permissions').delete().in('role_id', wsRoleIds)
+        }
+        await supabaseAdmin.from('workspace_roles').delete().eq('workspace_id', createdWorkspaceId)
+        await supabaseAdmin
+          .from('workspace_features')
+          .delete()
+          .eq('workspace_id', createdWorkspaceId)
+      }
+      if (createdEmployeeId) {
+        const { error } = await supabaseAdmin
+          .from('employees')
+          .delete()
+          .eq('id', createdEmployeeId)
+        if (error) logger.error('Rollback delete employee failed:', error)
+      }
+      if (createdWorkspaceId) {
+        const { error } = await supabaseAdmin
+          .from('workspaces')
+          .delete()
+          .eq('id', createdWorkspaceId)
+        if (error) logger.error('Rollback delete workspace failed:', error)
+      }
+    }
 
     // 1. 建立 workspace
     const { data: workspace, error: wsError } = await supabaseAdmin
@@ -160,6 +203,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    createdWorkspaceId = workspace.id
     logger.log(`Workspace created: ${workspace.id}`)
 
     // 2. 建立第一個管理員 (employee)
@@ -193,14 +237,14 @@ export async function POST(request: NextRequest) {
 
     if (empError || !employee) {
       logger.error('Failed to create employee:', empError)
-      // Rollback workspace
-      await supabaseAdmin.from('workspaces').delete().eq('id', workspace.id)
+      await rollback('employee creation failed')
       return errorResponse('建立管理員失敗', 500, ErrorCode.OPERATION_FAILED)
     }
 
+    createdEmployeeId = employee.id
     logger.log(`Employee created: ${employee.id}`)
 
-    // 2.3 建立 Supabase Auth 帳號（登入需要）
+    // 3. 建立 Supabase Auth 帳號（登入必備、失敗必 rollback）
     const authEmail =
       adminEmail?.toLowerCase() ||
       `${newWorkspaceCode.toLowerCase()}_${adminEmployeeNumber.toLowerCase()}@venturo.com`
@@ -217,18 +261,31 @@ export async function POST(request: NextRequest) {
 
     if (authError || !authUser?.user) {
       logger.error('Failed to create auth user:', authError)
-      // 不 rollback，employee 已建好，之後可手動建 auth
-      logger.warn('Auth user creation failed, employee created without auth')
-    } else {
-      // 更新 employee 的 supabase_user_id
-      await supabaseAdmin
-        .from('employees')
-        .update({ supabase_user_id: authUser.user.id })
-        .eq('id', employee.id)
-      logger.log(`Auth user created: ${authUser.user.id}, linked to employee ${employee.id}`)
+      await rollback('auth user creation failed')
+      const msg = authError?.message || ''
+      const userMsg = msg.includes('already been registered')
+        ? `此 email（${authEmail}）已被其他帳號使用、請換一個`
+        : `建立管理員登入帳號失敗：${msg || 'unknown'}`
+      return errorResponse(userMsg, 400, ErrorCode.OPERATION_FAILED)
     }
 
-    // 2.5 建立預設職務並設定管理員
+    createdAuthUserId = authUser.user.id
+
+    // 4. 更新 employee 的 supabase_user_id（登入綁定、失敗必 rollback）
+    const { error: linkError } = await supabaseAdmin
+      .from('employees')
+      .update({ supabase_user_id: authUser.user.id })
+      .eq('id', employee.id)
+
+    if (linkError) {
+      logger.error('Failed to link auth user to employee:', linkError)
+      await rollback('supabase_user_id link failed')
+      return errorResponse('綁定登入帳號失敗、請稍後重試', 500, ErrorCode.OPERATION_FAILED)
+    }
+
+    logger.log(`Auth user created: ${authUser.user.id}, linked to employee ${employee.id}`)
+
+    // 5. 建立預設職務並設定管理員（權限必備、失敗必 rollback）
     // P001 收尾（2026-04-22）：職務權限模板從 Corner 複製、跟 migration 20260422160000 同源
     const { data: createdRoles, error: rolesError } = await supabaseAdmin
       .from('workspace_roles')
@@ -242,71 +299,88 @@ export async function POST(request: NextRequest) {
       .select('id, name')
 
     if (rolesError || !createdRoles) {
-      logger.warn('Failed to create default roles:', rolesError)
-    } else {
-      logger.log(`Default roles created: ${createdRoles.length}`)
-
-      const adminRole = createdRoles.find(r => r.name === '管理員')
-      if (adminRole) {
-        await supabaseAdmin
-          .from('employees')
-          .update({ role_id: adminRole.id })
-          .eq('id', employee.id)
-        logger.log(`Admin employee role_id set: ${adminRole.id}`)
-      }
-
-      // 從 Corner 模板複製 4 職務的 role_tab_permissions
-      const { data: cornerRoles } = await supabaseAdmin
-        .from('workspace_roles')
-        .select('id, name')
-        .eq('workspace_id', CORNER_WORKSPACE_ID)
-        .in('name', DEFAULT_ROLE_NAMES as unknown as string[])
-
-      if (!cornerRoles || cornerRoles.length === 0) {
-        logger.warn('Corner template roles not found, skipping permission seed')
-      } else {
-        const { data: cornerPerms } = await supabaseAdmin
-          .from('role_tab_permissions')
-          .select('role_id, module_code, tab_code, can_read, can_write')
-          .in(
-            'role_id',
-            cornerRoles.map(r => r.id)
-          )
-
-        if (cornerPerms && cornerPerms.length > 0) {
-          const cornerRoleNameById = new Map(cornerRoles.map(r => [r.id, r.name]))
-          const newRoleIdByName = new Map(createdRoles.map(r => [r.name, r.id]))
-
-          const templatePerms = cornerPerms
-            .map(cp => {
-              const roleName = cornerRoleNameById.get(cp.role_id)
-              const newRoleId = roleName ? newRoleIdByName.get(roleName) : undefined
-              if (!newRoleId) return null
-              return {
-                role_id: newRoleId,
-                module_code: cp.module_code,
-                tab_code: cp.tab_code,
-                can_read: cp.can_read,
-                can_write: cp.can_write,
-              }
-            })
-            .filter((p): p is NonNullable<typeof p> => p !== null)
-
-          if (templatePerms.length > 0) {
-            const { error: permError } = await supabaseAdmin
-              .from('role_tab_permissions')
-              .insert(templatePerms)
-            if (permError) {
-              logger.warn('Failed to seed template permissions:', permError)
-            } else {
-              logger.log(`Template permissions seeded from Corner: ${templatePerms.length} rows`)
-            }
-          }
-        }
-      }
+      logger.error('Failed to create default roles:', rolesError)
+      await rollback('default roles creation failed')
+      return errorResponse('建立預設職務失敗', 500, ErrorCode.OPERATION_FAILED)
     }
 
-    // 2.6 建立預設 workspace_features（開放所有基本功能）
+    logger.log(`Default roles created: ${createdRoles.length}`)
+
+    const adminRole = createdRoles.find(r => r.name === '管理員')
+    if (!adminRole) {
+      await rollback('admin role missing after roles insert')
+      return errorResponse('建立管理員職務失敗', 500, ErrorCode.OPERATION_FAILED)
+    }
+
+    const { error: setRoleError } = await supabaseAdmin
+      .from('employees')
+      .update({ role_id: adminRole.id })
+      .eq('id', employee.id)
+
+    if (setRoleError) {
+      logger.error('Failed to set admin role_id:', setRoleError)
+      await rollback('set admin role_id failed')
+      return errorResponse('綁定管理員職務失敗', 500, ErrorCode.OPERATION_FAILED)
+    }
+
+    // 6. 從 Corner 模板複製 role_tab_permissions（權限表、失敗必 rollback）
+    const { data: cornerRoles, error: cornerRolesError } = await supabaseAdmin
+      .from('workspace_roles')
+      .select('id, name')
+      .eq('workspace_id', CORNER_WORKSPACE_ID)
+      .in('name', DEFAULT_ROLE_NAMES as unknown as string[])
+
+    if (cornerRolesError || !cornerRoles || cornerRoles.length === 0) {
+      logger.error('Corner template roles not found:', cornerRolesError)
+      await rollback('corner template roles missing')
+      return errorResponse('找不到權限模板、請聯絡工程團隊', 500, ErrorCode.OPERATION_FAILED)
+    }
+
+    const { data: cornerPerms, error: cornerPermsError } = await supabaseAdmin
+      .from('role_tab_permissions')
+      .select('role_id, module_code, tab_code, can_read, can_write')
+      .in(
+        'role_id',
+        cornerRoles.map(r => r.id)
+      )
+
+    if (cornerPermsError) {
+      logger.error('Failed to read corner permissions:', cornerPermsError)
+      await rollback('read corner permissions failed')
+      return errorResponse('讀取權限模板失敗', 500, ErrorCode.OPERATION_FAILED)
+    }
+
+    const cornerRoleNameById = new Map(cornerRoles.map(r => [r.id, r.name]))
+    const newRoleIdByName = new Map(createdRoles.map(r => [r.name, r.id]))
+
+    const templatePerms = (cornerPerms ?? [])
+      .map(cp => {
+        const roleName = cornerRoleNameById.get(cp.role_id)
+        const newRoleId = roleName ? newRoleIdByName.get(roleName) : undefined
+        if (!newRoleId) return null
+        return {
+          role_id: newRoleId,
+          module_code: cp.module_code,
+          tab_code: cp.tab_code,
+          can_read: cp.can_read,
+          can_write: cp.can_write,
+        }
+      })
+      .filter((p): p is NonNullable<typeof p> => p !== null)
+
+    if (templatePerms.length > 0) {
+      const { error: permError } = await supabaseAdmin
+        .from('role_tab_permissions')
+        .insert(templatePerms)
+      if (permError) {
+        logger.error('Failed to seed template permissions:', permError)
+        await rollback('seed permissions failed')
+        return errorResponse('複製權限模板失敗', 500, ErrorCode.OPERATION_FAILED)
+      }
+      logger.log(`Template permissions seeded from Corner: ${templatePerms.length} rows`)
+    }
+
+    // 7. 建立預設 workspace_features（功能開關、失敗必 rollback）
     // 免費功能（預設全開）
     const freeFeatures = [
       'dashboard',
@@ -372,12 +446,16 @@ export async function POST(request: NextRequest) {
       .insert(featuresToInsert)
 
     if (featuresError) {
-      logger.warn('Failed to create workspace features:', featuresError)
-    } else {
-      logger.log(`Workspace features created: ${defaultFeatures.length}`)
+      logger.error('Failed to create workspace features:', featuresError)
+      await rollback('workspace_features insert failed')
+      return errorResponse('建立功能開關失敗', 500, ErrorCode.OPERATION_FAILED)
     }
 
-    // 3. 建立公告頻道（不再建立 Supabase Auth 用戶，ERP 用員工編號+密碼登入）
+    logger.log(`Workspace features created: ${defaultFeatures.length}`)
+
+    // ========== 以下為 soft 步驟：失敗不 rollback（影響小、可事後補） ==========
+
+    // 8. 建立公告頻道（不再建立 Supabase Auth 用戶，ERP 用員工編號+密碼登入）
     try {
       await supabaseAdmin.from('channels').insert({
         workspace_id: workspace.id,
@@ -392,7 +470,7 @@ export async function POST(request: NextRequest) {
       logger.warn('Failed to create announcement channel:', channelError)
     }
 
-    // 7. 從 CORNER 複製基礎資料（國家、城市/機場）給新租戶
+    // 9. 從 CORNER 複製基礎資料（國家、城市/機場）給新租戶
     try {
       const CORNER_WS = '8ef05a74-1f87-48ab-afd3-9bfeb423935d'
       // 複製國家
@@ -417,7 +495,7 @@ export async function POST(request: NextRequest) {
       logger.warn('Failed to seed base data:', seedError)
     }
 
-    // 8. 建立 workspace bot
+    // 10. 建立 workspace bot
     try {
       const botResponse = await fetch(`${request.nextUrl.origin}/api/debug/setup-workspace-bots`, {
         method: 'POST',
