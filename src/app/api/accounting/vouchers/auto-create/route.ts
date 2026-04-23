@@ -61,28 +61,15 @@ export async function POST(request: NextRequest) {
 }
 
 /**
- * 產生傳票編號
+ * 產生傳票編號 — 透過 DB RPC、內建 advisory lock、防 race condition
  */
 async function generateVoucherNo(workspaceId: string, date: string): Promise<string> {
-  const yearMonth = date.substring(0, 7).replace('-', '') // "2026-03" -> "202603"
-  const prefix = `JV${yearMonth}`
-
-  const { data } = await getSupabase()
-    .from('journal_vouchers')
-    .select('voucher_no')
-    .eq('workspace_id', workspaceId)
-    .like('voucher_no', `${prefix}%`)
-    .order('voucher_no', { ascending: false })
-    .limit(1)
-
-  let seq = 1
-  if (data && data.length > 0) {
-    const lastNo = data[0].voucher_no
-    const lastSeq = parseInt(lastNo.slice(-4))
-    if (!isNaN(lastSeq)) seq = lastSeq + 1
-  }
-
-  return `${prefix}${seq.toString().padStart(4, '0')}`
+  const { data, error } = await getSupabase().rpc('generate_voucher_no', {
+    p_workspace_id: workspaceId,
+    p_voucher_date: date,
+  })
+  if (error || !data) throw error ?? new Error('generate_voucher_no returned null')
+  return data as string
 }
 
 /**

@@ -20,34 +20,18 @@ const createVoucherSchema = z.object({
   lines: z.array(lineSchema).min(2),
 })
 
-// 生成傳票編號
+// 生成傳票編號 — 透過 DB RPC、內建 advisory lock、防 race condition
 async function generateVoucherNo(
   supabase: SupabaseClient,
   workspaceId: string,
   date: string
 ): Promise<string> {
-  const yearMonth = date.substring(0, 7).replace('-', '') // "2026-03" -> "202603"
-  const prefix = `JV${yearMonth}`
-
-  // 查詢本月最後一個編號
-  const { data, error } = await supabase
-    .from('journal_vouchers')
-    .select('voucher_no')
-    .eq('workspace_id', workspaceId)
-    .like('voucher_no', `${prefix}%`)
-    .order('voucher_no', { ascending: false })
-    .limit(1)
-
-  if (error && error.code !== 'PGRST116') throw error
-
-  let seq = 1
-  if (data && data.length > 0) {
-    const lastNo = data[0].voucher_no
-    const lastSeq = parseInt(lastNo.slice(-4))
-    seq = lastSeq + 1
-  }
-
-  return `${prefix}${seq.toString().padStart(4, '0')}`
+  const { data, error } = await supabase.rpc('generate_voucher_no', {
+    p_workspace_id: workspaceId,
+    p_voucher_date: date,
+  })
+  if (error || !data) throw error ?? new Error('generate_voucher_no returned null')
+  return data as string
 }
 
 export async function POST(request: NextRequest) {

@@ -3808,6 +3808,20 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_itineraries_created_by"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_itineraries_updated_by"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "fk_itineraries_workspace"
             columns: ["workspace_id"]
             isOneToOne: false
@@ -5959,6 +5973,283 @@ export type Database = {
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pnr_passengers: {
+        Row: {
+          created_at: string | null
+          customer_id: string | null
+          date_of_birth: string | null
+          given_name: string | null
+          id: string
+          order_member_id: string | null
+          passenger_type: string | null
+          pnr_id: string
+          sequence_number: number | null
+          surname: string
+          title: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          customer_id?: string | null
+          date_of_birth?: string | null
+          given_name?: string | null
+          id?: string
+          order_member_id?: string | null
+          passenger_type?: string | null
+          pnr_id: string
+          sequence_number?: number | null
+          surname: string
+          title?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          customer_id?: string | null
+          date_of_birth?: string | null
+          given_name?: string | null
+          id?: string
+          order_member_id?: string | null
+          passenger_type?: string | null
+          pnr_id?: string
+          sequence_number?: number | null
+          surname?: string
+          title?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pnr_passengers_pnr_id_fkey"
+            columns: ["pnr_id"]
+            isOneToOne: false
+            referencedRelation: "pnr_records"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pnr_records: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          created_date: string | null
+          id: string
+          is_ticketed: boolean | null
+          notes: string | null
+          office_id: string | null
+          raw_content: string | null
+          record_locator: string
+          ticket_numbers: string[] | null
+          ticketing_deadline: string | null
+          ticketing_status: string | null
+          tour_id: string | null
+          updated_at: string | null
+          workspace_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          created_date?: string | null
+          id?: string
+          is_ticketed?: boolean | null
+          notes?: string | null
+          office_id?: string | null
+          raw_content?: string | null
+          record_locator: string
+          ticket_numbers?: string[] | null
+          ticketing_deadline?: string | null
+          ticketing_status?: string | null
+          tour_id?: string | null
+          updated_at?: string | null
+          workspace_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          created_date?: string | null
+          id?: string
+          is_ticketed?: boolean | null
+          notes?: string | null
+          office_id?: string | null
+          raw_content?: string | null
+          record_locator?: string
+          ticket_numbers?: string[] | null
+          ticketing_deadline?: string | null
+          ticketing_status?: string | null
+          tour_id?: string | null
+          updated_at?: string | null
+          workspace_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pnr_records_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pnr_records_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pnr_remarks: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: string
+          pnr_id: string
+          remark_type: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: string
+          pnr_id: string
+          remark_type?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: string
+          pnr_id?: string
+          remark_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pnr_remarks_pnr_id_fkey"
+            columns: ["pnr_id"]
+            isOneToOne: false
+            referencedRelation: "pnr_records"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pnr_segments: {
+        Row: {
+          airline_code: string
+          arrival_day_offset: number | null
+          arrival_time: string | null
+          booking_class: string | null
+          created_at: string | null
+          day_of_week: number | null
+          departure_date: string
+          departure_time: string | null
+          destination: string
+          equipment: string | null
+          flight_number: string
+          id: string
+          origin: string
+          pnr_id: string
+          quantity: number | null
+          segment_number: number | null
+          status_code: string | null
+        }
+        Insert: {
+          airline_code: string
+          arrival_day_offset?: number | null
+          arrival_time?: string | null
+          booking_class?: string | null
+          created_at?: string | null
+          day_of_week?: number | null
+          departure_date: string
+          departure_time?: string | null
+          destination: string
+          equipment?: string | null
+          flight_number: string
+          id?: string
+          origin: string
+          pnr_id: string
+          quantity?: number | null
+          segment_number?: number | null
+          status_code?: string | null
+        }
+        Update: {
+          airline_code?: string
+          arrival_day_offset?: number | null
+          arrival_time?: string | null
+          booking_class?: string | null
+          created_at?: string | null
+          day_of_week?: number | null
+          departure_date?: string
+          departure_time?: string | null
+          destination?: string
+          equipment?: string | null
+          flight_number?: string
+          id?: string
+          origin?: string
+          pnr_id?: string
+          quantity?: number | null
+          segment_number?: number | null
+          status_code?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pnr_segments_pnr_id_fkey"
+            columns: ["pnr_id"]
+            isOneToOne: false
+            referencedRelation: "pnr_records"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pnr_ssr_elements: {
+        Row: {
+          airline_code: string | null
+          created_at: string | null
+          free_text: string | null
+          id: string
+          passenger_id: string | null
+          pnr_id: string
+          segment_id: string | null
+          ssr_code: string
+          status: string | null
+        }
+        Insert: {
+          airline_code?: string | null
+          created_at?: string | null
+          free_text?: string | null
+          id?: string
+          passenger_id?: string | null
+          pnr_id: string
+          segment_id?: string | null
+          ssr_code: string
+          status?: string | null
+        }
+        Update: {
+          airline_code?: string | null
+          created_at?: string | null
+          free_text?: string | null
+          id?: string
+          passenger_id?: string | null
+          pnr_id?: string
+          segment_id?: string | null
+          ssr_code?: string
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pnr_ssr_elements_passenger_id_fkey"
+            columns: ["passenger_id"]
+            isOneToOne: false
+            referencedRelation: "pnr_passengers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pnr_ssr_elements_pnr_id_fkey"
+            columns: ["pnr_id"]
+            isOneToOne: false
+            referencedRelation: "pnr_records"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pnr_ssr_elements_segment_id_fkey"
+            columns: ["segment_id"]
+            isOneToOne: false
+            referencedRelation: "pnr_segments"
             referencedColumns: ["id"]
           },
         ]
@@ -9301,7 +9592,6 @@ export type Database = {
           checkin_qrcode: string | null
           closed_by: string | null
           closing_date: string | null
-          closing_status: string | null
           code: string
           confirmed_requirements: Json | null
           contract_archived_date: string | null
@@ -9359,7 +9649,6 @@ export type Database = {
           total_revenue: number
           tour_leader_id: string | null
           tour_service_type: string
-          tour_type: string
           updated_at: string
           updated_by: string | null
           workspace_id: string
@@ -9375,7 +9664,6 @@ export type Database = {
           checkin_qrcode?: string | null
           closed_by?: string | null
           closing_date?: string | null
-          closing_status?: string | null
           code: string
           confirmed_requirements?: Json | null
           contract_archived_date?: string | null
@@ -9433,7 +9721,6 @@ export type Database = {
           total_revenue?: number
           tour_leader_id?: string | null
           tour_service_type?: string
-          tour_type?: string
           updated_at?: string
           updated_by?: string | null
           workspace_id: string
@@ -9449,7 +9736,6 @@ export type Database = {
           checkin_qrcode?: string | null
           closed_by?: string | null
           closing_date?: string | null
-          closing_status?: string | null
           code?: string
           confirmed_requirements?: Json | null
           contract_archived_date?: string | null
@@ -9507,7 +9793,6 @@ export type Database = {
           total_revenue?: number
           tour_leader_id?: string | null
           tour_service_type?: string
-          tour_type?: string
           updated_at?: string
           updated_by?: string | null
           workspace_id?: string
@@ -10846,7 +11131,10 @@ export type Database = {
         Returns: string
       }
       generate_confirmation_token: { Args: never; Returns: string }
-      generate_voucher_no: { Args: { p_workspace_id: string }; Returns: string }
+      generate_voucher_no: {
+        Args: { p_voucher_date?: string; p_workspace_id: string }
+        Returns: string
+      }
       get_account_id_by_code: {
         Args: { p_code: string; p_workspace_id: string }
         Returns: string
