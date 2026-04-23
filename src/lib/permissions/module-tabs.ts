@@ -159,6 +159,11 @@ export const MODULES: ModuleDefinition[] = [
     tabs: [
       { code: 'employees', name: '員工管理', description: '員工資料、到職離職' },
       { code: 'roles', name: '職務管理', description: '職務角色與權限' },
+      {
+        code: 'settings',
+        name: '出勤設定',
+        description: '上下班時間、打卡方式、GPS 位置、LINE 打卡機器人',
+      },
     ],
   },
   {

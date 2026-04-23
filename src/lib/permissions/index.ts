@@ -65,12 +65,9 @@ const ROUTE_TO_MODULE: Record<string, string> = {
 }
 
 // 平台超管專屬路由：HR 職務權限不適用、必須 isAdmin（workspace 級）才放行
-// /hr/settings 與 /settings/modules：暫保留 admin only、
-// 之後在 module-tabs.ts 加對應 tab、role_tab_permissions backfill 後再轉成 HR 控管
+// /tenants：Venturo 超管專屬（商業敏感、不開放給一般租戶職務管理）
 export const PLATFORM_ADMIN_ROUTES: readonly string[] = [
   '/tenants',
-  '/hr/settings',
-  '/settings/modules',
 ]
 
 export function isPlatformAdminRoute(pathname: string): boolean {

@@ -11,6 +11,9 @@ import { Switch } from '@/components/ui/switch'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase/client'
 import { useAuthStore } from '@/stores/auth-store'
+import { useTabPermissions } from '@/lib/permissions'
+import { UnauthorizedPage } from '@/components/unauthorized-page'
+import { ModuleLoading } from '@/components/module-loading'
 import { logger } from '@/lib/utils/logger'
 
 interface AttendanceSettings {
@@ -74,6 +77,7 @@ function SettingSection({
 
 export default function HRSettingsPage() {
   const user = useAuthStore(state => state.user)
+  const { canRead, loading: permLoading } = useTabPermissions()
   const [settings, setSettings] = useState<AttendanceSettings>(DEFAULT_SETTINGS)
   const [lineConfig, setLineConfig] = useState<LineConfig | null>(null)
   const [loading, setLoading] = useState(true)
@@ -197,6 +201,9 @@ export default function HRSettingsPage() {
       setLineSaving(false)
     }
   }
+
+  if (permLoading) return <ModuleLoading fullscreen />
+  if (!canRead('hr', 'settings')) return <UnauthorizedPage />
 
   if (loading) {
     return (

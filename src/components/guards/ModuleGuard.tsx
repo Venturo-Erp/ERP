@@ -62,7 +62,7 @@ export function ModuleGuard({ children }: ModuleGuardProps) {
       return
     }
 
-    // 平台超管專屬：/tenants、/hr/settings、/settings/modules
+    // 平台超管專屬：/tenants（Venturo 超管商業敏感功能）
     if (isPlatformAdminRoute(pathname)) {
       if (!isAdmin) {
         router.replace('/unauthorized')

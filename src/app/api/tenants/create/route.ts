@@ -72,31 +72,47 @@ export async function POST(request: NextRequest) {
 
     logger.log(`Employee name resolved: ${employeeName}`)
 
-    // 🔒 權限檢查：只有有「租戶管理」權限的人可以建立租戶
-    // 新系統：檢查 workspace_roles 的分頁權限
-    // role_id 可能在頂層或 job_info 裡
+    // 🔒 權限檢查（兩層）：
+    //   1) 員工所在 workspace 必須開啟「租戶管理」功能（workspace_features.tenants = true）
+    //   2) 員工必須是該 workspace 的 admin（workspace_roles.is_admin = true）
+    //
+    // 租戶管理是 Venturo 超管商業敏感功能、不走 role_tab_permissions（那個 tab 根本沒定義）
+    // 原查詢 role_tab_permissions.settings.tenants 是 bug、settings.tenants tab 不存在於 module-tabs.ts
     const effectiveRoleId =
       currentEmployee.role_id ||
       ((currentEmployee.job_info as Record<string, unknown>)?.role_id as string | undefined)
-    let canManageTenants = false
 
+    let isWorkspaceAdmin = false
     if (effectiveRoleId) {
-      const { data: rolePermission } = await supabaseAdmin
-        .from('role_tab_permissions')
-        .select('can_write')
-        .eq('role_id', effectiveRoleId)
-        .eq('module_code', 'settings')
-        .eq('tab_code', 'tenants')
+      const { data: role } = await supabaseAdmin
+        .from('workspace_roles')
+        .select('is_admin')
+        .eq('id', effectiveRoleId)
         .single()
-
-      canManageTenants = rolePermission?.can_write ?? false
+      isWorkspaceAdmin = role?.is_admin === true
     }
 
-    logger.log(`Permission check: canManageTenants=${canManageTenants}, name=${employeeName}`)
+    const { data: tenantsFeature } = await supabaseAdmin
+      .from('workspace_features')
+      .select('enabled')
+      .eq('workspace_id', currentEmployee.workspace_id)
+      .eq('feature_code', 'tenants')
+      .single()
+    const hasTenantsFeature = tenantsFeature?.enabled === true
 
-    if (!canManageTenants) {
-      logger.error(`Permission denied: canManageTenants=${canManageTenants}, name=${employeeName}`)
-      return errorResponse('只有有「租戶管理」權限的人可以建立租戶', 403, ErrorCode.FORBIDDEN)
+    logger.log(
+      `Permission check: admin=${isWorkspaceAdmin}, tenantsFeature=${hasTenantsFeature}, name=${employeeName}`
+    )
+
+    if (!isWorkspaceAdmin || !hasTenantsFeature) {
+      logger.error(
+        `Permission denied for tenants/create: admin=${isWorkspaceAdmin}, feature=${hasTenantsFeature}, name=${employeeName}`
+      )
+      return errorResponse(
+        '只有已開啟「租戶管理」功能的 workspace 管理員可以建立租戶',
+        403,
+        ErrorCode.FORBIDDEN
+      )
     }
 
     // 解析請求
