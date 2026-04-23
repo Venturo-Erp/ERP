@@ -256,20 +256,6 @@ export const issueAllowanceSchema = z.object({
 })
 
 // ==========================================
-// Logan Chat
-// ==========================================
-
-export const loganChatSchema = z.object({
-  message: z.string().optional(),
-  action: z.enum(['chat', 'teach']).default('chat'),
-  title: z.string().optional(),
-  content: z.string().optional(),
-  category: z.string().optional(),
-  tags: z.array(z.string()).optional(),
-  importance: z.number().optional(),
-})
-
-// ==========================================
 // Gemini 圖片生成
 // ==========================================
 
