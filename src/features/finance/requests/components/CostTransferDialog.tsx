@@ -5,12 +5,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button'
 import { Combobox } from '@/components/ui/combobox'
 import { ArrowRightLeft, Loader2 } from 'lucide-react'
-import { useToursSlim } from '@/data'
+import { useToursSlim, invalidatePaymentRequests, invalidatePaymentRequestItems } from '@/data'
 import { supabase } from '@/lib/supabase/client'
 import { useAuthStore } from '@/stores'
 import { logger } from '@/lib/utils/logger'
 import { useToast } from '@/components/ui/use-toast'
 import { formatCurrency } from '@/lib/utils/format-currency'
+import { useRequestOperations } from '../hooks/useRequestOperations'
+import { useWorkspaceId } from '@/lib/workspace-context'
 
 interface CostTransferDialogProps {
   open: boolean
@@ -42,6 +44,8 @@ export function CostTransferDialog({
   const { items: tours } = useToursSlim()
   const { user } = useAuthStore()
   const { toast } = useToast()
+  const workspaceId = useWorkspaceId()
+  const { generateRequestCode } = useRequestOperations()
   const [targetTourId, setTargetTourId] = useState('')
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set())
   const [transferring, setTransferring] = useState(false)
@@ -81,35 +85,197 @@ export function CostTransferDialog({
     }
   }
 
-  // 執行轉移
+  // 執行轉移（對沖模式）：
+  //   不改既有 item、改成建兩張新請款單：
+  //     R_src：tour = 來源團、amount = -X、items 複製原 items 且金額取負
+  //     R_dst：tour = 目標團、amount = +X、items 複製原 items 且金額為正
+  //   兩張共用 transferred_pair_id、走正常 pending → 出納 → 正式 flow
   const handleTransfer = async () => {
     if (!sourceRequest || selectedItems.size === 0 || !targetTourId) return
+    if (!workspaceId) {
+      toast({ title: '轉移失敗', description: '找不到 workspace', variant: 'destructive' })
+      return
+    }
 
-    const targetTour = tours.find(t => t.id === targetTourId)
+    const targetTour = tours.find(t => t.id === targetTourId) as
+      | { id: string; code?: string | null; name?: string | null }
+      | undefined
     if (!targetTour) return
 
     setTransferring(true)
     try {
+      // 1. 抓所選 items 完整欄位
       const itemIds = Array.from(selectedItems)
-
-      // 更新 payment_request_items 的 tour_id + 記錄轉移資訊
-      const { error } = await supabase
+      const { data: fullItems, error: fetchErr } = await supabase
         .from('payment_request_items')
-        .update({
-          tour_id: targetTourId,
-          transferred_from_tour_id: sourceRequest.tourId,
-          transferred_at: new Date().toISOString(),
-          transferred_by: user?.id,
-          updated_by: user?.id,
-          updated_at: new Date().toISOString(),
-        })
+        .select(
+          'id, category, supplier_id, supplier_name, description, unitprice, quantity, subtotal, payment_method_id'
+        )
         .in('id', itemIds)
+      if (fetchErr || !fullItems) throw fetchErr || new Error('讀取 items 失敗')
 
-      if (error) throw error
+      const totalAmount = fullItems.reduce(
+        (s, i) => s + ((i as { subtotal?: number }).subtotal || 0),
+        0
+      )
+      const pairId = crypto.randomUUID()
+      const today = new Date().toISOString().split('T')[0]
+      const srcCode = generateRequestCode(sourceRequest.tourCode)
 
+      // 2. 建 R_src（來源團、負金額）
+      const srcPayload = {
+        code: srcCode,
+        request_number: srcCode,
+        workspace_id: workspaceId,
+        tour_id: sourceRequest.tourId,
+        tour_code: sourceRequest.tourCode,
+        tour_name: sourceRequest.tourName,
+        request_category: 'tour',
+        request_type: '成本轉移',
+        request_date: today,
+        amount: -totalAmount,
+        total_amount: -totalAmount,
+        status: 'pending',
+        transferred_pair_id: pairId,
+        notes: `成本轉移至 ${targetTour.code || ''}`,
+        created_by: user?.id || null,
+      }
+      const { data: srcRequest, error: srcErr } = await supabase
+        .from('payment_requests')
+        .insert(srcPayload as never)
+        .select('id, code')
+        .single()
+      if (srcErr || !srcRequest) throw srcErr || new Error('建來源端請款單失敗')
+
+      // 3. 插入 R_src 的負向 items
+      const srcItems = fullItems.map((it, idx) => {
+        const i = it as {
+          category?: string | null
+          supplier_id?: string | null
+          supplier_name?: string | null
+          description?: string | null
+          unitprice?: number | null
+          quantity?: number | null
+          subtotal?: number | null
+          payment_method_id?: string | null
+        }
+        return {
+          request_id: (srcRequest as { id: string }).id,
+          workspace_id: workspaceId,
+          item_number: `${(srcRequest as { code: string }).code}-${idx + 1}`,
+          category: i.category || null,
+          supplier_id: i.supplier_id || null,
+          supplier_name: i.supplier_name || null,
+          description: i.description || null,
+          unitprice: -(i.unitprice || 0),
+          quantity: i.quantity || 1,
+          subtotal: -(i.subtotal || 0),
+          payment_method_id: i.payment_method_id || null,
+          sort_order: idx + 1,
+        }
+      })
+      const { error: srcItemsErr } = await supabase
+        .from('payment_request_items')
+        .insert(srcItems as never)
+      if (srcItemsErr) {
+        await supabase
+          .from('payment_requests')
+          .delete()
+          .eq('id', (srcRequest as { id: string }).id)
+        throw srcItemsErr
+      }
+
+      // 4. 建 R_dst（目標團、正金額）
+      const dstCode = generateRequestCode(targetTour.code || '')
+      const dstPayload = {
+        code: dstCode,
+        request_number: dstCode,
+        workspace_id: workspaceId,
+        tour_id: targetTour.id,
+        tour_code: targetTour.code || '',
+        tour_name: targetTour.name || '',
+        request_category: 'tour',
+        request_type: '成本轉移',
+        request_date: today,
+        amount: totalAmount,
+        total_amount: totalAmount,
+        status: 'pending',
+        transferred_pair_id: pairId,
+        notes: `從 ${sourceRequest.tourCode} 轉入`,
+        created_by: user?.id || null,
+      }
+      const { data: dstRequest, error: dstErr } = await supabase
+        .from('payment_requests')
+        .insert(dstPayload as never)
+        .select('id, code')
+        .single()
+      if (dstErr || !dstRequest) {
+        // rollback R_src 全部
+        await supabase
+          .from('payment_request_items')
+          .delete()
+          .eq('request_id', (srcRequest as { id: string }).id)
+        await supabase
+          .from('payment_requests')
+          .delete()
+          .eq('id', (srcRequest as { id: string }).id)
+        throw dstErr || new Error('建目標端請款單失敗')
+      }
+
+      // 5. 插入 R_dst 的正向 items
+      const dstItems = fullItems.map((it, idx) => {
+        const i = it as {
+          category?: string | null
+          supplier_id?: string | null
+          supplier_name?: string | null
+          description?: string | null
+          unitprice?: number | null
+          quantity?: number | null
+          subtotal?: number | null
+          payment_method_id?: string | null
+        }
+        return {
+          request_id: (dstRequest as { id: string }).id,
+          workspace_id: workspaceId,
+          item_number: `${(dstRequest as { code: string }).code}-${idx + 1}`,
+          category: i.category || null,
+          supplier_id: i.supplier_id || null,
+          supplier_name: i.supplier_name || null,
+          description: i.description || null,
+          unitprice: i.unitprice || 0,
+          quantity: i.quantity || 1,
+          subtotal: i.subtotal || 0,
+          payment_method_id: i.payment_method_id || null,
+          sort_order: idx + 1,
+        }
+      })
+      const { error: dstItemsErr } = await supabase
+        .from('payment_request_items')
+        .insert(dstItems as never)
+      if (dstItemsErr) {
+        // rollback 全部
+        await supabase
+          .from('payment_request_items')
+          .delete()
+          .eq('request_id', (srcRequest as { id: string }).id)
+        await supabase
+          .from('payment_requests')
+          .delete()
+          .eq('id', (srcRequest as { id: string }).id)
+        await supabase
+          .from('payment_requests')
+          .delete()
+          .eq('id', (dstRequest as { id: string }).id)
+        throw dstItemsErr
+      }
+
+      // 6. 成功
+      await Promise.all([invalidatePaymentRequests(), invalidatePaymentRequestItems()])
       toast({
         title: '成本轉移成功',
-        description: `${itemIds.length} 筆項目已從 ${sourceRequest.tourCode} 轉移至 ${targetTour.code}`,
+        description: `已建立 2 張對沖請款單：${sourceRequest.tourCode} -${formatCurrency(
+          totalAmount
+        )} / ${targetTour.code} +${formatCurrency(totalAmount)}`,
       })
 
       setTargetTourId('')
@@ -120,7 +286,7 @@ export function CostTransferDialog({
       logger.error('成本轉移失敗:', error)
       toast({
         title: '轉移失敗',
-        description: '請稍後再試',
+        description: (error as Error)?.message || '請稍後再試',
         variant: 'destructive',
       })
     } finally {

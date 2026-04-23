@@ -17,7 +17,7 @@ import { cn } from '@/lib/utils'
 import { ShareAdvanceDialog } from '../ShareAdvanceDialog'
 import { ShareOrdersDialog } from '../ShareOrdersDialog'
 import { ShareTodoDialog } from '../ShareTodoDialog'
-import { CreateReceiptDialog } from '../CreateReceiptDialog'
+import { AddReceiptDialog } from '@/features/finance/payments/components/AddReceiptDialog'
 import { CreatePaymentRequestDialog } from '../CreatePaymentRequestDialog'
 import { PLACEHOLDER_TEXT } from './constants'
 import { DIALOGS_CONTAINER_LABELS } from '@/constants/labels'
@@ -315,14 +315,16 @@ export function DialogsContainer({
 
       {/* Create Receipt Dialog */}
       {selectedOrder && (
-        <CreateReceiptDialog
-          order={selectedOrder}
+        <AddReceiptDialog
           open={showCreateReceiptDialog}
-          onClose={() => {
-            setShowCreateReceiptDialog(false)
-            setSelectedOrder(null)
+          onOpenChange={open => {
+            if (!open) {
+              setShowCreateReceiptDialog(false)
+              setSelectedOrder(null)
+            }
           }}
-          onSuccess={receiptId => {
+          defaultOrderId={selectedOrder.id}
+          onSuccess={() => {
             setShowCreateReceiptDialog(false)
             setSelectedOrder(null)
           }}
