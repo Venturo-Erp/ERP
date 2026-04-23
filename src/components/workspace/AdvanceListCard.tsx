@@ -6,6 +6,7 @@ import { AdvanceList } from '@/stores/workspace-store'
 import { confirm } from '@/lib/ui/alert-dialog'
 import { CurrencyCell } from '@/components/table-cells'
 import { Button } from '@/components/ui/button'
+import { useTabPermissions } from '@/lib/permissions'
 import { COMP_WORKSPACE_LABELS } from './constants/labels'
 
 interface AdvanceListCardProps {
@@ -14,7 +15,6 @@ interface AdvanceListCardProps {
   onCreatePayment: (itemId: string, item: unknown) => void
   onDelete?: (listId: string) => void
   currentUserId: string
-  userRole?: 'admin' | 'finance' | 'member'
 }
 
 export function AdvanceListCard({
@@ -22,14 +22,14 @@ export function AdvanceListCard({
   userName = COMP_WORKSPACE_LABELS.使用者,
   onCreatePayment,
   onDelete,
-  userRole = 'member',
 }: AdvanceListCardProps) {
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set())
+  const { canWrite } = useTabPermissions()
 
   const items = advanceList.items || []
   const pendingItems = items.filter(item => item.status === 'pending')
   const totalAmount = items.reduce((sum, item) => sum + item.amount, 0)
-  const canProcess = userRole === 'admin' || userRole === 'finance'
+  const canProcess = canWrite('finance', 'disbursement')
 
   const toggleSelection = (itemId: string) => {
     const newSelected = new Set(selectedItems)

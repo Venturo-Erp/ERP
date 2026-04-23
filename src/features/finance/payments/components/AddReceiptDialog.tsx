@@ -27,6 +27,7 @@ import type { PaymentItem } from '../types'
 import { Input } from '@/components/ui/input'
 import type { Receipt } from '@/stores'
 import { useAuthStore } from '@/stores'
+import { useTabPermissions } from '@/lib/permissions'
 import { ADD_RECEIPT_DIALOG_LABELS, ADD_RECEIPT_TOAST_LABELS } from '../../constants/labels'
 import { usePaymentMethodsCached } from '@/data/hooks'
 
@@ -83,14 +84,16 @@ export function AddReceiptDialog({
   const isConfirmed = editingReceipt?.status === '1'
   const isAbnormal = editingReceipt?.status === '2'
 
-  // 權限判斷（新系統）
-  const { user, isAdmin } = useAuthStore()
-  const isAccountant = isAdmin || user?.permissions?.includes('accounting')
+  // 權限判斷（HR 職務管理為單一標準）
+  const { user } = useAuthStore()
+  const { canWrite } = useTabPermissions()
+  const canManagePayments = canWrite('finance', 'payments')
+  const canConfirmCheck = canWrite('finance', 'payments-confirm')
 
-  // 是否可編輯（未確認 or 會計角色）
-  const canEdit = !isConfirmed || isAccountant
-  // 是否可確認（會計角色 + 編輯模式 + 未確認）
-  const canConfirm = isAccountant && isEditMode && !isConfirmed
+  // 是否可編輯（未確認 or 有收款寫入權）
+  const canEdit = !isConfirmed || canManagePayments
+  // 是否可確認（有確認核帳寫入權 + 編輯模式 + 未確認）
+  const canConfirm = canConfirmCheck && isEditMode && !isConfirmed
 
   // Tab 狀態
   const [activeTab, setActiveTab] = useState('tour')
@@ -539,7 +542,7 @@ export function AddReceiptDialog({
                         canRemove={paymentItems.length > 1}
                         isNewRow={!isEditMode && index === paymentItems.length - 1}
                         readonly={isConfirmed}
-                        canConfirmReceipt={!!isAccountant}
+                        canConfirmReceipt={canConfirmCheck}
                         paymentMethods={paymentMethods}
                         orderInfo={
                           selectedOrder
@@ -641,7 +644,7 @@ export function AddReceiptDialog({
                     isNewRow={!isEditMode && index === paymentItems.length - 1}
                     mode="company"
                     readonly={isConfirmed}
-                    canConfirmReceipt={!!isAccountant}
+                    canConfirmReceipt={canConfirmCheck}
                     paymentMethods={paymentMethods}
                   />
                 )}

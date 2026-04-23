@@ -17,6 +17,7 @@ import { confirm } from '@/lib/ui/alert-dialog'
 import { cn } from '@/lib/utils'
 import { RECEIPT_TYPE_OPTIONS } from '../types'
 import { useAuthStore } from '@/stores'
+import { useTabPermissions } from '@/lib/permissions'
 import { deleteReceipt, invalidateReceipts } from '@/data'
 import { recalculateReceiptStats } from '../services/receipt-core.service'
 import type { Receipt } from '@/types/receipt.types'
@@ -43,6 +44,7 @@ export function ReceiptConfirmDialog({
 }: ReceiptConfirmDialogProps) {
   const { toast } = useToast()
   const { user } = useAuthStore()
+  const { canWrite } = useTabPermissions()
   const [isConfirming, setIsConfirming] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [showAbnormalInput, setShowAbnormalInput] = useState(false)
@@ -50,11 +52,9 @@ export function ReceiptConfirmDialog({
 
   if (!receipt) return null
 
-  // 檢查是否可以刪除：管理員、有會計權限、或建立者
-  const { isAdmin } = useAuthStore()
-  const isAccountant = isAdmin || user?.permissions?.includes('accounting')
+  // 檢查是否可以刪除：有「收款管理」寫入權 或 建立者
   const isCreator = user?.id === receipt.created_by
-  const canDelete = isAccountant || isCreator
+  const canDelete = canWrite('finance', 'payments') || isCreator
 
   const receiptTypeLabel =
     RECEIPT_TYPE_OPTIONS.find(opt => opt.value === receipt.receipt_type)?.label ||

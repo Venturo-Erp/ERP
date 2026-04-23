@@ -5,6 +5,7 @@ import { Receipt, ChevronDown, ChevronUp, DollarSign, Check } from 'lucide-react
 import type { Order } from '@/stores/types'
 import { CurrencyCell } from '@/components/table-cells'
 import { Button } from '@/components/ui/button'
+import { useTabPermissions } from '@/lib/permissions'
 
 // 使用統一的型別定義
 import type { SharedOrderList } from '@/stores/workspace/types'
@@ -15,19 +16,18 @@ interface OrderListCardProps {
   userName?: string
   onCreateReceipt: (orderId: string, order: SharedOrderList['orders'][number]) => void
   currentUserId?: string
-  userRole?: 'admin' | 'finance' | 'member'
 }
 
 export function OrderListCard({
   orderList,
   userName = COMP_WORKSPACE_LABELS.會計,
   onCreateReceipt,
-  userRole = 'member',
 }: OrderListCardProps) {
   const [isExpanded, setIsExpanded] = useState(false)
+  const { canWrite } = useTabPermissions()
 
   const totalGap = orderList.orders.reduce((sum, order) => sum + order.gap, 0)
-  const canProcess = userRole === 'admin' || userRole === 'finance'
+  const canProcess = canWrite('finance', 'payments')
 
   const getOrderStatus = (order: {
     total_amount: number

@@ -40,6 +40,7 @@ import { alert, confirm } from '@/lib/ui/alert-dialog'
 import { getTodayString } from '@/lib/utils/format-date'
 import { useWorkspaceId } from '@/lib/workspace-context'
 import { useAuthStore } from '@/stores/auth-store'
+import { useTabPermissions } from '@/lib/permissions'
 import {
   createSupplier,
   invalidateSuppliers,
@@ -139,12 +140,9 @@ export function AddRequestDialog({
   // === 共用狀態 ===
   const [activeTab, setActiveTab] = useState<RequestMode>('tour')
 
-  // 檢查用戶是否有公司請款權限（管理員或有 accounting 權限）
-  const isAdmin = useAuthStore(state => state.isAdmin)
-  const canCreateCompanyPayment = useMemo(() => {
-    if (!currentUser?.permissions) return false
-    return isAdmin || currentUser.permissions.includes('accounting')
-  }, [currentUser?.permissions, isAdmin])
+  // 公司請款權限：HR 「公司請款」分頁寫入權
+  const { canWrite } = useTabPermissions()
+  const canCreateCompanyPayment = canWrite('finance', 'requests-company')
 
   // === 團體請款狀態 ===
   const [importFromRequests, setImportFromRequests] = useState(false)

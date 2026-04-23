@@ -12,8 +12,9 @@
 
 import { logger } from '@/lib/utils/logger'
 import { useAuthStore } from '@/stores'
-import { usePermissions } from '@/hooks/usePermissions'
+import { useTabPermissions } from '@/lib/permissions'
 import { UnauthorizedPage } from '@/components/unauthorized-page'
+import { ModuleLoading } from '@/components/module-loading'
 import { useState, useEffect, useCallback } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
@@ -59,7 +60,7 @@ export default function PaymentsPage() {
     handleDeleteReceipt,
   } = usePaymentData()
   const { user } = useAuthStore()
-  const { canViewFinance } = usePermissions()
+  const { canRead, loading: permLoading } = useTabPermissions()
 
   // 讀取 URL 參數（從快速收款按鈕傳入）
   const urlOrderId = searchParams.get('order_id')
@@ -214,14 +215,15 @@ export default function PaymentsPage() {
             className="h-7 px-2 text-xs text-morandi-secondary hover:text-morandi-primary"
           >
             <Edit2 size={14} className="mr-1" />
-            {row.status === '1' ? '檢視' : '編輯'}
+            {row.status === '1' ? FinanceLabels.view : FinanceLabels.edit}
           </Button>
         </div>
       ),
     },
   ]
 
-  if (!canViewFinance) return <UnauthorizedPage />
+  if (permLoading) return <ModuleLoading fullscreen />
+  if (!canRead('finance', 'payments')) return <UnauthorizedPage />
 
   return (
     <>

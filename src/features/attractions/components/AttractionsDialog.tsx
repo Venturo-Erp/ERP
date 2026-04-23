@@ -11,7 +11,7 @@ import { AttractionForm } from './attraction-dialog/AttractionForm'
 import { AttractionImageUpload } from './attraction-dialog/AttractionImageUpload'
 import { useAuthStore } from '@/stores/auth-store'
 import { isFeatureAvailable } from '@/lib/feature-restrictions'
-import { useRolePermissions } from '@/lib/permissions/hooks'
+import { useTabPermissions } from '@/lib/permissions'
 import { Button } from '@/components/ui/button'
 import { Sparkles, Loader2, CheckCircle2, Trash2 } from 'lucide-react'
 import { ATTRACTIONS_DIALOG_LABELS } from '../constants/labels'
@@ -51,8 +51,8 @@ export function AttractionsDialog({
   fixedCategory,
   onDelete,
 }: AttractionsDialogProps) {
-  const { canWrite } = useRolePermissions()
-  const readOnly = !!attraction && !canWrite('/database')
+  const { canWrite } = useTabPermissions()
+  const readOnly = !!attraction && !canWrite('database', 'attractions')
 
   const {
     formData,
