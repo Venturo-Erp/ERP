@@ -206,11 +206,6 @@ export const syncEmployeeSchema = z.object({
   access_token: z.string().optional(),
 })
 
-export const getEmployeeDataSchema = z.object({
-  username: z.string().min(1, '缺少帳號'),
-  code: z.string().min(1, '缺少代號'),
-})
-
 export const createEmployeeAuthSchema = z.object({
   employee_number: z.string().min(1, '缺少員工編號'),
   password: z.string().min(1, '缺少密碼'),

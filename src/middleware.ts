@@ -101,7 +101,7 @@ export async function middleware(request: NextRequest) {
 
   // P002（2026-04-22）：公開路由白名單、改精確匹配。
   // 原 `startsWith('/api/auth')` prefix 會把 admin-reset-password / create-employee-auth /
-  // reset-employee-password / change-password / get-employee-data 全放行、
+  // reset-employee-password / change-password 全放行、
   // 這些是敏感 API、必須走登入守門（endpoint 本身有 getServerAuth 是第二道、middleware 是第一道）。
   if (isPublicPath(pathname)) {
     return response
