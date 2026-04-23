@@ -2,12 +2,21 @@
 
 /**
  * 模組權限守衛
- * 檢查當前路由是否有權限，沒有就導向 /unauthorized
+ * 兩道 gate：
+ *   1. workspace_features — workspace 等級「有沒有買這個功能」
+ *   2. role_tab_permissions（HR）— 個人職務「能不能看這個模組」
+ *
+ * HR 是權限 SSOT。除 PLATFORM_ADMIN_ROUTES（平台超管專屬）外、所有路由統一吃此處。
  */
 
 import { useEffect, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
-import { useWorkspaceFeatures } from '@/lib/permissions'
+import {
+  useWorkspaceFeatures,
+  useTabPermissions,
+  isPlatformAdminRoute,
+  getModuleFromRoute,
+} from '@/lib/permissions'
 import { useAuthStore } from '@/stores'
 import { ModuleLoading } from '@/components/module-loading'
 
@@ -15,51 +24,82 @@ interface ModuleGuardProps {
   children: React.ReactNode
 }
 
-// 不需要檢查權限的路由
 const PUBLIC_ROUTES = ['/login', '/unauthorized', '/public']
 
-// 總是允許的路由（基本功能）
-const ALWAYS_ALLOWED = ['/dashboard', '/settings']
+// 永遠放行：根目錄、首頁、個人設定（不受職務權限管控）
+const ALWAYS_ALLOWED_EXACT = new Set([
+  '/',
+  '/dashboard',
+  '/settings',
+  '/settings/personal',
+  '/settings/appearance',
+])
+
+const ALWAYS_ALLOWED_PREFIXES = ['/dashboard/']
 
 export function ModuleGuard({ children }: ModuleGuardProps) {
   const pathname = usePathname()
   const router = useRouter()
-  const { user } = useAuthStore()
-  const { isRouteAvailable, loading, features } = useWorkspaceFeatures()
+  const isAdmin = useAuthStore(state => state.isAdmin)
+  const { isRouteAvailable, loading: featuresLoading, features } = useWorkspaceFeatures()
+  const { canReadAny, loading: permLoading } = useTabPermissions()
   const [checked, setChecked] = useState(false)
 
   useEffect(() => {
-    if (loading) return
+    if (featuresLoading || permLoading) return
 
-    // 公開路由不檢查
+    // 公開路由
     if (PUBLIC_ROUTES.some(r => pathname.startsWith(r))) {
       setChecked(true)
       return
     }
 
-    // 基本路由永遠可以進
-    if (pathname === '/' || ALWAYS_ALLOWED.some(r => pathname.startsWith(r))) {
+    // 永遠放行
+    if (
+      ALWAYS_ALLOWED_EXACT.has(pathname) ||
+      ALWAYS_ALLOWED_PREFIXES.some(r => pathname.startsWith(r))
+    ) {
       setChecked(true)
       return
     }
 
-    // 如果沒有設定任何 feature，預設全開（向下相容）
-    // admin 角色亦走此路徑（admin 不再 bypass workspace_features）
-    if (features.length === 0) {
+    // 平台超管專屬：/tenants、/hr/settings、/settings/{bot-line,menu,modules,receipt-test}
+    if (isPlatformAdminRoute(pathname)) {
+      if (!isAdmin) {
+        router.replace('/unauthorized')
+        return
+      }
       setChecked(true)
       return
     }
 
-    // 檢查權限
-    if (!isRouteAvailable(pathname)) {
+    // workspace_features：workspace 沒買功能就擋（features.length === 0 為向下相容、預設全開）
+    if (features.length > 0 && !isRouteAvailable(pathname)) {
+      router.replace('/unauthorized')
+      return
+    }
+
+    // HR 職務權限：模組層 canReadAny（HR 沒給該模組任一 tab 權限就擋）
+    // 細粒度 tab gate 由 page.tsx 自己用 canRead(module, tab) 守
+    const moduleCode = getModuleFromRoute(pathname)
+    if (moduleCode && !canReadAny(moduleCode)) {
       router.replace('/unauthorized')
       return
     }
 
     setChecked(true)
-  }, [pathname, loading, isRouteAvailable, router, features.length])
+  }, [
+    pathname,
+    featuresLoading,
+    permLoading,
+    isRouteAvailable,
+    router,
+    features.length,
+    canReadAny,
+    isAdmin,
+  ])
 
-  if (loading || !checked) {
+  if (featuresLoading || permLoading || !checked) {
     return <ModuleLoading fullscreen />
   }
 

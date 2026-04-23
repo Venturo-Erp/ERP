@@ -55,6 +55,7 @@ const ROUTE_TO_MODULE: Record<string, string> = {
   '/settings': 'settings',
   '/calendar': 'calendar',
   '/workspace': 'workspace',
+  '/channel': 'workspace', // 頻道 = workspace 模組
   '/todos': 'todos',
   '/dashboard': 'dashboard',
   '/itinerary': 'itinerary',
@@ -63,10 +64,26 @@ const ROUTE_TO_MODULE: Record<string, string> = {
   '/customers': 'database', // 顧客在資料管理
 }
 
+// 平台超管專屬路由：HR 職務權限不適用、必須 isAdmin（workspace 級）才放行
+// /hr/settings 與 /settings/{bot-line,menu,modules,receipt-test}：暫保留 admin only、
+// 之後在 module-tabs.ts 加對應 tab、role_tab_permissions backfill 後再轉成 HR 控管
+export const PLATFORM_ADMIN_ROUTES: readonly string[] = [
+  '/tenants',
+  '/hr/settings',
+  '/settings/bot-line',
+  '/settings/menu',
+  '/settings/modules',
+  '/settings/receipt-test',
+]
+
+export function isPlatformAdminRoute(pathname: string): boolean {
+  return PLATFORM_ADMIN_ROUTES.some(r => pathname === r || pathname.startsWith(`${r}/`))
+}
+
 /**
  * 從路由取得模組代碼
  */
-function getModuleFromRoute(route: string): string | null {
+export function getModuleFromRoute(route: string): string | null {
   // 移除開頭的 /
   const cleanRoute = route.startsWith('/') ? route : `/${route}`
 
