@@ -125,21 +125,6 @@ export const EXPENSE_TYPE_SELECTOR_LABELS = {
   LABEL_6005: '費用類型 *',
 }
 
-export const QUICK_REQUEST_FROM_ITEM_DIALOG_LABELS = {
-  請輸入有效的金額: '請輸入有效的金額',
-  請款單建立成功: '請款單建立成功',
-  建立請款單失敗: '建立請款單失敗',
-  確認請款: '確認請款',
-
-  LABEL_8944: '快速請款',
-  LABEL_7325: '項目',
-  LABEL_4947: '供應商：',
-  LABEL_1073: '旅遊團：',
-  LABEL_3827: '請款金額 *',
-  REMARKS: '備註',
-  CANCEL: '取消',
-}
-
 export const REQUEST_DATE_INPUT_LABELS = {
   請款日期: '請款日期',
   一般請款_週四出帳: '一般請款：週四出帳',
@@ -187,56 +172,6 @@ export const USE_REQUEST_TABLE_LABELS = {
   狀態: '狀態',
 }
 
-export const BATCH_INVOICE_DIALOG_LABELS = {
-  請輸入買受人名稱: '請輸入買受人名稱',
-  請選擇至少一筆訂單: '請選擇至少一筆訂單',
-  批次開立失敗: '批次開立失敗',
-  選擇團別: '選擇團別...',
-  買受人名稱: '買受人名稱',
-  n_8_碼數字: '8 碼數字',
-  發票通知信箱: '發票通知信箱',
-
-  LABEL_2624: '批次開立發票',
-  LABEL_9860: '團別 *',
-  LABEL_7017: '訂單編號',
-  LABEL_7009: '聯絡人',
-  LABEL_491: '可開金額',
-  NOT_FOUND_8100: '此團沒有可開發票的訂單',
-  已選: '已選',
-  LABEL_3592: '筆訂單',
-  LABEL_3678: '合計可開金額',
-  LABEL_8775: '發票資訊',
-  LABEL_7408: '名稱 *',
-  LABEL_3729: '統編',
-  LABEL_3494: '日期 *',
-  CANCEL: '取消',
-}
-
-export const ISSUE_INVOICE_DIALOG_LABELS = {
-  旅遊服務費: '旅遊服務費',
-  發票金額必須大於_0: '發票金額必須大於 0',
-  式: '式',
-  發票開立成功: '發票開立成功',
-  開立失敗: '開立失敗',
-  輸入發票金額: '輸入發票金額',
-  開立發票: '開立發票',
-  ORDER_INFO: '訂單資訊',
-  ORDER_NUMBER_LABEL: '訂單編號：',
-  CONTACT_LABEL: '聯絡人：',
-  LOADING: '載入中...',
-  RECEIVED: '已收款',
-  INVOICED: '已開發票',
-  AVAILABLE: '可開金額',
-  INVOICE_AMOUNT: '發票金額 *',
-  EXCEEDS_AVAILABLE: '金額超過可開金額',
-  PRODUCT_NAME: '品名',
-
-  LABEL_7283: '買受人名稱 *',
-  LABEL_8296: '統一編號',
-  LABEL_3957: '開立日期 *',
-  CANCEL: '取消',
-}
-
 // 請款單 (AddRequestDialog / RequestDetailDialog)
 export const REQUEST_LABELS = {
   // 分類
@@ -259,11 +194,6 @@ export const REQUEST_LABELS = {
     `確定要刪除此請款單（${code}）嗎？此操作無法復原。\n\n注意：只會刪除當前選中的請款單，同批次的其他請款單不受影響。`,
   訂單: (orderNumber: string) => ` | 訂單：${orderNumber}`,
   同批次請款單: '同批次請款單',
-}
-
-// 批次收款 (BatchReceiptDialog)
-export const BATCH_RECEIPT_LABELS = {
-  成功建立收款單: (count: number) => `成功建立 ${count} 筆收款單`,
 }
 
 // AddRequestDialog 額外標籤
@@ -377,13 +307,6 @@ export const RECEIPT_CONFIRM_LABELS = {
   CONFIRM_9972: '確認異常金額',
   CLOSE: '關閉',
 }
-export const FINANCE_LABELS = {
-  LABEL_953: '開立代轉發票',
-  CANCEL: '取消',
-  ISSUING: '開立中...',
-  ISSUE_INVOICE: '開立發票',
-}
-
 // AddReceiptDialog
 export const ADD_RECEIPT_TOAST_LABELS = {
   UPDATED: (receiptNumber: string, itemCount: number) =>
@@ -435,30 +358,11 @@ export const RECEIPT_MUTATION_LABELS = {
   CREATE_FAILED: '建立收款單失敗',
 }
 
-// useUnclosedTours
-export const UNCLOSED_TOURS_HOOK_LABELS = {
-  CLOSED: '已結團',
-  CANCELLED: '取消',
-}
-
-// useRequestForm
-export const REQUEST_FORM_HOOK_LABELS = {
-  SUPPLIER: '供應商',
-  EMPLOYEE: '員工',
-  OTHER: '其他',
-}
-
 // useRequestOperations
 export const REQUEST_OPERATIONS_LABELS = {
   CANNOT_GET_WORKSPACE: '無法取得 workspace_id，請重新登入',
   COMPANY_EXPENSE_TYPE_REQUIRED: '公司請款必須選擇費用類型',
   SUPPLIER_EXPENSE: '供應商支出',
-}
-
-// useTourRequestItems
-export const TOUR_REQUEST_ITEMS_LABELS = {
-  UNKNOWN_SUPPLIER: '未知供應商',
-  LOAD_FAILED: '載入需求單失敗',
 }
 
 // Request types
@@ -487,27 +391,3 @@ export const ADD_REQUEST_EXTRA_LABELS = {
   BATCH_CREATE_LABEL: '建立批次請款',
 }
 
-// BatchInvoiceDialog
-export const BATCH_INVOICE_TOAST_LABELS = {
-  SUCCESS: (count: number) => `成功開立 ${count} 筆訂單的發票`,
-  ISSUING: '開立中...',
-  ISSUE_N: (count: number) => `開立 ${count} 張發票`,
-}
-
-// IssueInvoiceDialog
-export const ISSUE_INVOICE_EXTRA_LABELS = {
-  EXCEED_AVAILABLE: (amount: number) => `發票金額不能超過可開金額 ${amount}`,
-  TRAVEL_SERVICE_FEE: '旅遊服務費',
-}
-
-// LinkConfirmationDialog
-export const LINK_CONFIRMATION_LABELS = {
-  TITLE: '關聯確認單項目',
-  LOADING: '載入中...',
-  EMPTY: '此團尚無確認單項目',
-  CLEAR: '取消關聯',
-  CANCEL: '取消',
-  CONFIRM: '確認',
-  LINK_BUTTON: '關聯',
-  LINKED: '已關聯',
-}
