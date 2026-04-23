@@ -13,6 +13,16 @@ export interface PermissionConfig {
 }
 
 /**
+ * 職務的分頁權限（role_tab_permissions 表的 row shape）
+ */
+export interface TabPermission {
+  module_code: string
+  tab_code: string | null
+  can_read: boolean
+  can_write: boolean
+}
+
+/**
  * 功能權限配置（給設定頁顯示用）
  * 權限決策不靠這個、走 role_tab_permissions（permissions[]）+ workspace_roles.is_admin
  */

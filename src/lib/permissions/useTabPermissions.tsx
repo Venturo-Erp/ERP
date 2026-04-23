@@ -3,13 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { useAuthStore } from '@/stores'
 import { logger } from '@/lib/utils/logger'
-
-interface TabPermission {
-  module_code: string
-  tab_code: string | null
-  can_read: boolean
-  can_write: boolean
-}
+import type { TabPermission } from './index'
 
 /**
  * 取得當前用戶的分頁權限

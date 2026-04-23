@@ -1,12 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createApiClient } from '@/lib/supabase/api-client'
 
-interface TabPermission {
-  module_code: string
-  tab_code: string | null
-  can_read: boolean
-  can_write: boolean
-}
+import type { TabPermission } from '@/lib/permissions'
 
 /**
  * GET /api/roles/[roleId]/tab-permissions
