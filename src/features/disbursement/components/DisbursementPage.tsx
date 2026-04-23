@@ -36,6 +36,9 @@ import { logger } from '@/lib/utils/logger'
 import { DISBURSEMENT_STATUS } from '../constants'
 import { DISBURSEMENT_LABELS } from '../constants/labels'
 import { useAuthStore } from '@/stores/auth-store'
+import { useTabPermissions } from '@/lib/permissions'
+import { UnauthorizedPage } from '@/components/unauthorized-page'
+import { ModuleLoading } from '@/components/module-loading'
 import { recalculateExpenseStats } from '@/features/finance/payments/services/expense-core.service'
 
 export function DisbursementPage() {
@@ -45,6 +48,8 @@ export function DisbursementPage() {
   const { items: payment_request_items } = usePaymentRequestItems()
 
   const user = useAuthStore(state => state.user)
+  const { canRead, canWrite, loading: permLoading } = useTabPermissions()
+  const canManage = canWrite('finance', 'disbursement')
 
   // 狀態
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
@@ -265,6 +270,9 @@ export function DisbursementPage() {
     }
   }, [])
 
+  if (permLoading) return <ModuleLoading fullscreen />
+  if (!canRead('finance', 'disbursement')) return <UnauthorizedPage />
+
   return (
     <>
       <ListPageLayout<DisbursementOrder>
@@ -273,13 +281,13 @@ export function DisbursementPage() {
         columns={columns}
         searchFields={['order_number']}
         searchPlaceholder={DISBURSEMENT_LABELS.搜尋出納單號}
-        onAdd={handleAdd}
-        addLabel={DISBURSEMENT_LABELS.新增出納單}
+        onAdd={canManage ? handleAdd : undefined}
+        addLabel={canManage ? DISBURSEMENT_LABELS.新增出納單 : undefined}
         onRowClick={handleRowClick}
         initialPageSize={15}
         renderActions={(row: DisbursementOrder) => (
           <div className="flex items-center gap-1">
-            {row.status === 'pending' && (
+            {row.status === 'pending' && canManage && (
               <Button
                 variant="ghost"
                 size="sm"
@@ -304,7 +312,7 @@ export function DisbursementPage() {
             >
               預覽
             </Button>
-            {row.status === 'pending' && (
+            {row.status === 'pending' && canManage && (
               <Button
                 variant="ghost"
                 size="sm"
@@ -317,7 +325,7 @@ export function DisbursementPage() {
                 出帳
               </Button>
             )}
-            {row.status === 'pending' && (
+            {row.status === 'pending' && canManage && (
               <Button
                 variant="ghost"
                 size="sm"
