@@ -226,10 +226,8 @@ export async function POST(request: NextRequest) {
       chinese_name: adminName,
       display_name: adminName,
       email: adminEmail || null,
-      roles: ['admin'],
       role_id: adminRole.id, // 🔑 連結到剛建立的系統主管角色（權限檢查用）
       job_info: { role_id: adminRole.id, position: '系統主管' },
-      is_active: true,
       is_bot: false,
       must_change_password: true, // 首次登入強制改密碼
     })
