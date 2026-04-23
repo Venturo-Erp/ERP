@@ -85,9 +85,6 @@ const WORKSPACE_SCOPED_TABLES = [
 
   // === 會計模組 ===
   'chart_of_accounts',
-  'erp_bank_accounts',
-  // 'erp_transactions', // ⚠️ 2026-01-17: 移除，表沒有 workspace_id 欄位
-  // 'erp_vouchers', // ⚠️ 2026-01-17: 移除，表沒有 workspace_id 欄位
   'journal_vouchers',
   'confirmations',
 

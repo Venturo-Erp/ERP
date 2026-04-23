@@ -67,8 +67,6 @@ const WORKSPACE_SCOPED_TABLES = [
   'receipt_orders',
   // === 會計模組 ===
   'chart_of_accounts',
-  'erp_bank_accounts',
-  // 'erp_transactions', 'erp_vouchers', // ⚠️ 2026-01-17: 移除，表沒有 workspace_id
   'journal_vouchers',
   'confirmations',
   // === 供應商 ===
