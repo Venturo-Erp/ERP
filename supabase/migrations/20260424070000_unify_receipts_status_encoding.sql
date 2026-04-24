@@ -28,6 +28,9 @@
 
 BEGIN;
 
+-- 0. 先拔掉舊的 CHECK constraint（限定 '0'/'1'/'2'、會擋 UPDATE）
+ALTER TABLE public.receipts DROP CONSTRAINT IF EXISTS receipts_status_check;
+
 -- 1. 更新現有 row
 UPDATE public.receipts
 SET status = 'pending'
@@ -37,7 +40,7 @@ UPDATE public.receipts
 SET status = 'confirmed'
 WHERE status = '1';
 
--- 2. 加 CHECK constraint
+-- 2. 加新 CHECK constraint
 ALTER TABLE public.receipts
   ADD CONSTRAINT receipts_status_check
   CHECK (status IN ('pending', 'confirmed', 'cancelled'));
