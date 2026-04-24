@@ -578,29 +578,48 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
                   dangerouslySetInnerHTML={{
                     __html: (() => {
                       let html = contractHtml
-                      // 填入簽約人資訊
+                      // 使用者輸入先 escape、避免 XSS 自我注入
+                      const escape = (s: string) =>
+                        s
+                          .replace(/&/g, '&amp;')
+                          .replace(/</g, '&lt;')
+                          .replace(/>/g, '&gt;')
+                          .replace(/"/g, '&quot;')
+                          .replace(/'/g, '&#39;')
                       const infoStyle =
                         'font-size:8pt;font-family:"PingFang TC Light",sans-serif;color:black'
                       html = html.replace(
                         '<!--SIGNER_ADDRESS-->',
-                        signerAddress ? `<span style="${infoStyle}">${signerAddress}</span>` : ''
+                        signerAddress
+                          ? `<span style="${infoStyle}">${escape(signerAddress)}</span>`
+                          : ''
                       )
                       html = html.replace(
                         '<!--SIGNER_ID-->',
-                        signerIdNumber ? `<span style="${infoStyle}">${signerIdNumber}</span>` : ''
+                        signerIdNumber
+                          ? `<span style="${infoStyle}">${escape(signerIdNumber)}</span>`
+                          : ''
                       )
                       html = html.replace(
                         '<!--SIGNER_PHONE-->',
-                        signerPhone ? `<span style="${infoStyle}">${signerPhone}</span>` : ''
+                        signerPhone
+                          ? `<span style="${infoStyle}">${escape(signerPhone)}</span>`
+                          : ''
                       )
-                      // 填入簽名
-                      if (savedSignature) {
+                      // savedSignature 是 data:image/png;base64,... URL、驗證起頭後才塞
+                      if (savedSignature && /^data:image\/(png|jpeg|jpg|svg\+xml);base64,/.test(savedSignature)) {
                         html = html.replace(
                           '<span id="contract-signature-placeholder"></span>',
                           `<span style="display:inline-block;vertical-align:middle;margin-left:12px;"><img src="${savedSignature}" alt="甲方簽名" style="height:50px;object-fit:contain;vertical-align:middle;" /></span>`
                         )
                       }
-                      return html
+                      // 最後整體經過 DOMPurify、防契約範本被注入惡意 script
+                      return DOMPurify.sanitize(html, {
+                        ADD_TAGS: ['img'],
+                        ADD_ATTR: ['style', 'src', 'alt', 'id'],
+                        FORBID_TAGS: ['script', 'iframe', 'object', 'embed', 'form', 'input'],
+                        FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover'],
+                      })
                     })(),
                   }}
                 />
