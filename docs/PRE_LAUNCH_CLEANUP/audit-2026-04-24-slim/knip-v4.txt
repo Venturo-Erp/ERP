@@ -1,0 +1,446 @@
+◇ injecting env (3) from .env.test.local // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
+Unused files (11)
+src/components/shared/constants/labels.ts: src/components/shared/constants/labels.ts
+src/components/shared/destination-selector.tsx: src/components/shared/destination-selector.tsx
+src/features/dashboard/actions/weather-actions.ts: src/features/dashboard/actions/weather-actions.ts
+src/features/disbursement/hooks/index.ts: src/features/disbursement/hooks/index.ts
+src/features/finance/requests/hooks/index.ts: src/features/finance/requests/hooks/index.ts
+src/features/visas/constants/usa-esta-info.ts: src/features/visas/constants/usa-esta-info.ts
+src/hooks/useDraftAutoSave.ts: src/hooks/useDraftAutoSave.ts
+src/hooks/useDragSort.ts: src/hooks/useDragSort.ts
+src/i18n/config.ts: src/i18n/config.ts
+src/i18n/index.ts: src/i18n/index.ts
+src/types/timeline-itinerary.types.ts: src/types/timeline-itinerary.types.ts
+Unused dependencies (1)
+package.json: @google/generative-ai, @tavily/core
+Unused devDependencies (1)
+package.json: pg, tailwindcss
+Unused exports (243)
+src/app/(main)/customers/components/CustomerDetailDialog.tsx: CustomerDetailDialog
+src/app/(main)/customers/components/CustomerVerifyDialog.tsx: CustomerVerifyDialog
+src/app/(main)/customers/components/index.ts: CustomerDetailDialog, CustomerVerifyDialog
+src/app/(main)/customers/constants/labels.ts: RESET_PASSWORD_LABELS, CUSTOMER_SEARCH_LABELS, CUSTOMER_VERIFY_LABELS
+src/app/(main)/finance/constants/labels.ts: BATCH_CONFIRM_LABELS, TOUR_PNL_LABELS, UNCLOSED_TOURS_LABELS, TRAVEL_INVOICE_LABELS, TRAVEL_INVOICE_DETAIL_LABELS
+src/app/(main)/settings/constants/labels.ts: API_SETTINGS_LABELS, DEVTOOLS_LABELS, MODULE_MANAGEMENT_LABELS, OTHER_SETTINGS_LABELS, PREFERRED_FEATURES_LABELS, WORKSPACE_SWITCHER_LABELS, MODULES_PAGE_LABELS
+src/components/ErrorBoundary.tsx: useErrorHandler, ErrorFallback, default
+src/components/dialog/index.ts: ConfirmDialog
+src/components/editor/tour-form/components/day-template/AccommodationSection.tsx: AccommodationSection
+src/components/editor/tour-form/components/day-template/ActivityList.tsx: ActivityList
+src/components/editor/tour-form/components/day-template/MealSection.tsx: MealSection
+src/components/editor/tour-form/components/day-template/index.ts: DayHeader, ActivityList, MealSection, AccommodationSection, EditableText, UploadableImage, useDayTemplate
+src/components/editor/tour-form/sections/daily-itinerary/index.ts: DayCard, DayList, DayTitleSection, ActivitiesSection, MealsSection, AccommodationSection, RecommendationsSection, SortableActivityItem, SortableActivityGridItem, useDailyItinerary
+src/components/editor/tour-form/sections/flight/utils.ts: formatDateShort
+src/components/table-cells/index.tsx: DateRangeCell, NumberCell, AvatarCell, LinkCell, BadgeCell
+src/components/ui/badge.tsx: badgeVariants
+src/components/ui/button.tsx: buttonVariants
+src/components/ui/card.tsx: CardFooter
+src/components/ui/date-picker.tsx: DateRangePicker
+src/components/ui/dialog.tsx: DIALOG_Z_INDEX
+src/components/ui/enhanced-table/VirtualizedTable.tsx: VirtualizedTable
+src/components/ui/enhanced-table/index.ts: VirtualizedTable, TableBody, TableHeader, TablePagination, useTableState
+src/components/ui/image-editor/ImageEditor.tsx: DEFAULT_ADJUSTMENTS, DEFAULT_SETTINGS
+src/components/ui/image-editor/index.ts: DEFAULT_SETTINGS, DEFAULT_ADJUSTMENTS
+src/components/ui/image-position-editor.tsx: defaultImagePosition, parseImagePosition
+src/components/ui/image-uploader/ImagePickerDialog.tsx: ImagePickerDialog
+src/components/ui/image-uploader/index.tsx: UnsplashSearch, ImagePickerDialog, MultiImageUploader
+src/components/ui/input-ime.tsx: default
+src/components/ui/input.tsx: _Input
+src/components/ui/rich-text-input.tsx: htmlToPlainText, RichTextDisplay
+src/components/ui/scroll-area.tsx: ScrollBar
+src/components/ui/select.tsx: SelectGroup, SelectLabel, SelectSeparator, SelectScrollUpButton, SelectScrollDownButton
+src/components/workspace/canvas/canvas-editor/index.ts: EditorContent, CanvasToolbar, useCanvasEditor
+src/components/workspace/canvas/shared/useCanvasState.ts: useCanvasState
+src/components/workspace/channel-chat/constants.ts: DEFAULT_CHANNEL_NAME, DIALOG_TYPES
+src/components/workspace/channel-chat/hooks/index.ts: useBotResponse
+src/components/workspace/channel-sidebar/utils/channelProcessing.ts: sortChannels
+src/components/workspace/chat/index.ts: MessageItem, EmptyState, FilePreview, UploadProgress, QuickActionMenu, createQuickActions, theme
+src/components/workspace/chat/theme.ts: theme
+src/constants/labels.ts: CATEGORY_SECTION_LABELS, COST_ITEM_ROW_LABELS, IMPORT_ACTIVITIES_DIALOG_LABELS, LINK_TOUR_DIALOG_LABELS, LOCAL_PRICING_DIALOG_LABELS, PARTICIPANT_COUNT_EDITOR_LABELS, PRICE_SUMMARY_CARD_LABELS, PRINTABLE_QUOTATION_LABELS, QUICK_QUOTE_DETAIL_LABELS, QUICK_QUOTE_DIALOG_LABELS, QUOTE_CONFIRMATION_SECTION_LABELS, QUOTE_DETAIL_EMBED_LABELS, QUOTE_DIALOG_LABELS, QUOTE_HEADER_LABELS, RESOURCE_SELECT_BUTTON_LABELS, SAVE_VERSION_DIALOG_LABELS, SELLING_PRICE_SECTION_LABELS, SYNC_TO_ITINERARY_DIALOG_LABELS, QUICK_QUOTE_ITEMS_TABLE_LABELS, QUOTATION_INFO_LABELS, QUOTATION_PRICING_TABLE_LABELS, QUICK_QUOTE_VERSION_PANEL_LABELS, QUOTATION_TERMS_LABELS, PRINT_FOOTER_LABELS, QUOTE_DIALOG_LABELS_EXTRA, ACCOMMODATION_ITEM_ROW_LABELS_EXTRA, TRAVEL_INVOICE_LABELS, WEEK_REVIEW_DIALOG_LABELS, WORKOUT_DIALOG_LABELS, STATISTICS_PANEL_LABELS, BASIC_DIALOG_LABELS, TEMPLATE_DATA_PANEL_LABELS, COMP_WORKSPACE_LABELS, ACCOUNTING_PAGE_LABELS, PERIOD_CLOSING_LABELS, BALANCE_SHEET_LABELS, INCOME_STATEMENT_LABELS, CASH_FLOW_LABELS, TRIAL_BALANCE_LABELS
+src/constants/visa-types.ts: VISA_TYPE_LABELS
+src/core/errors/app-errors.ts: AppError, DuplicateError, NetworkError
+src/data/entities/accounting-subjects.ts: accountingSubjectEntity, useAccountingSubjectsSlim, useAccountingSubject, useAccountingSubjectsPaginated, useAccountingSubjectDictionary, createAccountingSubject, updateAccountingSubject, deleteAccountingSubject, invalidateAccountingSubjects
+src/data/entities/airport-images.ts: airportImageEntity, useAirportImagesSlim, useAirportImage, useAirportImagesPaginated, useAirportImageDictionary, updateAirportImage, invalidateAirportImages
+src/data/entities/attractions.ts: attractionEntity, useAttractionsSlim, useAttraction, useAttractionsPaginated, useAttractionDictionary
+src/data/entities/calendar-events.ts: calendarEventEntity, useCalendarEventsSlim, useCalendarEvent, useCalendarEventsPaginated, useCalendarEventDictionary
+src/data/entities/channel-members.ts: channelMemberEntity, useChannelMembers, useChannelMembersSlim, useChannelMember, useChannelMembersPaginated, useChannelMemberDictionary, updateChannelMember, deleteChannelMember, invalidateChannelMembers
+src/data/entities/cities.ts: cityEntity, useCitiesSlim, useCity, useCitiesPaginated, useCityDictionary, createCity, deleteCity, invalidateCities
+src/data/entities/companies.ts: companyEntity, useCompaniesSlim, useCompany, useCompaniesPaginated, useCompanyDictionary, invalidateCompanies
+src/data/entities/company-contacts.ts: companyContactEntity, useCompanyContacts, useCompanyContactsSlim, useCompanyContact, useCompanyContactsPaginated, useCompanyContactDictionary, createCompanyContact, updateCompanyContact, deleteCompanyContact, invalidateCompanyContacts
+src/data/entities/cost-templates.ts: costTemplateEntity, useCostTemplates, useCostTemplatesSlim, useCostTemplate, useCostTemplatesPaginated, useCostTemplateDictionary, createCostTemplate, updateCostTemplate, deleteCostTemplate, invalidateCostTemplates
+src/data/entities/countries.ts: countryEntity, useCountriesSlim, useCountry, useCountriesPaginated, useCountryDictionary, createCountry, deleteCountry
+src/data/entities/customers.ts: customerEntity, useCustomer, useCustomersPaginated, useCustomerDictionary
+src/data/entities/departments.ts: departmentEntity, useDepartment
+src/data/entities/disbursement-orders.ts: disbursementOrderEntity, useDisbursementOrdersSlim, useDisbursementOrder, useDisbursementOrdersPaginated, useDisbursementOrderDictionary, createDisbursementOrder
+src/data/entities/employees.ts: employeeEntity, useEmployee, useEmployeesPaginated, createEmployee, updateEmployee, deleteEmployee, invalidateEmployees
+src/data/entities/hotels.ts: hotelEntity, useHotel, useHotelsPaginated
+src/data/entities/image-library.ts: imageLibraryEntity, useImageLibrary, useImageLibrarySlim, useImageLibraryItem, useImageLibraryPaginated, useImageLibraryDictionary, updateImageLibraryItem, deleteImageLibraryItem, invalidateImageLibrary
+src/data/entities/index.ts: tourEntity, useToursPaginated, orderEntity, useOrder, useOrdersPaginated, useOrderDictionary, memberEntity, useMember, useMembersPaginated, useMemberDictionary, createMember, updateMember, invalidateMembers, customerEntity, useCustomer, useCustomersPaginated, useCustomerDictionary, quoteEntity, useQuotesSlim, useQuotesPaginated, useQuoteDictionary, itineraryEntity, useItinerariesSlim, useItinerary, useItinerariesPaginated, useItineraryDictionary, deleteItinerary, invalidateItineraries, paymentRequestEntity, usePaymentRequestsSlim, usePaymentRequest, usePaymentRequestsPaginated, usePaymentRequestDictionary, receiptEntity, useReceiptsSlim, useReceipt, useReceiptsPaginated, useReceiptDictionary, disbursementOrderEntity, useDisbursementOrdersSlim, useDisbursementOrder, useDisbursementOrdersPaginated, useDisbursementOrderDictionary, createDisbursementOrder, accountingSubjectEntity, useAccountingSubjectsSlim, useAccountingSubject, useAccountingSubjectsPaginated, useAccountingSubjectDictionary, createAccountingSubject, updateAccountingSubject, deleteAccountingSubject, invalidateAccountingSubjects, workspaceModuleEntity, useWorkspaceModules, useWorkspaceModulesSlim, useWorkspaceModule, useWorkspaceModulesPaginated, useWorkspaceModuleDictionary, createWorkspaceModule, updateWorkspaceModule, deleteWorkspaceModule, invalidateWorkspaceModules, employeeEntity, useEmployee, useEmployeesPaginated, createEmployee, updateEmployee, deleteEmployee, invalidateEmployees, visaEntity, useVisasSlim, useVisa, useVisasPaginated, useVisaDictionary, todoEntity, useTodosSlim, useTodo, useTodosPaginated, useTodoDictionary, createTodo, deleteTodo, invalidateTodos, supplierEntity, useSupplier, useSuppliersPaginated, useSupplierDictionary, airportImageEntity, useAirportImagesSlim, useAirportImage, useAirportImagesPaginated, useAirportImageDictionary, updateAirportImage, invalidateAirportImages, countryEntity, useCountriesSlim, useCountry, useCountriesPaginated, useCountryDictionary, createCountry, deleteCountry, useDepartment, regionEntity, useRegionsSlim, useRegion, useRegionsPaginated, useRegionDictionary, createRegion, updateRegion, deleteRegion, invalidateRegions, cityEntity, useCitiesSlim, useCity, useCitiesPaginated, useCityDictionary, createCity, deleteCity, invalidateCities, attractionEntity, useAttractionsSlim, useAttraction, useAttractionsPaginated, useAttractionDictionary, hotelEntity, useHotel, useHotelsPaginated, restaurantEntity, useRestaurant, useRestaurantsPaginated, companyEntity, useCompaniesSlim, useCompany, useCompaniesPaginated, useCompanyDictionary, invalidateCompanies, companyContactEntity, useCompanyContacts, useCompanyContactsSlim, useCompanyContact, useCompanyContactsPaginated, useCompanyContactDictionary, createCompanyContact, updateCompanyContact, deleteCompanyContact, invalidateCompanyContacts, tourLeaderEntity, useTourLeadersSlim, useTourLeader, useTourLeadersPaginated, useTourLeaderDictionary, invalidateTourLeaders, calendarEventEntity, useCalendarEventsSlim, useCalendarEvent, useCalendarEventsPaginated, useCalendarEventDictionary, vendorCostEntity, useVendorCostsSlim, useVendorCost, useVendorCostsPaginated, useVendorCostDictionary, deleteVendorCost, invalidateVendorCosts, paymentRequestItemEntity, usePaymentRequestItemsSlim, usePaymentRequestItem, usePaymentRequestItemsPaginated, usePaymentRequestItemDictionary, createPaymentRequestItem, updatePaymentRequestItem, deletePaymentRequestItem, linkPayLogEntity, useLinkPayLogsSlim, useLinkPayLog, useLinkPayLogsPaginated, useLinkPayLogDictionary, createLinkPayLog, updateLinkPayLog, deleteLinkPayLog, invalidateLinkPayLogs, costTemplateEntity, useCostTemplates, useCostTemplatesSlim, useCostTemplate, useCostTemplatesPaginated, useCostTemplateDictionary, createCostTemplate, updateCostTemplate, deleteCostTemplate, invalidateCostTemplates, supplierCategoryEntity, useSupplierCategories, useSupplierCategoriesSlim, useSupplierCategory, useSupplierCategoriesPaginated, useSupplierCategoryDictionary, createSupplierCategory, updateSupplierCategory, deleteSupplierCategory, invalidateSupplierCategories, tourItineraryItemEntity, useTourItineraryItemsSlim, useTourItineraryItem, useTourItineraryItemsPaginated, useTourItineraryItemDictionary, createTourItineraryItem, updateTourItineraryItem, deleteTourItineraryItem, tourItineraryDayEntity, useTourItineraryDay, updateTourItineraryDay, invalidateTourItineraryDays
+src/data/entities/itineraries.ts: itineraryEntity, useItinerariesSlim, useItinerary, useItinerariesPaginated, useItineraryDictionary, deleteItinerary, invalidateItineraries
+src/data/entities/linkpay-logs.ts: linkPayLogEntity, useLinkPayLogsSlim, useLinkPayLog, useLinkPayLogsPaginated, useLinkPayLogDictionary, createLinkPayLog, updateLinkPayLog, deleteLinkPayLog, invalidateLinkPayLogs
+src/data/entities/members.ts: memberEntity, useMember, useMembersPaginated, useMemberDictionary, createMember, invalidateMembers
+src/data/entities/notes.ts: noteEntity, useNotes, useNotesSlim, useNote, useNotesPaginated, useNoteDictionary, createNote, updateNote, deleteNote, invalidateNotes
+src/data/entities/orders.ts: orderEntity, useOrder, useOrdersPaginated, useOrderDictionary
+src/data/entities/payment-request-items.ts: paymentRequestItemEntity, usePaymentRequestItemsSlim, usePaymentRequestItem, usePaymentRequestItemsPaginated, usePaymentRequestItemDictionary, createPaymentRequestItem, updatePaymentRequestItem, deletePaymentRequestItem
+src/data/entities/payment-requests.ts: paymentRequestEntity, usePaymentRequestsSlim, usePaymentRequest, usePaymentRequestsPaginated, usePaymentRequestDictionary
+src/data/entities/quotes.ts: quoteEntity, useQuotesSlim, useQuotesPaginated, useQuoteDictionary
+src/data/entities/receipts.ts: receiptEntity, useReceiptsSlim, useReceipt, useReceiptsPaginated, useReceiptDictionary
+src/data/entities/regions.ts: regionEntity, useRegionsSlim, useRegion, useRegionsPaginated, useRegionDictionary, createRegion, updateRegion, deleteRegion, invalidateRegions
+src/data/entities/restaurants.ts: restaurantEntity, useRestaurant, useRestaurantsPaginated
+src/data/entities/supplier-categories.ts: supplierCategoryEntity, useSupplierCategories, useSupplierCategoriesSlim, useSupplierCategory, useSupplierCategoriesPaginated, useSupplierCategoryDictionary, createSupplierCategory, updateSupplierCategory, deleteSupplierCategory, invalidateSupplierCategories
+src/data/entities/suppliers.ts: supplierEntity, useSupplier, useSuppliersPaginated, useSupplierDictionary
+src/data/entities/todos.ts: todoEntity, useTodosSlim, useTodo, useTodosPaginated, useTodoDictionary, createTodo, deleteTodo, invalidateTodos
+src/data/entities/tour-bonus-settings.ts: tourBonusSettingEntity, useTourBonusSettingsSlim, useTourBonusSetting, useTourBonusSettingsPaginated, useTourBonusSettingDictionary
+src/data/entities/tour-itinerary-days.ts: tourItineraryDayEntity, useTourItineraryDay, updateTourItineraryDay, invalidateTourItineraryDays
+src/data/entities/tour-itinerary-items.ts: tourItineraryItemEntity, useTourItineraryItemsSlim, useTourItineraryItem, useTourItineraryItemsPaginated, useTourItineraryItemDictionary, createTourItineraryItem, updateTourItineraryItem, deleteTourItineraryItem
+src/data/entities/tour-leaders.ts: tourLeaderEntity, useTourLeadersSlim, useTourLeader, useTourLeadersPaginated, useTourLeaderDictionary, invalidateTourLeaders
+src/data/entities/tours.ts: tourEntity, useToursPaginated
+src/data/entities/transportation-rates.ts: transportationRateEntity, useTransportationRates, useTransportationRatesSlim, useTransportationRate, useTransportationRatesPaginated, useTransportationRateDictionary, invalidateTransportationRates
+src/data/entities/vendor-costs.ts: vendorCostEntity, useVendorCostsSlim, useVendorCost, useVendorCostsPaginated, useVendorCostDictionary, deleteVendorCost, invalidateVendorCosts
+src/data/entities/visas.ts: visaEntity, useVisasSlim, useVisa, useVisasPaginated, useVisaDictionary
+src/data/entities/workspace-bonus-defaults.ts: workspaceBonusDefaultEntity, useWorkspaceBonusDefaultsSlim, useWorkspaceBonusDefault, useWorkspaceBonusDefaultsPaginated, useWorkspaceBonusDefaultDictionary, createWorkspaceBonusDefault, updateWorkspaceBonusDefault, deleteWorkspaceBonusDefault, invalidateWorkspaceBonusDefaults
+src/data/entities/workspace-modules.ts: workspaceModuleEntity, useWorkspaceModules, useWorkspaceModulesSlim, useWorkspaceModule, useWorkspaceModulesPaginated, useWorkspaceModuleDictionary, createWorkspaceModule, updateWorkspaceModule, deleteWorkspaceModule, invalidateWorkspaceModules
+src/data/entities/workspaces.ts: useWorkspaces, useWorkspacesSlim, useWorkspace, useWorkspacesPaginated, useWorkspaceDictionary, deleteWorkspace
+src/data/index.ts: createEntityHook, CACHE_PRESETS, DEFAULT_CACHE_CONFIG
+src/features/attractions/constants/labels.ts: ATTRACTION_PREVIEW_LABELS, MICHELIN_RESTAURANTS_TAB_LABELS, PREMIUM_EXPERIENCES_TAB_LABELS
+src/features/calendar/components/CalendarLegend.tsx: CalendarLegend
+src/features/calendar/components/index.ts: CalendarGrid, CalendarLegend
+src/features/contracts/components/constants/labels.ts: ENVELOPE_LABELS
+src/features/dashboard/actions/flight-actions.ts: searchAirportArrivalsAction
+src/features/dashboard/components/index.ts: ClockInWidget, CalculatorWidget, NotesWidget
+src/features/dashboard/constants/labels.ts: FLIGHT_WIDGET_LABELS
+src/features/dashboard/hooks/index.ts: useStatsData, useStatsConfig, saveStatsConfig
+src/features/dashboard/hooks/use-stats-data.ts: useStatsData, useStatsConfig, saveStatsConfig
+src/features/disbursement/components/DisbursementDialog.tsx: DisbursementDialog
+src/features/disbursement/components/DisbursementList.tsx: PendingList, CurrentOrderList, EmptyCurrentOrder, HistoryList
+src/features/disbursement/components/DisbursementPrintDialog.tsx: default
+src/features/disbursement/components/PrintDisbursementPreview.tsx: default
+src/features/disbursement/components/index.ts: DisbursementDialog, PendingList, CurrentOrderList, EmptyCurrentOrder, HistoryList, usePendingColumns, useCurrentOrderColumns, useHistoryColumns
+src/features/disbursement/index.ts: DisbursementDialog, DISBURSEMENT_STATUS_LABELS, DISBURSEMENT_STATUS_COLORS, PAYMENT_REQUEST_STATUS_LABELS, PAYMENT_REQUEST_STATUS_COLORS
+src/features/finance/payments/services/receipt-core.service.ts: afterReceiptChange
+src/features/itinerary/constants/labels.ts: ITINERARY_LABELS, FLIGHT_ITINERARY_LABELS, GEMINI_LABELS, ITINERARY_HOOKS_LABELS, ITINERARY_PAGE_LABELS
+src/features/orders/components/ExportDialog.tsx: ExportDialog
+src/features/orders/components/index.ts: ExportDialog, PassportUploadZone
+src/features/orders/components/member-row/index.tsx: RoomAssignmentCell
+src/features/orders/hooks/useMemberExport.ts: EXPORT_COLUMN_LABELS
+src/features/orders/hooks/useOrderMembers.ts: useOrderMembers
+src/features/orders/services/order-stats.service.ts: recalculatePaymentStatus
+src/features/orders/services/order_member.service.ts: insertRoomAssignments
+src/features/orders/types/order-member.types.ts: DEFAULT_EXPORT_COLUMNS
+src/features/quotes/components/ImportActivitiesDialog.tsx: ImportActivitiesDialog
+src/features/quotes/components/ImportMealsDialog.tsx: ImportMealsDialog
+src/features/quotes/components/QuoteDialog.tsx: QuoteDialog
+src/features/quotes/components/QuotesList.tsx: QuotesList
+src/features/quotes/components/index.ts: CostItemRow, AccommodationItemRow, QuotesList, QuoteDialog, ImportMealsDialog, ImportActivitiesDialog, QuoteConfirmationSection, QuickQuoteDetail, PrintableQuickQuote, QuoteDetailEmbed
+src/features/quotes/constants.ts: STATUS_FILTERS
+src/features/quotes/constants/labels.ts: PARTICIPANT_COUNT_EDITOR_LABELS, PRINTABLE_QUICK_QUOTE_LABELS, QUOTES_PAGE_LABELS, RESOURCE_SELECT_BUTTON_LABELS, SAVE_VERSION_DIALOG_LABELS, QUICK_QUOTE_VERSION_PANEL_LABELS, QUICK_QUOTE_LABELS, QUOTE_ITINERARY_SYNC_LABELS
+src/features/quotes/hooks/useQuotes.ts: useQuotesFeature
+src/features/quotes/types/index.ts: categoryIcons
+src/features/todos/constants/labels.ts: getPublicTodoMessages
+src/features/tour-leaders/index.ts: TourLeadersList, TourLeadersDialog, LeaderAvailabilityDialog
+src/features/tours/components/ArchiveReasonDialog.tsx: ARCHIVE_REASONS
+src/features/tours/components/TourConfirmationWizard.tsx: TourConfirmationWizard
+src/features/tours/components/TourOperationsAddButton.tsx: TourOperationsAddButton
+src/features/tours/components/TourOverviewTab.tsx: TourOverviewTab
+src/features/tours/components/TourTabs.tsx: TourTabs
+src/features/tours/components/TourUnlockDialog.tsx: TourUnlockDialog
+src/features/tours/components/index.ts: TourOverviewTab, TourOperationsAddButton, TourFormShell, DeleteConfirmDialog, TourConfirmationWizard, TourUnlockDialog, TourClosingDialog, TourItineraryDialog
+src/features/tours/components/itinerary-editor/ItineraryPreview.tsx: ItineraryPreview
+src/features/tours/components/sections/flight/UnifiedFlightCard.tsx: parseFlightDate, extractCityName
+src/features/tours/components/tour-print-constants.ts: STATUS_NAMES
+src/features/tours/constants.ts: TOUR_FLIGHT_INFO, TOUR_SETTINGS, TOUR_CONFIRMATION, TOUR_ITINERARY_DIALOG, TOUR_ACTIONS, TOUR_CLOSING
+src/features/tours/constants/bonus-labels.ts: BONUS_TYPE_COLORS
+src/features/tours/constants/labels.ts: BASIC_INFO_SECTION_LABELS, TOUR_PNR_TOOL_DIALOG_LABELS, FLIGHT_INFO_SECTION_LABELS, INVOICE_LABELS, ADD_PAYMENT_LABELS, FLIGHT_SECTION_LABELS, TOUR_PAYMENTS_LABELS, TOUR_FORM_LABELS, LINK_DOCUMENTS_LABELS, TOUR_WEBPAGE_TAB_LABELS, TOUR_NAVIGATION_LABELS, TOUR_LEADER_LABELS, TOUR_ITINERARY_SECTION_LABELS, PNR_TOOL_LABELS, TOUR_REQUEST_FORM_LABELS, ADD_MANUAL_REQUEST_DIALOG_LABELS, PACKAGE_LIST_PANEL_LABELS, TOUR_REQUEST_FORM_DIALOG_LABELS
+src/features/tours/hooks/index.ts: useTours, useTourPageState, useTourOperations, useTourScrollEffects, useTourGallery, useTourItineraryNav, useTourHealth, useTourDepartureData, useQuoteLoader, useTourDepartureTotals, useTourItineraryItemsByTour, useTourItineraryItemsByItinerary, useSyncItineraryToCore
+src/features/tours/hooks/useQuoteLoader.ts: useQuoteLoader
+src/features/tours/hooks/useTourDepartureData.ts: useTourDepartureData
+src/features/tours/hooks/useTourDepartureTotals.ts: useTourDepartureTotals
+src/features/tours/hooks/useTourGallery.ts: useTourGallery
+src/features/tours/hooks/useTourHealth.ts: useTourHealth
+src/features/tours/hooks/useTourItineraryItems.ts: useTourItineraryItemsByItinerary
+src/features/tours/hooks/useTours-advanced.ts: useTours
+src/features/tours/hooks/useToursPaginated.ts: useTourDetailsPaginated
+src/features/tours/index.ts: tourService
+src/features/tours/services/profit-calculation.service.ts: calculateReceiptTotal, calculateExpenseTotal, calculateAdministrativeCost, getAdminCostPerPerson, calculateProfitBeforeTax, getTaxRate, calculateProfitTax, calculateNetProfit, calculateBonus, calculateAllBonuses, calculateCompanyProfit
+src/features/tours/services/tour_dependency.service.ts: checkTourPaidOrders
+src/features/tours/themes/index.ts: themes, inferFlightStyle, themeToCSS
+src/features/tours/types/tour-itinerary-item.types.ts: ITEM_QUOTE_STATUS, ITEM_CONFIRMATION_STATUS, ITEM_LEADER_STATUS, ITEM_REQUEST_STATUS
+src/features/tours/utils/tour-display.ts: getTourCountryName, getTourCityName, getTourDestinationDisplay, isDomesticTour
+src/features/visas/constants/labels.ts: VISA_PAGE_LABELS, VISA_TAB_LABELS
+src/features/visas/constants/visa-info.ts: buildVisaInfoText, VISA_INFO_TEXT
+src/features/visas/hooks/useVisasFilters.ts: BUTTON_AVAILABILITY
+src/hooks/index.ts: useEnterSubmit, useCrudOperations, useManagedDialogState, useSimpleDialogState, useDialogState, useMultiDialogState, useBreadcrumb, getPageTitle, getParentPath
+src/hooks/useBreadcrumb.ts: getPageTitle, getParentPath
+src/hooks/useCalculableInput.ts: useCalculableInput
+src/hooks/useDataFiltering.ts: useMultiStatusFiltering, useDateRangeFiltering
+src/hooks/useDialogState.ts: useDialogState, useMultiDialogState
+src/hooks/useEnterSubmit.ts: useEnterSubmit
+src/hooks/useListSlim.ts: useItinerariesListSlim, useMembersCountSlim
+src/hooks/useManagedDialogState.ts: useManagedDialogState, useSimpleDialogState
+src/hooks/useRequireAuth.ts: useRequireAuth
+src/hooks/useTodos.ts: default
+src/hooks/useVirtualList.ts: useVirtualTable
+src/hooks/useWorkspaceSettings.ts: LOGO_CONSTRAINTS
+src/lib/ai-settings.ts: getAISettings, updateAISetting, renderTemplate
+src/lib/api-usage.ts: getApiUsage
+src/lib/api/validation.ts: validateQuery, validateParams, CommonSchemas
+src/lib/auth.ts: addTokenToBlacklist, isTokenBlacklisted, clearTokenBlacklist
+src/lib/auth/auth-sync.ts: getAuthSyncState, setupAuthSyncListener
+src/lib/auth/server-auth.ts: getServerUser
+src/lib/cache/indexeddb-cache.ts: configure_idb_cache, clear_cache, clear_expired
+src/lib/cache/memory-cache.ts: LRUCache, cacheKeys
+src/lib/channel-utils.ts: archiveChannelForTour
+src/lib/constants/airports.ts: AIRPORT_COORDINATES
+src/lib/constants/layout.ts: HEADER_HEIGHT, SIDEBAR_WIDTH_EXPANDED, SIDEBAR_WIDTH_COLLAPSED
+src/lib/constants/morandi-colors.ts: getMonandiColor, morandiColorClasses
+src/lib/constants/quote-status.ts: QUOTE_STATUS_COLORS, QUOTE_STATUS_FILTERS
+src/lib/constants/status-maps.ts: TOUR_STATUS_LABELS, QUOTE_STATUS_REVERSE_MAP, FINANCE_TYPE_REVERSE_MAP, CONTRACT_STATUS_REVERSE_MAP, PAYMENT_METHOD_REVERSE_MAP, VISA_STATUS_REVERSE_MAP
+src/lib/constants/timeouts.ts: SYNC_DELAYS, REQUEST_TIMEOUTS, ANIMATION_DURATIONS, POLLING_INTERVALS, SPECIAL_DELAYS
+src/lib/constants/workspace-settings.ts: ENABLE_TOUR_CHANNEL_DELETE_PROTECTION, DELETE_QUOTE_PASSWORD
+src/lib/constants/workspace.ts: WORKSPACE_LAYOUT, WORKSPACE_LIMITS, WORKSPACE_DELAYS, MESSAGE_TYPES, CHANNEL_TYPES, ALLOWED_FILE_TYPES, WORKSPACE_DEFAULTS
+src/lib/contract-utils.ts: replaceContractVariables
+src/lib/data/todos.ts: getTodoById, getTodosByStatus, getTodosByAssignee, getTodosByEntity
+src/lib/error-tracking.ts: captureMessage, setUser, withErrorTracking
+src/lib/feature-restrictions.ts: hasFullFeatures, getAvailablePaymentMethods
+src/lib/formula-calculator.ts: FIELD_MAP, FIELD_COORDINATES, FORMULA_EXAMPLES
+src/lib/i18n/client.ts: useScopedI18n
+src/lib/i18n/index.ts: locales
+src/lib/image-utils.ts: DEFAULT_BLUR_DATA_URL, shimmerToBase64, getBlurPlaceholder, compressImage, compressAvatarImage
+src/lib/itinerary-generator/index.ts: DEFAULT_SCHEDULING_CONFIG, calculateDistance, estimateTravelTime, filterNearbyAttractions, optimizeAttractionOrder, calculateTotalDistance, timeToMinutes, minutesToTime, calculateDailyTimeSlots, calculateUsableTime, formatDisplayDate
+src/lib/notifications/channel-notify.ts: sendChannelNotify
+src/lib/pdf/font-loader.ts: loadFontsForPDF
+src/lib/pdf/pdf-fonts.ts: setChineseFont, getAutoTableFontOptions
+src/lib/permissions/features.ts: getFeatureByCode, getFeatureByRoute
+src/lib/permissions/index.ts: FEATURE_PERMISSIONS, PLATFORM_CAPABILITY_ROUTES, getPermissionCategories, getPermissionsByCategory
+src/lib/permissions/module-tabs.ts: getModulesWithTabs, getModulesWithoutTabs, getAllModulesSorted
+src/lib/permissions/useTabPermissions.tsx: PermissionGuard
+src/lib/pexels.ts: getCuratedPhotos
+src/lib/pnr-parser/enhancers/cabin-class-enhancer.ts: getCabinClassInfo
+src/lib/pnr-parser/index.ts: SSR_CATEGORIES, OSI_KEYWORDS, MONTH_MAP, MONTH_NAMES, mergeMultilineEntries, parseAmadeusDate, formatSegment, extractImportantDates, isUrgent, parseEnhancedSSR, parseEnhancedOSI, extractAirportCode, extractTripComAirportCode, validateAmadeusPNR, parseAmadeusPNR, parseFareFromTelegram, parseHTMLConfirmation, parseETicketConfirmation, parseTicketOrderDetail, parseTripComConfirmation, parseAmadeusPNREnhanced, validateAllPassengerAges, validateInfantAdultRatio, enhanceAllSegmentsCabinClass, getCabinClassInfo, analyzeAllConnections, validateTicketNumbers, validateTicketNumber
+src/lib/pnr-parser/parsers/amadeus-enhanced.ts: parseAmadeusPNREnhanced
+src/lib/pnr-parser/parsers/amadeus.ts: validateAmadeusPNR, parseFareFromTelegram
+src/lib/pnr-parser/validators/age-validator.ts: validatePassengerAge
+src/lib/pnr-parser/validators/ticket-validator.ts: validateTicketNumber
+src/lib/pnr/index.ts: getReferenceData, refreshReferenceData, getAirline, getAirlineName, getAirport, getAirportName, getCityName, getBookingClass, getBookingClassDescription, getSSRCode, getSSRDescription, getSSRCategory, getStatusCode, getStatusDescription, getStatusCategory, isConfirmedStatus, isWaitlistStatus, isCancelledStatus, getCacheStatus, parseAmadeusPNR, parseHTMLConfirmation, parseFlightConfirmation, validateAmadeusPNR, formatSegment, extractImportantDates, isUrgent, SSRCategory, OSICategory
+src/lib/pnr/use-reference-data.ts: default
+src/lib/print/PrintTemplate.tsx: A4, PrintTemplate, PageBreak, NoBreak
+src/lib/print/index.ts: printElement, PrintTemplate, PageBreak, NoBreak, A4, PrintHeader, PrintControls, usePrintLogo, PRINT_STYLES
+src/lib/print/print-service.ts: printElement
+src/lib/print/print-styles.ts: PRINT_STYLES
+src/lib/rate-limit.ts: getClientIp
+src/lib/status-config.ts: STATUS_CONFIG
+src/lib/supabase/typed-client.ts: asTableName, typedFrom, castData, dynamicRpc, asInsert
+src/lib/supabase/types.ts: Constants
+src/lib/swr/config.ts: localStorageProvider, clearSWRCache
+src/lib/swr/index.ts: swrConfig, localStorageProvider, clearSWRCache
+src/lib/swr/provider.tsx: default
+src/lib/tasks/handlers.ts: taskHandlers
+src/lib/tasks/index.ts: createTask, processTask, cancelTask, getPendingTasks, getTaskStats, registerTaskHandler, TaskTypes, taskHandlers
+src/lib/tasks/task-queue.ts: createTask, getPendingTasks, processTask, cancelTask, getTaskStats
+src/lib/tenant.ts: getCopyright
+src/lib/ui/alert-dialog.tsx: alertWarning, alertInfo
+src/lib/utils/logger.ts: setLogContext, clearLogContext
+src/lib/utils/sync-passport-image.ts: checkMemberConflicts, syncPassportDataToMembers, syncAllPassportImages
+src/lib/utils/text.ts: withHalfWidthConversion
+src/lib/workspace-context.ts: getWorkspaceId, useRequiredWorkspaceId, withWorkspaceId
+src/lib/workspace-filter.ts: getCurrentWorkspaceFilter, isWorkspaceFilterEnabled, getWorkspaceFilterForQuery
+src/lib/workspace-helpers.ts: getCurrentWorkspace, canManageWorkspace, getWorkspaceTagline, getAvailableWorkspaces
+src/services/storage/index.ts: uploadFilesToStorage, removeFileFromStorage, listFilesInStorage
+src/stores/index.ts: useEmployeeStore, useThemeStore, useUserStore, useAccountingStore, storeEvents, setupStoreSyncListeners, STORE_SYNC_RELATIONS, emitCreated, emitUpdated, emitDeleted, TOUR_SYNC_CONFIG, ORDER_SYNC_CONFIG, MEMBER_SYNC_CONFIG, ITINERARY_SYNC_CONFIG, PAYMENT_REQUEST_SYNC_CONFIG, RECEIPT_ORDER_SYNC_CONFIG, useStoreSyncSetup
+src/stores/leader-availability-store.ts: isLeaderAvailableOnDate, getAvailableLeadersForDateRange
+src/stores/sync/StoreSyncProvider.tsx: StoreSyncProvider
+src/stores/sync/index.ts: storeEvents, setupStoreSyncListeners, STORE_SYNC_RELATIONS, useStoreSyncSetup, StoreSyncProvider, emitCreated, emitUpdated, emitDeleted, TOUR_SYNC_CONFIG, ORDER_SYNC_CONFIG, MEMBER_SYNC_CONFIG, ITINERARY_SYNC_CONFIG, PAYMENT_REQUEST_SYNC_CONFIG, RECEIPT_ORDER_SYNC_CONFIG
+src/stores/sync/store-events.ts: setupStoreSyncListeners, STORE_SYNC_RELATIONS
+src/stores/sync/use-store-sync.ts: emitTourUpdated, emitTourDeleted, emitOrderUpdated, emitOrderDeleted, emitMemberUpdated, emitMemberDeleted
+src/stores/sync/with-sync-events.ts: emitCreated, emitUpdated, emitDeleted, TOUR_SYNC_CONFIG, ORDER_SYNC_CONFIG, MEMBER_SYNC_CONFIG, ITINERARY_SYNC_CONFIG, PAYMENT_REQUEST_SYNC_CONFIG, RECEIPT_ORDER_SYNC_CONFIG
+src/stores/theme-store.ts: THEMES
+src/stores/types/index.ts: FEATURE_PERMISSIONS, BonusSettingType, BonusCalculationType
+src/stores/user-store.ts: useUserStoreCompat
+src/stores/workspace/index.ts: useChannelsStore, useMembersStore, useWidgetsStore
+src/types/calendar.types.ts: isCalendarEventType, isCalendarVisibility, isCalendarRecurring
+src/types/database.types.ts: Constants
+src/types/receipt.types.ts: RECEIPT_TYPE_LABELS, RECEIPT_STATUS_LABELS, RECEIPT_STATUS_COLORS, RECEIPT_STATUS_ICONS, LINKPAY_STATUS_LABELS, LINKPAY_STATUS_COLORS, getReceiptTypeName, getReceiptStatusName, getReceiptStatusColor
+Unused exported types (174)
+src/app/api/ocr/passport/passport-parser.ts: PassportCustomerData
+src/components/dialog/confirm-dialog.tsx: ConfirmDialogProps
+src/components/dialog/form-dialog.tsx: FormDialogProps
+src/components/dialog/index.ts: ConfirmDialogProps, FormDialogProps, ManagedDialogProps, ManagedDialogRenderProps
+src/components/dialog/managed-dialog.tsx: ManagedDialogRenderProps, ManagedDialogProps
+src/components/editor/tour-form/components/DayTemplateEditor.tsx: DayDisplayStyle
+src/components/editor/tour-form/sections/daily-itinerary/types.ts: HotelData, RestaurantData, DailyItinerarySectionProps
+src/components/layout/content-page-layout.tsx: ContentPageLayoutProps
+src/components/layout/list-page-layout.tsx: ListPageLayoutProps
+src/components/resource-panel/ResourceDetailDialog.tsx: ResourceType
+src/components/resource-panel/ResourcePanel.tsx: ResourceType
+src/components/table-cells/index.tsx: DateCellProps, StatusCellProps, CurrencyCellProps, DateRangeCellProps, ActionButton, ActionCellProps, AvatarCellProps, LinkCellProps, BadgeCellProps
+src/components/tour-preview/AttractionCard.tsx: AttractionCardProps
+src/components/tour-preview/DateSubtitle.tsx: DateSubtitleProps
+src/components/tour-preview/DayLabel.tsx: DayLabelProps
+src/components/tour-preview/DecorativeDivider.tsx: DecorativeDividerProps
+src/components/tour-preview/index.ts: DayLabelProps, DateSubtitleProps, DecorativeDividerProps, AttractionCardProps
+src/components/ui/badge.tsx: BadgeProps
+src/components/ui/button.tsx: ButtonProps
+src/components/ui/calendar.tsx: CalendarProps
+src/components/ui/combobox.tsx: ComboboxProps
+src/components/ui/date-picker.tsx: DatePickerProps, DateRangePickerProps
+src/components/ui/dialog.tsx: DialogSize, DialogContentProps
+src/components/ui/enhanced-table/VirtualizedTable.tsx: VirtualizedTableProps
+src/components/ui/enhanced-table/types.ts: Column
+src/components/ui/enhanced-table/useEnhancedTable.ts: UseEnhancedTableResult
+src/components/ui/enhanced-table/useTableState.ts: UseTableStateProps
+src/components/ui/image-editor/ImageEditor.tsx: ImageAdjustments
+src/components/ui/image-editor/index.ts: ImageAdjustments
+src/components/ui/image-editor/types.ts: AiAction
+src/components/ui/image-uploader/DropZone.tsx: DropZoneProps
+src/components/ui/image-uploader/ImagePickerDialog.tsx: ImagePickerDialogProps
+src/components/ui/image-uploader/ImagePreview.tsx: ImagePreviewProps
+src/components/ui/image-uploader/index.tsx: ImagePickerDialogProps, ImageUploaderProps, MultiImageUploaderProps
+src/components/ui/image-uploader/useImageUploader.ts: UseImageUploaderProps
+src/components/ui/inline-edit-table/InlineEditTable.tsx: InlineEditTableProps
+src/components/ui/inline-edit-table/index.ts: InlineEditTableProps
+src/components/ui/input-ime.tsx: InputIMEProps
+src/components/ui/input.tsx: InputProps
+src/components/ui/label.tsx: LabelProps
+src/components/ui/use-toast.ts: Toast
+src/components/workspace/CanvasEditor.tsx: CanvasEditorProps
+src/components/workspace/ChannelSidebar.tsx: ChannelSidebarProps
+src/components/workspace/canvas/shared/types.ts: PersonalCanvasProps
+src/components/workspace/channel-sidebar/index.ts: ChannelSidebarProps
+src/constants/visa-types.ts: VisaTypeGroup
+src/core/types/common.ts: ApiResponse, UseEntityDetailsResult
+src/data/entities/channel-members.ts: ChannelMember
+src/data/entities/image-library.ts: ImageLibraryItem
+src/data/entities/index.ts: Country, City
+src/data/entities/notes.ts: Note
+src/data/entities/workspaces.ts: WorkspaceEntity
+src/data/hooks/index.ts: PaymentMethod, WorkspaceRole
+src/data/hooks/useCountryAirports.ts: AirportOption
+src/data/hooks/useEligibleEmployees.ts: EligibleEmployee
+src/data/hooks/usePaymentMethods.ts: PaymentMethod
+src/data/hooks/useWorkspaceRoles.ts: WorkspaceRole
+src/data/index.ts: BaseEntity, EntityConfig, EntityHook, ListResult, DetailResult, PaginatedParams, PaginatedResult, DictionaryResult, CacheConfig
+src/data/region-hierarchy.ts: City, Region, Country, SelectedRegion
+src/features/attractions/hooks/useAttractionForm.ts: UseAttractionFormProps
+src/features/contracts/components/ContractDialog.tsx: ContractDialogProps, ContractData
+src/features/contracts/components/contract-dialog/index.ts: ContractDialogProps, ContractData
+src/features/contracts/components/contract-dialog/types.ts: ContractTemplateOption
+src/features/disbursement/index.ts: DisbursementOrder, PaymentRequest, DisbursementTab, DisbursementPageState
+src/features/disbursement/types.ts: DisbursementTab, DisbursementPageState
+src/features/finance/reports/components/DateRangeSelector.tsx: Granularity
+src/features/finance/reports/hooks/useUnclosedTours.ts: UseUnclosedToursResult
+src/features/itinerary/hooks/useTemplates.ts: Template
+src/features/orders/hooks/useMemberExport.ts: ExportColumns
+src/features/orders/types/order-member.types.ts: MemberRowProps, MemberEditDialogProps, PassportUploadZoneProps, AddMemberDialogProps, ExportDialogProps
+src/features/suppliers/types.ts: SupplierFormData, SupplierFilters
+src/features/todos/components/todo-expanded-view.tsx: TodoExpandedViewProps
+src/features/tours/components/ConvertToTourDialog.tsx: ConvertOrderData
+src/features/tours/components/TourTabs.tsx: TourTabValue
+src/features/tours/components/itinerary-editor/index.ts: ItineraryEditorContext
+src/features/tours/components/itinerary-editor/types.ts: AiThemeOption
+src/features/tours/components/itinerary/DroppableZone.tsx: DropZoneAcceptType
+src/features/tours/components/sections/flight/UnifiedFlightCard.tsx: FormattedDate
+src/features/tours/components/sections/utils/art-theme.ts: ArtTheme
+src/features/tours/hooks/useAirports.ts: Airport
+src/features/tours/hooks/useTourEdit.ts: EditFormData
+src/features/tours/hooks/useTourHealth.ts: TourHealthData
+src/features/tours/hooks/useToursDialogs.ts: UseToursDialogsReturn
+src/features/tours/hooks/useToursPaginated.ts: UseToursPaginatedParams
+src/features/tours/index.ts: NewTourData, TourExtraFields, DeleteConfirmState
+src/features/tours/services/tour_dependency.service.ts: TourDependencyCheck
+src/features/tours/types/tour-display.types.ts: Activity, Meals
+src/features/tours/types/tour-itinerary-item.types.ts: TourItineraryItemCreate, TourItineraryItemUpdate
+src/hooks/index.ts: UseManagedDialogStateOptions, UseManagedDialogStateReturn, UseDialogStateOptions, UseDialogStateReturn, OcrParsedData, BreadcrumbItem, UseBreadcrumbOptions
+src/hooks/useBreadcrumb.ts: UseBreadcrumbOptions, BreadcrumbConfig
+src/hooks/useDataFiltering.ts: FilterConfig
+src/hooks/useDialogState.ts: UseDialogStateOptions, UseDialogStateReturn
+src/hooks/useManagedDialogState.ts: UseManagedDialogStateOptions, UseManagedDialogStateReturn
+src/hooks/useOcrRecognition.ts: OcrParsedData
+src/lib/api-usage.ts: ApiUsageCheckResult, ApiName
+src/lib/api/response.ts: ApiResponse, ErrorCodeType
+src/lib/auth/server-auth.ts: ServerAuthResult, ServerAuthError
+src/lib/constants/airports.ts: AirportCoordinate
+src/lib/constants/status-maps.ts: TourStatusValue, OrderStatusKey, OrderStatusValue, PaymentStatusKey, PaymentStatusValue, QuoteStatusKey, QuoteStatusValue, FinanceTypeKey, FinanceTypeValue, ContractStatusKey, ContractStatusValue, PaymentMethodKey, PaymentMethodValue, VisaStatusKey, VisaStatusValue
+src/lib/crypto/totp.ts: TotpResult
+src/lib/excel/import-parser.ts: ImportParseResult
+src/lib/formula-calculator.ts: FormulaContext
+src/lib/image-utils.ts: CompressImageOptions
+src/lib/itinerary-generator/index.ts: GenerateItineraryResult, FlightConstraint, DailyTimeSlot, SchedulingConfig, AttractionWithDistance
+src/lib/itinerary-generator/types.ts: AttractionCategory
+src/lib/notifications/channel-notify.ts: NotifyEvent
+src/lib/pdf/font-loader.ts: FontStyle
+src/lib/permissions/features.ts: FeatureDefinition
+src/lib/permissions/index.ts: PermissionConfig
+src/lib/pexels.ts: PexelsSearchResult
+src/lib/pnr-parser/index.ts: EnhancedParsedPNR, PassengerAgeValidation, CabinClassInfo, EnhancedFlightSegment, ConnectionInfo, TicketNumberValidation
+src/lib/pnr-parser/parsers/amadeus-enhanced.ts: EnhancedParsedPNR
+src/lib/pnr/index.ts: Airline, Airport, BookingClass, SSRCode, StatusCode, ReferenceData, ParsedPNR, FlightSegment, EnhancedSSR, EnhancedOSI, ValidationResult, ParsedHTMLConfirmation
+src/lib/print/PrintTemplate.tsx: PrintTemplateProps
+src/lib/print/index.ts: PrintOptions, PrintTemplateProps
+src/lib/print/print-service.ts: PrintOptions
+src/lib/status-config.ts: StatusConfig
+src/lib/supabase/typed-client.ts: TableRow, TableInsert, TableUpdate, SupabaseRpcName, RpcArgs, RpcReturns
+src/lib/supabase/types.ts: Tables, TablesInsert, TablesUpdate, Enums, CompositeTypes
+src/lib/tasks/index.ts: Task, TaskHandler, TaskPayload, TaskStatus, TaskPriority, TaskType
+src/lib/tasks/task-queue.ts: TaskStatus, TaskPriority, TaskPayload, Task, TaskHandler, TaskType
+src/lib/utils/logger.ts: LogLevel
+src/lib/utils/passport-expiry.ts: PassportExpiryStatus, PassportExpiryResult
+src/lib/validations/schemas.ts: CreateProposalInput, CreateTourInput, CreatePaymentRequestInput, CreateDisbursementInput, AddManualRequestInput
+src/lib/webhook/idempotency.ts: WebhookSource
+src/lib/workspace-company-info.ts: CompanyInfo
+src/services/storage/index.ts: StorageUploadProgress, StorageUploadOptions, StorageUploadResult, UploadMultipleOptions
+src/stores/accounting-store.ts: AccountingStats
+src/stores/calendar-store.ts: CalendarSettings
+src/stores/core/types.ts: SyncState, StorageAdapter, RemoteAdapter
+src/stores/index.ts: Country, City, RegionNew, RegionStats, Tour, Itinerary, Order, Member, Customer, Payment, PaymentRequest, DisbursementOrder, Quote, QuoteItem, Employee, Todo, Visa, Supplier, CompanyContact, LinkPayLog, ReceiptType, ReceiptStatus, LinkPayStatus, CreateReceiptData, UpdateReceiptData, RECEIPT_TYPE_LABELS, RECEIPT_STATUS_LABELS, RECEIPT_STATUS_COLORS, LINKPAY_STATUS_LABELS, LINKPAY_STATUS_COLORS, StoreEventType, StoreSource, TourEventPayload, OrderEventPayload, MemberEventPayload, StoreSyncConfig, SyncEventConfig, SyncEntityType
+src/stores/leader-availability-store.ts: CreateLeaderAvailability, UpdateLeaderAvailability
+src/stores/region-store.ts: RegionStats
+src/stores/sync/index.ts: StoreEventType, StoreSource, TourEventPayload, OrderEventPayload, MemberEventPayload, ItineraryEventPayload, PaymentRequestEventPayload, ReceiptOrderEventPayload, StoreEventPayloadMap, StoreSyncConfig, SyncEventConfig, SyncEntityType
+src/stores/sync/store-events.ts: StoreSyncConfig
+src/stores/sync/with-sync-events.ts: SyncEntityType, SyncEventConfig
+src/stores/theme-store.ts: ThemeType
+src/stores/types/base.types.ts: AirportImageSeason
+src/stores/types/finance.types.ts: TourAllocation, ReceiptOrder, OrderAllocation, ReceiptPaymentItem
+src/stores/types/index.ts: AirportImageSeason, FlightInfo, TourAddOn, ItineraryFeature, FocusCard, LeaderInfo, MeetingInfo, HotelInfo, DailyActivity, DailyMeals, DailyImage, PricingItem, PricingDetails, PriceTier, FAQ, QuoteRegion, QuoteCategory, TierPricing, PaymentRequestCategory, TourAllocation, ReceiptOrder, OrderAllocation, ReceiptPaymentItem, UpdateInput, TourBonusSetting, WorkspaceBonusDefault, BonusResult, ProfitCalculationResult, ProfitTableRow
+src/stores/types/quote.types.ts: QuoteRegion, QuoteCategory
+src/stores/types/tour.types.ts: FlightSegment, FlightInfo, TourAddOn, ItineraryFeature, FocusCard, MeetingInfo, TourType, TourStatus, ContractStatus, ContractTemplate, TourCategory, CreateTourData, UpdateTourData, TourFilter, TourListItem, TourStats
+src/stores/workspace/advance-list-store.ts: AdvanceListStoreType
+src/stores/workspace/channel-group-store.ts: ChannelGroupStoreType
+src/stores/workspace/channel-member-store.ts: ChannelMemberBase, ChannelMemberStoreType
+src/stores/workspace/channel-store.ts: ChannelStoreType
+src/stores/workspace/channels-store.ts: ChannelsStoreType
+src/stores/workspace/chat-store.ts: ChatStoreType
+src/stores/workspace/members-store.ts: MembersStoreType
+src/stores/workspace/message-store.ts: MessageStoreType
+src/stores/workspace/shared-order-list-store.ts: SharedOrderListStoreType
+src/stores/workspace/types.ts: Bulletin, PersonalCanvas, DocumentFormatData, RichDocument
+src/stores/workspace/widgets-store.ts: WidgetsStoreType
+src/stores/workspace/workspace-store.ts: WorkspaceStoreDataType
+src/types/accounting-pro.types.ts: VoucherType, VoucherStatus, VoucherSourceType, Voucher, VoucherEntry, GeneralLedger, CreateWorkspaceModuleData, UpdateWorkspaceModuleData, CreateAccountingSubjectData, UpdateAccountingSubjectData, CreateVoucherData, UpdateVoucherData, CreateVoucherEntryData, UpdateVoucherEntryData, CreateGeneralLedgerData, UpdateGeneralLedgerData, AutoVoucherFromPayment, CardPaymentMeta, AutoVoucherFromCardPayment, AutoVoucherFromPaymentRequest, AutoVoucherFromTourClosing, VoucherQueryParams, GeneralLedgerQueryParams, SubjectBalance, FinancialStatement
+src/types/accounting.types.ts: AccountType, SubledgerType, Account, BankAccount, JournalVoucher, JournalLine, AccountBalance
+src/types/base.types.ts: PageRequest, PageResponse, Filter, FilterOperator, Sort, ApiResponse, ApiError, LoadingState, AsyncState
+src/types/calendar.types.ts: CreateCalendarEventData, UpdateCalendarEventData
+src/types/company.types.ts: CompanyContact, UpdateCompanyData, CreateCompanyContactData, UpdateCompanyContactData
+src/types/customer.types.ts: CustomerFilter, CustomerListItem, CustomerStats
+src/types/database.types.ts: Database, Tables, TablesInsert, TablesUpdate, Enums, CompositeTypes
+src/types/finance.types.ts: TourAllocation, ReceiptOrder, OrderAllocation, ReceiptPaymentItem
+src/types/flight.types.ts: FlightInfoRequired
+src/types/index.ts: Database, Json, PageRequest, PageResponse, Filter, FilterOperator, Sort, ApiResponseBase, ApiError, LoadingState, AsyncState, ID, ISODateTime, Email, URL, Payment, Todo, Visa, Supplier, Quote, PaymentRequest, DisbursementOrder, Workspace, WorkspaceSettings, Document, Message, Attachment, SyncStatus, PendingChange, SyncConflict, ApiSuccessResponse, ApiErrorResponse, ApiResponse, PaginationParams, PaginatedResponse, FormState, FormErrors, FormTouched, FilterCondition, SearchParams
+src/types/models.types.ts: ID, ISODateTime, Email, URL, Payment, Todo, Visa, Supplier, PaymentRequest, DisbursementOrder, Workspace, WorkspaceSettings, Document, Message, Attachment, SyncStatus, PendingChange, SyncConflict, ApiSuccessResponse, ApiErrorResponse, ApiResponse, PaginationParams, PaginatedResponse, FormState, FormErrors, FormTouched, FilterCondition, SearchParams
+src/types/order.types.ts: Gender, AgeCategory, RoomType, CreateOrderData, UpdateOrderData, CreateMemberData, UpdateMemberData, OrderFilter, OrderListItem, OrderStats
+src/types/quote.types.ts: QuoteItem, QuoteStatus, QuoteItemType, CreateQuoteData, UpdateQuoteData, CreateQuoteItemData, UpdateQuoteItemData, QuoteFilter, QuoteListItem, QuoteStats, SendConfirmationLinkParams, CustomerConfirmParams, StaffConfirmParams
+src/types/receipt.types.ts: CreateReceiptData, UpdateReceiptData, DbReceiptItem, CreateReceiptItemData
+src/types/supplier-category.types.ts: CreateSupplierCategoryData, UpdateSupplierCategoryData
+src/types/supplier.types.ts: SupplierServiceArea, SupplierWithServiceAreas, CostTemplateWithRelations, SupplierFormData, CostTemplateFormData, CreateSupplierData, UpdateSupplierData, CreateCostTemplateData, UpdateCostTemplateData
+src/types/tour-departure.types.ts: CompleteTourDepartureData
+src/types/tour-leader.types.ts: CreateTourLeaderData, UpdateTourLeaderData
+src/types/tour.types.ts: TourAddOn, ContractStatus, TourCategory, CreateTourData, UpdateTourData, TourFilter, TourListItem, TourStats
+src/types/transportation-rates.types.ts: Country, GroupedRate
+Duplicate exports (9)
+src/components/ErrorBoundary.tsx: ErrorBoundary, default
+src/features/disbursement/components/DisbursementPrintDialog.tsx: DisbursementPrintDialog, default
+src/features/disbursement/components/PrintDisbursementPreview.tsx: PrintDisbursementPreview, default
+src/features/quotes/hooks/useQuotes.ts: useQuotesFeature, useQuotes
+src/hooks/useTodos.ts: useTodos, default
+src/lib/pnr/use-reference-data.ts: useReferenceData, default
+src/lib/status-config.ts: STATUS_CONFIGS, STATUS_CONFIG
+src/lib/swr/provider.tsx: SWRProvider, default
+src/lib/utils/format-date.ts: formatDateTW, formatDateDisplay
