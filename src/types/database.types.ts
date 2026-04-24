@@ -9618,7 +9618,6 @@ export type Database = {
           _deleted: boolean | null
           _needs_sync: boolean | null
           _synced_at: string | null
-          accommodation_days: number | null
           airport_code: string | null
           archive_reason: string | null
           archived: boolean | null
@@ -9656,6 +9655,7 @@ export type Database = {
           itinerary_id: string | null
           last_unlocked_at: string | null
           last_unlocked_by: string | null
+          liability_insurance_coverage: number | null
           location: string | null
           locked_at: string | null
           locked_by: string | null
@@ -9664,19 +9664,17 @@ export type Database = {
           locked_quote_id: string | null
           locked_quote_version: number | null
           max_participants: number | null
+          medical_insurance_coverage: number | null
           modification_reason: string | null
           name: string
           outbound_flight: Json | null
-          participant_counts: Json | null
           price: number | null
           profit: number
           quote_cost_structure: Json | null
           return_date: string | null
           return_flight: Json | null
           selling_price_per_person: number | null
-          selling_prices: Json | null
           status: string
-          tier_pricings: Json | null
           total_cost: number
           total_revenue: number
           tour_leader_id: string | null
@@ -9689,7 +9687,6 @@ export type Database = {
           _deleted?: boolean | null
           _needs_sync?: boolean | null
           _synced_at?: string | null
-          accommodation_days?: number | null
           airport_code?: string | null
           archive_reason?: string | null
           archived?: boolean | null
@@ -9727,6 +9724,7 @@ export type Database = {
           itinerary_id?: string | null
           last_unlocked_at?: string | null
           last_unlocked_by?: string | null
+          liability_insurance_coverage?: number | null
           location?: string | null
           locked_at?: string | null
           locked_by?: string | null
@@ -9735,19 +9733,17 @@ export type Database = {
           locked_quote_id?: string | null
           locked_quote_version?: number | null
           max_participants?: number | null
+          medical_insurance_coverage?: number | null
           modification_reason?: string | null
           name: string
           outbound_flight?: Json | null
-          participant_counts?: Json | null
           price?: number | null
           profit?: number
           quote_cost_structure?: Json | null
           return_date?: string | null
           return_flight?: Json | null
           selling_price_per_person?: number | null
-          selling_prices?: Json | null
           status?: string
-          tier_pricings?: Json | null
           total_cost?: number
           total_revenue?: number
           tour_leader_id?: string | null
@@ -9760,7 +9756,6 @@ export type Database = {
           _deleted?: boolean | null
           _needs_sync?: boolean | null
           _synced_at?: string | null
-          accommodation_days?: number | null
           airport_code?: string | null
           archive_reason?: string | null
           archived?: boolean | null
@@ -9798,6 +9793,7 @@ export type Database = {
           itinerary_id?: string | null
           last_unlocked_at?: string | null
           last_unlocked_by?: string | null
+          liability_insurance_coverage?: number | null
           location?: string | null
           locked_at?: string | null
           locked_by?: string | null
@@ -9806,19 +9802,17 @@ export type Database = {
           locked_quote_id?: string | null
           locked_quote_version?: number | null
           max_participants?: number | null
+          medical_insurance_coverage?: number | null
           modification_reason?: string | null
           name?: string
           outbound_flight?: Json | null
-          participant_counts?: Json | null
           price?: number | null
           profit?: number
           quote_cost_structure?: Json | null
           return_date?: string | null
           return_flight?: Json | null
           selling_price_per_person?: number | null
-          selling_prices?: Json | null
           status?: string
-          tier_pricings?: Json | null
           total_cost?: number
           total_revenue?: number
           tour_leader_id?: string | null

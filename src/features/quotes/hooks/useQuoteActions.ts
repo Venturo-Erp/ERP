@@ -41,6 +41,9 @@ interface UseQuoteActionsProps {
   quickQuoteCustomerInfo?: QuickQuoteCustomerInfo
   // 檻次表相關
   tierPricings?: TierPricing[]
+  // 保險金額（tours 表，單位：萬元）
+  liabilityInsurance?: number | null
+  medicalInsurance?: number | null
   // 核心表相關
   coreItems?: TourItineraryItem[]
   refreshCoreItems?: () => Promise<TourItineraryItem[] | undefined>
@@ -64,6 +67,8 @@ export const useQuoteActions = ({
   quickQuoteItems,
   quickQuoteCustomerInfo,
   tierPricings,
+  liabilityInsurance,
+  medicalInsurance,
   coreItems,
   refreshCoreItems,
 }: UseQuoteActionsProps) => {
@@ -83,6 +88,8 @@ export const useQuoteActions = ({
     quickQuoteItems,
     quickQuoteCustomerInfo,
     tierPricings,
+    liabilityInsurance,
+    medicalInsurance,
     coreItems,
     refreshCoreItems,
   })

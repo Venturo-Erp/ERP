@@ -116,9 +116,24 @@ export function QuoteDetailEmbed({ quoteId, showHeader = true }: QuoteDetailEmbe
     infant: 0,
   })
   const [tierPricings, setTierPricings] = useState<TierPricing[]>([])
+  // 保險金額 SSOT 在 tours 表（單位：萬元），docs/QUOTES_SSOT.md
+  const [liabilityInsurance, setLiabilityInsurance] = useState<number | null>(null)
+  const [medicalInsurance, setMedicalInsurance] = useState<number | null>(null)
+  const insuranceText = useMemo(
+    () =>
+      liabilityInsurance != null && medicalInsurance != null
+        ? `${liabilityInsurance}萬旅責險+${medicalInsurance}萬意外醫療`
+        : '',
+    [liabilityInsurance, medicalInsurance]
+  )
+  const handleInsuranceChange = useCallback((text: string) => {
+    const m = text.match(/^(\d+)萬旅責險\+(\d+)萬意外醫療$/)
+    setLiabilityInsurance(m ? Number(m[1]) : null)
+    setMedicalInsurance(m ? Number(m[2]) : null)
+  }, [])
   const [hasLoaded, setHasLoaded] = useState(false)
 
-  // 初始化資料：categories 從核心表讀取，定價從 fullTour 讀取（fallback 到 quote）
+  // 初始化資料：categories 從核心表讀取，定價 SSOT 從 quote 讀取（docs/QUOTES_SSOT.md）
   useEffect(() => {
     if (quote && !hasLoaded) {
       // 有 tour_id 時，等核心表載入完成再決定資料來源（避免 race condition）
@@ -138,10 +153,10 @@ export function QuoteDetailEmbed({ quoteId, showHeader = true }: QuoteDetailEmbe
         setCategories(costCategories)
       }
 
-      // 定價欄位優先從 fullTour 讀取
-      setAccommodationDays(fullTour?.accommodation_days ?? quote.accommodation_days ?? 0)
+      // 定價欄位 SSOT 在 quotes 表
+      setAccommodationDays(quote.accommodation_days ?? 0)
       setParticipantCounts(
-        ((fullTour?.participant_counts ?? quote.participant_counts) as ParticipantCounts) || {
+        (quote.participant_counts as ParticipantCounts) || {
           adult: quote.group_size || 20,
           child_with_bed: 0,
           child_no_bed: 0,
@@ -151,7 +166,7 @@ export function QuoteDetailEmbed({ quoteId, showHeader = true }: QuoteDetailEmbe
       )
       setQuoteName(quote.name || '')
       setSellingPrices(
-        ((fullTour?.selling_prices ?? quote.selling_prices) as SellingPrices) || {
+        (quote.selling_prices as SellingPrices) || {
           adult: 0,
           child_with_bed: 0,
           child_no_bed: 0,
@@ -159,7 +174,16 @@ export function QuoteDetailEmbed({ quoteId, showHeader = true }: QuoteDetailEmbe
           infant: 0,
         }
       )
-      setTierPricings((fullTour?.tier_pricings ?? quote.tier_pricings ?? []) as TierPricing[])
+      setTierPricings((quote.tier_pricings ?? []) as TierPricing[])
+      // 保險金額從 tour 讀（null = 未設定、不 fallback 預設）
+      setLiabilityInsurance(
+        (fullTour as { liability_insurance_coverage?: number | null } | undefined)
+          ?.liability_insurance_coverage ?? null
+      )
+      setMedicalInsurance(
+        (fullTour as { medical_insurance_coverage?: number | null } | undefined)
+          ?.medical_insurance_coverage ?? null
+      )
       setHasLoaded(true)
     }
   }, [quote, hasLoaded, fullTour, coreItems, coreItemsLoading])
@@ -289,6 +313,8 @@ export function QuoteDetailEmbed({ quoteId, showHeader = true }: QuoteDetailEmbe
     setSaveSuccess,
     setCategories,
     tierPricings,
+    liabilityInsurance,
+    medicalInsurance,
     coreItems,
     refreshCoreItems,
   })
@@ -310,7 +336,6 @@ export function QuoteDetailEmbed({ quoteId, showHeader = true }: QuoteDetailEmbe
     '行李超重費用',
     '單人房差價',
   ])
-  const [insuranceText, setInsuranceText] = useState<string>('200萬旅責險+20萬意外醫療')
   const [showLocalPricingDialog, setShowLocalPricingDialog] = useState(false)
   const [localTiers, setLocalTiers] = useState<LocalTier[]>([])
 
@@ -672,7 +697,7 @@ export function QuoteDetailEmbed({ quoteId, showHeader = true }: QuoteDetailEmbe
             excludedItems={excludedItems}
             onExcludedItemsChange={setExcludedItems}
             insuranceText={insuranceText}
-            onInsuranceChange={setInsuranceText}
+            onInsuranceChange={handleInsuranceChange}
           />
         </div>
       </div>

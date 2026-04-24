@@ -38,6 +38,9 @@ interface UseQuoteSaveProps {
   quickQuoteItems?: QuickQuoteItem[]
   quickQuoteCustomerInfo?: QuickQuoteCustomerInfo
   tierPricings?: TierPricing[]
+  // 保險金額（tours 表，單位：萬元）
+  liabilityInsurance?: number | null
+  medicalInsurance?: number | null
   // 核心表相關（有 tour_id 時使用）
   coreItems?: TourItineraryItem[]
   refreshCoreItems?: () => Promise<TourItineraryItem[] | undefined>
@@ -58,6 +61,8 @@ export const useQuoteSave = ({
   quickQuoteItems,
   quickQuoteCustomerInfo,
   tierPricings,
+  liabilityInsurance,
+  medicalInsurance,
   coreItems,
   refreshCoreItems,
 }: UseQuoteSaveProps) => {
@@ -110,13 +115,16 @@ export const useQuoteSave = ({
       // ✅ 等待存檔完成，捕獲錯誤
       await updateQuote(quote.id, quoteHeaderData)
 
-      // 定價欄位寫到 tour（只寫 tours 表實際存在的欄位）
+      // tours 表欄位：max_participants 是 tour 本身屬性；total_cost / selling_price_per_person 為列表頁顯示用的聚合值；
+      // liability_insurance_coverage / medical_insurance_coverage 是保險 SSOT（整團投保金額）
       if (quote.tour_id) {
         await updateTour(quote.tour_id, {
           total_cost,
           max_participants: groupSize,
           selling_price_per_person: sellingPrices.adult,
-        })
+          liability_insurance_coverage: liabilityInsurance,
+          medical_insurance_coverage: medicalInsurance,
+        } as Parameters<typeof updateTour>[1])
       }
 
       // ✅ 確認存檔成功後才顯示「已儲存」
@@ -168,6 +176,8 @@ export const useQuoteSave = ({
     quickQuoteItems,
     quickQuoteCustomerInfo,
     tierPricings,
+    liabilityInsurance,
+    medicalInsurance,
     coreItems,
     refreshCoreItems,
     user?.workspace_id,
