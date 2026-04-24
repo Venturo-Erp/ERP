@@ -14,9 +14,4 @@ export type { Supplier } from '@/types/supplier.types'
 export type { QuoteRegion, TierPricing } from '@/types/quote-store.types'
 
 // Store 專用 Quote 型別（與 @/types/quote.types.ts 的 Quote extends BaseEntity 不同）
-export type {
-  Quote,
-  QuickQuoteItem,
-  QuoteCategory,
-  QuoteItem,
-} from '@/types/quote-store.types'
+export type { Quote, QuickQuoteItem, QuoteCategory, QuoteItem } from '@/types/quote-store.types'

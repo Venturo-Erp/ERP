@@ -13,6 +13,7 @@
 ## 幕僚 1 初稿驗收清單
 
 ### A. Migration
+
 - A1 `DROP POLICY IF EXISTS "workspaces_delete"` 先行（冪等）
 - A2 新 policy `USING` 明確擋 authenticated（選型見下）
 - A3 🔴 **不得** `FORCE ROW LEVEL SECURITY`（CLAUDE.md 紅線）
@@ -22,6 +23,7 @@
 - A7 若 `is_super_admin()` 已停用、不得當 policy 謂詞
 
 ### B. API DELETE `/api/workspaces/[id]` DELETE（新）
+
 - B1 走 `requireTenantAdmin()`（**提取後的共用版**）、401/403 分開
 - B2 真人員工 > 0 → 409
 - B3 active（未歸檔）tours / orders / payments > 0 → 409、回傳阻擋類型與筆數
@@ -32,6 +34,7 @@
 - B8 Audit log：操作者 + 目標 workspaceId + 時戳
 
 ### C. UI
+
 - C1 `WorkspacesManagePage:77` 改 `fetch('/api/workspaces/'+id, {method:'DELETE'})`
 - C2 UI 既有員工數檢查保留、但 server 是最終守門
 - C3 `AddWorkspaceDialog:139` rollback 定案（見 §5.2）、不能直連 supabase
@@ -45,6 +48,7 @@
 
 **1.1 Migration 選型**（🔴）
 pattern map v1.2 寫「`is_super_admin()` 已停用」。選項：
+
 - X `USING (is_super_admin())` → 🔴 不能用（function 停用）
 - Y `USING (false)` → 安全、但語義像「忘了寫」
 - Z `USING (auth.role() = 'service_role')` → 自文件化、**推薦**
@@ -63,6 +67,7 @@ pattern map v1.2 寫「`is_super_admin()` 已停用」。選項：
 ### 2. 測試覆蓋
 
 幕僚 1 必附 e2e（或計畫）：
+
 - T1 無登入 → 401
 - T2 一般員工 → 403
 - T3 tenant 系統主管 刪空殼 → 200
@@ -76,12 +81,12 @@ pattern map v1.2 寫「`is_super_admin()` 已停用」。選項：
 
 ### 3. 副作用
 
-| 模組 | 影響 |
-|---|---|
-| `/database/workspaces` | 直連改 API、多一次 round-trip |
-| `AddWorkspaceDialog` rollback | flow 改、需新 error path |
-| `/tenants` GET | 無影響 |
-| `workspace_features` update | 無影響 |
+| 模組                              | 影響                                                                                          |
+| --------------------------------- | --------------------------------------------------------------------------------------------- |
+| `/database/workspaces`            | 直連改 API、多一次 round-trip                                                                 |
+| `AddWorkspaceDialog` rollback     | flow 改、需新 error path                                                                      |
+| `/tenants` GET                    | 無影響                                                                                        |
+| `workspace_features` update       | 無影響                                                                                        |
 | `is_active=false` soft deactivate | 無直接影響、**但建議順手驗** `workspaces_update` policy 是否也依賴已停用的 `is_super_admin()` |
 
 **隱性依賴掃完**：grep `workspaces.*delete` 全站 — 只有 WorkspacesManagePage:77、AddWorkspaceDialog:139、tenants/create:197（API 內 rollback、admin client、不受 policy 影響）。**無 cron job** 自動清 inactive workspace。
@@ -90,11 +95,13 @@ pattern map v1.2 寫「`is_super_admin()` 已停用」。選項：
 
 - **場景 A**：API 太嚴 → patch guard、不用 rollback migration
 - **場景 B**：Policy 鎖錯連 service_role 都擋 → 不該發生、但真炸：
+
 ```sql
 DROP POLICY IF EXISTS "workspaces_delete" ON public.workspaces;
 CREATE POLICY "workspaces_delete" ON public.workspaces
   FOR DELETE TO authenticated USING (true);
 ```
+
 幕僚 1 migration 底部附註解版 rollback block、緊急即貼。
 
 **可逆性**：policy 改動、無 schema 變更、100% 可逆。整體 rollback risk 低。
@@ -104,6 +111,7 @@ CREATE POLICY "workspaces_delete" ON public.workspaces
 **5.1 USING 選型**：推薦 Z（service_role 明確）。選 Y 🟡 建議改、不擋。
 
 **5.2 AddWorkspaceDialog rollback 選型**（🔴 關鍵）
+
 - A：改 `is_active=false`（soft）+ cleanup ticket → 髒資料、但簡單
 - B：改走新 DELETE API → **會被自己的 guard 409 擋**（剛建的 workspace 有 1 個 系統主管 員工）
 - C：保留 supabase client 直連 → 🔴 client 拿不到 service_role、現行 policy 擋死

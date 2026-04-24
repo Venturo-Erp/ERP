@@ -365,9 +365,7 @@ export function EditableRequestItemList({
               />
               <button
                 type="button"
-                onClick={() =>
-                  onUpdate({ advanced_by: undefined, advanced_by_name: undefined })
-                }
+                onClick={() => onUpdate({ advanced_by: undefined, advanced_by_name: undefined })}
                 disabled={disabled}
                 className="shrink-0 p-0.5 rounded hover:bg-morandi-red/10 text-morandi-muted hover:text-morandi-red disabled:cursor-default disabled:text-morandi-primary"
                 title={disabled ? '此請款單已加入出納單，無法修改' : '取消代墊'}

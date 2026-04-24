@@ -143,12 +143,7 @@ export default function OrdersPage() {
       addLabel={LABELS.ADD_ORDER}
       contentClassName="flex-1 overflow-auto flex flex-col"
     >
-      <OrderListView
-        className="flex-1"
-        orders={sortedOrders}
-        tours={tours}
-        showTourInfo={true}
-      />
+      <OrderListView className="flex-1" orders={sortedOrders} tours={tours} showTourInfo={true} />
 
       {/* 新增訂單對話框 */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>

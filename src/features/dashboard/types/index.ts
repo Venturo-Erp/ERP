@@ -1,8 +1,5 @@
 // 可用的小工具類型
-export type WidgetType =
-  | 'calculator'
-  | 'notes'
-  | 'clock-in'
+export type WidgetType = 'calculator' | 'notes' | 'clock-in'
 
 export interface WidgetConfig {
   id: WidgetType

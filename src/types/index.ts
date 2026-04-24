@@ -42,7 +42,6 @@ export type {
   DisbursementOrder,
   // ReceiptOrder 已廢棄，改用 Receipt（見 ADR-001）
 
-
   // 工作區
   Workspace,
   WorkspaceSettings,

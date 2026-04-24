@@ -10,10 +10,10 @@
 
 ### 🔴 HIGH / CRITICAL
 
-| Symbol | Risk | d=1 | d=2 | 備註 |
-|---|---|---|---|---|
-| `useWorkspaceFeatures` (`src/lib/permissions/hooks.ts`) | **HIGH** | **11** | 3 | 全站「牆」級 hook |
-| `getFeaturesByRoute` (`src/lib/permissions/features.ts`) | **HIGH** | 1 (→ `useWorkspaceFeatures`) | 11 | 透過 hook 傳導 |
+| Symbol                                                   | Risk     | d=1                          | d=2 | 備註              |
+| -------------------------------------------------------- | -------- | ---------------------------- | --- | ----------------- |
+| `useWorkspaceFeatures` (`src/lib/permissions/hooks.ts`)  | **HIGH** | **11**                       | 3   | 全站「牆」級 hook |
+| `getFeaturesByRoute` (`src/lib/permissions/features.ts`) | **HIGH** | 1 (→ `useWorkspaceFeatures`) | 11  | 透過 hook 傳導    |
 
 `useWorkspaceFeatures` 的 11 個 d=1（WILL BREAK）直接調用點：
 
@@ -102,6 +102,7 @@ d=2 往 `TourDetailPage`、`TourTabs`、`ResetDBPage` 擴散。**影響 2 個 ex
 **建議順序：層 1 → 層 3 → 層 2**（不是 1→2→3）
 
 原因：
+
 - 層 1 只加不減，**零破壞**、先落地
 - 層 3 在層 2 之前做，讓 DB 先變乾淨（所有 workspace 有完整 seed row）、層 2 的 hook 簡化才有底氣（可以假設 row 一定存在）
 - 層 2 最後做，因為它同時改 API + 消費端，需要前兩層打好地基
@@ -129,17 +130,18 @@ d=2 往 `TourDetailPage`、`TourTabs`、`ResetDBPage` 擴散。**影響 2 個 ex
 
 ### 重構每階段必跑
 
-| 階段 | type-check | lint | tab-gating e2e | login-api e2e | 新加 unit | 新加 role-perm e2e |
-|---|---|---|---|---|---|---|
-| 層 1 後 | ✅ | ✅ | ✅ | — | ✅ | — |
-| 層 3 後 | ✅ | ✅ | ✅ | **✅ 必跑** | ✅ | — |
-| 層 2 後 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| 階段    | type-check | lint | tab-gating e2e | login-api e2e | 新加 unit | 新加 role-perm e2e |
+| ------- | ---------- | ---- | -------------- | ------------- | --------- | ------------------ |
+| 層 1 後 | ✅         | ✅   | ✅             | —             | ✅        | —                  |
+| 層 3 後 | ✅         | ✅   | ✅             | **✅ 必跑**   | ✅        | —                  |
+| 層 2 後 | ✅         | ✅   | ✅             | ✅            | ✅        | ✅                 |
 
 ---
 
 ## 6. CI/Gate 設置
 
 **現況**（`.github/workflows/ci.yml` + `.husky/pre-commit`）：
+
 - pre-commit：type-check + 禁 `@ts-expect-error` + 警告 console.log
 - CI `quality`：format:check + lint + type-check
 - CI `build`：next build（失敗擋 merge）

@@ -281,7 +281,10 @@ export const userStoreHelpers = {
   /**
    * 新增合約
    */
-  addContract: async (id: string, contract: Omit<EmployeeFull['contracts'][0], 'id'>): Promise<void> => {
+  addContract: async (
+    id: string,
+    contract: Omit<EmployeeFull['contracts'][0], 'id'>
+  ): Promise<void> => {
     const user = useUserStore.getState().items.find((u: EmployeeFull) => u.id === id)
     if (!user) return
 

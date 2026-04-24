@@ -1,1 +1,1811 @@
-[{"id":"ded55a1d-de25-4649-a580-bc234c2b3731","category":"transport","code":"receipt_please","icon":"🧾","label_zh":"請給我收據","translations":{"en":"Receipt please","ja":"領収書をください","ko":"영수증 주세요","th":"ขอใบเสร็จ"},"sort_order":105,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"0e13a609-b2f8-4163-9396-dc0e8adb69fd","category":"dietary","code":"no_onion","icon":"🚫","label_zh":"我不吃蔥","translations":{"en":"I cannot eat green onions","ja":"ネギは食べられません","ko":"파를 못 먹어요","th":"ฉันกินต้นหอมไม่ได้"},"sort_order":1,"created_at":"2025-12-28 14:03:03.459157+00","updated_at":"2026-04-09 06:43:22.985717+00"},{"id":"c924ab7d-82e4-4e76-abc2-c150ee721bdd","category":"dietary","code":"no_garlic","icon":"🚫","label_zh":"我不吃蒜","translations":{"en":"I cannot eat garlic","ja":"ニンニクは食べられません","ko":"마늘을 못 먹어요","th":"ฉันกินกระเทียมไม่ได้"},"sort_order":2,"created_at":"2025-12-28 14:03:03.459157+00","updated_at":"2026-04-09 06:43:22.985717+00"},{"id":"dc8358f8-4d31-47f9-9490-b962ec5ae2bf","category":"dietary","code":"no_onion_garlic","icon":"🚫","label_zh":"我不吃蔥蒜","translations":{"en":"I cannot eat onions or garlic","ja":"ネギとニンニクは食べられません","ko":"파와 마늘을 못 먹어요","th":"ฉันกินต้นหอมและกระเทียมไม่ได้"},"sort_order":3,"created_at":"2025-12-28 14:03:03.459157+00","updated_at":"2026-04-09 06:43:22.985717+00"},{"id":"33ec7097-93c9-4ac2-88f1-d729d67eb150","category":"daily","code":"thank_you","icon":"🙏","label_zh":"謝謝","translations":{"en":"Thank you","ja":"ありがとうございます","ko":"감사합니다","th":"ขอบคุณ"},"sort_order":180,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"d57c204a-cb69-48d8-a3d0-f0ab31de7077","category":"dietary","code":"no_cilantro","icon":"🚫","label_zh":"我不吃香菜","translations":{"en":"I cannot eat cilantro","ja":"パクチーは食べられません","ko":"고수를 못 먹어요","th":"ฉันกินผักชีไม่ได้"},"sort_order":4,"created_at":"2025-12-28 14:03:03.459157+00","updated_at":"2026-04-09 06:43:22.985717+00"},{"id":"f6199c50-db9b-4bbf-a01c-25c985c6c67c","category":"dietary","code":"no_spicy","icon":"🌶️","label_zh":"我不吃辣","translations":{"en":"I cannot eat spicy food","ja":"辛いものは食べられません","ko":"매운 음식을 못 먹어요","th":"ฉันกินเผ็ดไม่ได้"},"sort_order":5,"created_at":"2025-12-28 14:03:03.459157+00","updated_at":"2026-04-09 06:43:22.985717+00"},{"id":"5ff4df33-80ba-4725-b8b9-66b74f7f7730","category":"dietary","code":"no_raw","icon":"🍣","label_zh":"我不吃生食","translations":{"en":"I cannot eat raw food","ja":"生ものは食べられません","ko":"날것을 못 먹어요","th":"ฉันกินอาหารดิบไม่ได้"},"sort_order":6,"created_at":"2025-12-28 14:03:03.459157+00","updated_at":"2026-04-09 06:43:22.985717+00"},{"id":"20867500-7640-4398-a856-60163c7c80d8","category":"dietary","code":"vegetarian","icon":"🥬","label_zh":"我吃素（蛋奶素）","translations":{"en":"I am vegetarian (eggs and dairy OK)","ja":"ベジタリアンです（卵と乳製品はOK）","ko":"채식주의자입니다 (계란, 유제품 가능)","th":"ฉันเป็นมังสวิรัติ (ไข่และนมได้)"},"sort_order":7,"created_at":"2025-12-28 14:03:03.459157+00","updated_at":"2026-04-09 06:43:22.985717+00"},{"id":"bf8cdc96-9789-492e-88b4-6e8f4a56b660","category":"dietary","code":"vegan","icon":"🌱","label_zh":"我吃全素","translations":{"en":"I am vegan","ja":"ヴィーガンです","ko":"비건입니다","th":"ฉันเป็นวีแกน"},"sort_order":8,"created_at":"2025-12-28 14:03:03.459157+00","updated_at":"2026-04-09 06:43:22.985717+00"},{"id":"9c9325ba-940c-494b-b60e-407c8748bf6c","category":"dietary","code":"no_beef","icon":"🐄","label_zh":"我不吃牛肉","translations":{"en":"I cannot eat beef","ja":"牛肉は食べられません","ko":"소고기를 못 먹어요","th":"ฉันกินเนื้อวัวไม่ได้"},"sort_order":9,"created_at":"2025-12-28 14:03:03.459157+00","updated_at":"2026-04-09 06:43:22.985717+00"},{"id":"5deb3234-3524-4004-931d-1039401f80e0","category":"dietary","code":"no_pork","icon":"🐷","label_zh":"我不吃豬肉","translations":{"en":"I cannot eat pork","ja":"豚肉は食べられません","ko":"돼지고기를 못 먹어요","th":"ฉันกินหมูไม่ได้"},"sort_order":10,"created_at":"2025-12-28 14:03:03.459157+00","updated_at":"2026-04-09 06:43:22.985717+00"},{"id":"d94d615c-d017-4a36-9fea-df1f4b4f855a","category":"dietary","code":"halal","icon":"☪️","label_zh":"我只吃清真食物","translations":{"en":"I only eat Halal food","ja":"ハラール食のみ食べられます","ko":"할랄 음식만 먹어요","th":"ฉันกินอาหารฮาลาลเท่านั้น"},"sort_order":11,"created_at":"2025-12-28 14:03:03.459157+00","updated_at":"2026-04-09 06:43:22.985717+00"},{"id":"8dbface9-f570-4cec-b43e-e0399ad05b00","category":"allergy","code":"seafood_allergy","icon":"🦐","label_zh":"我對海鮮過敏","translations":{"en":"I have a seafood allergy","ja":"シーフードアレルギーがあります","ko":"해산물 알레르기가 있어요","th":"ฉันแพ้อาหารทะเล"},"sort_order":20,"created_at":"2025-12-28 14:03:03.459157+00","updated_at":"2026-04-09 06:43:22.985717+00"},{"id":"82da2658-4cf7-420a-b313-b4d554539ba2","category":"allergy","code":"shellfish_allergy","icon":"🦪","label_zh":"我對貝類過敏","translations":{"en":"I have a shellfish allergy","ja":"貝類アレルギーがあります","ko":"조개류 알레르기가 있어요","th":"ฉันแพ้หอย"},"sort_order":21,"created_at":"2025-12-28 14:03:03.459157+00","updated_at":"2026-04-09 06:43:22.985717+00"},{"id":"e659f260-73c0-428d-a1fa-9d971174a6b1","category":"allergy","code":"nut_allergy","icon":"🥜","label_zh":"我對堅果過敏","translations":{"en":"I have a nut allergy","ja":"ナッツアレルギーがあります","ko":"견과류 알레르기가 있어요","th":"ฉันแพ้ถั่ว"},"sort_order":22,"created_at":"2025-12-28 14:03:03.459157+00","updated_at":"2026-04-09 06:43:22.985717+00"},{"id":"e33d143f-554e-4666-bca4-e1a2c5cc7e4d","category":"allergy","code":"peanut_allergy","icon":"🥜","label_zh":"我對花生過敏","translations":{"en":"I have a peanut allergy","ja":"ピーナッツアレルギーがあります","ko":"땅콩 알레르기가 있어요","th":"ฉันแพ้ถั่วลิสง"},"sort_order":23,"created_at":"2025-12-28 14:03:03.459157+00","updated_at":"2026-04-09 06:43:22.985717+00"},{"id":"9a64d308-2937-4fdb-8c99-43e3ab1698a0","category":"allergy","code":"dairy_allergy","icon":"🥛","label_zh":"我對乳製品過敏","translations":{"en":"I have a dairy allergy","ja":"乳製品アレルギーがあります","ko":"유제품 알레르기가 있어요","th":"ฉันแพ้นม"},"sort_order":24,"created_at":"2025-12-28 14:03:03.459157+00","updated_at":"2026-04-09 06:43:22.985717+00"},{"id":"25ed7499-1305-4aad-aba5-d53654697aeb","category":"allergy","code":"egg_allergy","icon":"🥚","label_zh":"我對蛋過敏","translations":{"en":"I have an egg allergy","ja":"卵アレルギーがあります","ko":"계란 알레르기가 있어요","th":"ฉันแพ้ไข่"},"sort_order":25,"created_at":"2025-12-28 14:03:03.459157+00","updated_at":"2026-04-09 06:43:22.985717+00"},{"id":"22e7cfac-aecb-4a3a-baa3-c02ead920743","category":"allergy","code":"gluten_allergy","icon":"🌾","label_zh":"我對麩質過敏","translations":{"en":"I have a gluten allergy","ja":"グルテンアレルギーがあります","ko":"글루텐 알레르기가 있어요","th":"ฉันแพ้กลูเตน"},"sort_order":26,"created_at":"2025-12-28 14:03:03.459157+00","updated_at":"2026-04-09 06:43:22.985717+00"},{"id":"5e8b9983-4768-40ed-b76c-88e544c08532","category":"allergy","code":"soy_allergy","icon":"🫘","label_zh":"我對大豆過敏","translations":{"en":"I have a soy allergy","ja":"大豆アレルギーがあります","ko":"대두 알레르기가 있어요","th":"ฉันแพ้ถั่วเหลือง"},"sort_order":27,"created_at":"2025-12-28 14:03:03.459157+00","updated_at":"2026-04-09 06:43:22.985717+00"},{"id":"9e8f3d9a-8ab7-4627-a733-0d9c36f4f2b9","category":"medical","code":"diabetes","icon":"💉","label_zh":"我有糖尿病","translations":{"en":"I have diabetes","ja":"糖尿病があります","ko":"당뇨병이 있어요","th":"ฉันเป็นเบาหวาน"},"sort_order":40,"created_at":"2025-12-28 14:03:03.459157+00","updated_at":"2026-04-09 06:43:22.985717+00"},{"id":"c0a84b58-bb26-46f8-9304-a7828572ca0f","category":"medical","code":"heart_condition","icon":"❤️","label_zh":"我有心臟病","translations":{"en":"I have a heart condition","ja":"心臓病があります","ko":"심장병이 있어요","th":"ฉันเป็นโรคหัวใจ"},"sort_order":41,"created_at":"2025-12-28 14:03:03.459157+00","updated_at":"2026-04-09 06:43:22.985717+00"},{"id":"945d8780-2952-47db-ba1c-56365caebc74","category":"medical","code":"asthma","icon":"🫁","label_zh":"我有氣喘","translations":{"en":"I have asthma","ja":"喘息があります","ko":"천식이 있어요","th":"ฉันเป็นหอบหืด"},"sort_order":42,"created_at":"2025-12-28 14:03:03.459157+00","updated_at":"2026-04-09 06:43:22.985717+00"},{"id":"ec52caed-1457-4db5-8496-9aa7e0ffb68c","category":"medical","code":"epilepsy","icon":"⚡","label_zh":"我有癲癇","translations":{"en":"I have epilepsy","ja":"てんかんがあります","ko":"간질이 있어요","th":"ฉันเป็นลมชัก"},"sort_order":43,"created_at":"2025-12-28 14:03:03.459157+00","updated_at":"2026-04-09 06:43:22.985717+00"},{"id":"07c2d448-1c67-47f9-9dd5-54c946e18a19","category":"accommodation","code":"non_smoking","icon":"🚭","label_zh":"我需要禁煙房","translations":{"en":"I need a non-smoking room","ja":"禁煙室をお願いします","ko":"금연실 부탁드려요","th":"ขอห้องปลอดบุหรี่"},"sort_order":60,"created_at":"2025-12-28 14:03:03.459157+00","updated_at":"2026-04-09 06:43:22.985717+00"},{"id":"3e714861-2af8-4617-95a7-7bd44bd6ded9","category":"accommodation","code":"quiet_floor","icon":"🔇","label_zh":"我需要安靜樓層","translations":{"en":"I need a quiet floor","ja":"静かなフロアをお願いします","ko":"조용한 층 부탁드려요","th":"ขอชั้นที่เงียบ"},"sort_order":61,"created_at":"2025-12-28 14:03:03.459157+00","updated_at":"2026-04-09 06:43:22.985717+00"},{"id":"2e1324f8-d8f9-43ff-b1db-d8f0c20b92a0","category":"accommodation","code":"high_floor","icon":"🏢","label_zh":"我想要高樓層","translations":{"en":"I prefer a high floor","ja":"高層階をお願いします","ko":"높은 층 부탁드려요","th":"ขอชั้นสูง"},"sort_order":62,"created_at":"2025-12-28 14:03:03.459157+00","updated_at":"2026-04-09 06:43:22.985717+00"},{"id":"263f79ac-1c1b-4d86-9a01-295895deb2ad","category":"accommodation","code":"wheelchair","icon":"♿","label_zh":"我需要無障礙設施","translations":{"en":"I need wheelchair accessibility","ja":"バリアフリー対応をお願いします","ko":"휠체어 이용 가능한 곳 부탁드려요","th":"ต้องการสิ่งอำนวยความสะดวกสำหรับรถเข็น"},"sort_order":63,"created_at":"2025-12-28 14:03:03.459157+00","updated_at":"2026-04-09 06:43:22.985717+00"},{"id":"ff1ba650-23e8-482e-9f4c-679dc043534c","category":"hotel","code":"extra_towel","icon":"🛁","label_zh":"請多給我毛巾","translations":{"en":"Extra towels please","ja":"タオルを追加でください","ko":"수건 더 주세요","th":"ขอผ้าเช็ดตัวเพิ่ม"},"sort_order":70,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"10630459-c762-4498-afed-4e2d9d1880b0","category":"hotel","code":"extra_pillow","icon":"🛏️","label_zh":"請多給我枕頭","translations":{"en":"Extra pillows please","ja":"枕を追加でください","ko":"베개 더 주세요","th":"ขอหมอนเพิ่ม"},"sort_order":71,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"6b5bb975-f3cc-4f25-9edd-efea7c71b164","category":"hotel","code":"extra_blanket","icon":"🛋️","label_zh":"請多給我被子","translations":{"en":"Extra blanket please","ja":"毛布を追加でください","ko":"이불 더 주세요","th":"ขอผ้าห่มเพิ่ม"},"sort_order":72,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"4d2a98b7-7c58-4563-9aa2-a86b468cbc2a","category":"hotel","code":"room_cleaning","icon":"🧹","label_zh":"請打掃房間","translations":{"en":"Please clean the room","ja":"部屋を掃除してください","ko":"방 청소해 주세요","th":"กรุณาทำความสะอาดห้อง"},"sort_order":73,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"b46b32e6-cacd-4426-a671-50c8ff1d5988","category":"hotel","code":"no_cleaning","icon":"🚫","label_zh":"今天不用打掃","translations":{"en":"No cleaning today","ja":"今日は掃除不要です","ko":"오늘은 청소 안 해도 돼요","th":"วันนี้ไม่ต้องทำความสะอาด"},"sort_order":74,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"5529f6d4-90fe-4d9f-9c4e-8234991d2cea","category":"hotel","code":"late_checkout","icon":"⏰","label_zh":"我想延遲退房","translations":{"en":"Late checkout please","ja":"レイトチェックアウトをお願いします","ko":"늦은 체크아웃 부탁드려요","th":"ขอเช็คเอาท์ช้า"},"sort_order":75,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"743761aa-8480-434a-aaee-83982eca56cb","category":"hotel","code":"early_checkin","icon":"⏰","label_zh":"我想提早入住","translations":{"en":"Early check-in please","ja":"アーリーチェックインをお願いします","ko":"일찍 체크인 부탁드려요","th":"ขอเช็คอินเร็ว"},"sort_order":76,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"015fe4c0-3b84-43fa-b327-f72f4ea3b2e1","category":"hotel","code":"luggage_storage","icon":"🧳","label_zh":"可以寄放行李嗎？","translations":{"en":"Can you store my luggage?","ja":"荷物を預かってもらえますか？","ko":"짐 맡길 수 있나요?","th":"ฝากกระเป๋าได้ไหม?"},"sort_order":77,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"c2e6a040-97fd-4585-9f3e-84cbb18f9c8c","category":"hotel","code":"wake_up_call","icon":"⏰","label_zh":"請明早叫我起床","translations":{"en":"Wake-up call please","ja":"モーニングコールをお願いします","ko":"모닝콜 부탁드려요","th":"ขอโทรปลุกตอนเช้า"},"sort_order":78,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"28a0224f-3b29-42b9-bb2b-8bcb8f2e5b46","category":"hotel","code":"hot_water_issue","icon":"🚿","label_zh":"熱水不夠熱","translations":{"en":"Hot water is not hot enough","ja":"お湯がぬるいです","ko":"온수가 안 나와요","th":"น้ำร้อนไม่ร้อน"},"sort_order":79,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"67e80498-f8c9-48cb-8490-6a32104778d0","category":"hotel","code":"ac_broken","icon":"❄️","label_zh":"冷氣壞了","translations":{"en":"The AC is broken","ja":"エアコンが壊れています","ko":"에어컨이 고장났어요","th":"แอร์เสีย"},"sort_order":80,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"b054bbab-1849-4405-8e12-fbe11fe1dd65","category":"hotel","code":"wifi_issue","icon":"📶","label_zh":"WiFi 連不上","translations":{"en":"WiFi is not working","ja":"WiFiに繋がりません","ko":"와이파이가 안 돼요","th":"WiFi ใช้ไม่ได้"},"sort_order":81,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"420f1e6b-81dd-4233-a737-c75812f730ca","category":"hotel","code":"room_too_noisy","icon":"🔊","label_zh":"房間太吵了","translations":{"en":"The room is too noisy","ja":"部屋がうるさいです","ko":"방이 너무 시끄러워요","th":"ห้องเสียงดังเกินไป"},"sort_order":82,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"b6cefc1d-19c0-4f03-8af0-e09c012e12b8","category":"hotel","code":"change_room","icon":"🔄","label_zh":"可以換房間嗎？","translations":{"en":"Can I change rooms?","ja":"部屋を変えてもらえますか？","ko":"방 바꿀 수 있나요?","th":"ขอเปลี่ยนห้องได้ไหม?"},"sort_order":83,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"af904fd1-7a88-4319-998e-eb77b0c97f4d","category":"transport","code":"go_to_hotel","icon":"🏨","label_zh":"請載我去這間飯店","translations":{"en":"Please take me to this hotel","ja":"このホテルまでお願いします","ko":"이 호텔로 가주세요","th":"ไปโรงแรมนี้"},"sort_order":100,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"c624b817-962c-416a-8cf8-6797614392be","category":"transport","code":"go_to_airport","icon":"✈️","label_zh":"請載我去機場","translations":{"en":"To the airport please","ja":"空港までお願いします","ko":"공항으로 가주세요","th":"ไปสนามบิน"},"sort_order":101,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"a08a04fa-3be5-4f0b-b853-36165b13cd80","category":"transport","code":"go_to_station","icon":"🚉","label_zh":"請載我去車站","translations":{"en":"To the station please","ja":"駅までお願いします","ko":"역으로 가주세요","th":"ไปสถานีรถไฟ"},"sort_order":102,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"48347b96-b18b-48fd-96d3-88a9b6fa4323","category":"transport","code":"go_to_address","icon":"📍","label_zh":"請載我去這個地址","translations":{"en":"Please take me to this address","ja":"この住所までお願いします","ko":"이 주소로 가주세요","th":"ไปที่อยู่นี้"},"sort_order":103,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"d5a48180-939f-435a-adb3-ccc8559f2414","category":"transport","code":"how_much_fare","icon":"💰","label_zh":"到那裡多少錢？","translations":{"en":"How much to get there?","ja":"そこまでいくらですか？","ko":"거기까지 얼마예요?","th":"ไปที่นั่นเท่าไหร่?"},"sort_order":104,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"cf40d4aa-56a3-4316-aa6e-d06fcbb96d3c","category":"transport","code":"stop_here","icon":"✋","label_zh":"請在這裡停車","translations":{"en":"Stop here please","ja":"ここで止めてください","ko":"여기서 세워주세요","th":"จอดที่นี่"},"sort_order":106,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"e8708bf5-2ce0-445b-916b-84d35cee1b3e","category":"transport","code":"wait_here","icon":"⏳","label_zh":"請在這裡等我","translations":{"en":"Please wait here","ja":"ここで待っていてください","ko":"여기서 기다려 주세요","th":"รอที่นี่"},"sort_order":107,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"2819ae2a-23df-4fe6-b03b-1f42d4a91531","category":"transport","code":"turn_on_meter","icon":"🔢","label_zh":"請開錶","translations":{"en":"Please use the meter","ja":"メーターを使ってください","ko":"미터기 켜주세요","th":"เปิดมิเตอร์"},"sort_order":108,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"3e30c18f-35f0-4587-9cab-cef9f8dc4d3e","category":"transport","code":"no_toll_road","icon":"🛣️","label_zh":"不要走收費道路","translations":{"en":"No toll roads please","ja":"有料道路は使わないでください","ko":"유료도로 안 가도 돼요","th":"ไม่ใช้ทางด่วน"},"sort_order":109,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"8dee4396-4015-46f3-ad58-103b4dc738f1","category":"shopping","code":"tax_free","icon":"💳","label_zh":"可以免稅嗎？","translations":{"en":"Is tax-free available?","ja":"免税できますか？","ko":"면세 되나요?","th":"ขอคืนภาษีได้ไหม?"},"sort_order":120,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"f66bf0e4-7acd-4c8b-b42f-1f851f9ab795","category":"shopping","code":"try_on","icon":"👕","label_zh":"可以試穿嗎？","translations":{"en":"Can I try this on?","ja":"試着できますか？","ko":"입어봐도 되나요?","th":"ลองได้ไหม?"},"sort_order":121,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"d2ea9851-bd2b-492d-947a-a13ef378831e","category":"shopping","code":"other_size","icon":"📏","label_zh":"有其他尺寸嗎？","translations":{"en":"Do you have other sizes?","ja":"他のサイズはありますか？","ko":"다른 사이즈 있나요?","th":"มีไซส์อื่นไหม?"},"sort_order":122,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"11879e7a-e4c9-4a1a-b718-80bf1bd6f55e","category":"shopping","code":"size_bigger","icon":"⬆️","label_zh":"有大一點的嗎？","translations":{"en":"Do you have a bigger size?","ja":"もっと大きいのはありますか？","ko":"더 큰 거 있나요?","th":"มีใหญ่กว่านี้ไหม?"},"sort_order":123,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"2aa8dcc1-b171-4ea8-8b26-129728da4162","category":"shopping","code":"size_smaller","icon":"⬇️","label_zh":"有小一點的嗎？","translations":{"en":"Do you have a smaller size?","ja":"もっと小さいのはありますか？","ko":"더 작은 거 있나요?","th":"มีเล็กกว่านี้ไหม?"},"sort_order":124,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"87a85ead-d687-454d-84c1-759b675b074d","category":"shopping","code":"other_color","icon":"🎨","label_zh":"有其他顏色嗎？","translations":{"en":"Do you have other colors?","ja":"他の色はありますか？","ko":"다른 색 있나요?","th":"มีสีอื่นไหม?"},"sort_order":125,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"08bcb4a7-3df4-4150-85ea-6ad40ec479b1","category":"shopping","code":"how_much","icon":"💰","label_zh":"這個多少錢？","translations":{"en":"How much is this?","ja":"これはいくらですか？","ko":"이거 얼마예요?","th":"อันนี้เท่าไหร่?"},"sort_order":126,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"be947e5a-3b8b-4373-b337-8a859fdcd1f7","category":"shopping","code":"can_discount","icon":"💸","label_zh":"可以便宜一點嗎？","translations":{"en":"Can you give a discount?","ja":"安くなりますか？","ko":"깎아주세요","th":"ลดได้ไหม?"},"sort_order":127,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"47bc7a38-71ed-48af-b98c-19b5514d912e","category":"shopping","code":"pay_card","icon":"💳","label_zh":"可以刷卡嗎？","translations":{"en":"Can I pay by card?","ja":"カードで払えますか？","ko":"카드 되나요?","th":"จ่ายบัตรได้ไหม?"},"sort_order":128,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"19d4a0fb-b077-4e06-a366-bb8772b6821a","category":"shopping","code":"pay_cash","icon":"💵","label_zh":"我付現金","translations":{"en":"I will pay in cash","ja":"現金で払います","ko":"현금으로 할게요","th":"จ่ายเงินสด"},"sort_order":129,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"a7731f08-427d-46ce-8338-285d91f5abcd","category":"shopping","code":"just_looking","icon":"👀","label_zh":"我只是看看","translations":{"en":"Just looking","ja":"見ているだけです","ko":"그냥 구경하는 거예요","th":"แค่ดูเฉยๆ"},"sort_order":130,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"a7861734-77f5-401e-a437-867985b36161","category":"shopping","code":"wrap_gift","icon":"🎁","label_zh":"可以包裝嗎？","translations":{"en":"Can you gift wrap it?","ja":"ギフト包装できますか？","ko":"포장해 주세요","th":"ห่อของขวัญได้ไหม?"},"sort_order":131,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"dcd07afc-444b-4e40-b291-ac5575bac193","category":"shopping","code":"separate_bag","icon":"🛍️","label_zh":"請分開裝袋","translations":{"en":"Separate bags please","ja":"別々の袋に入れてください","ko":"따로 담아주세요","th":"แยกถุงให้หน่อย"},"sort_order":132,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"b4809ea4-f856-4720-a7e0-0843d812a224","category":"restaurant","code":"table_for_x","icon":"🍽️","label_zh":"我們有X位","translations":{"en":"Table for X please","ja":"X名です","ko":"X명이요","th":"X ที่นั่ง"},"sort_order":140,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"ac0fdcd7-109e-4eea-8ed3-2519212b28a7","category":"restaurant","code":"reservation","icon":"📅","label_zh":"我有預約","translations":{"en":"I have a reservation","ja":"予約しています","ko":"예약했어요","th":"จองไว้แล้ว"},"sort_order":141,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"b266064d-0adb-44a6-a03a-e1313cd9d701","category":"restaurant","code":"menu_please","icon":"📖","label_zh":"請給我菜單","translations":{"en":"Menu please","ja":"メニューをください","ko":"메뉴판 주세요","th":"ขอเมนู"},"sort_order":142,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"a9bfecdd-dad4-4b77-9725-4b25b26b108c","category":"restaurant","code":"recommend","icon":"⭐","label_zh":"有推薦的嗎？","translations":{"en":"What do you recommend?","ja":"おすすめは何ですか？","ko":"추천 메뉴 뭐예요?","th":"แนะนำอะไร?"},"sort_order":143,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"fd9ee797-e30b-4262-993c-6cbc0e1587dc","category":"restaurant","code":"order_same","icon":"👆","label_zh":"我要跟他一樣的","translations":{"en":"Same as theirs please","ja":"同じものをください","ko":"저것과 같은 거요","th":"เอาเหมือนเขา"},"sort_order":144,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"2e729d2c-ccc3-4fcc-973d-d4bb92b9b92d","category":"restaurant","code":"water_please","icon":"💧","label_zh":"請給我水","translations":{"en":"Water please","ja":"お水をください","ko":"물 주세요","th":"ขอน้ำ"},"sort_order":145,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"4b1f362e-6617-4973-a6da-ea020fd915c8","category":"restaurant","code":"bill_please","icon":"🧾","label_zh":"請結帳","translations":{"en":"Bill please","ja":"お会計をお願いします","ko":"계산해 주세요","th":"เก็บเงิน"},"sort_order":146,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"4498a5a0-aec2-4911-a457-5a3442a3dccf","category":"restaurant","code":"pay_together","icon":"💰","label_zh":"一起結帳","translations":{"en":"Pay together","ja":"一緒に会計します","ko":"같이 계산할게요","th":"จ่ายรวม"},"sort_order":147,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"8e61931b-aeef-4f8d-bd89-79fd99baf675","category":"restaurant","code":"pay_separate","icon":"💰","label_zh":"分開結帳","translations":{"en":"Separate bills","ja":"別々に会計します","ko":"따로 계산해 주세요","th":"จ่ายแยก"},"sort_order":148,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"ab9dc2c1-946b-45df-8719-b3995f11e755","category":"restaurant","code":"take_away","icon":"📦","label_zh":"我要外帶","translations":{"en":"To go please","ja":"持ち帰りでお願いします","ko":"포장해 주세요","th":"ห่อกลับ"},"sort_order":149,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"81b752bd-ed30-4605-9f20-05e9ec203a99","category":"restaurant","code":"eat_here","icon":"🪑","label_zh":"我要內用","translations":{"en":"For here please","ja":"店内で食べます","ko":"여기서 먹을게요","th":"ทานที่นี่"},"sort_order":150,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"ac0dfe74-f47a-441b-b637-3e7a8546a834","category":"restaurant","code":"less_ice","icon":"🧊","label_zh":"少冰","translations":{"en":"Less ice please","ja":"氷少なめで","ko":"얼음 적게요","th":"น้ำแข็งน้อย"},"sort_order":151,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"bc75ac07-5006-4cda-99b6-93181e497ac5","category":"restaurant","code":"no_ice","icon":"🧊","label_zh":"去冰","translations":{"en":"No ice please","ja":"氷なしで","ko":"얼음 빼주세요","th":"ไม่ใส่น้ำแข็ง"},"sort_order":152,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"ef1f8d55-f0d7-40f6-b44f-2d98a55afd69","category":"restaurant","code":"less_sugar","icon":"🍬","label_zh":"少糖","translations":{"en":"Less sugar please","ja":"砂糖少なめで","ko":"덜 달게요","th":"หวานน้อย"},"sort_order":153,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"26044d69-bb6c-4b2b-9752-1c40c992e09f","category":"restaurant","code":"no_sugar","icon":"🍬","label_zh":"無糖","translations":{"en":"No sugar please","ja":"砂糖なしで","ko":"설탕 빼주세요","th":"ไม่หวาน"},"sort_order":154,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"10a93ae2-5c35-438c-8026-3a261ea5d1b4","category":"emergency","code":"need_help","icon":"🆘","label_zh":"我需要幫助","translations":{"en":"I need help","ja":"助けてください","ko":"도와주세요","th":"ช่วยด้วย"},"sort_order":160,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"bee465f1-0fb3-452f-a746-0d44bf468542","category":"emergency","code":"call_police","icon":"🚔","label_zh":"請幫我報警","translations":{"en":"Please call the police","ja":"警察を呼んでください","ko":"경찰 불러주세요","th":"เรียกตำรวจ"},"sort_order":161,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"bb6b91b9-a1b8-4c07-8b41-e754825f691e","category":"emergency","code":"call_ambulance","icon":"🚑","label_zh":"請叫救護車","translations":{"en":"Please call an ambulance","ja":"救急車を呼んでください","ko":"구급차 불러주세요","th":"เรียกรถพยาบาล"},"sort_order":162,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"46835ab0-6b38-47b3-99f8-a14bd5303efb","category":"emergency","code":"lost_passport","icon":"📕","label_zh":"我的護照不見了","translations":{"en":"I lost my passport","ja":"パスポートをなくしました","ko":"여권을 잃어버렸어요","th":"หนังสือเดินทางหาย"},"sort_order":163,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"c2ef2f3a-bf20-4ac1-8080-3981919829a6","category":"emergency","code":"lost_wallet","icon":"👛","label_zh":"我的錢包不見了","translations":{"en":"I lost my wallet","ja":"財布をなくしました","ko":"지갑을 잃어버렸어요","th":"กระเป๋าสตางค์หาย"},"sort_order":164,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"ac1816ac-21bb-41ea-b798-a1ca8b7755e3","category":"emergency","code":"lost_phone","icon":"📱","label_zh":"我的手機不見了","translations":{"en":"I lost my phone","ja":"携帯をなくしました","ko":"핸드폰을 잃어버렸어요","th":"โทรศัพท์หาย"},"sort_order":165,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"86bac50c-8838-47ce-8cf5-492def3900f4","category":"emergency","code":"feel_sick","icon":"🤒","label_zh":"我身體不舒服","translations":{"en":"I feel sick","ja":"気分が悪いです","ko":"몸이 안 좋아요","th":"ไม่สบาย"},"sort_order":166,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"10689555-0be5-4716-a71d-a5dab0044505","category":"emergency","code":"need_hospital","icon":"🏥","label_zh":"我需要去醫院","translations":{"en":"I need to go to a hospital","ja":"病院に行きたいです","ko":"병원에 가야 해요","th":"ต้องไปโรงพยาบาล"},"sort_order":167,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"0697dbef-792f-49f9-8ff1-b8a7bbe8cbf5","category":"emergency","code":"pharmacy_where","icon":"💊","label_zh":"藥局在哪裡？","translations":{"en":"Where is a pharmacy?","ja":"薬局はどこですか？","ko":"약국 어디예요?","th":"ร้านขายยาอยู่ไหน?"},"sort_order":168,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"7828bc4c-47c5-4b48-8706-4a90a21ed173","category":"emergency","code":"embassy_where","icon":"🏛️","label_zh":"大使館在哪裡？","translations":{"en":"Where is the embassy?","ja":"大使館はどこですか？","ko":"대사관 어디예요?","th":"สถานทูตอยู่ไหน?"},"sort_order":169,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"fc50b825-df7d-4ab4-865c-e23edd802f7d","category":"emergency","code":"been_robbed","icon":"😰","label_zh":"我被搶劫了","translations":{"en":"I have been robbed","ja":"強盗に遭いました","ko":"강도당했어요","th":"ถูกปล้น"},"sort_order":170,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"f614b8e4-946b-4e35-9bb9-01130ce69165","category":"daily","code":"sorry","icon":"🙇","label_zh":"對不起","translations":{"en":"Sorry","ja":"すみません","ko":"죄송합니다","th":"ขอโทษ"},"sort_order":181,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"64b7a643-dc1d-41f1-a50b-9ffa99f83a28","category":"daily","code":"excuse_me","icon":"👋","label_zh":"不好意思（借過）","translations":{"en":"Excuse me","ja":"すみません（通ります）","ko":"잠시만요","th":"ขอทางหน่อย"},"sort_order":182,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"6ff43b64-9fe7-4d78-aca3-187cb58fec4a","category":"daily","code":"no_understand","icon":"❓","label_zh":"我聽不懂","translations":{"en":"I don't understand","ja":"わかりません","ko":"못 알아들었어요","th":"ไม่เข้าใจ"},"sort_order":183,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"b4ca4a04-a2cf-4dac-9201-95e2772d4c9e","category":"daily","code":"speak_slowly","icon":"🐢","label_zh":"請說慢一點","translations":{"en":"Please speak slowly","ja":"ゆっくり話してください","ko":"천천히 말해주세요","th":"พูดช้าๆ หน่อย"},"sort_order":184,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"4dacd623-8202-44b2-bcda-6d22c8e02894","category":"daily","code":"write_please","icon":"✍️","label_zh":"請寫下來給我看","translations":{"en":"Please write it down","ja":"書いてください","ko":"적어주세요","th":"เขียนให้ดูหน่อย"},"sort_order":185,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"7c9f62d7-9ce1-40ec-a886-f37a23fae933","category":"daily","code":"photo_ok","icon":"📸","label_zh":"可以拍照嗎？","translations":{"en":"Can I take a photo?","ja":"写真を撮ってもいいですか？","ko":"사진 찍어도 되나요?","th":"ถ่ายรูปได้ไหม?"},"sort_order":186,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"b9d1d1be-9470-435a-8824-7527617c25e5","category":"daily","code":"photo_help","icon":"🤳","label_zh":"可以幫我拍照嗎？","translations":{"en":"Can you take my photo?","ja":"写真を撮ってもらえますか？","ko":"사진 찍어주세요","th":"ถ่ายรูปให้หน่อย"},"sort_order":187,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"e71a7645-a702-4351-ac79-4c0ba46a5784","category":"daily","code":"bathroom_where","icon":"🚻","label_zh":"廁所在哪裡？","translations":{"en":"Where is the bathroom?","ja":"トイレはどこですか？","ko":"화장실 어디예요?","th":"ห้องน้ำอยู่ไหน?"},"sort_order":188,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"aa10dc6f-57b1-4f6e-98a0-0ae3b95c59f4","category":"daily","code":"how_to_go","icon":"🗺️","label_zh":"要怎麼去？","translations":{"en":"How do I get there?","ja":"どうやって行きますか？","ko":"어떻게 가요?","th":"ไปยังไง?"},"sort_order":189,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"1ba36d86-a098-4a93-be1c-30d19b0ada05","category":"daily","code":"how_long","icon":"⏱️","label_zh":"要多久？","translations":{"en":"How long does it take?","ja":"どのくらいかかりますか？","ko":"얼마나 걸려요?","th":"ใช้เวลานานไหม?"},"sort_order":190,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"0c51d01c-548d-444d-b20e-dd818e96f510","category":"daily","code":"what_time_close","icon":"🕐","label_zh":"幾點關門？","translations":{"en":"What time do you close?","ja":"何時に閉まりますか？","ko":"몇 시에 닫아요?","th":"ปิดกี่โมง?"},"sort_order":191,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"64b2dd27-c8fc-427f-86ea-3814f190db65","category":"daily","code":"what_time_open","icon":"🕐","label_zh":"幾點開門？","translations":{"en":"What time do you open?","ja":"何時に開きますか？","ko":"몇 시에 열어요?","th":"เปิดกี่โมง?"},"sort_order":192,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"a944531d-345e-4d6f-aa14-b19b68333134","category":"daily","code":"yes","icon":"✅","label_zh":"是/好的","translations":{"en":"Yes","ja":"はい","ko":"네","th":"ใช่"},"sort_order":193,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"9be4b5c8-59c2-49cf-90e7-d17079d2669e","category":"daily","code":"no","icon":"❌","label_zh":"不是/不要","translations":{"en":"No","ja":"いいえ","ko":"아니요","th":"ไม่"},"sort_order":194,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"78be1191-5e90-40a3-86e3-d2639f7748a9","category":"special","code":"baby_chair","icon":"👶","label_zh":"有兒童座椅嗎？","translations":{"en":"Do you have a baby chair?","ja":"子供用の椅子はありますか？","ko":"아기 의자 있나요?","th":"มีเก้าอี้เด็กไหม?"},"sort_order":200,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"d4e00a09-7372-4e97-afad-cb71ed318004","category":"special","code":"baby_bed","icon":"🛏️","label_zh":"有嬰兒床嗎？","translations":{"en":"Do you have a baby crib?","ja":"ベビーベッドはありますか？","ko":"아기 침대 있나요?","th":"มีเตียงเด็กไหม?"},"sort_order":201,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"cb84bed9-8e7a-40f5-8c52-288e9008980c","category":"special","code":"stroller_ok","icon":"🚼","label_zh":"可以推嬰兒車嗎？","translations":{"en":"Are strollers allowed?","ja":"ベビーカーで入れますか？","ko":"유모차 가능한가요?","th":"เข็นรถเด็กได้ไหม?"},"sort_order":202,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"34593a06-c787-4dae-883e-3dc4f04dfab5","category":"special","code":"breastfeed_room","icon":"🍼","label_zh":"有哺乳室嗎？","translations":{"en":"Is there a nursing room?","ja":"授乳室はありますか？","ko":"수유실 있나요?","th":"มีห้องให้นมไหม?"},"sort_order":203,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"3e9b8c07-869b-43fb-beed-02e6def50cf5","category":"special","code":"elevator_where","icon":"🛗","label_zh":"電梯在哪裡？","translations":{"en":"Where is the elevator?","ja":"エレベーターはどこですか？","ko":"엘리베이터 어디예요?","th":"ลิฟต์อยู่ไหน?"},"sort_order":204,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"28632217-6af3-4746-aff4-ee9dabb69c6c","category":"special","code":"pregnant","icon":"🤰","label_zh":"我懷孕了","translations":{"en":"I am pregnant","ja":"妊娠しています","ko":"임신 중이에요","th":"ฉันท้อง"},"sort_order":205,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"91ef9227-8116-4c2b-9070-6b6afe1343c7","category":"special","code":"elderly","icon":"👴","label_zh":"有年長者同行","translations":{"en":"I have an elderly person with me","ja":"高齢者が一緒です","ko":"노인이 함께 있어요","th":"มีผู้สูงอายุมาด้วย"},"sort_order":206,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"886bc890-fcac-4b8b-bb9b-21b4be853e44","category":"special","code":"kid_menu","icon":"🧒","label_zh":"有兒童餐嗎？","translations":{"en":"Do you have a kids menu?","ja":"お子様メニューはありますか？","ko":"아이 메뉴 있나요?","th":"มีเมนูเด็กไหม?"},"sort_order":207,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"},{"id":"770f1706-f0cb-474a-a6a6-5f9ce96b5b2c","category":"special","code":"pet_allowed","icon":"🐕","label_zh":"可以帶寵物嗎？","translations":{"en":"Are pets allowed?","ja":"ペットOKですか？","ko":"반려동물 가능한가요?","th":"พาสัตว์เลี้ยงได้ไหม?"},"sort_order":208,"created_at":"2025-12-28 15:20:55.944186+00","updated_at":"2026-04-09 06:43:23.10544+00"}]
+[
+  {
+    "id": "ded55a1d-de25-4649-a580-bc234c2b3731",
+    "category": "transport",
+    "code": "receipt_please",
+    "icon": "🧾",
+    "label_zh": "請給我收據",
+    "translations": {
+      "en": "Receipt please",
+      "ja": "領収書をください",
+      "ko": "영수증 주세요",
+      "th": "ขอใบเสร็จ"
+    },
+    "sort_order": 105,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "0e13a609-b2f8-4163-9396-dc0e8adb69fd",
+    "category": "dietary",
+    "code": "no_onion",
+    "icon": "🚫",
+    "label_zh": "我不吃蔥",
+    "translations": {
+      "en": "I cannot eat green onions",
+      "ja": "ネギは食べられません",
+      "ko": "파를 못 먹어요",
+      "th": "ฉันกินต้นหอมไม่ได้"
+    },
+    "sort_order": 1,
+    "created_at": "2025-12-28 14:03:03.459157+00",
+    "updated_at": "2026-04-09 06:43:22.985717+00"
+  },
+  {
+    "id": "c924ab7d-82e4-4e76-abc2-c150ee721bdd",
+    "category": "dietary",
+    "code": "no_garlic",
+    "icon": "🚫",
+    "label_zh": "我不吃蒜",
+    "translations": {
+      "en": "I cannot eat garlic",
+      "ja": "ニンニクは食べられません",
+      "ko": "마늘을 못 먹어요",
+      "th": "ฉันกินกระเทียมไม่ได้"
+    },
+    "sort_order": 2,
+    "created_at": "2025-12-28 14:03:03.459157+00",
+    "updated_at": "2026-04-09 06:43:22.985717+00"
+  },
+  {
+    "id": "dc8358f8-4d31-47f9-9490-b962ec5ae2bf",
+    "category": "dietary",
+    "code": "no_onion_garlic",
+    "icon": "🚫",
+    "label_zh": "我不吃蔥蒜",
+    "translations": {
+      "en": "I cannot eat onions or garlic",
+      "ja": "ネギとニンニクは食べられません",
+      "ko": "파와 마늘을 못 먹어요",
+      "th": "ฉันกินต้นหอมและกระเทียมไม่ได้"
+    },
+    "sort_order": 3,
+    "created_at": "2025-12-28 14:03:03.459157+00",
+    "updated_at": "2026-04-09 06:43:22.985717+00"
+  },
+  {
+    "id": "33ec7097-93c9-4ac2-88f1-d729d67eb150",
+    "category": "daily",
+    "code": "thank_you",
+    "icon": "🙏",
+    "label_zh": "謝謝",
+    "translations": {
+      "en": "Thank you",
+      "ja": "ありがとうございます",
+      "ko": "감사합니다",
+      "th": "ขอบคุณ"
+    },
+    "sort_order": 180,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "d57c204a-cb69-48d8-a3d0-f0ab31de7077",
+    "category": "dietary",
+    "code": "no_cilantro",
+    "icon": "🚫",
+    "label_zh": "我不吃香菜",
+    "translations": {
+      "en": "I cannot eat cilantro",
+      "ja": "パクチーは食べられません",
+      "ko": "고수를 못 먹어요",
+      "th": "ฉันกินผักชีไม่ได้"
+    },
+    "sort_order": 4,
+    "created_at": "2025-12-28 14:03:03.459157+00",
+    "updated_at": "2026-04-09 06:43:22.985717+00"
+  },
+  {
+    "id": "f6199c50-db9b-4bbf-a01c-25c985c6c67c",
+    "category": "dietary",
+    "code": "no_spicy",
+    "icon": "🌶️",
+    "label_zh": "我不吃辣",
+    "translations": {
+      "en": "I cannot eat spicy food",
+      "ja": "辛いものは食べられません",
+      "ko": "매운 음식을 못 먹어요",
+      "th": "ฉันกินเผ็ดไม่ได้"
+    },
+    "sort_order": 5,
+    "created_at": "2025-12-28 14:03:03.459157+00",
+    "updated_at": "2026-04-09 06:43:22.985717+00"
+  },
+  {
+    "id": "5ff4df33-80ba-4725-b8b9-66b74f7f7730",
+    "category": "dietary",
+    "code": "no_raw",
+    "icon": "🍣",
+    "label_zh": "我不吃生食",
+    "translations": {
+      "en": "I cannot eat raw food",
+      "ja": "生ものは食べられません",
+      "ko": "날것을 못 먹어요",
+      "th": "ฉันกินอาหารดิบไม่ได้"
+    },
+    "sort_order": 6,
+    "created_at": "2025-12-28 14:03:03.459157+00",
+    "updated_at": "2026-04-09 06:43:22.985717+00"
+  },
+  {
+    "id": "20867500-7640-4398-a856-60163c7c80d8",
+    "category": "dietary",
+    "code": "vegetarian",
+    "icon": "🥬",
+    "label_zh": "我吃素（蛋奶素）",
+    "translations": {
+      "en": "I am vegetarian (eggs and dairy OK)",
+      "ja": "ベジタリアンです（卵と乳製品はOK）",
+      "ko": "채식주의자입니다 (계란, 유제품 가능)",
+      "th": "ฉันเป็นมังสวิรัติ (ไข่และนมได้)"
+    },
+    "sort_order": 7,
+    "created_at": "2025-12-28 14:03:03.459157+00",
+    "updated_at": "2026-04-09 06:43:22.985717+00"
+  },
+  {
+    "id": "bf8cdc96-9789-492e-88b4-6e8f4a56b660",
+    "category": "dietary",
+    "code": "vegan",
+    "icon": "🌱",
+    "label_zh": "我吃全素",
+    "translations": {
+      "en": "I am vegan",
+      "ja": "ヴィーガンです",
+      "ko": "비건입니다",
+      "th": "ฉันเป็นวีแกน"
+    },
+    "sort_order": 8,
+    "created_at": "2025-12-28 14:03:03.459157+00",
+    "updated_at": "2026-04-09 06:43:22.985717+00"
+  },
+  {
+    "id": "9c9325ba-940c-494b-b60e-407c8748bf6c",
+    "category": "dietary",
+    "code": "no_beef",
+    "icon": "🐄",
+    "label_zh": "我不吃牛肉",
+    "translations": {
+      "en": "I cannot eat beef",
+      "ja": "牛肉は食べられません",
+      "ko": "소고기를 못 먹어요",
+      "th": "ฉันกินเนื้อวัวไม่ได้"
+    },
+    "sort_order": 9,
+    "created_at": "2025-12-28 14:03:03.459157+00",
+    "updated_at": "2026-04-09 06:43:22.985717+00"
+  },
+  {
+    "id": "5deb3234-3524-4004-931d-1039401f80e0",
+    "category": "dietary",
+    "code": "no_pork",
+    "icon": "🐷",
+    "label_zh": "我不吃豬肉",
+    "translations": {
+      "en": "I cannot eat pork",
+      "ja": "豚肉は食べられません",
+      "ko": "돼지고기를 못 먹어요",
+      "th": "ฉันกินหมูไม่ได้"
+    },
+    "sort_order": 10,
+    "created_at": "2025-12-28 14:03:03.459157+00",
+    "updated_at": "2026-04-09 06:43:22.985717+00"
+  },
+  {
+    "id": "d94d615c-d017-4a36-9fea-df1f4b4f855a",
+    "category": "dietary",
+    "code": "halal",
+    "icon": "☪️",
+    "label_zh": "我只吃清真食物",
+    "translations": {
+      "en": "I only eat Halal food",
+      "ja": "ハラール食のみ食べられます",
+      "ko": "할랄 음식만 먹어요",
+      "th": "ฉันกินอาหารฮาลาลเท่านั้น"
+    },
+    "sort_order": 11,
+    "created_at": "2025-12-28 14:03:03.459157+00",
+    "updated_at": "2026-04-09 06:43:22.985717+00"
+  },
+  {
+    "id": "8dbface9-f570-4cec-b43e-e0399ad05b00",
+    "category": "allergy",
+    "code": "seafood_allergy",
+    "icon": "🦐",
+    "label_zh": "我對海鮮過敏",
+    "translations": {
+      "en": "I have a seafood allergy",
+      "ja": "シーフードアレルギーがあります",
+      "ko": "해산물 알레르기가 있어요",
+      "th": "ฉันแพ้อาหารทะเล"
+    },
+    "sort_order": 20,
+    "created_at": "2025-12-28 14:03:03.459157+00",
+    "updated_at": "2026-04-09 06:43:22.985717+00"
+  },
+  {
+    "id": "82da2658-4cf7-420a-b313-b4d554539ba2",
+    "category": "allergy",
+    "code": "shellfish_allergy",
+    "icon": "🦪",
+    "label_zh": "我對貝類過敏",
+    "translations": {
+      "en": "I have a shellfish allergy",
+      "ja": "貝類アレルギーがあります",
+      "ko": "조개류 알레르기가 있어요",
+      "th": "ฉันแพ้หอย"
+    },
+    "sort_order": 21,
+    "created_at": "2025-12-28 14:03:03.459157+00",
+    "updated_at": "2026-04-09 06:43:22.985717+00"
+  },
+  {
+    "id": "e659f260-73c0-428d-a1fa-9d971174a6b1",
+    "category": "allergy",
+    "code": "nut_allergy",
+    "icon": "🥜",
+    "label_zh": "我對堅果過敏",
+    "translations": {
+      "en": "I have a nut allergy",
+      "ja": "ナッツアレルギーがあります",
+      "ko": "견과류 알레르기가 있어요",
+      "th": "ฉันแพ้ถั่ว"
+    },
+    "sort_order": 22,
+    "created_at": "2025-12-28 14:03:03.459157+00",
+    "updated_at": "2026-04-09 06:43:22.985717+00"
+  },
+  {
+    "id": "e33d143f-554e-4666-bca4-e1a2c5cc7e4d",
+    "category": "allergy",
+    "code": "peanut_allergy",
+    "icon": "🥜",
+    "label_zh": "我對花生過敏",
+    "translations": {
+      "en": "I have a peanut allergy",
+      "ja": "ピーナッツアレルギーがあります",
+      "ko": "땅콩 알레르기가 있어요",
+      "th": "ฉันแพ้ถั่วลิสง"
+    },
+    "sort_order": 23,
+    "created_at": "2025-12-28 14:03:03.459157+00",
+    "updated_at": "2026-04-09 06:43:22.985717+00"
+  },
+  {
+    "id": "9a64d308-2937-4fdb-8c99-43e3ab1698a0",
+    "category": "allergy",
+    "code": "dairy_allergy",
+    "icon": "🥛",
+    "label_zh": "我對乳製品過敏",
+    "translations": {
+      "en": "I have a dairy allergy",
+      "ja": "乳製品アレルギーがあります",
+      "ko": "유제품 알레르기가 있어요",
+      "th": "ฉันแพ้นม"
+    },
+    "sort_order": 24,
+    "created_at": "2025-12-28 14:03:03.459157+00",
+    "updated_at": "2026-04-09 06:43:22.985717+00"
+  },
+  {
+    "id": "25ed7499-1305-4aad-aba5-d53654697aeb",
+    "category": "allergy",
+    "code": "egg_allergy",
+    "icon": "🥚",
+    "label_zh": "我對蛋過敏",
+    "translations": {
+      "en": "I have an egg allergy",
+      "ja": "卵アレルギーがあります",
+      "ko": "계란 알레르기가 있어요",
+      "th": "ฉันแพ้ไข่"
+    },
+    "sort_order": 25,
+    "created_at": "2025-12-28 14:03:03.459157+00",
+    "updated_at": "2026-04-09 06:43:22.985717+00"
+  },
+  {
+    "id": "22e7cfac-aecb-4a3a-baa3-c02ead920743",
+    "category": "allergy",
+    "code": "gluten_allergy",
+    "icon": "🌾",
+    "label_zh": "我對麩質過敏",
+    "translations": {
+      "en": "I have a gluten allergy",
+      "ja": "グルテンアレルギーがあります",
+      "ko": "글루텐 알레르기가 있어요",
+      "th": "ฉันแพ้กลูเตน"
+    },
+    "sort_order": 26,
+    "created_at": "2025-12-28 14:03:03.459157+00",
+    "updated_at": "2026-04-09 06:43:22.985717+00"
+  },
+  {
+    "id": "5e8b9983-4768-40ed-b76c-88e544c08532",
+    "category": "allergy",
+    "code": "soy_allergy",
+    "icon": "🫘",
+    "label_zh": "我對大豆過敏",
+    "translations": {
+      "en": "I have a soy allergy",
+      "ja": "大豆アレルギーがあります",
+      "ko": "대두 알레르기가 있어요",
+      "th": "ฉันแพ้ถั่วเหลือง"
+    },
+    "sort_order": 27,
+    "created_at": "2025-12-28 14:03:03.459157+00",
+    "updated_at": "2026-04-09 06:43:22.985717+00"
+  },
+  {
+    "id": "9e8f3d9a-8ab7-4627-a733-0d9c36f4f2b9",
+    "category": "medical",
+    "code": "diabetes",
+    "icon": "💉",
+    "label_zh": "我有糖尿病",
+    "translations": {
+      "en": "I have diabetes",
+      "ja": "糖尿病があります",
+      "ko": "당뇨병이 있어요",
+      "th": "ฉันเป็นเบาหวาน"
+    },
+    "sort_order": 40,
+    "created_at": "2025-12-28 14:03:03.459157+00",
+    "updated_at": "2026-04-09 06:43:22.985717+00"
+  },
+  {
+    "id": "c0a84b58-bb26-46f8-9304-a7828572ca0f",
+    "category": "medical",
+    "code": "heart_condition",
+    "icon": "❤️",
+    "label_zh": "我有心臟病",
+    "translations": {
+      "en": "I have a heart condition",
+      "ja": "心臓病があります",
+      "ko": "심장병이 있어요",
+      "th": "ฉันเป็นโรคหัวใจ"
+    },
+    "sort_order": 41,
+    "created_at": "2025-12-28 14:03:03.459157+00",
+    "updated_at": "2026-04-09 06:43:22.985717+00"
+  },
+  {
+    "id": "945d8780-2952-47db-ba1c-56365caebc74",
+    "category": "medical",
+    "code": "asthma",
+    "icon": "🫁",
+    "label_zh": "我有氣喘",
+    "translations": {
+      "en": "I have asthma",
+      "ja": "喘息があります",
+      "ko": "천식이 있어요",
+      "th": "ฉันเป็นหอบหืด"
+    },
+    "sort_order": 42,
+    "created_at": "2025-12-28 14:03:03.459157+00",
+    "updated_at": "2026-04-09 06:43:22.985717+00"
+  },
+  {
+    "id": "ec52caed-1457-4db5-8496-9aa7e0ffb68c",
+    "category": "medical",
+    "code": "epilepsy",
+    "icon": "⚡",
+    "label_zh": "我有癲癇",
+    "translations": {
+      "en": "I have epilepsy",
+      "ja": "てんかんがあります",
+      "ko": "간질이 있어요",
+      "th": "ฉันเป็นลมชัก"
+    },
+    "sort_order": 43,
+    "created_at": "2025-12-28 14:03:03.459157+00",
+    "updated_at": "2026-04-09 06:43:22.985717+00"
+  },
+  {
+    "id": "07c2d448-1c67-47f9-9dd5-54c946e18a19",
+    "category": "accommodation",
+    "code": "non_smoking",
+    "icon": "🚭",
+    "label_zh": "我需要禁煙房",
+    "translations": {
+      "en": "I need a non-smoking room",
+      "ja": "禁煙室をお願いします",
+      "ko": "금연실 부탁드려요",
+      "th": "ขอห้องปลอดบุหรี่"
+    },
+    "sort_order": 60,
+    "created_at": "2025-12-28 14:03:03.459157+00",
+    "updated_at": "2026-04-09 06:43:22.985717+00"
+  },
+  {
+    "id": "3e714861-2af8-4617-95a7-7bd44bd6ded9",
+    "category": "accommodation",
+    "code": "quiet_floor",
+    "icon": "🔇",
+    "label_zh": "我需要安靜樓層",
+    "translations": {
+      "en": "I need a quiet floor",
+      "ja": "静かなフロアをお願いします",
+      "ko": "조용한 층 부탁드려요",
+      "th": "ขอชั้นที่เงียบ"
+    },
+    "sort_order": 61,
+    "created_at": "2025-12-28 14:03:03.459157+00",
+    "updated_at": "2026-04-09 06:43:22.985717+00"
+  },
+  {
+    "id": "2e1324f8-d8f9-43ff-b1db-d8f0c20b92a0",
+    "category": "accommodation",
+    "code": "high_floor",
+    "icon": "🏢",
+    "label_zh": "我想要高樓層",
+    "translations": {
+      "en": "I prefer a high floor",
+      "ja": "高層階をお願いします",
+      "ko": "높은 층 부탁드려요",
+      "th": "ขอชั้นสูง"
+    },
+    "sort_order": 62,
+    "created_at": "2025-12-28 14:03:03.459157+00",
+    "updated_at": "2026-04-09 06:43:22.985717+00"
+  },
+  {
+    "id": "263f79ac-1c1b-4d86-9a01-295895deb2ad",
+    "category": "accommodation",
+    "code": "wheelchair",
+    "icon": "♿",
+    "label_zh": "我需要無障礙設施",
+    "translations": {
+      "en": "I need wheelchair accessibility",
+      "ja": "バリアフリー対応をお願いします",
+      "ko": "휠체어 이용 가능한 곳 부탁드려요",
+      "th": "ต้องการสิ่งอำนวยความสะดวกสำหรับรถเข็น"
+    },
+    "sort_order": 63,
+    "created_at": "2025-12-28 14:03:03.459157+00",
+    "updated_at": "2026-04-09 06:43:22.985717+00"
+  },
+  {
+    "id": "ff1ba650-23e8-482e-9f4c-679dc043534c",
+    "category": "hotel",
+    "code": "extra_towel",
+    "icon": "🛁",
+    "label_zh": "請多給我毛巾",
+    "translations": {
+      "en": "Extra towels please",
+      "ja": "タオルを追加でください",
+      "ko": "수건 더 주세요",
+      "th": "ขอผ้าเช็ดตัวเพิ่ม"
+    },
+    "sort_order": 70,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "10630459-c762-4498-afed-4e2d9d1880b0",
+    "category": "hotel",
+    "code": "extra_pillow",
+    "icon": "🛏️",
+    "label_zh": "請多給我枕頭",
+    "translations": {
+      "en": "Extra pillows please",
+      "ja": "枕を追加でください",
+      "ko": "베개 더 주세요",
+      "th": "ขอหมอนเพิ่ม"
+    },
+    "sort_order": 71,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "6b5bb975-f3cc-4f25-9edd-efea7c71b164",
+    "category": "hotel",
+    "code": "extra_blanket",
+    "icon": "🛋️",
+    "label_zh": "請多給我被子",
+    "translations": {
+      "en": "Extra blanket please",
+      "ja": "毛布を追加でください",
+      "ko": "이불 더 주세요",
+      "th": "ขอผ้าห่มเพิ่ม"
+    },
+    "sort_order": 72,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "4d2a98b7-7c58-4563-9aa2-a86b468cbc2a",
+    "category": "hotel",
+    "code": "room_cleaning",
+    "icon": "🧹",
+    "label_zh": "請打掃房間",
+    "translations": {
+      "en": "Please clean the room",
+      "ja": "部屋を掃除してください",
+      "ko": "방 청소해 주세요",
+      "th": "กรุณาทำความสะอาดห้อง"
+    },
+    "sort_order": 73,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "b46b32e6-cacd-4426-a671-50c8ff1d5988",
+    "category": "hotel",
+    "code": "no_cleaning",
+    "icon": "🚫",
+    "label_zh": "今天不用打掃",
+    "translations": {
+      "en": "No cleaning today",
+      "ja": "今日は掃除不要です",
+      "ko": "오늘은 청소 안 해도 돼요",
+      "th": "วันนี้ไม่ต้องทำความสะอาด"
+    },
+    "sort_order": 74,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "5529f6d4-90fe-4d9f-9c4e-8234991d2cea",
+    "category": "hotel",
+    "code": "late_checkout",
+    "icon": "⏰",
+    "label_zh": "我想延遲退房",
+    "translations": {
+      "en": "Late checkout please",
+      "ja": "レイトチェックアウトをお願いします",
+      "ko": "늦은 체크아웃 부탁드려요",
+      "th": "ขอเช็คเอาท์ช้า"
+    },
+    "sort_order": 75,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "743761aa-8480-434a-aaee-83982eca56cb",
+    "category": "hotel",
+    "code": "early_checkin",
+    "icon": "⏰",
+    "label_zh": "我想提早入住",
+    "translations": {
+      "en": "Early check-in please",
+      "ja": "アーリーチェックインをお願いします",
+      "ko": "일찍 체크인 부탁드려요",
+      "th": "ขอเช็คอินเร็ว"
+    },
+    "sort_order": 76,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "015fe4c0-3b84-43fa-b327-f72f4ea3b2e1",
+    "category": "hotel",
+    "code": "luggage_storage",
+    "icon": "🧳",
+    "label_zh": "可以寄放行李嗎？",
+    "translations": {
+      "en": "Can you store my luggage?",
+      "ja": "荷物を預かってもらえますか？",
+      "ko": "짐 맡길 수 있나요?",
+      "th": "ฝากกระเป๋าได้ไหม?"
+    },
+    "sort_order": 77,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "c2e6a040-97fd-4585-9f3e-84cbb18f9c8c",
+    "category": "hotel",
+    "code": "wake_up_call",
+    "icon": "⏰",
+    "label_zh": "請明早叫我起床",
+    "translations": {
+      "en": "Wake-up call please",
+      "ja": "モーニングコールをお願いします",
+      "ko": "모닝콜 부탁드려요",
+      "th": "ขอโทรปลุกตอนเช้า"
+    },
+    "sort_order": 78,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "28a0224f-3b29-42b9-bb2b-8bcb8f2e5b46",
+    "category": "hotel",
+    "code": "hot_water_issue",
+    "icon": "🚿",
+    "label_zh": "熱水不夠熱",
+    "translations": {
+      "en": "Hot water is not hot enough",
+      "ja": "お湯がぬるいです",
+      "ko": "온수가 안 나와요",
+      "th": "น้ำร้อนไม่ร้อน"
+    },
+    "sort_order": 79,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "67e80498-f8c9-48cb-8490-6a32104778d0",
+    "category": "hotel",
+    "code": "ac_broken",
+    "icon": "❄️",
+    "label_zh": "冷氣壞了",
+    "translations": {
+      "en": "The AC is broken",
+      "ja": "エアコンが壊れています",
+      "ko": "에어컨이 고장났어요",
+      "th": "แอร์เสีย"
+    },
+    "sort_order": 80,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "b054bbab-1849-4405-8e12-fbe11fe1dd65",
+    "category": "hotel",
+    "code": "wifi_issue",
+    "icon": "📶",
+    "label_zh": "WiFi 連不上",
+    "translations": {
+      "en": "WiFi is not working",
+      "ja": "WiFiに繋がりません",
+      "ko": "와이파이가 안 돼요",
+      "th": "WiFi ใช้ไม่ได้"
+    },
+    "sort_order": 81,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "420f1e6b-81dd-4233-a737-c75812f730ca",
+    "category": "hotel",
+    "code": "room_too_noisy",
+    "icon": "🔊",
+    "label_zh": "房間太吵了",
+    "translations": {
+      "en": "The room is too noisy",
+      "ja": "部屋がうるさいです",
+      "ko": "방이 너무 시끄러워요",
+      "th": "ห้องเสียงดังเกินไป"
+    },
+    "sort_order": 82,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "b6cefc1d-19c0-4f03-8af0-e09c012e12b8",
+    "category": "hotel",
+    "code": "change_room",
+    "icon": "🔄",
+    "label_zh": "可以換房間嗎？",
+    "translations": {
+      "en": "Can I change rooms?",
+      "ja": "部屋を変えてもらえますか？",
+      "ko": "방 바꿀 수 있나요?",
+      "th": "ขอเปลี่ยนห้องได้ไหม?"
+    },
+    "sort_order": 83,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "af904fd1-7a88-4319-998e-eb77b0c97f4d",
+    "category": "transport",
+    "code": "go_to_hotel",
+    "icon": "🏨",
+    "label_zh": "請載我去這間飯店",
+    "translations": {
+      "en": "Please take me to this hotel",
+      "ja": "このホテルまでお願いします",
+      "ko": "이 호텔로 가주세요",
+      "th": "ไปโรงแรมนี้"
+    },
+    "sort_order": 100,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "c624b817-962c-416a-8cf8-6797614392be",
+    "category": "transport",
+    "code": "go_to_airport",
+    "icon": "✈️",
+    "label_zh": "請載我去機場",
+    "translations": {
+      "en": "To the airport please",
+      "ja": "空港までお願いします",
+      "ko": "공항으로 가주세요",
+      "th": "ไปสนามบิน"
+    },
+    "sort_order": 101,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "a08a04fa-3be5-4f0b-b853-36165b13cd80",
+    "category": "transport",
+    "code": "go_to_station",
+    "icon": "🚉",
+    "label_zh": "請載我去車站",
+    "translations": {
+      "en": "To the station please",
+      "ja": "駅までお願いします",
+      "ko": "역으로 가주세요",
+      "th": "ไปสถานีรถไฟ"
+    },
+    "sort_order": 102,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "48347b96-b18b-48fd-96d3-88a9b6fa4323",
+    "category": "transport",
+    "code": "go_to_address",
+    "icon": "📍",
+    "label_zh": "請載我去這個地址",
+    "translations": {
+      "en": "Please take me to this address",
+      "ja": "この住所までお願いします",
+      "ko": "이 주소로 가주세요",
+      "th": "ไปที่อยู่นี้"
+    },
+    "sort_order": 103,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "d5a48180-939f-435a-adb3-ccc8559f2414",
+    "category": "transport",
+    "code": "how_much_fare",
+    "icon": "💰",
+    "label_zh": "到那裡多少錢？",
+    "translations": {
+      "en": "How much to get there?",
+      "ja": "そこまでいくらですか？",
+      "ko": "거기까지 얼마예요?",
+      "th": "ไปที่นั่นเท่าไหร่?"
+    },
+    "sort_order": 104,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "cf40d4aa-56a3-4316-aa6e-d06fcbb96d3c",
+    "category": "transport",
+    "code": "stop_here",
+    "icon": "✋",
+    "label_zh": "請在這裡停車",
+    "translations": {
+      "en": "Stop here please",
+      "ja": "ここで止めてください",
+      "ko": "여기서 세워주세요",
+      "th": "จอดที่นี่"
+    },
+    "sort_order": 106,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "e8708bf5-2ce0-445b-916b-84d35cee1b3e",
+    "category": "transport",
+    "code": "wait_here",
+    "icon": "⏳",
+    "label_zh": "請在這裡等我",
+    "translations": {
+      "en": "Please wait here",
+      "ja": "ここで待っていてください",
+      "ko": "여기서 기다려 주세요",
+      "th": "รอที่นี่"
+    },
+    "sort_order": 107,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "2819ae2a-23df-4fe6-b03b-1f42d4a91531",
+    "category": "transport",
+    "code": "turn_on_meter",
+    "icon": "🔢",
+    "label_zh": "請開錶",
+    "translations": {
+      "en": "Please use the meter",
+      "ja": "メーターを使ってください",
+      "ko": "미터기 켜주세요",
+      "th": "เปิดมิเตอร์"
+    },
+    "sort_order": 108,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "3e30c18f-35f0-4587-9cab-cef9f8dc4d3e",
+    "category": "transport",
+    "code": "no_toll_road",
+    "icon": "🛣️",
+    "label_zh": "不要走收費道路",
+    "translations": {
+      "en": "No toll roads please",
+      "ja": "有料道路は使わないでください",
+      "ko": "유료도로 안 가도 돼요",
+      "th": "ไม่ใช้ทางด่วน"
+    },
+    "sort_order": 109,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "8dee4396-4015-46f3-ad58-103b4dc738f1",
+    "category": "shopping",
+    "code": "tax_free",
+    "icon": "💳",
+    "label_zh": "可以免稅嗎？",
+    "translations": {
+      "en": "Is tax-free available?",
+      "ja": "免税できますか？",
+      "ko": "면세 되나요?",
+      "th": "ขอคืนภาษีได้ไหม?"
+    },
+    "sort_order": 120,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "f66bf0e4-7acd-4c8b-b42f-1f851f9ab795",
+    "category": "shopping",
+    "code": "try_on",
+    "icon": "👕",
+    "label_zh": "可以試穿嗎？",
+    "translations": {
+      "en": "Can I try this on?",
+      "ja": "試着できますか？",
+      "ko": "입어봐도 되나요?",
+      "th": "ลองได้ไหม?"
+    },
+    "sort_order": 121,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "d2ea9851-bd2b-492d-947a-a13ef378831e",
+    "category": "shopping",
+    "code": "other_size",
+    "icon": "📏",
+    "label_zh": "有其他尺寸嗎？",
+    "translations": {
+      "en": "Do you have other sizes?",
+      "ja": "他のサイズはありますか？",
+      "ko": "다른 사이즈 있나요?",
+      "th": "มีไซส์อื่นไหม?"
+    },
+    "sort_order": 122,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "11879e7a-e4c9-4a1a-b718-80bf1bd6f55e",
+    "category": "shopping",
+    "code": "size_bigger",
+    "icon": "⬆️",
+    "label_zh": "有大一點的嗎？",
+    "translations": {
+      "en": "Do you have a bigger size?",
+      "ja": "もっと大きいのはありますか？",
+      "ko": "더 큰 거 있나요?",
+      "th": "มีใหญ่กว่านี้ไหม?"
+    },
+    "sort_order": 123,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "2aa8dcc1-b171-4ea8-8b26-129728da4162",
+    "category": "shopping",
+    "code": "size_smaller",
+    "icon": "⬇️",
+    "label_zh": "有小一點的嗎？",
+    "translations": {
+      "en": "Do you have a smaller size?",
+      "ja": "もっと小さいのはありますか？",
+      "ko": "더 작은 거 있나요?",
+      "th": "มีเล็กกว่านี้ไหม?"
+    },
+    "sort_order": 124,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "87a85ead-d687-454d-84c1-759b675b074d",
+    "category": "shopping",
+    "code": "other_color",
+    "icon": "🎨",
+    "label_zh": "有其他顏色嗎？",
+    "translations": {
+      "en": "Do you have other colors?",
+      "ja": "他の色はありますか？",
+      "ko": "다른 색 있나요?",
+      "th": "มีสีอื่นไหม?"
+    },
+    "sort_order": 125,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "08bcb4a7-3df4-4150-85ea-6ad40ec479b1",
+    "category": "shopping",
+    "code": "how_much",
+    "icon": "💰",
+    "label_zh": "這個多少錢？",
+    "translations": {
+      "en": "How much is this?",
+      "ja": "これはいくらですか？",
+      "ko": "이거 얼마예요?",
+      "th": "อันนี้เท่าไหร่?"
+    },
+    "sort_order": 126,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "be947e5a-3b8b-4373-b337-8a859fdcd1f7",
+    "category": "shopping",
+    "code": "can_discount",
+    "icon": "💸",
+    "label_zh": "可以便宜一點嗎？",
+    "translations": {
+      "en": "Can you give a discount?",
+      "ja": "安くなりますか？",
+      "ko": "깎아주세요",
+      "th": "ลดได้ไหม?"
+    },
+    "sort_order": 127,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "47bc7a38-71ed-48af-b98c-19b5514d912e",
+    "category": "shopping",
+    "code": "pay_card",
+    "icon": "💳",
+    "label_zh": "可以刷卡嗎？",
+    "translations": {
+      "en": "Can I pay by card?",
+      "ja": "カードで払えますか？",
+      "ko": "카드 되나요?",
+      "th": "จ่ายบัตรได้ไหม?"
+    },
+    "sort_order": 128,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "19d4a0fb-b077-4e06-a366-bb8772b6821a",
+    "category": "shopping",
+    "code": "pay_cash",
+    "icon": "💵",
+    "label_zh": "我付現金",
+    "translations": {
+      "en": "I will pay in cash",
+      "ja": "現金で払います",
+      "ko": "현금으로 할게요",
+      "th": "จ่ายเงินสด"
+    },
+    "sort_order": 129,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "a7731f08-427d-46ce-8338-285d91f5abcd",
+    "category": "shopping",
+    "code": "just_looking",
+    "icon": "👀",
+    "label_zh": "我只是看看",
+    "translations": {
+      "en": "Just looking",
+      "ja": "見ているだけです",
+      "ko": "그냥 구경하는 거예요",
+      "th": "แค่ดูเฉยๆ"
+    },
+    "sort_order": 130,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "a7861734-77f5-401e-a437-867985b36161",
+    "category": "shopping",
+    "code": "wrap_gift",
+    "icon": "🎁",
+    "label_zh": "可以包裝嗎？",
+    "translations": {
+      "en": "Can you gift wrap it?",
+      "ja": "ギフト包装できますか？",
+      "ko": "포장해 주세요",
+      "th": "ห่อของขวัญได้ไหม?"
+    },
+    "sort_order": 131,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "dcd07afc-444b-4e40-b291-ac5575bac193",
+    "category": "shopping",
+    "code": "separate_bag",
+    "icon": "🛍️",
+    "label_zh": "請分開裝袋",
+    "translations": {
+      "en": "Separate bags please",
+      "ja": "別々の袋に入れてください",
+      "ko": "따로 담아주세요",
+      "th": "แยกถุงให้หน่อย"
+    },
+    "sort_order": 132,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "b4809ea4-f856-4720-a7e0-0843d812a224",
+    "category": "restaurant",
+    "code": "table_for_x",
+    "icon": "🍽️",
+    "label_zh": "我們有X位",
+    "translations": {
+      "en": "Table for X please",
+      "ja": "X名です",
+      "ko": "X명이요",
+      "th": "X ที่นั่ง"
+    },
+    "sort_order": 140,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "ac0fdcd7-109e-4eea-8ed3-2519212b28a7",
+    "category": "restaurant",
+    "code": "reservation",
+    "icon": "📅",
+    "label_zh": "我有預約",
+    "translations": {
+      "en": "I have a reservation",
+      "ja": "予約しています",
+      "ko": "예약했어요",
+      "th": "จองไว้แล้ว"
+    },
+    "sort_order": 141,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "b266064d-0adb-44a6-a03a-e1313cd9d701",
+    "category": "restaurant",
+    "code": "menu_please",
+    "icon": "📖",
+    "label_zh": "請給我菜單",
+    "translations": {
+      "en": "Menu please",
+      "ja": "メニューをください",
+      "ko": "메뉴판 주세요",
+      "th": "ขอเมนู"
+    },
+    "sort_order": 142,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "a9bfecdd-dad4-4b77-9725-4b25b26b108c",
+    "category": "restaurant",
+    "code": "recommend",
+    "icon": "⭐",
+    "label_zh": "有推薦的嗎？",
+    "translations": {
+      "en": "What do you recommend?",
+      "ja": "おすすめは何ですか？",
+      "ko": "추천 메뉴 뭐예요?",
+      "th": "แนะนำอะไร?"
+    },
+    "sort_order": 143,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "fd9ee797-e30b-4262-993c-6cbc0e1587dc",
+    "category": "restaurant",
+    "code": "order_same",
+    "icon": "👆",
+    "label_zh": "我要跟他一樣的",
+    "translations": {
+      "en": "Same as theirs please",
+      "ja": "同じものをください",
+      "ko": "저것과 같은 거요",
+      "th": "เอาเหมือนเขา"
+    },
+    "sort_order": 144,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "2e729d2c-ccc3-4fcc-973d-d4bb92b9b92d",
+    "category": "restaurant",
+    "code": "water_please",
+    "icon": "💧",
+    "label_zh": "請給我水",
+    "translations": {
+      "en": "Water please",
+      "ja": "お水をください",
+      "ko": "물 주세요",
+      "th": "ขอน้ำ"
+    },
+    "sort_order": 145,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "4b1f362e-6617-4973-a6da-ea020fd915c8",
+    "category": "restaurant",
+    "code": "bill_please",
+    "icon": "🧾",
+    "label_zh": "請結帳",
+    "translations": {
+      "en": "Bill please",
+      "ja": "お会計をお願いします",
+      "ko": "계산해 주세요",
+      "th": "เก็บเงิน"
+    },
+    "sort_order": 146,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "4498a5a0-aec2-4911-a457-5a3442a3dccf",
+    "category": "restaurant",
+    "code": "pay_together",
+    "icon": "💰",
+    "label_zh": "一起結帳",
+    "translations": {
+      "en": "Pay together",
+      "ja": "一緒に会計します",
+      "ko": "같이 계산할게요",
+      "th": "จ่ายรวม"
+    },
+    "sort_order": 147,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "8e61931b-aeef-4f8d-bd89-79fd99baf675",
+    "category": "restaurant",
+    "code": "pay_separate",
+    "icon": "💰",
+    "label_zh": "分開結帳",
+    "translations": {
+      "en": "Separate bills",
+      "ja": "別々に会計します",
+      "ko": "따로 계산해 주세요",
+      "th": "จ่ายแยก"
+    },
+    "sort_order": 148,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "ab9dc2c1-946b-45df-8719-b3995f11e755",
+    "category": "restaurant",
+    "code": "take_away",
+    "icon": "📦",
+    "label_zh": "我要外帶",
+    "translations": {
+      "en": "To go please",
+      "ja": "持ち帰りでお願いします",
+      "ko": "포장해 주세요",
+      "th": "ห่อกลับ"
+    },
+    "sort_order": 149,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "81b752bd-ed30-4605-9f20-05e9ec203a99",
+    "category": "restaurant",
+    "code": "eat_here",
+    "icon": "🪑",
+    "label_zh": "我要內用",
+    "translations": {
+      "en": "For here please",
+      "ja": "店内で食べます",
+      "ko": "여기서 먹을게요",
+      "th": "ทานที่นี่"
+    },
+    "sort_order": 150,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "ac0dfe74-f47a-441b-b637-3e7a8546a834",
+    "category": "restaurant",
+    "code": "less_ice",
+    "icon": "🧊",
+    "label_zh": "少冰",
+    "translations": {
+      "en": "Less ice please",
+      "ja": "氷少なめで",
+      "ko": "얼음 적게요",
+      "th": "น้ำแข็งน้อย"
+    },
+    "sort_order": 151,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "bc75ac07-5006-4cda-99b6-93181e497ac5",
+    "category": "restaurant",
+    "code": "no_ice",
+    "icon": "🧊",
+    "label_zh": "去冰",
+    "translations": {
+      "en": "No ice please",
+      "ja": "氷なしで",
+      "ko": "얼음 빼주세요",
+      "th": "ไม่ใส่น้ำแข็ง"
+    },
+    "sort_order": 152,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "ef1f8d55-f0d7-40f6-b44f-2d98a55afd69",
+    "category": "restaurant",
+    "code": "less_sugar",
+    "icon": "🍬",
+    "label_zh": "少糖",
+    "translations": {
+      "en": "Less sugar please",
+      "ja": "砂糖少なめで",
+      "ko": "덜 달게요",
+      "th": "หวานน้อย"
+    },
+    "sort_order": 153,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "26044d69-bb6c-4b2b-9752-1c40c992e09f",
+    "category": "restaurant",
+    "code": "no_sugar",
+    "icon": "🍬",
+    "label_zh": "無糖",
+    "translations": {
+      "en": "No sugar please",
+      "ja": "砂糖なしで",
+      "ko": "설탕 빼주세요",
+      "th": "ไม่หวาน"
+    },
+    "sort_order": 154,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "10a93ae2-5c35-438c-8026-3a261ea5d1b4",
+    "category": "emergency",
+    "code": "need_help",
+    "icon": "🆘",
+    "label_zh": "我需要幫助",
+    "translations": {
+      "en": "I need help",
+      "ja": "助けてください",
+      "ko": "도와주세요",
+      "th": "ช่วยด้วย"
+    },
+    "sort_order": 160,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "bee465f1-0fb3-452f-a746-0d44bf468542",
+    "category": "emergency",
+    "code": "call_police",
+    "icon": "🚔",
+    "label_zh": "請幫我報警",
+    "translations": {
+      "en": "Please call the police",
+      "ja": "警察を呼んでください",
+      "ko": "경찰 불러주세요",
+      "th": "เรียกตำรวจ"
+    },
+    "sort_order": 161,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "bb6b91b9-a1b8-4c07-8b41-e754825f691e",
+    "category": "emergency",
+    "code": "call_ambulance",
+    "icon": "🚑",
+    "label_zh": "請叫救護車",
+    "translations": {
+      "en": "Please call an ambulance",
+      "ja": "救急車を呼んでください",
+      "ko": "구급차 불러주세요",
+      "th": "เรียกรถพยาบาล"
+    },
+    "sort_order": 162,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "46835ab0-6b38-47b3-99f8-a14bd5303efb",
+    "category": "emergency",
+    "code": "lost_passport",
+    "icon": "📕",
+    "label_zh": "我的護照不見了",
+    "translations": {
+      "en": "I lost my passport",
+      "ja": "パスポートをなくしました",
+      "ko": "여권을 잃어버렸어요",
+      "th": "หนังสือเดินทางหาย"
+    },
+    "sort_order": 163,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "c2ef2f3a-bf20-4ac1-8080-3981919829a6",
+    "category": "emergency",
+    "code": "lost_wallet",
+    "icon": "👛",
+    "label_zh": "我的錢包不見了",
+    "translations": {
+      "en": "I lost my wallet",
+      "ja": "財布をなくしました",
+      "ko": "지갑을 잃어버렸어요",
+      "th": "กระเป๋าสตางค์หาย"
+    },
+    "sort_order": 164,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "ac1816ac-21bb-41ea-b798-a1ca8b7755e3",
+    "category": "emergency",
+    "code": "lost_phone",
+    "icon": "📱",
+    "label_zh": "我的手機不見了",
+    "translations": {
+      "en": "I lost my phone",
+      "ja": "携帯をなくしました",
+      "ko": "핸드폰을 잃어버렸어요",
+      "th": "โทรศัพท์หาย"
+    },
+    "sort_order": 165,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "86bac50c-8838-47ce-8cf5-492def3900f4",
+    "category": "emergency",
+    "code": "feel_sick",
+    "icon": "🤒",
+    "label_zh": "我身體不舒服",
+    "translations": {
+      "en": "I feel sick",
+      "ja": "気分が悪いです",
+      "ko": "몸이 안 좋아요",
+      "th": "ไม่สบาย"
+    },
+    "sort_order": 166,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "10689555-0be5-4716-a71d-a5dab0044505",
+    "category": "emergency",
+    "code": "need_hospital",
+    "icon": "🏥",
+    "label_zh": "我需要去醫院",
+    "translations": {
+      "en": "I need to go to a hospital",
+      "ja": "病院に行きたいです",
+      "ko": "병원에 가야 해요",
+      "th": "ต้องไปโรงพยาบาล"
+    },
+    "sort_order": 167,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "0697dbef-792f-49f9-8ff1-b8a7bbe8cbf5",
+    "category": "emergency",
+    "code": "pharmacy_where",
+    "icon": "💊",
+    "label_zh": "藥局在哪裡？",
+    "translations": {
+      "en": "Where is a pharmacy?",
+      "ja": "薬局はどこですか？",
+      "ko": "약국 어디예요?",
+      "th": "ร้านขายยาอยู่ไหน?"
+    },
+    "sort_order": 168,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "7828bc4c-47c5-4b48-8706-4a90a21ed173",
+    "category": "emergency",
+    "code": "embassy_where",
+    "icon": "🏛️",
+    "label_zh": "大使館在哪裡？",
+    "translations": {
+      "en": "Where is the embassy?",
+      "ja": "大使館はどこですか？",
+      "ko": "대사관 어디예요?",
+      "th": "สถานทูตอยู่ไหน?"
+    },
+    "sort_order": 169,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "fc50b825-df7d-4ab4-865c-e23edd802f7d",
+    "category": "emergency",
+    "code": "been_robbed",
+    "icon": "😰",
+    "label_zh": "我被搶劫了",
+    "translations": {
+      "en": "I have been robbed",
+      "ja": "強盗に遭いました",
+      "ko": "강도당했어요",
+      "th": "ถูกปล้น"
+    },
+    "sort_order": 170,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "f614b8e4-946b-4e35-9bb9-01130ce69165",
+    "category": "daily",
+    "code": "sorry",
+    "icon": "🙇",
+    "label_zh": "對不起",
+    "translations": { "en": "Sorry", "ja": "すみません", "ko": "죄송합니다", "th": "ขอโทษ" },
+    "sort_order": 181,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "64b7a643-dc1d-41f1-a50b-9ffa99f83a28",
+    "category": "daily",
+    "code": "excuse_me",
+    "icon": "👋",
+    "label_zh": "不好意思（借過）",
+    "translations": {
+      "en": "Excuse me",
+      "ja": "すみません（通ります）",
+      "ko": "잠시만요",
+      "th": "ขอทางหน่อย"
+    },
+    "sort_order": 182,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "6ff43b64-9fe7-4d78-aca3-187cb58fec4a",
+    "category": "daily",
+    "code": "no_understand",
+    "icon": "❓",
+    "label_zh": "我聽不懂",
+    "translations": {
+      "en": "I don't understand",
+      "ja": "わかりません",
+      "ko": "못 알아들었어요",
+      "th": "ไม่เข้าใจ"
+    },
+    "sort_order": 183,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "b4ca4a04-a2cf-4dac-9201-95e2772d4c9e",
+    "category": "daily",
+    "code": "speak_slowly",
+    "icon": "🐢",
+    "label_zh": "請說慢一點",
+    "translations": {
+      "en": "Please speak slowly",
+      "ja": "ゆっくり話してください",
+      "ko": "천천히 말해주세요",
+      "th": "พูดช้าๆ หน่อย"
+    },
+    "sort_order": 184,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "4dacd623-8202-44b2-bcda-6d22c8e02894",
+    "category": "daily",
+    "code": "write_please",
+    "icon": "✍️",
+    "label_zh": "請寫下來給我看",
+    "translations": {
+      "en": "Please write it down",
+      "ja": "書いてください",
+      "ko": "적어주세요",
+      "th": "เขียนให้ดูหน่อย"
+    },
+    "sort_order": 185,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "7c9f62d7-9ce1-40ec-a886-f37a23fae933",
+    "category": "daily",
+    "code": "photo_ok",
+    "icon": "📸",
+    "label_zh": "可以拍照嗎？",
+    "translations": {
+      "en": "Can I take a photo?",
+      "ja": "写真を撮ってもいいですか？",
+      "ko": "사진 찍어도 되나요?",
+      "th": "ถ่ายรูปได้ไหม?"
+    },
+    "sort_order": 186,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "b9d1d1be-9470-435a-8824-7527617c25e5",
+    "category": "daily",
+    "code": "photo_help",
+    "icon": "🤳",
+    "label_zh": "可以幫我拍照嗎？",
+    "translations": {
+      "en": "Can you take my photo?",
+      "ja": "写真を撮ってもらえますか？",
+      "ko": "사진 찍어주세요",
+      "th": "ถ่ายรูปให้หน่อย"
+    },
+    "sort_order": 187,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "e71a7645-a702-4351-ac79-4c0ba46a5784",
+    "category": "daily",
+    "code": "bathroom_where",
+    "icon": "🚻",
+    "label_zh": "廁所在哪裡？",
+    "translations": {
+      "en": "Where is the bathroom?",
+      "ja": "トイレはどこですか？",
+      "ko": "화장실 어디예요?",
+      "th": "ห้องน้ำอยู่ไหน?"
+    },
+    "sort_order": 188,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "aa10dc6f-57b1-4f6e-98a0-0ae3b95c59f4",
+    "category": "daily",
+    "code": "how_to_go",
+    "icon": "🗺️",
+    "label_zh": "要怎麼去？",
+    "translations": {
+      "en": "How do I get there?",
+      "ja": "どうやって行きますか？",
+      "ko": "어떻게 가요?",
+      "th": "ไปยังไง?"
+    },
+    "sort_order": 189,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "1ba36d86-a098-4a93-be1c-30d19b0ada05",
+    "category": "daily",
+    "code": "how_long",
+    "icon": "⏱️",
+    "label_zh": "要多久？",
+    "translations": {
+      "en": "How long does it take?",
+      "ja": "どのくらいかかりますか？",
+      "ko": "얼마나 걸려요?",
+      "th": "ใช้เวลานานไหม?"
+    },
+    "sort_order": 190,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "0c51d01c-548d-444d-b20e-dd818e96f510",
+    "category": "daily",
+    "code": "what_time_close",
+    "icon": "🕐",
+    "label_zh": "幾點關門？",
+    "translations": {
+      "en": "What time do you close?",
+      "ja": "何時に閉まりますか？",
+      "ko": "몇 시에 닫아요?",
+      "th": "ปิดกี่โมง?"
+    },
+    "sort_order": 191,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "64b2dd27-c8fc-427f-86ea-3814f190db65",
+    "category": "daily",
+    "code": "what_time_open",
+    "icon": "🕐",
+    "label_zh": "幾點開門？",
+    "translations": {
+      "en": "What time do you open?",
+      "ja": "何時に開きますか？",
+      "ko": "몇 시에 열어요?",
+      "th": "เปิดกี่โมง?"
+    },
+    "sort_order": 192,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "a944531d-345e-4d6f-aa14-b19b68333134",
+    "category": "daily",
+    "code": "yes",
+    "icon": "✅",
+    "label_zh": "是/好的",
+    "translations": { "en": "Yes", "ja": "はい", "ko": "네", "th": "ใช่" },
+    "sort_order": 193,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "9be4b5c8-59c2-49cf-90e7-d17079d2669e",
+    "category": "daily",
+    "code": "no",
+    "icon": "❌",
+    "label_zh": "不是/不要",
+    "translations": { "en": "No", "ja": "いいえ", "ko": "아니요", "th": "ไม่" },
+    "sort_order": 194,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "78be1191-5e90-40a3-86e3-d2639f7748a9",
+    "category": "special",
+    "code": "baby_chair",
+    "icon": "👶",
+    "label_zh": "有兒童座椅嗎？",
+    "translations": {
+      "en": "Do you have a baby chair?",
+      "ja": "子供用の椅子はありますか？",
+      "ko": "아기 의자 있나요?",
+      "th": "มีเก้าอี้เด็กไหม?"
+    },
+    "sort_order": 200,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "d4e00a09-7372-4e97-afad-cb71ed318004",
+    "category": "special",
+    "code": "baby_bed",
+    "icon": "🛏️",
+    "label_zh": "有嬰兒床嗎？",
+    "translations": {
+      "en": "Do you have a baby crib?",
+      "ja": "ベビーベッドはありますか？",
+      "ko": "아기 침대 있나요?",
+      "th": "มีเตียงเด็กไหม?"
+    },
+    "sort_order": 201,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "cb84bed9-8e7a-40f5-8c52-288e9008980c",
+    "category": "special",
+    "code": "stroller_ok",
+    "icon": "🚼",
+    "label_zh": "可以推嬰兒車嗎？",
+    "translations": {
+      "en": "Are strollers allowed?",
+      "ja": "ベビーカーで入れますか？",
+      "ko": "유모차 가능한가요?",
+      "th": "เข็นรถเด็กได้ไหม?"
+    },
+    "sort_order": 202,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "34593a06-c787-4dae-883e-3dc4f04dfab5",
+    "category": "special",
+    "code": "breastfeed_room",
+    "icon": "🍼",
+    "label_zh": "有哺乳室嗎？",
+    "translations": {
+      "en": "Is there a nursing room?",
+      "ja": "授乳室はありますか？",
+      "ko": "수유실 있나요?",
+      "th": "มีห้องให้นมไหม?"
+    },
+    "sort_order": 203,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "3e9b8c07-869b-43fb-beed-02e6def50cf5",
+    "category": "special",
+    "code": "elevator_where",
+    "icon": "🛗",
+    "label_zh": "電梯在哪裡？",
+    "translations": {
+      "en": "Where is the elevator?",
+      "ja": "エレベーターはどこですか？",
+      "ko": "엘리베이터 어디예요?",
+      "th": "ลิฟต์อยู่ไหน?"
+    },
+    "sort_order": 204,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "28632217-6af3-4746-aff4-ee9dabb69c6c",
+    "category": "special",
+    "code": "pregnant",
+    "icon": "🤰",
+    "label_zh": "我懷孕了",
+    "translations": {
+      "en": "I am pregnant",
+      "ja": "妊娠しています",
+      "ko": "임신 중이에요",
+      "th": "ฉันท้อง"
+    },
+    "sort_order": 205,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "91ef9227-8116-4c2b-9070-6b6afe1343c7",
+    "category": "special",
+    "code": "elderly",
+    "icon": "👴",
+    "label_zh": "有年長者同行",
+    "translations": {
+      "en": "I have an elderly person with me",
+      "ja": "高齢者が一緒です",
+      "ko": "노인이 함께 있어요",
+      "th": "มีผู้สูงอายุมาด้วย"
+    },
+    "sort_order": 206,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "886bc890-fcac-4b8b-bb9b-21b4be853e44",
+    "category": "special",
+    "code": "kid_menu",
+    "icon": "🧒",
+    "label_zh": "有兒童餐嗎？",
+    "translations": {
+      "en": "Do you have a kids menu?",
+      "ja": "お子様メニューはありますか？",
+      "ko": "아이 메뉴 있나요?",
+      "th": "มีเมนูเด็กไหม?"
+    },
+    "sort_order": 207,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  },
+  {
+    "id": "770f1706-f0cb-474a-a6a6-5f9ce96b5b2c",
+    "category": "special",
+    "code": "pet_allowed",
+    "icon": "🐕",
+    "label_zh": "可以帶寵物嗎？",
+    "translations": {
+      "en": "Are pets allowed?",
+      "ja": "ペットOKですか？",
+      "ko": "반려동물 가능한가요?",
+      "th": "พาสัตว์เลี้ยงได้ไหม?"
+    },
+    "sort_order": 208,
+    "created_at": "2025-12-28 15:20:55.944186+00",
+    "updated_at": "2026-04-09 06:43:23.10544+00"
+  }
+]

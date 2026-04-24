@@ -139,28 +139,28 @@ export async function POST(request: NextRequest) {
     // 同時保留 in-memory processedMessages dedup 當第二道防線 (single instance 內快取)
     const idempotencyKey = createHash('sha256').update(rawBody).digest('hex')
     return await withWebhookIdempotency('meta', idempotencyKey, async () => {
-    const body = JSON.parse(rawBody)
-    const object = body.object
+      const body = JSON.parse(rawBody)
+      const object = body.object
 
-    if (object === 'page' || object === 'instagram') {
-      const entries = body.entry || []
+      if (object === 'page' || object === 'instagram') {
+        const entries = body.entry || []
 
-      for (const entry of entries) {
-        const messaging = entry.messaging || []
+        for (const entry of entries) {
+          const messaging = entry.messaging || []
 
-        for (const event of messaging) {
-          // 處理 message_echo（偵測人工回覆）
-          if (event.message?.is_echo) {
-            handleEchoMessage(event)
-            continue
-          }
+          for (const event of messaging) {
+            // 處理 message_echo（偵測人工回覆）
+            if (event.message?.is_echo) {
+              handleEchoMessage(event)
+              continue
+            }
 
-          if (event.message) {
-            await handleIncomingMessage(object, event, config.page_access_token)
+            if (event.message) {
+              await handleIncomingMessage(object, event, config.page_access_token)
+            }
           }
         }
       }
-    }
 
       return { status: 200, body: { status: 'ok' } }
     })

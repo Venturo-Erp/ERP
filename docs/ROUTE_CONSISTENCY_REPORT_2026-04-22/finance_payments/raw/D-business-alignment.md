@@ -6,13 +6,13 @@
 
 ## 1. 代碼是否符合業務意圖
 
-| 業務步驟 | 代碼實況 | 符合 | 差異 |
-|---|---|---|---|
-| OP 建收款單 | page.tsx:211 整頁 `if (!isAdmin)`、OP 不擁有管理員資格 根本進不來 | ❌ | 整頁 role-gate |
-| 選 5 種付款方式 | payment_method + receipt_type 雙寫 + 四處映射 | 🟡 | 功能在、但三套欄位並存 |
-| 建單自動連動 | `recalculateReceiptStats` 回寫 `orders.payment_status` + tours 財務 | ⚠️ | William 明說 orders.payment_status 不該存 |
-| 旅遊團認列 | `tours.total_revenue` + `profit` 被寫 | ✅ | 設計對、只是是回寫欄位、未來若走「聚合即時算」要改 view |
-| 會計核准 / 異常 | 任何進頁者都能按、無細分權限 | ❌ | 沒對應「會計核准權」 |
+| 業務步驟        | 代碼實況                                                            | 符合 | 差異                                                    |
+| --------------- | ------------------------------------------------------------------- | ---- | ------------------------------------------------------- |
+| OP 建收款單     | page.tsx:211 整頁 `if (!isAdmin)`、OP 不擁有管理員資格 根本進不來   | ❌   | 整頁 role-gate                                          |
+| 選 5 種付款方式 | payment_method + receipt_type 雙寫 + 四處映射                       | 🟡   | 功能在、但三套欄位並存                                  |
+| 建單自動連動    | `recalculateReceiptStats` 回寫 `orders.payment_status` + tours 財務 | ⚠️   | William 明說 orders.payment_status 不該存               |
+| 旅遊團認列      | `tours.total_revenue` + `profit` 被寫                               | ✅   | 設計對、只是是回寫欄位、未來若走「聚合即時算」要改 view |
+| 會計核准 / 異常 | 任何進頁者都能按、無細分權限                                        | ❌   | 沒對應「會計核准權」                                    |
 
 ---
 
@@ -25,6 +25,7 @@
 3. 4 個核心動作（建 / 核准 / 異常 / 刪）無 hasPermission 細分檢查
 
 **後果**：
+
 - 會計 / OP / 業務不擁有管理員資格 → 連頁都進不來、整個「建單 → 核准」流程卡死
 - William 在 /hr/roles 設定「公司收款」權限 → 代碼**不查這個 key**
 
@@ -49,7 +50,7 @@
 
 ---
 
-## 4. 新原則候選（William 本次口述、建議 Step 2.5 收進 _INDEX）
+## 4. 新原則候選（William 本次口述、建議 Step 2.5 收進 \_INDEX）
 
 **原則候選**：**衍生狀態（aggregate / derived）不存欄位、即時算出來**
 
@@ -58,12 +59,14 @@
 - 客戶應付總額、供應商應付總額 同理
 
 **業務價值**：
+
 - SSOT 純淨：真相只在 receipts、不在 orders 冗餘欄位
 - 實時性：收款一改、所有依賴立即正確
 - 防不同步：不會有「兩邊版本不一樣」
 
 **局限**：
+
 - 跨表聚合成本（每次讀 orders 要 JOIN）→ 需要 cache / materialized view
 - UI 層延遲 → 可能要前端 memo 緩解
 
-**建議**：跟 William 確認適用範圍（全系統 or 財務模組 only）、再正式收進 _INDEX.md「跨路由設計原則」區塊。
+**建議**：跟 William 確認適用範圍（全系統 or 財務模組 only）、再正式收進 \_INDEX.md「跨路由設計原則」區塊。

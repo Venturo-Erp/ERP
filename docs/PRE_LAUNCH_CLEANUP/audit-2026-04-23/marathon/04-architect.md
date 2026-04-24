@@ -20,16 +20,19 @@
 **症狀**：`voucher_no`、`order_number`、`tour_code`、`receipt_number` 各自在 code 中用 `.order('DESC').limit(1)` 取最大 → 並行 INSERT 會撞號
 
 **證據**：
+
 - `src/app/api/accounting/vouchers/auto-create/route.ts` L66-81：singleton supabase client 取最後一筆、seq++、無 transaction
 - Orders / Payments / Quotes 模組各自有類似邏輯、沒有統一
 - DB 層沒有 RPC / `FOR UPDATE` 鎖機制
 
 **為什麼痛**：
+
 - 新客戶租戶上線時大批量導入舊資料，併發撞號機率 100%
 - 5 年後如果加新的編號類型（voucher_no → 分帳號前綴的編號），会重複這個 bug
 - 當前是「某天有人發現兩筆傳票編號一樣」才知道
 
 **架構視角**：
+
 ```
 ❌ 現況（分散）
   orders → generateOrderNo() ← orders DB query
@@ -46,6 +49,7 @@
 ```
 
 **修法**：
+
 1. **DB 層**（Wave 8 後期）：建 `number_sequences` 表 + RPC `get_next_number(entity_type TEXT) → INT`、用 `FOR UPDATE` 鎖行
 2. **Code 層**：`src/lib/erp/number-generator.ts` 統一取號邏輯
 3. **Supabase client**：用 per-request client（現在是 singleton、違反 CLAUDE.md）
@@ -60,6 +64,7 @@
 **症狀**：Orders 模組的 Component 直接 import Tours 的 Service（`tour-stats.service`、`tour-channel.service`），繞過了應有的 API 層或共用 Service
 
 **證據**：
+
 ```
 src/features/orders/components/simple-order-table.tsx
   ↓
@@ -72,11 +77,13 @@ import { recalculateParticipants } from '@/features/tours/services/tour-stats.se
 ```
 
 **為什麼痛**：
+
 - Tours 改了內部 service 簽名、Orders component 沒測到、runtime 才炸
 - 五年後加新的「副團」feature，要改兩個 service 的邏輯、但改法不一致、導致 Orders 和 Tours 的狀態不同步
 - Features 邊界變成「我知道你的私密邏輯」而非「我只呼叫你的公開 API」
 
 **架構視角**：
+
 ```
 ❌ 現況（跨域直用 service）
   Orders Component
@@ -87,15 +94,17 @@ import { recalculateParticipants } from '@/features/tours/services/tour-stats.se
   Orders Component ─────────→ Orders API Route ────→ Orders Service
                                     ↓
   Tours Component ─────────→ Tours API Route ────→ Tours Service
-  
+
   跨域協調只在 service 層（Orders Service 呼叫 Tours API、不直用 Tours Service）
 ```
 
 **具體問題**：
+
 - `recalculateParticipants`（Tour 內部）被 Orders 直用 → 應該是 Tours API `/api/tours/{id}/recalculate-participants` 給 Orders 呼叫
 - `addMembersToTourChannel`（Tour 內部）被 Orders Hook 直用 → 應該暴露成 API endpoint
 
 **修法**：
+
 1. Tours service 內的「跨邊界」function（如上二者）改成 API route（需 William 決定 scope）
 2. Orders 改用 API endpoint 而非直 import service
 3. 短期可行：在 `src/features/tours/api/` 建一個 internal API layer（不暴露給前端、只給 backend service 用）
@@ -110,6 +119,7 @@ import { recalculateParticipants } from '@/features/tours/services/tour-stats.se
 **症狀**：五個超大檔案（1500+ 行）未按責任分層
 
 **證據**：
+
 ```
 src/features/finance/requests/components/AddRequestDialog.tsx     1525 行（Dialog 本身要 1000+ 嗎？）
 src/features/orders/components/OrderMembersExpandable.tsx          1449 行（Expandable 應該很小）
@@ -119,6 +129,7 @@ src/app/(main)/todos/page.tsx                                     1098 行
 ```
 
 **層級應該是**：
+
 ```
 Page（業務路由層、200 行內）
   ↓
@@ -130,15 +141,18 @@ Presentational Components（純展示、<200 行）
 ```
 
 **現況的問題**：
+
 - `AddRequestDialog` 1525 行 = Dialog 框架 + Form 邏輯 + Table 邏輯 + API 呼叫 + 多個 sub-dialog 管理 → 一個 god component 裡五層東西
 - `OrderMembersExpandable` 1449 行 = 成員列表展開 + 房間分配 + 車輛分配 + 座位分配 + PNR 匹配 → Expandable 變怪物
 
 **為什麼痛**：
+
 - 測試：沒人敢動，因為改一行可能影響五個地方
 - Reuse：想在別的地方重用「房間分配邏輯」，但它跟成員列表緊耦合
 - Review：1500 行 PR 沒人能 review 完整、bug 藏在深層
 
 **修法方向**（Post-Launch）：
+
 1. **AddRequestDialog** → 拆成 `<RequestForm/>` + `<RequestItemTable/>` + `<AllocationSummary/>` 三個 component
 2. **OrderMembersExpandable** → 拆成 `<MemberList/>` + `<RoomAssignmentPanel/>` + `<VehicleAssignmentPanel/>` + `<PnrMatcherPanel/>`
 3. **tour-itinerary-tab** → 拆成 `<ItineraryDayEditor/>` + `<FlightSection/>` + `<AccommodationSection/>` 各自是 <400 行
@@ -153,17 +167,19 @@ Presentational Components（純展示、<200 行）
 
 **症狀**：同一個組件在多個 feature 各有一份
 
-| 組件 | 位置 1 | 位置 2 | 行數 |
-|---|---|---|---|
-| `CustomerMatchDialog` | orders | visas | ~140 |
-| `ContractDialog` | contracts | contracts/contract-dialog | ~650（不確定有無重複） |
-| 5 個 CRUD Dialog | database（/archive /attractions 等） | tours / orders / suppliers | ~90-300 |
+| 組件                  | 位置 1                               | 位置 2                     | 行數                   |
+| --------------------- | ------------------------------------ | -------------------------- | ---------------------- |
+| `CustomerMatchDialog` | orders                               | visas                      | ~140                   |
+| `ContractDialog`      | contracts                            | contracts/contract-dialog  | ~650（不確定有無重複） |
+| 5 個 CRUD Dialog      | database（/archive /attractions 等） | tours / orders / suppliers | ~90-300                |
 
 **為什麼痛**：
+
 - visas 的 CustomerMatchDialog 改了、orders 沒跟上 → visa 功能正常、order 功能異常
 - 5 年後加「自動補全顧客名字」feature → 需要改 5 個地方 / 或漏掉一個
 
 **短期修法**：建立共用 component library
+
 ```
 src/features/common/
   ├── components/
@@ -180,11 +196,13 @@ src/features/common/
 ### 2. 共用邏輯散落在 Hook / Util / Service 三處、無一致性
 
 **症狀**：
+
 - 「取最後一個編號 + 1」：orders / payments / accounting 各一份
 - 「報表統計 query」：accounting reports × 3 都 copy-paste（DBA 已提）
 - 「狀態轉移機」：tour / order / quote / payment / request 各自寫一份狀態機
 
 **應該的樣子**：
+
 ```
 src/lib/erp/
   ├── number-generator.ts（統一編號邏輯）
@@ -203,11 +221,13 @@ src/lib/erp/
 ### 3. State Management 邊界模糊
 
 **症狀**：
+
 - Zustand store（`useChannelsStore` 等）直接在 store 內做 Supabase query
 - Server state（API 資料）和 client state（UI 狀態）混在一起
 - 沒有明確的「API 層」vs「Store 層」邊界
 
 **應該的樣子**：
+
 ```
 Server State（誰都不改、API 是真相源）
   ←SWR/React Query
@@ -232,11 +252,13 @@ Client State（UI 狀態、Zustand）
 ### 1. 沒有 Repository Pattern、直接 supabase.from() 散落各地
 
 **現況**：
+
 - Page 直查 supabase（已列 BACKLOG INV-P02、e.g. /tours /customers /quotes）
 - Hook 直查（大部分是這樣）
 - Component 偶爾直查（OrderMembersExpandable 可能有）
 
 **為什麼值得做**：
+
 - 測試困難（需要 mock Supabase）
 - 遷移困難（如果要換 backend）
 - Query 最佳化困難（不知道全局有幾個重複 query）
@@ -250,11 +272,13 @@ Client State（UI 狀態、Zustand）
 ### 2. API Route 層級守衛不一致
 
 **症狀**：
+
 - 有些 API route 有 `withErrorHandler` HOC
 - 有些 API route 有 try/catch
 - 有些 API route 13% 沒有 try/catch（SRE 指出）
 
 **應該**：統一 HOC 或 middleware
+
 ```typescript
 export async function GET(req: NextRequest) {
   return withErrorHandler(async () => {
@@ -272,6 +296,7 @@ export async function GET(req: NextRequest) {
 ### 1. 18 個 Feature Module 邊界清晰
 
 **證據**：
+
 - `src/features/tours`、`src/features/orders`、`src/features/finance` 等各自獨立
 - 資料流向清楚（Page → Hook → Service → API → Supabase）
 - 沒有「什麼都在 features 根目錄」的混亂
@@ -281,6 +306,7 @@ export async function GET(req: NextRequest) {
 ### 2. RLS + Audit FK 統一（Wave 0-6 已處理）
 
 **證據**：
+
 - 所有業務表都 enable RLS + `workspace_id` filter
 - Audit FK 全指 `employees(id)`（CLAUDE.md 紅線遵守）
 - 多租戶隔離從 DB 層保護
@@ -290,6 +316,7 @@ export async function GET(req: NextRequest) {
 ### 3. Service Layer 存在、大部分 feature 有（不完全）
 
 **證據**：
+
 ```
 payments:  payment-request.service.ts / disbursement-order.service.ts
 tours:     tour.service / tour-stats.service / tour-channel.service
@@ -302,6 +329,7 @@ finance:   receipt-core.service / expense-core.service
 ### 4. Hook 層次（Custom Hooks）有體系、不混亂
 
 **證據**：
+
 - `useRequestForm()` / `useRequestOperations()` 分離（form 邏輯 vs 操作邏輯）
 - `useToursPaginated()` / `useToursPage()` 分離（分頁 vs 頁面狀態）
 - 不像有些框架全亂在 `useFetch()`
@@ -356,7 +384,7 @@ finance:   receipt-core.service / expense-core.service
 
 ```
                Security + DBA + Architect 合看
-               
+
 層級問題（Architect）
 ├─ Page 直查 Supabase（INV-P02）
 ├─ Component 直用其他 feature service
@@ -386,18 +414,22 @@ Performance vs Correctness（DBA）
 ## 建議執行順序（給 William）
 
 ### 上線前（今晚、明天）：P0 架構雷
+
 - ✅ 已列 BACKLOG 的 6 個紅色項（不重報）
 
 ### 上線後第 1 週（架構債 Quick Wins）
+
 - 編號生成中央化 + DB RPC（DBA 確認的修法更對）
 - API 層統一 `withErrorHandler` HOC
 
 ### 上線後第 1 個月（架構演化）
+
 - God component 拆分（AddRequestDialog / OrderMembersExpandable）
 - 共用組件库建立（CustomerMatchDialog 統一）
 - Hook 層共用邏輯集中（number-generator / state-machines）
 
 ### Post-Launch（架構重構、不卡功能）
+
 - 跨域引用改用 API endpoint（Orders 不直用 Tours service）
 - State Management 重構（Zustand → SWR 分離）
 - Repository pattern 全面應用
@@ -421,19 +453,20 @@ _Software Architect 簽名：架構的目標不是完美、而是「減少未來
 
 ### 1. 真問題過濾
 
-| # | Architect 說 | 覆盤後 | 備註 |
-|---|---|---|---|
-| 編號 race condition | 🔴 | ⚠️ **第 4 次重報** | DBA + 01-accounting + SRE 都講過、Architect 加的新角度是「跨模組 pattern 的 meta 觀察」、修法已確定 DB RPC |
-| **跨域引用繞層級**（Orders → Tours service） | 🔴 | 🔴 **真、新、Architect 獨有** | 嚴重 layer violation、兩模組改動時易失同步 |
-| **OrderMembersExpandable 1449 行 god component** | 🔴 | 🔴 **真、新巨型檔** | Wave 7 清單沒列、加進去 |
-| AddRequestDialog 1525 行 | 🔴 | ❌ **已列 Wave 7** |
-| tour-itinerary-tab 1914 行 | 🟠 | 🟠 **新** | Wave 7 補入 |
-| Finance vs Accounting 無共用 service | 🟠 | 🟠 真、新 |
-| 8 個 Zustand store 無統一 pattern | 🟠 | 🟡 低 | 運作正常 |
-| SSOT 3 處衝突 | - | - | 3 個都已列別處、重述 |
-| Repository pattern 缺 | 🟡 | 🟡 架構品味題 |
+| #                                                | Architect 說 | 覆盤後                        | 備註                                                                                                       |
+| ------------------------------------------------ | ------------ | ----------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| 編號 race condition                              | 🔴           | ⚠️ **第 4 次重報**            | DBA + 01-accounting + SRE 都講過、Architect 加的新角度是「跨模組 pattern 的 meta 觀察」、修法已確定 DB RPC |
+| **跨域引用繞層級**（Orders → Tours service）     | 🔴           | 🔴 **真、新、Architect 獨有** | 嚴重 layer violation、兩模組改動時易失同步                                                                 |
+| **OrderMembersExpandable 1449 行 god component** | 🔴           | 🔴 **真、新巨型檔**           | Wave 7 清單沒列、加進去                                                                                    |
+| AddRequestDialog 1525 行                         | 🔴           | ❌ **已列 Wave 7**            |
+| tour-itinerary-tab 1914 行                       | 🟠           | 🟠 **新**                     | Wave 7 補入                                                                                                |
+| Finance vs Accounting 無共用 service             | 🟠           | 🟠 真、新                     |
+| 8 個 Zustand store 無統一 pattern                | 🟠           | 🟡 低                         | 運作正常                                                                                                   |
+| SSOT 3 處衝突                                    | -            | -                             | 3 個都已列別處、重述                                                                                       |
+| Repository pattern 缺                            | 🟡           | 🟡 架構品味題                 |
 
 **覆盤結論**：**1 個 P0 新 + 2 個 Wave 7 補入**
+
 - **P0 新**：Orders ↔ Tours 跨域繞層引用
 - **Wave 7 補**：OrderMembersExpandable 1449、tour-itinerary-tab 1914
 
@@ -444,18 +477,18 @@ _Software Architect 簽名：架構的目標不是完美、而是「減少未來
 
 ### 3. 跨視角 pattern 累積（1-4 位）
 
-| # | Pattern | 誰發現 |
-|---|---|---|
-| 1 | 外部輸入信任邊界未統一 | Security |
-| 2 | 資料密集功能全 client 算 | DBA |
-| 3 | 編號 race condition 跨模組 | DBA + SRE + Architect |
-| 4 | HTML 安全 × 列印 × 無障礙 | Security |
-| 5 | 效能 vs 正確性政策缺失 | DBA |
-| 6 | 外部依賴無防禦 | SRE |
-| 7 | 冪等性缺席 | SRE |
-| 8 | 觀察性近零 | SRE |
-| **9** | **跨域引用繞層級** | **Architect 新** |
-| **10** | **god component 吞噬分層** | **Architect 新** |
+| #      | Pattern                    | 誰發現                |
+| ------ | -------------------------- | --------------------- |
+| 1      | 外部輸入信任邊界未統一     | Security              |
+| 2      | 資料密集功能全 client 算   | DBA                   |
+| 3      | 編號 race condition 跨模組 | DBA + SRE + Architect |
+| 4      | HTML 安全 × 列印 × 無障礙  | Security              |
+| 5      | 效能 vs 正確性政策缺失     | DBA                   |
+| 6      | 外部依賴無防禦             | SRE                   |
+| 7      | 冪等性缺席                 | SRE                   |
+| 8      | 觀察性近零                 | SRE                   |
+| **9**  | **跨域引用繞層級**         | **Architect 新**      |
+| **10** | **god component 吞噬分層** | **Architect 新**      |
 
 **觀察**：Architect 價值在**從架構高度確認 pattern**、並補 meta 層 2 個。累計 10 種跨視角 pattern。
 

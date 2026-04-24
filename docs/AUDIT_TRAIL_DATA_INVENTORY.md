@@ -17,38 +17,38 @@
 
 ## 逐欄位明細
 
-| 表 | 欄位 | total | non_null | mappable | 動作 |
-|---|---|---:|---:|---:|---|
-| assigned_itineraries | created_by | 0 | 0 | 0 | 只換 FK |
-| confirmations | created_by | 12 | 12 | 12 | UPDATE + 換 FK |
-| confirmations | updated_by | 12 | 12 | 12 | UPDATE + 換 FK |
-| cost_templates | created_by | 0 | 0 | 0 | 只換 FK |
-| cost_templates | updated_by | 0 | 0 | 0 | 只換 FK |
-| emails | created_by | 0 | 0 | 0 | 只換 FK |
-| emails | updated_by | 0 | 0 | 0 | 只換 FK |
-| file_audit_logs | performed_by | 0 | 0 | 0 | 只換 FK |
-| files | created_by | 1 | 0 | 0 | 只換 FK |
-| files | updated_by | 1 | 0 | 0 | 只換 FK |
-| image_library | created_by | 0 | 0 | 0 | 只換 FK |
-| **itineraries** | **created_by** | **19** | **19** | **19** | **UPDATE + 換 FK** |
-| itineraries | created_by_legacy_user_id | 19 | 0 | 0 | DROP COLUMN（Q4=A） |
-| itineraries | creator_user_id | 19 | 0 | 0 | DROP COLUMN（Q4=A） |
-| linkpay_logs | created_by | 0 | 0 | 0 | 只換 FK |
-| linkpay_logs | updated_by | 0 | 0 | 0 | 只換 FK |
-| michelin_restaurants | created_by | 26 | 0 | 0 | 只換 FK |
-| michelin_restaurants | updated_by | 26 | 0 | 0 | 只換 FK |
-| payment_requests | updated_by | 10 | 7 | 7 | UPDATE + 換 FK |
-| premium_experiences | created_by | 80 | 0 | 0 | 只換 FK |
-| premium_experiences | updated_by | 80 | 0 | 0 | 只換 FK |
-| suppliers | created_by | 13 | 13 | 13 | UPDATE + 換 FK |
-| suppliers | updated_by | 13 | 13 | 13 | UPDATE + 換 FK |
-| todos | created_by | 5 | 2 | 2 | UPDATE + 換 FK |
-| todos | updated_by | 5 | 1 | 1 | UPDATE + 換 FK |
-| tour_control_forms | created_by | 0 | 0 | 0 | 只換 FK |
-| tour_control_forms | updated_by | 0 | 0 | 0 | 只換 FK |
-| tour_documents | uploaded_by | 3 | 0 | 0 | 只換 FK |
-| tours | last_unlocked_by | 43 | 0 | 0 | 只換 FK |
-| tours | locked_by | 43 | 0 | 0 | 只換 FK |
+| 表                   | 欄位                      |  total | non_null | mappable | 動作                |
+| -------------------- | ------------------------- | -----: | -------: | -------: | ------------------- |
+| assigned_itineraries | created_by                |      0 |        0 |        0 | 只換 FK             |
+| confirmations        | created_by                |     12 |       12 |       12 | UPDATE + 換 FK      |
+| confirmations        | updated_by                |     12 |       12 |       12 | UPDATE + 換 FK      |
+| cost_templates       | created_by                |      0 |        0 |        0 | 只換 FK             |
+| cost_templates       | updated_by                |      0 |        0 |        0 | 只換 FK             |
+| emails               | created_by                |      0 |        0 |        0 | 只換 FK             |
+| emails               | updated_by                |      0 |        0 |        0 | 只換 FK             |
+| file_audit_logs      | performed_by              |      0 |        0 |        0 | 只換 FK             |
+| files                | created_by                |      1 |        0 |        0 | 只換 FK             |
+| files                | updated_by                |      1 |        0 |        0 | 只換 FK             |
+| image_library        | created_by                |      0 |        0 |        0 | 只換 FK             |
+| **itineraries**      | **created_by**            | **19** |   **19** |   **19** | **UPDATE + 換 FK**  |
+| itineraries          | created_by_legacy_user_id |     19 |        0 |        0 | DROP COLUMN（Q4=A） |
+| itineraries          | creator_user_id           |     19 |        0 |        0 | DROP COLUMN（Q4=A） |
+| linkpay_logs         | created_by                |      0 |        0 |        0 | 只換 FK             |
+| linkpay_logs         | updated_by                |      0 |        0 |        0 | 只換 FK             |
+| michelin_restaurants | created_by                |     26 |        0 |        0 | 只換 FK             |
+| michelin_restaurants | updated_by                |     26 |        0 |        0 | 只換 FK             |
+| payment_requests     | updated_by                |     10 |        7 |        7 | UPDATE + 換 FK      |
+| premium_experiences  | created_by                |     80 |        0 |        0 | 只換 FK             |
+| premium_experiences  | updated_by                |     80 |        0 |        0 | 只換 FK             |
+| suppliers            | created_by                |     13 |       13 |       13 | UPDATE + 換 FK      |
+| suppliers            | updated_by                |     13 |       13 |       13 | UPDATE + 換 FK      |
+| todos                | created_by                |      5 |        2 |        2 | UPDATE + 換 FK      |
+| todos                | updated_by                |      5 |        1 |        1 | UPDATE + 換 FK      |
+| tour_control_forms   | created_by                |      0 |        0 |        0 | 只換 FK             |
+| tour_control_forms   | updated_by                |      0 |        0 |        0 | 只換 FK             |
+| tour_documents       | uploaded_by               |      3 |        0 |        0 | 只換 FK             |
+| tours                | last_unlocked_by          |     43 |        0 |        0 | 只換 FK             |
+| tours                | locked_by                 |     43 |        0 |        0 | 只換 FK             |
 
 ---
 
@@ -56,13 +56,13 @@
 
 原計畫 Batch A–D，現依「實際資料筆數」+「業務影響」重排：
 
-| Batch | 表 | 要改 row | 業務影響 |
-|---|---|---:|---|
-| **B1（最安全）** | linkpay_logs, cost_templates, emails, assigned_itineraries, tour_control_forms, file_audit_logs, image_library | 0 | 全空表，壞了也不會發現 |
-| **B2** | files, tour_documents, michelin_restaurants, premium_experiences | 0 非空值 | 表有資料但 FK 欄位都 NULL |
-| **B3** | tours（43/0）、todos（5 row，3 non-null） | 3 | 日常功能但 FK 欄位少用 |
-| **B4** | payment_requests（7）, suppliers（26）, confirmations（24） | 57 | 財務/採購相關 |
-| **B5（救火）** | **itineraries（19）** | 19 | 已爆出事、使用者直接踩到 |
+| Batch            | 表                                                                                                             | 要改 row | 業務影響                  |
+| ---------------- | -------------------------------------------------------------------------------------------------------------- | -------: | ------------------------- |
+| **B1（最安全）** | linkpay_logs, cost_templates, emails, assigned_itineraries, tour_control_forms, file_audit_logs, image_library |        0 | 全空表，壞了也不會發現    |
+| **B2**           | files, tour_documents, michelin_restaurants, premium_experiences                                               | 0 非空值 | 表有資料但 FK 欄位都 NULL |
+| **B3**           | tours（43/0）、todos（5 row，3 non-null）                                                                      |        3 | 日常功能但 FK 欄位少用    |
+| **B4**           | payment_requests（7）, suppliers（26）, confirmations（24）                                                    |       57 | 財務/採購相關             |
+| **B5（救火）**   | **itineraries（19）**                                                                                          |       19 | 已爆出事、使用者直接踩到  |
 
 Q2 要求「從最不重要先改」→ B1 → B2 → B3 → B4 → B5。
 但 B5 是當下爆掉的 → 須在 B1 之前跑（救火優先於實驗）。

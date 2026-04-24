@@ -121,6 +121,7 @@ FOR EACH ROW EXECUTE FUNCTION sync_role_perms_on_feature_disable();
 ```
 
 **Race condition 處理**：
+
 - 用 `AFTER UPDATE` + `SECURITY DEFINER` bypass RLS（trigger 是系統級操作）
 - 同一 transaction 內看得到變更、自動 ACID
 - 新 workspace seeding 在自己的 tx 內跑、看不到其他 workspace 的 trigger、無衝突

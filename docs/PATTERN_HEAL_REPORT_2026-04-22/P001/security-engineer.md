@@ -19,11 +19,11 @@ P001 目前的「提案修法」（移 isAdmin 短路 + 4 API 改 hasPermission 
 
 目前 codebase 三處 `isAdmin`：
 
-| 位置 | 來源 | 消費者 | P001 修後狀態 |
-|---|---|---|---|
-| JWT `is_admin` claim | `validate-login/route.ts:153-157` 查 `workspace_roles.is_admin` 簽進 JWT | 前端 auth-store、server-side `getServerAuth()` | **保留**（P001 沒移除） |
-| Zustand `isAdmin` flag | `auth-store.ts:127 / 232 / 311 persist` | 整個前端 UI 判斷 | **保留**（persist 了） |
-| DB `workspace_roles.is_admin` | migration `20260422000000` 每租戶種一個 | seeding + JWT 查 | **保留**（是 seeding 依據） |
+| 位置                          | 來源                                                                     | 消費者                                         | P001 修後狀態               |
+| ----------------------------- | ------------------------------------------------------------------------ | ---------------------------------------------- | --------------------------- |
+| JWT `is_admin` claim          | `validate-login/route.ts:153-157` 查 `workspace_roles.is_admin` 簽進 JWT | 前端 auth-store、server-side `getServerAuth()` | **保留**（P001 沒移除）     |
+| Zustand `isAdmin` flag        | `auth-store.ts:127 / 232 / 311 persist`                                  | 整個前端 UI 判斷                               | **保留**（persist 了）      |
+| DB `workspace_roles.is_admin` | migration `20260422000000` 每租戶種一個                                  | seeding + JWT 查                               | **保留**（是 seeding 依據） |
 
 **結論**：P001 只拆了 `auth-store.ts:249` 的 `if (get().isAdmin) return true` 短路 + 4 個 API 的 `if (!isAdmin)`。但 JWT 仍簽 `is_admin` 給前端、前端仍 persist、DB 仍有 `is_admin: true` 的 role。**後門管道 3 條仍在**、未來任何工程師一句 `if (user.is_admin)` 就復辟整個 P001。
 
@@ -39,6 +39,7 @@ P001 目前的「提案修法」（移 isAdmin 短路 + 4 API 改 hasPermission 
 **P001 沒有降低 blast radius、只換了內部決策路徑**。這是 refactor、不是 mitigation。如果團隊以為「改了就變安全」而放鬆其他防線（例如 2FA 延後、JWT TTL 不縮）、就是被自己騙。
 
 **真正降低攻擊面需要（不在 P001 scope、但必須寫入 roadmap）**：
+
 1. 敏感動作（建員工、重設密碼、改 role）強制 **step-up authentication**（重新輸密碼或 TOTP）
 2. 系統主管 JWT **TTL 縮短至 15 分鐘**（目前 1 小時、配 refresh token）
 3. 敏感 API 加 **audit log with tamper-evident storage**（WORM / append-only）
@@ -60,13 +61,14 @@ P001 目前的「提案修法」（移 isAdmin 短路 + 4 API 改 hasPermission 
 
 **盤點發現**：`role_tab_permissions` 實際 schema 是 `(module_code, tab_code, can_read, can_write)` — **tab 級 CRUD**、不是 action 級 permission。
 
-| 任務要求的 key | 實際 DB 能表達的 | 匹配？ |
-|---|---|---|
-| `employees.create` | `('hr', 'employees', can_write=true)` | ❌ 概念對不上 |
-| `employees.reset_password` | 無法在現行 schema 表達 | ❌ 必須 schema 變更 |
-| `employees.admin_reset` | 無法在現行 schema 表達 | ❌ 必須 schema 變更 |
+| 任務要求的 key             | 實際 DB 能表達的                      | 匹配？              |
+| -------------------------- | ------------------------------------- | ------------------- |
+| `employees.create`         | `('hr', 'employees', can_write=true)` | ❌ 概念對不上       |
+| `employees.reset_password` | 無法在現行 schema 表達                | ❌ 必須 schema 變更 |
+| `employees.admin_reset`    | 無法在現行 schema 表達                | ❌ 必須 schema 變更 |
 
 **如果直接套用 `hasPermission(user, 'employees.reset_password')`**：
+
 - 查 role_tab_permissions 永遠查不到這個 key
 - **所有用戶（含 系統主管）都無法重設密碼**
 - /login 流程在「忘記密碼」就死、系統主管 也救不了
@@ -74,6 +76,7 @@ P001 目前的「提案修法」（移 isAdmin 短路 + 4 API 改 hasPermission 
 **嚴重度**：CRITICAL（production outage 級）
 
 **修正建議**：
+
 1. **Option A（推薦）**：P001 先只做 tab 級 — `hasPermission(user, 'hr', 'employees', 'write')` 作為四個 API 的門檻、延後 action 級到 P008（policy 函式統一入口）時一併處理
 2. **Option B**：擴張 schema 加 `role_action_permissions(role_id, module_code, action_key, allowed)`；seeding 預填 系統主管職務 全部 action；但這大幅超出 P001 scope
 3. **絕對不可**：硬上 action key 而沒 migration 預填 — 會立刻鎖死生產
@@ -90,6 +93,7 @@ P001 目前的「提案修法」（移 isAdmin 短路 + 4 API 改 hasPermission 
 ```
 
 **正確順序（必須）**：
+
 1. **先** migration：確保每個 系統主管職務 在 `role_tab_permissions` 有對應 `(hr, employees, can_read=true, can_write=true)` 等全套 row。寫一個 idempotent SQL：對每個 `workspace_roles.is_admin=true` 的 role、INSERT ON CONFLICT DO NOTHING 全部 MODULES / tabs。
 2. **再** 部署代碼（移 isAdmin 短路）
 3. **回滾計劃**：migration 要有 `down.sql`、代碼要有 feature flag 可即時切回 isAdmin 短路（安全網）
@@ -103,6 +107,7 @@ P001 目前的「提案修法」（移 isAdmin 短路 + 4 API 改 hasPermission 
 - P009（feature cascade trigger）未修、跟 P001 預填衝突：系統主管職務 預填全部 tab permission → feature 關掉某模組 → role_tab_permissions 資料還在 → 下次 feature 重開、系統主管 自動有權（可能是 desired、但要 William 拍板）。
 
 **建議**：P001 的 seeding 邏輯用 **application-layer function**（在 `/api/workspaces/create` 裡呼叫）、**不寫 DB trigger**。原因：
+
 - trigger 繞 RLS、跨租戶風險大
 - application-layer 可寫 unit test
 - P007 已經計劃建 `module_registry` 當 SSOT、seeding 應該走那條路
@@ -112,11 +117,13 @@ P001 目前的「提案修法」（移 isAdmin 短路 + 4 API 改 hasPermission 
 **目前**：admin 一刀過、前端 JWT 的 `is_admin` 跟後端一致、沒有「前後端不同步」問題。
 
 **P001 修後**：前端讀 JWT 裡的 `user.permissions` 快照、後端即時查 DB。**改 role 權限後 1 小時**（JWT TTL）：
+
 - 前端 UI 仍顯示舊的「可以按」按鈕
 - 後端拒絕執行
 - 用戶體驗：「按了沒反應」、容易誤以為是 bug
 
 **對 系統主管 降權場景**（業務要求：系統主管 被降成 OP）：
+
 - 1 小時內 系統主管 在前端仍看到「建員工」按鈕、點了才發現被擋
 - 這 1 小時內 系統主管 JWT 若被竊（P001 之前提過攻擊面沒降）、攻擊者**仍可用舊 JWT 執行部分動作**（因為有些動作可能只走前端檢查）
 
@@ -125,6 +132,7 @@ P001 目前的「提案修法」（移 isAdmin 短路 + 4 API 改 hasPermission 
 ### 2.5 🟡 MEDIUM：permission key seeding 分散（與 P007 衝突）
 
 P001 如果自己在 4 API 硬 code permission key（例如 `'hr.employees.write'`）、migration 也用這個 key 預填、**但 P007 規劃中的 `module_registry` 還沒做**、會發生：
+
 - key 在代碼、role_tab_permissions、features.ts、module-tabs.ts 四處又多一份
 - 跟 P007/P008/P009 的「收斂到 SSOT」方向衝突
 

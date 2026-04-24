@@ -8,21 +8,21 @@
 ## Summary
 
 ### Dialogs: 4 audited
+
 - **Still Used**: 2 (QuickReceipt, BatchReceiptDialog)
 - **Confirmed Dead**: 2 (BatchReceiptConfirmDialog, ResetPasswordDialog)
 - **Action**: Safe to remove BatchReceiptConfirmDialog + ResetPasswordDialog trigger logic
 
 ### Tables Sampled: 12 / 126
+
 - **Confirmed Dead** (zero .from + zero type imports + zero service): 5
   - batch_control_forms (migration 08bf4562 orphaned)
   - file_audit_logs (migration b1680cf4 but no usage)
   - emails (migration bf5ad5b5 but no usage)
   - email_accounts (never used)
   - email_attachments (never used)
-  
 - **Actually Used (via entity/type)**: 1
   - **cost_templates** — exported in data/entities/index.ts but zero call sites → **FALSE POSITIVE**
-  
 - **Needs Review**: 6
   - tour_control_forms (2026-04-19 refactor touched, 08bf4562 created)
   - tour_request_items (type import exists, data call unclear)
@@ -36,6 +36,7 @@
 ## 4 Dialogs
 
 ### 1. QuickReceipt
+
 - **File**: `src/features/todos/components/quick-actions/quick-receipt.tsx` (415 lines)
 - **Exported**: YES (direct export)
 - **Import Sites**: 3
@@ -46,6 +47,7 @@
 - **Verdict**: **STILL_USED** ✓
 
 ### 2. BatchReceiptDialog
+
 - **File**: `src/features/finance/payments/components/BatchReceiptDialog.tsx` (626 lines)
 - **Exported**: YES (index.ts line 8)
 - **Import Sites**: 1
@@ -54,6 +56,7 @@
 - **Verdict**: **STILL_USED** ✓
 
 ### 3. BatchReceiptConfirmDialog
+
 - **File**: `src/features/finance/payments/components/BatchReceiptConfirmDialog.tsx` (200 lines)
 - **Exported**: YES (index.ts line 10)
 - **Import Sites**: **0** — grep found zero references outside payments module
@@ -62,6 +65,7 @@
   - Safe to archive + remove export
 
 ### 4. ResetPasswordDialog
+
 - **File**: `src/app/(main)/customers/components/ResetPasswordDialog.tsx` (142 lines)
 - **Exported**: YES (index.ts line 8)
 - **Import Sites**: 1
@@ -80,6 +84,7 @@
 ### ✗ Confirmed Dead (5)
 
 #### file_audit_logs
+
 - **.from()**: 0 call sites
 - **Type import**: 0 references
 - **Service wrapper**: None
@@ -87,6 +92,7 @@
 - **Verdict**: **CONFIRMED_DEAD**
 
 #### emails
+
 - **.from()**: 0 call sites in `/src`
 - **Type import**: 0 references in code (only in database.types.ts schema)
 - **Service wrapper**: None
@@ -94,18 +100,21 @@
 - **Verdict**: **CONFIRMED_DEAD**
 
 #### email_accounts
+
 - **.from()**: 0 call sites
 - **Type import**: 0 references
 - **Service wrapper**: None (no entity hook in entities/index.ts)
 - **Verdict**: **CONFIRMED_DEAD**
 
 #### email_attachments
+
 - **.from()**: 0 call sites
 - **Type import**: 0 FK reference (only in database.types.ts)
 - **Service wrapper**: None
 - **Verdict**: **CONFIRMED_DEAD**
 
 #### batch_control_forms (grep list says tour_control_forms)
+
 - **.from()**: 0 call sites in code
 - **Type import**: 0 references
 - **Service wrapper**: None (only historical migrations)
@@ -117,6 +126,7 @@
 ### ⚠ False Positive (1)
 
 #### cost_templates
+
 - **.from()**: 1 explicit call site: `src/data/entities/cost-templates.ts:7`
   ```typescript
   export const costTemplateEntity = createEntityHook<CostTemplate>('cost_templates', {...})
@@ -135,6 +145,7 @@
 ### ⚠ Needs Review (6)
 
 #### tour_control_forms
+
 - **.from()**: 0 in code (marked dead)
 - **Type import**: Present in database.types.ts
 - **Migrations**: Created 20260108, **then touched 08bf4562 (2026-04-19 refactor)**
@@ -142,22 +153,26 @@
 - **Verdict**: **NEEDS_REVIEW** — Recent migration activity suggests possible hidden use
 
 #### accounting_entries
+
 - **Type import**: database.types.ts (FK relations only)
 - **Service wrapper**: No entity hook exported
 - **Migrations**: Part of 2026-04-20 FK refactor (FK cleanup touched related tables)
 - **Verdict**: **NEEDS_REVIEW** — Related to finance module, trace required
 
 #### accounting_periods
+
 - **Type import**: database.types.ts
 - **Service wrapper**: No entity hook
 - **Verdict**: **NEEDS_REVIEW** — Finance infrastructure, check if dormant or scaffolding
 
 #### tour_request_items
+
 - **Type import**: Referenced in database.types.ts
 - **Service wrapper**: No entity hook, but tour_requests exists (related)
 - **Verdict**: **NEEDS_REVIEW** — Child table of tour_requests, may be scaffold
 
 #### traveler_expenses + traveler_settlements
+
 - **Type import**: Both in database.types.ts
 - **Service wrapper**: No entity hooks (related to traveler_trips which IS used)
 - **Verdict**: **NEEDS_REVIEW** — Relational integrity to active tables
@@ -168,11 +183,11 @@
 
 Based on 12-table sample:
 
-| Category | Count | Percentage |
-|----------|-------|-----------|
-| Confirmed dead (zero .from + zero import) | 5 | 42% |
-| False positives (used via entity/type) | 1 | 8% |
-| Needs review (recent activity / relational) | 6 | 50% |
+| Category                                    | Count | Percentage |
+| ------------------------------------------- | ----- | ---------- |
+| Confirmed dead (zero .from + zero import)   | 5     | 42%        |
+| False positives (used via entity/type)      | 1     | 8%         |
+| Needs review (recent activity / relational) | 6     | 50%        |
 
 **Extrapolated**: ~50 / 126 are truly safe to archive  
 **Confidence**: MEDIUM (sample too small, high variance in recent refactors)

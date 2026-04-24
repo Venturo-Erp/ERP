@@ -166,9 +166,12 @@ async function getGroupName(groupId: string): Promise<string | null> {
 
 async function getGroupMemberCount(groupId: string): Promise<number | null> {
   try {
-    const res = await fetchWithTimeout(`https://api.line.me/v2/bot/group/${groupId}/members/count`, {
-      headers: { Authorization: `Bearer ${LINE_TOKEN}` },
-    })
+    const res = await fetchWithTimeout(
+      `https://api.line.me/v2/bot/group/${groupId}/members/count`,
+      {
+        headers: { Authorization: `Bearer ${LINE_TOKEN}` },
+      }
+    )
     if (res.ok) {
       const data = await res.json()
       return data.count || null
@@ -670,60 +673,60 @@ export async function POST(req: NextRequest) {
     // LINE 對同一 webhook 重發時 body 完全相同、第二次起會被 skip
     const idempotencyKey = createHash('sha256').update(rawBody).digest('hex')
     return await withWebhookIdempotency('line', idempotencyKey, async () => {
-    const body = JSON.parse(rawBody)
-    const events = body.events || []
+      const body = JSON.parse(rawBody)
+      const events = body.events || []
 
-    for (const event of events) {
-      const source = event.source || {}
+      for (const event of events) {
+        const source = event.source || {}
 
-      // follow/unfollow 事件 → 記錄用戶
-      if (event.type === 'follow' || event.type === 'unfollow') {
-        await processFollowEvent(event)
-      }
-
-      // Postback 事件 → 景點選擇按鈕
-      if (event.type === 'postback') {
-      }
-
-      // 私人訊息 → 檢查綁定指令（客戶或員工）或 AI 客服
-      if (source.type === 'user' && event.type === 'message' && event.message?.type === 'text') {
-        // 確保用戶記錄存在（補漏：follow 事件可能遺漏）
-        const msgUserId = source.userId
-        if (msgUserId) {
-          const profile = await getUserProfile(msgUserId)
-          await saveUserToDb(msgUserId, profile)
+        // follow/unfollow 事件 → 記錄用戶
+        if (event.type === 'follow' || event.type === 'unfollow') {
+          await processFollowEvent(event)
         }
 
-        // 先嘗試打卡指令（上班/下班）
-        const isClockIn = await processClockIn(event)
-        if (!isClockIn) {
-          // 再嘗試客戶綁定（C 開頭）
-          const isCustomerBinding = await processCustomerBinding(event)
-          if (!isCustomerBinding) {
-            // 再嘗試員工綁定（非 C 開頭）
-            const isEmployeeBinding = await processEmployeeBinding(event)
-            if (!isEmployeeBinding) {
-              // 都不是綁定 → AI 客服回覆（內含景點選擇邏輯）
-              await handleAIMessage(event)
+        // Postback 事件 → 景點選擇按鈕
+        if (event.type === 'postback') {
+        }
+
+        // 私人訊息 → 檢查綁定指令（客戶或員工）或 AI 客服
+        if (source.type === 'user' && event.type === 'message' && event.message?.type === 'text') {
+          // 確保用戶記錄存在（補漏：follow 事件可能遺漏）
+          const msgUserId = source.userId
+          if (msgUserId) {
+            const profile = await getUserProfile(msgUserId)
+            await saveUserToDb(msgUserId, profile)
+          }
+
+          // 先嘗試打卡指令（上班/下班）
+          const isClockIn = await processClockIn(event)
+          if (!isClockIn) {
+            // 再嘗試客戶綁定（C 開頭）
+            const isCustomerBinding = await processCustomerBinding(event)
+            if (!isCustomerBinding) {
+              // 再嘗試員工綁定（非 C 開頭）
+              const isEmployeeBinding = await processEmployeeBinding(event)
+              if (!isEmployeeBinding) {
+                // 都不是綁定 → AI 客服回覆（內含景點選擇邏輯）
+                await handleAIMessage(event)
+              }
             }
           }
         }
-      }
 
-      if (source.type === 'group') {
-        const groupId = source.groupId
+        if (source.type === 'group') {
+          const groupId = source.groupId
 
-        // Bot 加入群組 or 群組訊息 → 記錄 groupId
-        if (event.type === 'join' || event.type === 'message') {
-          await processGroupEvent(groupId)
+          // Bot 加入群組 or 群組訊息 → 記錄 groupId
+          if (event.type === 'join' || event.type === 'message') {
+            await processGroupEvent(groupId)
+          }
+
+          // 檔案訊息 → 檢查是否為保險 PDF
+          if (event.type === 'message' && event.message?.type === 'file') {
+            await processInsurancePDF(event)
+          }
         }
-
-        // 檔案訊息 → 檢查是否為保險 PDF
-        if (event.type === 'message' && event.message?.type === 'file') {
-          await processInsurancePDF(event)
-        }
       }
-    }
 
       return { status: 200, body: { status: 'ok' } }
     })

@@ -26,14 +26,15 @@
 
 ### A.1 頁面層
 
-| 頁面 | 權限檢查 | 檢查類型 | 狀態 |
-|------|---------|---------|------|
-| `/finance/treasury` | `canRead('finance', 'treasury')` | useTabPermissions hook | ✅ 有檢查 |
-| `/finance/treasury/disbursement` | ModuleGuard module="finance" | route 層級 + layout | ⚠️ 僅靠 module 層，未用 tab 層 |
+| 頁面                             | 權限檢查                         | 檢查類型               | 狀態                           |
+| -------------------------------- | -------------------------------- | ---------------------- | ------------------------------ |
+| `/finance/treasury`              | `canRead('finance', 'treasury')` | useTabPermissions hook | ✅ 有檢查                      |
+| `/finance/treasury/disbursement` | ModuleGuard module="finance"     | route 層級 + layout    | ⚠️ 僅靠 module 層，未用 tab 層 |
 
 **發現**: `/finance/treasury/disbursement` 路由層有 ModuleGuard（`module="finance"`），但沒有用 tab 層權限 `canRead('finance', 'disbursement')`。這意味著只要有 finance 模組讀權就能進去，不能細粒度控制「出納管理」單獨鎖定。
 
 **檔案**: src/app/(main)/finance/treasury/disbursement/page.tsx
+
 ```tsx
 // 現況：只靠 layout 層 ModuleGuard，沒有 page 層檢查
 export { DisbursementPage as default } from '@/features/disbursement'
@@ -41,20 +42,21 @@ export { DisbursementPage as default } from '@/features/disbursement'
 
 ### A.2 動作層 — 按鈕權限檢查
 
-| 動作 | 檔案 | 當前檢查 | 建議 |
-|------|------|---------|------|
-| 建立出納單 | CreateDisbursementDialog.tsx | ❌ 無檢查 | 應在 dialog open 時驗證 canWrite('finance', 'disbursement') |
-| 編輯出納單 | DisbursementPage.tsx:168 編輯按鈕 | ❌ 無檢查 | 應檢查 canWrite |
-| 刪除出納單 | DisbursementPage.tsx:181 刪除按鈕 | ❌ 無檢查 | 應檢查 canWrite |
-| 確認出帳 | DisbursementDetailDialog.tsx | ❌ 無檢查 | 應檢查 canWrite + 可能需特殊權限如 canWrite('finance', 'disbursement-confirm') |
-| 列印 | DisbursementPrintDialog.tsx | ❌ 無檢查（only 讀）| read 權限已在頁面層檢查 ✅ |
-| 成本轉移 | CostTransferDialog.tsx | ❌ 無檢查 | 應檢查 canWrite('finance', 'payments') 或 canWrite('finance', 'requests') |
+| 動作       | 檔案                              | 當前檢查             | 建議                                                                           |
+| ---------- | --------------------------------- | -------------------- | ------------------------------------------------------------------------------ |
+| 建立出納單 | CreateDisbursementDialog.tsx      | ❌ 無檢查            | 應在 dialog open 時驗證 canWrite('finance', 'disbursement')                    |
+| 編輯出納單 | DisbursementPage.tsx:168 編輯按鈕 | ❌ 無檢查            | 應檢查 canWrite                                                                |
+| 刪除出納單 | DisbursementPage.tsx:181 刪除按鈕 | ❌ 無檢查            | 應檢查 canWrite                                                                |
+| 確認出帳   | DisbursementDetailDialog.tsx      | ❌ 無檢查            | 應檢查 canWrite + 可能需特殊權限如 canWrite('finance', 'disbursement-confirm') |
+| 列印       | DisbursementPrintDialog.tsx       | ❌ 無檢查（only 讀） | read 權限已在頁面層檢查 ✅                                                     |
+| 成本轉移   | CostTransferDialog.tsx            | ❌ 無檢查            | 應檢查 canWrite('finance', 'payments') 或 canWrite('finance', 'requests')      |
 
 **結論**: 出納管理模組**完全缺少按鈕層的權限檢查**。目前只靠頁面層的 read 權限防守，但沒有針對「誰能編輯、誰能確認」的寫權限控制。
 
 ### A.3 AdvanceListCard / OrderListCard 的新版權限
 
 **檔案**: src/components/workspace/AdvanceListCard.tsx:32
+
 ```tsx
 const canProcess = canWrite('finance', 'disbursement')
 ```
@@ -66,6 +68,7 @@ const canProcess = canWrite('finance', 'disbursement')
 ### A.4 permission 定義覆蓋
 
 **檔案**: src/lib/permissions/module-tabs.ts:108-128
+
 ```typescript
 {
   code: 'finance',
@@ -95,13 +98,14 @@ const selectedAmount = useMemo(() => {
     .filter(r => selectedRequestIds.includes(r.id))
     .reduce((sum, r) => {
       const pairId = (r as unknown as Record<string, unknown>).transferred_pair_id
-      if (pairId) return sum  // ✅ 成本轉移請求不算進出帳金額
+      if (pairId) return sum // ✅ 成本轉移請求不算進出帳金額
       return sum + (r.amount || 0)
     }, 0)
 }, [pendingRequests, selectedRequestIds])
 ```
 
 **驗證**:
+
 - ✅ 邏輯正確：pair requests（R_src 負 + R_dst 正）扣除後，淨流量為 0，不算入出帳金額
 - ✅ 邊界處理：只選 R_src 或 R_dst 其中一張，會被扣除，反映「實際銀行流量」
 - ✅ Commit c7f4fce7e 對應改動已整合
@@ -117,18 +121,20 @@ const transferPairs = useMemo<TransferPairRow[]>(() => {
   // 1. group requests by pair_id
   const pairGroups = new Map<string, PaymentRequest[]>()
   for (const req of paymentRequests) {
-    const pairId = (req as unknown as Record<string, unknown>).transferred_pair_id as string | undefined
-    if (!pairId) continue  // ✅ 只處理有 pair_id 的
+    const pairId = (req as unknown as Record<string, unknown>).transferred_pair_id as
+      | string
+      | undefined
+    if (!pairId) continue // ✅ 只處理有 pair_id 的
     if (!pairGroups.has(pairId)) pairGroups.set(pairId, [])
     pairGroups.get(pairId)!.push(req)
   }
-  
+
   // 2. 每對取 src（amount<0）跟 dst（amount>0）
   const rows: TransferPairRow[] = []
   for (const [pairId, reqs] of pairGroups) {
-    const src = reqs.find(r => (r.amount || 0) < 0)  // ✅
-    const dst = reqs.find(r => (r.amount || 0) > 0)  // ✅
-    if (!src || !dst) continue  // ✅ 配對完整性檢查
+    const src = reqs.find(r => (r.amount || 0) < 0) // ✅
+    const dst = reqs.find(r => (r.amount || 0) > 0) // ✅
+    if (!src || !dst) continue // ✅ 配對完整性檢查
     // ... 構造 row
   }
   return rows
@@ -136,6 +142,7 @@ const transferPairs = useMemo<TransferPairRow[]>(() => {
 ```
 
 **驗證**:
+
 - ✅ pair_id 分區渲染邏輯正確
 - ✅ src 負、dst 正的偵測邏輯正確
 - ✅ 配對失效時跳過（容錯）
@@ -149,15 +156,15 @@ const transferPairs = useMemo<TransferPairRow[]>(() => {
 
 **必填欄位 seed** （對應 migration 20260423230000 註解）:
 
-| 欄位 | R_src 值 | R_dst 值 | 狀態 |
-|------|----------|----------|------|
-| request_category | 'tour' | 'tour' | ✅ |
-| request_type | '成本轉移' | '成本轉移' | ✅ |
-| status | 'pending' | 'pending' | ✅ |
-| transferred_pair_id | 同 pairId | 同 pairId | ✅ |
-| amount | -totalAmount | +totalAmount | ✅ |
-| total_amount | -totalAmount | +totalAmount | ✅ |
-| notes | 自動填充 | 自動填充 | ✅ |
+| 欄位                | R_src 值     | R_dst 值     | 狀態 |
+| ------------------- | ------------ | ------------ | ---- |
+| request_category    | 'tour'       | 'tour'       | ✅   |
+| request_type        | '成本轉移'   | '成本轉移'   | ✅   |
+| status              | 'pending'    | 'pending'    | ✅   |
+| transferred_pair_id | 同 pairId    | 同 pairId    | ✅   |
+| amount              | -totalAmount | +totalAmount | ✅   |
+| total_amount        | -totalAmount | +totalAmount | ✅   |
+| notes               | 自動填充     | 自動填充     | ✅   |
 
 **items 複製邏輯** （行 151-176 & 226-251）:
 
@@ -179,6 +186,7 @@ const srcItems = fullItems.map((it, idx) => ({
 ```
 
 **檢查**:
+
 - ✅ SELECT 包含了所需的 9 個欄位（category / supplier_id / supplier_name / description / unitprice / quantity / subtotal / payment_method_id）
 - ✅ R_src items 金額取負
 - ✅ R_dst items 金額為正
@@ -190,6 +198,7 @@ const srcItems = fullItems.map((it, idx) => ({
 ### B.4 出納單狀態機
 
 **定義**: src/features/disbursement/constants.ts
+
 ```typescript
 // pending（待出帳）→ confirmed（已確認）→ paid（已出帳）
 // 或
@@ -197,6 +206,7 @@ const srcItems = fullItems.map((it, idx) => ({
 ```
 
 ⚠️ **標籤混亂**: DISBURSEMENT_STATUS 中同一狀態有兩套標籤：
+
 - pending: "待確認" vs "待出帳" （constants.ts 第 20 行和第 11 行）
 - confirmed: "已確認" ✅ 一致
 - paid: "已付款" vs "已出帳" （constants.ts 第 12 行和第 22 行）
@@ -224,6 +234,7 @@ export const DISBURSEMENT_STATUS = {
 ### B.5 advance_payment eligibility 判斷
 
 **檔案**: src/lib/permissions/module-tabs.ts:122-127
+
 ```typescript
 {
   code: 'advance_payment',
@@ -242,6 +253,7 @@ export const DISBURSEMENT_STATUS = {
 ### C.1 `selectedAmount` 算法
 
 **位置 1**: useCreateDisbursement.ts:137-145
+
 ```typescript
 const selectedAmount = useMemo(() => {
   return pendingRequests
@@ -257,6 +269,7 @@ const selectedAmount = useMemo(() => {
 ✅ **邏輯正確**
 
 **位置 2**: useDisbursementForm.ts:15-28（未使用）
+
 ```typescript
 const selectedAmount = useMemo(() => {
   return selectedRequests.reduce((sum, requestId) => {
@@ -273,6 +286,7 @@ const selectedAmount = useMemo(() => {
 ### C.2 `amount_covered` / `amount_remaining` 一致性
 
 **檢查**: 掃描整個 codebase 尋找 `amount_covered`、`amount_remaining` 欄位
+
 ```bash
 grep -r "amount_covered\|amount_remaining" /src --include="*.ts" --include="*.tsx"
 ```
@@ -282,6 +296,7 @@ grep -r "amount_covered\|amount_remaining" /src --include="*.ts" --include="*.ts
 ### C.3 `pair_id` 配對後金額加總 = 0 保證
 
 **驗證**: CostTransferDialog.tsx:136 & 200
+
 ```typescript
 // R_src
 const srcPayload = {
@@ -304,10 +319,12 @@ PrintDisbursementPreview.tsx:278-283 implicit 驗證（src.amount < 0 && dst.amo
 ### C.4 `payment_request_items` SELECT 完整性
 
 **之前遺漏**: src/data/entities/payment-request-items.ts 註解提及
+
 - 2026-04-23 移除了 `tour_request_id`（DB 無此欄位）
 - 2026-04-23 補上 5 個欄位: confirmation_item_id / notes / transferred_at / transferred_by / transferred_from_tour_id
 
 **當前 SELECT** (line 23-24):
+
 ```
 'id,request_id,item_number,category,supplier_id,supplier_name,description,tour_id,quantity,unitprice,subtotal,payment_method,payment_method_id,custom_request_date,sort_order,workspace_id,created_at,created_by,updated_at,updated_by,advanced_by,advanced_by_name,notes,confirmation_item_id,transferred_at,transferred_by,transferred_from_tour_id'
 ```
@@ -361,7 +378,8 @@ PrintDisbursementPreview.tsx:278-283 implicit 驗證（src.amount < 0 && dst.amo
 
 **用途**: 表單狀態管理（選擇、全選、金額計算），但沒有任何地方呼叫。
 
-**金額計算邏輯**: 
+**金額計算邏輯**:
+
 ```typescript
 const selectedAmount = useMemo(() => {
   return selectedRequests.reduce((sum, requestId) => {
@@ -399,10 +417,10 @@ const selectedAmount = useMemo(() => {
 
 #### D.2.1 金額計算的二套邏輯
 
-| 計算邏輯 | 位置 | 扣除 pair requests | 使用狀況 |
-|---------|------|-------------------|--------|
-| 邏輯 A | useCreateDisbursement:137 | ✅ 是 | 實際使用 ✅ |
-| 邏輯 B | useDisbursementForm:15 | ❌ 否 | dead hook（未使用） |
+| 計算邏輯 | 位置                      | 扣除 pair requests | 使用狀況            |
+| -------- | ------------------------- | ------------------ | ------------------- |
+| 邏輯 A   | useCreateDisbursement:137 | ✅ 是              | 實際使用 ✅         |
+| 邏輯 B   | useDisbursementForm:15    | ❌ 否              | dead hook（未使用） |
 
 **成因**: useDisbursementForm 是舊邏輯、useCreateDisbursement 是新邏輯（支持 transferred_pair_id），但舊的沒被刪除。
 
@@ -410,15 +428,16 @@ const selectedAmount = useMemo(() => {
 
 #### D.2.2 出納單號生成的二套演算法
 
-| 算法 | 位置 | 生成格式 | 備註 |
-|------|------|---------|------|
-| 演算法 A | useCreateDisbursement:37-68 | DOYYMMDD-NNN（流水 001） | ✅ 當前使用 |
-| 演算法 B | useDisbursementData:34-59 | PYYMMDD + A-Z（字母） | ❌ dead code |
-| 演算法 C | disbursement-order.service.ts:147 | P + slice(2) | ❌ 舊 service 層 |
+| 算法     | 位置                              | 生成格式                 | 備註             |
+| -------- | --------------------------------- | ------------------------ | ---------------- |
+| 演算法 A | useCreateDisbursement:37-68       | DOYYMMDD-NNN（流水 001） | ✅ 當前使用      |
+| 演算法 B | useDisbursementData:34-59         | PYYMMDD + A-Z（字母）    | ❌ dead code     |
+| 演算法 C | disbursement-order.service.ts:147 | P + slice(2)             | ❌ 舊 service 層 |
 
 **3 種生成方式並存！**
 
 **檔案**:
+
 - useCreateDisbursement.ts:45 → `DO${yy}${mm}${dd}-${String(nextNum).padStart(3, '0')}`
 - useDisbursementData.ts:42 → `P${year}${month}${day}${nextLetter}`
 - disbursement-order.service.ts:147 → `P${disbursementDate.replace(/-/g, '').slice(2)}${String.fromCharCode(...)}`
@@ -447,11 +466,11 @@ export const DISBURSEMENT_STATUS = {
 }
 ```
 
-| 狀態 | 定義組 1 標籤 | 定義組 2 標籤 | 實際使用 |
-|------|------------|------------|--------|
-| pending | 待確認 | 待出帳 | DISBURSEMENT_STATUS（二號） |
-| confirmed | 已確認 | 已確認 | 一致 ✅ |
-| paid | 已付款 | 已出帳 | DISBURSEMENT_STATUS（二號） |
+| 狀態      | 定義組 1 標籤 | 定義組 2 標籤 | 實際使用                    |
+| --------- | ------------- | ------------- | --------------------------- |
+| pending   | 待確認        | 待出帳        | DISBURSEMENT_STATUS（二號） |
+| confirmed | 已確認        | 已確認        | 一致 ✅                     |
+| paid      | 已付款        | 已出帳        | DISBURSEMENT_STATUS（二號） |
 
 **使用地點**: DisbursementPage.tsx:145 用 DISBURSEMENT_STATUS，所以 UI 顯示「待出帳」
 
@@ -463,13 +482,14 @@ export const DISBURSEMENT_STATUS = {
 
 #### D.3.1 週四計算——二套實現
 
-| 實現位置 | 邏輯 | 備註 |
-|---------|------|------|
-| useCreateDisbursement:26-34 | getNextThursday() — 簡單版 | ✅ 使用中 |
-| useDisbursementData:22-30 | getNextThursday() — 簡單版 | ❌ dead |
+| 實現位置                             | 邏輯                       | 備註      |
+| ------------------------------------ | -------------------------- | --------- |
+| useCreateDisbursement:26-34          | getNextThursday() — 簡單版 | ✅ 使用中 |
+| useDisbursementData:22-30            | getNextThursday() — 簡單版 | ❌ dead   |
 | disbursement-order.service.ts:90-106 | getNextThursday() — 複雜版 | ❌ 未使用 |
 
 **複雜版特色** (service.ts):
+
 ```typescript
 // 如果今天是週四且超過 17:00，則為下週四
 if (daysUntilThursday === 0 && today.getHours() >= 17) {
@@ -478,8 +498,9 @@ if (daysUntilThursday === 0 && today.getHours() >= 17) {
 ```
 
 **簡單版** (useCreateDisbursement.ts):
+
 ```typescript
-const daysUntilThursday = (4 - dayOfWeek + 7) % 7 || 7  // 今天週四時直接取下週四
+const daysUntilThursday = (4 - dayOfWeek + 7) % 7 || 7 // 今天週四時直接取下週四
 ```
 
 **差異**: 簡單版無時間檢查（17:00 閾值），service 版有。
@@ -495,30 +516,38 @@ const daysUntilThursday = (4 - dayOfWeek + 7) % 7 || 7  // 今天週四時直接
 #### D.4.1 useCreateDisbursement.ts
 
 **Line 8-9**:
+
 ```typescript
 import { getTodayString, formatDate } from '@/lib/utils/format-date'
 ```
+
 - `getTodayString` — import 但只在 L165 setToday() 用，很少路徑會觸發（篩選器功能）
 - **低優先級** — 不建議移除（可能有使用）
 
 **Line 22**:
+
 ```typescript
 import { DISBURSEMENT_LABELS, DISBURSEMENT_HOOK_LABELS } from '../constants/labels'
 ```
+
 - 查看實際用途 — L228, 259, 265, 267, 342, 350 — **都用了** ✅
 
 **Line 21**:
+
 ```typescript
 import { logger } from '@/lib/utils/logger'
 ```
+
 - L219, 227, 265 — **都用了** ✅
 
 #### D.4.2 PrintDisbursementPreview.tsx
 
 **Line 15**:
+
 ```typescript
 import { PRINT_LABELS } from '../constants/labels'
 ```
+
 - ❌ **Unused** — 整個檔案沒有 PRINT_LABELS 的使用（搜尋 0 hit）
 
 **應移除**: 第 15 行
@@ -534,6 +563,7 @@ import { PRINT_LABELS } from '../constants/labels'
 #### D.5.1 舊欄位檢查
 
 **tour_request_id**:
+
 - ❌ **已移除**（payment-request-items.ts 註解 line 15 明確說明）
 - type 層仍保留此欄位（finance.types.ts / base.types.ts）以防誤傷其他用途
 - **狀態**: 正確清理
@@ -542,11 +572,11 @@ import { PRINT_LABELS } from '../constants/labels'
 
 payment-requests 的 status 值歷史:
 
-| 值 | 代表意義 | 當前使用 |
-|----|---------|--------|
-| pending | 待出帳 | ✅ |
-| confirmed | 已加入出納單、待出帳 | ✅ |
-| billed | 已出帳 | ✅ |
+| 值        | 代表意義             | 當前使用 |
+| --------- | -------------------- | -------- |
+| pending   | 待出帳               | ✅       |
+| confirmed | 已加入出納單、待出帳 | ✅       |
+| billed    | 已出帳               | ✅       |
 
 No legacy 殘留的狀態值（如 '0' / 'approved' / 'paid'）。
 
@@ -557,6 +587,7 @@ No legacy 殘留的狀態值（如 '0' / 'approved' / 'paid'）。
 ### D.5.2 Trigger / View / Function 檢查
 
 **掃描 migrations**:
+
 ```bash
 grep -r "CREATE TRIGGER\|CREATE VIEW\|CREATE FUNCTION" /supabase/migrations
 ```
@@ -579,7 +610,7 @@ grep -r "CREATE TRIGGER\|CREATE VIEW\|CREATE FUNCTION" /supabase/migrations
 
 2. **在 DisbursementPage / CreateDisbursementDialog 層加 `canWrite('finance', 'disbursement')` 檢查**
    - **檔案**: src/features/disbursement/components/DisbursementPage.tsx（頁頂加 useTabPermissions）
-   - **改動**: 
+   - **改動**:
      ```typescript
      const { canWrite } = useTabPermissions()
      if (!canWrite('finance', 'disbursement')) return <UnauthorizedPage />
@@ -590,7 +621,7 @@ grep -r "CREATE TRIGGER\|CREATE VIEW\|CREATE FUNCTION" /supabase/migrations
 #### P1 — HIGH（1 週內解決）
 
 3. **刪除 dead hooks（useDisbursementForm、useDisbursementFilters、useDisbursementData）**
-   - **檔案**: 
+   - **檔案**:
      - src/features/disbursement/hooks/useDisbursementForm.ts
      - src/features/disbursement/hooks/useDisbursementFilters.ts
      - src/features/disbursement/hooks/useDisbursementData.ts
@@ -652,4 +683,3 @@ grep -r "CREATE TRIGGER\|CREATE VIEW\|CREATE FUNCTION" /supabase/migrations
 - [x] B.4: 狀態機邏輯清晰（標籤重複為 P1）
 - [x] C.1-5: 資料一致性驗證通過
 - [x] D.1-5: 多餘代碼和多重標準識別完成
-

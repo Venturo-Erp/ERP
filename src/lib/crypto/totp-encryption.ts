@@ -11,7 +11,9 @@ function getKey(): Buffer {
   }
   const key = Buffer.from(keyB64, 'base64')
   if (key.length !== 32) {
-    throw new Error('AMADEUS_TOTP_ENCRYPTION_KEY 必須是 32 bytes base64（用 openssl rand -base64 32 產生）')
+    throw new Error(
+      'AMADEUS_TOTP_ENCRYPTION_KEY 必須是 32 bytes base64（用 openssl rand -base64 32 產生）'
+    )
   }
   return key
 }

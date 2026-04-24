@@ -27,12 +27,7 @@ interface ModuleGuardProps {
 const PUBLIC_ROUTES = ['/login', '/unauthorized', '/public']
 
 // 永遠放行：根目錄、首頁、個人設定（不受職務權限管控）
-const ALWAYS_ALLOWED_EXACT = new Set([
-  '/',
-  '/dashboard',
-  '/settings',
-  '/settings/personal',
-])
+const ALWAYS_ALLOWED_EXACT = new Set(['/', '/dashboard', '/settings', '/settings/personal'])
 
 const ALWAYS_ALLOWED_PREFIXES = ['/dashboard/']
 

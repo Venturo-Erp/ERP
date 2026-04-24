@@ -390,4 +390,3 @@ export const ADD_REQUEST_EXTRA_LABELS = {
   ESTIMATED_COST: (amount: string) => `預估成本：NT$ ${amount}`,
   BATCH_CREATE_LABEL: '建立批次請款',
 }
-

@@ -280,10 +280,7 @@ export function useCreateDisbursement({
       }
       if (dateChanged) {
         if (!user?.workspace_id) throw new Error('找不到 workspace_id、無法生成出納單號')
-        const newOrderNumber = await generateDisbursementNumber(
-          user.workspace_id,
-          disbursementDate
-        )
+        const newOrderNumber = await generateDisbursementNumber(user.workspace_id, disbursementDate)
         updatedFields = { ...updatedFields, order_number: newOrderNumber, code: newOrderNumber }
       }
 

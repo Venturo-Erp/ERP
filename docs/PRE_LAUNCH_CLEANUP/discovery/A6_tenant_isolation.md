@@ -3,6 +3,7 @@
 ## Executive Summary
 
 Wave 3 (multi-tenant isolation) cannot proceed safely without consolidating hardcoded IDs. Found:
+
 - **CORNER_WORKSPACE_ID**: 6 files (legitimate in 1, hardcoded danger in 5)
 - **LOGAN_ID conflict**: 3 files with disagreement — `000...001` vs `000...002`
 - **SYSTEM_BOT_ID**: 1 file, currently unused outside workspace.ts
@@ -16,22 +17,22 @@ Wave 3 (multi-tenant isolation) cannot proceed safely without consolidating hard
 
 ## Full Occurrence Inventory
 
-| UUID / ID (Type) | File:line | Current Value | Context | Severity |
-|------------------|-----------|---------------|---------|----------|
-| CORNER_WORKSPACE_ID | `src/lib/line/ai-customer-service.ts:10` | `8ef05a74-1f87-48ab-afd3-9bfeb423935d` | FALLBACK for webhook (needs env override) | HIGH |
-| CORNER_WORKSPACE_ID | `src/features/attractions/components/DatabaseManagementPage.tsx:20` | `8ef05a74-1f87-48ab-afd3-9bfeb423935d` | Hardcoded, locked to Corner milestones (LEGITIMATE) | MEDIUM |
-| CORNER_WORKSPACE_ID | `src/app/api/tenants/seed-base-data/route.ts:6` | `8ef05a74-1f87-48ab-afd3-9bfeb423935d` | Template source (correct pattern, but needs env) | MEDIUM |
-| CORNER_WS | `src/app/api/tenants/create/route.ts:578` | `8ef05a74-1f87-48ab-afd3-9bfeb423935d` | Duplicate seed logic (should deduplicate) | MEDIUM |
-| workspace_id (hardcoded) | `src/app/api/line/send-insurance/route.ts:130` | `8ef05a74-1f87-48ab-afd3-9bfeb423935d` | Hardcoded in tour_documents insert | HIGH |
-| sourceId (fallback) | `src/app/api/finance/account-mappings/route.ts:97` | `8ef05a74-1f87-48ab-afd3-9bfeb423935d` | Fallback if no source_workspace_id provided | MEDIUM |
-| **LOGAN_ID** | `src/lib/logan/logan-service.ts:11` | `000...001` | Main service (says "00000000-0000-0000-0000-000000000001") | CRITICAL |
-| **LOGAN_ID** | `src/lib/constants/workspace.ts:66` | `000...001` | SYSTEM_BOT_ID (aliased, confirms 001) | CRITICAL |
-| **LOGAN_ID** | `src/app/api/cron/sync-logan-knowledge/route.ts:18` | `000...002` | Cron job uses DIFFERENT ID (000...002) | CRITICAL |
-| LOGAN_EMPLOYEE_NUMBER | `src/lib/logan/logan-service.ts:12` | `BOT001` | Consistent with 001 UUID | - |
-| Payment method UUID | `src/features/finance/requests/components/AddRequestDialog.tsx:184` | `e554fee7-412f-4b58-a7b3-c08602c624d2` | Hardcoded default "wire transfer" | HIGH |
-| Payment method UUID | `src/features/finance/requests/components/AddRequestDialog.tsx:840` | `d6e2b71f-0d06-4119-9047-c709f31dfc31` | Hardcoded fallback for batch payment | HIGH |
-| LINE Bot ID | `src/app/(main)/customers/page.tsx:523` | `process.env.NEXT_PUBLIC_LINE_BOT_ID \|\| '@745gftqd'` | QR code generation fallback | MEDIUM |
-| LINE Bot ID | `src/app/(main)/customers/page.tsx:540` | `process.env.NEXT_PUBLIC_LINE_BOT_ID \|\| '@745gftqd'` | URL copy link fallback | MEDIUM |
+| UUID / ID (Type)         | File:line                                                           | Current Value                                          | Context                                                    | Severity |
+| ------------------------ | ------------------------------------------------------------------- | ------------------------------------------------------ | ---------------------------------------------------------- | -------- |
+| CORNER_WORKSPACE_ID      | `src/lib/line/ai-customer-service.ts:10`                            | `8ef05a74-1f87-48ab-afd3-9bfeb423935d`                 | FALLBACK for webhook (needs env override)                  | HIGH     |
+| CORNER_WORKSPACE_ID      | `src/features/attractions/components/DatabaseManagementPage.tsx:20` | `8ef05a74-1f87-48ab-afd3-9bfeb423935d`                 | Hardcoded, locked to Corner milestones (LEGITIMATE)        | MEDIUM   |
+| CORNER_WORKSPACE_ID      | `src/app/api/tenants/seed-base-data/route.ts:6`                     | `8ef05a74-1f87-48ab-afd3-9bfeb423935d`                 | Template source (correct pattern, but needs env)           | MEDIUM   |
+| CORNER_WS                | `src/app/api/tenants/create/route.ts:578`                           | `8ef05a74-1f87-48ab-afd3-9bfeb423935d`                 | Duplicate seed logic (should deduplicate)                  | MEDIUM   |
+| workspace_id (hardcoded) | `src/app/api/line/send-insurance/route.ts:130`                      | `8ef05a74-1f87-48ab-afd3-9bfeb423935d`                 | Hardcoded in tour_documents insert                         | HIGH     |
+| sourceId (fallback)      | `src/app/api/finance/account-mappings/route.ts:97`                  | `8ef05a74-1f87-48ab-afd3-9bfeb423935d`                 | Fallback if no source_workspace_id provided                | MEDIUM   |
+| **LOGAN_ID**             | `src/lib/logan/logan-service.ts:11`                                 | `000...001`                                            | Main service (says "00000000-0000-0000-0000-000000000001") | CRITICAL |
+| **LOGAN_ID**             | `src/lib/constants/workspace.ts:66`                                 | `000...001`                                            | SYSTEM_BOT_ID (aliased, confirms 001)                      | CRITICAL |
+| **LOGAN_ID**             | `src/app/api/cron/sync-logan-knowledge/route.ts:18`                 | `000...002`                                            | Cron job uses DIFFERENT ID (000...002)                     | CRITICAL |
+| LOGAN_EMPLOYEE_NUMBER    | `src/lib/logan/logan-service.ts:12`                                 | `BOT001`                                               | Consistent with 001 UUID                                   | -        |
+| Payment method UUID      | `src/features/finance/requests/components/AddRequestDialog.tsx:184` | `e554fee7-412f-4b58-a7b3-c08602c624d2`                 | Hardcoded default "wire transfer"                          | HIGH     |
+| Payment method UUID      | `src/features/finance/requests/components/AddRequestDialog.tsx:840` | `d6e2b71f-0d06-4119-9047-c709f31dfc31`                 | Hardcoded fallback for batch payment                       | HIGH     |
+| LINE Bot ID              | `src/app/(main)/customers/page.tsx:523`                             | `process.env.NEXT_PUBLIC_LINE_BOT_ID \|\| '@745gftqd'` | QR code generation fallback                                | MEDIUM   |
+| LINE Bot ID              | `src/app/(main)/customers/page.tsx:540`                             | `process.env.NEXT_PUBLIC_LINE_BOT_ID \|\| '@745gftqd'` | URL copy link fallback                                     | MEDIUM   |
 
 ---
 
@@ -47,7 +48,8 @@ export const LOGAN_ID = '00000000-0000-0000-0000-000000000001'
 const LOGAN_ID = '00000000-0000-0000-0000-000000000002'
 ```
 
-**Impact**: 
+**Impact**:
+
 - Cron job (`sync-logan-knowledge`) writes memories with `000...002` as `created_by`
 - Main service (`logan-service.ts`) reads/processes as `000...001`
 - If 002 record is queried with filter `created_by = 001`, it's invisible → orphaned memories
@@ -57,12 +59,13 @@ const LOGAN_ID = '00000000-0000-0000-0000-000000000002'
 **Action**: Query DB to determine which is the actual Logan employee row.
 
 ```sql
-SELECT id, employee_number, name FROM public.employees 
+SELECT id, employee_number, name FROM public.employees
 WHERE employee_number LIKE 'BOT%' OR id LIKE '00000000%'
 ORDER BY created_at;
 ```
 
 **Expected outcome**: One of these:
+
 - **Option A**: Only one exists (e.g., 001 is correct) → Remove duplicate, unify to one
 - **Option B**: Both exist with roles → Rename cron to use 002 consistently, document why
 - **Option C**: Neither exists → Create proper Logan employee with assigned UUID, migrate both hardcodes
@@ -107,8 +110,10 @@ await supabase.rpc('seed_tenant_base_data', {
 - **Why not hardcode**: What if we later support "partner A is template source for partner B"?
 
 **Recommendation**:
+
 ```typescript
-const CORNER_WORKSPACE_ID = process.env.CORNER_WORKSPACE_ID || '8ef05a74-1f87-48ab-afd3-9bfeb423935d'
+const CORNER_WORKSPACE_ID =
+  process.env.CORNER_WORKSPACE_ID || '8ef05a74-1f87-48ab-afd3-9bfeb423935d'
 // Throw error if missing:
 if (!CORNER_WORKSPACE_ID) {
   throw new Error('CORNER_WORKSPACE_ID env not set — cannot seed base data')
@@ -126,11 +131,13 @@ const CORNER_WORKSPACE_ID = '8ef05a74-1f87-48ab-afd3-9bfeb423935d'
 **Purpose**: Gate "Michelin" / "Premium Experiences" tabs — these are Corner-only features (sourced from our research, copyright concerns).
 
 **Assessment**: **Legitimate hardcode for feature gating.**
+
 - **Why**: Competitors/partners have no business seeing this tab
 - **Why keep hardcoded**: Feature roadmap won't change per tenant, it's a product decision
 - **Guard**: Add RLS check at DB level, don't rely only on client-side gate
 
 **No change needed**, but add comment:
+
 ```typescript
 // CORNER workspace ID — Michelin/premium data is Corner-exclusive
 // RLS policy guards DB queries too (src/app/api/attractions/route.ts)
@@ -170,7 +177,7 @@ payment_method_id: batchPaymentMethodId || 'd6e2b71f-0d06-4119-9047-c709f31dfc31
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const workspaceId = searchParams.get('workspace_id')
-  
+
   const { data: methods } = await supabase
     .from('payment_methods')
     .select('id, name, is_default')
@@ -261,7 +268,7 @@ export const LOGAN_ID = (() => {
   if (!id) {
     throw new Error(
       'LOGAN_ID env not set. ' +
-      'Set to the UUID of the Logan employee record (e.g., 00000000-0000-0000-0000-000000000001)'
+        'Set to the UUID of the Logan employee record (e.g., 00000000-0000-0000-0000-000000000001)'
     )
   }
   return id
@@ -294,8 +301,7 @@ export const CORNER_WORKSPACE_ID = (() => {
   const id = process.env.CORNER_WORKSPACE_ID
   if (!id) {
     throw new Error(
-      'CORNER_WORKSPACE_ID env not set. ' +
-      'Required for multi-tenant seeding and feature gating.'
+      'CORNER_WORKSPACE_ID env not set. ' + 'Required for multi-tenant seeding and feature gating.'
     )
   }
   return id
@@ -320,7 +326,7 @@ export const LINE_BOT_ID = (() => {
   if (!id) {
     throw new Error(
       'NEXT_PUBLIC_LINE_BOT_ID env not set. ' +
-      'Set to your LINE Official Account ID (format: @abc123def456)'
+        'Set to your LINE Official Account ID (format: @abc123def456)'
     )
   }
   return id.startsWith('@') ? id : `@${id}`
@@ -438,13 +444,13 @@ await supabase.from('ai_memories').insert({
 
 ### Phase 2: Hardcode Replacement (2-3 days)
 
-| File | Change | Complexity |
-|------|--------|-----------|
-| `src/lib/line/ai-customer-service.ts:10` | `FALLBACK_WORKSPACE_ID` → env-driven | Low |
-| `src/app/api/line/send-insurance/route.ts:130` | Extract workspace_id from request context | Medium |
-| `src/app/api/finance/account-mappings/route.ts:97` | Env fallback → require env | Low |
-| `src/features/finance/requests/components/AddRequestDialog.tsx` | Query payment methods from DB, remove hardcodes | Medium |
-| `src/app/(main)/customers/page.tsx:523,540` | Use `LINE_BOT_ID` from well-known-ids | Low |
+| File                                                            | Change                                          | Complexity |
+| --------------------------------------------------------------- | ----------------------------------------------- | ---------- |
+| `src/lib/line/ai-customer-service.ts:10`                        | `FALLBACK_WORKSPACE_ID` → env-driven            | Low        |
+| `src/app/api/line/send-insurance/route.ts:130`                  | Extract workspace_id from request context       | Medium     |
+| `src/app/api/finance/account-mappings/route.ts:97`              | Env fallback → require env                      | Low        |
+| `src/features/finance/requests/components/AddRequestDialog.tsx` | Query payment methods from DB, remove hardcodes | Medium     |
+| `src/app/(main)/customers/page.tsx:523,540`                     | Use `LINE_BOT_ID` from well-known-ids           | Low        |
 
 ### Phase 3: Tenant Template Setup (1 day)
 
@@ -490,13 +496,13 @@ CRON_SECRET=<generated per deployment>
 
 ## Risk Assessment
 
-| Risk | Likelihood | Impact | Mitigation |
-|------|-----------|--------|-----------|
-| LOGAN_ID mismatch → orphaned memories | HIGH | MEDIUM | Consolidate before Phase 1 |
-| Partner data leaks via CORNER_WORKSPACE_ID fallback | MEDIUM | CRITICAL | Env-only, no silent fallback |
-| Missing LINE Bot → QR codes fail silently | HIGH | LOW | Build-time error, not runtime |
-| Payment method UUIDs stale after migration | MEDIUM | MEDIUM | DB-driven, seed script validation |
-| Inconsistent env vars across deployments | MEDIUM | MEDIUM | Document in .env.example, add health check |
+| Risk                                                | Likelihood | Impact   | Mitigation                                 |
+| --------------------------------------------------- | ---------- | -------- | ------------------------------------------ |
+| LOGAN_ID mismatch → orphaned memories               | HIGH       | MEDIUM   | Consolidate before Phase 1                 |
+| Partner data leaks via CORNER_WORKSPACE_ID fallback | MEDIUM     | CRITICAL | Env-only, no silent fallback               |
+| Missing LINE Bot → QR codes fail silently           | HIGH       | LOW      | Build-time error, not runtime              |
+| Payment method UUIDs stale after migration          | MEDIUM     | MEDIUM   | DB-driven, seed script validation          |
+| Inconsistent env vars across deployments            | MEDIUM     | MEDIUM   | Document in .env.example, add health check |
 
 ---
 
@@ -517,4 +523,3 @@ CRON_SECRET=<generated per deployment>
 - CLAUDE.md § DB 紅線 (audit trail FK rules)
 - `docs/DATABASE_DESIGN_STANDARDS.md` § 8 (created_by / updated_by)
 - Phase A notes: `docs/PRE_LAUNCH_CLEANUP/discovery/A1-A5.md`
-

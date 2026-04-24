@@ -9,6 +9,7 @@
 ## 業務背景再梳理
 
 **行程 / 報價 / 需求是一整套 SSOT**：
+
 - 單一真相表：`tour_itinerary_items`（世界樹）
 - 行程編輯 → 行程項目同步到核心表 → 報價讀核心表 → 需求單掛鉤
 - 景點是獨立 SSOT，展示時外掛進來
@@ -22,32 +23,33 @@
 **檔案**: `src/features/tours/components/tour-itinerary-tab.tsx`
 
 ### 業務目的推斷
+
 - **誰看**: 內部員工（團隊主任 / 企劃）
-- **怎麼用**: 
+- **怎麼用**:
   - 建立 / 編輯每日行程（日期、景點、餐食、住宿）
   - 搜尋並掛入航班資料
   - 儲存到 `tour_itinerary_items` 核心表（觸發需求單、報價同步）
 
 ### 完成度
 
-| 層面 | 狀態 | 備註 |
-|------|------|------|
-| **UI** | ✅ 100% | 上下分欄：團層級（航班、天數）+ 日分頁（每日景點/餐食/住宿）|
-| **讀** | ✅ 100% | `useItineraries()` 讀 itineraries 表；`useTourItineraryItemsByTour()` 讀核心表 |
-| **寫** | ✅ 90% | `syncToCore()` 同步 daily_itinerary → 核心表；**缺失**：AI 排行程 |
-| **AI 生成** | 🟡 30% | `AiGenerateDialog` 有 UI；**無 API 調用**，推測尚未實作 |
-| **版本管理** | ❌ 0% | 行程標籤頁無版本控制（版本機制在展示行程）|
+| 層面         | 狀態    | 備註                                                                           |
+| ------------ | ------- | ------------------------------------------------------------------------------ |
+| **UI**       | ✅ 100% | 上下分欄：團層級（航班、天數）+ 日分頁（每日景點/餐食/住宿）                   |
+| **讀**       | ✅ 100% | `useItineraries()` 讀 itineraries 表；`useTourItineraryItemsByTour()` 讀核心表 |
+| **寫**       | ✅ 90%  | `syncToCore()` 同步 daily_itinerary → 核心表；**缺失**：AI 排行程              |
+| **AI 生成**  | 🟡 30%  | `AiGenerateDialog` 有 UI；**無 API 調用**，推測尚未實作                        |
+| **版本管理** | ❌ 0%   | 行程標籤頁無版本控制（版本機制在展示行程）                                     |
 
 ### DB 表依賴
 
-| 表 | 操作 | 用途 |
-|---|------|------|
-| `itineraries` | 讀 | 取得該團的展示行程 metadata（通常 NULL，除非有獨立編輯） |
-| `tour_itinerary_items` | 讀/寫 | **核心表**：存景點、餐食、住宿、報價欄位 |
-| `tour_itinerary_days` | 讀 | Phase 5 新表：日層級（早/午/晚預設、註記） |
-| `tours` | 讀 | 獲取 tour.name、departure_date、return_date、airport_code |
-| `attractions` | 讀 | 批次查景點描述 / 圖片（`useTourItineraryItemsByTour` 自動 JOIN） |
-| `countries` | 讀 | 解析 country_id → 國家名稱 |
+| 表                     | 操作  | 用途                                                             |
+| ---------------------- | ----- | ---------------------------------------------------------------- |
+| `itineraries`          | 讀    | 取得該團的展示行程 metadata（通常 NULL，除非有獨立編輯）         |
+| `tour_itinerary_items` | 讀/寫 | **核心表**：存景點、餐食、住宿、報價欄位                         |
+| `tour_itinerary_days`  | 讀    | Phase 5 新表：日層級（早/午/晚預設、註記）                       |
+| `tours`                | 讀    | 獲取 tour.name、departure_date、return_date、airport_code        |
+| `attractions`          | 讀    | 批次查景點描述 / 圖片（`useTourItineraryItemsByTour` 自動 JOIN） |
+| `countries`            | 讀    | 解析 country_id → 國家名稱                                       |
 
 ### 核心 hooks / services
 
@@ -66,8 +68,9 @@ const flightSearch = useFlightSearch({...})
 ```
 
 **syncToCore 觸發時機**：
+
 ```
-按「保存」按鈕 
+按「保存」按鈕
   → formatDailyItinerary() 組出完整 DailyItinerary[]
   → syncToCore({ itinerary_id, tour_id, daily_itinerary })
     → 1. 查舊項目 → 提取報價資料（unit_price, quantity, quote_status）
@@ -146,7 +149,7 @@ const flightSearch = useFlightSearch({...})
 
 **syncToCore 怎麼觸發**：按「保存」鈕 → formatDailyItinerary() → syncToCore()  
 **景點外掛 UI 流程**：🚫 完全缺失，只有文字 route 欄  
-**AI 生成完成度**：🟡 UI 對話框 30%，無後端服務實裝  
+**AI 生成完成度**：🟡 UI 對話框 30%，無後端服務實裝
 
 ---
 
@@ -155,6 +158,7 @@ const flightSearch = useFlightSearch({...})
 **檔案**: `src/features/tours/components/tour-display-itinerary-tab.tsx`
 
 ### 業務目的推斷
+
 - **誰看**: 客戶 / 內部企劃（精美行程展示）
 - **怎麼用**:
   - 編輯客戶看得到的精美行程頁面（文案、主題、FAQs、定價分層）
@@ -164,24 +168,24 @@ const flightSearch = useFlightSearch({...})
 
 ### 完成度
 
-| 層面 | 狀態 | 備註 |
-|------|------|------|
-| **UI** | ✅ 100% | 雙欄編輯器（左表單 + 右預覽）；模式切換（網頁/紙本）；響應式（桌機/手機） |
-| **讀** | ✅ 100% | `useItineraries()` + 新表組 composedDailyItinerary |
-| **寫** | ✅ 100% | `PublishButton` + `updateTour(itinerary_id)` 回寫 tours.itinerary_id |
-| **主題** | ✅ 6 套 | Art / Luxury / Dreamscape / Collage / Gemini / 預設 |
-| **客戶端** | ✅ 檢測到 | `/tours/[code]` 路由讀 itineraries.id 展示 |
+| 層面       | 狀態      | 備註                                                                      |
+| ---------- | --------- | ------------------------------------------------------------------------- |
+| **UI**     | ✅ 100%   | 雙欄編輯器（左表單 + 右預覽）；模式切換（網頁/紙本）；響應式（桌機/手機） |
+| **讀**     | ✅ 100%   | `useItineraries()` + 新表組 composedDailyItinerary                        |
+| **寫**     | ✅ 100%   | `PublishButton` + `updateTour(itinerary_id)` 回寫 tours.itinerary_id      |
+| **主題**   | ✅ 6 套   | Art / Luxury / Dreamscape / Collage / Gemini / 預設                       |
+| **客戶端** | ✅ 檢測到 | `/tours/[code]` 路由讀 itineraries.id 展示                                |
 
 ### DB 表依賴
 
-| 表 | 操作 | 用途 |
-|---|------|------|
-| `itineraries` | 讀/寫 | **主要表**：存 title / description / features / price_tiers / FAQs / cancellation_policy |
-| `tour_itinerary_days` | 讀 | 日層級資料（day_number、title、note、breakfast/lunch/dinner_preset）|
-| `tour_itinerary_items` | 讀 | 日項目（activities、meals、accommodation，組成 DailyItinerary） |
-| `tours` | 讀/寫 | 讀 departure_date / airport_code；寫 itinerary_id（發布時） |
-| `countries` | 讀 | 解析 tour.country_id → 國家名稱（SSOT）|
-| `attractions` | 讀 | 批次查景點描述（來自核心表的 resource_id） |
+| 表                     | 操作  | 用途                                                                                     |
+| ---------------------- | ----- | ---------------------------------------------------------------------------------------- |
+| `itineraries`          | 讀/寫 | **主要表**：存 title / description / features / price_tiers / FAQs / cancellation_policy |
+| `tour_itinerary_days`  | 讀    | 日層級資料（day_number、title、note、breakfast/lunch/dinner_preset）                     |
+| `tour_itinerary_items` | 讀    | 日項目（activities、meals、accommodation，組成 DailyItinerary）                          |
+| `tours`                | 讀/寫 | 讀 departure_date / airport_code；寫 itinerary_id（發布時）                              |
+| `countries`            | 讀    | 解析 tour.country_id → 國家名稱（SSOT）                                                  |
+| `attractions`          | 讀    | 批次查景點描述（來自核心表的 resource_id）                                               |
 
 ### 核心 hooks / services
 
@@ -193,6 +197,7 @@ const itemRows = allItineraryItems.filter(i => i.tour_id === tour.id)
 ```
 
 **Primary / Fallback 策略**：
+
 ```
 若 tour_itinerary_days 有資料 → composedDailyItinerary（新表優先）
 否則 → itineraries.daily_itinerary JSONB（舊格式降級）
@@ -262,7 +267,7 @@ const itemRows = allItineraryItems.filter(i => i.tour_id === tour.id)
 
 **6 套主題切換**：coverStyle / flightStyle / itineraryStyle 欄位儲存；預設不明；無 UI 見到的選擇器  
 **客戶端能否看**：✅ 可，`/tours/[code]` 路由  
-**是否真有客戶曾看**：❌ 無存取日誌驗證  
+**是否真有客戶曾看**：❌ 無存取日誌驗證
 
 ---
 
@@ -271,6 +276,7 @@ const itemRows = allItineraryItems.filter(i => i.tour_id === tour.id)
 **檔案**: v2 用 `src/features/tours/components/tour-quote-tab-v2.tsx`（掛上）；v1 為 `tour-quote-tab.tsx`（舊）
 
 ### 業務目的推斷
+
 - **誰看**: 內部員工、客戶（報價單）
 - **怎麼用**:
   - 主報價單（標準報價）：從行程核心表自動組出成本 → 設定售價
@@ -279,22 +285,22 @@ const itemRows = allItineraryItems.filter(i => i.tour_id === tour.id)
 
 ### 完成度
 
-| 層面 | 狀態 | 備註 |
-|------|------|------|
-| **UI** | ✅ 100% | v2：左側版本選單 + 右側內容區；主報價 + 快速報價列表 |
-| **讀** | ✅ 100% | 主報價讀 tour.quote_id；快速報價讀 quotes.quote_type='quick' |
-| **寫** | ✅ 100% | `QuoteDetailEmbed` 嵌入編輯；快速報價 inline 重命名 + 刪除 |
-| **計算** | 🟡 70% | useCategoryItems 定死分攤邏輯；無公式化計算 |
-| **版本** | 🟡 50% | v1 vs v2 並存；快速報價單多版本；主報價無版本 |
+| 層面     | 狀態    | 備註                                                         |
+| -------- | ------- | ------------------------------------------------------------ |
+| **UI**   | ✅ 100% | v2：左側版本選單 + 右側內容區；主報價 + 快速報價列表         |
+| **讀**   | ✅ 100% | 主報價讀 tour.quote_id；快速報價讀 quotes.quote_type='quick' |
+| **寫**   | ✅ 100% | `QuoteDetailEmbed` 嵌入編輯；快速報價 inline 重命名 + 刪除   |
+| **計算** | 🟡 70%  | useCategoryItems 定死分攤邏輯；無公式化計算                  |
+| **版本** | 🟡 50%  | v1 vs v2 並存；快速報價單多版本；主報價無版本                |
 
 ### DB 表依賴
 
-| 表 | 操作 | 用途 |
-|---|------|------|
-| `quotes` | 讀/寫 | 主表：id / code / name / quote_type / status / total_amount |
-| `tour_itinerary_items` | 讀 | **核心表**：coreItemsToCostCategories() 轉換為報價分類 |
-| `tours` | 讀/寫 | 讀 quote_id；寫 quote_id（建立主報價時回寫） |
-| `quick_quote_items` | 讀/寫 | 快速報價單項目（JSONB 欄位儲存在 quotes.quick_quote_items） |
+| 表                     | 操作  | 用途                                                        |
+| ---------------------- | ----- | ----------------------------------------------------------- |
+| `quotes`               | 讀/寫 | 主表：id / code / name / quote_type / status / total_amount |
+| `tour_itinerary_items` | 讀    | **核心表**：coreItemsToCostCategories() 轉換為報價分類      |
+| `tours`                | 讀/寫 | 讀 quote_id；寫 quote_id（建立主報價時回寫）                |
+| `quick_quote_items`    | 讀/寫 | 快速報價單項目（JSONB 欄位儲存在 quotes.quick_quote_items） |
 
 ### 核心 hooks / services
 
@@ -317,6 +323,7 @@ const handleDeleteQuickQuote = (quote) => { ... }
 ```
 
 **計算邏輯分裂**：
+
 ```
 1. useCategoryItems (住宿 & 餐飲 & 活動)：
    - 小計 = 單價 ÷ 數量（住宿÷人房、餐飲÷桌數、活動÷人數）
@@ -374,17 +381,19 @@ const handleDeleteQuickQuote = (quote) => { ... }
 
 ### 紅旗（業務語言）
 
-1. **writePricingToCore 缺 workspace 過濾**（CRITICAL）  
+1. **writePricingToCore 缺 workspace 過濾**（CRITICAL）
+
    ```typescript
    // 當前（危險）
    .update({...})
    .eq('id', item.itinerary_item_id)
-   
+
    // 應該
    .update({...})
    .eq('id', item.itinerary_item_id)
    .eq('workspace_id', workspace_id)
    ```
+
    若租戶 A 編報價，可能改到租戶 B 的核心表資料 → 合規風險
 
 2. **計算邏輯無配置化**  
@@ -410,16 +419,19 @@ const handleDeleteQuickQuote = (quote) => { ... }
 ### 特別針對
 
 **v1 vs v2 實際差異**：
+
 - v1：單主報價單，簡潔
 - v2：主報價 + 快速報價列表，支援多版本比較
 - 差異：v2 的快速報價是新功能，但無回溯到核心表
 
 **計算邏輯分裂**：
+
 - useCategoryItems（前端計算）vs useQuoteLoader（後端公式）
 - useCategoryItems 負責：住宿÷人房、餐飲÷桌數、活動÷人數
 - useQuoteLoader 負責：讀 quotes / quick_quote_items
 
 **快速報價新功能用在哪**：
+
 - v2 tab 內建立（新增快速報價按鈕）
 - 支援 inline 重命名、刪除
 - 無對應到「出單」或「客戶分享」流程
@@ -432,16 +444,20 @@ const handleDeleteQuickQuote = (quote) => { ... }
 
 **問題**：DailyScheduleEditor 只有文字 route 欄  
 **預期流程**：
+
 ```
 點「新增景點」→ 開景點庫篩選器 → 選景點 → 帶入描述/座標
 ```
+
 **現況**：無此 UI → 只能手打「阿里山森林遊樂區」文字  
 **影響**：
+
 - 無法自動帶景點圖片、評分、營業時間
 - 報價計算無基準（活動費用怎麼估？）
 - 需求單無法掛鉤景點供應商
 
 **修法**：
+
 - DailyScheduleEditor 需加「景點選擇器」元件
 - 每個 activity 需記 attraction_id → 查景點詳情
 - syncToCore 時確保 resource_type='attraction'
@@ -449,18 +465,21 @@ const handleDeleteQuickQuote = (quote) => { ... }
 ### 2. AI 排行程：UI 有，邏輯無
 
 **現況**：
+
 - AiGenerateDialog 接收 destination / theme / arrival_time / departure_time
 - 無 API 呼叫、無狀態管理
 
 **預期**：
+
 ```
-按「AI 排行程」→ 輸入目的地 + 風格 → 調用 Claude API 
+按「AI 排行程」→ 輸入目的地 + 風格 → 調用 Claude API
   → 產生「Day 1: 抵達→飯店check-in→當地美食」結構化內容
   → 填入 dailyItinerary
   → syncToCore
 ```
 
 **修法**：
+
 - 需建立 `/api/tours/generate-itinerary` 端點
 - 接收 { destination, days, theme, arrival_time, departure_time }
 - 呼叫 Claude API → 回傳結構化 daily_itinerary
@@ -470,10 +489,12 @@ const handleDeleteQuickQuote = (quote) => { ... }
 
 **問題**：修改 tour.max_participants → 報價不變  
 **根本原因**：
+
 - unit_price 存的是「人房30,000」的數字
 - 無 quantity_formula（「人房÷2=每人15,000」的公式）
 
 **修法**：
+
 - 在 tour_itinerary_items 加欄位：
   - quantity_formula: "max_participants / 2" （人房）
   - adult_price_formula: "unit_price / quantity_formula"
@@ -483,11 +504,13 @@ const handleDeleteQuickQuote = (quote) => { ... }
 ### 4. 核心表報價欄位不完整
 
 **缺失**：
+
 - quantity_formula / adult_price_formula 無欄位
 - 無 formula_variables（人數、房型等變數）
 - 無 pricing_source（從景點引入 vs 手輸）
 
 **影響**：
+
 - writePricingToCore 無法存公式
 - 人數變化時報價無法回算
 
@@ -498,6 +521,7 @@ const handleDeleteQuickQuote = (quote) => { ... }
 
 **根本原因**：行程項目無穩定 ID  
 **修法**：
+
 - activity 加 itinerary_item_id FK
 - 改用 upsert 而不是 delete-then-insert
 - 價格、需求單狀態可完整保留
@@ -506,16 +530,16 @@ const handleDeleteQuickQuote = (quote) => { ... }
 
 ## 對 8 條原則的驗證結果
 
-| 原則 | 行程 | 展示行程 | 報價 | 整體 |
-|------|------|---------|------|------|
-| 1. 權限長身上 | ✅ | ✅ | ✅ | ✅ |
-| 2. 職務是身份卡 | ✅ | ✅ | ✅ | ✅ |
-| 3. 租戶一致性 | ✅ | ✅ | ❌ 缺filter | 🟡 |
-| 4. 狀態是SSOT | ✅ | ✅ | ✅ | ✅ |
-| 5. 業務事件走一表 | 🟡 景點缺 | ✅ | ✅ 讀端 | 🟡 |
-| 6. 聚合vs明細 | 🟡 3層分裂 | ✅ | ✅ | 🟡 |
-| 7. 資源獨立週期 | 🟡 景點缺UI | ✅ 讀景點 | 🟡 快速報無回溯 | 🟡 |
-| 8. 快速入口≠獨立資 | ✅ | ✅ | 🟡 快速報 | 🟡 |
+| 原則               | 行程        | 展示行程  | 報價            | 整體 |
+| ------------------ | ----------- | --------- | --------------- | ---- |
+| 1. 權限長身上      | ✅          | ✅        | ✅              | ✅   |
+| 2. 職務是身份卡    | ✅          | ✅        | ✅              | ✅   |
+| 3. 租戶一致性      | ✅          | ✅        | ❌ 缺filter     | 🟡   |
+| 4. 狀態是SSOT      | ✅          | ✅        | ✅              | ✅   |
+| 5. 業務事件走一表  | 🟡 景點缺   | ✅        | ✅ 讀端         | 🟡   |
+| 6. 聚合vs明細      | 🟡 3層分裂  | ✅        | ✅              | 🟡   |
+| 7. 資源獨立週期    | 🟡 景點缺UI | ✅ 讀景點 | 🟡 快速報無回溯 | 🟡   |
+| 8. 快速入口≠獨立資 | ✅          | ✅        | 🟡 快速報       | 🟡   |
 
 **最關鍵**：原則 3（租戶）和原則 5（SSOT）有明確缺口，需優先修
 
@@ -529,4 +553,3 @@ const handleDeleteQuickQuote = (quote) => { ... }
 4. **MEDIUM - 報價人數重算公式化** （客戶體驗）
 5. **MEDIUM - syncToCore 改 upsert** （AI 重排不爆）
 6. **LOW - v1 vs v2 報價合併** （維護負擔）
-

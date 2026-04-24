@@ -259,9 +259,7 @@ export function TourDisplayItineraryTab({ tour }: TourDisplayItineraryTabProps) 
     }
 
     // 依 day_number 排序
-    const sortedDays = [...dayRows].sort(
-      (a, b) => (a.day_number || 0) - (b.day_number || 0)
-    )
+    const sortedDays = [...dayRows].sort((a, b) => (a.day_number || 0) - (b.day_number || 0))
 
     return sortedDays.map(dayRow => {
       const dn = dayRow.day_number
@@ -303,8 +301,7 @@ export function TourDisplayItineraryTab({ tour }: TourDisplayItineraryTabProps) 
 
       // Accommodation
       const accommodationItem = dayItems.find(i => i.category === 'accommodation')
-      const accommodation =
-        accommodationItem?.resource_name || accommodationItem?.title || ''
+      const accommodation = accommodationItem?.resource_name || accommodationItem?.title || ''
       const accommodationId = accommodationItem?.resource_id || undefined
 
       const dayDate = dateForDay(dn)
@@ -594,7 +591,9 @@ export function TourDisplayItineraryTab({ tour }: TourDisplayItineraryTabProps) 
 
           {/* 狀態 */}
           {linkedItinerary && (
-            <Badge variant={linkedItinerary.status === TOUR_STATUS.UPCOMING ? 'default' : 'secondary'}>
+            <Badge
+              variant={linkedItinerary.status === TOUR_STATUS.UPCOMING ? 'default' : 'secondary'}
+            >
               {linkedItinerary.status || '草稿'}
             </Badge>
           )}

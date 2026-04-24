@@ -17,6 +17,7 @@
 ### F1：`canAccess(route)` 只檢 workspace feature、沒檢 user role permission — B1-B7 會變成「全 workspace 用戶都能進」
 
 **命中點**：
+
 - `src/lib/permissions/hooks.ts:283-292` `canAccess` 實作
 - `src/lib/permissions/hooks.ts:249-263` `useRolePermissions.canRead / canWrite` → `perm?.can_read ?? true`（**預設 true**）
 - B1 `accounting/layout.tsx:13` → canAccess('/accounting')
@@ -29,6 +30,7 @@
 現實情境：Corner workspace 買了 finance 模組（所有會計用戶都能用），但 `/finance/settings`（改會計科目、改付款方式）**原本只給系統主管**。改成 `canAccess('/finance/settings')` 後、**全 Corner 會計都能改會計科目**。這不是功能退化、是**權限放寬**、等於在上線前一週把 系統主管 gate 開成 workspace gate。
 
 **修法補強**（不需改方向、只需補一層）：
+
 ```ts
 // hooks.ts canAccess 要實際檢 userPermissions（目前 useRolePermissions 是空殼）
 const canAccess = useCallback(
@@ -37,7 +39,10 @@ const canAccess = useCallback(
     if (!workspaceFeatures.isRouteAvailable(route)) return false
     // 👇 新增：檢 user.permissions 有沒有這模組 key
     const moduleCode = getModuleFromRoute(route)
-    if (moduleCode && !user.permissions.some(p => p === moduleCode || p.startsWith(`${moduleCode}:`))) {
+    if (
+      moduleCode &&
+      !user.permissions.some(p => p === moduleCode || p.startsWith(`${moduleCode}:`))
+    ) {
       return false
     }
     return true
@@ -45,6 +50,7 @@ const canAccess = useCallback(
   [workspaceFeatures, user.permissions]
 )
 ```
+
 **或者**、B1-B7 **不用 canAccess、改用 useTabPermissions.canRead('finance', 'settings')** — 那個 hook 才是真的查 `role_tab_permissions`。預設修法上「用 canAccess」這個選擇本身就該打問號。
 
 ---
@@ -52,29 +58,34 @@ const canAccess = useCallback(
 ### F2：A7-A10 刪 `useTabPermissions` 短路但沒改 fetchPermissions — 系統主管 全站白屏
 
 **命中點**：
+
 - `src/lib/permissions/useTabPermissions.tsx:53-59`（fetchPermissions 對 系統主管 走 `setPermissions([])`、直接 return）
 - `src/lib/permissions/useTabPermissions.tsx:80, 97, 113, 121` 4 處 `if (isAdmin) return true`
 - 下游：`PermissionGuard` 元件（同檔 line 147）、以及 channel-sidebar、finance tab gating 等所有叫這 hook 的地方
 
 **為什麼致命**：
 檔案內部 fetchPermissions 對 系統主管 的路徑是：
+
 ```ts
 if (roleData.is_admin) {
   setIsAdmin(true)
-  setPermissions([])  // ← 故意留空、因為後面有短路
+  setPermissions([]) // ← 故意留空、因為後面有短路
   return
 }
 ```
+
 然後 canRead / canWrite / canReadAny / canWriteAny 都靠 `if (isAdmin) return true` 接住這個空陣列。
 
 **如果只刪短路不改 fetch**：系統主管 進來、permissions=[]、`permissions.find(...)` 回 undefined → `canRead` 回 false。**所有用 `useTabPermissions` 的 UI 元件對 系統主管 全部 gating 失敗**、按鈕消失、tab 消失、core page 破碎。
 
 這比 PR-1a 當初「auth-store 白屏」還慘，因為：
+
 - PR-1a 的修法（backfill role_tab_permissions）已經補了資料、但這個 hook **根本不會去 fetch 系統主管 的 row**（第 53-59 行是 early return）。
 - PR-1a 的測試 `admin-login-permissions.spec.ts` 只驗 `/api/auth/validate-login` 的回傳、**沒驗** `/api/roles/:roleId/tab-permissions` 對 系統主管 的回傳、也**沒驗** `useTabPermissions` hook 本身。
 
 **修法補強**：
 A7-A10 的修法必須是**雙層改**：
+
 1. **改 fetchPermissions**：拿掉 `if (roleData.is_admin) { setPermissions([]); return }` 這段、讓系統主管 也正常走 `/api/roles/:roleId/tab-permissions` 的 fetch 把 54 個 row 讀進來（PR-1a backfill 已把資料準備好）。
 2. **再刪 4 處 isAdmin 短路**。
 
@@ -85,6 +96,7 @@ A7-A10 的修法必須是**雙層改**：
 ### F3：B 系列用 `canViewFinance` / `canEditDatabase` 這種「模組級 bool」替「系統主管 gate」— 層級掉太多、靜默擴權
 
 **命中點**：
+
 - `src/hooks/usePermissions.ts:37-41` canViewFinance / canManageFinance / canEditDatabase 的實作（都是 `hasModulePermission(userPermissions, 'finance' | 'database')`）
 - B1: `/accounting/layout.tsx` → 原本 系統主管-only / 預設改 canAccess('/accounting') 或 canManageFinance
 - B2: `/database/layout.tsx` → 覆蓋 9 個子路由（含 `/database/workspaces` 這種超 系統主管）

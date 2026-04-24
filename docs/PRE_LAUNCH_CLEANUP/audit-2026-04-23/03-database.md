@@ -16,6 +16,7 @@ Database 模組整體乾淨，但有 **3 個設計債** 和 **1 個幽靈功能*
 ## 🔴 真問題（上線前處理）
 
 ### 1. **幽靈功能：company-assets 頁面參考但不存在**
+
 - **檔案**：`src/app/(main)/database/page.tsx:40-47`
 - **問題**：Database 首頁在功能卡片列出 `company-assets` 模組，但 `/database/company-assets` 路由完全未實作
 - **證據**：
@@ -30,6 +31,7 @@ Database 模組整體乾淨，但有 **3 個設計債** 和 **1 個幽靈功能*
 ---
 
 ### 2. **tour-leaders 表缺稽核欄位（created_by / updated_by）**
+
 - **檔案**：`supabase/migrations/20251216120000_create_tour_leaders.sql`
 - **問題**：
   - tour-leaders 表**無** `created_by`、`updated_by`、`workspace_id` 欄位
@@ -65,6 +67,7 @@ Database 模組整體乾淨，但有 **3 個設計債** 和 **1 個幽靈功能*
 ---
 
 ### 3. **transportation_rates 直查 Supabase、無 entity hook 封裝**
+
 - **檔案**：`src/app/(main)/database/transportation-rates/page.tsx:18-35`
 - **問題**：
   ```typescript
@@ -73,10 +76,13 @@ Database 模組整體乾淨，但有 **3 個設計債** 和 **1 個幽靈功能*
     const { data, error } = await supabase
       .from('transportation_rates')
       .select('id, country_id, country_name, ...')
-      .order('category').order('supplier').order('route')
+      .order('category')
+      .order('supplier')
+      .order('route')
       .limit(500)
   }
   ```
+
   - Page 層直查 DB，違反 **SSOT（Single Source of Truth）**
   - 其他頁面（suppliers、attractions）用 `useSuppliers()` / `useAttractions()` hook
   - transportation_rates 有 entity hook `useTransportationRates` 卻不用，反而手寫
@@ -98,11 +104,12 @@ Database 模組整體乾淨，但有 **3 個設計債** 和 **1 個幽靈功能*
 ## 🟡 小債（上線後優先）
 
 ### 1. **硬編中文 label（沒入 constants）**
+
 - **位置**：
   - `src/features/suppliers/components/SuppliersDialog.tsx:21-30`
     ```typescript
     const SUPPLIER_TYPE_OPTIONS = [
-      { value: 'hotel', label: '飯店' },        // ← 硬編
+      { value: 'hotel', label: '飯店' }, // ← 硬編
       { value: 'restaurant', label: '餐廳' },
       { value: 'transport', label: '交通' },
       // ...
@@ -123,6 +130,7 @@ Database 模組整體乾淨，但有 **3 個設計債** 和 **1 個幽靈功能*
 ---
 
 ### 2. **重複 CRUD hook pattern（5 個幾乎一樣）**
+
 - **現象**：
   - `src/features/suppliers/`
   - `src/features/attractions/`
@@ -130,7 +138,7 @@ Database 模組整體乾淨，但有 **3 個設計債** 和 **1 個幽靈功能*
   - `src/data/entities/suppliers.ts`
   - `src/data/entities/attractions.ts`
   - `src/data/entities/tour-leaders.ts`
-  
+
   都用 `createEntityHook('table_name', { list, slim, detail, cache })` 模式
 
 - **重複代碼**：
@@ -154,16 +162,19 @@ Database 模組整體乾淨，但有 **3 個設計債** 和 **1 個幽靈功能*
 ---
 
 ### 3. **attractions 有冗餘的 tab 邏輯（hardcoded workspace 判別）**
+
 - **檔案**：`src/features/attractions/components/DatabaseManagementPage.tsx:19-40`
 - **問題**：
+
   ```typescript
   const CORNER_WORKSPACE_ID = '8ef05a74-1f87-48ab-afd3-9bfeb423935d'
-  
+
   const isCorner = user?.workspace_id === CORNER_WORKSPACE_ID
   const validTabs: readonly TabValue[] = isCorner
     ? ALL_TABS
     : (['regions', 'attractions', 'hotels', 'restaurants'] as const)
   ```
+
   - 專屬 workspace (`CORNER_WORKSPACE_ID`) 有額外 tab（米其林、頂級體驗）
   - ID 寫死在代碼，應該在 DB or env
   - 若要給別家租戶開放，要改代碼
@@ -173,6 +184,7 @@ Database 模組整體乾淨，但有 **3 個設計債** 和 **1 個幽靈功能*
 ---
 
 ### 4. **Archive Management 混淆職責**
+
 - **檔案**：`src/app/(main)/database/archive-management/page.tsx`
 - **問題**：
   - 名義上是「Database 檔案管理」
@@ -187,6 +199,7 @@ Database 模組整體乾淨，但有 **3 個設計債** 和 **1 個幽靈功能*
 ---
 
 ### 5. **PageLayout 無統一的 workspace filter**
+
 - **現象**：
   - attractions / suppliers 各自在 useAttractions() / useSuppliers() 透過 createEntityHook 實現 workspace filter（RLS 層）
   - tour-leaders 無任何 workspace_id 欄位、無 filter
@@ -198,29 +211,35 @@ Database 模組整體乾淨，但有 **3 個設計債** 和 **1 個幽靈功能*
 ## 🟢 健康面向
 
 ### ✓ 整體架構乾淨
+
 - 6 個頁面路由清晰：attractions / suppliers / tour-leaders / transportation-rates / archive-management / （company-assets 缺）
 - 無死 import、無孤兒組件
 - 功能完整、無重大 bug
 
 ### ✓ Entity Hook 統一化
+
 - `src/data/entities/` 下 attractions、suppliers、tour-leaders、transportation-rates 都用統一 createEntityHook
 - Cache 預設值恰當（low / medium）
 - slim / detail 選擇合理
 
 ### ✓ Label 中央化（部分）
+
 - attractions 做得最好：210 行 constants
 - suppliers / tour-leaders 也有獨立 labels.ts
 - 尚有零星硬編但比例小
 
 ### ✓ 多租戶隔離（部分）
+
 - attractions、suppliers 的 entity hook 透過 RLS 實現 workspace 隔離
 - tour-leaders 缺這功能（見紅問題 #2）
 
 ### ✓ 無死功能殘骸
+
 - 未見 `@/features/accommodation` 或已砍功能的引用
 - 導入邏輯（ImportSuppliersDialog）獨立、邏輯完整
 
 ### ✓ API 層最小化
+
 - `/api/suppliers` 有基本 GET/POST（GET 目前 stub、但結構對）
 - 其他實體都用 client-side entity hook，不走 API route（符合設計）
 
@@ -229,15 +248,18 @@ Database 模組整體乾淨，但有 **3 個設計債** 和 **1 個幽靈功能*
 ## 跨模組 pattern 候選
 
 ### 1. **Generic CRUD Dialog Pattern（可共享給 Tours / Orders / Customers 等）**
+
 - Database 模組的 SuppliersDialog / TourLeadersDialog 可抽象為
 - `<EntityFormDialog<T> schema={schema} />` 元件
 - 與其他模組共享這個基礎元件
 
 ### 2. **Entity Hook Factory 已成熟**
+
 - `createEntityHook()` 的實現已被各 Database 表複用
 - 建議文檔化（如何為新表加 hook）、推廣給 Tours / Orders / Finance 等模組
 
 ### 3. **Label 中央化規範**
+
 - 各功能模組應有 `src/features/{module}/constants/labels.ts`
 - Database 模組做得好，可作範本
 
@@ -246,6 +268,7 @@ Database 模組整體乾淨，但有 **3 個設計債** 和 **1 個幽靈功能*
 ## 掃描清單附錄
 
 ### 欄位層（DB Schema）
+
 - ✓ 無死欄位（每個欄位都有代碼讀寫）
 - ✗ **tour-leaders 缺 created_by / updated_by / workspace_id**（紅問題 #2）
 - ✓ 無重複概念欄位（name vs display_name 無衝突）
@@ -254,6 +277,7 @@ Database 模組整體乾淨，但有 **3 個設計債** 和 **1 個幽靈功能*
 - ✓ RLS policy 設定（除 tour-leaders 無 workspace 隔離）
 
 ### 程式碼層（TS/TSX）
+
 - ✓ 無 dead import（掃全範圍無未使用引用）
 - ✗ **company-assets 幽靈功能**（紅問題 #1）
 - ⚠ **transportation-rates 直查 Supabase**（紅問題 #3）
@@ -262,6 +286,7 @@ Database 模組整體乾淨，但有 **3 個設計債** 和 **1 個幽靈功能*
 - ✓ 無舊 feature 殘骸引用
 
 ### 邏輯層（API / Hook / Logic）
+
 - ✓ Entity hook 統一實作
 - ⚠ CRUD pattern 90% 重複（小債 #2，功能正常）
 - ✓ Import/Export（supplier import 邏輯完整、無重複）
@@ -271,13 +296,13 @@ Database 模組整體乾淨，但有 **3 個設計債** 和 **1 個幽靈功能*
 
 ## 建議優先次序
 
-| 優先度 | 項目 | 何時 | 預估工時 |
-|--------|------|------|---------|
-| P0 | tour-leaders 新增 3 欄 + RLS | **上線前** | 1h (migration + test) |
-| P1 | 移除或實作 company-assets | **上線前** | 0.5h |
-| P2 | transportation-rates 改用 hook | **上線前** | 0.5h |
-| P3 | 硬編 label 移到 constants | 上線後 | 1h |
-| P4 | generic dialog / hook pattern | 上線後 | 2-3h (可選) |
+| 優先度 | 項目                           | 何時       | 預估工時              |
+| ------ | ------------------------------ | ---------- | --------------------- |
+| P0     | tour-leaders 新增 3 欄 + RLS   | **上線前** | 1h (migration + test) |
+| P1     | 移除或實作 company-assets      | **上線前** | 0.5h                  |
+| P2     | transportation-rates 改用 hook | **上線前** | 0.5h                  |
+| P3     | 硬編 label 移到 constants      | 上線後     | 1h                    |
+| P4     | generic dialog / hook pattern  | 上線後     | 2-3h (可選)           |
 
 ---
 
@@ -287,5 +312,4 @@ Database 模組整體乾淨，但有 **3 個設計債** 和 **1 個幽靈功能*
 ✅ Wave 1b：FK index CONCURRENTLY  
 ✅ Wave 6：CASCADE → RESTRICT  
 ✅ Wave 1：Restaurants/Hotels city_id nullable  
-✅ page 直查、spread 寫 DB、Magic string filter（已清查）  
-
+✅ page 直查、spread 寫 DB、Magic string filter（已清查）

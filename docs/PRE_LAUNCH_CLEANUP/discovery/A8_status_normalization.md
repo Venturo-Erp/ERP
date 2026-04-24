@@ -13,12 +13,13 @@ Current state: Mixed Chinese/English across database. Tours/Visas/Payments entir
 ## Current Distribution
 
 ### tours.status
-| value | proposed English | context |
-|--|--|--|
-| `開團` | `proposal` | Proposal/planning phase |
+
+| value    | proposed English    | context                       |
+| -------- | ------------------- | ----------------------------- |
+| `開團`   | `proposal`          | Proposal/planning phase       |
 | `待出發` | `pending_departure` | Confirmed, awaiting departure |
-| `已結團` | `completed` | Tour finished |
-| `取消` | `cancelled` | Cancelled tour |
+| `已結團` | `completed`         | Tour finished                 |
+| `取消`   | `cancelled`         | Cancelled tour                |
 
 **Schema**: No CHECK constraint, VARCHAR(20) default `'提案'` (should be `'proposal'`)
 **Stored as**: Chinese directly (開團, 待出發, 已結團, 取消)
@@ -28,10 +29,11 @@ Current state: Mixed Chinese/English across database. Tours/Visas/Payments entir
 ---
 
 ### tours.contract_status
-| value | proposed English | context |
-|--|--|--|
-| `未簽署` | `unsigned` | Contract not signed |
-| `已簽署` | `signed` | Contract signed |
+
+| value    | proposed English | context             |
+| -------- | ---------------- | ------------------- |
+| `未簽署` | `unsigned`       | Contract not signed |
+| `已簽署` | `signed`         | Contract signed     |
 
 **Schema**: No CHECK constraint, VARCHAR(20) default `'未簽署'`
 **Stored as**: Chinese directly
@@ -41,9 +43,10 @@ Current state: Mixed Chinese/English across database. Tours/Visas/Payments entir
 ---
 
 ### orders.status
-| value | proposed English | context |
-|--|--|--|
-| `進行中` | `in_progress` | Order being fulfilled |
+
+| value    | proposed English | context               |
+| -------- | ---------------- | --------------------- |
+| `進行中` | `in_progress`    | Order being fulfilled |
 
 **Schema**: No CHECK constraint, VARCHAR(20) default `'進行中'`
 **Stored as**: Chinese directly (only 1 value observed, but schema allows arbitrary)
@@ -53,12 +56,13 @@ Current state: Mixed Chinese/English across database. Tours/Visas/Payments entir
 ---
 
 ### orders.payment_status
-| value | proposed English | context |
-|--|--|--|
-| `未收款` | `unpaid` | Payment not received |
-| `部分收款` | `partial` | Partial payment received |
-| `已收款` | `paid` | Full payment received |
-| `已退款` | `refunded` | Refund issued |
+
+| value      | proposed English | context                  |
+| ---------- | ---------------- | ------------------------ |
+| `未收款`   | `unpaid`         | Payment not received     |
+| `部分收款` | `partial`        | Partial payment received |
+| `已收款`   | `paid`           | Full payment received    |
+| `已退款`   | `refunded`       | Refund issued            |
 
 **Schema**: No CHECK constraint, VARCHAR(20) default `'未收款'`
 **Stored as**: Chinese directly
@@ -68,9 +72,10 @@ Current state: Mixed Chinese/English across database. Tours/Visas/Payments entir
 ---
 
 ### payments.status
-| value | proposed English | context |
-|--|--|--|
-| `已收款` | `received` | Payment received |
+
+| value    | proposed English | context          |
+| -------- | ---------------- | ---------------- |
+| `已收款` | `received`       | Payment received |
 
 **Schema**: No CHECK constraint, VARCHAR(20) default `'已收款'`
 **Stored as**: Chinese directly
@@ -78,11 +83,12 @@ Current state: Mixed Chinese/English across database. Tours/Visas/Payments entir
 ---
 
 ### payment_requests.status
-| value | proposed English | context |
-|--|--|--|
-| `待審核` | `pending_review` | Awaiting approval |
-| (derived from UI) | `approved` | Approved |
-| (derived from UI) | `rejected` | Rejected |
+
+| value             | proposed English | context           |
+| ----------------- | ---------------- | ----------------- |
+| `待審核`          | `pending_review` | Awaiting approval |
+| (derived from UI) | `approved`       | Approved          |
+| (derived from UI) | `rejected`       | Rejected          |
 
 **Schema**: No CHECK constraint, VARCHAR(20) default `'待審核'`
 **Stored as**: Chinese directly
@@ -91,9 +97,10 @@ Current state: Mixed Chinese/English across database. Tours/Visas/Payments entir
 ---
 
 ### disbursement_orders.status
-| value | proposed English | context |
-|--|--|--|
-| `已支付` | `paid` | Disbursement paid |
+
+| value    | proposed English | context           |
+| -------- | ---------------- | ----------------- |
+| `已支付` | `paid`           | Disbursement paid |
 
 **Schema**: No CHECK constraint, VARCHAR(20) default `'已支付'`
 **Stored as**: Chinese directly
@@ -101,9 +108,10 @@ Current state: Mixed Chinese/English across database. Tours/Visas/Payments entir
 ---
 
 ### receipt_orders.status
-| value | proposed English | context |
-|--|--|--|
-| `已收款` | `received` | Receipt received |
+
+| value    | proposed English | context          |
+| -------- | ---------------- | ---------------- |
+| `已收款` | `received`       | Receipt received |
 
 **Schema**: No CHECK constraint, VARCHAR(20) default `'已收款'`
 **Stored as**: Chinese directly
@@ -111,14 +119,15 @@ Current state: Mixed Chinese/English across database. Tours/Visas/Payments entir
 ---
 
 ### quotes.status
-| value | proposed English | context |
-|--|--|--|
-| `draft` | `draft` | ✅ Already English (default) |
-| (expected) | `proposed` | Proposed to customer |
-| (expected) | `revised` | Under revision |
-| (expected) | `approved` | Customer approved |
-| (expected) | `converted` | Converted to tour |
-| (expected) | `rejected` | Customer rejected |
+
+| value      | proposed English | context                      |
+| ---------- | ---------------- | ---------------------------- |
+| `draft`    | `draft`          | ✅ Already English (default) |
+| (expected) | `proposed`       | Proposed to customer         |
+| (expected) | `revised`        | Under revision               |
+| (expected) | `approved`       | Customer approved            |
+| (expected) | `converted`      | Converted to tour            |
+| (expected) | `rejected`       | Customer rejected            |
 
 **Schema**: VARCHAR(20) default `'draft'` **✅ Already English**
 **Stored as**: Quotes already use English (draft, proposed, revised, approved, converted, rejected)
@@ -128,13 +137,14 @@ Current state: Mixed Chinese/English across database. Tours/Visas/Payments entir
 ---
 
 ### visas.status
-| value | proposed English | context |
-|--|--|--|
-| `待送件` | `pending_submission` | Awaiting submission |
-| (observed) | `已送件` | Submitted |
-| (observed) | `已取件` | Collected |
-| (observed) | `退件` | Rejected |
-| (observed) | `已歸還` | Returned |
+
+| value      | proposed English     | context             |
+| ---------- | -------------------- | ------------------- |
+| `待送件`   | `pending_submission` | Awaiting submission |
+| (observed) | `已送件`             | Submitted           |
+| (observed) | `已取件`             | Collected           |
+| (observed) | `退件`               | Rejected            |
+| (observed) | `已歸還`             | Returned            |
 
 **Schema**: No CHECK constraint, VARCHAR(20) default `'待送件'`
 **Stored as**: Chinese directly
@@ -144,12 +154,13 @@ Current state: Mixed Chinese/English across database. Tours/Visas/Payments entir
 ---
 
 ### todos.status
-| value | proposed English | context |
-|--|--|--|
-| `pending` | `pending` | ✅ Already English |
-| `in_progress` | `in_progress` | ✅ Already English |
-| `completed` | `completed` | ✅ Already English |
-| `cancelled` | `cancelled` | ✅ Already English |
+
+| value         | proposed English | context            |
+| ------------- | ---------------- | ------------------ |
+| `pending`     | `pending`        | ✅ Already English |
+| `in_progress` | `in_progress`    | ✅ Already English |
+| `completed`   | `completed`      | ✅ Already English |
+| `cancelled`   | `cancelled`      | ✅ Already English |
 
 **Schema**: ✅ Has CHECK constraint, ✅ already English with valid values
 **Status**: ✅ No change needed
@@ -157,12 +168,13 @@ Current state: Mixed Chinese/English across database. Tours/Visas/Payments entir
 ---
 
 ### employees.status
-| value | proposed English | context |
-|--|--|--|
-| `active` | `active` | ✅ Already English |
-| `probation` | `probation` | ✅ Already English |
-| `leave` | `leave` | ✅ Already English |
-| `terminated` | `terminated` | ✅ Already English |
+
+| value        | proposed English | context            |
+| ------------ | ---------------- | ------------------ |
+| `active`     | `active`         | ✅ Already English |
+| `probation`  | `probation`      | ✅ Already English |
+| `leave`      | `leave`          | ✅ Already English |
+| `terminated` | `terminated`     | ✅ Already English |
 
 **Schema**: ✅ Has CHECK constraint, ✅ already English
 **Status**: ✅ No change needed
@@ -170,12 +182,13 @@ Current state: Mixed Chinese/English across database. Tours/Visas/Payments entir
 ---
 
 ### syncQueue.status
-| value | proposed English | context |
-|--|--|--|
-| `pending` | `pending` | ✅ Already English |
-| `processing` | `processing` | ✅ Already English |
-| `completed` | `completed` | ✅ Already English |
-| `failed` | `failed` | ✅ Already English |
+
+| value        | proposed English | context            |
+| ------------ | ---------------- | ------------------ |
+| `pending`    | `pending`        | ✅ Already English |
+| `processing` | `processing`     | ✅ Already English |
+| `completed`  | `completed`      | ✅ Already English |
+| `failed`     | `failed`         | ✅ Already English |
 
 **Schema**: ✅ Has CHECK constraint, ✅ already English
 **Status**: ✅ No change needed
@@ -185,6 +198,7 @@ Current state: Mixed Chinese/English across database. Tours/Visas/Payments entir
 ## Proposed Enums for Each Table
 
 ### tours.status
+
 ```typescript
 export type TourStatus = 'proposal' | 'pending_departure' | 'completed' | 'cancelled'
 
@@ -192,11 +206,12 @@ export type TourStatus = 'proposal' | 'pending_departure' | 'completed' | 'cance
 ALTER TABLE tours ALTER COLUMN status SET DEFAULT 'proposal';
 
 // CHECK constraint:
-ALTER TABLE tours ADD CONSTRAINT check_tours_status 
+ALTER TABLE tours ADD CONSTRAINT check_tours_status
   CHECK (status IN ('proposal', 'pending_departure', 'completed', 'cancelled'));
 ```
 
 ### tours.contract_status
+
 ```typescript
 export type ContractStatus = 'unsigned' | 'signed'
 
@@ -205,6 +220,7 @@ ALTER TABLE tours ADD CONSTRAINT check_tours_contract_status
 ```
 
 ### orders.status
+
 ```typescript
 export type OrderStatus = 'in_progress' | 'completed' | 'cancelled'
 
@@ -213,6 +229,7 @@ ALTER TABLE orders ADD CONSTRAINT check_orders_status
 ```
 
 ### orders.payment_status
+
 ```typescript
 export type PaymentStatus = 'unpaid' | 'partial' | 'paid' | 'refunded'
 
@@ -221,6 +238,7 @@ ALTER TABLE orders ADD CONSTRAINT check_orders_payment_status
 ```
 
 ### payments.status
+
 ```typescript
 export type PaymentRecordStatus = 'received' | 'cancelled'
 
@@ -229,6 +247,7 @@ ALTER TABLE payments ADD CONSTRAINT check_payments_status
 ```
 
 ### payment_requests.status
+
 ```typescript
 export type PaymentRequestStatus = 'pending_review' | 'approved' | 'rejected' | 'paid'
 
@@ -237,6 +256,7 @@ ALTER TABLE payment_requests ADD CONSTRAINT check_payment_requests_status
 ```
 
 ### disbursement_orders.status
+
 ```typescript
 export type DisbursementStatus = 'paid' | 'cancelled'
 
@@ -245,6 +265,7 @@ ALTER TABLE disbursement_orders ADD CONSTRAINT check_disbursement_orders_status
 ```
 
 ### receipt_orders.status
+
 ```typescript
 export type ReceiptStatus = 'received' | 'cancelled'
 
@@ -259,21 +280,25 @@ ALTER TABLE receipt_orders ADD CONSTRAINT check_receipt_orders_status
 **Current state**: `src/lib/constants/status-maps.ts` has bidirectional maps for most status types.
 
 ### Option A: DB = English, UI = Translated (RECOMMENDED)
+
 - DB stores English enums
 - `status-maps.ts` contains `STATUS_MAP` (English → Chinese) and `STATUS_REVERSE_MAP` (Chinese → English)
 - All UI `<StatusBadge status={record.status} />` looks up label via `getXxxStatusLabel(status)`
 - Filters accept both English (DB) and Chinese (for user visibility)
 
 **Pros**:
+
 - DB is language-neutral (easier for multi-tenant)
 - Single source of truth for business logic
 - Backward compatible with current `status-maps.ts` structure
 - Supports future i18n easily (just add more maps: `status-maps.fr.ts`)
 
 **Cons**:
+
 - Requires all UI to use label function (audit current usage)
 
 ### Option B: DB = Chinese, Create Reverse Map (NOT RECOMMENDED)
+
 - Keep DB as-is (Chinese values)
 - Create `REVERSE_MAP` to get English for API contracts
 - Not feasible — breaks existing `quotes.status` which is already English
@@ -285,6 +310,7 @@ ALTER TABLE receipt_orders ADD CONSTRAINT check_receipt_orders_status
 ## Migration Plan
 
 ### Phase 1: Update status-maps.ts
+
 Ensure all maps have bidirectional English ↔ Chinese:
 
 ```typescript
@@ -298,16 +324,17 @@ export const TOUR_STATUS_MAP = {
 } as const
 
 export const TOUR_STATUS_REVERSE_MAP = {
-  '開團': 'proposal',
-  '待出發': 'pending_departure',
-  '已結團': 'completed',
-  '取消': 'cancelled',
+  開團: 'proposal',
+  待出發: 'pending_departure',
+  已結團: 'completed',
+  取消: 'cancelled',
 } as const
 
 // ... similarly for ORDERS, PAYMENTS, PAYMENT_REQUESTS, DISBURSEMENT, RECEIPT
 ```
 
 ### Phase 2: DB Migration (Single Transaction)
+
 Execute all UPDATEs before adding CHECK constraints:
 
 ```sql
@@ -361,7 +388,7 @@ UPDATE visas SET status = 'returned' WHERE status = '已歸還';
 
 -- Step 3: Add CHECK constraints
 
-ALTER TABLE tours ADD CONSTRAINT check_tours_status 
+ALTER TABLE tours ADD CONSTRAINT check_tours_status
   CHECK (status IN ('proposal', 'pending_departure', 'completed', 'cancelled'));
 
 ALTER TABLE tours ADD CONSTRAINT check_tours_contract_status
@@ -399,9 +426,11 @@ COMMIT;
 ```
 
 ### Phase 3: UI Layer Updates
+
 After DB migration, update all UI to use label functions:
 
 **Pattern 1: Status displays**
+
 ```typescript
 // ❌ Before
 <span>{order.payment_status}</span> // Shows "已收款"
@@ -411,16 +440,17 @@ After DB migration, update all UI to use label functions:
 ```
 
 **Pattern 2: Status filters/selects**
+
 ```typescript
 // ❌ Before
 <Select options={['未收款', '已收款', ...]} />
 
 // ✅ After
-<Select 
-  options={['unpaid', 'paid', ...].map(key => ({ 
-    value: key, 
-    label: getPaymentStatusLabel(key) 
-  }))} 
+<Select
+  options={['unpaid', 'paid', ...].map(key => ({
+    value: key,
+    label: getPaymentStatusLabel(key)
+  }))}
 />
 ```
 
@@ -434,23 +464,28 @@ All API responses already return English (post-migration), frontend filters/maps
 **Critical UI files using raw status strings** (50 files grepped for Chinese status):
 
 ### Tours Module
+
 - `src/features/tours/components/TourFilters.tsx:42, 44` — uses `'待出發'`, `'已結團'` as tab values (need translation)
 - `src/features/tours/components/ToursPage.tsx` — filters by tour status
 - `src/features/tours/components/TourFormShell.tsx` — displays tour status badge
 
 ### Orders Module
+
 - `src/features/orders/components/add-order-form.tsx` — order status select
 - `src/features/orders/components/order-edit-dialog.tsx` — order status edit
 
 ### Quotes Module
+
 - `src/features/quotes/components/QuotesList.tsx` — quote status filter (already English ✅)
 - `src/features/quotes/components/QuoteDetailEmbed.tsx` — quote status display
 
 ### Finance Module
+
 - `src/features/finance/requests/components/RequestItemList.tsx` — payment request status
 - `src/features/finance/payments/components/BatchReceiptConfirmDialog.tsx` — payment status
 
 ### Other Modules
+
 - Public/booking pages, confirmations, visas — all use status-maps for display
 
 **Summary**: 40-50 files need audit. Most already use `getTourStatusLabel()` / `getPaymentStatusLabel()` pattern, but 5-10 files directly interpolate Chinese strings in filters/tabs.

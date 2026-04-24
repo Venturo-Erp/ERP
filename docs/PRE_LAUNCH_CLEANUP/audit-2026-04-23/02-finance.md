@@ -15,6 +15,7 @@
 ## 🔴 真問題（上線前必須處理）
 
 ### 1. **危險的 as unknown 轉型 + 財務邏輯**
+
 - **檔案**: `/src/features/finance/requests/components/AddRequestDialog.tsx`
 - **行號**: 823, 833, 841, 848, 857（多處）
 - **證據**:
@@ -32,14 +33,13 @@
 ---
 
 ### 2. **API 守門缺失 + 無 workspace_id 檢查**
+
 - **檔案**: `/src/app/api/finance/accounting-subjects/route.ts`、`expense-categories/route.ts`
 - **行號**: GET 方法無 workspace_id 明確驗證（第 5-24 行）
 - **證據**:
   ```typescript
   // GET 沒有 getCurrentWorkspaceId() 檢查
-  let query = supabase.from('chart_of_accounts')
-    .select('...')
-    .eq('is_active', true)
+  let query = supabase.from('chart_of_accounts').select('...').eq('is_active', true)
   // RLS 會自動過濾，但如果 RLS 配置錯誤將返回其他租戶資料
   ```
 - **問題**: `payment-methods` route 有 `if (workspaceId) { query.eq('workspace_id', workspaceId) }`（第 30-32 行），但 `accounting-subjects` 和 `expense-categories` 沒有。依賴 RLS，但 CLAUDE.md 已警示「RLS 配置錯誤歷史」。
@@ -50,21 +50,23 @@
 ---
 
 ### 3. **狀態值混用：字串 '0'/'1' vs 英文 status**
+
 - **檔案多處**:
   - `/src/features/finance/payments/components/ReceiptConfirmDialog.tsx:47` → `receipt.status === '1'`
   - `/src/app/(main)/finance/treasury/page.tsx:84` → `r.status === '0'` vs `pr.status === 'pending'`
   - `/src/features/finance/payments/services/receipt-core.service.ts:55` → `.eq('status', '1')`
 - **證據**:
+
   ```typescript
   // 收款 status：'0' = 待確認，'1' = 已確認
   const isConfirmed = receipt.status === '1'
   const pendingReceipts = monthReceipts.filter(r => r.status === '0').length
-  
+
   // 請款 status：'pending' / 'confirmed' / 'billed' （或 'approved'）
-  const totalExpense = monthPayments
-    .filter(pr => pr.status === 'approved' || pr.status === 'paid')
+  const totalExpense = monthPayments.filter(pr => pr.status === 'approved' || pr.status === 'paid')
   const pendingPayments = monthPayments.filter(pr => pr.status === 'pending').length
   ```
+
 - **問題**: 收款用數字字串，請款用英文，混合邏輯下容易寫出 `receipt.status === 'pending'` 永遠 false 的 bug。
 - **為什麼**: 歷史遺留，最初建模時沒有統一 enum。
 - **風險**: M（高機率引發狀態篩選 bug，財務報表統計不對）
@@ -73,15 +75,18 @@
 ---
 
 ### 4. **entity hook vs service 欄位不同步**
+
 - **檔案**: `/src/data/entities/payment-requests.ts` 與 `/src/features/finance/payments/services/receipt-core.service.ts`
 - **證據**:
+
   ```typescript
   // payment-requests entity (line 22)
   select: '...,accounting_subject_id,accounting_voucher_id,budget_warning,transferred_pair_id,...'
-  
+
   // 但前端 AddRequestDialog 用 item 對象讀這些欄位，型別定義卻在 RequestItem interface
   // RequestItem 沒有 transferred_pair_id、accounting_voucher_id（line 24-42 in types.ts）
   ```
+
 - **問題**: `transferred_pair_id` 在 DB 有、entity hook 有 SELECT，但 TypeScript interface 沒定義，造成 `PrintDisbursementPreview` 讀不到對沖標記。
 - **為什麼**: 2026-04-24 補欄，但只補 entity hook 的 SELECT，沒補型別。
 - **風險**: M（UI 顯示不同步，對沖邏輯可能失效）
@@ -92,30 +97,36 @@
 ## 🟡 小債（上線後優化）
 
 ### 1. **AddRequestDialog.tsx 1525 行 → 已列 Wave 7**
+
 - **檔案**: `/src/features/finance/requests/components/AddRequestDialog.tsx`
 - **狀況**: 已列 BACKLOG
 - **分解目標**: 拆成 RequestForm + TourAllocationSection + SupplierSelectionPanel
 
 ### 2. **BatchReceiptDialog 625 行 + PaymentItemRow 591 行**
+
 - **檔案**: 兩個大型組件共 1200+ 行邏輯
 - **建議**: BatchReceiptDialog 應抽 batchAllocationLogic hook，PaymentItemRow 應拆成 LinkPayGenerator + PaymentInfoInput 子組件
 
 ### 3. **收款 vs 請款 API 模式重複**
+
 - **檔案**: `useReceiptMutations.ts` (389 行) vs `useRequestOperations.ts` (257 行)
 - **重複**: 都做 insert → validate → recalculate stats → invalidate cache
 - **建議**: 抽共用 `useFinanceMutations<T>` generic hook
 
 ### 4. **settings page 直接在 page.tsx 定義 3 個 Dialog 內部組件**
+
 - **檔案**: `/src/app/(main)/finance/settings/page.tsx` 第 1002-1434 行
 - **問題**: MethodDialog、BankDialog、CategoryDialog 都定義在同檔，1435 行單檔
 - **建議**: 拆成 `components/MethodDialog.tsx` 等，page 引入
 
 ### 5. **中文標籤集中在一個檔案但尚未 i18n**
+
 - **檔案**: `/src/features/finance/constants/labels.ts` (150+ 行的嵌套 Chinese label object)
 - **狀況**: 已集中化，但未進行國際化準備
 - **建議**: 留給後續 i18n sprint
 
 ### 6. **浮點數精度（無當前問題，但是跨模組風險）**
+
 - **觀察**: `/src/features/finance/payments/services/receipt-core.service.ts` 使用 `DECIMAL(12,2)` 計算，math.js 或 decimal.js 未導入
 - **風險**: 前端 JavaScript 浮點運算可能產生 0.1 + 0.2 ≠ 0.3 的精度誤差
 - **建議**: 在 `formatCurrency` / `formatMoney` 已有四捨五入，但大額計算應驗證
@@ -138,15 +149,18 @@
 ## 跨模組 Pattern 候選
 
 ### A. **狀態值管理（跨 accounting + orders）**
+
 - 財務：receipt status '0'/'1'、payment_request status 'pending'/'confirmed'
 - 訂單：order payment_status 'unpaid'/'partial'/'paid'
 - **建議**: 建立統一的 `FinanceStatusEnum` 並進行全 codebase migration
 
 ### B. **金額計算精度（跨 payments + disbursement + reports）**
+
 - 當前用 JavaScript 原生 number + DECIMAL DB
 - **建議**: 統一導入 `decimal.js` 或 `big.js` 供前端計算
 
 ### C. **重複的 stats 重算邏輯**
+
 - `recalculateReceiptStats` (receipt-core.service.ts)
 - `recalculateExpenseStats` (expense-core.service.ts，名稱不同但邏輯相似)
 - **建議**: 合併成 `recalculateFinanceStats(type, id)`

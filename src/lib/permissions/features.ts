@@ -113,11 +113,7 @@ export const FEATURES: FeatureDefinition[] = [
     name: '系統設定',
     description: '公司設定、角色權限、選單配置',
     category: 'basic',
-    routes: [
-      '/settings',
-      '/settings/company',
-      '/settings/roles',
-    ],
+    routes: ['/settings', '/settings/company', '/settings/roles'],
   },
 
   {

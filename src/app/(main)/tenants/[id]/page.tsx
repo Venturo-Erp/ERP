@@ -96,9 +96,7 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
         enabled: featureMap.get(f.code) ?? false,
       }))
       // 保留所有 tab 級的 row（不覆蓋、不丟失）
-      const tabFeatures: WorkspaceFeature[] = featuresData.filter(f =>
-        f.feature_code.includes('.')
-      )
+      const tabFeatures: WorkspaceFeature[] = featuresData.filter(f => f.feature_code.includes('.'))
       setFeatures([...moduleFeatures, ...tabFeatures])
 
       setLoading(false)
@@ -340,10 +338,7 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
                     })
                     if (!res.ok) {
                       const err = await res.json().catch(() => ({}))
-                      await showAlert(
-                        err?.error || err?.message || '重設失敗',
-                        'error'
-                      )
+                      await showAlert(err?.error || err?.message || '重設失敗', 'error')
                       return
                     }
                     await showAlert(

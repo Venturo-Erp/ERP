@@ -27,23 +27,23 @@
 
 > 狀態說明：🟢 完成、🟡 骨架有、待業務訪談補完、⚪ 未開始
 
-| # | 路由 | 狀態 | 檔案 | Audit |
-|--|--|--|--|--|
-| 01 | `/login` | ⚪ | — | ✅ 有 |
-| 02 | `/dashboard` | ⚪ | — | ✅ 有 |
-| 03 | `/tools` | ⚪ | — | ✅ 有 |
-| 04 | `/quotes` 列表 | ⚪ | — | ✅ 有 |
-| 05 | `/quotes/[id]` | ⚪ | — | ✅ 有 |
-| **06** | **`/quotes/quick/[id]`** | **🟡** | [06-quotes-quick.md](blueprints/06-quotes-quick.md) | ✅ |
-| 07 | `/tours` 列表 | ⚪ | — | ✅ 有 |
-| 08 | `/tours/[code]` | ⚪ | — | ✅ 有 |
-| 09 | `/finance/requests` | ⚪ | — | ✅ 有 |
-| 10 | `/finance/payments` | ⚪ | — | ✅ 有 |
-| 11 | `/finance/travel-invoice` | ⚪ | — | ✅ 有 |
-| 12 | `/orders` | ⚪ | — | ✅ 有 |
-| 13 | `/customers` | ⚪ | — | ✅ 有 |
-| 14 | `/calendar` | ⚪ | — | ✅ 有 |
-| 15 | `/channel` | ⚪ | — | ✅ 有 |
+| #      | 路由                      | 狀態   | 檔案                                                | Audit |
+| ------ | ------------------------- | ------ | --------------------------------------------------- | ----- |
+| 01     | `/login`                  | ⚪     | —                                                   | ✅ 有 |
+| 02     | `/dashboard`              | ⚪     | —                                                   | ✅ 有 |
+| 03     | `/tools`                  | ⚪     | —                                                   | ✅ 有 |
+| 04     | `/quotes` 列表            | ⚪     | —                                                   | ✅ 有 |
+| 05     | `/quotes/[id]`            | ⚪     | —                                                   | ✅ 有 |
+| **06** | **`/quotes/quick/[id]`**  | **🟡** | [06-quotes-quick.md](blueprints/06-quotes-quick.md) | ✅    |
+| 07     | `/tours` 列表             | ⚪     | —                                                   | ✅ 有 |
+| 08     | `/tours/[code]`           | ⚪     | —                                                   | ✅ 有 |
+| 09     | `/finance/requests`       | ⚪     | —                                                   | ✅ 有 |
+| 10     | `/finance/payments`       | ⚪     | —                                                   | ✅ 有 |
+| 11     | `/finance/travel-invoice` | ⚪     | —                                                   | ✅ 有 |
+| 12     | `/orders`                 | ⚪     | —                                                   | ✅ 有 |
+| 13     | `/customers`              | ⚪     | —                                                   | ✅ 有 |
+| 14     | `/calendar`               | ⚪     | —                                                   | ✅ 有 |
+| 15     | `/channel`                | ⚪     | —                                                   | ✅ 有 |
 
 ---
 

@@ -109,7 +109,7 @@ export const QuickQuoteDetail: React.FC<QuickQuoteDetailProps> = ({
     if (quote.tour_code) {
       router.push(`/tours/${quote.tour_code}?tab=quick-quote`)
     } else {
-      router.push('/tours')  // 無團號時導去團列表、/quotes 已廢棄
+      router.push('/tours') // 無團號時導去團列表、/quotes 已廢棄
     }
   }, [isEditing, quote.tour_code, router])
 

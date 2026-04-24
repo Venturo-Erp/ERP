@@ -1,4 +1,5 @@
 # 真死清單（126 張、grep only）
+
 - accounting_entries
 - accounting_periods
 - accounts
@@ -127,6 +128,7 @@
 - workspace_notification_settings
 
 # 未啟用但 code 有引用（57 張、不可搬）
+
 - accounting_accounts
 - accounting_period_closings
 - accounting_transactions
@@ -186,4 +188,5 @@
 - workspace_meta_config
 
 # 已不存在 DB（1 張）
+
 - employee_job_roles

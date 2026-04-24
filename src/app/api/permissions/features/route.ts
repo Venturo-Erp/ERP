@@ -7,8 +7,7 @@ import { getSupabaseAdminClient } from '@/lib/supabase/admin'
 // 只有有「租戶管理」權限（role_tab_permissions.settings.tenants.can_write）的人才能動任何 workspace 的 features。
 // 同 pattern 於 src/app/api/tenants/create/route.ts。
 async function requireTenantAdmin(): Promise<
-  | { ok: true; workspaceId: string }
-  | { ok: false; response: NextResponse }
+  { ok: true; workspaceId: string } | { ok: false; response: NextResponse }
 > {
   const auth = await getServerAuth()
   if (!auth.success) {

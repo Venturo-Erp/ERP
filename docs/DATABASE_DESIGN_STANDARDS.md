@@ -513,12 +513,14 @@ CREATE TABLE public.example (
 ### 8.1 誰指誰、為什麼
 
 **ERP 內部操作追溯 → `employees(id)`**
+
 - 場景：「哪位員工建立/修改這筆業務資料」
 - 欄位名：`created_by`、`updated_by`、`performed_by`、`uploaded_by`、`locked_by`、`last_unlocked_by`
 - FK：`REFERENCES public.employees(id) ON DELETE SET NULL`
 - 例外：無（即使是 Supabase Auth 登入進來，也要記 employee.id，因為 UI 顯示的是員工姓名）
 
 **用戶身份/社交/traveler → `auth.users(id)`**
+
 - 場景：「這個 row 就是一個 Supabase 用戶本身」、社交關係、私訊
 - 欄位名：`user_id`、`sender_id`、`receiver_id`、`friend_id`、`supabase_user_id`
 - FK：`REFERENCES auth.users(id)`（cascade 策略依語意）
@@ -541,6 +543,7 @@ CREATE TABLE public.your_new_table (
 ```
 
 **重點**：
+
 - `ON DELETE SET NULL`（不要 CASCADE，不要 NO ACTION）——員工離職刪 row 時、不要把他建立過的業務資料全刪
 - `created_by` 和 `updated_by` 都 nullable——允許系統操作（如 trigger 自動寫入）時留 NULL
 - 不要加 NOT NULL 到這些欄位上（除非有非常明確的業務需求）
@@ -574,12 +577,14 @@ created_by: auth.data.employeeId,  // getServerAuth 回傳 employee id
 ### 8.4 為什麼 `currentUser.id` = `employee.id`？
 
 看 `src/stores/auth-store.ts` `buildUserFromEmployee`：
+
 ```ts
 return {
-  id: employeeData.id,  // 這就是 employees.id
+  id: employeeData.id, // 這就是 employees.id
   // ...
 }
 ```
+
 所以整個 front-end `currentUser?.id` 永遠是 `employees.id`。跟 Supabase Auth 的 `auth.users.id` 是不同 uuid。
 
 ---
@@ -618,6 +623,7 @@ CREATE TABLE disbursement_orders (
 ### 9.3 例外
 
 全域 UNIQUE **只有**下列情境合理：
+
 - 外部系統給的識別碼、全球唯一（LINE user_id、eSIM 序號、RFC 5322 Message-ID 等）
 - 一個 workspace 一份的設定表（UNIQUE 就是 `workspace_id` 本身）
 - 共用資料表（無 workspace_id，如 `ref_cities`、`ref_destinations`）

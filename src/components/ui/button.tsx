@@ -21,8 +21,7 @@ const buttonVariants = cva(
         ghost: 'hover:bg-accent hover:text-accent-foreground',
         link: 'text-primary underline-offset-4 hover:underline',
         // Soft：柔和漸層、給次要/非主 CTA、跟 dashboard widget 按鈕同一套配方
-        soft:
-          'bg-gradient-to-br from-card to-morandi-container/30 border border-morandi-gold/30 text-morandi-primary hover:from-morandi-gold/10 hover:to-morandi-gold/20 hover:border-morandi-gold/50 shadow-sm hover:shadow-md',
+        soft: 'bg-gradient-to-br from-card to-morandi-container/30 border border-morandi-gold/30 text-morandi-primary hover:from-morandi-gold/10 hover:to-morandi-gold/20 hover:border-morandi-gold/50 shadow-sm hover:shadow-md',
         // Morandi 色系常用組合（避免各檔案手寫 className）
         'morandi-gold':
           'text-morandi-gold border border-morandi-gold/50 hover:bg-morandi-gold/10 hover:border-morandi-gold',

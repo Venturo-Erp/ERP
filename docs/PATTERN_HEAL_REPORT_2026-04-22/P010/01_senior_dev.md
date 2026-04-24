@@ -1,4 +1,5 @@
 ## 身份宣告
+
 我是 Venturo ERP 的 Senior Developer，負責產出 P010 `role_tab_permissions` RLS 修復的可執行 migration 草案。
 
 ---
@@ -176,12 +177,12 @@ COMMIT;
 
 ## 邊界問題回答（4 個 client）
 
-| # | 路由 / 位置 | Client | 走 RLS？ | 新 policy 影響 |
-|---|---|---|---|---|
-| 1 | `api/auth/validate-login/route.ts:20,160-163` | `getSupabaseAdminClient()` | ❌（service_role） | 不受影響，命中 `role_tab_permissions_service_role`，登入照舊 |
-| 2 | `api/roles/[roleId]/tab-permissions/route.ts:20,43` | `createApiClient()` | ✅ 走 RLS | **P010 主戰場**；GET/PUT 需 user JWT，`get_current_user_workspace()` 會回該 user 的 workspace；跨租戶查詢會回空陣列（預期行為）|
-| 3 | `api/permissions/check/route.ts:13` | `createApiClient()` | ✅ 走 RLS | 跟 #2 同；user 查自己 workspace 的 role 權限 OK；查到別家 role_id 會回空（預期）|
-| 4 | `api/tenants/create/route.ts:43,78,483` | `getSupabaseAdminClient()` | ❌（service_role） | line 78 權限檢查、line 483 seed 新租戶 default permissions，全走 service_role policy，不受影響 |
+| #   | 路由 / 位置                                         | Client                     | 走 RLS？           | 新 policy 影響                                                                                                                  |
+| --- | --------------------------------------------------- | -------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | `api/auth/validate-login/route.ts:20,160-163`       | `getSupabaseAdminClient()` | ❌（service_role） | 不受影響，命中 `role_tab_permissions_service_role`，登入照舊                                                                    |
+| 2   | `api/roles/[roleId]/tab-permissions/route.ts:20,43` | `createApiClient()`        | ✅ 走 RLS          | **P010 主戰場**；GET/PUT 需 user JWT，`get_current_user_workspace()` 會回該 user 的 workspace；跨租戶查詢會回空陣列（預期行為） |
+| 3   | `api/permissions/check/route.ts:13`                 | `createApiClient()`        | ✅ 走 RLS          | 跟 #2 同；user 查自己 workspace 的 role 權限 OK；查到別家 role_id 會回空（預期）                                                |
+| 4   | `api/tenants/create/route.ts:43,78,483`             | `getSupabaseAdminClient()` | ❌（service_role） | line 78 權限檢查、line 483 seed 新租戶 default permissions，全走 service_role policy，不受影響                                  |
 
 結論：新 RLS **只影響** `createApiClient()` 的前台呼叫（#2、#3），且正是我們要擋的跨租戶存取。後端 系統主管 流程全數綠燈。
 

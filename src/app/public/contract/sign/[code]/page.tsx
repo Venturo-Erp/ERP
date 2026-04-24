@@ -34,11 +34,7 @@ export default async function Page({ params }: PageProps) {
       .select('id, code, name, location, departure_date, return_date')
       .eq('id', contract.tour_id)
       .single(),
-    supabase
-      .from('workspaces')
-      .select('id, name')
-      .eq('id', contract.workspace_id)
-      .single(),
+    supabase.from('workspaces').select('id, name').eq('id', contract.workspace_id).single(),
   ])
 
   // fallback: 舊合約的 include_itinerary 可能存在 contract_data 裡

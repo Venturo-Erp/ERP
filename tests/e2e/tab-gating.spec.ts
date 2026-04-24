@@ -12,8 +12,7 @@
 import { test, expect } from './fixtures/auth.fixture'
 
 const TESTUX_ID = 'd5a0ab4c-b403-4a07-b3fe-7de9424775a0'
-const SB_TOKEN =
-  'sbp_953b2a869c635989a2eef60aebf0dbe35b34d7aa'
+const SB_TOKEN = 'sbp_953b2a869c635989a2eef60aebf0dbe35b34d7aa'
 const MGMT = 'https://api.supabase.com/v1/projects/wzvwmawpkapcmkfmkvav/database/query'
 
 async function setFeatureEnabled(featureCode: string, enabled: boolean) {
@@ -67,15 +66,16 @@ test.describe('Tab 權限 gating (end-to-end)', () => {
     // /hr/roles 的權限表是每個 tab 一行、左側有 tab 名稱
     // 看整頁 body 有沒有「需求」字（要排除其他地方的「需求」）
     // 最穩：找 tbody 內的 tab-name cell 有沒有精確匹配「需求」
-    const requirementsTabCell = page.locator('td, div').filter({ hasText: /^\s*需求\s*$/ }).first()
+    const requirementsTabCell = page
+      .locator('td, div')
+      .filter({ hasText: /^\s*需求\s*$/ })
+      .first()
     const visible = await requirementsTabCell.isVisible({ timeout: 3000 }).catch(() => false)
 
     expect(visible, '需求 tab 應該被隱藏、但有顯示').toBe(false)
   })
 
-  test('開回 tours.requirements → 需求 tab 回來', async ({
-    authenticatedPage: page,
-  }) => {
+  test('開回 tours.requirements → 需求 tab 回來', async ({ authenticatedPage: page }) => {
     // 1. SQL 開回
     await setFeatureEnabled('tours.requirements', true)
 

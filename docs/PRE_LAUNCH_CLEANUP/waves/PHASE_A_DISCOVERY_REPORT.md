@@ -10,12 +10,12 @@
 
 四個盤點項目全跑完、發現項目會改寫後續 Wave 計畫：
 
-| 盤點 | 結果 | 影響 Wave |
-|--|--|--|
-| **A1 RLS 全掃** | 28 張 FORCE RLS（等同 workspaces 紅線）、3 張完全缺 RLS | 🔴 新 Wave 或 Wave 2 擴充 |
-| **A2 audit FK 驗證** | 5 個漏網、1 嚴重 `tours.deleted_by → profiles` | 🔴 Wave 0 補一項 |
-| **A3 permissions 系統** | `useTabPermissions` 已存在、可直接用 | ✅ Wave 2 不用新設計 |
-| **A4 184 張空表分類** | 可搬 126 / 不可搬 57 / 已不存在 1 | 🟡 archive migration 要重寫 |
+| 盤點                    | 結果                                                    | 影響 Wave                   |
+| ----------------------- | ------------------------------------------------------- | --------------------------- |
+| **A1 RLS 全掃**         | 28 張 FORCE RLS（等同 workspaces 紅線）、3 張完全缺 RLS | 🔴 新 Wave 或 Wave 2 擴充   |
+| **A2 audit FK 驗證**    | 5 個漏網、1 嚴重 `tours.deleted_by → profiles`          | 🔴 Wave 0 補一項            |
+| **A3 permissions 系統** | `useTabPermissions` 已存在、可直接用                    | ✅ Wave 2 不用新設計        |
+| **A4 184 張空表分類**   | 可搬 126 / 不可搬 57 / 已不存在 1                       | 🟡 archive migration 要重寫 |
 
 ---
 
@@ -59,6 +59,7 @@ workspace_selector_fields
 **風險**：API route 用 `getSupabaseAdminClient()` 查這些表、若 policy 沒寫 service_role 例外、會空結果。
 
 **建議動作**：
+
 - 逐張評估：改 `NO FORCE` 還是保留但在 policy 加 service_role 例外
 - 至少對「API route 常用的」優先處理：`tour_itinerary_items`、`confirmations`、`files`、`folders`、`visas`
 
@@ -80,20 +81,20 @@ ref_cities      — 4-18 新建的參考表、該加 policy
 
 ### 🔴 1 個嚴重漏網（ERP 核心表）
 
-| 表 | 欄位 | 錯指 | 修法 |
-|--|--|--|--|
+| 表      | 欄位         | 錯指         | 修法                              |
+| ------- | ------------ | ------------ | --------------------------------- |
 | `tours` | `deleted_by` | **profiles** | Wave 0 擴充：改指 `employees(id)` |
 
 **注意**：4-20 FK 重構 17 表、但 `tours.deleted_by` 被漏掉——inventory 沒列這欄位。
 
 ### 🟡 4 個 traveler domain（可接受）
 
-| 表 | 欄位 | 錯指 | 處置 |
-|--|--|--|--|
-| `traveler_conversations` | `created_by` | `auth.users` | 旅客端 domain、可獨立邏輯 |
-| `traveler_trips` | `created_by` | `traveler_profiles` | 同上 |
-| `traveler_split_groups` | `created_by` | `traveler_profiles` | 同上 |
-| `social_groups` | `created_by` | `traveler_profiles` | 同上 |
+| 表                       | 欄位         | 錯指                | 處置                      |
+| ------------------------ | ------------ | ------------------- | ------------------------- |
+| `traveler_conversations` | `created_by` | `auth.users`        | 旅客端 domain、可獨立邏輯 |
+| `traveler_trips`         | `created_by` | `traveler_profiles` | 同上                      |
+| `traveler_split_groups`  | `created_by` | `traveler_profiles` | 同上                      |
+| `social_groups`          | `created_by` | `traveler_profiles` | 同上                      |
 
 **建議**：traveler/social 系統是另一個 domain（旅客本人操作、不是員工）、指 traveler_profiles 或 auth.users 語義合理。
 **但** `tours.deleted_by` 是 ERP 員工操作、必須修。
@@ -121,6 +122,7 @@ src/lib/permissions/
 **用 `useTabPermissions.canRead / canWrite`**、不要新設計 hasPermission。
 
 API：
+
 ```tsx
 const { canRead, canWrite } = useTabPermissions()
 
@@ -151,21 +153,23 @@ if (!canRead('finance', 'reports')) return <Unauthorized />
 
 ### 結果（grep only、不是 100% 保證）
 
-| 類別 | 張數 | 可動嗎 |
-|--|--|--|
-| 🟢 真死（0 row + grep 無引用） | **126** | 可搬 `_archive` |
-| 🟡 未啟用但 code 有引用 | **57** | **不可搬**（功能準備中） |
-| 🔴 其實有資料 | 0 | — |
-| ⚪ DB 已無此表 | 1 | `employee_job_roles`（4-18 已 drop） |
+| 類別                           | 張數    | 可動嗎                               |
+| ------------------------------ | ------- | ------------------------------------ |
+| 🟢 真死（0 row + grep 無引用） | **126** | 可搬 `_archive`                      |
+| 🟡 未啟用但 code 有引用        | **57**  | **不可搬**（功能準備中）             |
+| 🔴 其實有資料                  | 0       | —                                    |
+| ⚪ DB 已無此表                 | 1       | `employee_job_roles`（4-18 已 drop） |
 
 ### ⚠️ grep 的盲點
 
 我只抓 `.from('xxx')` pattern、漏：
+
 - type import：`Database['public']['Tables']['xxx']`
 - service 層封裝（`TABLE_NAMES.X`）
 - 動態 table name
 
 **實證警告**：真死清單裡有 3 張 4-20 FK 重構剛處理過的表：
+
 - `tour_control_forms`
 - `file_audit_logs`
 - `emails`
@@ -225,17 +229,21 @@ workspace_meta_config            — workspace 設定、未啟用
 ## 🎯 盤點結論：Wave 計畫修正
 
 ### Wave 0 擴充
+
 - 新增：修 `tours.deleted_by → employees`（1 條 migration）
 
 ### Wave 2（權限系統）確立方向
+
 - 不用新設計 hasPermission、延伸現有 `useTabPermissions`
 - 前置：盤點現有檢查 + 列 permission key 清單
 
 ### 新 Wave：RLS 體檢
+
 - 28 張 FORCE RLS 逐張評估（Wave 2.5 或 Wave 3 前置）
 - 優先：tour_itinerary_items / confirmations / files / folders / visas
 
 ### Archive migration 緩做
+
 - 原 184 張降為 126（扣 57 有 code 引用 + 1 已刪）
 - 但 grep 有盲點、實際安全數 < 126
 - 不是上線阻擋項、Phase D 前再決定要不要搬

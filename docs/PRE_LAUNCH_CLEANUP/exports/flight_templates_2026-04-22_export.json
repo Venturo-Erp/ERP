@@ -1,1 +1,90 @@
-[{"id":"original","name":"經典金色","description":"莫蘭迪金色風格，簡潔優雅","preview_image_url":null,"component_name":"FlightCardOriginal","sort_order":1,"is_active":true,"created_at":"2025-12-15 10:23:35.359732+00","updated_at":"2025-12-15 10:23:35.359732+00"},{"id":"chinese","name":"中國風","description":"書法水墨風格，傳統美學","preview_image_url":null,"component_name":"FlightCardChinese","sort_order":2,"is_active":true,"created_at":"2025-12-15 10:23:35.359732+00","updated_at":"2025-12-15 10:23:35.359732+00"},{"id":"japanese","name":"日式和風","description":"和紙風格，搭配目的地圖片","preview_image_url":null,"component_name":"FlightCardJapanese","sort_order":3,"is_active":true,"created_at":"2025-12-15 10:23:35.359732+00","updated_at":"2025-12-15 10:23:35.359732+00"},{"id":"luxury","name":"奢華質感","description":"表格式深色調，商務感","preview_image_url":null,"component_name":"FlightCardLuxury","sort_order":4,"is_active":true,"created_at":"2025-12-15 10:23:35.359732+00","updated_at":"2025-12-15 10:23:35.359732+00"},{"id":"art","name":"藝術雜誌","description":"Brutalist 高對比，現代感","preview_image_url":null,"component_name":"FlightCardArt","sort_order":5,"is_active":true,"created_at":"2025-12-15 10:23:35.359732+00","updated_at":"2025-12-15 10:23:35.359732+00"},{"id":"none","name":"國內無航班","description":"台灣行程專用，不顯示航班","preview_image_url":null,"component_name":"FlightCardNone","sort_order":6,"is_active":true,"created_at":"2025-12-15 10:23:35.359732+00","updated_at":"2025-12-15 10:23:35.359732+00"},{"id":"dreamscape","name":"夢幻漫遊","description":"節點路徑圖、玻璃卡片設計、浮動動畫","preview_image_url":null,"component_name":"TourFlightSectionDreamscape","sort_order":7,"is_active":true,"created_at":"2025-12-18 13:25:49.831428+00","updated_at":"2025-12-18 13:25:49.831428+00"},{"id":"collage","name":"互動拼貼","description":"登機證風格、Pop Art 配色、膠帶裝飾","preview_image_url":null,"component_name":"TourFlightSectionCollage","sort_order":8,"is_active":true,"created_at":"2025-12-18 14:03:26.292296+00","updated_at":"2025-12-18 14:03:26.292296+00"}]
+[
+  {
+    "id": "original",
+    "name": "經典金色",
+    "description": "莫蘭迪金色風格，簡潔優雅",
+    "preview_image_url": null,
+    "component_name": "FlightCardOriginal",
+    "sort_order": 1,
+    "is_active": true,
+    "created_at": "2025-12-15 10:23:35.359732+00",
+    "updated_at": "2025-12-15 10:23:35.359732+00"
+  },
+  {
+    "id": "chinese",
+    "name": "中國風",
+    "description": "書法水墨風格，傳統美學",
+    "preview_image_url": null,
+    "component_name": "FlightCardChinese",
+    "sort_order": 2,
+    "is_active": true,
+    "created_at": "2025-12-15 10:23:35.359732+00",
+    "updated_at": "2025-12-15 10:23:35.359732+00"
+  },
+  {
+    "id": "japanese",
+    "name": "日式和風",
+    "description": "和紙風格，搭配目的地圖片",
+    "preview_image_url": null,
+    "component_name": "FlightCardJapanese",
+    "sort_order": 3,
+    "is_active": true,
+    "created_at": "2025-12-15 10:23:35.359732+00",
+    "updated_at": "2025-12-15 10:23:35.359732+00"
+  },
+  {
+    "id": "luxury",
+    "name": "奢華質感",
+    "description": "表格式深色調，商務感",
+    "preview_image_url": null,
+    "component_name": "FlightCardLuxury",
+    "sort_order": 4,
+    "is_active": true,
+    "created_at": "2025-12-15 10:23:35.359732+00",
+    "updated_at": "2025-12-15 10:23:35.359732+00"
+  },
+  {
+    "id": "art",
+    "name": "藝術雜誌",
+    "description": "Brutalist 高對比，現代感",
+    "preview_image_url": null,
+    "component_name": "FlightCardArt",
+    "sort_order": 5,
+    "is_active": true,
+    "created_at": "2025-12-15 10:23:35.359732+00",
+    "updated_at": "2025-12-15 10:23:35.359732+00"
+  },
+  {
+    "id": "none",
+    "name": "國內無航班",
+    "description": "台灣行程專用，不顯示航班",
+    "preview_image_url": null,
+    "component_name": "FlightCardNone",
+    "sort_order": 6,
+    "is_active": true,
+    "created_at": "2025-12-15 10:23:35.359732+00",
+    "updated_at": "2025-12-15 10:23:35.359732+00"
+  },
+  {
+    "id": "dreamscape",
+    "name": "夢幻漫遊",
+    "description": "節點路徑圖、玻璃卡片設計、浮動動畫",
+    "preview_image_url": null,
+    "component_name": "TourFlightSectionDreamscape",
+    "sort_order": 7,
+    "is_active": true,
+    "created_at": "2025-12-18 13:25:49.831428+00",
+    "updated_at": "2025-12-18 13:25:49.831428+00"
+  },
+  {
+    "id": "collage",
+    "name": "互動拼貼",
+    "description": "登機證風格、Pop Art 配色、膠帶裝飾",
+    "preview_image_url": null,
+    "component_name": "TourFlightSectionCollage",
+    "sort_order": 8,
+    "is_active": true,
+    "created_at": "2025-12-18 14:03:26.292296+00",
+    "updated_at": "2025-12-18 14:03:26.292296+00"
+  }
+]

@@ -69,9 +69,7 @@ export async function POST(request: NextRequest) {
 
     // 4. 從 auth.users 取得這位員工的登入 email（單一來源、不再 fallback）
     if (!employee.supabase_user_id) {
-      logger.warn(
-        `Employee ${employee.employee_number}@${code} 缺少 supabase_user_id、無法登入`
-      )
+      logger.warn(`Employee ${employee.employee_number}@${code} 缺少 supabase_user_id、無法登入`)
       return ApiError.unauthorized('帳號設定不完整、請聯絡系統主管')
     }
 

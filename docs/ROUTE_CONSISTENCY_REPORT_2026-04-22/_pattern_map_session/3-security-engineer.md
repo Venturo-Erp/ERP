@@ -16,12 +16,11 @@
 
 ```js
 // 攻擊者：A 公司的普通員工、登入自家 workspace
-const { data: { session } } = await supabase.auth.getSession()
+const {
+  data: { session },
+} = await supabase.auth.getSession()
 // 直接呼叫 supabase-js client（公開 anon key 打 PostgREST）
-const { error } = await supabase
-  .from('workspaces')
-  .delete()
-  .eq('id', '<victim-workspace-uuid>')  // 從公司粉專 / LinkedIn 猜 code 再 select 拿 id
+const { error } = await supabase.from('workspaces').delete().eq('id', '<victim-workspace-uuid>') // 從公司粉專 / LinkedIn 猜 code 再 select 拿 id
 // RLS 沒擋 → 目標 workspace 整筆刪除 → ON DELETE CASCADE 帶走：
 //   employees / tour_requests / orders / payments / all 工作流表
 // 一鍵打爆競爭對手整間公司的 ERP
@@ -30,6 +29,7 @@ const { error } = await supabase
 **爆炸半徑**：目標 workspace 所有 `ON DELETE CASCADE` 的子表（光看 migration 目錄就有 50+ 張含 `REFERENCES workspaces(id) ON DELETE CASCADE`）。這是**整間公司瞬間蒸發等級**。
 
 **CWE / OWASP**：
+
 - CWE-284 Improper Access Control
 - CWE-285 Improper Authorization
 - OWASP API Security Top 10 2023 — **API5: Broken Function Level Authorization**（刪 workspace 擁有管理員資格級功能、卻對 authenticated 全開放）
@@ -49,6 +49,7 @@ const { data } = await supabase.from('_migrations').select('*')
 ```
 
 攻擊者取得：
+
 1. **schema 變更全史**（哪張表什麼時候加什麼欄位、哪個 constraint 被拆過、哪個 RLS 被 DISABLE）
 2. **未修補的弱點地圖**（看到 `disable_all_remaining_rls` 就知道還有多少張表沒 RLS）
 3. **近期 migration 名**如 `20260422140000_fix_role_tab_permissions_rls` — 直接告訴攻擊者「這張表昨天才補、代表昨天之前是洞」
@@ -56,6 +57,7 @@ const { data } = await supabase.from('_migrations').select('*')
 **本身不直接奪資料、但是所有後續攻擊的偵察教科書**。配合 Pattern A 使用：先讀 `_migrations` 拿 schema、再精準挑 USING:true 的表下手。
 
 **CWE / OWASP**：
+
 - CWE-200 Exposure of Sensitive Information
 - CWE-1295 Debug Messages Revealing Unnecessary Information
 - OWASP A01:2021 — Broken Access Control（info disclosure 變形）
@@ -81,12 +83,14 @@ await supabase.from('rate_limits').delete().eq('key', 'login:attacker@...')
 // 清掉自己的計數 → brute force login 無限次數
 
 // 攻擊 3：DoS 別人
-await supabase.from('rate_limits')
+await supabase
+  .from('rate_limits')
   .upsert({ key: 'login:victim@corp.com', count: 9999, reset_at: '2099-01-01' })
 // 把受害者的 login rate limit 打爆 → 永遠登不進來
 ```
 
 **CWE / OWASP**：
+
 - CWE-307 Improper Restriction of Excessive Authentication Attempts（可 reset 自己的 throttle 等於 rate limit 無效）
 - CWE-799 Improper Control of Interaction Frequency
 - OWASP API4:2023 — Unrestricted Resource Consumption
@@ -103,15 +107,13 @@ await supabase.from('rate_limits')
 ```js
 // authenticated user、自家 workspace 的普通會計
 // 1. 先讀：偷看別家公司的權限結構
-const { data } = await supabase
-  .from('employee_permission_overrides')
-  .select('*')
+const { data } = await supabase.from('employee_permission_overrides').select('*')
 // 拿到跨租戶所有員工的個別權限覆蓋
 
 // 2. 再寫：給自己加系統主管覆蓋
 await supabase.from('employee_permission_overrides').insert({
   employee_id: '<my-own-employee-id>',
-  permission: 'systemmaster.full_access',  // 或該系統定義的提權 key
+  permission: 'systemmaster.full_access', // 或該系統定義的提權 key
   granted: true,
 })
 // 下一次 JWT refresh / 重登 → 我就擁有管理員資格
@@ -128,6 +130,7 @@ await supabase.from('employee_permission_overrides').insert({
 **爆炸半徑**：這是**所有權限系統的最後一道個人覆蓋**、USING:true 等於告訴每個登入用戶「你可以自己任命自己當系統主管」。比 Pattern A（刪 workspace）更陰險、因為 A 是一鎚定音可被發現、D 是悄悄提權長期潛伏。
 
 **CWE / OWASP**：
+
 - CWE-269 Improper Privilege Management
 - CWE-639 Authorization Bypass Through User-Controlled Key（IDOR + privilege escalation）
 - OWASP API3:2023 — Broken Object Property Level Authorization（BOPLA）
@@ -157,6 +160,7 @@ await supabase.from('employee_permission_overrides').insert({
 ```
 
 **關鍵洞察**：
+
 1. **P003 修好 API 層 ≠ 安全**。只要攻擊者**繞過 API 層**（直接呼叫 supabase-js client 打 PostgREST、或透過 REST API 直打 `/rest/v1/<table>`）、L3 RLS 是**最後一道防線**。現在 L3 USING:true = **沒有最後一道防線**。
 2. **L1 + L3 都漏 = 雙層失守、無縱深防禦**。L1 修完就停 = 單層防線、任何 regression / API 新增漏 workspace 檢查 = 立即穿透到 DB。
 3. **Pattern A/D 特別危險**：因為 Supabase 的設計哲學就是「前端可以直接打 DB」。你的 anon key 在前端 bundle 裡、RLS 是**唯一**擋前端直連的東西。RLS USING:true 在 Supabase stack 下 = **把 DB 完全當 public API**。
@@ -167,14 +171,15 @@ await supabase.from('employee_permission_overrides').insert({
 
 ## 3. 優先度排序與攻擊者模型
 
-| # | Pattern | 嚴重度 | 攻擊門檻 | 可行攻擊者 | 爆炸半徑 |
-|---|---|---|---|---|---|
-| 1 | **D · employee_permission_overrides** | 🔴 Crit | 單行 SQL | 任一 authenticated 員工 | 跨租戶提權 + 長期潛伏 |
-| 2 | **A · workspaces_delete** | 🔴 Crit | 單行 SQL | 任一 authenticated 員工 | 整間公司 ERP 蒸發 |
-| 3 | **C · rate_limits** | 🟠 High | 單行 SQL | 任一 authenticated 員工 | brute-force 防線崩潰 + 員工偵察 |
-| 4 | **B · _migrations** | 🟠 High | 單行 SQL | 任一 authenticated 員工 | 情報洩漏（輔助其他攻擊）|
+| #   | Pattern                               | 嚴重度  | 攻擊門檻 | 可行攻擊者              | 爆炸半徑                        |
+| --- | ------------------------------------- | ------- | -------- | ----------------------- | ------------------------------- |
+| 1   | **D · employee_permission_overrides** | 🔴 Crit | 單行 SQL | 任一 authenticated 員工 | 跨租戶提權 + 長期潛伏           |
+| 2   | **A · workspaces_delete**             | 🔴 Crit | 單行 SQL | 任一 authenticated 員工 | 整間公司 ERP 蒸發               |
+| 3   | **C · rate_limits**                   | 🟠 High | 單行 SQL | 任一 authenticated 員工 | brute-force 防線崩潰 + 員工偵察 |
+| 4   | **B · \_migrations**                  | 🟠 High | 單行 SQL | 任一 authenticated 員工 | 情報洩漏（輔助其他攻擊）        |
 
 **排序邏輯**：
+
 - **D 第一**：提權後攻擊者擁有所有後續攻擊的 token、並且**難以發現**（普通員工變系統主管 不會有 alert）
 - **A 第二**：破壞力最大、但一刪即明顯、客戶第一時間就發現、reputational 炸但可 restore backup
 - **C 第三**：rate limit 被繞 = 所有 auth endpoint 對 brute-force 裸奔
@@ -216,6 +221,7 @@ CREATE POLICY "epo_write" ON public.employee_permission_overrides FOR ALL TO aut
 ```
 
 **為什麼這兩張是紅線**：
+
 - D 讓普通員工能提權自己變系統主管、所有其他權限控制形同虛設
 - A 讓普通員工能一鍵刪除整間公司、這是 existential risk
 
@@ -246,6 +252,6 @@ WHERE schemaname = 'public' AND qual = 'true';
 
 這 4 條是 **P003（API 層）在 DB 層的鏡像**、**同一個病縱深防禦的另一半**。P003 修完只代表 L1 擋住正常流量、但 Supabase 架構下、**任何人都能用前端 anon key 直打 PostgREST 繞過 L1**、此時 L3 RLS 是最後一道牆、USING:true = 牆不存在。
 
-優先度：**D（permission_overrides 提權）> A（workspaces_delete）> C（rate_limits）> B（_migrations）**。4 條的攻擊門檻**都是一行 supabase-js 調用、普通登入員工即可**、不需要系統主管或 service_role。
+優先度：**D（permission_overrides 提權）> A（workspaces_delete）> C（rate_limits）> B（\_migrations）**。4 條的攻擊門檻**都是一行 supabase-js 調用、普通登入員工即可**、不需要系統主管或 service_role。
 
 **上線前最小必修**：D + A（防存在級災難）。C + B 上線後 1-2 週內補（但 migration 本身 < 20 行、沒理由拖）。**強烈建議上線前對 `pg_policies WHERE qual='true'` 全掃一次**、這 4 張只是露出來的冰山。

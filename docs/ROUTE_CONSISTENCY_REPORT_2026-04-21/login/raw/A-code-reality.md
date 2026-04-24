@@ -22,6 +22,7 @@
 ## 3. 提交流程
 
 按下登入 → `handleLogin()`：
+
 1. 前端校驗：code / username 非空
 2. 存 localStorage：上次用過的 code / username
 3. 呼叫 `/api/auth/validate-login`（POST）
@@ -44,15 +45,18 @@
 ## 4. 「保持 30 天」實際路徑
 
 **UI 層**：line 152-165
+
 - Checkbox id=`rememberMe`
 - Label：「記住我（30 天內免重新登入）」
 - State：`rememberMe` useState（預設 true）
 - onChange：`setRememberMe(e.target.checked)`
 
 **送出層**：line 67
+
 - `const result = await validateLogin(username.trim(), password, trimmedCode, rememberMe)`
 
 **auth-store.ts**：
+
 - 簽名（line 165-170）：`rememberMe: boolean = true` 接收
 - **實際代碼**：line 181-185
   ```javascript
@@ -61,15 +65,18 @@
   **rememberMe 參數被無視** — POST body 裡沒有送
 
 **後端**：validate-login/route.ts
+
 - 函數簽名完全沒有 rememberMe 參數
 - 無任何邏輯處理 30 天
 
 **Session TTL**：supabase/config.toml line 127
+
 - `jwt_expiry = 3600` — JWT 有效期 **1 小時**（不是 30 天）
 - `enable_refresh_token_rotation = true` — 可自動刷新 token
 - Refresh token 無明確 TTL
 
 **結論**：「30 天」完全未實作。復選框存 state、但：
+
 - 不送到後端
 - 後端無邏輯
 - JWT 固定 1 小時
@@ -78,6 +85,7 @@
 ## 5. Middleware / Guard
 
 **middleware.ts** 全局路由保護：
+
 - 先檢 quick-login-token（特殊一次性登入）
 - 再檢 Supabase session（createServerClient 讀 cookies）
 - Token 過期 → 自動刷新（line 32-35）
@@ -85,6 +93,7 @@
 - 公開路由白名單：`/login` 等
 
 **登入後重導**：
+
 - 優先 query param `?redirect=`
 - Fallback localStorage `last-visited-path`
 - 最終 fallback `/dashboard`
@@ -92,6 +101,7 @@
 ## 6. Session / Token 建立
 
 **Supabase Auth（@supabase/ssr）**：
+
 - `supabase.auth.signInWithPassword()` → Supabase 簽發 JWT + refresh token
 - JWT：1 小時有效期
 - Refresh token：內建機制
@@ -99,6 +109,7 @@
 - **無自家 JWT**（已移除）
 
 **Client State Persistence**：
+
 - Zustand store 持久化到 localStorage（`auth-storage`）
 - `skipHydration: true`
 - 重載頁面時 rehydrate + 觸發 `ensureAuthSync()`
@@ -123,13 +134,15 @@
 **(2) 「保持 30 天」打勾實際上改了什麼**
 **改了**：Zustand state 內的 `rememberMe`（UI 反應、localStorage 可見）。
 **沒改**：
+
 - 未送到後端（auth-store.ts line 184 POST body 無此參數）
 - 後端無邏輯
 - JWT TTL 仍為 1 小時
-**這個打勾是 UI 假象、無後端支撐**。
+  **這個打勾是 UI 假象、無後端支撐**。
 
 **(3) 多套驗證方式並存跡象**
+
 - 主流：Supabase Auth + JWT cookie（`@supabase/ssr`）
 - 特殊：Quick-Login Token（HMAC 驗、一次性、middleware.ts 16-18）
 - 舊已移除：自家 JWT auth-token cookie（2026-04-18 移除）
-主要是「保留 quick-login（內部機制）+ 標準 Supabase Auth」的雙軌。
+  主要是「保留 quick-login（內部機制）+ 標準 Supabase Auth」的雙軌。

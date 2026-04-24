@@ -22,6 +22,7 @@
 **問題**：pattern-map 寫「3-stage migration」但沒說清楚是**同一個 migration 檔 3 個 BEGIN**還是**3 個分開的 migration 檔**。
 
 **實務**：
+
 - `ADD COLUMN workspace_id uuid NULL` 與 `UPDATE ... SET workspace_id = FROM employees` 可以放**同一個 BEGIN/COMMIT**（零停機、DDL+DML 同交易、Postgres 支援）。
 - `ALTER COLUMN workspace_id SET NOT NULL` + 重寫 4 policy 則**必須等 code PR 先 deploy** — 否則舊 code 的 PUT INSERT 沒送 workspace_id 進來、新 NOT NULL 直接 500。
 - 建議草案寫成**兩個 migration 檔**：
@@ -37,10 +38,12 @@
 **事實**：`wave6_batch6_cascade_to_restrict.sql`（2026-04-21 applied）把 FK 改成 **ON DELETE RESTRICT**、意味著資料層**不可能存在 employee_id 指向已刪員工**（employees 本身採 soft-delete `is_active=false`，row 還在）。
 
 **結論**：
+
 - orphan override 不會出現、`UPDATE FROM employees INNER JOIN` **不會漏任何已存在 row**（前提：FK RESTRICT 生效中、沒有歷史髒資料繞過 FK 插進來）。
 - 但：**若 employees 表有 `workspace_id IS NULL` 的 row**（理論上不該、實務可能有），對應 override row backfill 後仍 NULL → migration_B 的 `SET NOT NULL` 會直接炸。
 
 **建議**（比照 P010 的 STEP 0 預檢樣板）：
+
 ```sql
 DO $$
 DECLARE v_orphan int; v_null_ws int;
@@ -59,6 +62,7 @@ BEGIN
   IF v_null_ws > 0 THEN RAISE EXCEPTION 'Abort: % overrides point to NULL-workspace employees', v_null_ws; END IF;
 END $$;
 ```
+
 **若草案沒有預檢 DO block**：🔴 blocker — 跟 P010 範本對不齊、上線當下才發現髒資料太晚。
 
 ### 3. 🔴 Policy 邊界 — UPDATE 必須 USING + WITH CHECK 雙寫、service_role 例外必補
@@ -66,6 +70,7 @@ END $$;
 **事實**（P010 範本 line 103-119 明示）：UPDATE policy **只寫 USING 不寫 WITH CHECK = 有人可以把 row 的 workspace_id UPDATE 成別家 workspace**、繞過隔離（水平提權變種）。
 
 **必檢查草案的 4 條新 policy**：
+
 - [ ] SELECT：USING（workspace_id = get_current_user_workspace()）— 單邊 OK
 - [ ] INSERT：WITH CHECK（workspace_id = get_current_user_workspace()）— 單邊 OK
 - [ ] UPDATE：**USING + WITH CHECK 兩邊都要** — 缺一 = 🔴 blocker
@@ -77,11 +82,13 @@ END $$;
 ### 4. 🔴 部署順序 — code PR 必先於 migration_B
 
 **正確順序**：
+
 1. migration_A deploy（workspace_id nullable + backfill + 預檢）— 此時 policy 仍是 USING:true、code 仍是舊版、一切運作如常。
 2. code PR deploy（route.ts PUT INSERT 補 workspace_id: auth.data.workspaceId）— 此時 PUT INSERT 會開始寫 workspace_id、policy 還沒收緊不影響。
 3. migration_B deploy（SET NOT NULL + 4 policy 改寫 + service_role policy）— 此時 code 已送正確 workspace_id、policy 收緊也能 pass。
 
 **反過來會怎樣**：
+
 - 若 migration_B 先 deploy、code 還沒上 → 舊 code PUT INSERT 沒送 workspace_id → NOT NULL 違反 → 500 error、PUT 全死。
 - 若 code 先 deploy、migration_A 還沒上 → code 送 workspace_id 但欄位不存在 → Supabase client error（unknown column）→ PUT 全死。
 
@@ -100,6 +107,7 @@ END $$;
 ### 6. 🔴 permissions/check 影響 — backfill 跟 policy 切換之間有空窗
 
 **情境**：migration_A 已跑但還沒跑到 migration_B（幾小時到幾天之間）：
+
 - 此時 policy 還是 USING:true、cookie session SELECT 照舊看得到任何 row（**仍有 P018 漏洞**、這段時間不安全）。
 - migration_B 一跑 → policy 立刻收緊為 `workspace_id = get_current_user_workspace()`。
 - 如果 backfill 某些 row 漏掉（e.g. 稍後 INSERT 但 code 還沒 deploy、workspace_id 是 NULL）→ policy 判斷 `NULL = <uuid>` = NULL → 被過濾掉（SQL NULL 語義）→ permissions/check 拿不到這些 override → **使用者權限錯誤**（該 grant 的沒 grant、該 revoke 的沒 revoke）。
@@ -111,6 +119,7 @@ END $$;
 ### 7. 🔴 PUT handler 的 DELETE — 新 policy 下 delete 會**看到 0 row**（預期行為）
 
 **程式碼**（route.ts:51-54）：
+
 ```ts
 await supabase.from('employee_permission_overrides').delete().eq('employee_id', employeeId)
 ```
@@ -127,11 +136,13 @@ await supabase.from('employee_permission_overrides').delete().eq('employee_id', 
 ### 8. 🟡 測試覆蓋 — e2e 守門必加、建議 2 個 spec
 
 **必加**：
+
 - `tests/e2e/permission-overrides-tenant-isolation.spec.ts` — 建 2 個 workspace A/B、各建 系統主管 + employee、A 系統主管 嘗試 PUT `/api/employees/<B 的 employeeId>/permission-overrides` → 預期：policy 擋、INSERT 回 0 rows 或 error、PUT response 成功但 DB 無 row（因為 policy 讓 DELETE 刪 0 row + INSERT 因 WITH CHECK 失敗）。
 
 - 簡化版：直接在 DB 用 A 的 JWT 做 `INSERT INTO employee_permission_overrides (employee_id, workspace_id, ...) VALUES (<B 員工>, <B workspace>, ...)` → 預期 policy 擋、回 42501 或 0 rows affected。
 
 **建議**：
+
 - `tests/e2e/permission-overrides-detector.spec.ts` — 跑 detector 的 SQL（`SELECT count(*) FROM pg_policies WHERE tablename='employee_permission_overrides' AND (qual='true' OR with_check='true')`）、assert 0 筆。
 
 **守門優先級**：第 1 個（租戶隔離 e2e）是 🟡 應該加、第 2 個（detector spec）🟡 nice to have（因為 `npm run check:patterns P018` 會跑）。
@@ -147,17 +158,20 @@ await supabase.from('employee_permission_overrides').delete().eq('employee_id', 
 **⚠️ 這是 P018 修法的漏洞**：P018 只驗 `workspace_id = 當前 user workspace`、沒驗 `employee_id 屬於當前 user workspace`。修 P018 沒修掉這個。
 
 **要不要擋？**：
+
 - 這個攻擊的真正守門是 P022（應用層驗 `target employee.workspace_id === auth.data.workspaceId`）、**不是 P018 的工作**。
 - 但若 pattern-map 宣稱「P018 修完等於關上跨租戶提權」是不正確的 — **P018 只修一半、另一半要 P022 補**。
 - 建議草案在最後加「known gap」段落、明說「P018 migration 不擋 employee_id 跨租戶、那個由 P022 處理」、讓 William 知道這個 CRITICAL 今天只修一半。
 
 **或者更好**：加第 2 條 INSERT WITH CHECK 子句：
+
 ```sql
 WITH CHECK (
   workspace_id = get_current_user_workspace()
   AND employee_id IN (SELECT id FROM employees WHERE workspace_id = get_current_user_workspace())
 )
 ```
+
 這是 DB 層的雙保險、跟 P022（應用層）不衝突、且在 P018 修法範圍內（仍然是這張表的 policy）。**建議 senior-dev 採這個版本**。
 
 ---
@@ -178,6 +192,7 @@ WITH CHECK (
 ## Blocker / Suggestion 總表
 
 ### 🔴 Blockers（修法落稿前必解）
+
 1. Migration 必須拆兩檔（A: add+backfill、B: NOT NULL+policy）、明示 deploy runbook
 2. 比照 P010 加 STEP 0 預檢 DO block（orphan + NULL workspace）
 3. UPDATE policy 必須 USING + WITH CHECK 雙寫、避免 workspace_id 被改跨租戶
@@ -186,12 +201,14 @@ WITH CHECK (
 6. 草案必明示「P018 不擋 employee_id 跨租戶、那個歸 P022」；或在 INSERT WITH CHECK 加 `AND employee_id IN (...)` 雙重保險
 
 ### 🟡 Suggestions（應該做）
+
 1. 加 e2e spec `permission-overrides-tenant-isolation.spec.ts`（跨租戶攻擊）
 2. migration_B STEP 0 重跑 NULL workspace_id 預檢（不要只在 migration_A 跑）
 3. 附 rollback.sql（把 policy 退回、但欄位不動）
 4. Not-add `is_super_admin()` OR 子句（沒跨 workspace 管理需求）
 
 ### 💭 Nits
+
 1. Policy COMMENT 文字可加「P018 fix: ...」方便未來考古
 2. `check:patterns P018` detector 可加 qual/with_check 兩個欄位都驗
 

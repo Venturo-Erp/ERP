@@ -22,9 +22,9 @@ export default defineConfig({
 
   use: {
     baseURL: 'http://localhost:3000',
-    trace: 'retain-on-failure',         // 失敗保留 trace（可互動回放）
+    trace: 'retain-on-failure', // 失敗保留 trace（可互動回放）
     screenshot: 'only-on-failure',
-    video: 'retain-on-failure',         // 失敗保留錄影 MP4
+    video: 'retain-on-failure', // 失敗保留錄影 MP4
     // 使用已儲存的登入狀態
     storageState: './tests/e2e/.auth/user.json',
   },

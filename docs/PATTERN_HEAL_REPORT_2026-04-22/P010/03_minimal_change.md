@@ -32,32 +32,32 @@
 
 以下若出現在任何幕僚草案、**我一律否決**：
 
-| 否決項 | 原因 |
-|---|---|
-| ❌ 修改 `workspace_roles` 的 RLS | 跟 P010 無關、另案處理 |
-| ❌ 改 `role_tab_permissions` 的 schema / column / index | 本次只動 policy、不動表結構 |
-| ❌ 順手加 CHECK constraint | 那是 P007 的範圍 |
-| ❌ 碰 `/api/roles/[roleId]/tab-permissions/route.ts` | 只動 DB、不動 TS/TSX code |
-| ❌ 碰 `validate-login` 相關 code | 跟本次無關 |
-| ❌ 順手修 `employee_permission_overrides` 同類問題 | 列入 pattern-map 下次處理、**本次不做** |
-| ❌ 順手「復活」`is_super_admin()` 函式 | 跟 P010 無關 |
-| ❌ 加 audit log trigger | P009 範圍 |
-| ❌ 補 tests / RLS integration test | P015 範圍 |
-| ❌ 改寫 migration naming 慣例 / 加 README | 沿用既有慣例即可 |
+| 否決項                                                  | 原因                                    |
+| ------------------------------------------------------- | --------------------------------------- |
+| ❌ 修改 `workspace_roles` 的 RLS                        | 跟 P010 無關、另案處理                  |
+| ❌ 改 `role_tab_permissions` 的 schema / column / index | 本次只動 policy、不動表結構             |
+| ❌ 順手加 CHECK constraint                              | 那是 P007 的範圍                        |
+| ❌ 碰 `/api/roles/[roleId]/tab-permissions/route.ts`    | 只動 DB、不動 TS/TSX code               |
+| ❌ 碰 `validate-login` 相關 code                        | 跟本次無關                              |
+| ❌ 順手修 `employee_permission_overrides` 同類問題      | 列入 pattern-map 下次處理、**本次不做** |
+| ❌ 順手「復活」`is_super_admin()` 函式                  | 跟 P010 無關                            |
+| ❌ 加 audit log trigger                                 | P009 範圍                               |
+| ❌ 補 tests / RLS integration test                      | P015 範圍                               |
+| ❌ 改寫 migration naming 慣例 / 加 README               | 沿用既有慣例即可                        |
 
 ---
 
 ## 預期改動量
 
-| 指標 | 預估 |
-|---|---|
-| 新增檔案數 | 1 |
-| 修改檔案數 | 0 |
-| TypeScript 改動行數 | **0** |
-| SQL 改動行數 | ~30（±5） |
-| 影響表數 | 1（僅 `role_tab_permissions`） |
-| 5 分鐘內可讀懂 | ✅ 是 |
-| Blast radius | 僅限該表的 RLS 讀寫權限、不影響 schema、不影響任何既有 API call shape |
+| 指標                | 預估                                                                  |
+| ------------------- | --------------------------------------------------------------------- |
+| 新增檔案數          | 1                                                                     |
+| 修改檔案數          | 0                                                                     |
+| TypeScript 改動行數 | **0**                                                                 |
+| SQL 改動行數        | ~30（±5）                                                             |
+| 影響表數            | 1（僅 `role_tab_permissions`）                                        |
+| 5 分鐘內可讀懂      | ✅ 是                                                                 |
+| Blast radius        | 僅限該表的 RLS 讀寫權限、不影響 schema、不影響任何既有 API call shape |
 
 ---
 

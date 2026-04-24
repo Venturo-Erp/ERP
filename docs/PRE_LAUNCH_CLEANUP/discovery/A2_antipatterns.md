@@ -4,18 +4,18 @@
 
 Comprehensive anti-pattern audit of `/src/` completed 2026-04-20. **330 `as unknown as` casts** dominate the codebase—primarily **LIBRARY_WORKAROUND** (Supabase Json type mismatch, Form lib schema escapes) and **UNNECESSARY** type assertions. **Audit columns clean** — 4-20 refactor verified. **6 page.tsx files directly query DB** (INV-P02 violation). **20 location references** to deprecated `tour.location` field still live. **1 spread insert** found. **0 `'current_user'` literals** and **0 `|| ''` audit patterns**—Wave 0 held.
 
-| Pattern | Count | Severity | Status |
-|--|--|--|--|
-| audit `\|\| ''` | 0 | ✅ clean | Verified 0—Wave 0 success |
-| `as unknown as` (PHANTOM_FIELD) | ~45 | 🔴 | Access phantom fields (e.g. job_title on emp) |
-| `as unknown as` (LIBRARY_WORKAROUND) | ~165 | ⚪ | Supabase Json, Form libs type constraints |
-| `as unknown as` (UNNECESSARY) | ~120 | 🟡 | Proper typing possible—tech debt |
-| hardcoded UUIDs | 14 | 🟠 | 8×CORNER_WS, 3×LOGAN, 2×PAYMENT_METHOD, 1×OTHER |
-| spread insert/update | 1 | 🔴 | INV-D01: phantom field silent drops |
-| supabase.from in page.tsx | 6 | 🟡 | INV-P02: direct DB queries in Server Components |
-| `'current_user'` literal | 0 | ✅ | Wave 0 complete |
-| magic string filter | ~80 | 🟡 | Business logic scattered (tour status, segment codes) |
-| dead `location` refs | 20 | 🟢 | Low risk—mostly read-only fallbacks |
+| Pattern                              | Count | Severity | Status                                                |
+| ------------------------------------ | ----- | -------- | ----------------------------------------------------- |
+| audit `\|\| ''`                      | 0     | ✅ clean | Verified 0—Wave 0 success                             |
+| `as unknown as` (PHANTOM_FIELD)      | ~45   | 🔴       | Access phantom fields (e.g. job_title on emp)         |
+| `as unknown as` (LIBRARY_WORKAROUND) | ~165  | ⚪       | Supabase Json, Form libs type constraints             |
+| `as unknown as` (UNNECESSARY)        | ~120  | 🟡       | Proper typing possible—tech debt                      |
+| hardcoded UUIDs                      | 14    | 🟠       | 8×CORNER_WS, 3×LOGAN, 2×PAYMENT_METHOD, 1×OTHER       |
+| spread insert/update                 | 1     | 🔴       | INV-D01: phantom field silent drops                   |
+| supabase.from in page.tsx            | 6     | 🟡       | INV-P02: direct DB queries in Server Components       |
+| `'current_user'` literal             | 0     | ✅       | Wave 0 complete                                       |
+| magic string filter                  | ~80   | 🟡       | Business logic scattered (tour status, segment codes) |
+| dead `location` refs                 | 20    | 🟢       | Low risk—mostly read-only fallbacks                   |
 
 ---
 
@@ -38,9 +38,11 @@ No matches found. The 4-20 refactor successfully eliminated string default patte
 ### Breakdown by Category
 
 #### LIBRARY_WORKAROUND (~165, 50%) — Acceptable tech debt
+
 Supabase `Json` type + Form lib schema escapes. These require intermediate casts due to 3rd-party type limitations, not design flaws.
 
 **Top files:**
+
 - `src/stores/workspace/chat-store.ts` (9 casts) — Converting Message/Author to Supabase Json
 - `src/lib/logan/logan-service.ts` (3 casts) — AI conversation history Json storage
 - `src/app/(main)/settings/components/NewebPaySettings.tsx` (2 casts)
@@ -49,15 +51,18 @@ Supabase `Json` type + Form lib schema escapes. These require intermediate casts
 - `src/app/public/insurance/[code]/page.tsx` (3 casts)
 
 **Example:**
+
 ```typescript
 // Line 205 - chat-store.ts
 author: newMessage.author as unknown as Json,  // Json = Supabase's opaque type
 ```
 
 #### PHANTOM_FIELD (~45, 14%) — Design debt
+
 Casting to access fields not declared in the actual type definition. Examples: accessing `job_title` on employee objects, `line_user_id` on customers.
 
 **Top files:**
+
 - `src/features/confirmations/components/RequirementsList.tsx` (15 casts)
 - `src/features/confirmations/components/AssignSupplierDialog.tsx` (2 casts)
 - `src/app/api/auth/admin-reset-password/route.ts` (1 cast)
@@ -66,15 +71,18 @@ Casting to access fields not declared in the actual type definition. Examples: a
 - `src/features/todos/components/todo-expanded-view/TaskTypeForm.tsx` (1 cast)
 
 **Example (Line 362, RequirementsList.tsx):**
+
 ```typescript
 const firstItem = req.items[0] as unknown as Record<string, unknown>
 // Then accesses [field] not in TourRequest type
 ```
 
 #### UNNECESSARY (~120, 36%) — Can be eliminated
+
 Safe removable casts where type is already correct or easily definable.
 
 **Top files:**
+
 - `src/data/core/createEntityHook.ts` (6 casts)
 - `src/lib/data/todos.ts` (5 casts)
 - `src/lib/data/messages.ts` (2 casts)
@@ -85,8 +93,9 @@ Safe removable casts where type is already correct or easily definable.
 - `src/lib/supabase/typed-client.ts` (1 cast)
 
 **Example (Line 315, createEntityHook.ts):**
+
 ```typescript
-return (data || []) as unknown as T[]  // Could be: return (data as T[]) || []
+return (data || []) as unknown as T[] // Could be: return (data as T[]) || []
 ```
 
 ### Priority for Wave 4/9
@@ -109,16 +118,17 @@ return (data || []) as unknown as T[]  // Could be: return (data as T[]) || []
 
 All found UUIDs are workspace/account constants, not customer data. Safe.
 
-| UUID | Context | Count | Tag |
-|--|--|--|--|
-| `8ef05a74-1f87-48ab-afd3-9bfeb423935d` | Corner workspace (fallback) | 6 | CORNER_WS |
-| `00000000-0000-0000-0000-000000000001` | System bot ID | 1 | LOGAN |
-| `00000000-0000-0000-0000-000000000002` | Logan sync ID | 1 | LOGAN |
-| `e554fee7-412f-4b58-a7b3-c08602c624d2` | Wire transfer payment method | 1 | PAYMENT_METHOD |
-| `d6e2b71f-0d06-4119-9047-c709f31dfc31` | Default payment method | 1 | PAYMENT_METHOD |
-| `10000000-1000-4000-8000-100000000000` | Temp UUID generator (seed) | 2 | OTHER |
+| UUID                                   | Context                      | Count | Tag            |
+| -------------------------------------- | ---------------------------- | ----- | -------------- |
+| `8ef05a74-1f87-48ab-afd3-9bfeb423935d` | Corner workspace (fallback)  | 6     | CORNER_WS      |
+| `00000000-0000-0000-0000-000000000001` | System bot ID                | 1     | LOGAN          |
+| `00000000-0000-0000-0000-000000000002` | Logan sync ID                | 1     | LOGAN          |
+| `e554fee7-412f-4b58-a7b3-c08602c624d2` | Wire transfer payment method | 1     | PAYMENT_METHOD |
+| `d6e2b71f-0d06-4119-9047-c709f31dfc31` | Default payment method       | 1     | PAYMENT_METHOD |
+| `10000000-1000-4000-8000-100000000000` | Temp UUID generator (seed)   | 2     | OTHER          |
 
 **Files:**
+
 - `src/data/hooks/useEligibleEmployees.ts:77`
 - `src/hooks/useTodos.ts:37`
 - `src/lib/line/ai-customer-service.ts:10`
@@ -161,22 +171,22 @@ All found UUIDs are workspace/account constants, not customer data. Safe.
 
 **INV-P02 Violation: Direct DB queries in Server Components**
 
-| File | Line | Count | Pattern |
-|--|--|--|--|
-| `src/app/public/insurance/[code]/page.tsx` | 38 | 1 | `supabase.from('orders').select()` |
-| `src/app/(public)/p/customized/[slug]/page.tsx` | 500s | 1 | `supabase.from('customer_inquiries').insert()` |
-| `src/app/(main)/settings/workspaces/page.tsx` | `?` | 1 | Insert profiles |
-| `src/app/(main)/settings/company/page.tsx` | `?` | 1 | Update workspaces |
-| `src/app/(main)/database/archive-management/page.tsx` | Multi | 6 | Multi-table deletes, updates |
-| `src/app/(main)/hr/deductions/page.tsx` | Multi | 4 | Upsert deductions/allowances |
-| `src/app/(main)/hr/announcements/page.tsx` | `?` | 1 | Insert announcements |
-| `src/app/(main)/hr/settings/page.tsx` | `?` | 1 | Upsert attendance settings |
-| `src/app/(main)/hr/overtime/page.tsx` | 100 | 1 | Insert overtime |
-| `src/app/(main)/hr/missed-clock/page.tsx` | 90 | 1 | Insert missed clock |
-| `src/app/(main)/customized-tours/page.tsx` | Multi | 2 | Upsert/delete templates |
-| `src/app/(main)/customized-tours/[id]/page.tsx` | Multi | 2 | Template items |
-| `src/app/m/tours/[id]/page.tsx` | 206 | 1 | Select orders |
-| `src/app/(main)/reports/tour-closing/page.tsx` | Multi | 2 | Queries for reports |
+| File                                                  | Line  | Count | Pattern                                        |
+| ----------------------------------------------------- | ----- | ----- | ---------------------------------------------- |
+| `src/app/public/insurance/[code]/page.tsx`            | 38    | 1     | `supabase.from('orders').select()`             |
+| `src/app/(public)/p/customized/[slug]/page.tsx`       | 500s  | 1     | `supabase.from('customer_inquiries').insert()` |
+| `src/app/(main)/settings/workspaces/page.tsx`         | `?`   | 1     | Insert profiles                                |
+| `src/app/(main)/settings/company/page.tsx`            | `?`   | 1     | Update workspaces                              |
+| `src/app/(main)/database/archive-management/page.tsx` | Multi | 6     | Multi-table deletes, updates                   |
+| `src/app/(main)/hr/deductions/page.tsx`               | Multi | 4     | Upsert deductions/allowances                   |
+| `src/app/(main)/hr/announcements/page.tsx`            | `?`   | 1     | Insert announcements                           |
+| `src/app/(main)/hr/settings/page.tsx`                 | `?`   | 1     | Upsert attendance settings                     |
+| `src/app/(main)/hr/overtime/page.tsx`                 | 100   | 1     | Insert overtime                                |
+| `src/app/(main)/hr/missed-clock/page.tsx`             | 90    | 1     | Insert missed clock                            |
+| `src/app/(main)/customized-tours/page.tsx`            | Multi | 2     | Upsert/delete templates                        |
+| `src/app/(main)/customized-tours/[id]/page.tsx`       | Multi | 2     | Template items                                 |
+| `src/app/m/tours/[id]/page.tsx`                       | 206   | 1     | Select orders                                  |
+| `src/app/(main)/reports/tour-closing/page.tsx`        | Multi | 2     | Queries for reports                            |
 
 **Cumulative: 25 direct DB queries in page.tsx files**
 
@@ -202,13 +212,15 @@ No hardcoded `'current_user'` strings found. All code now uses `currentUser?.id`
 Business logic scattered as inline conditionals. Examples:
 
 - **Segment status codes** (src/services/pnr/queue-automation-service.ts)
+
   ```typescript
-  s.status === 'UC' || s.status === 'UN'  // Ticketing state machine
+  s.status === 'UC' || s.status === 'UN' // Ticketing state machine
   ```
 
 - **Tour search** (src/features/tours/hooks/useTours-advanced.ts:65)
+
   ```typescript
-  tour.code.includes() | tour.name.includes()  // Should use full-text search
+  tour.code.includes() | tour.name.includes() // Should use full-text search
   ```
 
 - **Request status** (src/services/pnr/revalidation-service.ts:108)
@@ -217,12 +229,14 @@ Business logic scattered as inline conditionals. Examples:
   ```
 
 **Risk:** INV-S02 — missing refactoring point for Wave 9. Extract to constants:
+
 ```typescript
 const TICKETING_UNCONFIRMED = ['UC', 'UN']
 const CANCELLED_STATUS = ['XX', 'SC']
 ```
 
 **Files with 5+ instances:**
+
 - `src/services/pnr/queue-automation-service.ts` (20+ instances)
 - `src/features/tours/components/*.tsx` (15+ instances)
 - `src/features/confirmations/components/*.tsx` (10+ instances)
@@ -238,7 +252,7 @@ Field `tour.location` was deprecated + removed from Tours schema. Code now uses 
 
 ```typescript
 // Safe fallback pattern (already in use)
-tour.name || tour.location || ''  // tour.location = undefined → skips to ''
+tour.name || tour.location || '' // tour.location = undefined → skips to ''
 
 // Read-only access (no mutations)
 // - Line 127, TourClosingDialog.tsx
@@ -249,12 +263,14 @@ tour.name || tour.location || ''  // tour.location = undefined → skips to ''
 **Verified:** No code writes to `tour.location`. All accesses are **read-only fallbacks**. Safe to ship.
 
 **Example (Line 239, TourClosingDialog.tsx):**
+
 ```typescript
 <span>{tour.name || tour.location}</span>
 // tour.location = undefined → renders tour.name only
 ```
 
 **Comments in code confirm deprecation:**
+
 - `src/components/documents/ItineraryVersionPicker.tsx:70` — "不再 fallback 到 tour.location"
 - `src/lib/contract-utils.ts:180` — "不再從已廢棄的 tour.location 讀"
 - `src/features/tours/utils/tour-display.ts:6` — "不從已廢棄的 tours.location 字串猜"

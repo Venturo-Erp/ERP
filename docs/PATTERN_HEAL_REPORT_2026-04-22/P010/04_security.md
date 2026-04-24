@@ -22,13 +22,13 @@
 
 本次 RLS 強化**完全繞不過** service_role（Supabase 設計）。5 個 service_role 寫/讀 `role_tab_permissions` 的點：
 
-| 檔案 | 行 | 動作 | 有無 API 層 workspace/角色驗證 |
-|---|---|---|---|
-| `validate-login/route.ts` | 161 | SELECT（讀自己登入帳號的權限） | ✅ 透過 employee_number + password 驗身分、workspace 綁在 employee 上 |
-| `tenants/create/route.ts` | 79 | SELECT（驗 can_write settings/tenants） | ✅ 先驗 session、讀當前 user 的 role_id、再查 → 邏輯對 |
-| `tenants/create/route.ts` | 483 | INSERT（新建租戶 seed 系統主管職務 權限） | ✅ 新 workspace、新 role_id、不污染其他租戶 |
-| `workspaces/route.ts` | 197 | INSERT（建租戶 seed 系統主管職務） | ⚠️ 需確認呼叫者身分檢查（未逐行讀）、但輸入同樣綁新 workspaceId |
-| `tenants/seed-base-data/route.ts` | ~31 | SELECT | ⚠️ 需逐行驗 |
+| 檔案                              | 行  | 動作                                      | 有無 API 層 workspace/角色驗證                                        |
+| --------------------------------- | --- | ----------------------------------------- | --------------------------------------------------------------------- |
+| `validate-login/route.ts`         | 161 | SELECT（讀自己登入帳號的權限）            | ✅ 透過 employee_number + password 驗身分、workspace 綁在 employee 上 |
+| `tenants/create/route.ts`         | 79  | SELECT（驗 can_write settings/tenants）   | ✅ 先驗 session、讀當前 user 的 role_id、再查 → 邏輯對                |
+| `tenants/create/route.ts`         | 483 | INSERT（新建租戶 seed 系統主管職務 權限） | ✅ 新 workspace、新 role_id、不污染其他租戶                           |
+| `workspaces/route.ts`             | 197 | INSERT（建租戶 seed 系統主管職務）        | ⚠️ 需確認呼叫者身分檢查（未逐行讀）、但輸入同樣綁新 workspaceId       |
+| `tenants/seed-base-data/route.ts` | ~31 | SELECT                                    | ⚠️ 需逐行驗                                                           |
 
 **本次 P010 不改 service_role 使用邏輯、也不需要**。修完 RLS 後 service_role 仍可繞、但這 5 處的上游都有 workspace 綁定或建立時自決 workspaceId，**不構成跨租戶洩漏新風險**。
 
@@ -37,6 +37,7 @@
 ### 3. JWT 時間差窗口 → **是共通問題、不是 P010 獨有、out of scope**
 
 `get_current_user_workspace()` 從 JWT claims 讀 workspace_id。員工被踢出 workspace 後、JWT 最長 1 小時仍有效、期間：
+
 - 他仍能 SELECT / UPDATE 自己原 workspace 的 `role_tab_permissions`（新 RLS 不擋、因 JWT 還回舊 workspace）。
 - 但他**不能跨到別 workspace**（新 RLS 本來就擋）。
 
@@ -58,6 +59,7 @@
 ### 5. RLS performance / DoS 面 → **可接受、不需加索引**
 
 查詢結果：
+
 - `role_tab_permissions`：**259 rows**（全公司）、極小。
 - `role_tab_permissions_role_id_module_code_tab_code_key` 是 UNIQUE index、已覆蓋 `role_id` 前綴、`.eq('role_id', ...)` 走 index scan。
 - `workspace_roles.id` = PK（unique index）、EXISTS 子查詢走 PK lookup、O(1)。
@@ -89,15 +91,15 @@ DoS 面：此 API 本來就非公開、只 session 後可達、rate limit 不是
 
 ## 不能做、要另開 PR 的項目
 
-| 項目 | 對應 pattern | 原因 |
-|---|---|---|
-| `/api/roles/[roleId]/tab-permissions` 加 session / 系統主管 檢查 | P003 | 是 TS code 改動、P010 scope 是 DB only |
-| `employee_permission_overrides` 同類 RLS 修復 | P022（下次 pattern-heal） | 同病不同表、獨立 migration、獨立回歸測試 |
-| JWT permissions_version / 短 TTL / session invalidation | P011 | 影響所有 workspace RLS、架構級改動 |
-| 5 個 service_role 點加「呼叫者 workspace 一致性」驗證 | P003 | 每個 API 都要逐行改、blast radius 大 |
-| Audit log trigger on `role_tab_permissions` | P009 | 獨立設計決策、trigger schema 要先定 |
-| RLS integration test / privilege escalation test | P015 | 測試基礎建設獨立事 |
-| 租戶內「沒有系統主管資格 不能改自己 role 權限」API 層檢查 | P001 + P003 | 需先定義 `canManageRoles` 授權模型 |
+| 項目                                                             | 對應 pattern              | 原因                                     |
+| ---------------------------------------------------------------- | ------------------------- | ---------------------------------------- |
+| `/api/roles/[roleId]/tab-permissions` 加 session / 系統主管 檢查 | P003                      | 是 TS code 改動、P010 scope 是 DB only   |
+| `employee_permission_overrides` 同類 RLS 修復                    | P022（下次 pattern-heal） | 同病不同表、獨立 migration、獨立回歸測試 |
+| JWT permissions_version / 短 TTL / session invalidation          | P011                      | 影響所有 workspace RLS、架構級改動       |
+| 5 個 service_role 點加「呼叫者 workspace 一致性」驗證            | P003                      | 每個 API 都要逐行改、blast radius 大     |
+| Audit log trigger on `role_tab_permissions`                      | P009                      | 獨立設計決策、trigger schema 要先定      |
+| RLS integration test / privilege escalation test                 | P015                      | 測試基礎建設獨立事                       |
+| 租戶內「沒有系統主管資格 不能改自己 role 權限」API 層檢查        | P001 + P003               | 需先定義 `canManageRoles` 授權模型       |
 
 ---
 

@@ -1,1 +1,15 @@
-[{"id":"6a4014de-1c7f-4cee-9e5e-bd350a4225b4","user_id":"4300f4f8-c5c6-4431-a180-5b04117de245","current_streak":1,"longest_streak":0,"last_record_date":"2026-01-30","total_records":3,"total_expense_amount":"920.00","total_income_amount":"0.00","achievements":[],"created_at":"2026-01-30 05:06:07.371351+00","updated_at":"2026-01-30 05:07:07.069501+00"}]
+[
+  {
+    "id": "6a4014de-1c7f-4cee-9e5e-bd350a4225b4",
+    "user_id": "4300f4f8-c5c6-4431-a180-5b04117de245",
+    "current_streak": 1,
+    "longest_streak": 0,
+    "last_record_date": "2026-01-30",
+    "total_records": 3,
+    "total_expense_amount": "920.00",
+    "total_income_amount": "0.00",
+    "achievements": [],
+    "created_at": "2026-01-30 05:06:07.371351+00",
+    "updated_at": "2026-01-30 05:07:07.069501+00"
+  }
+]

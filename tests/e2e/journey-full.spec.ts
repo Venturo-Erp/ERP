@@ -76,9 +76,7 @@ test.describe.serial('完整業務流程 E2E', () => {
     await page.waitForTimeout(2000) // 等待動態載入
 
     // 找行程表標題輸入框
-    const titleInput = page
-      .locator(`input[placeholder*="行程表標題"]`)
-      .first()
+    const titleInput = page.locator(`input[placeholder*="行程表標題"]`).first()
     const hasTitleInput = await titleInput.isVisible({ timeout: 5000 }).catch(() => false)
     expect(hasTitleInput, '行程表標題輸入框應存在').toBe(true)
 
@@ -146,10 +144,8 @@ test.describe.serial('完整業務流程 E2E', () => {
     // 先從 URL 取 tourId
     const idMatch = page.url().match(/\/tours\/([A-Z0-9]+)/)
     if (idMatch) {
-      const supabaseRes = await page.evaluate(async (code) => {
-        const r = await fetch(
-          `/api/tours/by-code/${code}`
-        )
+      const supabaseRes = await page.evaluate(async code => {
+        const r = await fetch(`/api/tours/by-code/${code}`)
         if (!r.ok) return null
         return r.json()
       }, shared.tourCode)
@@ -173,8 +169,16 @@ test.describe.serial('完整業務流程 E2E', () => {
 
     // 確認報價 tab 有載入（不強制成功，因為 TESTUX 可能無報價資料）
     const hasQuoteContent =
-      (await page.locator('text=報價').first().isVisible({ timeout: 5000 }).catch(() => false)) ||
-      (await page.locator('text=Quick').first().isVisible({ timeout: 3000 }).catch(() => false))
+      (await page
+        .locator('text=報價')
+        .first()
+        .isVisible({ timeout: 5000 })
+        .catch(() => false)) ||
+      (await page
+        .locator('text=Quick')
+        .first()
+        .isVisible({ timeout: 3000 })
+        .catch(() => false))
 
     if (!hasQuoteContent) {
       console.log('報價 tab 無可用內容，跳過')
@@ -277,14 +281,19 @@ test.describe.serial('完整業務流程 E2E', () => {
       await page.waitForTimeout(500)
 
       // 搜尋此團的 code
-      const searchInput = page.locator('[role="listbox"] input, [aria-expanded="true"] input').first()
+      const searchInput = page
+        .locator('[role="listbox"] input, [aria-expanded="true"] input')
+        .first()
       const hasSearch = await searchInput.isVisible({ timeout: 2000 }).catch(() => false)
       if (hasSearch) {
         await searchInput.fill(shared.tourCode)
         await page.waitForTimeout(500)
       }
 
-      const tourOption = page.locator('[role="option"]').filter({ hasText: shared.tourCode }).first()
+      const tourOption = page
+        .locator('[role="option"]')
+        .filter({ hasText: shared.tourCode })
+        .first()
       const firstOption = page.locator('[role="option"]').first()
       const target = (await tourOption.isVisible({ timeout: 3000 }).catch(() => false))
         ? tourOption
@@ -377,7 +386,9 @@ test.describe.serial('完整業務流程 E2E', () => {
 
       // 填姓名欄位（找中文名或英文名 input）
       const nameInput = dialog
-        .locator('input[placeholder*="姓名"], input[placeholder*="name"], input[placeholder*="Name"]')
+        .locator(
+          'input[placeholder*="姓名"], input[placeholder*="name"], input[placeholder*="Name"]'
+        )
         .first()
       const firstInput = dialog.locator('input[type="text"]').first()
       const targetInput = (await nameInput.isVisible({ timeout: 2000 }).catch(() => false))
@@ -414,8 +425,7 @@ test.describe.serial('完整業務流程 E2E', () => {
     // 驗證：orders.member_count 自動更新（UI 層：看是否有顯示人數）
     // 軟性驗證 via 頁面文字（不強制要求特定位置）
     const bodyText = await page.locator('body').textContent()
-    const showsMemberCount =
-      bodyText?.includes('3') || bodyText?.includes('Test Member')
+    const showsMemberCount = bodyText?.includes('3') || bodyText?.includes('Test Member')
     expect(showsMemberCount, '頁面應反映團員資料').toBe(true)
   })
 

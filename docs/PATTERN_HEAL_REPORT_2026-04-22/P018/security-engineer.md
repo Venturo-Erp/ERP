@@ -10,12 +10,12 @@
 
 ## 1. 4 種攻擊評估（跨租戶威脅）
 
-| # | 攻擊 | 封堵依據 | 判定 |
-|---|------|----------|------|
-| (a) | 讀別家公司員工 overrides（`SELECT WHERE employee_id=B_of_tenantB`） | SELECT policy `USING (workspace_id = get_current_user_workspace())` → 列過濾，B 的 row `workspace_id=tenantB`、呼叫者是 tenantA → **0 row** | 🟢 擋住 |
-| (b) | 幫自己 INSERT grant 別家 workspace 的 override（`{workspace_id: tenantB, employee_id: A_of_tenantA}`） | INSERT policy `WITH CHECK (workspace_id = get_current_user_workspace())` → `tenantB ≠ tenantA` → RLS **擋、回 error** | 🟢 擋住 |
-| (c) | 幫別家員工 INSERT/DELETE（`{workspace_id: tenantB, employee_id: B_of_tenantB}`） | INSERT 同上；DELETE policy `USING` 條件不符（row `workspace_id=tenantB`）→ **0 row affected** | 🟢 擋住 |
-| (d) | DELETE 別家員工的 overrides | 同 (c)、`USING` 列級過濾 → 刪 0 row | 🟢 擋住 |
+| #   | 攻擊                                                                                                   | 封堵依據                                                                                                                                    | 判定    |
+| --- | ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| (a) | 讀別家公司員工 overrides（`SELECT WHERE employee_id=B_of_tenantB`）                                    | SELECT policy `USING (workspace_id = get_current_user_workspace())` → 列過濾，B 的 row `workspace_id=tenantB`、呼叫者是 tenantA → **0 row** | 🟢 擋住 |
+| (b) | 幫自己 INSERT grant 別家 workspace 的 override（`{workspace_id: tenantB, employee_id: A_of_tenantA}`） | INSERT policy `WITH CHECK (workspace_id = get_current_user_workspace())` → `tenantB ≠ tenantA` → RLS **擋、回 error**                       | 🟢 擋住 |
+| (c) | 幫別家員工 INSERT/DELETE（`{workspace_id: tenantB, employee_id: B_of_tenantB}`）                       | INSERT 同上；DELETE policy `USING` 條件不符（row `workspace_id=tenantB`）→ **0 row affected**                                               | 🟢 擋住 |
+| (d) | DELETE 別家員工的 overrides                                                                            | 同 (c)、`USING` 列級過濾 → 刪 0 row                                                                                                         | 🟢 擋住 |
 
 **判定**：policy `workspace_id = public.get_current_user_workspace()` 對 4 種跨租戶攻擊**完整封堵**。`get_current_user_workspace()` 是 `SECURITY DEFINER STABLE` 函數、從 `auth.uid()` 經 `employees` 表 + fallback `user_metadata` 取得、攻擊者無法偽造（要換 workspace 必須換整個 auth session）。
 
@@ -63,13 +63,13 @@
 
 ## 5. 其他跨租戶讀寫路徑
 
-| 路徑 | 風險 | 結論 |
-|------|------|------|
-| supabase-js client 直接 `from('employee_permission_overrides').select/insert` | anon/authenticated key 走 RLS、新 policy 擋 | 🟢 擋 |
-| Browser console 嘗試 DELETE 整表 | 列級過濾、只刪同租戶（配 P022 修完後更佳） | 🟡 同租戶內仍裸 |
-| `/api/permissions/check` route.ts SELECT overrides | 用 `createApiClient`（cookie session）→ RLS 走 authenticated → 新 policy 只回同租戶 | 🟢 擋 |
-| Webhook / Cron（若有）塞 override | 本次沒看到這類路徑、搜尋 `from('employee_permission_overrides')` 除 route + validate-login 外無命中 | ✅ 無 |
-| raw SQL（pgadmin / Supabase Studio） | 用 postgres role、本來就繞 RLS、這是 William 親自操作、不在威脅模型內 | — |
+| 路徑                                                                          | 風險                                                                                                | 結論            |
+| ----------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- | --------------- |
+| supabase-js client 直接 `from('employee_permission_overrides').select/insert` | anon/authenticated key 走 RLS、新 policy 擋                                                         | 🟢 擋           |
+| Browser console 嘗試 DELETE 整表                                              | 列級過濾、只刪同租戶（配 P022 修完後更佳）                                                          | 🟡 同租戶內仍裸 |
+| `/api/permissions/check` route.ts SELECT overrides                            | 用 `createApiClient`（cookie session）→ RLS 走 authenticated → 新 policy 只回同租戶                 | 🟢 擋           |
+| Webhook / Cron（若有）塞 override                                             | 本次沒看到這類路徑、搜尋 `from('employee_permission_overrides')` 除 route + validate-login 外無命中 | ✅ 無           |
+| raw SQL（pgadmin / Supabase Studio）                                          | 用 postgres role、本來就繞 RLS、這是 William 親自操作、不在威脅模型內                               | —               |
 
 **結論**：跨租戶路徑**只有這 3 條**（validate-login、permissions/check、overrides/route.ts），全部封堵。無第四條新攻擊面。
 
@@ -101,6 +101,7 @@ Migration 最後 DO block（senior-dev 第 117-124 行）強制驗證 `COUNT(*) 
 ## 8. DELETE policy WITH CHECK 驗證
 
 senior-dev 草案第 97-100 行：
+
 ```sql
 CREATE POLICY employee_permission_overrides_delete
   ON public.employee_permission_overrides
@@ -172,15 +173,15 @@ test('service_role validate-login 仍可讀（不受 RLS 影響）', async () =>
 
 ## 修完 P018 威脅矩陣（STRIDE 收斂）
 
-| 威脅 | 修前 | 修後（P018 only） | 修後（P018+P022） |
-|------|------|------------------|------------------|
-| Spoofing | — | — | — |
-| Tampering 跨租戶 | 🔴 CRIT | 🟢 擋 | 🟢 擋 |
-| Tampering 同租戶提權 | 🔴 CRIT | 🔴 CRIT（不變） | 🟢 擋 |
-| Info Disclosure 跨租戶 | 🔴 CRIT | 🟢 擋 | 🟢 擋 |
-| DoS | 🟡 低 | 🟡 低 | 🟡 低 |
-| Elevation of Privilege 跨租戶 | 🔴 CRIT | 🟢 擋 | 🟢 擋 |
-| Elevation of Privilege 同租戶 | 🔴 CRIT | 🔴 CRIT（不變） | 🟢 擋 |
+| 威脅                          | 修前    | 修後（P018 only） | 修後（P018+P022） |
+| ----------------------------- | ------- | ----------------- | ----------------- |
+| Spoofing                      | —       | —                 | —                 |
+| Tampering 跨租戶              | 🔴 CRIT | 🟢 擋             | 🟢 擋             |
+| Tampering 同租戶提權          | 🔴 CRIT | 🔴 CRIT（不變）   | 🟢 擋             |
+| Info Disclosure 跨租戶        | 🔴 CRIT | 🟢 擋             | 🟢 擋             |
+| DoS                           | 🟡 低   | 🟡 低             | 🟡 低             |
+| Elevation of Privilege 跨租戶 | 🔴 CRIT | 🟢 擋             | 🟢 擋             |
+| Elevation of Privilege 同租戶 | 🔴 CRIT | 🔴 CRIT（不變）   | 🟢 擋             |
 
 **P018 修完攻擊面縮減**：跨租戶威脅 100% 歸零、同租戶水平/垂直提權 100% 殘留（P022 責任）。
 

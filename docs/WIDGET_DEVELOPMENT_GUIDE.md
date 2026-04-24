@@ -17,6 +17,7 @@
 ## 新增 widget 的 Checklist
 
 ### 1. Widget 本身
+
 - [ ] 在 `widget-config.tsx` 的 `AVAILABLE_WIDGETS` 陣列加條目
 - [ ] 建立元件檔（同目錄）
 - [ ] 如有資料持久化：
@@ -26,10 +27,12 @@
 ### 2. 判斷是否為付費 widget
 
 **哪些算付費？**
+
 - 針對企業加值的 widget（全團即時儀表板、AI 助理、進階統計）
 - 需要額外 API 成本、或商業邏輯複雜的
 
 **哪些算基本？**
+
 - 個人工作工具（筆記、計算機、打卡、匯率、天氣、航班查詢）
 - **預設通通免費、給所有員工**
 
@@ -38,11 +41,13 @@
 這套機制跟「分頁級功能控制」共用架構（`workspace_features` + `{prefix}.{code}` 格式）。參考 `tours.contract` 的實作：
 
 #### 3a. 資料層
+
 - feature_code 格式：`dashboard.{widget_id}`（例：`dashboard.advanced_stats`）
 - 存到 `workspace_features` 表、沿用現有 `enabled` 欄位
 - **不動 DB schema**
 
 #### 3b. widget-config.tsx 加過濾邏輯
+
 ```ts
 // 在 widget-config.tsx 或 DashboardClient 渲染前過濾
 const { isTabEnabled } = useWorkspaceFeatures()
@@ -78,6 +83,7 @@ const visibleWidgets = AVAILABLE_WIDGETS.filter(w => {
    - 如果怕 role permission 誤被塞進 dashboard、在 role page 的 `visibleModules` 過濾 `m.code !== 'dashboard'`
 
 #### 3d. 測試
+
 - [ ] Venturo 帳號進任一租戶管理、開齒輪 → 看到 widget 清單、付費 widget 預設關
 - [ ] 勾開付費 widget → 儲存 → 該租戶的員工首頁多出這個 widget
 - [ ] 不勾 → 員工首頁看不到
@@ -99,10 +105,14 @@ const visibleWidgets = AVAILABLE_WIDGETS.filter(w => {
 ### 容器結構（4 個 widget 必走這套）
 
 ```tsx
-<div className="h-full">                                    {/* SortableWidget 會給 h-full + min-h-0 */}
-  <div className="h-full rounded-2xl border border-border/70 shadow-lg backdrop-blur-md
+<div className="h-full">
+  {' '}
+  {/* SortableWidget 會給 h-full + min-h-0 */}
+  <div
+    className="h-full rounded-2xl border border-border/70 shadow-lg backdrop-blur-md
                   transition-all duration-300 hover:shadow-lg hover:border-border/80
-                  bg-gradient-to-br from-[widget主色] via-card to-[widget輔色]">
+                  bg-gradient-to-br from-[widget主色] via-card to-[widget輔色]"
+  >
     <div className="p-4 space-y-3 h-full flex flex-col">
       {/* Header */}
       {/* Content */}
@@ -140,6 +150,7 @@ const visibleWidgets = AVAILABLE_WIDGETS.filter(w => {
 ```
 
 **關鍵尺寸**（4 個 widget 都一致、不要只改一個）：
+
 - Icon 圓框：`p-2`（不要 p-2.5）
 - Icon 本體：`w-4 h-4`（不要 w-5 h-5）
 - 外框 ring：`ring-1`（不要 ring-2 + ring-offset）
@@ -149,15 +160,18 @@ const visibleWidgets = AVAILABLE_WIDGETS.filter(w => {
 ### 按鈕規範
 
 **CTA 主按鈕**（= 號、上班等）：
+
 ```tsx
 className="bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60
            text-morandi-primary ring-1 ring-border/50
            hover:from-morandi-gold/60 hover:to-morandi-container/80
            shadow-md hover:shadow-lg rounded-xl"
 ```
+
 → 柔和米金漸層、深色文字、**不用白字 + 飽和金**（跟 morandi 風格衝突）
 
 **次要按鈕**（數字鍵等）：
+
 ```tsx
 className="bg-gradient-to-br from-card to-morandi-container/30
            border border-morandi-gold/30
@@ -165,13 +179,16 @@ className="bg-gradient-to-br from-card to-morandi-container/30
            hover:border-morandi-gold/50
            shadow-sm hover:shadow-md rounded-xl"
 ```
+
 → 幾乎白底、hover 才出金色
 
 **已完成 / Disabled**：
+
 ```tsx
 className="bg-gradient-to-br from-morandi-green/10 to-morandi-green/20
            border border-morandi-green/30 text-morandi-green"
 ```
+
 → 淡綠或淡金、表示狀態、不可互動
 
 ### 響應式（Dashboard 佈局、不是單一 widget）
@@ -190,14 +207,14 @@ Grid 用 **container query**、不是 viewport：
 
 ### 禁忌
 
-| 不要 | 為什麼 |
-|---|---|
-| `bg-morandi-gold` 純飽和金 | 跟 morandi 淡雅風衝突 |
-| `shadow-xl` 以上陰影 | 會被 content overflow 切掉 |
-| 寫死 `h-96` / `h-[XXXpx]` | Mac 14/16 / 外接螢幕不同尺寸、會切或留白 |
-| 三色 `from-X via-Y to-Z` 漸層 | 兩色太近看不出 via；想要明顯用透明度拉對比 |
-| icon `w-5 h-5` / `p-2.5` | 跟已統一的 `w-4 h-4 / p-2` 不一致、只改一個會很怪 |
-| 漏 `min-w-0` 在 flex-1 div | 長文字會把 widget 撐破欄 |
+| 不要                          | 為什麼                                            |
+| ----------------------------- | ------------------------------------------------- |
+| `bg-morandi-gold` 純飽和金    | 跟 morandi 淡雅風衝突                             |
+| `shadow-xl` 以上陰影          | 會被 content overflow 切掉                        |
+| 寫死 `h-96` / `h-[XXXpx]`     | Mac 14/16 / 外接螢幕不同尺寸、會切或留白          |
+| 三色 `from-X via-Y to-Z` 漸層 | 兩色太近看不出 via；想要明顯用透明度拉對比        |
+| icon `w-5 h-5` / `p-2.5`      | 跟已統一的 `w-4 h-4 / p-2` 不一致、只改一個會很怪 |
+| 漏 `min-w-0` 在 flex-1 div    | 長文字會把 widget 撐破欄                          |
 
 ### 新增 widget 的視覺檢查清單
 

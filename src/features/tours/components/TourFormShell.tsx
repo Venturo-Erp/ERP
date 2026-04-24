@@ -165,9 +165,7 @@ export function TourFormShell({
                     <label className="text-sm font-medium text-morandi-primary">備註</label>
                     <Input
                       value={newTour.description || ''}
-                      onChange={e =>
-                        setNewTour(prev => ({ ...prev, description: e.target.value }))
-                      }
+                      onChange={e => setNewTour(prev => ({ ...prev, description: e.target.value }))}
                       placeholder="內部備註，客人看不到"
                       className="mt-1"
                     />

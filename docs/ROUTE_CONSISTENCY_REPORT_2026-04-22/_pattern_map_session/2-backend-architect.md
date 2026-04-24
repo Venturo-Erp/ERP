@@ -25,10 +25,10 @@
 
 讀可全域、寫入要限租戶或系統主管：
 
-| Table | 理由 |
-|---|---|
-| `wishlist_templates` / `wishlist_template_items` | 有 workspace_id + created_by — 模板共享可行、但寫入應限建立者租戶 |
-| `todo_columns` | 有 workspace_id — 應綁租戶 |
+| Table                                                                                            | 理由                                                                          |
+| ------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------- |
+| `wishlist_templates` / `wishlist_template_items`                                                 | 有 workspace_id + created_by — 模板共享可行、但寫入應限建立者租戶             |
+| `todo_columns`                                                                                   | 有 workspace_id — 應綁租戶                                                    |
 | `workspace_attendance_settings` / `workspace_notification_settings` / `workspace_bonus_defaults` | 租戶級設定、SELECT 若為系統主管頁合理、但 `USING: true` 意味他租戶也能讀 → 修 |
 
 ### 🔴 絕對漏鎖（租戶 / 員工 / 個資 / 訊息 / 計酬）共 45 張
@@ -59,6 +59,7 @@
 ## 2. 3 張 RLS disabled 表處理建議
 
 ### `_migrations`
+
 - **建議**：RLS 開、policy 只給 `service_role` — migration 記錄不該給任何登入用戶讀。
 - **影響分析**：此表由 `npm run migrate` / Supabase migrate CLI 透過 service_role 寫入、**不會打斷現有流程**。
 - **SQL**：
@@ -69,10 +70,12 @@
   ```
 
 ### `rate_limits`
+
 - **建議**：同 `_migrations`、只給 service_role、因為限流由 middleware / edge function 以 service_role 維護。
 - **風險**：若某 client 端邏輯直接讀此表、會壞。**先 grep 確認無 client 讀取、再套**。
 
 ### `ref_cities` — 跟 `ref_countries` / `ref_airports` 同步處理
+
 - **語義**：城市表、FK 指 `ref_countries.code`、**跟 ref_countries / ref_airports 一模一樣的公版靜態資料**。
 - **現況漏**：RLS 完全沒開（跟同族表不一致、是歷史漏洞）。
 - **強烈建議**：套跟 `ref_countries` 完全一樣的 4-policy 模式（public read + super_admin write）：
@@ -87,7 +90,7 @@
   CREATE POLICY "ref_cities_admin_delete" ON public.ref_cities
     FOR DELETE TO authenticated USING (is_super_admin());
   ```
-- 這樣 3 張 ref_* 全族齊一、未來新增 ref 類型也 copy-paste。
+- 這樣 3 張 ref\_\* 全族齊一、未來新增 ref 類型也 copy-paste。
 
 ---
 
@@ -152,11 +155,11 @@ CREATE POLICY "<table>_same_workspace" ON public.<table>
 -- INSERT/UPDATE/DELETE 同 pattern、只是動作不同
 ```
 
-### 模板 D — 全域參考表（ref_*）
+### 模板 D — 全域參考表（ref\_\*）
 
 已寫在上方 ref_cities 區塊。模式：`SELECT true` + `is_super_admin()` 寫入。
 
-### 模板 E — 系統內部表（_migrations / rate_limits）
+### 模板 E — 系統內部表（\_migrations / rate_limits）
 
 ```sql
 ALTER TABLE public.<table> ENABLE ROW LEVEL SECURITY;
@@ -169,6 +172,7 @@ CREATE POLICY "<table>_service_role_only" ON public.<table>
 ## 4. `employee_permission_overrides` 加 workspace_id 欄 migration 建議
 
 ### 現況
+
 - 表有 `employee_id uuid NOT NULL` FK → `employees.id` ON DELETE RESTRICT
 - **無 `workspace_id` 欄**、RLS 4 policy 全 `USING: true`（4 條主 pattern 之 1、v2.0 點名未修）
 
@@ -228,4 +232,4 @@ DROP POLICY IF EXISTS employee_permission_overrides_delete ON public.employee_pe
 
 ## 結尾摘要（200 字）
 
-83 張 USING:true 表中、**45 張絕對漏鎖**（員工/租戶/個資/訊息/計酬、含 workspaces_delete 與 employee_permission_overrides）、**15 張 by design 全域可讀**（ref_* 類靜態 lookup）、**6 張讀可寬但寫要鎖**、**17 張需 William 拍板**（公版 vs 租戶語義不明的 activities / luxury_hotels / premium_experiences / profiles 等）。3 張 RLS disabled 表中、`_migrations` 與 `rate_limits` 應改 service_role only、`ref_cities` 應套 ref_countries 同型 policy 讓 ref_* 全族齊一。修法提供 5 個 SQL 模板（租戶 / 個人 / 員工 / 參考 / 系統）、pattern-heal 可批次跑。`employee_permission_overrides` 加 `workspace_id` 欄採 3 段式 migration：加欄 nullable → join employees 回填 → NOT NULL + CASCADE FK + 換 policy 套模板 A；同時補 WITH CHECK 防 workspace_id 被改寫逃租戶（同 P010 修法）。
+83 張 USING:true 表中、**45 張絕對漏鎖**（員工/租戶/個資/訊息/計酬、含 workspaces*delete 與 employee_permission_overrides）、**15 張 by design 全域可讀**（ref*_ 類靜態 lookup）、**6 張讀可寬但寫要鎖**、**17 張需 William 拍板**（公版 vs 租戶語義不明的 activities / luxury*hotels / premium_experiences / profiles 等）。3 張 RLS disabled 表中、`_migrations` 與 `rate_limits` 應改 service_role only、`ref_cities` 應套 ref_countries 同型 policy 讓 ref*_ 全族齊一。修法提供 5 個 SQL 模板（租戶 / 個人 / 員工 / 參考 / 系統）、pattern-heal 可批次跑。`employee_permission_overrides` 加 `workspace_id` 欄採 3 段式 migration：加欄 nullable → join employees 回填 → NOT NULL + CASCADE FK + 換 policy 套模板 A；同時補 WITH CHECK 防 workspace_id 被改寫逃租戶（同 P010 修法）。

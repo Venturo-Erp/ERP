@@ -6,16 +6,16 @@
 
 ## 今日驗證
 
-| 路由 | 類型 | 狀態 | raw 位置 |
-|---|---|---|---|
-| `/login` | v2.0 補驗（Agent F DB 真相 + Agent G API/middleware） | ✅ 完成 | `./login/raw/` |
-| `/hr` | 首驗（Agent A-E） | ✅ 完成 | `./hr/raw/` |
-| `/finance/payments` | v2.0 首驗（Agent A-F） | ✅ 完成 | `./finance_payments/raw/` |
-| `/tours` | v2.0 首驗（Agent A-F、6 agent 並行）| ✅ 完成 | `./tours/raw/` |
+| 路由                | 類型                                                  | 狀態    | raw 位置                  |
+| ------------------- | ----------------------------------------------------- | ------- | ------------------------- |
+| `/login`            | v2.0 補驗（Agent F DB 真相 + Agent G API/middleware） | ✅ 完成 | `./login/raw/`            |
+| `/hr`               | 首驗（Agent A-E）                                     | ✅ 完成 | `./hr/raw/`               |
+| `/finance/payments` | v2.0 首驗（Agent A-F）                                | ✅ 完成 | `./finance_payments/raw/` |
+| `/tours`            | v2.0 首驗（Agent A-F、6 agent 並行）                  | ✅ 完成 | `./tours/raw/`            |
 
 ---
 
-## 本日新加進 _INDEX 的跨路由共通問題
+## 本日新加進 \_INDEX 的跨路由共通問題
 
 （全部來自 /login v2.0 補驗）
 

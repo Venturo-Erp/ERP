@@ -16,12 +16,14 @@
 ## Pattern 1 · `workspaces_delete` 收緊
 
 ### 現況查證
+
 - 現況 policy（`20260405500000_fix_rls_medium_risk_tables.sql:622-626`）：`USING (is_super_admin())` — **不是** `USING (true)`。
 - William 標「USING:true」推測來自 audit 老資料 stale、或把 `workspaces_select` `id = get_current_user_workspace() OR is_super_admin()` 這類 OR 條件誤讀。
 - 實情：DELETE 已經只 super_admin 能做。Level 目前其實偏嚴。
 - 但代碼端：`WorkspacesManagePage.tsx:77` 用 anon client（`supabase.from('workspaces').delete()`）、是 super_admin 身份下的 RLS 擋板放行才會過。
 
 ### Migration SQL 草稿
+
 **前提**：如果 pattern 是 audit stale，實際 policy 已經對、不動 DB、只更新 `_PATTERN_MAP.md` 狀態。如果 William 要**再收一層**（例如「必須是該 workspace 自己的系統主管 才能刪自家，其他人一律不准」），用下面：
 
 ```sql
@@ -48,6 +50,7 @@ COMMIT;
 ```
 
 ### Blast Radius（代碼連動）
+
 - `src/features/workspaces/components/WorkspacesManagePage.tsx:77` — 需要 super_admin 身份才走得過、目前就這樣、不用改。
 - `src/features/workspaces/components/AddWorkspaceDialog.tsx:139` — 建立失敗回滾時 DELETE、必須是 super_admin 建立才走得通（現在就是這樣）。
 - `src/app/api/tenants/create/route.ts:197` — 用 `supabaseAdmin`（service_role 繞 RLS）、不受 policy 影響。
@@ -55,6 +58,7 @@ COMMIT;
 **沒有代碼要改**；只要前端 UI 層確保非 super_admin 不顯示「刪除公司」按鈕（我檢查 `WorkspacesManagePage` 沒有 guard、應加）。
 
 ### Rollback
+
 ```sql
 -- 無資料改動、rollback 只是回 policy（其實本來就是這樣、等於 no-op）
 BEGIN;
@@ -65,6 +69,7 @@ COMMIT;
 ```
 
 ### 測試守門
+
 - `tests/e2e/login-api.spec.ts`（動 workspaces RLS 必跑、CLAUDE.md 紅線）。
 - 新增 `tests/e2e/workspaces-delete.spec.ts`：登入 沒有平台管理資格 → DELETE /workspaces → 應 403。
 
@@ -73,11 +78,13 @@ COMMIT;
 ## Pattern 2 · `_migrations` 開 RLS
 
 ### 現況查證
+
 - `_migrations` 是 Supabase CLI 內部表（schema 紀錄）、app 幾乎不該 query。
 - grep 結果：`src/types/database.types.ts:17` 有 type、但 **沒有任何一處 app code 查它**（`from('_migrations')` 命中 0 筆）。
 - `src/app/api/health/db/route.ts:76` 查的是 `schema_migrations`（不同表）、且已 cast 成 `'employees'` type workaround。
 
 ### Migration SQL 草稿
+
 ```sql
 BEGIN;
   ALTER TABLE public._migrations ENABLE ROW LEVEL SECURITY;
@@ -94,11 +101,13 @@ COMMIT;
 ```
 
 ### Blast Radius
+
 - **app 零影響**：沒有 code path 依賴 `_migrations`。
 - **CLI 影響**：Supabase CLI `supabase db push` / `supabase migration up` 用 service_role、policy 放行、正常運作。
 - **health check 影響**：`api/health/db` 查的是 `schema_migrations`、不受此 migration 影響。
 
 ### Rollback
+
 ```sql
 BEGIN;
   DROP POLICY IF EXISTS "_migrations_service_only" ON public._migrations;
@@ -107,6 +116,7 @@ COMMIT;
 ```
 
 ### 測試守門
+
 - 本地 `supabase db push` 驗一次（CLI 通）。
 - `tests/e2e/login-api.spec.ts`（paranoid；動 RLS 一律跑）。
 
@@ -115,11 +125,13 @@ COMMIT;
 ## Pattern 3 · `rate_limits` 開 RLS
 
 ### 現況查證
+
 - 表設計：`rate_limits(key, count, reset_at)` — 不含 workspace_id / user_id、是**全局共用**的 rate limiter store。
 - 寫入路徑只有 `check_rate_limit()` / `cleanup_rate_limits()` function（`SECURITY DEFINER`）、app code **完全沒有** `from('rate_limits')` 直接讀寫。
 - GRANT 目前：`check_rate_limit` 對 `authenticated, service_role, anon` 都開、`cleanup_rate_limits` 只 `service_role`。
 
 ### Migration SQL 草稿
+
 ```sql
 BEGIN;
   ALTER TABLE public.rate_limits ENABLE ROW LEVEL SECURITY;
@@ -136,11 +148,13 @@ COMMIT;
 ```
 
 ### Blast Radius
+
 - **零代碼異動**：grep `rate_limits` 在 `src/` 只命中 types、沒任何直查。
 - **function 照跑**：SECURITY DEFINER 繞 RLS、`check_rate_limit` 不受影響。
 - **風險點**：如果未來有人 bypass function 直接 `supabase.from('rate_limits')`、會突然失敗——**這是我們要的**（防 abuse）。
 
 ### Rollback
+
 ```sql
 BEGIN;
   DROP POLICY IF EXISTS "rate_limits_service_only" ON public.rate_limits;
@@ -149,6 +163,7 @@ COMMIT;
 ```
 
 ### 測試守門
+
 - 手動 `SELECT check_rate_limit('test', 3, 60);` 跑 4 次、驗第 4 次回 false。
 - `tests/e2e/login-api.spec.ts` 跑一次（登入走 rate limit path）。
 
@@ -157,6 +172,7 @@ COMMIT;
 ## Pattern 4 · `employee_permission_overrides` 補 `workspace_id` + RLS 重寫（最大條）
 
 ### 現況查證
+
 - Schema 只有：`id, employee_id, module_code, tab_code, override_type, created_at, updated_at`。
 - **無 workspace_id**。現有 RLS 4 條全 USING:true（Backend 同事已標 P4 critical）。
 - 代碼使用：
@@ -259,6 +275,7 @@ COMMIT;
 ```
 
 ### Blast Radius（代碼）
+
 1. `validate-login/route.ts:180` — 目前 SELECT 用 supabase client (anon key authenticated)、加 RLS 後**仍會通**（因為 login 當下已 authenticated、employee 在該 workspace）。**不用改**。
 2. `permissions/check/route.ts:48` — 同上、不用改。
 3. `employees/[employeeId]/permission-overrides/route.ts:52-68` — **DELETE + INSERT**：
@@ -268,6 +285,7 @@ COMMIT;
 4. Type 檔：`src/types/database.types.ts` + `src/lib/supabase/types.ts` 要 regen（`supabase gen types`）。
 
 ### 需要改的代碼片段（必改）
+
 ```ts
 // src/app/api/employees/[employeeId]/permission-overrides/route.ts:57-64
 // 加 workspace_id、從 server auth 取：
@@ -278,7 +296,7 @@ const overridesToInsert = overrides
   .filter(o => o.override_type)
   .map(o => ({
     employee_id: employeeId,
-    workspace_id: auth.data.workspaceId,  // ← 新增
+    workspace_id: auth.data.workspaceId, // ← 新增
     module_code: o.module_code,
     tab_code: o.tab_code,
     override_type: o.override_type,
@@ -286,6 +304,7 @@ const overridesToInsert = overrides
 ```
 
 ### Rollback
+
 ```sql
 BEGIN;
   DROP POLICY IF EXISTS "epo_select" ON public.employee_permission_overrides;
@@ -302,6 +321,7 @@ COMMIT;
 ```
 
 ### 測試守門
+
 - `tests/e2e/login-api.spec.ts`（RLS 變動必跑）
 - `tests/e2e/admin-login-permissions.spec.ts`（若不存在、**必須新建**）
 - 新建 `tests/e2e/permission-overrides.spec.ts`：
@@ -313,14 +333,15 @@ COMMIT;
 
 ## Migration 順序（依賴性分析）
 
-| 順序 | Pattern | 依賴 | 原因 |
-|---|---|---|---|
-| 1 | Pattern 2 `_migrations` RLS | 無 | 零代碼風險、先熱身、驗 pipeline |
-| 2 | Pattern 3 `rate_limits` RLS | 無 | 同上、純防守型 |
-| 3 | Pattern 1 `workspaces_delete` | 無 | 若是 audit stale、只是 re-assert、更新文件 |
-| 4 | Pattern 4 `employee_permission_overrides` | 有：需要 `get_current_user_workspace()` function 存在（已存在、`20260405500000...` 已建）；code PR 與 migration 要**同一批上線** | 最大條、最後做 |
+| 順序 | Pattern                                   | 依賴                                                                                                                             | 原因                                       |
+| ---- | ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| 1    | Pattern 2 `_migrations` RLS               | 無                                                                                                                               | 零代碼風險、先熱身、驗 pipeline            |
+| 2    | Pattern 3 `rate_limits` RLS               | 無                                                                                                                               | 同上、純防守型                             |
+| 3    | Pattern 1 `workspaces_delete`             | 無                                                                                                                               | 若是 audit stale、只是 re-assert、更新文件 |
+| 4    | Pattern 4 `employee_permission_overrides` | 有：需要 `get_current_user_workspace()` function 存在（已存在、`20260405500000...` 已建）；code PR 與 migration 要**同一批上線** | 最大條、最後做                             |
 
 **不能一起跑的理由**：Pattern 4 需要對應 API code 改 `workspace_id` 欄、若 migration 先跑、舊 code 還在、INSERT 必炸。必須：
+
 1. 開 PR 包含 migration + code 改動
 2. Staging 先跑 migration、跑新 code、驗通
 3. 正式環境同步 deploy（Vercel + Supabase）
@@ -329,12 +350,12 @@ COMMIT;
 
 ## 回滾策略總結
 
-| Pattern | Rollback 複雜度 | 資料風險 | 時間 |
-|---|---|---|---|
-| 1 | 零（no-op） | 無 | < 1 min |
-| 2 | 兩條 SQL | 無 | < 1 min |
-| 3 | 兩條 SQL | 無 | < 1 min |
-| 4 | 5 條 SQL（policy + FK + index + col） | **有**：workspace_id 資料丟失（回填可重跑）| ~ 3 min |
+| Pattern | Rollback 複雜度                       | 資料風險                                    | 時間    |
+| ------- | ------------------------------------- | ------------------------------------------- | ------- |
+| 1       | 零（no-op）                           | 無                                          | < 1 min |
+| 2       | 兩條 SQL                              | 無                                          | < 1 min |
+| 3       | 兩條 SQL                              | 無                                          | < 1 min |
+| 4       | 5 條 SQL（policy + FK + index + col） | **有**：workspace_id 資料丟失（回填可重跑） | ~ 3 min |
 
 Pattern 4 rollback 後、若要 re-apply、重跑 migration 就會再 JOIN employees 重填、**data 可恢復**（因為 employees.workspace_id 是 source of truth）。
 
@@ -342,11 +363,11 @@ Pattern 4 rollback 後、若要 re-apply、重跑 migration 就會再 JOIN emplo
 
 ## 測試矩陣（e2e spec 守門）
 
-| Migration | 必跑 spec |
-|---|---|
-| Pattern 1 | `login-api.spec.ts`（CLAUDE.md 紅線）、新 `workspaces-delete.spec.ts` |
-| Pattern 2 | `login-api.spec.ts`（paranoid） |
-| Pattern 3 | 手動測 `check_rate_limit` + `login-api.spec.ts` |
+| Migration | 必跑 spec                                                                                             |
+| --------- | ----------------------------------------------------------------------------------------------------- |
+| Pattern 1 | `login-api.spec.ts`（CLAUDE.md 紅線）、新 `workspaces-delete.spec.ts`                                 |
+| Pattern 2 | `login-api.spec.ts`（paranoid）                                                                       |
+| Pattern 3 | 手動測 `check_rate_limit` + `login-api.spec.ts`                                                       |
 | Pattern 4 | `login-api.spec.ts` + `admin-login-permissions.spec.ts`（若存在） + 新 `permission-overrides.spec.ts` |
 
 **所有 pattern 上線前、`npm run type-check` 必通**（pre-commit hook 強制、不能 `--no-verify`、CLAUDE.md 紅線）。

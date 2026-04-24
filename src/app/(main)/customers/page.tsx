@@ -37,11 +37,7 @@ import { syncPassportImageToMembers } from '@/lib/utils/sync-passport-image'
 import { useRouter } from 'next/navigation'
 
 // 本地組件
-import {
-  CustomerAddDialog,
-  CustomerDialog,
-  ImportCustomersDialog,
-} from './components'
+import { CustomerAddDialog, CustomerDialog, ImportCustomersDialog } from './components'
 import { CUSTOMER_PAGE_LABELS as L, CUSTOMER_IMPORT_LABELS } from './constants/labels'
 
 export default function CustomersPage() {

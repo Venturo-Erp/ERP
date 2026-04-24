@@ -9,7 +9,7 @@
 | 🔴 必須修復 | **5**   | 無 RLS 保護，任何登入用戶可跨租戶讀寫                        |
 | 🟠 高風險   | **5**   | Policy 等同無效（`USING(true)` 或 tautology）                |
 | ⚠️ 中風險   | **11**  | 隔離不完整（auth-only、漏洞、缺功能）                        |
-| ✅ 安全     | **26+** | workspace_id 過濾 + super_系統主管 bypass                       |
+| ✅ 安全     | **26+** | workspace*id 過濾 + super*系統主管 bypass                    |
 | ⚠️ 需隔離   | **3**   | 原以為共用，實際應隔離（companies, attractions, workspaces） |
 
 ---
@@ -134,7 +134,7 @@
 
 - **現狀**：workspace 隔離正確，但缺少 `is_super_admin()` bypass
 - **風險**：super_admin 無法跨工作區管理檔案
-- **修復方向**：新增 super_系統主管 bypass 條件
+- **修復方向**：新增 super\_系統主管 bypass 條件
 
 ### 8. `folders` — 資料夾管理
 
@@ -164,7 +164,7 @@
 
 ## ✅ 安全（workspace_id 隔離完整）
 
-以下表格已有完整的 workspace_id 過濾 + super_系統主管 bypass：
+以下表格已有完整的 workspace*id 過濾 + super*系統主管 bypass：
 
 `tours` · `orders` · `itineraries` · `receipts` · `payment_requests` · `disbursement_orders` · `employees` · `attendance_records` · `leave_requests` · `leave_types` · `leave_balances` · `employee_route_overrides` · `customers` · `customer_groups` · `regions` · `suppliers` · `leader_schedules` · `fleet_vehicles` · `fleet_drivers` · `fleet_schedules` · `transportation_rates` · `accounting_events` · `accounting_periods` · `quotes` · `channels` · `todos` · `pnrs` · `design_templates` · `office_documents`
 

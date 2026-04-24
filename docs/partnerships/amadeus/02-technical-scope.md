@@ -20,88 +20,88 @@
 
 ### 1.1 查詢類 APIs（階段 1 啟用）
 
-| API | 用途 | 優先級 |
-|---|---|---|
-| Flight Search / Low-Fare Search | 航班搜尋（單程、來回、多段） | P0 |
-| Air Availability | 座位即時查詢 | P0 |
-| Fare Quote | 票價即時計算 | P0 |
-| Branded Fares | 艙等升級選項 | P1 |
-| Ancillary Catalogue | 加值服務查詢 | P1 |
-| Airline / Airport Lookup | 航司、機場 reference data | P0 |
+| API                             | 用途                         | 優先級 |
+| ------------------------------- | ---------------------------- | ------ |
+| Flight Search / Low-Fare Search | 航班搜尋（單程、來回、多段） | P0     |
+| Air Availability                | 座位即時查詢                 | P0     |
+| Fare Quote                      | 票價即時計算                 | P0     |
+| Branded Fares                   | 艙等升級選項                 | P1     |
+| Ancillary Catalogue             | 加值服務查詢                 | P1     |
+| Airline / Airport Lookup        | 航司、機場 reference data    | P0     |
 
 ### 1.2 訂位類 APIs（階段 2 啟用，但一次授權）
 
-| API | 用途 | 優先級 |
-|---|---|---|
-| PNR Create | 建立 PNR | P0 |
-| PNR Retrieve | 讀取 PNR | P0 |
-| PNR Modify | 修改 PNR | P0 |
-| PNR Cancel | 取消 PNR | P0 |
-| Passenger Info | 乘客資料（Name、APIS、護照） | P0 |
-| Special Service Request（SSR） | 特殊需求（餐食/輪椅/嬰兒） | P0 |
-| Seat Selection | 座位選位 | P0 |
-| Form of Payment | 付款方式註記 | P1 |
+| API                            | 用途                         | 優先級 |
+| ------------------------------ | ---------------------------- | ------ |
+| PNR Create                     | 建立 PNR                     | P0     |
+| PNR Retrieve                   | 讀取 PNR                     | P0     |
+| PNR Modify                     | 修改 PNR                     | P0     |
+| PNR Cancel                     | 取消 PNR                     | P0     |
+| Passenger Info                 | 乘客資料（Name、APIS、護照） | P0     |
+| Special Service Request（SSR） | 特殊需求（餐食/輪椅/嬰兒）   | P0     |
+| Seat Selection                 | 座位選位                     | P0     |
+| Form of Payment                | 付款方式註記                 | P1     |
 
 ### 1.3 Queue / 航班異動類（**Venturo 殺手功能，階段 1 啟用**）
 
-| API / 機制 | 用途 | 優先級 |
-|---|---|---|
-| Queue Management API | 讀寫 QJ / TJ / EJ Queue | P0 |
-| Schedule Change / Schedule Recovery | SSIM / TK / UN 訊息取得 | P0 |
-| Webhook / Push 機制 | 即時推播，非輪詢 | **P0（強烈要求）** |
-| Amadeus Robotics | 自動處理 Queue | P1 |
-| Notification Manager | 多管道通知 | P1 |
+| API / 機制                          | 用途                    | 優先級             |
+| ----------------------------------- | ----------------------- | ------------------ |
+| Queue Management API                | 讀寫 QJ / TJ / EJ Queue | P0                 |
+| Schedule Change / Schedule Recovery | SSIM / TK / UN 訊息取得 | P0                 |
+| Webhook / Push 機制                 | 即時推播，非輪詢        | **P0（強烈要求）** |
+| Amadeus Robotics                    | 自動處理 Queue          | P1                 |
+| Notification Manager                | 多管道通知              | P1                 |
 
 **說明**：Venturo 的航班異動通知功能對小旅行社極為關鍵，
 要求 **Webhook / Push 而非輪詢**，以確保即時性與成本控制。
 
 ### 1.4 出票類 APIs（階段 3 啟用，但一次授權）
 
-| API | 用途 | 優先級 |
-|---|---|---|
-| E-Ticket Issuance | 電子票開票 | P0 |
-| Void | 作廢 | P0 |
-| Refund | 退票 | P0 |
-| EMD（Electronic Miscellaneous Document） | 加值服務憑證 | P1 |
-| Commission / Incentive Tracking | 佣金追蹤 | P1 |
-| BSP Integration（台灣）| 台灣 BSP 結算對接 | P0（如 Venturo 取得票務授權） |
+| API                                      | 用途              | 優先級                        |
+| ---------------------------------------- | ----------------- | ----------------------------- |
+| E-Ticket Issuance                        | 電子票開票        | P0                            |
+| Void                                     | 作廢              | P0                            |
+| Refund                                   | 退票              | P0                            |
+| EMD（Electronic Miscellaneous Document） | 加值服務憑證      | P1                            |
+| Commission / Incentive Tracking          | 佣金追蹤          | P1                            |
+| BSP Integration（台灣）                  | 台灣 BSP 結算對接 | P0（如 Venturo 取得票務授權） |
 
 ### 1.5 Post-Booking
 
-| API | 用途 | 優先級 |
-|---|---|---|
-| Online Check-in | 線上報到 | P2 |
-| Flight Status | 航班即時狀態 | P1 |
-| Disruption Management | 取消 / 延誤處理 | P1 |
-| Itinerary Share | 行程分享給旅客 | P2 |
+| API                   | 用途            | 優先級 |
+| --------------------- | --------------- | ------ |
+| Online Check-in       | 線上報到        | P2     |
+| Flight Status         | 航班即時狀態    | P1     |
+| Disruption Management | 取消 / 延誤處理 | P1     |
+| Itinerary Share       | 行程分享給旅客  | P2     |
 
 ### 1.6 加值服務
 
-| API | 用途 | 優先級 |
-|---|---|---|
-| Seat Map | 視覺化座位圖 | P1 |
-| Meal Selection | 餐食預訂 | P2 |
-| Baggage | 行李加購 | P2 |
-| Insurance | 旅平險（若 Amadeus 有提供） | P2 |
+| API            | 用途                        | 優先級 |
+| -------------- | --------------------------- | ------ |
+| Seat Map       | 視覺化座位圖                | P1     |
+| Meal Selection | 餐食預訂                    | P2     |
+| Baggage        | 行李加購                    | P2     |
+| Insurance      | 旅平險（若 Amadeus 有提供） | P2     |
 
 ### 1.7 報表 / 分析
 
-| API / 資料 | 用途 | 優先級 |
-|---|---|---|
-| Sales Report | 銷售報表 | P1 |
-| Daily Transaction | 每日交易明細 | P1 |
-| Commission Report | 佣金報表 | P1 |
-| MIS Data Feed | 管理資訊系統資料源 | P2 |
+| API / 資料        | 用途               | 優先級 |
+| ----------------- | ------------------ | ------ |
+| Sales Report      | 銷售報表           | P1     |
+| Daily Transaction | 每日交易明細       | P1     |
+| Commission Report | 佣金報表           | P1     |
+| MIS Data Feed     | 管理資訊系統資料源 | P2     |
 
 ### 1.8 後台 / 整合
 
-| 需求 | 優先級 |
-|---|---|
-| User / Permission Management API | P0 |
-| Audit Log（操作稽核）API | P0 |
+| 需求                                | 優先級         |
+| ----------------------------------- | -------------- |
+| User / Permission Management API    | P0             |
+| Audit Log（操作稽核）API            | P0             |
 | Sandbox / Test Environment 永久存取 | **P0（必要）** |
-| Technical Support 票務系統 | P0 |
-| Account Manager 專屬窗口 | P0 |
+| Technical Support 票務系統          | P0             |
+| Account Manager 專屬窗口            | P0             |
 
 ---
 
@@ -155,12 +155,12 @@ Amadeus BD 已口頭確認此架構可行（2026-04 雙方業務對談），
 
 ### 2.7 服務等級（SLA）
 
-| 指標 | 承諾 |
-|---|---|
-| API 可用性 | ≥ 99.5% 月 |
-| 故障響應時間 | P1 < 1 小時 / P2 < 4 小時 / P3 < 24 小時 |
-| 計畫性維護通知 | 至少 7 天前告知 |
-| 故障補償 | 依 SLA 比例退費或延長合約 |
+| 指標           | 承諾                                     |
+| -------------- | ---------------------------------------- |
+| API 可用性     | ≥ 99.5% 月                               |
+| 故障響應時間   | P1 < 1 小時 / P2 < 4 小時 / P3 < 24 小時 |
+| 計畫性維護通知 | 至少 7 天前告知                          |
+| 故障補償       | 依 SLA 比例退費或延長合約                |
 
 ### 2.8 資安與合規
 
@@ -235,14 +235,14 @@ Venturo Integration Layer
 
 ## 4. Venturo 技術棧（給 Amadeus 參考）
 
-| 層級 | 技術 |
-|---|---|
-| 前端 | Next.js 15 / React 18 |
-| API / 後端 | Next.js Route Handlers + Node.js |
-| 資料庫 | PostgreSQL（Supabase 託管） |
-| 部署 | Vercel（前端 / API）+ Supabase（DB） |
-| 代收轉付 / 固定 IP | 遠振 VPS / Oracle Cloud 雙區 |
-| 異地備份 | Backblaze B2（加密） |
+| 層級               | 技術                                 |
+| ------------------ | ------------------------------------ |
+| 前端               | Next.js 15 / React 18                |
+| API / 後端         | Next.js Route Handlers + Node.js     |
+| 資料庫             | PostgreSQL（Supabase 託管）          |
+| 部署               | Vercel（前端 / API）+ Supabase（DB） |
+| 代收轉付 / 固定 IP | 遠振 VPS / Oracle Cloud 雙區         |
+| 異地備份           | Backblaze B2（加密）                 |
 
 Venturo 可配合 Amadeus 要求的 TLS 版本、IP 白名單、固定 IP 等。
 
@@ -267,4 +267,4 @@ Venturo 可配合 Amadeus 要求的 TLS 版本、IP 白名單、固定 IP 等。
 
 ---
 
-*本文件為草稿 v1.0，William 審閱後定稿。*
+_本文件為草稿 v1.0，William 審閱後定稿。_

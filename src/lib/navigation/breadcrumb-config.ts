@@ -83,7 +83,6 @@ export const BREADCRUMB_CONFIG: Record<string, BreadcrumbConfig> = {
   // ========== 報表 ==========
   '/reports': { label: '報表', parent: '/', hidden: true },
   '/reports/tour-closing': { label: '結團報表', parent: '/' },
-
 }
 
 /**

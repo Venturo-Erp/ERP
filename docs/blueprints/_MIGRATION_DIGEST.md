@@ -13,6 +13,7 @@
 ## Week of YYYY-MM-DD · Pending Migrations Digest
 
 ### Stats
+
 - Total pending: N
 - Since last digest: +M
 - Oldest age: D days
@@ -21,6 +22,7 @@
 ### Migrations (sorted by impact)
 
 #### 1. `YYYYMMDDHHMMSS_<name>.sql`
+
 - **Purpose**: <一句話>
 - **Type**: CREATE INDEX / ADD CONSTRAINT / RENAME / ADD COLUMN / ...
 - **Table**: <name>
@@ -38,16 +40,19 @@
 ## 🚦 William 的審查決策（每條三選一）
 
 ### ✅ RUN（允許執行）
+
 - 我在 CLI 執行 `npx supabase migration up <file>`（手動、非 cron）
 - 執行前後都備份（`pg_dump` 該 table）
 - 跑完把 file 搬到 `supabase/migrations/_applied/YYYY-MM-DD/`
 - 在 `_DAILY_REPORT.md` 記一行
 
 ### ⏸ DEFER（延後）
+
 - 加 comment 到 file 頭：「DEFERRED: <理由> by William <date>」
 - file 留在 `_pending_review/`、下週再進 digest
 
 ### ❌ REJECT（否決）
+
 - 加 comment 到 file 頭：「REJECTED: <理由> by William <date>」
 - 搬到 `supabase/migrations/_rejected/`
 - 原始觸發 route 的 Blueprint §9 標註「migration 被拒、需改方案」
@@ -88,5 +93,6 @@ supabase/migrations/
 _（第一個週三觸發後、cron 寫入）_
 
 目前 pending：1 條
+
 - `quick_items_array_check.sql` —— ADD CONSTRAINT jsonb_typeof array（`/quotes/quick/[id]` Blueprint §6）
 - 狀態：draft、未格式化、未進正式 `_pending_review/`

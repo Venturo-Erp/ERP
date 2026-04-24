@@ -11,11 +11,7 @@ import { useEffect, useRef } from 'react'
  * @param reset 切 tab 時要執行的動作（通常是 resetForm）
  * @param enabled 停用開關（例如編輯模式時不清空）
  */
-export function useResetOnTabChange(
-  activeTab: string,
-  reset: () => void,
-  enabled = true
-) {
+export function useResetOnTabChange(activeTab: string, reset: () => void, enabled = true) {
   const prevTabRef = useRef(activeTab)
 
   useEffect(() => {

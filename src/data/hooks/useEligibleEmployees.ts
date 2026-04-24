@@ -39,51 +39,48 @@ export function useEligibleEmployees(moduleCode: string, tabCode: string) {
 
   const cacheKey = workspaceId ? `eligible:${workspaceId}:${moduleCode}:${tabCode}` : null
 
-  const { data, error, isLoading, mutate } = useSWR<EligibleEmployee[]>(
-    cacheKey,
-    async () => {
-      if (!workspaceId) return []
+  const { data, error, isLoading, mutate } = useSWR<EligibleEmployee[]>(cacheKey, async () => {
+    if (!workspaceId) return []
 
-      // Step 1: 找有該權限的 role_ids
-      const { data: perms, error: permsErr } = await supabase
-        .from('role_tab_permissions')
-        .select('role_id')
-        .eq('module_code', moduleCode)
-        .eq('tab_code', tabCode)
-        .eq('can_write', true)
+    // Step 1: 找有該權限的 role_ids
+    const { data: perms, error: permsErr } = await supabase
+      .from('role_tab_permissions')
+      .select('role_id')
+      .eq('module_code', moduleCode)
+      .eq('tab_code', tabCode)
+      .eq('can_write', true)
 
-      if (permsErr) throw permsErr
-      const roleIds = Array.from(new Set((perms ?? []).map(p => p.role_id).filter(Boolean)))
-      if (roleIds.length === 0) return []
+    if (permsErr) throw permsErr
+    const roleIds = Array.from(new Set((perms ?? []).map(p => p.role_id).filter(Boolean)))
+    if (roleIds.length === 0) return []
 
-      // Step 2: 找該 workspace 內、role_id 在清單中、在職且非 bot 的員工
-      const { data: employees, error: empErr } = await supabase
-        .from('employees')
-        .select(
-          'id, employee_number, chinese_name, english_name, display_name, avatar_url, status, role_id, employee_type'
-        )
-        .eq('workspace_id', workspaceId)
-        .eq('status', 'active')
-        .in('role_id', roleIds)
-
-      if (empErr) throw empErr
-
-      // Client-side filter: 排 bot + 排 hardcoded BOT001
-      const filtered = (employees ?? []).filter(
-        e =>
-          e.employee_type !== 'bot' &&
-          e.employee_number !== 'BOT001' &&
-          e.id !== '00000000-0000-0000-0000-000000000001'
+    // Step 2: 找該 workspace 內、role_id 在清單中、在職且非 bot 的員工
+    const { data: employees, error: empErr } = await supabase
+      .from('employees')
+      .select(
+        'id, employee_number, chinese_name, english_name, display_name, avatar_url, status, role_id, employee_type'
       )
+      .eq('workspace_id', workspaceId)
+      .eq('status', 'active')
+      .in('role_id', roleIds)
 
-      // 按 employee_number 排序（相容原邏輯）
-      filtered.sort((a, b) =>
-        (a.employee_number || '').localeCompare(b.employee_number || '', 'en', { numeric: true })
-      )
+    if (empErr) throw empErr
 
-      return filtered as EligibleEmployee[]
-    }
-  )
+    // Client-side filter: 排 bot + 排 hardcoded BOT001
+    const filtered = (employees ?? []).filter(
+      e =>
+        e.employee_type !== 'bot' &&
+        e.employee_number !== 'BOT001' &&
+        e.id !== '00000000-0000-0000-0000-000000000001'
+    )
+
+    // 按 employee_number 排序（相容原邏輯）
+    filtered.sort((a, b) =>
+      (a.employee_number || '').localeCompare(b.employee_number || '', 'en', { numeric: true })
+    )
+
+    return filtered as EligibleEmployee[]
+  })
 
   return {
     employees: data ?? [],

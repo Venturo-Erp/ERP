@@ -20,11 +20,9 @@ export function useWorkspaceRoles() {
 
   const key = workspaceId ? `workspace-roles-${workspaceId}` : null
 
-  const { data, isLoading } = useSWR<WorkspaceRole[]>(
-    key,
-    () => fetcher('/api/roles'),
-    { revalidateOnFocus: false }
-  )
+  const { data, isLoading } = useSWR<WorkspaceRole[]>(key, () => fetcher('/api/roles'), {
+    revalidateOnFocus: false,
+  })
 
   return {
     roles: data ?? [],

@@ -1117,7 +1117,7 @@ class OrderService extends BaseService<Order & BaseEntity> {
 | ------ | ---- | --------------------------------------- |
 | **道** | ✅   | 財務正確從屬於團/訂單，編號依附團號     |
 | C      | ⚠️   | 有 placeholder 代碼、useEffect 依賴問題 |
-| A      | ✅   | 角色權限控制完善（會計/系統主管）         |
+| A      | ✅   | 角色權限控制完善（會計/系統主管）       |
 | R      | ⚠️   | 使用 browser alert 而非 UI 組件         |
 | D      | ⚠️   | 收款頁面載入過多資料                    |
 

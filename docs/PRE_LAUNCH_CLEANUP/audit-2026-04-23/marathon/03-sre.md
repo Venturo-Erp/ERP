@@ -21,11 +21,13 @@
 **位置**：`src/app/api/tenants/create/route.ts` L154-250
 
 **症狀**：
+
 - 建立租戶流程：建 workspace → 建 employee → 建 auth user → seed 基礎資料
 - 若步驟 3（auth user creation）失敗，步驟 1-2 已建立的 workspace/employee 孤兒殘留
 - 下次重試建相同 workspace code，會報「已存在」、新客無法開通
 
 **證據**：
+
 ```typescript
 // L157-159 追蹤已建立資源
 let createdWorkspaceId: string | null = null
@@ -45,6 +47,7 @@ const { data: workspace, error: wsError } = await supabaseAdmin
 **修法（優先序）**：
 
 **P1（立刻）**：改用 Supabase RPC transaction + retry
+
 ```typescript
 // 建一個 RPC function 在 DB 層做原子建立、內部 BEGIN/COMMIT/ROLLBACK
 CREATE OR REPLACE FUNCTION public.create_tenant_atomic(
@@ -79,12 +82,14 @@ $$ LANGUAGE plpgsql;
 **位置**：`src/app/api/accounting/vouchers/auto-create/route.ts` L6-86
 
 **症狀**：
+
 - 批次確認付款 2 筆以上、同時呼叫 auto-create API
 - 兩個請求同時執行 generateVoucherNo，都查到最後一筆 seq=5、都計算 seq=6
 - 兩筆傳票都是 `JV20260306`、unique constraint 失敗、其中一筆payment確認失敗
 - 會計無法結轉、SLA 破裂
 
 **證據**：
+
 ```typescript
 // L6-16 ⚠️ singleton client
 let supabase: SupabaseClient
@@ -103,7 +108,7 @@ async function generateVoucherNo(workspaceId: string, date: string): Promise<str
     .like('voucher_no', `${prefix}%`)
     .order('voucher_no', { ascending: false })
     .limit(1)
-  
+
   // ⚠️ 步驟 1：查詢
   let seq = 1
   if (data && data.length > 0) seq = parseInt(data[0].voucher_no.slice(-4)) + 1
@@ -116,6 +121,7 @@ async function generateVoucherNo(workspaceId: string, date: string): Promise<str
 **修法（優先序）**：
 
 **P1（立刻）**：改用 DB RPC + FOR UPDATE 鎖
+
 ```sql
 CREATE OR REPLACE FUNCTION public.generate_next_voucher_no(
   p_workspace_id UUID,
@@ -127,15 +133,15 @@ DECLARE
   v_result TEXT;
 BEGIN
   v_prefix := 'JV' || TO_CHAR(p_voucher_date, 'YYYYMM');
-  
+
   -- 用 FOR UPDATE 鎖定、確保原子性
   SELECT COALESCE(MAX(CAST(SUBSTRING(voucher_no, -4) AS INT)), 0) + 1
   INTO v_next_seq
   FROM public.journal_vouchers
-  WHERE workspace_id = p_workspace_id 
+  WHERE workspace_id = p_workspace_id
     AND voucher_no LIKE v_prefix || '%'
   FOR UPDATE;  -- ⚠️ 關鍵：鎖定、防止並行
-  
+
   v_result := v_prefix || LPAD(v_next_seq::TEXT, 4, '0');
   RETURN v_result;
 END;
@@ -153,12 +159,14 @@ $$ LANGUAGE plpgsql;
 **位置**：`src/app/api/accounting/vouchers/auto-create/route.ts` L6-16
 
 **症狀**：
+
 - Vercel serverless 環境、container 可能重用
 - 同一個 container 內、singleton supabase client 會存活多個 request
 - RLS policy 更新、token 過期、connection pool 狀態不同步
 - 自動產生傳票時、查不到應該看到的資料（RLS 過時）或拿到錯的 workspace 資料
 
 **證據**：
+
 ```typescript
 // ⚠️ 這違反 CLAUDE.md 紅線
 let supabase: SupabaseClient
@@ -171,6 +179,7 @@ function getSupabase() {
 ```
 
 **修法**：
+
 ```typescript
 // 改成 per-request client
 export async function POST(request: NextRequest) {
@@ -186,16 +195,19 @@ export async function POST(request: NextRequest) {
 ### 4. [LINE/LinkPay/OCR 外部呼叫] 超時無 fallback
 
 **位置**：
+
 - LINE webhook 回調超時（`src/app/api/line/webhook/route.ts`）
 - LinkPay API 超時（`src/app/api/linkpay/route.ts`）
 - Gemini 圖片生成超時（有重試但無 fallback UI）
 
 **症狀**：
+
 - LINE API 掛 30 秒、webhook 超時、新訊息進來沒有回應
 - 用戶等待 AI 客服回應、half-loading → 整個頁面掛
 - 生成行程圖片超時、前端沒有「稍後重試」UI、只顯示破圖
 
 **證據**：
+
 ```typescript
 // LINE webhook — 若 reply 超時、entire endpoint timeout
 const profileRes = await fetch(`https://api.line.me/v2/bot/profile/${lineUserId}`, {
@@ -207,7 +219,7 @@ const profileRes = await fetch(`https://api.line.me/v2/bot/profile/${lineUserId}
 if (result.isQuotaError) {
   markKeyAsBlocked(apiKey, result.retryAfter || 60)
   lastError = result.error || 'Quota exceeded'
-  continue  // 重試下一個 key
+  continue // 重試下一個 key
 }
 // 所有 key 都失敗後、API 回傳 error
 return errorResponse('所有 API Key 都失敗了', 500, ErrorCode.EXTERNAL_API_ERROR)
@@ -217,6 +229,7 @@ return errorResponse('所有 API Key 都失敗了', 500, ErrorCode.EXTERNAL_API_
 **修法**（優先序）：
 
 **P1（立刻）**：加 timeout + graceful degradation
+
 ```typescript
 // 1. 加 timeout
 const controller = new AbortController()
@@ -250,30 +263,33 @@ export default function AIBotError({error, reset}) {
 ### 5. [Webhook 去重機制缺失] LINE/META 重複 Event
 
 **位置**：
+
 - `src/app/api/line/webhook/route.ts` — 無 dedup
 - `src/app/api/meta/webhook/route.ts` — 可能也無
 
 **症狀**：
+
 - LINE/META 重試邏輯：若我們 API 回 timeout、LINE 會 3 次重試
 - 同一個 event（例如 follow / message）被我們處理 3 次
 - 新客戶被重複建立 3 筆 line_user
 - 訊息被重複儲存、AI 客服被呼叫 3 次、內存 query 被擊中 3 次
 
 **證據**：
+
 ```typescript
 // LINE webhook — 無 dedup
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     const events: LineEvent[] = body.events
-    
+
     for (const event of events) {
       if (event.type === 'follow') {
         // 直接建立 user
-        await saveUserToDb(event.source.userId, profile)  // ⚠️ 無檢查重複
+        await saveUserToDb(event.source.userId, profile) // ⚠️ 無檢查重複
       }
     }
-    
+
     return NextResponse.json({ message: 'ok' })
   } catch (error) {
     // 若此 try/catch 裡任何地方拋出、webhook 回傳 error
@@ -285,6 +301,7 @@ export async function POST(request: NextRequest) {
 **修法**（優先序）：
 
 **P1（立刻）**：加 idempotency key 檢查
+
 ```typescript
 // 在 webhook event 表記錄 (event_id, workspace_id) unique constraint
 // 每個 event 第一次進來、記錄到 webhook_event_dedup
@@ -293,7 +310,7 @@ export async function POST(request: NextRequest) {
 const { data: existing } = await supabase
   .from('webhook_event_dedup')
   .select('id')
-  .eq('event_id', event.message.id)  // LINE 每個 event 有唯一 id
+  .eq('event_id', event.message.id) // LINE 每個 event 有唯一 id
   .eq('provider', 'line')
   .single()
 
@@ -321,35 +338,40 @@ await supabase.from('webhook_event_dedup').insert({
 ### 6. [Observability] Sentry 設定但無 SLO / 無 Alert Rule
 
 **位置**：
+
 - `sentry.client.config.ts` — 設定了 Sentry 但無 alert threshold
 - `src/lib/utils/logger.ts` — 自刻 logger、error 發送到 `/api/log-error`
 - **缺失**：SLO 定義、error budget、burn rate alert
 
 **症狀**：
+
 - Error rate 爬升到 5%、沒有人收到通知
 - 等到隔天看 Sentry dashboard、才發現昨晚 01:00-02:00 LAG 爆表
 - 上線當天有隱藏 bug（例如金額計算 0.01 偏差）、持續漏帳 1 小時、被發現時已有 100 筆訂單受影響
 
 **證據**：
+
 ```typescript
 // sentry.client.config.ts 有初始化但無 alert
 Sentry.init({
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
-  tracesSampleRate: 1,  // 但沒有 burn rate thresholds
+  tracesSampleRate: 1, // 但沒有 burn rate thresholds
   // ⚠️ 無 beforeSend（無 PII 過濾）
   // ⚠️ 無 integrations（如 RequestIntegration）
 })
 
 // logger.ts 有遠端發送但無集中儀表板
 if (level === 'error') {
-  sendToRemote(entry)  // 發到 /api/log-error、但沒後端收集
+  sendToRemote(entry) // 發到 /api/log-error、但沒後端收集
 }
 ```
 
 **修法**（優先序）：
 
 **P2（上線前後 1 週內）**：
+
 1. 定義 SLO
+
    ```
    - 可用性：99.9%（月度 uptime）
    - 登入成功率：99.95%
@@ -358,12 +380,13 @@ if (level === 'error') {
    ```
 
 2. 設定 Sentry alert
+
    ```json
    {
      "conditions": [
        {
          "interval": "1m",
-         "threshold": 10,  // error rate > 10% in 1min
+         "threshold": 10, // error rate > 10% in 1min
          "comparisonType": ">"
        }
      ],
@@ -394,23 +417,26 @@ if (level === 'error') {
 ### 7. [Background Jobs] Cron Task 失敗無重試
 
 **位置**：
+
 - `src/app/api/cron/ticket-status/route.ts`
 - `src/app/api/cron/process-tasks/route.ts`
 
 **症狀**：
+
 - 每天 02:00 UTC (10:00 Taiwan) 開票狀態檢查 cron 失敗
 - 因為那時 Supabase 做 maintenance、API 回 503
 - Cron 執行失敗、只記到 cron_execution_logs、沒有人被通知
 - 隔天發現開票狀態沒有推給業務、會計無法確認
 
 **證據**：
+
 ```typescript
 // ticket-status/route.ts — 無重試
 export async function GET(request: NextRequest) {
   try {
     const response = await fetch(`${baseUrl}/api/bot/ticket-status`, {...})
     const result = await response.json()
-    
+
     if (!result.success) {
       logger.error('開票狀態檢查失敗:', result)
       return NextResponse.json(result, { status: 500 })  // ⚠️ 失敗、無重試
@@ -427,7 +453,9 @@ export async function GET(request: NextRequest) {
 **修法**（優先序）：
 
 **P2（上線後 1 週）**：
+
 1. 改用 exponential backoff
+
    ```typescript
    async function fetchWithRetry(url, maxRetries = 3) {
      for (let i = 0; i < maxRetries; i++) {
@@ -436,13 +464,14 @@ export async function GET(request: NextRequest) {
          if (res.ok) return res
        } catch (e) {
          if (i === maxRetries - 1) throw e
-         await sleep(1000 * Math.pow(2, i))  // 1s, 2s, 4s
+         await sleep(1000 * Math.pow(2, i)) // 1s, 2s, 4s
        }
      }
    }
    ```
 
 2. 加監控告警
+
    ```typescript
    if (!result.success) {
      // 記錄 + 通知
@@ -462,11 +491,13 @@ export async function GET(request: NextRequest) {
 **位置**：API routes（75 個中約 10 個無頂層 try/catch）
 
 **症狀**：
+
 - API 拋出未捕捉的異常（例如 JSON.parse 失敗、RPC 超時）
 - Vercel Function 回傳 5xx、但沒有結構化日誌
 - Client 收到 `<html> 502 Bad Gateway</html>`、無法區分「backend down」vs「我寫錯了」
 
 **修法**：
+
 ```typescript
 // ⚠️ 現況：某些 route 無頂層 catch
 export async function POST(request: NextRequest) {
@@ -501,11 +532,13 @@ export async function POST(request: NextRequest) {
 **位置**：訂單建立、支付確認 endpoint
 
 **症狀**：
+
 - 使用者網路慢、點「確認付款」2 次
 - 兩筆 receipt 都建立、金額扣 2 倍
 - 對帳時差 2 倍金額、會計崩潰
 
 **修法**：
+
 ```typescript
 // 在 client 端生成 idempotency key、在 API 層檢查
 const idempotencyKey = `${userId}:${Date.now()}`
@@ -518,7 +551,7 @@ const { data: existing } = await supabase
   .single()
 
 if (existing) {
-  return successResponse(existing.result)  // 返回快取結果
+  return successResponse(existing.result) // 返回快取結果
 }
 
 // 執行...
@@ -537,11 +570,13 @@ await supabase.from('idempotency_keys').insert({
 **位置**：所有 error.tsx 都是「顯示 error message」、無降級方案
 
 **症狀**：
+
 - 報表頁因為 Supabase query 超時、顯示白屏 error
 - 本來使用者可以看「載入中」UI、改成看錯誤訊息
 - 後台管理頁掛、新客無法開團
 
 **修法**：
+
 ```typescript
 // error.tsx 加 fallback UI
 export default function Error({error, reset}) {
@@ -549,13 +584,13 @@ export default function Error({error, reset}) {
     <div>
       {/* 優先級 1：嘗試重新載入 */}
       <button onClick={reset}>重試</button>
-      
+
       {/* 優先級 2：顯示快取資料（若有的話）*/}
       {cachedData && <CachedView data={cachedData} />}
-      
+
       {/* 優先級 3：顯示簡化版本 */}
       <SimplifiedView />
-      
+
       {/* 優先級 4：才顯示錯誤細節 */}
       {process.env.NODE_ENV === 'development' && (
         <pre>{error.message}</pre>
@@ -573,41 +608,46 @@ export default function Error({error, reset}) {
 
 ### ✅ 強點
 
-| 面向 | 證據 | 評價 |
-|---|---|---|
-| **Error Logging** | Logger 自刻、支援 context、遠端發送 | ✅ 結構完善、只缺 SLO |
-| **Admin Client** | per-request（非 singleton），遵守 CLAUDE.md | ✅ 正確架構 |
-| **Rate Limiting** | 登入、public API 都有檢查 + RPC 分散鎖 | ✅ 防禦完整 |
-| **Webhook 簽驗** | LINE 用 timingSafeEqual、防 timing attack | ✅ 安全 |
-| **Cron 認證** | CRON_SECRET 檢查 | ✅ 防止 unauthorized 呼叫 |
-| **Request Dedup** | 實作 dedup 函式（client 端防雙擊） | ✅ 基礎有、但 API 層還需補 |
-| **External API Retry** | Gemini 有多 key 輪替 + 標記封鎖 | ✅ 主動降級設計 |
+| 面向                   | 證據                                        | 評價                       |
+| ---------------------- | ------------------------------------------- | -------------------------- |
+| **Error Logging**      | Logger 自刻、支援 context、遠端發送         | ✅ 結構完善、只缺 SLO      |
+| **Admin Client**       | per-request（非 singleton），遵守 CLAUDE.md | ✅ 正確架構                |
+| **Rate Limiting**      | 登入、public API 都有檢查 + RPC 分散鎖      | ✅ 防禦完整                |
+| **Webhook 簽驗**       | LINE 用 timingSafeEqual、防 timing attack   | ✅ 安全                    |
+| **Cron 認證**          | CRON_SECRET 檢查                            | ✅ 防止 unauthorized 呼叫  |
+| **Request Dedup**      | 實作 dedup 函式（client 端防雙擊）          | ✅ 基礎有、但 API 層還需補 |
+| **External API Retry** | Gemini 有多 key 輪替 + 標記封鎖             | ✅ 主動降級設計            |
 
 ---
 
 ## 跨視角 Pattern 候選（傳給下一位）
 
 ### 1. **多步驟 API 無事務邊界** → Architect / Database 也會看
+
 - Tenants create、Period closing、Invoice 等都是「寫多張表」
 - 目前都靠 rollback 函式（易漏）
 - 應該中央定義「multi-step API 範本」→ RPC 做原子
 
 ### 2. **外部 API 超時無 fallback** → UX Architect / DevOps 也會看
+
 - LINE、LinkPay、Gemini、OCR 各有超時
 - 前端沒有降級方案
 - 應該文件化「外部 API SLA」+ 「降級策略清單」
 
 ### 3. **Webhook 去重 + 幂等性統一政策缺失** → Data Engineer 也會看
+
 - LINE / META / LinkPay 都有重試邏輯
 - 目前無中央 dedup 框架
 - 應該建 `webhook-dedup-middleware` 供所有 webhook 共用
 
 ### 4. **Cron Job 失敗無重試、無通知** → DevOps / Automation 也會看
+
 - 兩個 cron 都失敗無重試
 - 沒有 monitoring、沒有 alert
 - 應該改用 Supabase Edge Functions（原生重試）或加 external job queue
 
 ### 5. **Observability 無 SLO/Alert** → DevOps / Architect 也會看
+
 - Sentry 裝了但沒告警
 - Logger 發了但沒人收
 - 上線 day-1 需要一份「維運儀表板」+ 「告警規則」
@@ -619,12 +659,14 @@ export default function Error({error, reset}) {
 ## 給下一位靈魂（Software Architect）的 Hint
 
 **Architecture 視角會補充**：
+
 - 多步驟 API 是否應該改用 saga pattern（分散 transaction）
 - Webhook 去重是否該改成 event sourcing
 - External API resilience 是否該加 circuit breaker
 - Observability 架構（Sentry vs 自刻 logger 的 trade-off）
 
 **DevOps/SRE 會補充的**：
+
 - Vercel function timeout（10s / 60s / 900s）有沒有超
 - Supabase 連線池容量（pgBouncer default 20、會不會炸）
 - Cron 改用 Edge Functions / GitHub Actions / Bull Queue 的評估
@@ -670,6 +712,7 @@ export default function Error({error, reset}) {
 # Venturo ERP 事故 Runbook
 
 ## Case 1: LINE API 掛機（response 5xx 或 timeout）
+
 - **症狀**：用戶在 ai-bot 收不到回應、半分鐘後 timeout
 - **檢查**：
   1. `curl https://api.line.me/v2/bot/info -H "Authorization: Bearer..."` 測試 LINE 連通性
@@ -681,6 +724,7 @@ export default function Error({error, reset}) {
 - **復原**：LINE 恢復後、app 自動重試
 
 ## Case 2: Supabase 連線爆滿（pgBouncer pool exhausted）
+
 - **症狀**：所有 API 超時、登入無法進行
 - **檢查**：
   1. Supabase dashboard 看 active connections
@@ -692,6 +736,7 @@ export default function Error({error, reset}) {
   4. 如果還是掛，準備 rollback to 前一版本
 
 ## Case 3: 新客戶建立失敗（Tenants Create）
+
 - **症狀**：新租戶無法開通、重試後報「workspace code 已存在」
 - **檢查**：
   1. 去 workspaces 表查是否有孤兒 workspace（沒有 owner employee）
@@ -706,16 +751,16 @@ export default function Error({error, reset}) {
 
 ## 附錄：SRE 視角總結
 
-| 維度 | 目前狀況 | 風險等級 | 修復難度 |
-|---|---|---|---|
-| Error Handling | 113 個 try/catch、13% 缺失 | 🟠 High | 低 |
-| Transaction | Tenants / Vouchers 無原子性 | 🔴 Critical | 中 |
-| Idempotency | Webhook 無去重、POST API 無 idempotency key | 🔴 Critical | 中 |
-| External API | LINE/LinkPay 無 timeout / fallback | 🔴 Critical | 低 |
-| Observability | Sentry 配好但無 SLO / alert | 🟠 High | 中 |
-| Background Jobs | Cron 失敗無重試、無通知 | 🟠 High | 中 |
-| Runbook | **完全缺失** | 🟠 High | 低 |
-| Feature Flags | 無（無法 rollback 功能、只能 rollback 整版） | 🟡 Medium | 高 |
+| 維度            | 目前狀況                                     | 風險等級    | 修復難度 |
+| --------------- | -------------------------------------------- | ----------- | -------- |
+| Error Handling  | 113 個 try/catch、13% 缺失                   | 🟠 High     | 低       |
+| Transaction     | Tenants / Vouchers 無原子性                  | 🔴 Critical | 中       |
+| Idempotency     | Webhook 無去重、POST API 無 idempotency key  | 🔴 Critical | 中       |
+| External API    | LINE/LinkPay 無 timeout / fallback           | 🔴 Critical | 低       |
+| Observability   | Sentry 配好但無 SLO / alert                  | 🟠 High     | 中       |
+| Background Jobs | Cron 失敗無重試、無通知                      | 🟠 High     | 中       |
+| Runbook         | **完全缺失**                                 | 🟠 High     | 低       |
+| Feature Flags   | 無（無法 rollback 功能、只能 rollback 整版） | 🟡 Medium   | 高       |
 
 ---
 
@@ -727,18 +772,19 @@ export default function Error({error, reset}) {
 
 ### 1. 真問題過濾
 
-| # | SRE 說 | 覆盤後 | 備註 |
-|---|---|---|---|
-| Tenants Create 無 transaction | 🔴 | 🔴 **真、視角升級** | 原 INDEX ① 只講「欄位錯」、SRE 升級成「多步驟無事務邊界」、**兩個問題合併看更完整**、修 ① 時一起修 transaction |
-| Vouchers race | 🔴 | ❌ **扣分、重報** | 01-accounting + 02-db-optimizer 都報過、SRE 沒加新角度 |
-| Supabase singleton | 🔴 | ❌ **扣分、重報** | INDEX ⑥ 已列、CLAUDE.md 紅線已規範、SRE 重報 |
-| **LINE/LinkPay/Gemini timeout 無 fallback** | 🔴 | 🔴 **真、新、SRE 獨有** | 外部 API 超時沒 circuit breaker、使用者白屏 |
-| **Webhook 無去重（idempotency）** | 🔴 | 🔴 **真、新、SRE 獨有** | LINE 重試或 META 重試會重複建訂單 / 扣款。Security 指出簽驗、SRE 補上冪等性、兩層都要 |
-| **無 SLO / alert / oncall** | 🟠 | 🟠 **真、新、SRE 獨有** | Sentry 裝了但沒接告警、壞了不知道 |
-| Cron 無重試 | 🟠 | ⚠️ **需驗證** | 要先確認「有沒有 cron job」、可能誤設前提 |
-| 13% API route 缺 try/catch | 🟠 | 🟡 低 | Next.js framework 有頂層 catch、不會整個 crash、是可觀察性差 |
+| #                                           | SRE 說 | 覆盤後                  | 備註                                                                                                           |
+| ------------------------------------------- | ------ | ----------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Tenants Create 無 transaction               | 🔴     | 🔴 **真、視角升級**     | 原 INDEX ① 只講「欄位錯」、SRE 升級成「多步驟無事務邊界」、**兩個問題合併看更完整**、修 ① 時一起修 transaction |
+| Vouchers race                               | 🔴     | ❌ **扣分、重報**       | 01-accounting + 02-db-optimizer 都報過、SRE 沒加新角度                                                         |
+| Supabase singleton                          | 🔴     | ❌ **扣分、重報**       | INDEX ⑥ 已列、CLAUDE.md 紅線已規範、SRE 重報                                                                   |
+| **LINE/LinkPay/Gemini timeout 無 fallback** | 🔴     | 🔴 **真、新、SRE 獨有** | 外部 API 超時沒 circuit breaker、使用者白屏                                                                    |
+| **Webhook 無去重（idempotency）**           | 🔴     | 🔴 **真、新、SRE 獨有** | LINE 重試或 META 重試會重複建訂單 / 扣款。Security 指出簽驗、SRE 補上冪等性、兩層都要                          |
+| **無 SLO / alert / oncall**                 | 🟠     | 🟠 **真、新、SRE 獨有** | Sentry 裝了但沒接告警、壞了不知道                                                                              |
+| Cron 無重試                                 | 🟠     | ⚠️ **需驗證**           | 要先確認「有沒有 cron job」、可能誤設前提                                                                      |
+| 13% API route 缺 try/catch                  | 🟠     | 🟡 低                   | Next.js framework 有頂層 catch、不會整個 crash、是可觀察性差                                                   |
 
 **覆盤結論**：**4 個真 P0 / 1 個 P1 新的**
+
 - P0：LINE/LinkPay timeout fallback
 - P0：Webhook idempotency
 - P0：Tenants Create 無 transaction（合併 ①）
@@ -766,4 +812,3 @@ export default function Error({error, reset}) {
 **總計 8 種跨視角 pattern**、後面 7 位繼續累積。
 
 ---
-

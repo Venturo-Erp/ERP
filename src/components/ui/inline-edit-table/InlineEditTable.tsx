@@ -79,11 +79,7 @@ export function InlineEditTable<T>({
     <div className={cn('flex flex-col min-h-0', className)}>
       {(title || onAdd || headerExtra) && (
         <div className="flex items-center justify-between mb-3">
-          {title ? (
-            <h3 className="text-sm font-medium text-morandi-primary">{title}</h3>
-          ) : (
-            <span />
-          )}
+          {title ? <h3 className="text-sm font-medium text-morandi-primary">{title}</h3> : <span />}
           <div className="flex items-center gap-2">
             {headerExtra}
             {onAdd && !readonly && (
@@ -98,9 +94,7 @@ export function InlineEditTable<T>({
 
       <div
         className={cn(
-          isMinimal
-            ? 'overflow-hidden'
-            : 'border border-border/50 rounded-lg overflow-hidden'
+          isMinimal ? 'overflow-hidden' : 'border border-border/50 rounded-lg overflow-hidden'
         )}
       >
         <table className="w-full border-collapse">
@@ -148,14 +142,13 @@ export function InlineEditTable<T>({
               ))
             ) : (
               rows.map((row, index) => {
-                const canRemoveRow = onRemove && (canRemove ? canRemove(row, index) : rows.length > 1)
+                const canRemoveRow =
+                  onRemove && (canRemove ? canRemove(row, index) : rows.length > 1)
                 return (
                   <React.Fragment key={index}>
                     <tr
                       className={cn(
-                        isMinimal
-                          ? ''
-                          : 'bg-card border-b border-border/50 last:border-b-0'
+                        isMinimal ? '' : 'bg-card border-b border-border/50 last:border-b-0'
                       )}
                     >
                       {columns.map(col => (

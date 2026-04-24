@@ -1,1 +1,130 @@
-[{"city_id":"sapporo","attractions_count":0,"cost_templates_count":0,"quotes_count":0,"tours_count":0,"updated_at":"2025-10-27 13:05:32.760223+00"},{"city_id":"tokyo","attractions_count":0,"cost_templates_count":0,"quotes_count":0,"tours_count":0,"updated_at":"2025-10-27 13:05:32.760223+00"},{"city_id":"yokohama","attractions_count":0,"cost_templates_count":0,"quotes_count":0,"tours_count":0,"updated_at":"2025-10-27 13:05:32.760223+00"},{"city_id":"osaka","attractions_count":0,"cost_templates_count":0,"quotes_count":0,"tours_count":0,"updated_at":"2025-10-27 13:05:32.760223+00"},{"city_id":"kyoto","attractions_count":0,"cost_templates_count":0,"quotes_count":0,"tours_count":0,"updated_at":"2025-10-27 13:05:32.760223+00"},{"city_id":"kobe","attractions_count":0,"cost_templates_count":0,"quotes_count":0,"tours_count":0,"updated_at":"2025-10-27 13:05:32.760223+00"},{"city_id":"fukuoka","attractions_count":0,"cost_templates_count":0,"quotes_count":0,"tours_count":0,"updated_at":"2025-10-27 13:05:32.760223+00"},{"city_id":"kumamoto","attractions_count":0,"cost_templates_count":0,"quotes_count":0,"tours_count":0,"updated_at":"2025-10-27 13:05:32.760223+00"},{"city_id":"nagasaki","attractions_count":0,"cost_templates_count":0,"quotes_count":0,"tours_count":0,"updated_at":"2025-10-27 13:05:32.760223+00"},{"city_id":"naha","attractions_count":0,"cost_templates_count":0,"quotes_count":0,"tours_count":0,"updated_at":"2025-10-27 13:05:32.760223+00"},{"city_id":"bangkok","attractions_count":0,"cost_templates_count":0,"quotes_count":0,"tours_count":0,"updated_at":"2025-10-27 13:05:32.760223+00"},{"city_id":"chiang-mai","attractions_count":0,"cost_templates_count":0,"quotes_count":0,"tours_count":0,"updated_at":"2025-10-27 13:05:32.760223+00"},{"city_id":"phuket","attractions_count":0,"cost_templates_count":0,"quotes_count":0,"tours_count":0,"updated_at":"2025-10-27 13:05:32.760223+00"},{"city_id":"seoul","attractions_count":0,"cost_templates_count":0,"quotes_count":0,"tours_count":0,"updated_at":"2025-10-27 13:05:32.760223+00"},{"city_id":"busan","attractions_count":0,"cost_templates_count":0,"quotes_count":0,"tours_count":0,"updated_at":"2025-10-27 13:05:32.760223+00"},{"city_id":"jeju","attractions_count":0,"cost_templates_count":0,"quotes_count":0,"tours_count":0,"updated_at":"2025-10-27 13:05:32.760223+00"}]
+[
+  {
+    "city_id": "sapporo",
+    "attractions_count": 0,
+    "cost_templates_count": 0,
+    "quotes_count": 0,
+    "tours_count": 0,
+    "updated_at": "2025-10-27 13:05:32.760223+00"
+  },
+  {
+    "city_id": "tokyo",
+    "attractions_count": 0,
+    "cost_templates_count": 0,
+    "quotes_count": 0,
+    "tours_count": 0,
+    "updated_at": "2025-10-27 13:05:32.760223+00"
+  },
+  {
+    "city_id": "yokohama",
+    "attractions_count": 0,
+    "cost_templates_count": 0,
+    "quotes_count": 0,
+    "tours_count": 0,
+    "updated_at": "2025-10-27 13:05:32.760223+00"
+  },
+  {
+    "city_id": "osaka",
+    "attractions_count": 0,
+    "cost_templates_count": 0,
+    "quotes_count": 0,
+    "tours_count": 0,
+    "updated_at": "2025-10-27 13:05:32.760223+00"
+  },
+  {
+    "city_id": "kyoto",
+    "attractions_count": 0,
+    "cost_templates_count": 0,
+    "quotes_count": 0,
+    "tours_count": 0,
+    "updated_at": "2025-10-27 13:05:32.760223+00"
+  },
+  {
+    "city_id": "kobe",
+    "attractions_count": 0,
+    "cost_templates_count": 0,
+    "quotes_count": 0,
+    "tours_count": 0,
+    "updated_at": "2025-10-27 13:05:32.760223+00"
+  },
+  {
+    "city_id": "fukuoka",
+    "attractions_count": 0,
+    "cost_templates_count": 0,
+    "quotes_count": 0,
+    "tours_count": 0,
+    "updated_at": "2025-10-27 13:05:32.760223+00"
+  },
+  {
+    "city_id": "kumamoto",
+    "attractions_count": 0,
+    "cost_templates_count": 0,
+    "quotes_count": 0,
+    "tours_count": 0,
+    "updated_at": "2025-10-27 13:05:32.760223+00"
+  },
+  {
+    "city_id": "nagasaki",
+    "attractions_count": 0,
+    "cost_templates_count": 0,
+    "quotes_count": 0,
+    "tours_count": 0,
+    "updated_at": "2025-10-27 13:05:32.760223+00"
+  },
+  {
+    "city_id": "naha",
+    "attractions_count": 0,
+    "cost_templates_count": 0,
+    "quotes_count": 0,
+    "tours_count": 0,
+    "updated_at": "2025-10-27 13:05:32.760223+00"
+  },
+  {
+    "city_id": "bangkok",
+    "attractions_count": 0,
+    "cost_templates_count": 0,
+    "quotes_count": 0,
+    "tours_count": 0,
+    "updated_at": "2025-10-27 13:05:32.760223+00"
+  },
+  {
+    "city_id": "chiang-mai",
+    "attractions_count": 0,
+    "cost_templates_count": 0,
+    "quotes_count": 0,
+    "tours_count": 0,
+    "updated_at": "2025-10-27 13:05:32.760223+00"
+  },
+  {
+    "city_id": "phuket",
+    "attractions_count": 0,
+    "cost_templates_count": 0,
+    "quotes_count": 0,
+    "tours_count": 0,
+    "updated_at": "2025-10-27 13:05:32.760223+00"
+  },
+  {
+    "city_id": "seoul",
+    "attractions_count": 0,
+    "cost_templates_count": 0,
+    "quotes_count": 0,
+    "tours_count": 0,
+    "updated_at": "2025-10-27 13:05:32.760223+00"
+  },
+  {
+    "city_id": "busan",
+    "attractions_count": 0,
+    "cost_templates_count": 0,
+    "quotes_count": 0,
+    "tours_count": 0,
+    "updated_at": "2025-10-27 13:05:32.760223+00"
+  },
+  {
+    "city_id": "jeju",
+    "attractions_count": 0,
+    "cost_templates_count": 0,
+    "quotes_count": 0,
+    "tours_count": 0,
+    "updated_at": "2025-10-27 13:05:32.760223+00"
+  }
+]

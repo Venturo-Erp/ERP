@@ -262,7 +262,6 @@ export default function PaymentsPage() {
 
       {/* 批量收款對話框 */}
       <BatchReceiptDialog open={isBatchDialogOpen} onOpenChange={setIsBatchDialogOpen} />
-
     </>
   )
 }

@@ -20,11 +20,9 @@ const fetcher = async (url: string): Promise<Role[]> => {
  * so createEntityHook cannot be used here).
  */
 export function useRoles() {
-  const { data, isLoading, mutate } = useSWR<Role[]>(
-    'hr-roles-list',
-    () => fetcher('/api/roles'),
-    { revalidateOnFocus: false }
-  )
+  const { data, isLoading, mutate } = useSWR<Role[]>('hr-roles-list', () => fetcher('/api/roles'), {
+    revalidateOnFocus: false,
+  })
 
   return {
     roles: data ?? [],

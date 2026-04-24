@@ -85,7 +85,9 @@ export async function withCronHeartbeat<T>(
         attempts: attempt,
         last_error: null,
       })
-      logger.log(`[cron:${jobName}] success on attempt ${attempt}`, { duration_ms: finishedAt - startedAt })
+      logger.log(`[cron:${jobName}] success on attempt ${attempt}`, {
+        duration_ms: finishedAt - startedAt,
+      })
       return NextResponse.json({ success: true, attempt, data: result })
     } catch (e) {
       lastError = e

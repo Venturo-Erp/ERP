@@ -106,7 +106,6 @@ interface TourAllocation {
 
 type RequestMode = 'tour' | 'batch' | 'company'
 
-
 export function AddRequestDialog({
   open,
   onOpenChange,

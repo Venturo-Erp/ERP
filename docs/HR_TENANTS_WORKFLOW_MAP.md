@@ -79,6 +79,7 @@ employees（員工表）
 #### 操作流程：建職務 → 設權限 → 分配員工
 
 **Step 1：新增職務**
+
 ```
 老闆點「新增職務」按鈕
   ↓
@@ -115,6 +116,7 @@ API 回傳新職務（id / name / description / is_admin / sort_order）
 ```
 
 操作方式：
+
 - **模組層級**（第 130-178 行）：勾「可讀取」/「可寫入」→ toggle 該模組全部分頁
 - **分頁層級**（第 180-203 行）：展開模組 → 勾每個分頁
 - **Admin 的特殊性**（第 315 行 `isAdmin = selectedRole?.is_admin`）：
@@ -122,9 +124,10 @@ API 回傳新職務（id / name / description / is_admin / sort_order）
   - 但「下拉資格」tab 可以個別取消（`adminCanEdit = tab.isEligibility === true`）
 
 點「儲存」按鈕：
+
 ```
 PUT /api/roles/{roleId}/tab-permissions
-  ├── 前端發送 { permissions: [ 
+  ├── 前端發送 { permissions: [
   │     { module_code: "tours", tab_code: "overview", can_read: true, can_write: true },
   │     { module_code: "tours", tab_code: "orders", can_read: false, can_write: false },
   │     ...
@@ -138,6 +141,7 @@ PUT /api/roles/{roleId}/tab-permissions
 ```
 
 **程式碼證據**：
+
 - 讀權限：`/src/app/(main)/hr/roles/page.tsx:68-88`（GET 權限）
 - 儲存：`/src/app/(main)/hr/roles/page.tsx:237-284`（PUT）
 - API：檔案不在本報告讀取範圍（但邏輯由 UI 代碼推測）
@@ -149,6 +153,7 @@ PUT /api/roles/{roleId}/tab-permissions
 職務管理頁**本身不做員工指派**。指派邏輯在「員工管理」頁（`/hr` 主頁）。
 
 進入「編輯員工」表單：
+
 ```
 EmployeeForm 組件 (/src/features/hr/components/EmployeeForm.tsx)
   ├── 載入職務列表：GET /api/roles → roles[]
@@ -200,6 +205,7 @@ EmployeeForm 組件 (/src/features/hr/components/EmployeeForm.tsx)
 **答**：**沒有預設**。新員工的 `role_id = NULL`。
 
 操作流程：
+
 ```
 HR 系統主管 在「員工管理」頁新增員工
   ├─ EmployeeForm 出現
@@ -298,6 +304,7 @@ HR 系統主管 在「員工管理」頁新增員工
 **新租戶建立** → 系統主管職務權限來自 **Corner 模板**
 
 流程（`/src/app/api/tenants/create/route.ts:288-381`）：
+
 ```
 1. 建 4 個預設 workspace_roles（含 is_admin: name === '系統主管'）
 2. 查 Corner workspace 的 4 個同名角色
@@ -324,6 +331,7 @@ HR 系統主管 在「員工管理」頁新增員工
 **答**：**Venturo 平台管理資格 + 被賦予「租戶管理」功能權限的租戶員工**
 
 具體：
+
 ```
 1. Venturo 平台管理資格（平台系統主管）
    - 在 Venturo 的「管理後台」（假想存在的另一套系統）
@@ -417,6 +425,7 @@ API：`/src/app/api/tenants/create/route.ts`（行 41-537）
 #### 10 個建立步驟（第 138-509 行）
 
 **Step 1：建 workspaces row**（第 184-207 行）
+
 ```sql
 INSERT INTO workspaces {
   name: "京遙旅行社",
@@ -429,11 +438,13 @@ INSERT INTO workspaces {
 ```
 
 **Step 2-4：建第一個系統主管（employee + auth + 綁定）**（第 209-286 行）
+
 - CREATE employees row（employee_number = "E001"、roles = ['系統主管']、permissions 已廢除、role_id 暫空）
 - CREATE auth.users row（email、password、user_metadata 存 workspace_id / employee_id）
 - UPDATE employees.supabase_user_id = auth_user_id
 
 **Step 5：建 4 個預設職務**（第 288-325 行）
+
 ```sql
 INSERT INTO workspace_roles × 4 {
   name: "系統主管" / "業務" / "會計" / "助理"
@@ -445,6 +456,7 @@ INSERT INTO workspace_roles × 4 {
 ```
 
 **Step 6：從 Corner 複製 role_tab_permissions（權限模板）**（第 326-381 行）
+
 ```
 1. 查 Corner 的 4 個同名職務 ID
    WHERE workspace_code = 'CORNER' AND name IN ('系統主管', '業務', '會計', '助理')
@@ -461,6 +473,7 @@ INSERT INTO workspace_roles × 4 {
 ```
 
 **Step 7：初始化 workspace_features（功能開關）**（第 383-454 行）
+
 ```
 1. 免費功能預設全開：
    dashboard, calendar, workspace, todos, tours, orders, quotes, finance,
@@ -477,11 +490,13 @@ INSERT INTO workspace_roles × 4 {
 ```
 
 **Step 8-10：Soft 步驟（失敗不 rollback）**
+
 - 建公告頻道（channels.INSERT）
 - 從 Corner 複製基礎資料（countries）
 - 建 workspace bot
 
 #### 回傳值（第 513-528 行）
+
 ```json
 {
   "success": true,
@@ -518,6 +533,7 @@ INSERT INTO workspace_roles × 4 {
 **預設職務的權限來自哪裡**？**Corner 租戶**（第 326-381 行的 CORNER_WORKSPACE_ID）
 
 這樣設計的好處：
+
 - 新租戶不用重新設定一遍「業務可以看什麼」
 - Venturo 可以統一調整 Corner 的職務權限 → 未來新租戶都會用最新的模板
 - （缺點：如果 Corner 改了、舊租戶不會自動更新，那是未來的 P007 問題）
@@ -545,6 +561,7 @@ INSERT INTO workspace_roles × 4 {
 ```
 
 **程式碼證據**：
+
 - 功能層：`/src/lib/permissions/hooks.ts`（`useWorkspaceFeatures`）
 - 職務層：`useTabPermissions` hook
 - 組合邏輯：`/src/app/(main)/hr/roles/page.tsx:42-51`
@@ -553,15 +570,14 @@ INSERT INTO workspace_roles × 4 {
     () =>
       MODULES.filter(m => isFeatureEnabled(m.code)).map(m => ({
         ...m,
-        tabs: m.tabs.filter(
-          t => t.isEligibility || isTabEnabled(m.code, t.code, t.category)
-        ),
+        tabs: m.tabs.filter(t => t.isEligibility || isTabEnabled(m.code, t.code, t.category)),
       })),
     [isFeatureEnabled, isTabEnabled]
   )
   ```
 
 **實例**：
+
 ```
 新租戶 JINGYAO
 ├─ workspace_features: accounting = false（未買會計模組）
@@ -601,6 +617,7 @@ INSERT INTO workspace_roles × 4 {
 **答**：職務的 `role_tab_permissions` → `module_code='settings' AND tab_code='tenants' AND can_write=true`
 
 **查詢邏輯**（`/src/app/api/tenants/create/route.ts:83-93`）：
+
 ```typescript
 if (effectiveRoleId) {
   const { data: rolePermission } = await supabaseAdmin
@@ -634,6 +651,7 @@ Code 證據：
 ```
 
 **未來改進**（P009+）：
+
 - 可以考慮加 `workspaces.created_by` FK → employees
 - 或 `platform_admins` 表
 - 但目前用「某租戶某員工有租戶管理權」來代理「Venturo 平台管理資格」
@@ -714,6 +732,7 @@ JINGYAO 租戶的員工也看不到 CORNER 的員工
 ```
 
 **理想狀態**（P007 未來改進）：
+
 - 建立「職務權限模板」table（platform-wide）
 - 新租戶建時、可選擇用哪個模板
 - 將來模板版本升級、既有租戶可 opt-in 同步
@@ -815,7 +834,7 @@ HR 建新員工
 ✅ **租戶 = 獨立的系統實例**（workspace_id 隔離所有資料）  
 ✅ **系統主管職務 = 全開但可調整下拉資格**  
 ✅ **職務模板 = 新租戶從 Corner 複製**  
-✅ **權限檢查 = 3 層（驗證 → 路由 → API）**  
+✅ **權限檢查 = 3 層（驗證 → 路由 → API）**
 
 ---
 
@@ -1010,4 +1029,3 @@ HR 建新員工
 - [ ] 新員工登入 → validate-login 讀 role_tab_permissions → 建 permissions[] → 存 authStore
 - [ ] 路由層 layout 讀 useTabPermissions hook + workspace_features 雙層檢查
 - [ ] 「租戶管理」權限**硬寫在 API 層**、HR 職務管理 UI 裡沒有 `settings.tenants` tab
-

@@ -33,7 +33,8 @@ const REMOTE_LOGGING_ENABLED = process.env.NEXT_PUBLIC_REMOTE_LOGGING === 'true'
 const PII_FULL_REDACT_REGEX =
   /^(password|password_hash|token|access_token|refresh_token|api_key|apikey|secret|authorization|bearer|session|cookie|credit_card)$/i
 // 部分遮蔽: email / phone 保留前後可辨識、中間星號
-const PII_PARTIAL_MASK_REGEX = /^(email|auth_email|user_email|phone|mobile|national_id|passport_no)$/i
+const PII_PARTIAL_MASK_REGEX =
+  /^(email|auth_email|user_email|phone|mobile|national_id|passport_no)$/i
 
 function maskEmail(v: string): string {
   const [local, domain] = v.split('@')

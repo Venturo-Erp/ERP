@@ -607,7 +607,10 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
                           : ''
                       )
                       // savedSignature 是 data:image/png;base64,... URL、驗證起頭後才塞
-                      if (savedSignature && /^data:image\/(png|jpeg|jpg|svg\+xml);base64,/.test(savedSignature)) {
+                      if (
+                        savedSignature &&
+                        /^data:image\/(png|jpeg|jpg|svg\+xml);base64,/.test(savedSignature)
+                      ) {
                         html = html.replace(
                           '<span id="contract-signature-placeholder"></span>',
                           `<span style="display:inline-block;vertical-align:middle;margin-left:12px;"><img src="${savedSignature}" alt="甲方簽名" style="height:50px;object-fit:contain;vertical-align:middle;" /></span>`

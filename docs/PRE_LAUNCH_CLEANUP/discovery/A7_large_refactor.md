@@ -4,11 +4,11 @@
 
 ## Summary
 
-| File | Current LOC | Proposed LOC (shell) | # new files | Risk |
-|------|------------:|---------------------:|------------:|:----:|
-| `AddRequestDialog.tsx` | 1474 | ~140 | 8 | HIGH |
-| `QuoteDetailEmbed.tsx` | 737 | ~60 + 20 re-export | 6 | MEDIUM |
-| `customers/page.tsx` | 562 | ~90 | 5 | LOW-MED |
+| File                   | Current LOC | Proposed LOC (shell) | # new files |  Risk   |
+| ---------------------- | ----------: | -------------------: | ----------: | :-----: |
+| `AddRequestDialog.tsx` |        1474 |                 ~140 |           8 |  HIGH   |
+| `QuoteDetailEmbed.tsx` |         737 |   ~60 + 20 re-export |           6 | MEDIUM  |
+| `customers/page.tsx`   |         562 |                  ~90 |           5 | LOW-MED |
 
 > ⚠️ **Stale reference in BACKLOG**：BACKLOG L214 寫 `/quotes/[id]/page.tsx` 614 行、**實際該檔不存在**。Wave 7 真正要處理的是 `QuoteDetailEmbed.tsx` 737 行本身。BACKLOG 要修正。
 
@@ -142,12 +142,12 @@ src/features/quotes/components/
 
 ### 4 處 `supabase.from()` 直查（INV-P02 違反）
 
-| 行 | 表 | 用途 | 目標 hook |
-|---|---|---|---|
-| 99 | customers | row-click fetch passport_image_url | `useCustomerPassportImage(id)` |
-| 116 | order_members | 跨 order_members 找 passport | 同上（合併） |
-| 128 | customers | 寫回 passport_image_url | `updateCustomerPassportImage` mutation |
-| 152 | order_members + orders!inner join | delete 前檢查 customer 是否連訂單 | `useCustomerLinkedOrders(id)` |
+| 行  | 表                                | 用途                               | 目標 hook                              |
+| --- | --------------------------------- | ---------------------------------- | -------------------------------------- |
+| 99  | customers                         | row-click fetch passport_image_url | `useCustomerPassportImage(id)`         |
+| 116 | order_members                     | 跨 order_members 找 passport       | 同上（合併）                           |
+| 128 | customers                         | 寫回 passport_image_url            | `updateCustomerPassportImage` mutation |
+| 152 | order_members + orders!inner join | delete 前檢查 customer 是否連訂單  | `useCustomerLinkedOrders(id)`          |
 
 ### 5 處 `as unknown as` LINE 欄位
 

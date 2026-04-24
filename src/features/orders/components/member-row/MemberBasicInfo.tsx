@@ -206,7 +206,9 @@ export function MemberBasicInfo({
       {/* 團體模式：訂單序號 */}
       {showOrderCode && (
         <td className="border border-morandi-gold/20 px-2 py-1 bg-status-info-bg text-center">
-          <span className="text-xs text-status-info font-medium">{member.order_code ? member.order_code.slice(-3) : '-'}</span>
+          <span className="text-xs text-status-info font-medium">
+            {member.order_code ? member.order_code.slice(-3) : '-'}
+          </span>
         </td>
       )}
 

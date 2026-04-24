@@ -8,11 +8,11 @@
 
 UI 層的權限檢查目前並存三套：
 
-| 系統 | 例子 | 狀態 |
-| --- | --- | --- |
-| ✅ `useTabPermissions.canRead/canWrite(module, tab)` | finance/requests、finance/reports、finance/treasury、finance/settings、accounting/layout、database/layout、attraction-selector、WorkspaceSwitcher | 唯一讀 `role_tab_permissions`（HR 職務管理設定的） |
-| ⚠️ `usePermissions`（`src/hooks/usePermissions.ts`） | finance/payments、AdvanceListCard、OrderListCard | 模組級 bool、讀 `user.permissions` 字串陣列 |
-| ⚠️ 裸字串 `user.permissions.includes(...)` / `isAccountant` / `useRolePermissions`（空殼） | AddReceiptDialog、ReceiptConfirmDialog、AddRequestDialog、tour-itinerary-tab、useChannelSidebar、settings/page、AttractionsDialog | 完全繞過 HR 職務設定 |
+| 系統                                                                                       | 例子                                                                                                                                              | 狀態                                               |
+| ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| ✅ `useTabPermissions.canRead/canWrite(module, tab)`                                       | finance/requests、finance/reports、finance/treasury、finance/settings、accounting/layout、database/layout、attraction-selector、WorkspaceSwitcher | 唯一讀 `role_tab_permissions`（HR 職務管理設定的） |
+| ⚠️ `usePermissions`（`src/hooks/usePermissions.ts`）                                       | finance/payments、AdvanceListCard、OrderListCard                                                                                                  | 模組級 bool、讀 `user.permissions` 字串陣列        |
+| ⚠️ 裸字串 `user.permissions.includes(...)` / `isAccountant` / `useRolePermissions`（空殼） | AddReceiptDialog、ReceiptConfirmDialog、AddRequestDialog、tour-itinerary-tab、useChannelSidebar、settings/page、AttractionsDialog                 | 完全繞過 HR 職務設定                               |
 
 **最該優先處理的 3 個熱點**（HR 改職務 → 實際權限不變）：
 
@@ -29,6 +29,7 @@ UI 層的權限檢查目前並存三套：
 #### /finance（`src/app/(main)/finance/page.tsx`）
 
 **頁面層**
+
 - 檔案：`src/app/(main)/finance/page.tsx:26`
 - 現況：**完全沒有權限 gate** ❌。這是 finance 模組的入口頁（總覽 + 4 張統計卡 + 交易列表），任何能進 `(main)` 的人都看得到。
 - 仰賴：`src/components/layout/sidebar.tsx:137` 用 `requiredPermission: 'finance'` 隱藏側邊欄入口；但直接輸入 `/finance` URL 沒擋。
@@ -37,18 +38,21 @@ UI 層的權限檢查目前並存三套：
 #### /finance/payments（收款管理）
 
 **頁面層**
+
 - 檔案：`src/app/(main)/finance/payments/page.tsx:15,62,224`
 - 現況：用 `usePermissions().canViewFinance` ⚠️。底層是 `hasModulePermission(perms, 'finance') || hasModulePermission(perms, 'accounting')`，granularity 掉到模組級。
 - 建議：改 `useTabPermissions.canRead('finance', 'payments')`。
 - tab 定義：`finance.payments` 已存在 ✅。
 
 **Action 層（同頁 dialog 由上游傳入，不另 gate 開啟）**
+
 - `AddReceiptDialog`：開啟按鈕 `setIsDialogOpen(true)` 沒檢查（page.tsx:241）。建議：按鈕顯示/觸發用 `canWrite('finance', 'payments')`。
 - `BatchReceiptDialog`：目前 UI 沒按鈕觸發（`setIsBatchDialogOpen` 僅宣告、未綁按鈕）；若之後開放，需補 `canWrite('finance', 'payments')`。
 
 #### /finance/payments 相關 Dialog
 
 **`src/features/finance/payments/components/AddReceiptDialog.tsx:87-93,542,644`**
+
 - 現況：
   ```ts
   const { user, isAdmin } = useAuthStore()
@@ -62,6 +66,7 @@ UI 層的權限檢查目前並存三套：
 - 影響：現在 accounting 模組任一權限都能確認核帳，HR 沒辦法把「只能填單、不能核帳」的會計分開。
 
 **`src/features/finance/payments/components/ReceiptConfirmDialog.tsx:54-57`**
+
 - 現況：`isAccountant = isAdmin || user?.permissions?.includes('accounting')`，`canDelete = isAccountant || isCreator`。
 - 建議：`canDelete = canWrite('finance', 'payments') || isCreator`。
 - 注意：刪除收款單在 `finance.payments` 寫入權限下合理；若要再細分「確認後才能刪」，可用 `payments-confirm`。
@@ -69,11 +74,13 @@ UI 層的權限檢查目前並存三套：
 #### /finance/requests（請款管理）
 
 **頁面層**
+
 - 檔案：`src/app/(main)/finance/requests/page.tsx:5,24,65`
 - 現況：`canRead('finance', 'requests')` ✅
 - tab 定義：`finance.requests` 已存在 ✅
 
 **Action 層：`src/features/finance/requests/components/AddRequestDialog.tsx:143-147,1011,1341`**
+
 - 現況：
   ```ts
   const isAdmin = useAuthStore(state => state.isAdmin)
@@ -119,9 +126,11 @@ UI 層的權限檢查目前並存三套：
 ### 模組：accounting
 
 **Layout 層：`src/app/(main)/accounting/layout.tsx:3,13,15`**
+
 - 現況：`canReadAny('accounting')` ✅。涵蓋所有 6 個子路由。
 
 **子頁面**（accounts / checks / period-closing / reports / reports/{balance-sheet,general-ledger,income-statement,trial-balance} / vouchers）
+
 - 現況：**子頁面層沒有自己的 gate**，完全仰賴 layout。
 - 評估：目前 OK，因為 layout 用 `canReadAny` 只守「有任一 accounting 權限」就放行；子頁面若要細分（例：讓某職務只能看 vouchers 不能看 checks）要另外在每個 page.tsx 加 `canRead('accounting', '<tab>')`。
 - 建議：先不動，等 HR 有需要再細分。
@@ -131,17 +140,20 @@ UI 層的權限檢查目前並存三套：
 ### 模組：hr
 
 #### /hr（員工列表）
+
 - 檔案：`src/app/(main)/hr/page.tsx:39`
 - 現況：讀了 `isAdmin` 但**沒拿來 gate 頁面**，只在後面一些按鈕邏輯可能會用到。頁面任何進得來 `(main)` 的 user 都看得到員工列表。
 - tab 定義：`hr.employees` 已存在 ✅。
 - 建議：加 `canRead('hr', 'employees')`。
 
 #### /hr/roles（職務管理 — 本次稽核的 SSOT 設定頁）
+
 - 檔案：`src/app/(main)/hr/roles/page.tsx:35,421-441`
 - 現況：`if (!isAdmin) return <權限不足>` ⚠️ 只用 auth-store 的 `isAdmin` 判定。
 - 建議：**這頁是特例**，改職務權限設定本身 = 平台管理操作，建議保留 `isAdmin` 檢查（呼應 P001 PR-1d 報告對 WorkspaceSwitcher 的同樣結論）。若要給特定職務管理，才改 `canWrite('hr', 'roles')`（tab 已定義 ✅）。
 
 #### /hr/settings（出勤/LINE 打卡設定）
+
 - 檔案：`src/app/(main)/hr/settings/page.tsx`
 - 現況：**完全沒有 gate** ❌。任何進得來 `(main)` 的 user 都看得到/改得到。
 - 建議：加 `canWrite('hr', '<settings-tab>')`。**但目前 `module-tabs.ts` 的 `hr` 模組只有 `employees` / `roles`，需新增 `settings` tab。**
@@ -151,13 +163,16 @@ UI 層的權限檢查目前並存三套：
 ### 模組：database
 
 **Layout 層：`src/app/(main)/database/layout.tsx:3,14,16`**
+
 - 現況：`canReadAny('database')` ✅ 涵蓋所有子路由（archive-management / attractions / page / suppliers / tour-leaders / transportation-rates）。
 
 **子頁面**
+
 - 現況：所有子頁面均無自己的 gate，完全仰賴 layout。
 - 注意：P001 PR-1d audit 曾警告若 database 之下包含 `/database/workspaces`（平台管理資格）、要在子頁再加系統主管 gate。實際檢查下來 **`workspaces` 路由目前不存在**（layout 註解寫覆蓋 9 個但檔案只有 6 個），所以眼下沒此風險；但若未來真的恢復 `/database/workspaces` 必須雙層 gate。
 
 **dialog 層：`src/features/attractions/components/AttractionsDialog.tsx:14,54-55`**
+
 - 現況：
   ```ts
   const { canWrite } = useRolePermissions()
@@ -167,12 +182,15 @@ UI 層的權限檢查目前並存三套：
 - 建議：改 `useTabPermissions.canWrite('database', 'attractions')`。
 
 **元件層：`src/components/editor/attraction-selector/index.tsx:19,86-87`**
+
 - 現況：`canEditDatabase = canWrite('database', 'attractions')` ✅。
 
 **元件層：`src/components/resource-panel/ResourcePanel.tsx:167,179` + `ResourceDetailDialog.tsx:55,69`**
+
 - 現況：`canEditDatabase` 是 prop，預設 `false`。實際上只有一個呼叫點 `src/features/tours/components/tour-itinerary-tab.tsx:1868,1906` 傳。
 
 **`src/features/tours/components/tour-itinerary-tab.tsx:91-92`**
+
 - 現況：
   ```ts
   const canEditDatabase =
@@ -217,6 +235,7 @@ UI 層的權限檢查目前並存三套：
 ### 模組：settings / tenants
 
 #### /settings（個人設定）
+
 - 檔案：`src/app/(main)/settings/page.tsx:47-48`
 - 現況：
   ```ts
@@ -228,19 +247,23 @@ UI 層的權限檢查目前並存三套：
 - 建議：改 `canWriteAny('settings')` 決定是否顯示 tabs。
 
 #### /settings/company（公司設定）
+
 - 檔案：`src/app/(main)/settings/company/page.tsx:224,324`
 - 現況：`if (!isAdmin) return <無權限>` ⚠️
 - 建議：改 `canWrite('settings', 'company')`（tab 已定義 ✅）。
 
 #### /settings/components/SettingsTabs.tsx:22,25
+
 - 現況：`const tabs = ALL_TABS.filter(tab => !tab.adminOnly || isAdmin)` ⚠️
 - 建議：`company` tab 改以 `canWrite('settings', 'company')` 決定。
 
 #### /settings/components/WorkspaceSwitcher.tsx:5,13-14
+
 - 現況：`canWrite('settings', 'company')` ✅ 已走 useTabPermissions
 - 注意：P001 PR-1d audit 主張這個是「平台管理資格 功能」應該保留 isAdmin，不該用 workspace tab。目前 code 已經改成 settings.company 寫入權 — 如果 系統主管職務 backfill 正確這個 OK；如果 HR 給某 workspace 用戶開 `settings.company` 寫入，那他就能看到跨 workspace 切換卡。**請 William 確認這個選擇是否符合預期**。
 
 #### /settings/appearance、/settings/bot-line、/settings/menu、/settings/modules、/settings/receipt-test
+
 - 現況：**全部無 gate** ❌
 - 建議：至少 `bot-line`/`modules` 這類「系統級」設定要 gate；`appearance` 屬個人可放過。
 - tab 定義：**目前 settings 模組只有 `personal` 和 `company` 兩個 tab，下面頁面沒對應 tab。需新增**：
@@ -251,6 +274,7 @@ UI 層的權限檢查目前並存三套：
   - `settings.receipt-test`（測試頁，可能不需要 gate，或只給系統主管）
 
 #### /tenants、/tenants/[id]（平台管理資格）
+
 - 現況：**無 gate** ❌
 - module-tabs.ts 註解：「租戶管理（tenants）為 Venturo 平台管理資格內部功能、不開放給租戶職務管理」
 - 建議：保留純 `isAdmin` 或引入 `isPlatformAdmin` 概念（與 P001 PR-1d 結論一致）。**不該走 useTabPermissions**。
@@ -260,14 +284,17 @@ UI 層的權限檢查目前並存三套：
 ### 元件層（跨模組）
 
 #### `src/components/workspace/AdvanceListCard.tsx:9,27,32`
+
 - 現況：`const { canManageFinance } = usePermissions()`；`canProcess = canManageFinance`
 - 建議：`canWrite('finance', 'disbursement')` 或 `canWrite('finance', 'requests')`（依動作而定）。
 
 #### `src/components/workspace/OrderListCard.tsx:8,27,30`
+
 - 現況：`const { canCreateReceipts } = usePermissions()`
 - 建議：`canWrite('finance', 'payments')`。
 
 #### `src/components/workspace/channel-sidebar/useChannelSidebar.ts:15-22`
+
 - 現況：
   ```ts
   const permissions = user.permissions || []
@@ -286,16 +313,16 @@ UI 層的權限檢查目前並存三套：
 
 這些使用 `isAdmin` 的地方**不是**權限 gate，而是「平台平台管理資格 only」或「UI 功能差異」，建議保留：
 
-| 檔案 | 用途 |
-| --- | --- |
-| `src/app/(main)/calendar/page.tsx:56,183` | 跨 workspace 篩選器（僅平台管理資格可見） |
-| `src/components/workspace/channel-sidebar/CreateChannelDialog.tsx:47,55,166` | 建立頻道時的跨 workspace scope 選項 |
-| `src/components/workspace/channel-chat/useChannelChat.ts:50,188`、`ChatMessages.tsx`、`ChannelList.tsx` 等 | 「公告頻道只有系統主管能發訊息」— 聊天室邏輯、非權限 gate |
-| `src/components/workspace/chat/MessageInput.tsx:26,55,83` | 同上 |
-| `src/features/calendar/components/EventDetailDialog.tsx:48-49` | 公司事項編輯檢查（creator 或系統主管） |
-| `src/features/calendar/hooks/useCalendarEvents.ts:77,82,229,277,392` | 平台管理資格看全部 workspace 行事曆 |
-| `src/features/dashboard/components/DashboardClient.tsx:62,73`、`widget-settings-dialog.tsx:26,35` | `admin_only` widget 的顯示切換 |
-| `src/components/layout/sidebar.tsx:419,467,483` | 側邊欄 menu 整體過濾（底層用 `user.permissions` 前綴比對） |
+| 檔案                                                                                                       | 用途                                                       |
+| ---------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| `src/app/(main)/calendar/page.tsx:56,183`                                                                  | 跨 workspace 篩選器（僅平台管理資格可見）                  |
+| `src/components/workspace/channel-sidebar/CreateChannelDialog.tsx:47,55,166`                               | 建立頻道時的跨 workspace scope 選項                        |
+| `src/components/workspace/channel-chat/useChannelChat.ts:50,188`、`ChatMessages.tsx`、`ChannelList.tsx` 等 | 「公告頻道只有系統主管能發訊息」— 聊天室邏輯、非權限 gate  |
+| `src/components/workspace/chat/MessageInput.tsx:26,55,83`                                                  | 同上                                                       |
+| `src/features/calendar/components/EventDetailDialog.tsx:48-49`                                             | 公司事項編輯檢查（creator 或系統主管）                     |
+| `src/features/calendar/hooks/useCalendarEvents.ts:77,82,229,277,392`                                       | 平台管理資格看全部 workspace 行事曆                        |
+| `src/features/dashboard/components/DashboardClient.tsx:62,73`、`widget-settings-dialog.tsx:26,35`          | `admin_only` widget 的顯示切換                             |
+| `src/components/layout/sidebar.tsx:419,467,483`                                                            | 側邊欄 menu 整體過濾（底層用 `user.permissions` 前綴比對） |
 
 這些「不是 HR 職務管理能設定的概念」：跨 workspace、公告頻道、平台管理資格 dashboard widget 等。
 
@@ -305,29 +332,30 @@ UI 層的權限檢查目前並存三套：
 
 ### 統計
 
-| 類別 | 數量 |
-| --- | --- |
-| 用 ✅ `useTabPermissions` 的頁面/元件 | 8（finance/requests、finance/reports、finance/treasury、finance/settings、accounting/layout、database/layout、WorkspaceSwitcher、attraction-selector） |
-| 用 ⚠️ `usePermissions`（`src/hooks/usePermissions.ts`）的 | 3（finance/payments page、AdvanceListCard、OrderListCard） |
-| 用 ⚠️ 裸 `permissions.includes(...)` / `isAccountant` 的 | 5（AddReceiptDialog、ReceiptConfirmDialog、AddRequestDialog、useChannelSidebar、settings/page） |
-| 用 ⚠️ `useRolePermissions` 空殼的 | 1（AttractionsDialog） |
-| 完全**沒有**頁面 gate 的頁面（URL 直接打就進） | 19<br>/finance、/finance/treasury/disbursement、/finance/reports/unpaid-orders、/accounting 子頁 *6、/hr、/hr/settings、/database 子頁 *6、/tours、/tours/[code]、/orders、/customers、/customers/companies、/visas、/calendar、/channel、/todos、/ai-bot、/settings/appearance、/settings/bot-line、/settings/menu、/settings/modules、/settings/receipt-test、/tenants、/tenants/[id]<br>（其中部分靠 layout 層 gate：accounting 和 database 子頁） |
-| `isAccountant` 變數出現次數 | 3（AddReceiptDialog:88, ReceiptConfirmDialog:55, AddRequestDialog:146 的 inline 版） |
-| `user.permissions.includes(...)` 在 features/components/app 的出現次數 | 5（AddReceiptDialog, ReceiptConfirmDialog, AddRequestDialog, useChannelSidebar 三次, settings/page） |
-| `canViewFinance`/`canManageFinance`/`canCreateReceipts` 等 legacy flag 實際使用 | 3（finance/payments、AdvanceListCard、OrderListCard） |
+| 類別                                                                            | 數量                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| ------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 用 ✅ `useTabPermissions` 的頁面/元件                                           | 8（finance/requests、finance/reports、finance/treasury、finance/settings、accounting/layout、database/layout、WorkspaceSwitcher、attraction-selector）                                                                                                                                                                                                                                                                                                |
+| 用 ⚠️ `usePermissions`（`src/hooks/usePermissions.ts`）的                       | 3（finance/payments page、AdvanceListCard、OrderListCard）                                                                                                                                                                                                                                                                                                                                                                                            |
+| 用 ⚠️ 裸 `permissions.includes(...)` / `isAccountant` 的                        | 5（AddReceiptDialog、ReceiptConfirmDialog、AddRequestDialog、useChannelSidebar、settings/page）                                                                                                                                                                                                                                                                                                                                                       |
+| 用 ⚠️ `useRolePermissions` 空殼的                                               | 1（AttractionsDialog）                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| 完全**沒有**頁面 gate 的頁面（URL 直接打就進）                                  | 19<br>/finance、/finance/treasury/disbursement、/finance/reports/unpaid-orders、/accounting 子頁 *6、/hr、/hr/settings、/database 子頁 *6、/tours、/tours/[code]、/orders、/customers、/customers/companies、/visas、/calendar、/channel、/todos、/ai-bot、/settings/appearance、/settings/bot-line、/settings/menu、/settings/modules、/settings/receipt-test、/tenants、/tenants/[id]<br>（其中部分靠 layout 層 gate：accounting 和 database 子頁） |
+| `isAccountant` 變數出現次數                                                     | 3（AddReceiptDialog:88, ReceiptConfirmDialog:55, AddRequestDialog:146 的 inline 版）                                                                                                                                                                                                                                                                                                                                                                  |
+| `user.permissions.includes(...)` 在 features/components/app 的出現次數          | 5（AddReceiptDialog, ReceiptConfirmDialog, AddRequestDialog, useChannelSidebar 三次, settings/page）                                                                                                                                                                                                                                                                                                                                                  |
+| `canViewFinance`/`canManageFinance`/`canCreateReceipts` 等 legacy flag 實際使用 | 3（finance/payments、AdvanceListCard、OrderListCard）                                                                                                                                                                                                                                                                                                                                                                                                 |
 
 ### 建議在 `module-tabs.ts` 新增的 tab 定義
 
-| 模組 | 建議新增的 tab | 原因（對應路由/元件） |
-| --- | --- | --- |
-| `hr` | `settings` | `/hr/settings`（出勤、LINE 打卡機器人）目前無對應 tab |
-| `settings` | `appearance` | `/settings/appearance` 頁無對應 tab |
-| `settings` | `bot-line` | `/settings/bot-line` |
-| `settings` | `menu` | `/settings/menu`（側邊欄客製） |
-| `settings` | `modules` | `/settings/modules`（租戶功能開關） |
+| 模組                | 建議新增的 tab                         | 原因（對應路由/元件）                                                         |
+| ------------------- | -------------------------------------- | ----------------------------------------------------------------------------- |
+| `hr`                | `settings`                             | `/hr/settings`（出勤、LINE 打卡機器人）目前無對應 tab                         |
+| `settings`          | `appearance`                           | `/settings/appearance` 頁無對應 tab                                           |
+| `settings`          | `bot-line`                             | `/settings/bot-line`                                                          |
+| `settings`          | `menu`                                 | `/settings/menu`（側邊欄客製）                                                |
+| `settings`          | `modules`                              | `/settings/modules`（租戶功能開關）                                           |
 | `workspace`（選配） | `manage`（`isEligibility` 或普通 tab） | `useChannelSidebar.canManageMembers` 目前靠 `workspace:manage_members` 裸字串 |
 
 不建議新增（需釐清）：
+
 - `customers` 模組 / tab：目前 sidebar 用 `requiredPermission: 'customers'`、module-tabs 有 `database.customers`；需 William 確認 `user.permissions` 實際放的是哪個 key，才能決定「保留 customers 模組獨立」還是「統一到 database.customers」。
 
 ### 建議清理順序（按破壞性 × 影響範圍排序，William 自行取捨）
@@ -350,6 +378,7 @@ UI 層的權限檢查目前並存三套：
 ### 與 P001 PR-1d audit 的交集
 
 `docs/PATTERN_HEAL_REPORT_2026-04-22/P001-PR-1d/code-reviewer.md` 的 F1 / F3 finding 指出：若 PR-1d 用 `canAccess()` / `canViewFinance` 替代 系統主管 gate 會擴權。本次稽核證實：
+
 - `finance/payments` 目前仍用 `canViewFinance`（未隨 PR-1d 改掉）。
 - `useRolePermissions` 空殼沒修，所以 `AttractionsDialog` 的 `readOnly` 一直是 false。
 - `useTabPermissions` 已由 PR-1a 補好 backfill（系統主管 54 個 row）；本報告建議的「改用 useTabPermissions.canRead/canWrite」方向與 PR-1d audit 結論一致。

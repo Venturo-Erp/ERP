@@ -243,7 +243,9 @@ export default function HRPage() {
         onStatusTabChange={href => router.push(href)}
         data={filteredEmployees}
         columns={columns}
-        searchFields={['display_name', 'employee_number', 'personal_info'] as (keyof EmployeeFull)[]}
+        searchFields={
+          ['display_name', 'employee_number', 'personal_info'] as (keyof EmployeeFull)[]
+        }
         searchPlaceholder={LABELS.SEARCH_PLACEHOLDER}
         onRowClick={handleEmployeeClick}
         renderActions={renderActions}

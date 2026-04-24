@@ -55,8 +55,14 @@ export const SimpleOrderTable = React.memo(function SimpleOrderTable({
     // 團員（order_members）不擋、因為人員身份已在顧客管理、團員記錄可直接刪
     // 真正要守護的是：請款單 / 收款單（需求單/確認單 已砍除）
     const [reqRes, rcptRes] = await Promise.all([
-      supabase.from('payment_requests').select('id', { count: 'exact', head: true }).eq('order_id', order.id),
-      supabase.from('receipts').select('id', { count: 'exact', head: true }).eq('order_id', order.id),
+      supabase
+        .from('payment_requests')
+        .select('id', { count: 'exact', head: true })
+        .eq('order_id', order.id),
+      supabase
+        .from('receipts')
+        .select('id', { count: 'exact', head: true })
+        .eq('order_id', order.id),
     ])
 
     const blockers: string[] = []
@@ -99,10 +105,7 @@ export const SimpleOrderTable = React.memo(function SimpleOrderTable({
       logger.error('[OrderTable] 刪除訂單失敗:', err)
       const msg = err instanceof Error ? err.message : ''
       if (msg.includes('foreign key')) {
-        await alert(
-          '此訂單還有其他關聯資料、無法刪除。請聯繫工程確認。',
-          'error'
-        )
+        await alert('此訂單還有其他關聯資料、無法刪除。請聯繫工程確認。', 'error')
       } else {
         await alert(COMP_ORDERS_LABELS.刪除失敗_請稍後再試, 'error')
       }

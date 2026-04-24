@@ -65,19 +65,20 @@ _PROGRESS.json 所有 routes_core 全 verified？ ──→ Yes ──→ §Roun
 ### Step 1: 挑下一個 route
 
 從 `_PROGRESS.json` `routes_core` 依序：
+
 - 取第一個 `stages.verified.status != "done"` 的
 - 判斷當前最低的 stage：audit → blueprint → fix_green → shippable_code_green → verified
 - 該 stage 就是本次要做的
 
 ### Step 2: 跑對應 Stage
 
-| 當前狀態 | 下一 stage | 時間預算 |
-|--|--|--|
-| audit=pending | A: Shallow Audit | 10-15 分 |
-| blueprint=pending | B: Blueprint 骨架 | 15-25 分 |
-| fix_green=pending | C: 🟢 技術債修復 | 15-25 分 |
-| shippable_code_green=pending | E: Shippable Gate | 5-10 分 |
-| verified=pending | F: Verify + d=1 分析 | 5-10 分 |
+| 當前狀態                     | 下一 stage           | 時間預算 |
+| ---------------------------- | -------------------- | -------- |
+| audit=pending                | A: Shallow Audit     | 10-15 分 |
+| blueprint=pending            | B: Blueprint 骨架    | 15-25 分 |
+| fix_green=pending            | C: 🟢 技術債修復     | 15-25 分 |
+| shippable_code_green=pending | E: Shippable Gate    | 5-10 分  |
+| verified=pending             | F: Verify + d=1 分析 | 5-10 分  |
 
 **時間上限 25 分**、超時必存檔結束、不強推。
 
@@ -87,12 +88,13 @@ _PROGRESS.json 所有 routes_core 全 verified？ ──→ Yes ──→ §Roun
 
 1. 若有 code 改動：`npm run type-check`
 2. 若有 shared symbol 改動：`gitnexus_impact(target, upstream)` + 記 d=1
-3. 寫 _DAILY_REPORT.md 一行
-4. 更新 _PROGRESS.json（用 jq 或 Node 一次性 update、**不做部分 patch**）
-5. 從 JSON 渲染 _PROGRESS_VIEW.md（人可讀）
-6. 若有新卡點：寫 _BLOCKED.md
+3. 寫 \_DAILY_REPORT.md 一行
+4. 更新 \_PROGRESS.json（用 jq 或 Node 一次性 update、**不做部分 patch**）
+5. 從 JSON 渲染 \_PROGRESS_VIEW.md（人可讀）
+6. 若有新卡點：寫 \_BLOCKED.md
 
 ### Step 5: 清 lock、結束
+
 ```
 rmdir docs/blueprints/_LOCK
 ```
@@ -129,11 +131,11 @@ rmdir docs/blueprints/_LOCK
    - §8 擴展點
 7. §9 技術債快照（從 audit 搬、分三層 🟢/🟡/🔴）
 8. §10 修復計畫
-9. 更新 _PROGRESS.json：`stages.blueprint.status = "done"`
+9. 更新 \_PROGRESS.json：`stages.blueprint.status = "done"`
 
 ### 卡關升級
 
-- 需業務決策（📋）→ 寫 _BLOCKED.md、**同時**檢查是否重複 3+ 次（若是 → 記進 _META_PATTERNS.md）
+- 需業務決策（📋）→ 寫 \_BLOCKED.md、**同時**檢查是否重複 3+ 次（若是 → 記進 \_META_PATTERNS.md）
 - 需動 DB → SQL 進 `_pending_review/`、Blueprint §6 標 🛑
 - 需架構判斷 → Agent tool 召喚 **最多 2 位**（`general-purpose` 配 role prompt）
 
@@ -147,6 +149,7 @@ rmdir docs/blueprints/_LOCK
 ### 🟢 嚴格定義（reality-checker 強調）
 
 符合**全部**以下才算 🟢：
+
 1. 不動 DB schema
 2. 不需業務決策
 3. 不動 shared type（若動、gitnexus d=1 必 < 3 且全在本路由或已 verified 路由）
@@ -159,19 +162,19 @@ rmdir docs/blueprints/_LOCK
 1. 讀 Blueprint §9
 2. 對每條 🟢：
    - `gitnexus_impact` 要改的 symbol
-   - 若 HIGH/CRITICAL → 跳、寫 _BLOCKED.md
+   - 若 HIGH/CRITICAL → 跳、寫 \_BLOCKED.md
    - 改 code、遵守 `_INVARIANTS.md`
    - 修完後標 ✅、附 commit-ready diff（不 commit）
 3. 若需架構判斷 → Agent tool 召喚 ≤ 2 位
-4. `npm run type-check` — **失敗連 2 次 → git restore、寫 _BLOCKED.md、跳**
-5. 更新 _PROGRESS.json
+4. `npm run type-check` — **失敗連 2 次 → git restore、寫 \_BLOCKED.md、跳**
+5. 更新 \_PROGRESS.json
 
 ### Agent 召喚規則
 
 - 最多 2 位 / 卡點、絕不 > 2 並行
 - `general-purpose` 配 role prompt（扮演 code-reviewer / senior-dev / database-optimizer / reality-checker）
 - Agent 建議**只寫 Blueprint ADR、不自動採納**
-- 重大架構建議（跨路由影響）→ 進 _BLOCKED.md 等 William
+- 重大架構建議（跨路由影響）→ 進 \_BLOCKED.md 等 William
 
 ---
 
@@ -183,13 +186,14 @@ rmdir docs/blueprints/_LOCK
 ### 判定規則（靜態分析）
 
 讀 `_SHIPPABLE.md` 該路由 checklist、逐條檢查：
+
 1. 符合 `_INVARIANTS.md` 所有適用條
 2. Blueprint §9 🟢 全 ✅
 3. `npm run type-check` 0 error
 4. `gitnexus_impact` d=1 所有 callers 都在 `_PROGRESS.json` 已 verified 或本路由
 
 **全過** → `stages.shippable_code_green.status = "done"`
-**任一不過** → 寫 _BLOCKED.md、標該條哪裡失敗
+**任一不過** → 寫 \_BLOCKED.md、標該條哪裡失敗
 
 ### 不做
 
@@ -211,7 +215,7 @@ rmdir docs/blueprints/_LOCK
    ```
    - [HH:MM] Stage-F /route ✅ — verified. d=1 影響: X, Y, Z
    ```
-4. 更新 _PROGRESS.json：`stages.verified.status = "done"`
+4. 更新 \_PROGRESS.json：`stages.verified.status = "done"`
 
 ---
 
@@ -222,7 +226,7 @@ rmdir docs/blueprints/_LOCK
 
 ### 流程
 
-1. 讀過去 6 輪的 _BLOCKED.md 新增 📋 項目
+1. 讀過去 6 輪的 \_BLOCKED.md 新增 📋 項目
 2. 找**重複 3+ 次**的問題核心（不是字面重複、是語意）
 3. 抽成 Pattern：
    ```
@@ -232,7 +236,7 @@ rmdir docs/blueprints/_LOCK
    - 決策選項: A/B/C
    ```
 4. 寫入 `_META_PATTERNS.md`
-5. 寫 _DAILY_REPORT.md：「Meta 輪：找到 N 個新 pattern」
+5. 寫 \_DAILY_REPORT.md：「Meta 輪：找到 N 個新 pattern」
 6. **不做路由**、直接結束
 
 ---
@@ -252,25 +256,25 @@ rmdir docs/blueprints/_LOCK
    - 分類 🟢/🟡/🔴
    - 給 RUN/DEFER/REJECT 建議
 3. 寫進 `_MIGRATION_DIGEST.md` Week of YYYY-MM-DD 段落
-4. 寫 _DAILY_REPORT.md：「Digest 輪：N 條待審、M 條 🟢 建議 RUN」
+4. 寫 \_DAILY_REPORT.md：「Digest 輪：N 條待審、M 條 🟢 建議 RUN」
 5. **不做路由**、直接結束
 
 ---
 
 ## 🚨 卡關升級總表
 
-| 情境 | 動作 |
-|--|--|
-| 能自己解 | 解 |
-| 純技術需第二意見 | Agent tool 召喚 1-2 位、絕不 > 2 |
-| 需業務決策（📋）| 寫 `_BLOCKED.md` + 檢查是否該進 `_META_PATTERNS.md` |
-| 需動 DB（🛑）| 寫 SQL 到 `supabase/migrations/_pending_review/NNN_<route>_<desc>.sql` |
-| Type-check 連 2 敗 | `git restore` 所有 unstaged、寫 `_BLOCKED.md` |
-| Agent 回報 HIGH/CRITICAL | 不修、寫 `_BLOCKED.md` |
-| d=1 牽涉未 verified 路由 | 標 🟡、不給 shippable、寫 `_BLOCKED.md` |
-| 違反 INVARIANT 又無合理 ADR | 回滾、寫 `_BLOCKED.md` |
-| 超時 (>25 分) | 存當下進度、`rmdir _LOCK`、結束 |
-| 發現計劃漏洞 | 寫 `_BLOCKED.md`、不自行改 SOP |
+| 情境                        | 動作                                                                   |
+| --------------------------- | ---------------------------------------------------------------------- |
+| 能自己解                    | 解                                                                     |
+| 純技術需第二意見            | Agent tool 召喚 1-2 位、絕不 > 2                                       |
+| 需業務決策（📋）            | 寫 `_BLOCKED.md` + 檢查是否該進 `_META_PATTERNS.md`                    |
+| 需動 DB（🛑）               | 寫 SQL 到 `supabase/migrations/_pending_review/NNN_<route>_<desc>.sql` |
+| Type-check 連 2 敗          | `git restore` 所有 unstaged、寫 `_BLOCKED.md`                          |
+| Agent 回報 HIGH/CRITICAL    | 不修、寫 `_BLOCKED.md`                                                 |
+| d=1 牽涉未 verified 路由    | 標 🟡、不給 shippable、寫 `_BLOCKED.md`                                |
+| 違反 INVARIANT 又無合理 ADR | 回滾、寫 `_BLOCKED.md`                                                 |
+| 超時 (>25 分)               | 存當下進度、`rmdir _LOCK`、結束                                        |
+| 發現計劃漏洞                | 寫 `_BLOCKED.md`、不自行改 SOP                                         |
 
 ---
 
@@ -283,7 +287,7 @@ rmdir docs/blueprints/_LOCK
 
 ---
 
-## 📋 _DAILY_REPORT.md 格式
+## 📋 \_DAILY_REPORT.md 格式
 
 ```
 ## YYYY-MM-DD
@@ -310,6 +314,7 @@ rmdir docs/blueprints/_LOCK
 
 第一輪 = 12 核心 end-to-end shippable（code_green）。
 第二輪 = 處理：
+
 - 119 routes BLOCKED_SHALLOW 的 shallow audit
 - 🟡 級修復（需業務決策 but William 已決）
 - `_META_PATTERNS.md` 套用（批次決策後批次改）

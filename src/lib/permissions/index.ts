@@ -66,9 +66,7 @@ const ROUTE_TO_MODULE: Record<string, string> = {
 
 // 平台管理資格專屬路由：HR 職務權限不適用、必須擁有平台管理資格才放行
 // /tenants：Venturo 平台內部功能（商業敏感、不開放給租戶職務管理）
-export const PLATFORM_CAPABILITY_ROUTES: readonly string[] = [
-  '/tenants',
-]
+export const PLATFORM_CAPABILITY_ROUTES: readonly string[] = ['/tenants']
 
 export function isPlatformCapabilityRoute(pathname: string): boolean {
   return PLATFORM_CAPABILITY_ROUTES.some(r => pathname === r || pathname.startsWith(`${r}/`))

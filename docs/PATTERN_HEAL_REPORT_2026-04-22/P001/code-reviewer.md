@@ -13,6 +13,7 @@
 ### F1. 系統主管 backfill 漏洞——老租戶可能 0 permissions，拔短路後整站白屏
 
 **觀察**：
+
 - `20260422000000_check_and_seed_admin_roles.sql` **只補了「系統主管職務」本身**（`workspace_roles` 有 is_admin=true 的 row）、**沒有 seed `role_tab_permissions`**（見 migration L44-52、只 INSERT workspace_roles 不 INSERT permissions）。
 - `workspaces/route.ts:164-197` 新租戶走完整流程（建 系統主管職務 + 全 MODULES seed permissions）、但這條路徑**只對未來新租戶生效**。
 - 歷史 workspace 若透過 2026-04-22 之前的老 API 建立（或手動建 role）、很可能**只有 workspace_role.is_admin=true、但 role_tab_permissions 空白**。登入時 validate-login:160-175 從 `role_tab_permissions` 讀 permissions、老 admin 會拿到 `permissions: []`、`isAdmin: true`。
@@ -21,6 +22,7 @@
 **風險等級**：🔴 Blocker
 
 **建議**：
+
 1. **Migration 必須雙 seed**：補一支 migration、為所有 `is_admin=true` 的 role、對齊 MODULES 全開 `role_tab_permissions`（UPSERT 不覆蓋已存在）。
 2. 在部署 P001 前、跑 `SELECT wr.id, wr.name, wr.workspace_id, COUNT(rtp.id) FROM workspace_roles wr LEFT JOIN role_tab_permissions rtp ON rtp.role_id = wr.id WHERE wr.is_admin = true GROUP BY wr.id HAVING COUNT(rtp.id) = 0;` 確認孤兒 系統主管職務 數為 0、否則中止。
 3. 部署順序：**先 backfill → 再部署前端拔短路**。反過來順序直接線上爆炸。
@@ -30,6 +32,7 @@
 ### F2. UPDATE 權限不在 `module:tab` key schema 裡——後端敏感 API 會全滅
 
 **觀察**：
+
 - validate-login:170-175 把 `role_tab_permissions` 組成 `${module}:${tab}` 或純 `${module}`、塞進 `user.permissions`。
 - 4 個後端 API 若改 `hasPermission(user, action)`、**action 要叫什麼 key**？若是 `employees.create` / `employees.reset_password` / `employees.admin_reset`——這些 key 在 MODULES (`module-tabs.ts:36`) 的 tabs 陣列**完全沒定義**、自然也不會在 `role_tab_permissions` 裡。
 - 後果：**連合法 系統主管 都過不了 hasPermission 檢查**（因為 permissions 陣列裡根本沒這個字串）、所有 4 個 API 回 403、建員工 / 重設密碼 / 建租戶全部炸。
@@ -37,6 +40,7 @@
 **風險等級**：🔴 Blocker
 
 **建議**：
+
 1. 設計兩條路、二選一：
    - **A. 保留 `is_admin` 語義化檢查**：後端敏感 API 改成 `if (!user.is_admin && !hasPermission(user, 'hr:manage_auth')) return 403`——系統主管 走第一條、沒有系統主管資格 走細分權限。這不是 bypass key、是把「系統主管 = 有高權限 tab」寫成可讀的 OR。
    - **B. 擴充 MODULES 加 `hr.manage_auth` / `hr.reset_password` 等 tab**、validate-login backfill 補資料、再完全拔掉後端的 `isAdmin` 判斷。
@@ -47,6 +51,7 @@
 ### F3. UPDATE policy 的 role_id 跨租戶搬移已被 P010 防住——但 P001 新的 hasPermission 邏輯在前端預設阻斷 系統主管 登入一秒
 
 **觀察**（P010 依賴）：
+
 - P010 新 RLS 靠 `EXISTS(workspace_roles.workspace_id = get_current_user_workspace())`、而 `get_current_user_workspace()` 從 **JWT claims** 讀。
 - 登入流程：validate-login **用 service_role**（`getSupabaseAdminClient()`）查 role_tab_permissions、**不走 RLS**、所以 P010 新 policy 不影響登入階段的 permissions 拉取。✅
 - **但登入後**前端 `useWorkspaceFeatures`（hooks.ts:60、112-114）用 user JWT 查 `/api/permissions/features`、若 user 第一次登入 `get_current_user_workspace()` 的 JWT claim 尚未 hydrate（Supabase signInWithPassword 需要一次 round-trip）、會有**< 1 秒**空窗期、fetch 回 0 筆 → `workspaceFeatures.isRouteAvailable` 全 false。
@@ -56,6 +61,7 @@
 **風險等級**：🔴 Blocker（UX 災難、不是資料洩漏，但會讓用戶覺得登入壞了）
 
 **建議**：
+
 1. `canAccess` / `canEdit` 必須**明確區分三態**：`loading` / `allow` / `deny`。loading 時 UI 顯示骨架屏、不是 UnauthorizedPage。
 2. `workspaceFeatures.loading` 在 hooks.ts:68 有、但 `usePermissions` 沒往外暴露、canAccess 沒用它。這是 P001 修法必須補的。
 3. 配合 P011（permissions_version）時更該處理、但 P011 是 🟡 排期、P001 不能等。
@@ -67,6 +73,7 @@
 ### N1. `permissions` key schema 已是 `:`、hasModulePermission 和 validate-login 都用 `:`、但 hooks.ts:177 的 `isTabEnabled` 用 `.`（feature 的 key）
 
 **觀察**：
+
 - validate-login:171 組 `${module_code}:${tab_code}` → 權限 key 用**冒號**。
 - hooks.ts:7 `hasModulePermission` match 用**冒號**。
 - hooks.ts:177 `isTabEnabled` 讀 `workspace_features.feature_code = ${module}.${tab}` → feature key 用**點**。
@@ -76,6 +83,7 @@
 **風險等級**：🟡 Suggestion
 
 **建議**：
+
 1. P001 修法文件明寫：**action key 全用冒號**、交給 P008 統一時再全站處理。
 2. 加個 assertion 在 hasPermission 開頭：`if (action.includes('.')) console.warn('permission key should use colon')`。
 
@@ -84,6 +92,7 @@
 ### N2. usePermissions 的 9 個 bool——遷移後會錯殺「會計只能看、不能建」
 
 **觀察**（usePermissions.ts:34-48）：
+
 ```ts
 canViewReceipts: isAdmin || hasModulePermission(userPermissions, 'finance'),
 canCreateReceipts: isAdmin || hasModulePermission(userPermissions, 'finance'),  // 同
@@ -98,6 +107,7 @@ canConfirmReceipts: isAdmin || hasModulePermission(userPermissions, 'finance'), 
 **風險等級**：🟡 Suggestion（揭露真相、不退化）
 
 **建議**：
+
 1. 不在 P001 範圍重設計 9 個 bool、但要**寫一行註解**說明現況。
 2. 在 P008 統一 policy 函式時、拆成 `finance:view` / `finance:create` / `finance:confirm` 三個 tab-level action。
 
@@ -106,6 +116,7 @@ canConfirmReceipts: isAdmin || hasModulePermission(userPermissions, 'finance'), 
 ### N3. JWT isAdmin claim 會留下「前端 bypass key」影子
 
 **觀察**：
+
 - validate-login:212 回傳 `isAdmin` 給前端、auth-store.ts:127 存成 `state.isAdmin`。
 - 拔掉 hooks.ts:284、hooks.ts:293、auth-store.ts:249 的 `if (isAdmin) return true` 後、前端 state.isAdmin 變成只有 UI 展示用（例如「顯示一顆紅色 admin 徽章」）、**但 store 裡還能被任何地方讀**。
 - grep 結果：`isAdmin` 在 src 下有 **228 個命中點**。這些點大部分是合法 UI 顯示（/hr/missed-clock 選單隱藏沒有系統主管資格 項目、/calendar 顯示 workspace 切換）、但藏著幾個危險的：
@@ -118,6 +129,7 @@ canConfirmReceipts: isAdmin || hasModulePermission(userPermissions, 'finance'), 
 **風險等級**：🟡 Suggestion（P001 scope 擴張、但不擴會留半條根）
 
 **建議**：
+
 1. P001 真正要拔的是**所有前端「靠 state.isAdmin 做是否顯示整頁」的地方**、至少含上面 4 個 layout。
 2. senior-dev 列命中點時、不能只列靈魂定義裡的 3 處、要全掃 `useAuthStore.*isAdmin\|\.isAdmin`。
 3. JWT 本身可保留 isAdmin claim（給 UI 徽章用）、但**定義為展示訊息、不是授權依據**。寫進 CLAUDE.md 的權限紅線。
@@ -127,6 +139,7 @@ canConfirmReceipts: isAdmin || hasModulePermission(userPermissions, 'finance'), 
 ### N4. finance/payments 改完後、沒有系統主管資格 會看到空白 ListPageLayout
 
 **觀察**：
+
 - page.tsx:211 `if (!isAdmin) return <UnauthorizedPage />` 改掉後、沒有系統主管資格 會進入 ListPageLayout。
 - 但 hooks.ts:34-37（usePermissions.canViewReceipts）回 false → `receipts` 載不到？要查 usePaymentData 是否用 canViewReceipts 擋 query。若**沒擋、receipts 會正常載入**（靠 RLS 擋）、那 UI 正常。若**有擋、會空白**（Empty state、不是 UnauthorizedPage）。
 - 目前 UnauthorizedPage 是正確 UX、空白 list 不是。若 P001 拔掉這行、必須補：`if (!canAccess('finance/payments')) return <UnauthorizedPage />`。
@@ -135,6 +148,7 @@ canConfirmReceipts: isAdmin || hasModulePermission(userPermissions, 'finance'), 
 **風險等級**：🟡 Suggestion
 
 **建議**：
+
 1. 替換 `!isAdmin` 為 `!canAccess('finance:view')`（注意冒號、N1）、UnauthorizedPage 保留。
 2. 順便 grep 有沒有其他 page.tsx 在 return 前 if isAdmin、逐頁補。
 
@@ -143,6 +157,7 @@ canConfirmReceipts: isAdmin || hasModulePermission(userPermissions, 'finance'), 
 ### N5. validate-login 的 isAdmin 依賴 workspace_roles.is_admin、但新的後端 API 若統一 hasPermission、卡 Corner 建新租戶流程
 
 **觀察**：
+
 - create-employee-auth:95-127 的邏輯：`isCornerAdmin = isAdmin && currentUserWorkspaceCode === 'CORNER'`、只有 Corner workspace 的 系統主管 能建新租戶。
 - 這是**跨租戶授權**、不是一般權限。若要改 hasPermission、key 要叫什麼？`tenants:create`？但 MODULES 裡 `tenants` 模組**不存在**（module-tabs.ts:33 註解明寫「租戶管理（tenants）為 Venturo 平台管理資格內部功能、不開放給租戶職務管理」）。
 - 若 hasPermission 拿不到對應 key、所有人 403、Corner 也不能建新租戶——**Venturo 平台管理資格流程斷**。
@@ -150,6 +165,7 @@ canConfirmReceipts: isAdmin || hasModulePermission(userPermissions, 'finance'), 
 **風險等級**：🟡 Suggestion（屬於跨租戶平台管理資格授權、架構特殊）
 
 **建議**：
+
 1. create-employee-auth 不走一般 hasPermission、保留特殊路徑：`if (!isCornerAdmin) return 403`。這是合理的特化。
 2. `reset-employee-password` / `admin-reset-password` 走一般 hasPermission、因為是單租戶內的 系統主管 動作。
 3. 把這個邊界明確寫進 P001 修法文件：**跨租戶平台管理資格授權是獨立語義、不走 hasPermission**。
@@ -182,12 +198,12 @@ canConfirmReceipts: isAdmin || hasModulePermission(userPermissions, 'finance'), 
 
 ## CARD 檢查總結
 
-| 項 | 評語 |
-|---|---|
-| **C**lean | 🟡 拔 3 處短路的修改本身乾淨、但會揭露 usePermissions.ts 9 個 bool 的假區分（N2）、需要註解標記 |
-| **A**uth | 🔴 F2 是 auth 大洞（4 API key 遷移沒想好）、F1 是 auth 資料洞（老 系統主管 backfill 缺）、N5 是 auth 特化邊界（跨租戶平台管理資格） |
-| **R**edundant | 🟡 N3 還有 4+ 處 layout.tsx 用 isAdmin、必須一起拔否則只修半條根 |
-| **D**ependencies | 🟢 P010 ✅ 已完成、無雞生蛋；🟡 P011（JWT 時間差）P015（0 測試）是 P001 的上游債、P001 部署前該先點掉 |
+| 項               | 評語                                                                                                                                |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| **C**lean        | 🟡 拔 3 處短路的修改本身乾淨、但會揭露 usePermissions.ts 9 個 bool 的假區分（N2）、需要註解標記                                     |
+| **A**uth         | 🔴 F2 是 auth 大洞（4 API key 遷移沒想好）、F1 是 auth 資料洞（老 系統主管 backfill 缺）、N5 是 auth 特化邊界（跨租戶平台管理資格） |
+| **R**edundant    | 🟡 N3 還有 4+ 處 layout.tsx 用 isAdmin、必須一起拔否則只修半條根                                                                    |
+| **D**ependencies | 🟢 P010 ✅ 已完成、無雞生蛋；🟡 P011（JWT 時間差）P015（0 測試）是 P001 的上游債、P001 部署前該先點掉                               |
 
 ---
 

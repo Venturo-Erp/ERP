@@ -33,7 +33,11 @@
       "priority": "core",
       "stages": {
         "audit": { "status": "done", "file": "VENTURO_ROUTE_AUDIT/01-login.md" },
-        "blueprint": { "status": "done", "file": "docs/blueprints/01-login.md", "date": "2026-04-18" },
+        "blueprint": {
+          "status": "done",
+          "file": "docs/blueprints/01-login.md",
+          "date": "2026-04-18"
+        },
         "fix_green": { "status": "pending" },
         "shippable_code_green": { "status": "pending" },
         "verified": { "status": "pending" }
@@ -43,7 +47,12 @@
         { "type": "business_decision", "topic": "is_bot 擋登入?", "adr": "§4" },
         { "type": "business_decision", "topic": "rememberMe 行為 A/B/C", "adr": "L3" },
         { "type": "business_decision", "topic": "username 欄位重構啟動時機", "adr": "L2" },
-        { "type": "technical_bug", "topic": "is_active=false 未擋", "severity": "P0", "fixable_in_stage_c": true }
+        {
+          "type": "technical_bug",
+          "topic": "is_active=false 未擋",
+          "severity": "P0",
+          "fixable_in_stage_c": true
+        }
       ],
       "pending_migrations": [],
       "d1_impacts": [],
@@ -57,18 +66,35 @@
       "priority": "core",
       "stages": {
         "audit": { "status": "done", "file": "VENTURO_ROUTE_AUDIT/02-dashboard.md" },
-        "blueprint": { "status": "done", "file": "docs/blueprints/02-dashboard.md", "date": "2026-04-18" },
+        "blueprint": {
+          "status": "done",
+          "file": "docs/blueprints/02-dashboard.md",
+          "date": "2026-04-18"
+        },
         "fix_green": { "status": "pending" },
         "shippable_code_green": { "status": "pending" },
         "verified": { "status": "pending" }
       },
       "blockers": [
         { "type": "business_decision", "topic": "widget settings localStorage vs DB", "adr": "D2" },
-        { "type": "technical_verify", "topic": "雙胞胎 weather widget 哪個 dead", "fixable_in_stage_c": true },
-        { "type": "technical_verify", "topic": "selectedStats 是否 dead 欄位", "fixable_in_stage_c": true }
+        {
+          "type": "technical_verify",
+          "topic": "雙胞胎 weather widget 哪個 dead",
+          "fixable_in_stage_c": true
+        },
+        {
+          "type": "technical_verify",
+          "topic": "selectedStats 是否 dead 欄位",
+          "fixable_in_stage_c": true
+        }
       ],
       "decided": [
-        { "adr": "D1", "topic": "/ vs /dashboard 重複路由", "decision": "B: / 為主、刪 /dashboard", "date": "2026-04-18" }
+        {
+          "adr": "D1",
+          "topic": "/ vs /dashboard 重複路由",
+          "decision": "B: / 為主、刪 /dashboard",
+          "date": "2026-04-18"
+        }
       ],
       "pending_migrations": [],
       "d1_impacts": []
@@ -79,13 +105,23 @@
       "priority": "core",
       "stages": {
         "audit": { "status": "done", "file": "VENTURO_ROUTE_AUDIT/03-tools.md" },
-        "blueprint": { "status": "done", "file": "docs/blueprints/03-tools.md", "date": "2026-04-18" },
+        "blueprint": {
+          "status": "done",
+          "file": "docs/blueprints/03-tools.md",
+          "date": "2026-04-18"
+        },
         "fix_green": { "status": "pending" },
         "shippable_code_green": { "status": "pending" },
         "verified": { "status": "pending" }
       },
       "blockers": [
-        { "type": "technical_bug", "topic": "reset-db 無 admin guard", "severity": "P0", "fixable_in_stage_c": true, "inv_violated": "INV-A02" },
+        {
+          "type": "technical_bug",
+          "topic": "reset-db 無 admin guard",
+          "severity": "P0",
+          "fixable_in_stage_c": true,
+          "inv_violated": "INV-A02"
+        },
         { "type": "business_decision", "topic": "flight/hotel 是半成品還是已用?", "adr": "T3" },
         { "type": "business_decision", "topic": "會計是否看 voucher 工具?", "adr": "§4" }
       ],
@@ -141,9 +177,7 @@
           "status": "draft"
         }
       ],
-      "d1_impacts": [
-        { "symbol": "useTourItineraryItemsByTour", "callers_count": 8, "risk": "low" }
-      ]
+      "d1_impacts": [{ "symbol": "useTourItineraryItemsByTour", "callers_count": 8, "risk": "low" }]
     },
     {
       "id": "07-tours",
@@ -286,8 +320,15 @@
       "priority": "core",
       "note": "2026-04-18 William 重排加入：建團前置（選業務的下拉來源）",
       "stages": {
-        "audit": { "status": "merged_into_blueprint", "reason": "原不在 12 核心、無 audit、Stage A+B 合併" },
-        "blueprint": { "status": "done", "file": "docs/blueprints/16-hr-roles.md", "date": "2026-04-18" },
+        "audit": {
+          "status": "merged_into_blueprint",
+          "reason": "原不在 12 核心、無 audit、Stage A+B 合併"
+        },
+        "blueprint": {
+          "status": "done",
+          "file": "docs/blueprints/16-hr-roles.md",
+          "date": "2026-04-18"
+        },
         "fix_green": { "status": "pending" },
         "shippable_code_green": { "status": "pending" },
         "verified": { "status": "pending" }
@@ -295,13 +336,29 @@
       "blockers": [
         { "type": "business_decision", "topic": "預設職務模板（業務/會計/領隊?）", "adr": "§2" },
         { "type": "business_decision", "topic": "只 admin 管還是 HR 主管也能?", "adr": "§4" },
-        { "type": "technical_bug", "topic": "無 admin guard", "severity": "P0", "fixable_in_stage_c": true, "inv_violated": "INV-A02" }
+        {
+          "type": "technical_bug",
+          "topic": "無 admin guard",
+          "severity": "P0",
+          "fixable_in_stage_c": true,
+          "inv_violated": "INV-A02"
+        }
       ],
       "pending_migrations": [
-        { "file": "20260418_drop_employee_job_roles.sql", "purpose": "ADR-R2 Option A: 單一主職務", "status": "draft_with_preflight_checks" }
+        {
+          "file": "20260418_drop_employee_job_roles.sql",
+          "purpose": "ADR-R2 Option A: 單一主職務",
+          "status": "draft_with_preflight_checks"
+        }
       ],
       "decided": [
-        { "adr": "R2", "topic": "員工↔職務結構", "decision": "A: 單一主職務、刪 employee_job_roles", "date": "2026-04-18", "migration": "20260418_drop_employee_job_roles.sql" }
+        {
+          "adr": "R2",
+          "topic": "員工↔職務結構",
+          "decision": "A: 單一主職務、刪 employee_job_roles",
+          "date": "2026-04-18",
+          "migration": "20260418_drop_employee_job_roles.sql"
+        }
       ],
       "d1_impacts": []
     }

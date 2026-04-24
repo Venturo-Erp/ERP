@@ -71,7 +71,11 @@ test.describe('收款管理 - 完整功能測試', () => {
     test('頁面有收款列表', async ({ authenticatedPage: page }) => {
       // TESTUX 可能沒資料、至少驗有 table 結構
       const hasTable = (await page.locator('table, [role="table"]').count()) > 0
-      const hasEmptyState = await page.locator('text=/沒有|無資料|empty/i').first().isVisible().catch(() => false)
+      const hasEmptyState = await page
+        .locator('text=/沒有|無資料|empty/i')
+        .first()
+        .isVisible()
+        .catch(() => false)
       expect(hasTable || hasEmptyState, '列表應有 table 或空狀態提示').toBe(true)
     })
 

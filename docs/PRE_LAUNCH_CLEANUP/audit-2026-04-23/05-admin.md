@@ -14,7 +14,8 @@
 
 ## 🔴 真問題（上線前必處理）
 
-### 1. **⚠️ Tenants Create API 寫死欄位** — *爆炸雷*
+### 1. **⚠️ Tenants Create API 寫死欄位** — _爆炸雷_
+
 - **位置**：`/src/app/api/tenants/create/route.ts:235-248`
 - **問題**：員工初始化時強寫 `permissions: ['*', 'todos', 'payments', ...]` 陣列，但 migration `20260423100001_drop_employees_permissions_column.sql` 已於 2026-04-23 **砍掉 DB 欄位**。
   ```typescript
@@ -32,12 +33,14 @@
 - **相關 DB**：`employees` 已無 `permissions` 欄位（確認：`database.types.ts:20831` 仍有舊型別、需重新生成）。
 
 ### 2. **⚠️ 舊 is_active 欄位還在程式碼中 SELECT**
+
 - **位置**：未掃到程式碼直接 SELECT、但 migration `20260423150000_drop_employees_is_active.sql` 已砍掉。
 - **檢查**：`database.types.ts:5467` 仍有 `is_active: boolean | null`，意味型別未同步 (`npx supabase gen types` 未跑)。
 - **影響**：如果任何 API 試圖 `.select('*')` 或 `.select('..., is_active, ...')` → 運行時 RLS 政策錯誤。
 - **修復**：`npm run db:types` 重新生成型別。
 
 ### 3. **⚠️ Module-tabs 與路由不一致的幽靈 Permission**
+
 - **位置**：`/src/lib/permissions/module-tabs.ts:36-205`、特別是 `hr` 模組（line ~140+）。
 - **問題**：
   - `hr` 模組定義了 `tabs: [...]`（例：possibly `settings`, `payroll` 等）
@@ -47,6 +50,7 @@
 - **影響**：低風險（權限檢查只會拒絕、不會誤許），但造成 UX 困惑。
 
 ### 4. **⚠️ Corner Workspace UUID 硬編 + 依賴檢查**
+
 - **位置**：`/src/app/api/tenants/create/route.ts:24`
 - **程式碼**：`const CORNER_WORKSPACE_ID = '8ef05a74-1f87-48ab-afd3-9bfeb423935d'`
 - **狀況**：**已列 Wave 3 BACKLOG**（建 `src/lib/constants/well-known-ids.ts` 中央化），但未實施。
@@ -54,6 +58,7 @@
 - **上線前必做**：至少驗證 Corner workspace 存在（checkpoint）。
 
 ### 5. **⚠️ Settings > Company 頁直接查 supabase、無 RLS 層**
+
 - **位置**：`/src/app/(main)/settings/company/page.tsx:92-97`
   ```typescript
   const { data } = await supabase
@@ -74,6 +79,7 @@
 ## 🟡 小債（上線後優先處理）
 
 ### 6. **重複的「系統主管權限檢查」邏輯**
+
 - **位置**：
   - `hr/page.tsx:39`：`const isAdmin = useAuthStore(state => state.isAdmin)`
   - `hr/roles/page.tsx:35`：同上 + line 421 做 `if (!isAdmin)` 檢查
@@ -84,6 +90,7 @@
 - **現況**：可用但散彈槍式，不急（migration 9 個月內處理）。
 
 ### 7. **employees.permissions 陣列的亡靈（code side）**
+
 - **已砍 DB**：migration `20260423100001`
 - **仍在程式碼**：
   - `database.types.ts` 型別定義（待 `npx supabase gen types` 清理）
@@ -92,6 +99,7 @@
 - **改進**：完整清掃 codebase，移除所有 `permissions` 陣列操作。
 
 ### 8. **重複的「workspace seed」邏輯**
+
 - **位置**：
   - `/api/workspaces` POST（line 144-220）：seed features + roles + permissions
   - `/api/tenants/create` POST（line 199-398）：seed features + roles + permissions + template copy
@@ -100,12 +108,14 @@
 - **現況**：可用但維護成本高；重構可等（Wave 4）。
 
 ### 9. **max_employees 檢查位置**
+
 - **現況**：只在 `/api/employees/create` 做守門（line 46-61）。
 - **是否有 frontend 重複**：HR 員工列表頁沒看到前端重複檢查（✓ 好）。
 - **但 edge case**：如果多人同時建員工、可能 race condition 突破 max。
   - 改進：用 DB-level trigger（但超過上線前範圍）。
 
 ### 10. **HR Settings（打卡設定）無 API 層**
+
 - **位置**：`hr/settings/page.tsx` 直接 supabase：
   ```typescript
   const { data } = await supabase
@@ -121,32 +131,34 @@
 ## 🟢 健康面向
 
 ### ✅ 權限檢查邏輯一致
+
 - **hr/roles/page**（職務權限管理）：明確檢查 `!isAdmin` → 未授權頁面（line 421-441）
 - **settings/company**：同上（line 324-334）
 - **tenants/page**：檢查 feature flag（`workspace_features.tenants`）→ 對標平台管理資格邏輯
 - **Verdict**：三頁都有守門，沒有漏洞。
 
 ### ✅ Role-Tab-Permissions SSOT 明確
+
 - **DB 層**：`role_tab_permissions` 表是唯一權限真相來源（已於 2026-04-23 砍掉 `employees.permissions` 冗餘）
 - **登入流程**：`validateLogin` API 會拉 `role_tab_permissions`、存到 `user.permissions` 袋子
 - **前端 hook**：`useTabPermissions()` 會呼叫 `/api/roles/[roleId]/tab-permissions` 取最新狀態
 - **Verdict**：沒有分裂。
 
 ### ✅ Tenants 建立的原子性設計
+
 - **rollback 函數**（line 161-197）：追蹤已建資源、失敗時反向清理
 - **步驟順序**：workspace → features → roles → permissions → employee → channels
 - **Verdict**：架構完整（除了 #1 的死欄位寫入）。
 
 ### ✅ Module-Tabs 與 Workspace Features 搭配無誤
+
 - **Page 級過濾**：`hr/roles/page.tsx:37-50` 用 `isFeatureEnabled()` 過濾模組
   ```typescript
   const visibleModules = useMemo(
     () =>
       MODULES.filter(m => isFeatureEnabled(m.code)).map(m => ({
         ...m,
-        tabs: m.tabs.filter(
-          t => t.isEligibility || isTabEnabled(m.code, t.code, t.category)
-        ),
+        tabs: m.tabs.filter(t => t.isEligibility || isTabEnabled(m.code, t.code, t.category)),
       })),
     [isFeatureEnabled, isTabEnabled]
   )
@@ -154,6 +166,7 @@
 - **Verdict**：權限檢查鏈路清晰。
 
 ### ✅ 員工停用邏輯統一到 status
+
 - **舊**：`is_active` boolean + `status` enum（冗餘、易不同步）
 - **新**：只用 `status: 'active' | 'probation' | 'leave' | 'terminated'`（migration 20260423150000）
 - **前端**：`hr/page.tsx:61` 用 `emp.status !== 'terminated'` 過濾（✓）
@@ -164,6 +177,7 @@
 ## 跨模組 Pattern 候選
 
 ### 🔵 系統主管 Guard Pattern
+
 ```typescript
 // 現在（散彈槍）：每頁都 `const isAdmin = useAuthStore(...)`
 // 建議：統一提煉
@@ -178,6 +192,7 @@ export function useAdminGuard() {
 ```
 
 ### 🔵 Workspace Seed Pattern
+
 ```typescript
 // 現在：workspaces POST + tenants POST 都各自實作
 // 建議：
@@ -190,6 +205,7 @@ async function seedWorkspaceWithRoles(workspaceId: string, fromTemplate?: string
 ```
 
 ### 🔵 Permission Fetching Pattern
+
 ```typescript
 // 現在（兩層）：
 // - 登入時：validateLogin API 算 permissions[] 袋子
@@ -197,11 +213,9 @@ async function seedWorkspaceWithRoles(workspaceId: string, fromTemplate?: string
 
 // 問題：重複查、cache 沒同步
 // 建議：統一用 stale-while-revalidate SWR
-const { data: permissions } = useSWR(
-  `/api/users/${user.id}/tab-permissions`,
-  fetcher,
-  { revalidateOnFocus: true }
-)
+const { data: permissions } = useSWR(`/api/users/${user.id}/tab-permissions`, fetcher, {
+  revalidateOnFocus: true,
+})
 ```
 
 ---

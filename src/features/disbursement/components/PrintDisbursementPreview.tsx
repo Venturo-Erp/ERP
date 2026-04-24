@@ -240,9 +240,7 @@ export const PrintDisbursementPreview = forwardRef<HTMLDivElement, PrintDisburse
     // 分離：團體請款、公司請款（都排除成本轉移 pair requests）
     const companyItems = useMemo(
       () =>
-        processedItems.filter(
-          item => item.isCompany && !transferredRequestIds.has(item.requestId)
-        ),
+        processedItems.filter(item => item.isCompany && !transferredRequestIds.has(item.requestId)),
       [processedItems, transferredRequestIds]
     )
     const tourItems = useMemo(

@@ -67,9 +67,7 @@ export default function PublicViewClient({ id }: PublicViewClientProps) {
   }, [id])
 
   if (loading) {
-    return (
-      <ModuleLoading fullscreen className="bg-morandi-background" />
-    )
+    return <ModuleLoading fullscreen className="bg-morandi-background" />
   }
 
   if (error) {

@@ -103,9 +103,24 @@ export function AddReceiptDialog({
 
   // 收款項目表格的欄位定義（團體/公司共用；cell 內容由 PaymentItemRow 透過 rowRender 提供）
   const receiptColumns: InlineEditColumn<PaymentItem>[] = [
-    { key: 'method', label: ADD_RECEIPT_DIALOG_LABELS.LABEL_5187, width: '110px', render: () => null },
-    { key: 'date', label: ADD_RECEIPT_DIALOG_LABELS.LABEL_1182, width: '150px', render: () => null },
-    { key: 'detail', label: ADD_RECEIPT_DIALOG_LABELS.LABEL_6465, width: '180px', render: () => null },
+    {
+      key: 'method',
+      label: ADD_RECEIPT_DIALOG_LABELS.LABEL_5187,
+      width: '110px',
+      render: () => null,
+    },
+    {
+      key: 'date',
+      label: ADD_RECEIPT_DIALOG_LABELS.LABEL_1182,
+      width: '150px',
+      render: () => null,
+    },
+    {
+      key: 'detail',
+      label: ADD_RECEIPT_DIALOG_LABELS.LABEL_6465,
+      width: '180px',
+      render: () => null,
+    },
     { key: 'remarks', label: ADD_RECEIPT_DIALOG_LABELS.REMARKS, render: () => null },
     { key: 'amount', label: '收款金額', width: '120px', align: 'right', render: () => null },
     { key: 'actual', label: '實收金額', width: '120px', align: 'right', render: () => null },

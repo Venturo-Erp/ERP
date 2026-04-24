@@ -22,21 +22,21 @@ test.describe('Round 4 補測：authenticated 頁面', () => {
     test(`${name} (${path}) authenticated 能正常載入`, async ({ authenticatedPage: page }) => {
       const response = await page.goto(path)
       await page.waitForLoadState('networkidle', { timeout: 15000 })
-      
+
       // 檢查 HTTP status
       expect(response?.status()).toBeLessThan(500)
-      
+
       // 檢查沒有 404 文字
       const notFound = await page.locator('text=找不到頁面').count()
       const next404 = await page.locator('text=404').count()
       if (notFound > 0 || next404 > 0) {
         throw new Error(`${path} 顯示 404 頁面`)
       }
-      
+
       // 檢查沒有錯誤頁
       const internalError = await page.locator('text="Internal Server Error"').count()
       expect(internalError).toBe(0)
-      
+
       // body 有內容
       const bodyText = await page.locator('body').textContent()
       expect(bodyText?.length).toBeGreaterThan(50)

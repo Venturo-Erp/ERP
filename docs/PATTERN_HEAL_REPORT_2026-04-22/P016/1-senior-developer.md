@@ -90,8 +90,7 @@ import { getSupabaseAdminClient } from '@/lib/supabase/admin'
 // 只有有「租戶管理」權限的人（role_tab_permissions.settings.tenants.can_write）
 // 才能動任何 workspace（刪除 / 更新功能權限 / 建立）。
 async function requireTenantAdmin(): Promise<
-  | { ok: true; workspaceId: string; employeeId: string }
-  | { ok: false; response: NextResponse }
+  { ok: true; workspaceId: string; employeeId: string } | { ok: false; response: NextResponse }
 > {
   const auth = await getServerAuth()
   if (!auth.success) {
@@ -203,10 +202,7 @@ export async function DELETE(
     .eq('id', workspaceId)
 
   if (deleteError) {
-    return NextResponse.json(
-      { error: `刪除失敗：${deleteError.message}` },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: `刪除失敗：${deleteError.message}` }, { status: 500 })
   }
 
   return NextResponse.json({ success: true, workspace: existing })
@@ -280,6 +276,7 @@ const handleDelete = useCallback(
 ### 決策：**選 C — 把整個建公司流程搬到 `/api/tenants/create`**
 
 **理由（Senior Dev 判斷）**：
+
 1. `/api/tenants/create/route.ts` 已存在、**已實作** requireTenantAdmin + service_role + rollback 全流程（含 employee / auth / channel / features / countries / bot、比 Dialog 版還完整）。
 2. 方案 A 不可行：一般用戶沒 `tenants.can_write`、rollback DELETE 會 403 自己打自己。
 3. 方案 B 新增 `/api/tenants/rollback` endpoint = 重複 `/api/tenants/create` 已有的 rollback 邏輯、違反 DRY 也增加攻擊面。
@@ -346,6 +343,7 @@ const handleSubmit = useCallback(async () => {
 ```
 
 **需要順便處理**：
+
 - `/api/tenants/create/route.ts:121` 目前強制 `/^[A-Z]+$/` 驗 workspace code、但 Dialog 原本輸入 lowercase。改成：client 送上去前 `.toUpperCase()`、或放寬 API 驗證允許混大小寫（建議前者、API 嚴格）。
 - Import 可以刪除：`supabase`（不再直接查 DB）、`bcrypt`（server 端處理）。
 
@@ -362,6 +360,7 @@ npm run type-check
 ### 建議測試
 
 1. **既有 login e2e 必跑**（CLAUDE.md 紅線、動 RLS policy 必跑）：
+
    ```bash
    npx playwright test tests/e2e/login-api.spec.ts
    ```
@@ -385,6 +384,7 @@ npm run type-check
 - 先上 code → UI 改打 API → 但 policy 還是 `USING (true)` → 新舊都能刪、漏洞還在。
 
 **正確順序**（同一個 deploy）：
+
 1. Migration 先跑（Vercel deploy 前 Supabase push）。
 2. Build 成功後 Vercel 部署新版 Next.js（新 DELETE handler + UI fetch）。
 3. 驗證清單：
@@ -394,6 +394,7 @@ npm run type-check
    - 直接用沒有系統主管資格 帳號在 browser console `supabase.from('workspaces').delete().eq('id', '某個空 workspace')` → 預期 0 rows / RLS 擋
 
 **回滾策略**：
+
 - 如果 API DELETE 出包、可先緊急 patch migration、policy 臨時放寬成 `USING (EXISTS (SELECT 1 FROM employees WHERE id = auth.uid() AND roles @> ARRAY['admin']))` 擋 80% 情境、不重開 `USING (true)`。
 
 ---

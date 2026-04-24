@@ -20,13 +20,14 @@
 **位置**：`src/app/api/accounting/period-closing/route.ts` L195-221
 
 **證據**：
+
 ```typescript
 // L196-205：查詢損益結轉科目
 const { data: currentProfitAccount, error: profitAccountError } = await supabase
   .from('chart_of_accounts')
   .select('id')
   .eq('workspace_id', workspaceId)
-  .eq('code', '3200')  // ⚠️ 硬編、只適合台灣一般公認會計原則
+  .eq('code', '3200') // ⚠️ 硬編、只適合台灣一般公認會計原則
   .single()
 
 // L210-221：年結查詢保留盈餘科目
@@ -34,7 +35,7 @@ const { data, error } = await supabase
   .from('chart_of_accounts')
   .select('id')
   .eq('workspace_id', workspaceId)
-  .eq('code', '3300')  // ⚠️ 同樣硬編
+  .eq('code', '3300') // ⚠️ 同樣硬編
   .single()
 ```
 
@@ -51,6 +52,7 @@ const { data, error } = await supabase
 **建議**（M 優先級、半天）：
 
 1. 在 `workspace_settings` 表（或 JSON column）加欄位：
+
    ```sql
    ALTER TABLE workspaces ADD COLUMN accounting_config JSONB DEFAULT '{
      "profit_account_code": "3200",
@@ -59,6 +61,7 @@ const { data, error } = await supabase
    ```
 
 2. 期末結轉改查：
+
    ```typescript
    const profitAccountCode = workspace.accounting_config?.profit_account_code ?? '3200'
    const { data: currentProfitAccount } = await supabase
@@ -88,7 +91,7 @@ const { data, error } = await supabase
 - **問題**：DB 層沒有 CHECK CONSTRAINT
   ```sql
   -- 現況沒有這個
-  -- ALTER TABLE journal_vouchers 
+  -- ALTER TABLE journal_vouchers
   --   ADD CONSTRAINT check_debit_credit_balance
   --   CHECK (total_debit = total_credit);
   ```
@@ -112,7 +115,7 @@ ALTER TABLE journal_vouchers
   NOT VALID;  -- 先加 NOT VALID、驗證現有資料後再啟用
 
 -- 驗證現有資料
-SELECT COUNT(*) FROM journal_vouchers 
+SELECT COUNT(*) FROM journal_vouchers
 WHERE ABS(total_debit - total_credit) >= 0.01;
 -- 應該是 0
 
@@ -131,6 +134,7 @@ ALTER TABLE journal_vouchers VALIDATE CONSTRAINT check_voucher_balance;
 **會計師看法**：
 
 旅行業發票特殊性（台灣統一發票規則）：
+
 - **票號連號檢查**：台灣統一發票號碼區間由國稅局指定（例如 BA-00000001 到 BA-10000000）
 - **三聯式 vs 二聯式**：旅行業多數用三聯式發票、涉及客戶聯、廠商聯、主管機關聯
 - **發票作廢流程**：不能直接 DELETE、必須產生「作廢聯」（BACKLOG 已列「改 void 新 signature」）
@@ -138,18 +142,21 @@ ALTER TABLE journal_vouchers VALIDATE CONSTRAINT check_voucher_balance;
 - **進項發票認列時點**：購買飛機票 / 飯店費用的發票何時認列（簽約？支付？）
 
 **現況**：
+
 - Schema 有 `travel_invoices` 表、但無「票號字軌」概念
 - 無發票作廢追蹤（只有 `is_voided` boolean）
 - 無稅額分離欄位
 - 無月報 401 表 / 403 表產出邏輯
 
 **BACKLOG 確認**：
+
 - Line 319：「開發票 / 批次發票 / 作廢（測 void 新 signature）」— 上線前測試項
 - Line 249：「發票作廢：改 void 新 signature」— Wave 7 待做
 
 **建議**（L 優先級、2-3 天、需 William 決策範圍）：
 
 1. **票號字軌管理**：
+
    ```sql
    CREATE TABLE invoice_number_ranges (
      id uuid PRIMARY KEY,
@@ -165,6 +172,7 @@ ALTER TABLE journal_vouchers VALIDATE CONSTRAINT check_voucher_balance;
    ```
 
 2. **發票作廢追蹤**（改 soft-delete）：
+
    ```sql
    ALTER TABLE travel_invoices ADD COLUMN (
      is_voided BOOLEAN DEFAULT FALSE,
@@ -177,6 +185,7 @@ ALTER TABLE journal_vouchers VALIDATE CONSTRAINT check_voucher_balance;
    ```
 
 3. **稅額分離**：
+
    ```sql
    ALTER TABLE travel_invoices ADD COLUMN (
      gross_amount NUMERIC(15,2),  -- 稅前金額
@@ -202,13 +211,13 @@ ALTER TABLE journal_vouchers VALIDATE CONSTRAINT check_voucher_balance;
 
 旅行業有特殊的收支時點問題：
 
-| 事件 | 現況 | 應該是 |
-|------|------|--------|
-| **客戶繳訂金** | 收款單記錄 | 預收收入（liability） |
-| **簽證費代收** | 進賬、代付 | **代收代付不入損益**（過帳帳戶） |
-| **團費出發後確認** | 分錄記錄 | 應該何時認列？簽約/出發/結團？ |
-| **供應商發票後付** | 請款單記錄 | 費用認列 vs 付款分開 |
-| **跨年度長團** | 無特殊處理 | 應該分年度認列嗎？ |
+| 事件               | 現況       | 應該是                           |
+| ------------------ | ---------- | -------------------------------- |
+| **客戶繳訂金**     | 收款單記錄 | 預收收入（liability）            |
+| **簽證費代收**     | 進賬、代付 | **代收代付不入損益**（過帳帳戶） |
+| **團費出發後確認** | 分錄記錄   | 應該何時認列？簽約/出發/結團？   |
+| **供應商發票後付** | 請款單記錄 | 費用認列 vs 付款分開             |
+| **跨年度長團**     | 無特殊處理 | 應該分年度認列嗎？               |
 
 **現況缺陷**：
 
@@ -248,10 +257,12 @@ ALTER TABLE journal_vouchers VALIDATE CONSTRAINT check_voucher_balance;
 ### 1. 無「內部控制評估」機制（商業會計法第 4 條）
 
 **台灣商業會計法**：
+
 - 第 4 條：公司應建立完整內部控制制度
 - 第 38 條：會計紀錄必須至少保存 7 年
 
 **現況**：
+
 - 有 audit trail（`created_by` / `updated_by`）
 - 無「控制自評」文件
 - 無「異常交易 flag」機制
@@ -284,6 +295,7 @@ interface AccountingControl {
 ### 2. 無稅務類型標記（營業稅法第 3 條）
 
 **問題**：
+
 - 應稅 vs 免稅 / 零稅率 發票沒區分（例如境外服務）
 - 代理人代收發票無標記
 - 進項發票「待抵扣」狀態未追蹤
@@ -333,6 +345,7 @@ CREATE TABLE agency_float_accounts (
 ```
 
 **稽核痕跡**：
+
 - 「誰代墊」（supplied_by）
 - 「何時收回」（collected_date）
 - 「對應費用單據」（receipt_id）
@@ -344,11 +357,13 @@ CREATE TABLE agency_float_accounts (
 **問題**：無專用科目、無追蹤機制
 
 **應該有**：
+
 - `4200 航空佣金收入`
-- `4210 飯店佣金收入`  
+- `4210 飯店佣金收入`
 - `4220 簽證佣金收入`
 
 **稽核痕跡**：
+
 - 發票單位（供應商名）
 - 佣金計算基礎（客房夜數、人數等）
 - 月度對帳單據
@@ -360,6 +375,7 @@ CREATE TABLE agency_float_accounts (
 **現況**：無匯差處理
 
 **應該有**：
+
 ```sql
 ALTER TABLE travel_invoices ADD COLUMN (
   invoice_currency TEXT DEFAULT 'TWD',
@@ -465,16 +481,19 @@ ALTER TABLE travel_invoices ADD COLUMN (
 ## 行動清單
 
 ### 上線前必做（RED）
+
 1. **科目代碼參數化** — 3200 / 3300 不再硬編
 2. **DB 層借貸平衡 CHECK** — 防應用層 bug
 
 ### 上線後優化（YELLOW）
+
 3. 發票作廢流程完善 + 票號字軌管理
 4. 稅務科目分離 + 月報 401 / 403 自動產出
 5. 代收代付帳戶系統建立
 6. 權責認列原則明確文件化
 
 ### 可緩後處理（GREEN）
+
 7. 內部控制自評機制
 8. 佣金收入細分科目
 9. 匯兌損益處理
@@ -491,17 +510,17 @@ ALTER TABLE travel_invoices ADD COLUMN (
 
 ### 1. 真問題過濾
 
-| # | Bookkeeper 說 | 覆盤後 | 備註 |
-|---|---|---|---|
-| 科目代碼 3200/3300 硬編 | 🔴 | ❌ **扣分、重報**（01-accounting §6）|
-| **DB 層無 CHECK 借貸平衡** | 🔴 | 🔴 **真、新** | 前端+API 驗不夠、SQL 直 insert 還能寫壞、會計師堅持 DB 要守 |
-| 台灣發票邏輯未接 | 🟡 | ⚠️ **看上線要求**（要開發票→P0、內部帳→Post-Launch）|
-| 權責認列時點 | 🟡 | 🟡 **政策題**、需 William 決策 |
-| **代收代付追蹤缺** | 🟡 | 🔴 **升級 P0/P1** | 代收機票款不該進損益、稅務會查、需驗 Corner 實務 |
-| 佣金收入無專用科目 | 🟡 | 🟡 真、旅行社專業 |
-| 匯兌損益 | 🟡 | 🟡 看 Corner 有無外幣業務 |
-| 無內控自評 / 稅務類型 | 🟠 | 🟠 法規 |
-| 期末鎖定機制 | - | ⚠️ **需驗證**（`accounting_periods.closed` 之後是否真擋 insert）|
+| #                          | Bookkeeper 說 | 覆盤後                                                           | 備註                                                        |
+| -------------------------- | ------------- | ---------------------------------------------------------------- | ----------------------------------------------------------- |
+| 科目代碼 3200/3300 硬編    | 🔴            | ❌ **扣分、重報**（01-accounting §6）                            |
+| **DB 層無 CHECK 借貸平衡** | 🔴            | 🔴 **真、新**                                                    | 前端+API 驗不夠、SQL 直 insert 還能寫壞、會計師堅持 DB 要守 |
+| 台灣發票邏輯未接           | 🟡            | ⚠️ **看上線要求**（要開發票→P0、內部帳→Post-Launch）             |
+| 權責認列時點               | 🟡            | 🟡 **政策題**、需 William 決策                                   |
+| **代收代付追蹤缺**         | 🟡            | 🔴 **升級 P0/P1**                                                | 代收機票款不該進損益、稅務會查、需驗 Corner 實務            |
+| 佣金收入無專用科目         | 🟡            | 🟡 真、旅行社專業                                                |
+| 匯兌損益                   | 🟡            | 🟡 看 Corner 有無外幣業務                                        |
+| 無內控自評 / 稅務類型      | 🟠            | 🟠 法規                                                          |
+| 期末鎖定機制               | -             | ⚠️ **需驗證**（`accounting_periods.closed` 之後是否真擋 insert） |
 
 **覆盤結論**：**1 個 P0 新（DB CHECK）+ 1 個需驗證升級（代收代付）+ 4 個業務決策題**
 
@@ -514,9 +533,9 @@ ALTER TABLE travel_invoices ADD COLUMN (
 
 新增第 11、12：
 
-| # | Pattern | 誰發現 |
-|---|---|---|
-| **11** | **會計內控只在應用層、沒下到 DB CHECK** | **Bookkeeper 新** |
+| #      | Pattern                                                      | 誰發現            |
+| ------ | ------------------------------------------------------------ | ----------------- |
+| **11** | **會計內控只在應用層、沒下到 DB CHECK**                      | **Bookkeeper 新** |
 | **12** | **旅行社專業會計未接：代收代付 / 佣金 / 匯兌 / 發票 4 大類** | **Bookkeeper 新** |
 
 ### 4. 需 William 業務拍板（4 題、用業務話）
@@ -527,4 +546,3 @@ ALTER TABLE travel_invoices ADD COLUMN (
 4. **Corner 目前怎麼記代收代付？**（代收機票 / 代收簽證款）
 
 ---
-

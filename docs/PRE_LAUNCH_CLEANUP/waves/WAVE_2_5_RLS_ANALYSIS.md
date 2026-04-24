@@ -12,6 +12,7 @@
 ### Bug 機制
 
 當 FORCE RLS 且 policy `roles={public}`：
+
 - `service_role` 也受 RLS policy 管
 - Policy 內用 `get_current_user_workspace()` 取 auth.uid() 的 workspace
 - Service role **沒有** auth.uid() → 函式回傳 NULL
@@ -21,6 +22,7 @@
 ### 28 張中槍表（優先度）
 
 **🔴 高（API 常用、會爆）**：
+
 ```
 tour_itinerary_items      — 行程核心表、每個團務頁都讀
 confirmations             — 確認單
@@ -29,6 +31,7 @@ visas                     — 簽證
 ```
 
 **🟡 中（可能爆、看 API 寫法）**：
+
 ```
 accounting_accounts / accounting_entries / accounting_subjects
 attractions / attraction_licenses
@@ -38,6 +41,7 @@ esims
 ```
 
 **🟢 低（系統主管 操作為主）**：
+
 ```
 michelin_restaurants / premium_experiences
 payment_request_items
@@ -56,6 +60,7 @@ workspace_modules / workspace_selector_fields
 **沒有 service_role 例外**。
 
 例（`confirmations`）：
+
 ```sql
 POLICY confirmations_select: public, SELECT
   USING (workspace_id = get_current_user_workspace())
@@ -76,6 +81,7 @@ ALTER TABLE public.accounting_entries NO FORCE ROW LEVEL SECURITY;
 ```
 
 **好處**：
+
 - 和 4-20 修 workspaces bug 同策略（`workspaces` 也是 NO FORCE）
 - Supabase 官方建議：**不要** FORCE RLS
 - 一般 user 還是被 RLS 管（policy 還在）
@@ -106,6 +112,7 @@ ALTER POLICY confirmations_select ON public.confirmations
 ## 我的建議
 
 **方案 A（全 28 張 NO FORCE）**、原因：
+
 1. 和 workspaces 修復策略一致（連貫）
 2. 動作極小（28 條 ALTER、純 metadata）
 3. 零資料影響
@@ -115,6 +122,7 @@ ALTER POLICY confirmations_select ON public.confirmations
 ## 執行需 William 授權
 
 動作：
+
 ```sql
 -- 會在一個 migration 或 API batch 跑
 ALTER TABLE public.accounting_accounts NO FORCE ROW LEVEL SECURITY;

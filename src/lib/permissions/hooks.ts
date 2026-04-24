@@ -233,4 +233,3 @@ export function useVisibleModuleTabs<T extends { value: string }>(
     })
   }, [moduleCode, tabs, isTabEnabled])
 }
-

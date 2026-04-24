@@ -22,11 +22,13 @@
 ### P001 — 前端 isAdmin 短路拔除
 
 #### ✅ 代碼層落地完整
+
 - **auth-store.ts:131-135**：`setUser()` 改接收 `adminFlag` 參數、不再從 permissions 推斷
 - **permissions/hooks.ts:284-289**：`canAccess()` 移除了 `isAdmin &&` 短路（代碼已改為純 `isRouteAvailable + canRead` 雙檢查）
 - **usePermissions.ts:42**：保留 `isAdmin` 暴露但標記 `@deprecated`、hook 本身未用它做決策
 
 #### ⚠️ 業務場景驗證不足
+
 1. **系統主管白屏風險**：
    - Migration 20260422150000 理論上填了 54 row（48 tab + 6 無 tab 模組）
    - 但 pattern-map 紀錄 Corner 系統主管 現況是 74 row（> 54、含舊殘留）
@@ -45,12 +47,14 @@
 ### P002 — Middleware 公開路由白名單
 
 #### ✅ 完全落地
+
 - **middleware.ts:16-42**：新分法
   - `EXACT_PUBLIC_PATHS` 精確 14 項（含 `/api/auth/sync-employee` 特別允許）
   - `PREFIX_PUBLIC_PATHS` 精確 11 項（所有帶 `/` 的子路由）
 - **middleware.ts:67-70**：檢查邏輯改為先 exact 再 prefix、不會誤中
 
 #### ⚠️ sync-employee 特例檢視
+
 - **代碼立場**：`/api/auth/sync-employee` 理由寫的很清楚「登入時 session cookie 尚未就緒、用 access_token 驗」
 - **safety 驗證**：查看路由實現（見下 P003-B）
   - sync-employee 確實檢查 `access_token` 的合法性（`.getUser(access_token)` 驗證）
@@ -65,6 +69,7 @@
 ### P003-B — sync-employee 跨租戶綁帳號
 
 #### ✅ 修法完整
+
 - **sync-employee/route.ts:59-86**：三道守門
   1. 查目標 employee.workspace_id（第 59-68 行）
   2. body.workspace_id 必等於員工真實 workspace（第 70-77 行）
@@ -72,6 +77,7 @@
 - **user_metadata 更新**：用員工真實 workspace_id（第 107 行），不信任 body（第 102-111 行）
 
 #### ❌ 雞生蛋問題未解
+
 - **代碼流程**（route.ts:31-51）：
   ```
   if (access_token) {
@@ -98,6 +104,7 @@
 ### P003-C — reset-employee-password 跨租戶
 
 #### ✅ 完全落地
+
 - **route.ts:78-88**：workspace 檢查（新增）
   - 查目標員工 workspace → 必等於 auth.data.workspaceId
   - 違反 → 403 Forbidden
@@ -110,6 +117,7 @@
 ### P003-D — admin-reset-password 跨租戶
 
 #### ✅ 完全落地
+
 - **route.ts:86-99**：反查員工 workspace
   - 用 supabase_user_id 查 employees.workspace_id
   - 必等於 auth.data.workspaceId
@@ -123,6 +131,7 @@
 ### P003-E — create-employee-auth existing-tenant 跨租戶
 
 #### ✅ 完全落地
+
 - **route.ts:128-138**：workspace_code 對齊檢查（新增）
   - existing-tenant 分支強制檢查 `workspace_code === currentUserWorkspaceCode`
   - new-tenant 分支邏輯不動（isCornerAdmin only、已對）
@@ -135,6 +144,7 @@
 ### P003-A — PUT /api/permissions/features 缺授權
 
 #### ✅ 完全落地
+
 - **features/route.ts:9-55**：`requireTenantAdmin()` 函式（新增）
   - 檢查登入者是否有 `role_tab_permissions.settings.tenants.can_write`
   - 若指定 workspace_id query param → 加此檢查、否則用自己 workspace RLS
@@ -148,6 +158,7 @@
 ### P003-H — GET /api/workspaces/[id] 跨租戶
 
 #### ✅ 修法完整，業務推演有隱患
+
 - **route.ts:17-48**：跨租戶檢查（新增）
   ```
   if (workspaceId !== auth.data.workspaceId) {
@@ -158,11 +169,14 @@
 - **代碼無誤**：邏輯清晰、權限檢查正確
 
 #### ⚠️ 登入流程隱患
+
 - **流程推演**（auth-store.ts:222-223）：
+
   ```
   ensureAuthSync({...})
   fetchWorkspaceInfo(employeeData.workspace_id)
   ```
+
   - fetchWorkspaceInfo 會呼叫什麼 API？**代碼不在本文件**（import 可能指向 supabase RLS query）
   - 搜查發現是 `supabase.from('workspaces').select(...)` → 走 RLS、不會呼叫 `/api/workspaces/[id]`
   - **登入流**安全、此 API 主要供 dashboard 查付費狀態等用
@@ -178,6 +192,7 @@
 ### P003-I — POST /api/auth/get-employee-data 跨租戶
 
 #### ✅ 完全落地
+
 - **route.ts:49-56**：workspace 檢查（新增）
   ```
   workspace.id !== auth.data.workspaceId → 403
@@ -191,6 +206,7 @@
 ### P010 — role_tab_permissions RLS 從寬改租戶隔離
 
 #### ✅ 修法完整
+
 - **migration 20260422140000**：
   1. 預檢（第 18-39）：查 workspace_roles.workspace_id 是否有 NULL + role_tab_permissions 是否有孤兒 → abort
   2. DROP 舊 4 policy（第 44-54）
@@ -211,6 +227,7 @@
 ### P001 配套 — 系統主管 權限預填
 
 #### ✅ Migration 20260422150000 落地
+
 - 所有 `is_admin=true` 的 workspace_roles
   - 插入 54 row（48 module×tab + 6 無 tab 模組）
   - ON CONFLICT 覆蓋（確保 can_read/write = true）
@@ -227,6 +244,7 @@
 ### P001 配套 — 其他 Workspace 職務同步
 
 #### ✅ Migration 20260422160000 落地
+
 - JINGYAO / YUFEN / TESTUX 的 業務 / 會計 / 助理
   - 複製 Corner 同名職務的 role_tab_permissions rows
   - ON CONFLICT 覆蓋
@@ -243,6 +261,7 @@
 ## 整體業務符合性檢視
 
 ### 原則對照
+
 1. **原則 1：權限長在人身上、不是頭銜上**
    - ✅ P001 拔短路後確實改了、但 **未實測 系統主管/沒有系統主管資格 使用者實際進頁面的行為**
 
@@ -289,16 +308,16 @@
 
 ## 結論分項
 
-| 項目 | 狀態 | 備註 |
-|------|------|------|
-| **P001 代碼層** | ✅ 落地 | 3 處短路已拔、canAccess/canEdit 改雙檢查 |
-| **P001 業務層** | ❓ 部分驗證 | 系統主管預填邏輯對、但沒有系統主管資格 進頁面未實測 |
-| **P002 Middleware** | ✅ 完全落地 | 精確白名單建立、5 敏感 API 已不裸奔 |
-| **P003-A Features** | ✅ 完全落地 | 租戶管理權限檢查已加 |
-| **P003-B sync-employee** | ✅ 代碼完全 | 修法 + 跨租戶檢查全、但 token timing 文件不足 |
-| **P003-C/D/E 密碼重設** | ✅ 完全落地 | 3 支 API 都加 workspace 檢查 |
-| **P003-H/I 資訊查詢** | ✅ 完全落地 | 跨租戶讀側也加檢查 |
-| **P010 RLS 隔離** | ✅ 完全落地 | 5 新 policy 覆蓋 service_role + CRUD、預檢 + 後檢驗證完整 |
+| 項目                     | 狀態        | 備註                                                      |
+| ------------------------ | ----------- | --------------------------------------------------------- |
+| **P001 代碼層**          | ✅ 落地     | 3 處短路已拔、canAccess/canEdit 改雙檢查                  |
+| **P001 業務層**          | ❓ 部分驗證 | 系統主管預填邏輯對、但沒有系統主管資格 進頁面未實測       |
+| **P002 Middleware**      | ✅ 完全落地 | 精確白名單建立、5 敏感 API 已不裸奔                       |
+| **P003-A Features**      | ✅ 完全落地 | 租戶管理權限檢查已加                                      |
+| **P003-B sync-employee** | ✅ 代碼完全 | 修法 + 跨租戶檢查全、但 token timing 文件不足             |
+| **P003-C/D/E 密碼重設**  | ✅ 完全落地 | 3 支 API 都加 workspace 檢查                              |
+| **P003-H/I 資訊查詢**    | ✅ 完全落地 | 跨租戶讀側也加檢查                                        |
+| **P010 RLS 隔離**        | ✅ 完全落地 | 5 新 policy 覆蓋 service_role + CRUD、預檢 + 後檢驗證完整 |
 
 ---
 

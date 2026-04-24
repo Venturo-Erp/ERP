@@ -21,10 +21,7 @@ interface TourOrdersProps {
 
 export function TourOrders({ tour }: TourOrdersProps) {
   const { items: allOrders } = useOrdersListSlim()
-  const orders = useMemo(
-    () => allOrders.filter(o => o.tour_id === tour.id),
-    [allOrders, tour.id]
-  )
+  const orders = useMemo(() => allOrders.filter(o => o.tour_id === tour.id), [allOrders, tour.id])
   const [addDialogOpen, setAddDialogOpen] = useState(false)
   const currentWorkspace = useAuthStore(state => state.user?.workspace_id)
   const { toast } = useToast()

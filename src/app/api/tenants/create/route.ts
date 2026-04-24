@@ -181,10 +181,7 @@ export async function POST(request: NextRequest) {
           .eq('workspace_id', createdWorkspaceId)
       }
       if (createdEmployeeId) {
-        const { error } = await supabaseAdmin
-          .from('employees')
-          .delete()
-          .eq('id', createdEmployeeId)
+        const { error } = await supabaseAdmin.from('employees').delete().eq('id', createdEmployeeId)
         if (error) logger.error('Rollback delete employee failed:', error)
       }
       if (createdWorkspaceId) {

@@ -12,17 +12,21 @@
 
 - **業務效果**：手機選單過濾時、系統主管 不再無條件看到所有 item，需要跟 `user.permissions` 一致。系統主管職務 在 DB 已被 backfill 預設全 tab 權限，所以體感不變；若老闆在 /hr/roles 關掉 系統主管 的某模組，系統主管 手機端就看不到了（符合 SSOT）。
 - **old_string**:
+
 ```
         if (!item.requiredPermission) return item
         // 系統主管有所有權限
         if (isAdmin) return item
         return userPermissions.includes(item.requiredPermission) ? item : null
 ```
+
 - **new_string**:
+
 ```
         if (!item.requiredPermission) return item
         return userPermissions.includes(item.requiredPermission) ? item : null
 ```
+
 - **理由**：拔 系統主管 bypass、其餘邏輯（requiredPermission 比對 userPermissions）不動。`isAdmin` 變數還在第 212 行 destructure、但檔內已無其他引用點 —— 下一節 A2 討論是否清 import。
 
   **補充**：mobile-sidebar.tsx 現在 `isAdmin` 只有這一處用，移除後變孤兒。屬於「你的改動造成的孤兒才由你清」（CLAUDE.md §3）。建議同時刪第 212 行的 `const { isAdmin } = useAuthStore()` 與第 217 行 comment `// 新系統：使用 store.isAdmin`。
@@ -32,6 +36,7 @@
 ### A2 `src/components/layout/sidebar.tsx:522` — 空 if 塊
 
 - **現況**（line 517-531）：
+
 ```
 const visibleMenuItems = useMemo(() => {
   const workspaceCode = user?.workspace_code
@@ -46,9 +51,11 @@ const visibleMenuItems = useMemo(() => {
     return transportMenuItems
   }
 ```
+
 - **爭議**：這個 if 本身不是 bypass、而是「**讓系統主管 跳過 isTransport 分支、看到完整選單**」的語意旗。detector 命中它是因為模式匹配，但邏輯上它只是分支控制。
 - **我的傾向**：**保留** 系統主管 跳過 transport 選單的行為、但改寫形式避免 detector 命中。
 - **old_string**:
+
 ```
     // 擁有平台管理資格的人 看到所有功能（開發需要）
     // 不受租戶類型限制
@@ -60,13 +67,16 @@ const visibleMenuItems = useMemo(() => {
       return transportMenuItems
     }
 ```
+
 - **new_string**:
+
 ```
     // 車行用簡化選單（車趟管理為主）；系統主管 不受租戶類型限制、看完整選單
     if (isTransport && !isAdmin) {
       return transportMenuItems
     }
 ```
+
 - **理由**：語意完全一致（系統主管看全選單、沒有系統主管資格 車行看 transport）、形式上消除 `if (isAdmin)` pattern、detector 不再命中。
 - **移交 reviewer 確認**：系統主管 該不該跳過 transport 選單？這其實也是一種 bypass（只是不是權限 bypass、是「租戶類型」bypass）。如果徹底 RBAC 化、應該用「workspace_features 有 tours」而不是 isAdmin 來判斷。但這超出 PR-1d 範圍、屬於 follow-up。
 
@@ -76,6 +86,7 @@ const visibleMenuItems = useMemo(() => {
 
 - **業務效果**：桌面主選單過濾、系統主管 不再 bypass requiredPermission 比對。與 A1 同原理。
 - **old_string**:
+
 ```
           if (!item.requiredPermission) return item
           // '*' 代表擁有所有權限
@@ -84,13 +95,16 @@ const visibleMenuItems = useMemo(() => {
           const perm = item.requiredPermission
           return userPermissions.some(p => p === perm || p.startsWith(`${perm}:`)) ? item : null
 ```
+
 - **new_string**:
+
 ```
           if (!item.requiredPermission) return item
           // 精確比對或前綴比對（例如 requiredPermission='tours'，權限有 'tours:overview' 也算符合）
           const perm = item.requiredPermission
           return userPermissions.some(p => p === perm || p.startsWith(`${perm}:`)) ? item : null
 ```
+
 - **理由**：刪 bypass、保留 `*` 註解邏輯改到前綴比對來實現（本來就有）。
 
 ---
@@ -99,18 +113,22 @@ const visibleMenuItems = useMemo(() => {
 
 - **業務效果**：個人工具過濾、系統主管 不再 bypass。
 - **old_string**:
+
 ```
       if (!item.requiredPermission) return true
       if (isAdmin) return true
       const perm = item.requiredPermission
       return userPermissions.some(p => p === perm || p.startsWith(`${perm}:`))
 ```
+
 - **new_string**:
+
 ```
       if (!item.requiredPermission) return true
       const perm = item.requiredPermission
       return userPermissions.some(p => p === perm || p.startsWith(`${perm}:`))
 ```
+
 - **理由**：同 A3。注意 sidebar.tsx 的 `isAdmin` 還在 A2 保留使用（`isTransport && !isAdmin`）、所以 **第 509 行 `const { isAdmin } = useAuthStore()` 不可刪**、兩個 useMemo 的 deps 也要保留 `isAdmin`。
 
 ---
@@ -119,6 +137,7 @@ const visibleMenuItems = useMemo(() => {
 
 - **業務效果**：canManageMembers 不再 系統主管 bypass、改為實際比對 `workspace:manage_members` / `workspace:manage`。若 系統主管職務 沒 backfill 這兩個 permission，要人資系統改。
 - **old_string**:
+
 ```
   const canManageMembers = useMemo(() => {
     if (!user) return false
@@ -129,7 +148,9 @@ const visibleMenuItems = useMemo(() => {
     )
   }, [user, isAdmin])
 ```
+
 - **new_string**:
+
 ```
   const canManageMembers = useMemo(() => {
     if (!user) return false
@@ -139,6 +160,7 @@ const visibleMenuItems = useMemo(() => {
     )
   }, [user])
 ```
+
 - **理由**：刪 bypass、同時清 deps 的 `isAdmin` 跟第 13 行 `const isAdmin = useAuthStore(...)` 變孤兒、要一起清（checkbox 1、2、3）。
 - **⚠ 風險**：若 DB 裡 系統主管職務 的 `user.permissions` 不含 `workspace:manage_members`、系統主管 會無法管頻道成員。**需驗證 系統主管職務 的 user_permissions 是否有這兩個 permission**（不在 tab_permissions 範圍、可能被 backfill 漏掉）。**移交 reviewer/minimal-change**。
 
@@ -148,6 +170,7 @@ const visibleMenuItems = useMemo(() => {
 
 - **業務效果**：ModuleGuard 不再 系統主管 bypass、一律走 `isRouteAvailable(pathname)`。系統主管 的 workspace_features 應已開全部、不會擋。
 - **old_string**:
+
 ```
     // 擁有平台管理資格的人 跳過檢查
     if (isAdmin) {
@@ -157,10 +180,13 @@ const visibleMenuItems = useMemo(() => {
 
     // 如果沒有設定任何 feature，預設全開（向下相容）
 ```
+
 - **new_string**:
+
 ```
     // 如果沒有設定任何 feature，預設全開（向下相容）
 ```
+
 - **理由**：拔 bypass、features.length 向下相容還在、routeAvailable 檢查還在。`isAdmin` destructure（第 31 行）與 useEffect deps 的 `isAdmin`（第 67 行）變孤兒、一起清。
 
 ---
@@ -169,6 +195,7 @@ const visibleMenuItems = useMemo(() => {
 
 - **業務效果**：`canRead(module, tab)` 不再 系統主管 bypass、一律查 permissions 表。系統主管職務 的 tab_permissions 已由 migration 20260422150000 全補齊、體感不變；老闆改 系統主管權限時即時生效（SSOT）。
 - **old_string**:
+
 ```
   // 檢查是否有讀取權限
   const canRead = useCallback(
@@ -178,13 +205,16 @@ const visibleMenuItems = useMemo(() => {
 
       // 找對應的權限記錄
 ```
+
 - **new_string**:
+
 ```
   // 檢查是否有讀取權限
   const canRead = useCallback(
     (moduleCode: string, tabCode?: string): boolean => {
       // 找對應的權限記錄
 ```
+
 - **理由**：刪 bypass、dep 保留（isAdmin 下面 canWrite/canReadAny/canWriteAny 還用）。
 
 ---
@@ -192,6 +222,7 @@ const visibleMenuItems = useMemo(() => {
 ### A8 `src/lib/permissions/useTabPermissions.tsx:97` — canWrite
 
 - **old_string**:
+
 ```
   // 檢查是否有寫入權限
   const canWrite = useCallback(
@@ -201,13 +232,16 @@ const visibleMenuItems = useMemo(() => {
 
       // 找對應的權限記錄
 ```
+
 - **new_string**:
+
 ```
   // 檢查是否有寫入權限
   const canWrite = useCallback(
     (moduleCode: string, tabCode?: string): boolean => {
       // 找對應的權限記錄
 ```
+
 - **理由**：同 A7。
 
 ---
@@ -215,6 +249,7 @@ const visibleMenuItems = useMemo(() => {
 ### A9 `src/lib/permissions/useTabPermissions.tsx:113` — canReadAny
 
 - **old_string**:
+
 ```
   // 檢查模組內任一分頁是否有讀取權限
   const canReadAny = useCallback(
@@ -225,7 +260,9 @@ const visibleMenuItems = useMemo(() => {
     [permissions, isAdmin]
   )
 ```
+
 - **new_string**:
+
 ```
   // 檢查模組內任一分頁是否有讀取權限
   const canReadAny = useCallback(
@@ -235,6 +272,7 @@ const visibleMenuItems = useMemo(() => {
     [permissions]
   )
 ```
+
 - **理由**：同 A7、同時清 dep。
 
 ---
@@ -242,6 +280,7 @@ const visibleMenuItems = useMemo(() => {
 ### A10 `src/lib/permissions/useTabPermissions.tsx:122` — canWriteAny
 
 - **old_string**:
+
 ```
   // 檢查模組內任一分頁是否有寫入權限
   const canWriteAny = useCallback(
@@ -252,7 +291,9 @@ const visibleMenuItems = useMemo(() => {
     [permissions, isAdmin]
   )
 ```
+
 - **new_string**:
+
 ```
   // 檢查模組內任一分頁是否有寫入權限
   const canWriteAny = useCallback(
@@ -262,6 +303,7 @@ const visibleMenuItems = useMemo(() => {
     [permissions]
   )
 ```
+
 - **理由**：同 A9。
 
   **整體清理備註**：A7-A10 全刪後，`isAdmin` state（第 33 行）在 `return { isAdmin, ... }` 仍對外暴露（第 131 行）。保留此 export、不動外部呼叫者、符合 surgical changes。若 reviewer 要徹底清、可開 follow-up PR。
@@ -272,6 +314,7 @@ const visibleMenuItems = useMemo(() => {
 
 - **業務效果**：Server-side 路由權限檢查函式、系統主管 不再 bypass、一律走 module:tab 比對。系統主管 的 user_permissions 應含 `*` 或各模組代碼；若 backfill 漏掉會報 false。
 - **old_string**:
+
 ```
 export function hasPermissionForRoute(
   userPermissions: string[] | undefined,
@@ -287,7 +330,9 @@ export function hasPermissionForRoute(
 
   // 無需特殊權限的路由
 ```
+
 - **new_string**:
+
 ```
 export function hasPermissionForRoute(
   userPermissions: string[] | undefined,
@@ -297,6 +342,7 @@ export function hasPermissionForRoute(
 
   // 無需特殊權限的路由
 ```
+
 - **理由**：拔掉 `isAdmin?: boolean` 參數本身、更徹底（signature 變窄、呼叫端會被 type-check 抓出來）。
 - **⚠ 風險**：簽章改動、呼叫端要改。需要 grep `hasPermissionForRoute(` 看呼叫點是否有傳 `isAdmin` 第三參數、一起清。**這是簽章變更、移交 reviewer 要不要更保守**（保留參數、只刪 bypass、留 backward compatibility）。
 
@@ -315,6 +361,7 @@ export function hasPermissionForRoute(
 
 - **選用 permission**：`canAccess('/accounting')`
 - **old_string**:
+
 ```
 'use client'
 
@@ -332,7 +379,9 @@ export default function AccountingLayout({ children }: { children: React.ReactNo
   return <>{children}</>
 }
 ```
+
 - **new_string**:
+
 ```
 'use client'
 
@@ -350,6 +399,7 @@ export default function AccountingLayout({ children }: { children: React.ReactNo
   return <>{children}</>
 }
 ```
+
 - **理由**：整個會計家族受單一 layout 守門、canAccess 會同時檢查 workspace_features 有 accounting（對非企業客戶隱藏）+ role.tab_permissions 有 accounting 讀權限。系統主管 預設會過、沒有系統主管資格 在 /hr/roles 被開 accounting 也會過、SSOT 成立。
 
 ---
@@ -358,6 +408,7 @@ export default function AccountingLayout({ children }: { children: React.ReactNo
 
 - **選用 permission**：`canAccess('/database')`
 - **old_string**:
+
 ```
 'use client'
 
@@ -376,7 +427,9 @@ export default function DatabaseLayout({ children }: { children: React.ReactNode
   return <>{children}</>
 }
 ```
+
 - **new_string**:
+
 ```
 'use client'
 
@@ -395,6 +448,7 @@ export default function DatabaseLayout({ children }: { children: React.ReactNode
   return <>{children}</>
 }
 ```
+
 - **理由**：同 B1、database 家族。
 
 ---
@@ -403,13 +457,17 @@ export default function DatabaseLayout({ children }: { children: React.ReactNode
 
 - **選用 permission**：`canAccess('/finance/settings')`
 - **old_string**:
+
 ```
   if (!isAdmin) return <UnauthorizedPage />
 ```
+
 - **new_string**:
+
 ```
   if (!canAccess('/finance/settings')) return <UnauthorizedPage />
 ```
+
 - **前置改動**：第 67 行 import、第 121 行 destructure 要同步換：
   - old: `import { useAuthStore } from '@/stores/auth-store'`（若檔內 isAdmin 只此一處使用、import 可改為 `usePermissions`）
   - new: `import { usePermissions } from '@/lib/permissions'` + 第 121 行 `const isAdmin = useAuthStore(...)` 改為 `const { canAccess } = usePermissions()`
@@ -421,13 +479,17 @@ export default function DatabaseLayout({ children }: { children: React.ReactNode
 
 - **選用 permission**：`canAccess('/finance/requests')`
 - **old_string**:
+
 ```
   if (!isAdmin) return <UnauthorizedPage />
 ```
+
 - **new_string**:
+
 ```
   if (!canAccess('/finance/requests')) return <UnauthorizedPage />
 ```
+
 - **前置改動**：第 5 行 import `from '@/stores'` 保留（如果檔內還有 `useAuthStore` 其他用法；grep 確認，實測此檔 isAdmin 只這一處、可改為）
   - 第 5 行：改為 `import { usePermissions } from '@/lib/permissions'`
   - 第 23 行：`const isAdmin = useAuthStore(state => state.isAdmin)` → `const { canAccess } = usePermissions()`
@@ -439,13 +501,17 @@ export default function DatabaseLayout({ children }: { children: React.ReactNode
 
 - **選用 permission**：`canAccess('/finance/treasury')`
 - **old_string**:
+
 ```
   if (!isAdmin) return <UnauthorizedPage />
 ```
+
 - **new_string**:
+
 ```
   if (!canAccess('/finance/treasury')) return <UnauthorizedPage />
 ```
+
 - **前置改動**：同 B4，第 13 行 import、第 47 行 destructure。
 
 ---
@@ -454,13 +520,17 @@ export default function DatabaseLayout({ children }: { children: React.ReactNode
 
 - **選用 permission**：`canAccess('/finance/travel-invoice')`
 - **old_string**:
+
 ```
   if (!isAdmin) return <UnauthorizedPage />
 ```
+
 - **new_string**:
+
 ```
   if (!canAccess('/finance/travel-invoice')) return <UnauthorizedPage />
 ```
+
 - **前置改動**：同 B4，第 10 行 import、第 37 行 destructure。
 
 ---
@@ -469,13 +539,17 @@ export default function DatabaseLayout({ children }: { children: React.ReactNode
 
 - **選用 permission**：`canAccess('/finance/reports')`
 - **old_string**:
+
 ```
   if (!isAdmin) return <UnauthorizedPage />
 ```
+
 - **new_string**:
+
 ```
   if (!canAccess('/finance/reports')) return <UnauthorizedPage />
 ```
+
 - **前置改動**：同 B4，第 5 行 import、第 61 行 destructure。
 
 ---
@@ -488,6 +562,7 @@ export default function DatabaseLayout({ children }: { children: React.ReactNode
 - **建議 new_string**（保留 isAdmin、不改行為、但加註釋讓 detector 放心、或以變數重命名）：
   - 選項 1（最小動）：**保留 isAdmin**，在 detector exception list 加入此檔
   - 選項 2（改寫形式）：
+
 ```
 export function WorkspaceSwitcher() {
   const { workspaces, loadWorkspaces } = useWorkspaceChannels()
@@ -510,6 +585,7 @@ export function WorkspaceSwitcher() {
   ...
 }
 ```
+
 - **理由**：detector 的意圖是抓「RBAC bypass」；而這裡的 isAdmin 是 platform-admin feature gate、語意不同。把它獨立出 `canSwitchWorkspace` 並在註釋說明、或放入 detector exception list、是更誠實的做法。**移交 reviewer 決定選項 1 還是 2**。
 
 ---

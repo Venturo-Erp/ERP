@@ -76,12 +76,9 @@ export function OrderListView({
     setVisaOpen(true)
   }, [])
 
-  const clearIfAllClosed = useCallback(
-    (r: boolean, q: boolean, e: boolean, v: boolean) => {
-      if (!r && !q && !e && !v) setSelectedOrder(null)
-    },
-    []
-  )
+  const clearIfAllClosed = useCallback((r: boolean, q: boolean, e: boolean, v: boolean) => {
+    if (!r && !q && !e && !v) setSelectedOrder(null)
+  }, [])
 
   return (
     <>

@@ -33,25 +33,25 @@
 
 **ERP-domain 需要改**（FK 目前指 auth.users，應指 employees）：
 
-| 表 | 欄位 |
-|---|---|
-| `assigned_itineraries` | `created_by` |
-| `confirmations` | `created_by`, `updated_by` |
-| `cost_templates` | `created_by`, `updated_by` |
-| `emails` | `created_by`, `updated_by` |
-| `files` | `created_by`, `updated_by` |
-| `file_audit_logs` | `performed_by` |
-| `image_library` | `created_by` |
-| `itineraries` | `created_by`（+ 刪除 `created_by_legacy_user_id`、`creator_user_id` 兩個零值欄位） |
-| `linkpay_logs` | `created_by`, `updated_by` |
-| `michelin_restaurants` | `created_by`, `updated_by` |
-| `payment_requests` | `updated_by` |
-| `premium_experiences` | `created_by`, `updated_by` |
-| `suppliers` | `created_by`, `updated_by` |
-| `todos` | `created_by`, `updated_by` |
-| `tour_control_forms` | `created_by`, `updated_by` |
-| `tour_documents` | `uploaded_by` |
-| `tours` | `locked_by`, `last_unlocked_by` |
+| 表                     | 欄位                                                                               |
+| ---------------------- | ---------------------------------------------------------------------------------- |
+| `assigned_itineraries` | `created_by`                                                                       |
+| `confirmations`        | `created_by`, `updated_by`                                                         |
+| `cost_templates`       | `created_by`, `updated_by`                                                         |
+| `emails`               | `created_by`, `updated_by`                                                         |
+| `files`                | `created_by`, `updated_by`                                                         |
+| `file_audit_logs`      | `performed_by`                                                                     |
+| `image_library`        | `created_by`                                                                       |
+| `itineraries`          | `created_by`（+ 刪除 `created_by_legacy_user_id`、`creator_user_id` 兩個零值欄位） |
+| `linkpay_logs`         | `created_by`, `updated_by`                                                         |
+| `michelin_restaurants` | `created_by`, `updated_by`                                                         |
+| `payment_requests`     | `updated_by`                                                                       |
+| `premium_experiences`  | `created_by`, `updated_by`                                                         |
+| `suppliers`            | `created_by`, `updated_by`                                                         |
+| `todos`                | `created_by`, `updated_by`                                                         |
+| `tour_control_forms`   | `created_by`, `updated_by`                                                         |
+| `tour_documents`       | `uploaded_by`                                                                      |
+| `tours`                | `locked_by`, `last_unlocked_by`                                                    |
 
 合計：**17 表、30 欄位**。
 
@@ -72,17 +72,20 @@
 ## 三、執行分階段
 
 ### Phase 0：規劃與守門（本文件）
+
 - [x] 盤點完成
 - [x] 寫計畫
 - [x] William review 並 approve
 - [ ] 寫 E2E 守門測試：`tests/e2e/audit-trail-insert.spec.ts` — 跳過（改用現有 smoke + login-api.spec.ts 驗證 + 使用者實測 itineraries）
 
 ### Phase 1：可映射性審計（✅ 完成）
+
 - [x] 寫 SQL 報表：17 表 × 30 欄位的資料分布
 - [x] 產出檔：`docs/AUDIT_TRAIL_DATA_INVENTORY.md`
 - **結果**：79 row 有值、**100% 可 map**，0 unmappable → Q1「unmappable 處理」失效
 
 ### Phase 2：救火 — itineraries（✅ 完成）
+
 - [x] Migration `20260420140000_fix_itineraries_created_by_fk.sql` 執行於 prod
 - [x] 19 筆 created_by map 成功
 - [x] 兩個零值欄位 `created_by_legacy_user_id`、`creator_user_id` DROP
@@ -91,6 +94,7 @@
 - [x] 使用者實測建立全新行程表儲存成功
 
 ### Phase 3：分批 migration（✅ 完成，當天跑完）
+
 分批改按「風險從低到高」（Q2 決策）：
 
 - [x] **B1** `20260420150000_audit_trail_fk_batch_b1.sql`：7 空表、11 FK（linkpay_logs, cost_templates, emails, assigned_itineraries, tour_control_forms, file_audit_logs, image_library）
@@ -101,6 +105,7 @@
 驗證：`pg_constraint` 查 17 表全部指 employees ✅；smoke test 17/17 pass；login-api 6/6 pass。
 
 ### Phase 4：Code 掃蕩（✅ 完成）
+
 - [x] 掃所有 `created_by/updated_by/locked_by/uploaded_by/performed_by` 寫入
 - [x] 修掉 2 處 `'current_user'` 寫死字串（useInvoiceDialog.ts、useTourPayments.ts）
 - [x] 修掉 8 處 `|| ''` 空字串 fallback（BatchInvoiceDialog、IssueInvoiceDialog、useRequestForm、QuickRequestFromItemDialog、tour-itinerary-tab、tour-confirmation-sheet、CreateReceiptDialog）
@@ -108,6 +113,7 @@
 - [x] 驗證：`auth.user!.id`（useRequireAuth）本質上就是 employee.id，寫法正確
 
 ### Phase 5：規範入庫（✅ 完成）
+
 - [x] `docs/DATABASE_DESIGN_STANDARDS.md` §8 加「審計欄位慣例」節
 - [x] `CLAUDE.md` 紅線區加「審計欄位 FK 一律指 employees(id)」
 - [x] 模板 + code 寫入規則 + 為什麼 `currentUser.id` = `employee.id` 的說明都放進規範
@@ -119,15 +125,19 @@
 每個 Phase 都要能獨立回退。
 
 ### 4.1 Migration 回退檔
+
 每支 migration 都附 `.ROLLBACK.sql`：
+
 - `UPDATE` 反向寫回原 auth uid（從 `employees.user_id / supabase_user_id` 反查）
 - `DROP CONSTRAINT + ADD CONSTRAINT` 換回 auth.users
 
 ### 4.2 出問題判定
+
 - Phase 2/3 migration 跑完、守門測試失敗 → 立即 rollback、凍結後續 phase、回計畫檢討
 - Phase 2/3 跑完 24 小時內有使用者回報新錯誤 → 同上
 
 ### 4.3 Prod 安全網
+
 - Migration 前：`pg_dump` schema + 相關表 data
 - Migration 當下：BEGIN / COMMIT 包起來、任何一步失敗就 ROLLBACK
 - 不使用 Supabase CLI `db push`（目前 migration history 本地跟 prod 已分叉），一律用 Management API 手動跑、跑完把 SQL 存成 migration 檔對應
@@ -136,19 +146,20 @@
 
 ## 五、風險清單
 
-| 風險 | 機率 | 嚴重度 | 對策 |
-|---|---|---|---|
-| 舊 auth uid map 不到任何 employee（離職 / 已刪） | 中 | 低 | Phase 1 統計、approve NULL 策略 |
-| 某張表的 `created_by` 被 RLS policy 用到 | 低 | 高 | Phase 1 跑 `pg_policies` 掃一次、已驗證 17 表無此狀況 |
-| code 裡有地方故意傳 auth uid 而不是 employee.id | 低 | 中 | Phase 4 `grep -rn 'created_by.*\.id'` + gitnexus 掃 |
-| migration 跑到一半 prod 有人 insert | 低 | 中 | 選離峰時段、每個 migration 包 BEGIN/COMMIT、每張表最多 10 秒鎖 |
-| 類型生成後 TS 爆錯（欄位被刪） | 中 | 低 | Phase 2 / 4 都跑 `npm run type-check` |
+| 風險                                             | 機率 | 嚴重度 | 對策                                                           |
+| ------------------------------------------------ | ---- | ------ | -------------------------------------------------------------- |
+| 舊 auth uid map 不到任何 employee（離職 / 已刪） | 中   | 低     | Phase 1 統計、approve NULL 策略                                |
+| 某張表的 `created_by` 被 RLS policy 用到         | 低   | 高     | Phase 1 跑 `pg_policies` 掃一次、已驗證 17 表無此狀況          |
+| code 裡有地方故意傳 auth uid 而不是 employee.id  | 低   | 中     | Phase 4 `grep -rn 'created_by.*\.id'` + gitnexus 掃            |
+| migration 跑到一半 prod 有人 insert              | 低   | 中     | 選離峰時段、每個 migration 包 BEGIN/COMMIT、每張表最多 10 秒鎖 |
+| 類型生成後 TS 爆錯（欄位被刪）                   | 中   | 低     | Phase 2 / 4 都跑 `npm run type-check`                          |
 
 ---
 
 ## 六、驗證指標
 
 Phase 全部完成後：
+
 - [ ] 17 表 30 欄位 FK 全部指向 `employees(id)`（SQL 查 `pg_constraint` 驗證）
 - [ ] 守門測試全綠（`tests/e2e/audit-trail-insert.spec.ts`）
 - [ ] `npm run type-check` 無錯
@@ -159,15 +170,15 @@ Phase 全部完成後：
 
 ## 七、時間估算
 
-| Phase | 工時 | 依賴 |
-|---|---|---|
-| 0 計畫 approve | 0 | — |
-| 1 可映射性審計 | 0.5 天 | Phase 0 |
-| 2 救火 itineraries | 0.5 天 | Phase 1 |
+| Phase                 | 工時                             | 依賴           |
+| --------------------- | -------------------------------- | -------------- |
+| 0 計畫 approve        | 0                                | —              |
+| 1 可映射性審計        | 0.5 天                           | Phase 0        |
+| 2 救火 itineraries    | 0.5 天                           | Phase 1        |
 | 3 Batch A–D migration | 5 天（每批 1 天 + 1 天觀察滾動） | Phase 2 穩定後 |
-| 4 Code 掃蕩 | 0.5 天 | Phase 3 完成 |
-| 5 規範入庫 | 0.5 天 | Phase 4 |
-| **合計** | **7 天（含觀察）** | |
+| 4 Code 掃蕩           | 0.5 天                           | Phase 3 完成   |
+| 5 規範入庫            | 0.5 天                           | Phase 4        |
+| **合計**              | **7 天（含觀察）**               |                |
 
 ---
 

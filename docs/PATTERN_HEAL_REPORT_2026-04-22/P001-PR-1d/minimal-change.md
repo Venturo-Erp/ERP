@@ -17,6 +17,7 @@
 ## 逐點判定
 
 ### A1 `src/components/layout/mobile-sidebar.tsx:260` — `if (isAdmin) return item`
+
 - 判定：✅ **可改**
 - 具體改什麼行：**只刪 L259-260 這兩行**（註解 `// 系統主管有所有權限` + `if (isAdmin) return item`）。L261 `return userPermissions.includes(item.requiredPermission) ? item : null` 保留、已是正確 fallback。
 - 絕對不可順手改：
@@ -28,6 +29,7 @@
 ---
 
 ### A2 `src/components/layout/sidebar.tsx:522` — `if (isAdmin) { ... }` 空塊
+
 - 判定：🔴 **DEFER**
 - 具體改什麼行：本 PR **不動**。
 - 絕對不可順手改：
@@ -38,6 +40,7 @@
 ---
 
 ### A3 `src/components/layout/sidebar.tsx:565` — `if (isAdmin) return item`
+
 - 判定：✅ **可改**
 - 具體改什麼行：**只刪 L564-565 兩行**（註解 `// '*' 代表擁有所有權限` + 條件式）。L566-568 的 prefix-match 保留、已是正確的權限比對（例如 `tours` 匹配 `tours:overview`）。
 - 絕對不可順手改：
@@ -48,6 +51,7 @@
 ---
 
 ### A4 `src/components/layout/sidebar.tsx:596` — `if (isAdmin) return true`
+
 - 判定：⚠️ **小心**
 - 具體改什麼行：**只刪 L595-596 兩行**。保留 L597-598 `const perm = item.requiredPermission; return userPermissions.some(...)`。
 - 絕對不可順手改：
@@ -59,6 +63,7 @@
 ---
 
 ### A5-A8 `src/lib/permissions/useTabPermissions.tsx:80,97,113,122` — 4 處 `if (isAdmin) return true`
+
 - 判定：✅ **可改（4 處同時動）**
 - 具體改什麼行：**只刪每個 useCallback 裡的 `if (isAdmin) return true` 與其上一行註解 `// 系統主管擁有所有權限`**（共 4 組、每組 2 行）。
 - 絕對不可順手改：
@@ -72,6 +77,7 @@
 ---
 
 ### A9 `src/lib/permissions/index.ts:114` — `if (isAdmin) return true`（在 `hasPermissionForRoute` 裡）
+
 - 判定：🔴 **DEFER**
 - 具體改什麼行：本 PR **不動**。
 - 絕對不可順手改：
@@ -86,13 +92,14 @@
 ---
 
 ### A10 `src/components/guards/ModuleGuard.tsx:49` — `if (isAdmin) { setChecked(true); return }`
+
 - 判定：🔴 **DEFER**（或降級為 ⚠️ 小心並連同 AuthGuard 家族一起排）
 - 具體改什麼行：本 PR **不動**。
 - 絕對不可順手改：
   - ❌ 不可刪 L48-52（isAdmin 跳過檢查整段）
   - ❌ 不可順便把 ALWAYS_ALLOWED 陣列重排
 - 理由（DEFER 依據）：
-  - `ModuleGuard` 掛在 `src/app/(main)/layout.tsx` 全域根節點、所有 /(main)/* 路由都經過它
+  - `ModuleGuard` 掛在 `src/app/(main)/layout.tsx` 全域根節點、所有 /(main)/\* 路由都經過它
   - 系統主管 若拔掉這個短路、會走 `isRouteAvailable(pathname)`（來自 `useWorkspaceFeatures`）、系統主管 的 workspace features 是否涵蓋所有路由**沒有驗過**（features table ≠ role_tab_permissions backfill）
   - 風險 > 收益：一行改動 = 全站 系統主管 可能閃 `/unauthorized`
   - 建議 DEFER 到「workspace_features × isAdmin」一致性驗過後的獨立 PR
@@ -100,6 +107,7 @@
 ---
 
 ### A11 `src/components/workspace/channel-sidebar/useChannelSidebar.ts:17` — `if (isAdmin) return true`（在 `canManageMembers` useMemo 裡）
+
 - 判定：✅ **可改**
 - 具體改什麼行：**只刪 L17 一行**（`if (isAdmin) return true`）。保留 L18-21 permissions.includes 檢查。
 - 絕對不可順手改：
@@ -111,6 +119,7 @@
 ---
 
 ### B1 `src/app/(main)/accounting/layout.tsx:13` — `if (!isAdmin) return <UnauthorizedPage />`
+
 - 判定：✅ **可改**
 - 具體改什麼行：**只改 L13 一行**。從 `if (!isAdmin) return <UnauthorizedPage />` 改成 `if (!canAccess('accounting')) return <UnauthorizedPage />`（或等價的 module permission 檢查、接 `usePermissions` / `hasPermissionForRoute` 前端 hook）。
 - 絕對不可順手改：
@@ -123,6 +132,7 @@
 ---
 
 ### B2 `src/app/(main)/database/layout.tsx:14` — `if (!isAdmin) return <UnauthorizedPage />`
+
 - 判定：✅ **可改**
 - 具體改什麼行：**只改 L14 一行**、條件換成 `canAccess('database')` 或等價。
 - 絕對不可順手改：
@@ -134,6 +144,7 @@
 ---
 
 ### B3 `src/app/(main)/finance/settings/page.tsx:433` — `if (!isAdmin) return <UnauthorizedPage />`
+
 - 判定：⚠️ **小心**
 - 具體改什麼行：**只改 L433 一行**、條件換成對應 `canViewFinance` / `canAccess('finance:settings')` 或等價。
 - 絕對不可順手改：
@@ -146,6 +157,7 @@
 ---
 
 ### B4 `src/app/(main)/finance/treasury/page.tsx:135` — `if (!isAdmin) return <UnauthorizedPage />`
+
 - 判定：⚠️ **小心**
 - 具體改什麼行：**只改 L135 一行**、條件換成 `canViewFinance` 等模組 permission。
 - 絕對不可順手改：
@@ -157,6 +169,7 @@
 ---
 
 ### B5 `src/app/(main)/finance/requests/page.tsx:63` — `if (!isAdmin) return <UnauthorizedPage />`
+
 - 判定：⚠️ **小心**
 - 具體改什麼行：**只改 L63 一行**、條件換成 `canAccess('finance:requests')` 等。
 - 絕對不可順手改：
@@ -169,6 +182,7 @@
 ---
 
 ### B6 `src/app/(main)/finance/travel-invoice/page.tsx:49` — `if (!isAdmin) return <UnauthorizedPage />`
+
 - 判定：⚠️ **小心**
 - 具體改什麼行：**只改 L49 一行**、條件換成 `canAccess('finance:travel-invoice')` 等。
 - 絕對不可順手改：
@@ -181,6 +195,7 @@
 ---
 
 ### B7 `src/app/(main)/finance/reports/page.tsx:96` — `if (!isAdmin) return <UnauthorizedPage />`
+
 - 判定：⚠️ **小心**
 - 具體改什麼行：**只改 L96 一行**、條件換成 `canViewFinance` 或 `canAccess('finance:reports')`。
 - 絕對不可順手改：
@@ -193,6 +208,7 @@
 ---
 
 ### B8 `src/app/(main)/settings/components/WorkspaceSwitcher.tsx:16` — `if (!isAdmin) return`（在 useEffect 裡 early-return）
+
 - 判定：🔴 **DEFER**（候選、主席可再議）
 - 具體改什麼行：本 PR **不動**、或至少 **不套 canAccess 改法**。
 - 絕對不可順手改：
@@ -236,31 +252,33 @@
 
 ## Scope 自檢總表
 
-| 分類 | 命中點 | 判定 |
-|---|---|---|
-| A1 mobile-sidebar.tsx:260 | `if (isAdmin) return item` | ✅ |
-| A2 sidebar.tsx:522 | 空 if 塊 | 🔴 DEFER |
-| A3 sidebar.tsx:565 | `if (isAdmin) return item` | ✅ |
-| A4 sidebar.tsx:596 | `if (isAdmin) return true` | ⚠️（配合 A2 DEFER） |
+| 分類                                      | 命中點                          | 判定                        |
+| ----------------------------------------- | ------------------------------- | --------------------------- |
+| A1 mobile-sidebar.tsx:260                 | `if (isAdmin) return item`      | ✅                          |
+| A2 sidebar.tsx:522                        | 空 if 塊                        | 🔴 DEFER                    |
+| A3 sidebar.tsx:565                        | `if (isAdmin) return item`      | ✅                          |
+| A4 sidebar.tsx:596                        | `if (isAdmin) return true`      | ⚠️（配合 A2 DEFER）         |
 | A5-A8 useTabPermissions.tsx:80/97/113/122 | 4 處 `if (isAdmin) return true` | ✅（4 處統一、禁抽 helper） |
-| A9 permissions/index.ts:114 | `hasPermissionForRoute` 內短路 | 🔴 DEFER |
-| A10 ModuleGuard.tsx:49 | 系統主管 跳過 guard | 🔴 DEFER |
-| A11 useChannelSidebar.ts:17 | `if (isAdmin) return true` | ✅ |
-| B1 accounting/layout.tsx:13 | layout 大鎖 | ✅ |
-| B2 database/layout.tsx:14 | layout 大鎖 | ✅ |
-| B3 finance/settings/page.tsx:433 | page 大鎖 | ⚠️ |
-| B4 finance/treasury/page.tsx:135 | page 大鎖 | ⚠️ |
-| B5 finance/requests/page.tsx:63 | page 大鎖 | ⚠️ |
-| B6 finance/travel-invoice/page.tsx:49 | page 大鎖 | ⚠️ |
-| B7 finance/reports/page.tsx:96 | page 大鎖 | ⚠️ |
-| B8 WorkspaceSwitcher.tsx:16 | useEffect early-return | 🔴 DEFER |
+| A9 permissions/index.ts:114               | `hasPermissionForRoute` 內短路  | 🔴 DEFER                    |
+| A10 ModuleGuard.tsx:49                    | 系統主管 跳過 guard             | 🔴 DEFER                    |
+| A11 useChannelSidebar.ts:17               | `if (isAdmin) return true`      | ✅                          |
+| B1 accounting/layout.tsx:13               | layout 大鎖                     | ✅                          |
+| B2 database/layout.tsx:14                 | layout 大鎖                     | ✅                          |
+| B3 finance/settings/page.tsx:433          | page 大鎖                       | ⚠️                          |
+| B4 finance/treasury/page.tsx:135          | page 大鎖                       | ⚠️                          |
+| B5 finance/requests/page.tsx:63           | page 大鎖                       | ⚠️                          |
+| B6 finance/travel-invoice/page.tsx:49     | page 大鎖                       | ⚠️                          |
+| B7 finance/reports/page.tsx:96            | page 大鎖                       | ⚠️                          |
+| B8 WorkspaceSwitcher.tsx:16               | useEffect early-return          | 🔴 DEFER                    |
 
 **PR 預估 diff 行數**：
+
 - 本次建議修 13 件（A1、A3、A4、A5-A8、A11、B1-B7）
 - 每件改動 1-3 行（含刪註解）、5 個 finance page 可能多 2 行（canAccess import + 替換）
 - 總計 ≈ 30-50 行 diff、符合 CLAUDE.md 原則 3「精簡」
 
 **Follow-up PR 建議**：
+
 - PR-1e（sidebar 重構）：處理 A2 空 if
 - PR-P008 相關：處理 A9（lib）、A10（ModuleGuard）
 - PR-平台管理資格：處理 B8 WorkspaceSwitcher

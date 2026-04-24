@@ -301,7 +301,14 @@ interface SetupPanelProps {
   onClick: () => void
 }
 
-function SetupPanel({ dragOver, setDragOver, uploading, errorMsg, onFile, onClick }: SetupPanelProps) {
+function SetupPanel({
+  dragOver,
+  setDragOver,
+  uploading,
+  errorMsg,
+  onFile,
+  onClick,
+}: SetupPanelProps) {
   return (
     <div className="text-center w-full">
       <div
@@ -326,16 +333,10 @@ function SetupPanel({ dragOver, setDragOver, uploading, errorMsg, onFile, onClic
         )}
       >
         <Upload className="w-6 h-6 mx-auto text-morandi-muted mb-1" />
-        <p className="text-xs text-morandi-secondary">
-          拖入或點擊上傳 QR code
-        </p>
-        <p className="text-[10px] text-morandi-muted mt-1">
-          Google Authenticator 匯出截圖
-        </p>
+        <p className="text-xs text-morandi-secondary">拖入或點擊上傳 QR code</p>
+        <p className="text-[10px] text-morandi-muted mt-1">Google Authenticator 匯出截圖</p>
       </div>
-      {errorMsg && (
-        <p className="text-[11px] text-status-danger mt-2">{errorMsg}</p>
-      )}
+      {errorMsg && <p className="text-[11px] text-status-danger mt-2">{errorMsg}</p>}
     </div>
   )
 }

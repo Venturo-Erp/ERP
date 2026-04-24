@@ -117,9 +117,7 @@ export function DashboardClient() {
   }, [isAuthenticated, _hasHydrated, router])
 
   if (isLoading || widgetsLoading) {
-    return (
-      <ModuleLoading fullscreen />
-    )
+    return <ModuleLoading fullscreen />
   }
 
   return (

@@ -10,21 +10,25 @@
 ## 1. 為什麼 v2.0 漏抓 — 根因分析（不是細節）
 
 4 條 v2.0 漏抓 pattern：
+
 - **workspaces_delete USING: true**（任何登入用戶可 DELETE 任一 workspace）
-- **_migrations / rate_limits / ref_cities 無 RLS**（整張表無防火牆）
+- **\_migrations / rate_limits / ref_cities 無 RLS**（整張表無防火牆）
 - **employee_permission_overrides 4 條 policy 全 USING: true**（有點名、沒升格 pattern）
 
 4 條共同根因 = 3 個系統性盲點：
 
 ### 盲點 A：**Agent F 驗 policy 是抽樣式、不是窮舉式**
+
 v2.0 Agent F 對一張 table 的 RLS 檢查、往往只看到 SELECT + UPDATE 兩條最顯眼的、沒把 4 條（或 5 條含 service_role）**全部逐條列出**。
 結果：`workspaces` 的 SELECT/UPDATE 對了、DELETE 沒看 = 放行；`employee_permission_overrides` 看了 2 條 USING:true 就跳下一張、沒把「**4 條全 USING:true**」的嚴重度升格成 pattern。
 **根因**：prompt 沒強制「每張 table 4 條 policy 原文貼出」、agent 自由發揮、自由發揮 = 抽樣。
 
 ### 盲點 B：**沒有對「RLS disabled」做全站掃描**
+
 `_migrations` / `rate_limits` / `ref_cities` 沒開 RLS、不是「policy 寫錯」而是「沒有 policy」。Agent F 的視角是「這個路由用到哪些 table → 看這些 table 的 policy」、**不會主動枚舉「全站哪些 table 沒 RLS」**。這類問題要靠 cross-route 的 meta 掃描、route-verify 層級打不到。
 
 ### 盲點 C：**「有點名」不等於「進 pattern map」**
+
 v2.0 Agent F 的 `employee_permission_overrides` 已經寫在 login.md、但 pattern-map skill 沒自動讀取 per-route 的「🔴 條目」把它升成全站 pattern。結果：下次任何路由碰到同一張表、agent 都從零開始推論。知識沒被結構化成滾雪球的雪。
 
 **三個盲點共通點**：都是「**沒有機制強制 agent 做窮舉 / 升格 / 登記**」。這不是 agent 不夠聰明、是 skill 沒裝護欄。
@@ -34,7 +38,9 @@ v2.0 Agent F 的 `employee_permission_overrides` 已經寫在 login.md、但 pat
 ## 2. venturo-route-context-verify skill 該升級什麼規則
 
 ### 規則 F1：**Agent F 必須報 4 條 policy 原文、每張命中 table 無條件**
+
 prompt 加死：
+
 ```
 對該路由命中的每張 table、你必須以下表格式列出**所有**RLS policy：
 | Table | Policy Name | cmd | USING | WITH CHECK | 是否擋住 |
@@ -47,10 +53,13 @@ prompt 加死：
 如果有多條 SELECT policy、全部列、不得合併。
 任何 policy qual/with_check 為 `true` 必須標紅 🔴 並解釋後果。
 ```
+
 違反此格式 = agent output reject、重跑。
 
 ### 規則 F2：**Agent F 多加一塊「meta RLS 掃描」**
+
 每次跑任何路由、Agent F 除了看命中 table、還要跑：
+
 ```sql
 -- A. 哪些 public table 沒開 RLS
 SELECT tablename FROM pg_tables WHERE schemaname='public'
@@ -60,13 +69,16 @@ AND tablename NOT IN (SELECT tablename FROM pg_policies WHERE schemaname='public
 SELECT tablename, policyname, cmd FROM pg_policies
 WHERE schemaname='public' AND (qual='true' OR with_check='true');
 ```
+
 結果貼在 Agent F 輸出最上方、不是「該路由有沒有中」而是「全站統計」。一旦出現新項目、自動是 pattern 候補。
 **這是 v2.0 的最大漏口、每個路由都補看同樣統計表、雪球才能滾**。
 
 ### 規則 F3：**Agent F 要輸出「v2.0 點名但未升格」清單**
+
 每次 run、Agent F 讀前面已驗 SITEMAP 檔、把 🔴/🟠 條目但**沒出現在 `_PATTERN_MAP.md`** 的項目列出、彙整階段強制決策：「升格為 Pxxx / 合併到已有 Pxxx / 廢棄」。不允許「沒決策就過」。
 
 ### 規則 F4：**skill 完成後的「DB truth diff」回饋迴路**
+
 每次 route-verify 跑完、比對本次 DB_TRUTH.md vs 上次的 commit、**diff 新增的 table / policy / trigger 自動進「新表待關注清單」**。本次 amadeus_totp_secret 欄位就屬此類、不靠人記得。
 
 ---
@@ -75,20 +87,22 @@ WHERE schemaname='public' AND (qual='true' OR with_check='true');
 
 ### 每個 pattern 新增欄位（schema v2.0）
 
-| 欄位 | 型別 | 用途 |
-|---|---|---|
-| `detector` | script path 或 `manual_review` | 自動驗的腳本路徑、pattern-map 下次運行時先跑 |
-| `detector_sql` | SQL 字串（可多條）| 純 DB 層 pattern 直接存 SQL、不用寫 script |
-| `detector_grep` | regex + glob | 代碼 pattern 存 grep 指令（例：`grep -rn "USING: true" supabase/migrations`） |
-| `check_frequency` | `every_route_verify` / `pattern_map_session` / `weekly_cron` / `manual` | 決定多久回驗一次 |
-| `routes_verified` | `[route, status]` list | 每個已驗路由對照本 pattern 的結果（✓ 不中 / ✗ 命中 / ? 未對照） |
-| `depends_on` | pattern id list | 依賴順序 |
-| `principle` | 原則編號 | 升格時連動 |
-| `last_detector_run` | 日期 + result | health check 用 |
-| `regression_risk` | low/med/high | 修完回歸風險 |
+| 欄位                | 型別                                                                    | 用途                                                                          |
+| ------------------- | ----------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `detector`          | script path 或 `manual_review`                                          | 自動驗的腳本路徑、pattern-map 下次運行時先跑                                  |
+| `detector_sql`      | SQL 字串（可多條）                                                      | 純 DB 層 pattern 直接存 SQL、不用寫 script                                    |
+| `detector_grep`     | regex + glob                                                            | 代碼 pattern 存 grep 指令（例：`grep -rn "USING: true" supabase/migrations`） |
+| `check_frequency`   | `every_route_verify` / `pattern_map_session` / `weekly_cron` / `manual` | 決定多久回驗一次                                                              |
+| `routes_verified`   | `[route, status]` list                                                  | 每個已驗路由對照本 pattern 的結果（✓ 不中 / ✗ 命中 / ? 未對照）               |
+| `depends_on`        | pattern id list                                                         | 依賴順序                                                                      |
+| `principle`         | 原則編號                                                                | 升格時連動                                                                    |
+| `last_detector_run` | 日期 + result                                                           | health check 用                                                               |
+| `regression_risk`   | low/med/high                                                            | 修完回歸風險                                                                  |
 
 ### 機制 1：**pattern-map skill 開頭的 health check 階段**（最重要）
+
 skill 一啟動、不是讀地圖、而是先跑：
+
 ```
 for pattern in _PATTERN_MAP.md:
   if pattern.status == '🟢' and pattern.detector:
@@ -99,21 +113,27 @@ for pattern in _PATTERN_MAP.md:
   if pattern.status == '🔴' and pattern.last_detector_run > 14 days:
     pattern.flag = 'stale'
 ```
+
 每輪會診議程 = 只議 status ∈ {🔴, 🟡, 🟡 regression, 未命中但 detector 紅} 的 pattern。**綠的 pattern 連看都不看 = 迴路變輕的核心**。
 
 ### 機制 2：**每個 🟢 pattern 必須有 detector 才能標綠**
+
 「修完」的定義升級為：代碼修好 + detector 寫好 + detector 跑過 + CI 掛上。**三缺一只能標 🟠 已修但無守門**。避免 P004（28 張 FORCE RLS）今天的困境——pattern-map 記 🔴、實際 4/21 修完了、要人工去 pg_class 查才知道。
 
 ### 機制 3：**已驗路由相容性矩陣**（routes_verified 欄位）
+
 每次新路由驗完、pattern-map 自動新增一欄、把該路由對照每個 pattern 的結果填上：
+
 ```
 | Pattern | /login | /tours | /finance | /hr | ... |
 | P003 跨租戶 API | ✓ | ✗ | ✗ | ? | ... |
 | P010 USING:true | ✓ | ? | ? | ? | ... |
 ```
+
 這張表 = **真正的滾雪球**。第 N 個路由驗完、一眼看到「哪幾個 pattern 還沒在這路由測過」、下次重驗知道從哪補。
 
 ### 機制 4：**新 pattern 必先查「是否為既有 pattern 變體」**
+
 彙整階段強制 fuzzy match、避免 P007a / P007b / P007c 長出來。規則：新 pattern name + routes 任一與既有 pattern 交集 > 50%、彙整主 Claude 必須解釋「為什麼不合併」。
 
 ---
@@ -126,22 +146,26 @@ for pattern in _PATTERN_MAP.md:
 
 ```markdown
 ### A. RLS disabled 的 public table（整張表無防火牆）
+
 - `_migrations`
 - `rate_limits`
 - `ref_cities`
 - ...
 
 ### B. Policy qual 或 with_check = 'true' 的 policy
+
 | Table | Policy | cmd | qual | with_check |
 | workspaces | workspaces_delete | DELETE | true | — |
-| employee_permission_overrides | * | ALL | true | true |
+| employee_permission_overrides | \* | ALL | true | true |
 ...
 
 ### C. 4 條 policy 不齊全的 RLS-enabled table
+
 （開了 RLS 但 SELECT/INSERT/UPDATE/DELETE 其中一個 cmd 沒任何 policy）
 | Table | 缺 cmd |
 
 ### D. 本次 DB_TRUTH 相對上次的 diff
+
 - 新增 table: amadeus_totp_secrets
 - 新增欄位: employees.amadeus_totp_secret (text, nullable) 🟡 未加密、policy 未檢查
 - 移除 table: （無）
@@ -149,6 +173,7 @@ for pattern in _PATTERN_MAP.md:
 ```
 
 ### 實作代價評估
+
 - A/B/C：SQL 已存在、只要加聚合邏輯 + markdown section、< 50 行程式碼、**半天可做**
 - D：需要 git log 取上版本 DB_TRUTH.md、diff 解析、約 1 人日
 
@@ -159,23 +184,28 @@ for pattern in _PATTERN_MAP.md:
 ## 5. Pattern-map 會議本身的演進
 
 ### 幕僚組成（6 → 7 → 9）
+
 延續 v2.0 建議、但修正優先順序：
 
 #### 🔴 下次必加：**Product Translator**（產品翻譯員）
+
 - 目前業務翻譯欄位靠主席事後補、品質不穩
 - 獨立一位、專心把技術結論翻成 William 聽得懂的旅遊業比喻
 - 彙整階段直接收業務版、不再加工
 
 #### 🟡 次次加：**QA / 測試工程師**
+
 - 負責每個 pattern 的「修完怎麼驗」、定義 detector 腳本 + CI check
 - 跟機制 2（detector 強制）直接配對
 - 沒有 QA 幕僚、機制 2 只是口號
 
 #### 🟢 再次加：**UX / 前端流程幕僚**
+
 - 目前 6 幕僚都偏後端 / 架構、UI 層欄位三層不一致這類 pattern 沒人深挖
 - `_PATTERN_MAP.md` 的 P013（UI/API/DB 欄位三層不一致）就是 UX 幕僚該抓的
 
 #### ⚪ 不加：DevOps / 合規、Domain Modeler
+
 - 未上線階段不需要
 - Domain Modeler 等有新模組引入（AI 客服、OTA、會議助理）再加
 
@@ -184,7 +214,9 @@ for pattern in _PATTERN_MAP.md:
 v2.0 我看 pattern map 結構、下次我要看**兩個新東西**：
 
 #### 新看項 1：**health check 階段的自省紀錄**
+
 skill 跑完自動產出 `_PATTERN_MAP_HEALTH_YYYY-MM-DD.md`、記：
+
 - 本輪跑了哪些 detector、幾個綠、幾個回歸
 - 本輪新增的 pattern、是否為既有 pattern 變體（fuzzy match 報告）
 - 本輪地圖條目增幅（目標 ≤ 20%、超過 = 增熵警告）
@@ -193,6 +225,7 @@ skill 跑完自動產出 `_PATTERN_MAP_HEALTH_YYYY-MM-DD.md`、記：
 **我下次的工作 = 讀這份健康檢查報告、提建議 skill 自己怎麼變輕**。
 
 #### 新看項 2：**meta-pattern 浮現統計**
+
 從 4 次以上路由驗證中、哪些問題**重複出現但還沒被升格為 pattern**？
 例：如果 `/login` / `/tours` / `/hr` 三路都出現「agent F 漏看 DELETE policy」、這就該升為 **meta-pattern：skill 自己的盲點**、進一個新檔案 `_SKILL_META_PATTERNS.md`、不跟業務 pattern 混。
 

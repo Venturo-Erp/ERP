@@ -9,16 +9,16 @@
 
 ## 🎯 驗證總結：全過（8/8）
 
-| # | 檢查項 | 預期 | 實際 | 狀態 |
-|---|---|---|---|---|
-| 1 | BEFORE snapshot | 數字對得上 | ✅ | 見下表 |
-| 2 | 3 個 P0 修復依然有效 | FK / trigger 正確 | ✅ | — |
-| 3 | type-check | 0 error | ✅ | — |
-| 4 | 登入 API 四向驗證 | 員工編號 / email / 擋錯密碼 / 擋錯租戶 | ✅ | 4/4 過 |
-| 5 | max_employees 上限 | 3 人時應擋第 4 個 | ✅ | `WILL_BLOCK_E004` |
-| 6 | 開團完整 lifecycle | 團 + 行程 + folders + 訂單 | ✅ | 都建成 |
-| 7 | 收款 / 請款 lifecycle | status transitions trigger 不爆 | ✅ | 全過 |
-| 8 | AFTER snapshot vs BEFORE | protected 3 家零動 | ✅ | 見下表 |
+| #   | 檢查項                   | 預期                                   | 實際 | 狀態              |
+| --- | ------------------------ | -------------------------------------- | ---- | ----------------- |
+| 1   | BEFORE snapshot          | 數字對得上                             | ✅   | 見下表            |
+| 2   | 3 個 P0 修復依然有效     | FK / trigger 正確                      | ✅   | —                 |
+| 3   | type-check               | 0 error                                | ✅   | —                 |
+| 4   | 登入 API 四向驗證        | 員工編號 / email / 擋錯密碼 / 擋錯租戶 | ✅   | 4/4 過            |
+| 5   | max_employees 上限       | 3 人時應擋第 4 個                      | ✅   | `WILL_BLOCK_E004` |
+| 6   | 開團完整 lifecycle       | 團 + 行程 + folders + 訂單             | ✅   | 都建成            |
+| 7   | 收款 / 請款 lifecycle    | status transitions trigger 不爆        | ✅   | 全過              |
+| 8   | AFTER snapshot vs BEFORE | protected 3 家零動                     | ✅   | 見下表            |
 
 ---
 
@@ -27,22 +27,22 @@
 ### Protected workspaces（**必須 BEFORE = AFTER**）
 
 | Workspace | emp | tours | orders | receipts | PRs | items | folders | BEFORE=AFTER |
-|---|---|---|---|---|---|---|---|---|
-| CORNER | 5 | 29 | 19 | 17 | 7 | 337 | 372 | ✅ |
-| JINGYAO | 1 | 1 | 0 | 0 | 0 | 0 | 12 | ✅ |
-| YUFEN | 1 | 0 | 0 | 0 | 0 | 0 | 0 | ✅ |
+| --------- | --- | ----- | ------ | -------- | --- | ----- | ------- | ------------ |
+| CORNER    | 5   | 29    | 19     | 17       | 7   | 337   | 372     | ✅           |
+| JINGYAO   | 1   | 1     | 0      | 0        | 0   | 0     | 12      | ✅           |
+| YUFEN     | 1   | 0     | 0      | 0        | 0   | 0     | 0       | ✅           |
 
 ### TESTUX（測試資料、允許新增）
 
-| 欄位 | BEFORE | AFTER | 差異 | 說明 |
-|---|---|---|---|---|
-| emp | 3 | 3 | 0 | 沒動 |
-| tours | 2 | 3 | +1 | 新開 TEST003 |
-| orders | 2 | 3 | +1 | 新建 ORD-TEST-003 |
-| receipts | 2 | 3 | +1 | 新建 R-TEST-003（已確認 status=1）|
-| PRs | 2 | 3 | +1 | 新建 PR-TEST-003（已推到 paid）|
-| items | 2 | 4 | +2 | 新建 2 個行程項目（住宿 + 餐飲）|
-| folders | 24 | 36 | +12 | 新團自動建 12 個 folder |
+| 欄位     | BEFORE | AFTER | 差異 | 說明                               |
+| -------- | ------ | ----- | ---- | ---------------------------------- |
+| emp      | 3      | 3     | 0    | 沒動                               |
+| tours    | 2      | 3     | +1   | 新開 TEST003                       |
+| orders   | 2      | 3     | +1   | 新建 ORD-TEST-003                  |
+| receipts | 2      | 3     | +1   | 新建 R-TEST-003（已確認 status=1） |
+| PRs      | 2      | 3     | +1   | 新建 PR-TEST-003（已推到 paid）    |
+| items    | 2      | 4     | +2   | 新建 2 個行程項目（住宿 + 餐飲）   |
+| folders  | 24     | 36    | +12  | 新團自動建 12 個 folder            |
 
 **結論**：TESTUX 新增符合預期、Protected 零動。
 
@@ -106,13 +106,16 @@
 ## 🧹 TESTUX 清理
 
 測試資料在 TESTUX workspace：
+
 - 3 tours / 3 orders / 3 receipts / 3 PRs / 4 items / 36 folders
 
 **建議**：下週驗證完、確認上線沒問題後、你親自授權：
+
 ```sql
 -- WARNING: 只能在你確認後執行
 DELETE FROM workspaces WHERE code = 'TESTUX' CASCADE;
 ```
+
 （FK cascade 會連帶清 employees / tours / orders / receipts / prs / folders）
 
 **目前處理**：**留著**、不動。
@@ -122,11 +125,13 @@ DELETE FROM workspaces WHERE code = 'TESTUX' CASCADE;
 ## 📋 今晚做的所有事（讓你 review）
 
 ### DB 變更（都在 `_applied/2026-04-19/20260419a_*.sql`）
+
 1. `folders.created_by` FK 從 `auth.users` 改指 `employees`
 2. `auto_post_customer_receipt` 移除 `NEW.id::text` 轉型
 3. `auto_post_supplier_payment` 移除 `NEW.id::text` 轉型
 
 ### Code 變更
+
 1. `src/app/api/auth/validate-login/route.ts` — 支援 email 登入
 2. `src/app/api/auth/logout/route.ts` — 簡化為 no-op
 3. `src/middleware.ts` — 改用 Supabase session 驗證
@@ -140,6 +145,7 @@ DELETE FROM workspaces WHERE code = 'TESTUX' CASCADE;
 11. `src/types/user.types.ts` — User 加 terminated_at/by
 
 ### 文件新增
+
 1. `VENTURO_PRICING_V1_2026-04-19.md`
 2. `VENTURO_BRAND_WORKSHOP_V2_2026-04-19.md`
 3. `~/.claude/skills/venturo-safe-tenant-test/SKILL.md`（6 大地雷 → 8 大地雷）
@@ -147,6 +153,7 @@ DELETE FROM workspaces WHERE code = 'TESTUX' CASCADE;
 5. `docs/PRE_LAUNCH_VERIFICATION_2026-04-19.md`（本檔）
 
 ### CLAUDE.md 更新
+
 - 加 Karpathy 四原則
 - 加策略題觸發器（避免商業方向誤判）
 

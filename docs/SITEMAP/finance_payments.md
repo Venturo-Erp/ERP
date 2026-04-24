@@ -2,6 +2,7 @@
 
 **Route**：`/finance/payments`（收款管理）
 **Code paths**：
+
 - UI：`src/app/(main)/finance/payments/page.tsx` + `hooks/usePaymentData.ts` + `components/`
 - Dialog：`src/features/finance/payments/components/`（AddReceiptDialog、BatchReceiptDialog 等、動態 import）
 - Service：`src/features/finance/payments/services/receipt-core.service.ts`（重算訂單 + 團財務）
@@ -31,29 +32,32 @@
 - **原則 2**：職務是身份卡、全系統統一 → **違反**（代碼根本沒去查 workspace_roles 的細分權限 key）
 - **原則 3**：租戶一致性每層都守 → **違反**（LinkPay webhook unauthenticated + admin client 無 workspace 驗證；service 所有 query 靠 RLS 無應用層驗）
 - **原則 4**（2026-04-22 拍板升正式）：**狀態是真相、數字從狀態算出來** → **違反且雙倍違反**：
-    - `orders.payment_status` / `paid_amount` / `remaining_amount` 是冗餘欄位、違反原則
-    - `tours.total_revenue` 是冗餘欄位、**而且只算 status='1'**、「待確認金額」完全沒地方顯示、違反「**按狀態分開給**」的補充條款
-    - William 業務語意明示：大主管在旅遊團要看**待確認金額 + 已確認金額兩個數字**（區分「卡業務」vs「卡會計」）— 目前代碼做不到
+  - `orders.payment_status` / `paid_amount` / `remaining_amount` 是冗餘欄位、違反原則
+  - `tours.total_revenue` 是冗餘欄位、**而且只算 status='1'**、「待確認金額」完全沒地方顯示、違反「**按狀態分開給**」的補充條款
+  - William 業務語意明示：大主管在旅遊團要看**待確認金額 + 已確認金額兩個數字**（區分「卡業務」vs「卡會計」）— 目前代碼做不到
 
 ---
 
 ## 代碼現況（濃縮）
 
 ### 主流程
+
 1. **建單**：OP 選訂單 → 選付款方式 → 輸入金額 → `createReceipt` 寫進 `receipts` 表、`status = '0'`（待確認）
 2. **LinkPay 分支**：若選 LinkPay、呼叫 `/api/linkpay` 產付款連結、回寫 `receipts.link` + `linkpay_order_number`
 3. **LinkPay 付款成功**：台新 webhook 打 `/api/linkpay/webhook`（unauthenticated）→ 寫回 `receipts.actual_amount`（扣 2% 手續費）、但 `status` 不自動改為 '1'、**還是等會計按核准**
 4. **核准 / 異常**：會計按「核准」→ `status = '1'` + actual_amount 用收款單面額；按「異常」→ `status = '1'` + 備註金額落差 + 發機器人通知給建單者
 5. **自動連動**：建單 / 核准 / 刪除 後、呼叫 `recalculateReceiptStats(orderId, tourId)`：
-    - **回寫 `orders.payment_status` + `paid_amount` + `remaining_amount`**
-    - **回寫 `tours.total_revenue` + `profit`**
+   - **回寫 `orders.payment_status` + `paid_amount` + `remaining_amount`**
+   - **回寫 `tours.total_revenue` + `profit`**
 
 ### 權限控制
+
 - **整頁**：`page.tsx:211` 一句 `if (!isAdmin) return <UnauthorizedPage />`、**和 /login / /hr 同一個地雷**
 - **建單 / 核准 / 異常 / 編輯 / 刪除 按鈕**：進得來就能按、無細分權限查
 - **刪除有 soft guard**：已確認（status '1'）的單不能刪（usePaymentData:246-250）
 
 ### DB table 關係
+
 - 主表：`receipts`（42 欄、其中 5 欄是 UI / 代碼完全沒用的孤兒）
 - 連動：`orders` + `tours`（被 service 回寫）+ `linkpay_logs`（LinkPay 記錄）
 - FK：審計欄位（`created_by` / `updated_by`）正確指向 `employees(id)`（符合 CLAUDE.md 紅線 ✓）
@@ -64,25 +68,25 @@
 
 ### v2.0 已挖紅色當前狀態
 
-| 編號 | 問題 | v3.0 親查狀態 |
-|---|---|---|
-| 1 | 整頁 系統主管大鎖（page.tsx:211 if !isAdmin）| ✅ **P001 PR-1c 修完落地**：page.tsx:213 改 `if (!canViewFinance) return UnauthorizedPage`；canViewFinance = hasModulePermission(userPermissions, 'finance') OR 'accounting'；OP/業務/會計都能進、不再卡死 |
-| 2 | 原則 4 違反（雙寫冗餘欄位）| 🔴 仍在；recalculateReceiptStats 仍會回寫 orders.payment_status / paid_amount / remaining_amount + tours.total_revenue / profit；待確認金額仍無地方拿 |
-| 3 | LinkPay webhook 跨租戶 | 🟡 低風險可接受；MAC 簽章 + 金額驗證 + RLS 三層防、receipt_number 是業務級主鍵、攻擊面小；補一層 workspace 檢查可加分但非必須 |
-| 4 | payment_method_id NOT NULL 但代碼不寫 | ✅ **之謎結案**：DB_TRUTH 親查 `is_nullable=YES`、FK 是 SET NULL（不是 RESTRICT、不是 NOT NULL）；sitemap 文字錯了；createReceipt 寫 null 或 '' 都不會 FK violation；資料品質瑕疵但非當機 |
-| 5 | 4 動作沒細分權限 | 🔴 仍在；canViewFinance 進頁有檔、4 動作仍共用同一 permission key |
-| 6 | trigger_auto_post_receipt 黑盒 | ✅ 親查 function body 確認；migration 20260111200000 第 70-274 行；當 receipts.status='1' 時觸發、自動建 accounting_events + journal_vouchers + journal_lines；計算手續費（刷卡 1.68%、LinkPay 2%）；Debit 銀行 / Credit 預收團款；**是活的會計過帳機制、不是殘影、不需要 drop**；usePaymentData:37 註釋「會計模組已停用」是舊註釋誤導 |
-| 7 | 付款方式映射 4 處 | 🟡 仍在；usePaymentForm.ts:16 + useReceiptMutations.ts:16 PAYMENT_METHOD_MAP 重複定義同內容、可合併到共用常數 |
+| 編號 | 問題                                          | v3.0 親查狀態                                                                                                                                                                                                                                                                                                                          |
+| ---- | --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1    | 整頁 系統主管大鎖（page.tsx:211 if !isAdmin） | ✅ **P001 PR-1c 修完落地**：page.tsx:213 改 `if (!canViewFinance) return UnauthorizedPage`；canViewFinance = hasModulePermission(userPermissions, 'finance') OR 'accounting'；OP/業務/會計都能進、不再卡死                                                                                                                             |
+| 2    | 原則 4 違反（雙寫冗餘欄位）                   | 🔴 仍在；recalculateReceiptStats 仍會回寫 orders.payment_status / paid_amount / remaining_amount + tours.total_revenue / profit；待確認金額仍無地方拿                                                                                                                                                                                  |
+| 3    | LinkPay webhook 跨租戶                        | 🟡 低風險可接受；MAC 簽章 + 金額驗證 + RLS 三層防、receipt_number 是業務級主鍵、攻擊面小；補一層 workspace 檢查可加分但非必須                                                                                                                                                                                                          |
+| 4    | payment_method_id NOT NULL 但代碼不寫         | ✅ **之謎結案**：DB_TRUTH 親查 `is_nullable=YES`、FK 是 SET NULL（不是 RESTRICT、不是 NOT NULL）；sitemap 文字錯了；createReceipt 寫 null 或 '' 都不會 FK violation；資料品質瑕疵但非當機                                                                                                                                              |
+| 5    | 4 動作沒細分權限                              | 🔴 仍在；canViewFinance 進頁有檔、4 動作仍共用同一 permission key                                                                                                                                                                                                                                                                      |
+| 6    | trigger_auto_post_receipt 黑盒                | ✅ 親查 function body 確認；migration 20260111200000 第 70-274 行；當 receipts.status='1' 時觸發、自動建 accounting_events + journal_vouchers + journal_lines；計算手續費（刷卡 1.68%、LinkPay 2%）；Debit 銀行 / Credit 預收團款；**是活的會計過帳機制、不是殘影、不需要 drop**；usePaymentData:37 註釋「會計模組已停用」是舊註釋誤導 |
+| 7    | 付款方式映射 4 處                             | 🟡 仍在；usePaymentForm.ts:16 + useReceiptMutations.ts:16 PAYMENT_METHOD_MAP 重複定義同內容、可合併到共用常數                                                                                                                                                                                                                          |
 
 ### 5 張 finance 表 4 條 policy 親查結果（2026-04-22 深夜）
 
-| 表名 | SELECT | INSERT | UPDATE | DELETE | 評分 |
-|---|---|---|---|---|---|
-| `receipts` | workspace_id ✅ | workspace_id ✅ | workspace_id ✅ | workspace_id ✅ | 🟢 |
-| `linkpay_logs` | workspace_id ✅ | super_admin OR workspace_id ✅ | workspace_id ✅ | workspace_id ✅ | 🟢 |
-| `payment_methods` | workspace_id ✅ | super_admin OR workspace_id ✅ | workspace_id ✅ | workspace_id ✅ | 🟢 |
-| `payment_requests` | workspace_id ✅ | workspace_id ✅ | workspace_id ✅ | workspace_id ✅ | 🟢 |
-| `orders` | workspace_id ✅ | workspace_id ✅ | workspace_id ✅ | workspace_id ✅ | 🟢 |
+| 表名               | SELECT          | INSERT                         | UPDATE          | DELETE          | 評分 |
+| ------------------ | --------------- | ------------------------------ | --------------- | --------------- | ---- |
+| `receipts`         | workspace_id ✅ | workspace_id ✅                | workspace_id ✅ | workspace_id ✅ | 🟢   |
+| `linkpay_logs`     | workspace_id ✅ | super_admin OR workspace_id ✅ | workspace_id ✅ | workspace_id ✅ | 🟢   |
+| `payment_methods`  | workspace_id ✅ | super_admin OR workspace_id ✅ | workspace_id ✅ | workspace_id ✅ | 🟢   |
+| `payment_requests` | workspace_id ✅ | workspace_id ✅                | workspace_id ✅ | workspace_id ✅ | 🟢   |
+| `orders`           | workspace_id ✅ | workspace_id ✅                | workspace_id ✅ | workspace_id ✅ | 🟢   |
 
 **結論**：finance/payments 整個 DB 層 policy 全綠、不在 P019 紅 45 張、無 P016 同型 DELETE 漏洞、無 P020 多 policy 重疊。是目前所有重驗路由中 DB 層最乾淨的。
 
@@ -101,8 +105,8 @@
 - **你說的**：權限吃 hr role 的「公司收款」、進頁看、進來後各動作再分細權限
 - **代碼實際**：整頁 `if (!isAdmin)` 一刀擋、會計不擁有管理員資格 **連頁都進不來**、更別提按核准
 - **後果**：
-    - OP / 業務 / 會計三個角色、如果他們在 /hr 被設為沒有系統主管資格、打開這頁就是 **UnauthorizedPage**、整個「建單 → 核准」流程卡死
-    - 你在 /hr/roles 替「會計」設「公司收款」權限 → 代碼完全不看這個 key
+  - OP / 業務 / 會計三個角色、如果他們在 /hr 被設為沒有系統主管資格、打開這頁就是 **UnauthorizedPage**、整個「建單 → 核准」流程卡死
+  - 你在 /hr/roles 替「會計」設「公司收款」權限 → 代碼完全不看這個 key
 - **跟其他頁關聯**：`useAuthStore.checkPermission` 本身就有 `if (isAdmin) return true` 短路（/login 驗證已發現）、就算 page.tsx 改成 `hasPermission`、只要 admin 短路還在、isAdmin 仍是萬能通行證
 - **修的順序**：先改 `useAuthStore` 的短路、再改 `page.tsx:211`、再補 4 個動作的權限 key（`finance.payments.view` / `create` / `confirm` / `approve_abnormal` / `delete`）
 
@@ -112,20 +116,20 @@
 
 - **原則 4（2026-04-22 拍板）**：狀態是真相、數字從狀態算、不存冗餘欄位、按狀態分開給
 - **代碼違反三點**：
-    1. `orders.payment_status` / `paid_amount` / `remaining_amount` 冗餘、`recalculateReceiptStats` 每次收款變動都回寫（`receipt-core.service.ts:73-81`）
-    2. `tours.total_revenue` / `profit` 冗餘、同一段 service 回寫（L150-157）
-    3. `recalculateTourFinancials` **只算 status='1'**（已確認）、**待確認金額完全沒地方拿**
+  1. `orders.payment_status` / `paid_amount` / `remaining_amount` 冗餘、`recalculateReceiptStats` 每次收款變動都回寫（`receipt-core.service.ts:73-81`）
+  2. `tours.total_revenue` / `profit` 冗餘、同一段 service 回寫（L150-157）
+  3. `recalculateTourFinancials` **只算 status='1'**（已確認）、**待確認金額完全沒地方拿**
 - **業務後果**（William 明示）：
-    - 大主管在 /tours 總覽要看「待確認金額」+「已確認金額」兩個數字 → 目前只有後者
-    - 無法分辨「卡業務（OP 沒 key）」vs「卡會計（會計沒核銷）」
-    - 讀冗餘欄位沒先重算 → 過期值（同步地雷）
+  - 大主管在 /tours 總覽要看「待確認金額」+「已確認金額」兩個數字 → 目前只有後者
+  - 無法分辨「卡業務（OP 沒 key）」vs「卡會計（會計沒核銷）」
+  - 讀冗餘欄位沒先重算 → 過期值（同步地雷）
 - **修法方向（原則 4 規範版）**：
-    1. 建聚合 function：`getTourPaymentSummary(tour_id) → { pending_total, confirmed_total, tour_cost, profit }`
-    2. 移除 `orders.payment_status` / `paid_amount` / `remaining_amount` / `tours.total_revenue` / `profit` 欄位
-    3. 刪除 `recalculateReceiptStats` 整段 service（不需要了）
-    4. `usePaymentData:40-44` 篩「可收款訂單」改走聚合 function 或 view
-    5. /tours 頁顯示來源從欄位 → function call
-    6. 效能若需要、做 materialized view（不是第一選擇）
+  1. 建聚合 function：`getTourPaymentSummary(tour_id) → { pending_total, confirmed_total, tour_cost, profit }`
+  2. 移除 `orders.payment_status` / `paid_amount` / `remaining_amount` / `tours.total_revenue` / `profit` 欄位
+  3. 刪除 `recalculateReceiptStats` 整段 service（不需要了）
+  4. `usePaymentData:40-44` 篩「可收款訂單」改走聚合 function 或 view
+  5. /tours 頁顯示來源從欄位 → function call
+  6. 效能若需要、做 materialized view（不是第一選擇）
 - **William 授權範圍**：只要「這裡邏輯對 + 開放 API 給 /tours」、顯示端由 /tours 那邊自己驗
 
 ---
@@ -134,9 +138,9 @@
 
 - **檔案**：`src/app/api/linkpay/webhook/route.ts` + `middleware.ts`（`/api/linkpay` 列公開）
 - **現象**：
-    - webhook 是 unauthenticated（台新打進來）
-    - 用 admin client 查 `receipts`、用 `receipt_number` 當索引
-    - **沒有檢查** receipt 的 workspace_id === linkpay_log 的 workspace_id
+  - webhook 是 unauthenticated（台新打進來）
+  - 用 admin client 查 `receipts`、用 `receipt_number` 當索引
+  - **沒有檢查** receipt 的 workspace_id === linkpay_log 的 workspace_id
 - **風險**：攻擊者知道任一個 workspace 的收款單號、偽造台新 webhook 打進來、修別人的 actual_amount
 - **跟 /login sync-employee 是同型風險**（跨租戶操作缺 workspace 驗證）
 - **修法方向**：webhook 收到後、先 `receipt.workspace_id === linkpay_log.workspace_id` 檢查、不符拒絕
@@ -148,9 +152,9 @@
 - **DB 真相**（Agent F 盤點）：`receipts.payment_method_id` 是 UUID + **NOT NULL + FK 指 payment_methods(id)**
 - **代碼實際**：`usePaymentData.ts:103-138` 建收款單時**完全沒寫這個欄位**
 - **應該要炸但沒炸**、表示：
-    - a) DB 有 trigger 自動填（可能）
-    - b) 欄位實際有 DEFAULT（F 沒看到）
-    - c) 欄位其實可 NULL（F 看錯）
+  - a) DB 有 trigger 自動填（可能）
+  - b) 欄位實際有 DEFAULT（F 沒看到）
+  - c) 欄位其實可 NULL（F 看錯）
 - **緊急度**：⚠️ 先確認哪個是對的、不是立刻修
 - **如果真的沒 trigger / DEFAULT**：任何 insert receipts 應該會 FK violation — 但目前頁面能跑、推測 a 或 b 成立
 - **為什麼列 🔴**：如果哪天 DB migration 動到這個 trigger、所有收款立刻炸
@@ -172,8 +176,8 @@
 - **DB 真相**（Agent F）：`receipts` 表有 AFTER UPDATE trigger `trigger_auto_post_receipt`、但 DB_TRUTH 沒列 function body
 - **推測**：可能是「收款確認後自動開會計傳票」— 跟 `usePaymentData:37` 註釋「會計模組已停用」可能是一對殘影
 - **風險**：
-    - 會計模組「代碼面」停用、但 DB trigger 還活著、可能每次核准收款都在寫 `accounting_entries` 類的表、UI 看不到
-    - 如果「會計模組已停用」是真的、這個 trigger 應該也該停
+  - 會計模組「代碼面」停用、但 DB trigger 還活著、可能每次核准收款都在寫 `accounting_entries` 類的表、UI 看不到
+  - 如果「會計模組已停用」是真的、這個 trigger 應該也該停
 - **動作**：讀 trigger body、判斷是否要 drop / 是否跟未來重啟會計的設計衝突
 
 ---
@@ -182,9 +186,9 @@
 
 - **完全沒用**：`confirmed_at`、`confirmed_by`、`bank_name`、`account_last_digits`、`transaction_id`
 - **概念重複**：
-    - `amount` / `receipt_amount` / `total_amount` 三個、代碼用前兩個、`total_amount` 沒人用
-    - `payment_method`（文字）和 `receipt_type`（數字）雙寫、硬 coding 映射 `['transfer','cash','card','check','linkpay'][receipt_type]`
-    - `order_number` / `tour_name` / `customer_name` 三個「備份名稱」、冗餘於 `order_id` / `tour_id` / `customer_id`（JOIN 即可、但似乎是怕 JOIN 慢而故意冗餘）
+  - `amount` / `receipt_amount` / `total_amount` 三個、代碼用前兩個、`total_amount` 沒人用
+  - `payment_method`（文字）和 `receipt_type`（數字）雙寫、硬 coding 映射 `['transfer','cash','card','check','linkpay'][receipt_type]`
+  - `order_number` / `tour_name` / `customer_name` 三個「備份名稱」、冗餘於 `order_id` / `tour_id` / `customer_id`（JOIN 即可、但似乎是怕 JOIN 慢而故意冗餘）
 - **處理**：先別刪、先標、等 council 判要不要收（動 schema 前問根本問題）
 
 ---
@@ -218,17 +222,17 @@
 
 - ✅ `receipts` 四個 policy（SELECT/INSERT/UPDATE/DELETE）都有 `workspace_id = get_current_user_workspace()` 過濾
 - ⚠️ `recalculateReceiptStats` service 層所有 query **都沒加 `.eq('workspace_id', ...)`**、全靠前端 RLS bouncer
-    - 如果哪天改用 admin client、或加 service_role 用、立刻全洩漏
+  - 如果哪天改用 admin client、或加 service_role 用、立刻全洩漏
 - ⚠️ LinkPay webhook 跨租戶（見 🔴 3）
 
 ### 欄位一致性
 
-| 業務概念 | UI | API | DB | 一致？ |
-|---|---|---|---|---|
-| 收款金額 | 收款金額 | `receipt_amount` + `amount`（雙寫） | `receipt_amount` + `amount` + `total_amount` | 🟡 三個欄位 |
-| 實收金額 | 實收金額 | `actual_amount` | `actual_amount` | ✅ |
-| 付款方式 | 5 種 tag | `payment_method` (文字) + `receipt_type` (數字) | 同 + `payment_method_id` (UUID、沒寫) | 🔴 三套並存 |
-| 狀態 | 待確認 / 已確認 | `status: '0' / '1'` | `status` text | ✅ 但有孤兒 `confirmed_at` / `confirmed_by` 沒用 |
+| 業務概念 | UI              | API                                             | DB                                           | 一致？                                           |
+| -------- | --------------- | ----------------------------------------------- | -------------------------------------------- | ------------------------------------------------ |
+| 收款金額 | 收款金額        | `receipt_amount` + `amount`（雙寫）             | `receipt_amount` + `amount` + `total_amount` | 🟡 三個欄位                                      |
+| 實收金額 | 實收金額        | `actual_amount`                                 | `actual_amount`                              | ✅                                               |
+| 付款方式 | 5 種 tag        | `payment_method` (文字) + `receipt_type` (數字) | 同 + `payment_method_id` (UUID、沒寫)        | 🔴 三套並存                                      |
+| 狀態     | 待確認 / 已確認 | `status: '0' / '1'`                             | `status` text                                | ✅ 但有孤兒 `confirmed_at` / `confirmed_by` 沒用 |
 
 ### 未來影響
 
@@ -241,22 +245,22 @@
 
 ## 建議行動（只列、不動手、交 council 討論）
 
-| 項目 | 緊急度 | 出處 |
-|---|---|---|
-| 改 `useAuthStore.checkPermission` 把 `if (isAdmin) return true` 短路拆掉 | 🔴 高 | 沿 /login 議題、但一起影響這頁 |
-| `page.tsx:211` 改查 hr role 的「公司收款」權限 key、不用 isAdmin | 🔴 高 | 本次新增 |
-| 建單 / 核准 / 異常 / 刪除 四動作分別補 `hasPermission(user, action)` | 🔴 高 | 本次新增 |
-| 驗 DB：`payment_method_id` 真的是 NOT NULL 嗎？有 trigger / DEFAULT 嗎？ | 🔴 高（先查、再決定動不動） | Agent F 盤點 |
-| LinkPay webhook 加 workspace 一致性檢查 | 🔴 高 | 本次新增 |
-| 讀 `trigger_auto_post_receipt` function body、判斷要不要 drop | 🟡 中 | Agent F 盤點 |
-| 付款方式統一（四處 map → 一處；或改 DB 驅動的 payment_methods 表） | 🟡 中 | 本次新增 |
-| 孤兒欄位 5 個歸檔（先不刪、council 判） | 🟡 中 | Agent F 盤點 |
-| `workspace_id: user.workspace_id \|\| ''` → `\|\| undefined` | 🟡 中 | CLAUDE.md 紅線對齊 |
-| **建聚合 function `getTourPaymentSummary(tour_id) → { pending_total, confirmed_total }`** — 給 /tours 用、待確認 / 已確認分開回 | 🔴 高 | 原則 4 拍板、William 授權 |
-| **移除冗餘欄位** `orders.payment_status` / `paid_amount` / `remaining_amount` + `tours.total_revenue` / `profit` | 🔴 高 | 原則 4 拍板 |
-| **刪除 `recalculateReceiptStats` 整段 service**（冗餘計算、原則 4 後不需要） | 🔴 高 | 原則 4 拍板 |
-| `usePaymentData:40-44` 「可收款訂單」篩選改走 function 或 view | 🔴 高 | 原則 4 連動修正 |
-| 補：發票 / 收據 PDF、對帳 / 匯差、部分退款、稽核 log | 🟡 中（上線後短期） | Agent E 未來影響 |
+| 項目                                                                                                                            | 緊急度                      | 出處                           |
+| ------------------------------------------------------------------------------------------------------------------------------- | --------------------------- | ------------------------------ |
+| 改 `useAuthStore.checkPermission` 把 `if (isAdmin) return true` 短路拆掉                                                        | 🔴 高                       | 沿 /login 議題、但一起影響這頁 |
+| `page.tsx:211` 改查 hr role 的「公司收款」權限 key、不用 isAdmin                                                                | 🔴 高                       | 本次新增                       |
+| 建單 / 核准 / 異常 / 刪除 四動作分別補 `hasPermission(user, action)`                                                            | 🔴 高                       | 本次新增                       |
+| 驗 DB：`payment_method_id` 真的是 NOT NULL 嗎？有 trigger / DEFAULT 嗎？                                                        | 🔴 高（先查、再決定動不動） | Agent F 盤點                   |
+| LinkPay webhook 加 workspace 一致性檢查                                                                                         | 🔴 高                       | 本次新增                       |
+| 讀 `trigger_auto_post_receipt` function body、判斷要不要 drop                                                                   | 🟡 中                       | Agent F 盤點                   |
+| 付款方式統一（四處 map → 一處；或改 DB 驅動的 payment_methods 表）                                                              | 🟡 中                       | 本次新增                       |
+| 孤兒欄位 5 個歸檔（先不刪、council 判）                                                                                         | 🟡 中                       | Agent F 盤點                   |
+| `workspace_id: user.workspace_id \|\| ''` → `\|\| undefined`                                                                    | 🟡 中                       | CLAUDE.md 紅線對齊             |
+| **建聚合 function `getTourPaymentSummary(tour_id) → { pending_total, confirmed_total }`** — 給 /tours 用、待確認 / 已確認分開回 | 🔴 高                       | 原則 4 拍板、William 授權      |
+| **移除冗餘欄位** `orders.payment_status` / `paid_amount` / `remaining_amount` + `tours.total_revenue` / `profit`                | 🔴 高                       | 原則 4 拍板                    |
+| **刪除 `recalculateReceiptStats` 整段 service**（冗餘計算、原則 4 後不需要）                                                    | 🔴 高                       | 原則 4 拍板                    |
+| `usePaymentData:40-44` 「可收款訂單」篩選改走 function 或 view                                                                  | 🔴 高                       | 原則 4 連動修正                |
+| 補：發票 / 收據 PDF、對帳 / 匯差、部分退款、稽核 log                                                                            | 🟡 中（上線後短期）         | Agent E 未來影響               |
 
 ---
 

@@ -3,50 +3,53 @@
 **當前階段**：**Wave 6 完全收尾**（B7 回滾後淨 109 條）+ Wave 2 Batch 5 + Wave 9 /tours 分頁 + Post-Launch retention policy 題加入 BACKLOG
 **上次 session 結束時間**：2026-04-21 09:54
 **下一步**（新紅線下可自主）：
+
 - Wave 2 Batch 3：HR 系統主管 頁（payroll/reports/settings/deductions、需 William 確認 scope）
 - Wave 2 Batch 4：Settings 系統主管 頁（workspaces/modules、可能有普通員工用，需 William 確認）
 - Wave 8：狀態值中英（A8 plan、需 William 決策範圍）
 - Wave 3 剩：well-known-ids.ts 替換現有 hardcode（需 William 確認哪處保留 seed）
-**等待 William**：無
-**Blocker**：無
+  **等待 William**：無
+  **Blocker**：無
 
 ## Wave 執行統計（2026-04-20→21 至此）
 
-| Wave | 狀態 | 成績 |
-|--|--|--|
-| 0 | ✅ 完成 | 4 項 P0（current_user ×2 / reset-db / login / tours.deleted_by） |
-| 1a | ✅ 完成 | 4 條 CHECK |
-| 1b | ✅ 完成 | 103 條 FK index |
-| 1c | ✅ 完成 | 4 條 DROP 重複 index |
-| 2 Batch 1 | ✅ 完成 | Finance 6 頁 系統主管 guard |
-| 2 Batch 2 | ✅ 完成 | Accounting layout guard（10 頁 cover）|
-| 2.5 | ✅ 完成 | 28 張 NO FORCE RLS |
-| 3 LOGAN | ✅ 完成 | 1 bug 修 + well-known-ids.ts 骨架 |
-| 4 | ✅ 完成 | quotes 6 欄刪 + customers 5 casts + payment_requests 2 type |
-| 5 | ✅ 完成 | 3 dead column DROP |
-| 6 Batch 1 | ✅ 完成 | 5 條 financial/messages critical RESTRICT |
-| 6 Batch 2 | ✅ 完成 | 20 條 tours(id) 子表 RESTRICT |
-| 6 Batch 3 | ✅ 完成 | 14 條 orders/quotes/customers(id) RESTRICT |
-| 6 Batch 4 | ✅ 完成 | 24 條 suppliers/cities/countries/ref_airports/ref_countries/itineraries RESTRICT |
-| 6 Batch 5 | ✅ 完成 | 20 條 traveler_trips/workspace_roles/traveler_split_groups/tour_leaders/fleet_vehicles/projects/customer_assigned_itineraries RESTRICT |
-| 6 Batch 6 | ✅ 完成 | 14 條 employees(12) + channels 業務類(2) RESTRICT |
-| 6 Batch 7 | ⏪ 回滾 | 原改 12 條 → 09:54 SSOT 指正後全回 CASCADE、交 Post-Launch retention policy |
-| 6 Batch 8 | ✅ 完成 | 6 條 auth.users 跨 domain (accounting×2/tour_expenses/employees/private_messages×2) RESTRICT |
-| 6 Batch 9 | ✅ 完成 | 6 條小群財務/審計 (linkpay_logs/invoice_orders/opening_balances/accounting_transactions(account)/payroll_records(period)/file_audit_logs) RESTRICT |
-| 2 Batch 5 | ✅ 完成 | Database 管理頁 layout 系統主管 guard（9 頁 cover） |
-| 9 /tours 分頁 | ✅ 完成 | 接上 TablePagination、用 useToursPage.totalCount + currentPage |
+| Wave          | 狀態    | 成績                                                                                                                                               |
+| ------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0             | ✅ 完成 | 4 項 P0（current_user ×2 / reset-db / login / tours.deleted_by）                                                                                   |
+| 1a            | ✅ 完成 | 4 條 CHECK                                                                                                                                         |
+| 1b            | ✅ 完成 | 103 條 FK index                                                                                                                                    |
+| 1c            | ✅ 完成 | 4 條 DROP 重複 index                                                                                                                               |
+| 2 Batch 1     | ✅ 完成 | Finance 6 頁 系統主管 guard                                                                                                                        |
+| 2 Batch 2     | ✅ 完成 | Accounting layout guard（10 頁 cover）                                                                                                             |
+| 2.5           | ✅ 完成 | 28 張 NO FORCE RLS                                                                                                                                 |
+| 3 LOGAN       | ✅ 完成 | 1 bug 修 + well-known-ids.ts 骨架                                                                                                                  |
+| 4             | ✅ 完成 | quotes 6 欄刪 + customers 5 casts + payment_requests 2 type                                                                                        |
+| 5             | ✅ 完成 | 3 dead column DROP                                                                                                                                 |
+| 6 Batch 1     | ✅ 完成 | 5 條 financial/messages critical RESTRICT                                                                                                          |
+| 6 Batch 2     | ✅ 完成 | 20 條 tours(id) 子表 RESTRICT                                                                                                                      |
+| 6 Batch 3     | ✅ 完成 | 14 條 orders/quotes/customers(id) RESTRICT                                                                                                         |
+| 6 Batch 4     | ✅ 完成 | 24 條 suppliers/cities/countries/ref_airports/ref_countries/itineraries RESTRICT                                                                   |
+| 6 Batch 5     | ✅ 完成 | 20 條 traveler_trips/workspace_roles/traveler_split_groups/tour_leaders/fleet_vehicles/projects/customer_assigned_itineraries RESTRICT             |
+| 6 Batch 6     | ✅ 完成 | 14 條 employees(12) + channels 業務類(2) RESTRICT                                                                                                  |
+| 6 Batch 7     | ⏪ 回滾 | 原改 12 條 → 09:54 SSOT 指正後全回 CASCADE、交 Post-Launch retention policy                                                                        |
+| 6 Batch 8     | ✅ 完成 | 6 條 auth.users 跨 domain (accounting×2/tour_expenses/employees/private_messages×2) RESTRICT                                                       |
+| 6 Batch 9     | ✅ 完成 | 6 條小群財務/審計 (linkpay_logs/invoice_orders/opening_balances/accounting_transactions(account)/payroll_records(period)/file_audit_logs) RESTRICT |
+| 2 Batch 5     | ✅ 完成 | Database 管理頁 layout 系統主管 guard（9 頁 cover）                                                                                                |
+| 9 /tours 分頁 | ✅ 完成 | 接上 TablePagination、用 useToursPage.totalCount + currentPage                                                                                     |
 
 **Wave 6 淨值**：109 條 CASCADE → RESTRICT（原 121、B7 回滾 12）。**核心全部收尾**。剩 121 條保留 CASCADE 合理（74 workspaces + auth.users 14 GDPR + traveler_profiles 12 GDPR 對齊 + pnr 11 unit + composition 小群 + header-detail pattern 等）。
 
 **Phase A → B 進度**：**Wave 6 完成** + Wave 2 Batch 5 / 剩 Wave 2 Batch 3/4（需 William）/3 UUID 替換/7/8/9 其他
 
 ## 🛑 紅線新版（2026-04-21 更新）
+
 - **絕不**刪 CORNER/JINGYAO/YUFEN 的 row
 - **絕不** DROP 有資料（non-zero across real tenants）的 column
 - **絕不**修改既有 row 的值（除非備份 + 正規化）
 - **可自主**：ALTER schema、加 constraint、改 FK、RLS policy、DROP 確認空的 column、改 code（有測試驗證）
 
 ## 新自主 SOP（每個 Wave）
+
 1. BEFORE snapshot（`scripts/row-count-snapshot.sh`）
 2. 驗證待改動對 Corner 真資料零影響
 3. Apply 改動
@@ -59,9 +62,11 @@
 ## 完整 Discovery 檔案索引
 
 **主索引**（先看這個）：
+
 - `discovery/MASTER_INDEX.md` — 8 agent 整合、Wave 重估工期
 
 **8 份 agent 報告**：
+
 - `discovery/A1_all_routes_guard.md` — 121 頁 guard 全盤點
 - `discovery/A2_antipatterns.md` — 8 類反 pattern 數量
 - `discovery/A3_dead_verification.md` — dead dialog + table 三方驗證
@@ -72,12 +77,14 @@
 - `discovery/A8_status_normalization.md` — 中英 status 對應
 
 **Phase A 早期產出**（續用）：
+
 - `waves/PHASE_A_DISCOVERY_REPORT.md`
 - `waves/WAVE_2_PRE_WORK.md`
 - `waves/WAVE_2_5_RLS_ANALYSIS.md`
 - `waves/184_table_classification.md`
 
 ## 附記
+
 - Token 已更新（`sbp_ddbc54...`）、memory 同步
 - 搬 4 筆 4-15/4-16 過期 draft migration 到 `_rejected/`
 - Wave 1a：4 條 CHECK constraint（NOT VALID）

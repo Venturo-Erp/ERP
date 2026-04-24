@@ -3,12 +3,14 @@
 ## 1. 驗證邏輯有 3 套並存
 
 **活躍的驗證流程**：
+
 - UI（`src/app/(main)/login/page.tsx:67`）→ 呼叫 `validateLogin` store method
 - Store（`src/stores/auth-store.ts:165-244`）→ 呼叫 API + Supabase Auth
 - API（`src/app/api/auth/validate-login/route.ts`）→ DB 驗證 + 權限計算 + 角色查詢
 - Middleware（`src/middleware.ts:14-45`）→ 檢查 session / token
 
 **殘留機制**：
+
 - 註釋提到「已移除自家 JWT」（`middleware.ts:11` 和 `auth-store.ts:4`）
 - 但仍保留 `quick-login-token` 驗證分支（`middleware.ts:16-19`）
 
@@ -23,6 +25,7 @@
 ## 3. 角色判斷邏輯有 4 套並存（高風險）
 
 **API 層 — 3 個獨立的 `checkIsAdmin` 實作**（同邏輯各寫一次）：
+
 - `src/app/api/employees/create-employee-auth/route.ts:22-43`
 - `src/app/api/employees/reset-employee-password/route.ts:15-36`
 - `src/app/api/employees/admin-reset-password/route.ts:15-38`
@@ -32,6 +35,7 @@
 **登入驗證層**：`validate-login/route.ts:143-201` 也有同樣邏輯（**重複第 4 次**）
 
 **前端層**：
+
 - `useAuthStore` state（`isAdmin`）
 - 26 個檔案直接讀 `useAuthStore(state => state.isAdmin)`
 
@@ -41,12 +45,12 @@
 
 ## 改一個容易忘記改另一個的重複點
 
-| 重複點 | 檔案位置 | 風險等級 |
-|---|---|---|
-| `checkIsAdmin` 函數定義 3 次 | 3 個 API 路由（create-employee-auth、reset-employee-password、admin-reset-password） | 🔴 |
-| `isAdmin` 查詢邏輯（role_id + is_admin） | validate-login + 3 × checkIsAdmin | 🔴 |
-| rememberMe 參數文案 | login/page.tsx:163 + 實際不用 | 🟡 |
-| Supabase session 驗證 | middleware.ts:21-44 | 🟢 |
+| 重複點                                   | 檔案位置                                                                             | 風險等級 |
+| ---------------------------------------- | ------------------------------------------------------------------------------------ | -------- |
+| `checkIsAdmin` 函數定義 3 次             | 3 個 API 路由（create-employee-auth、reset-employee-password、admin-reset-password） | 🔴       |
+| `isAdmin` 查詢邏輯（role_id + is_admin） | validate-login + 3 × checkIsAdmin                                                    | 🔴       |
+| rememberMe 參數文案                      | login/page.tsx:163 + 實際不用                                                        | 🟡       |
+| Supabase session 驗證                    | middleware.ts:21-44                                                                  | 🟢       |
 
 **最危險的改動情景**：修改「系統主管判斷邏輯」時、需同時改 **4 個檔案**才完整。否則某些 API 用舊判斷、前端用新判斷。
 
