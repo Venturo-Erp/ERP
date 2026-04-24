@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import { useAuthStore } from '@/stores/auth-store'
 import { Sidebar } from './sidebar'
 import { cn } from '@/lib/utils'
-// import { TutorialProvider } from '@/components/tutorial/tutorial-provider'  // 2026-04-18 暫關、不影響上線進度
 import { usePathname } from 'next/navigation'
 import {
   NO_SIDEBAR_PAGES,
@@ -119,9 +118,6 @@ export function MainLayout({ children }: MainLayoutProps) {
       >
         <div className="h-full flex flex-col p-4 lg:p-6">{children}</div>
       </main>
-
-      {/* 新手引導教學遮罩 — 2026-04-18 暫關（William）*/}
-      {/* <TutorialProvider /> */}
     </div>
   )
 }

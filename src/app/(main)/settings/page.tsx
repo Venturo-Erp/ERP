@@ -82,8 +82,6 @@ export default function SettingsPage() {
       }
     >
       <div>
-        {/* 首次登入歡迎提示已改由 TutorialProvider 處理 */}
-
         {/* 個人資料 - 毛玻璃卡片 */}
         <div className="settings-glass relative rounded-xl">
           {/* 背景光暈 */}
