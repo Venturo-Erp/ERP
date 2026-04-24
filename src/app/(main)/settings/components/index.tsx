@@ -1,5 +1,0 @@
-export { AccountSettings } from './AccountSettings'
-export { SystemSettings } from './SystemSettings'
-export { OtherSettings } from './OtherSettings'
-export { WorkspaceSwitcher } from './WorkspaceSwitcher'
-export { DevToolsSettings } from './DevToolsSettings'
