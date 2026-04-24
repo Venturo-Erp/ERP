@@ -90,11 +90,9 @@ export const useQuoteTour = ({
       profit: 0,
     })
 
-    // 更新報價單的 tour_id + 反向設定 tour.quote_id
+    // 更新報價單的 tour_id（葡萄串模型：quote 自己貼標籤、不需要 tour 反指）
     if (newTour?.id) {
       await updateQuote(quote.id, { tour_id: newTour.id })
-      const { updateTour } = await import('@/data')
-      await updateTour(newTour.id, { quote_id: quote.id })
 
       // 自動建立頻道
       const workspaceId = getCurrentWorkspaceId()

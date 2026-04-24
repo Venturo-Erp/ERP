@@ -343,7 +343,7 @@ _（後續驗證累積的原則會加在這裡）_
 **樣態**：本該從事件聚合算出的值（已收 / 已付 / 剩餘 / 利潤）、被寫成 DB 欄位、靠 app service 或 trigger 每次重算回寫。真相分兩處、雙寫不同步風險、改 schema 時連動大。
 
 - **已確認命中**：/finance/payments（`orders.payment_status` + `paid_amount` + `remaining_amount` 由 `recalculateReceiptStats` 回寫；`tours.total_revenue` + `profit` 同）
-- **可能也中**：/orders（直接讀 orders.payment_status 的位置）、/tours/_（讀 tours.total_revenue）、/customers/_（若有 total_spent）、/supplier/_（若有 total_owed）、/accounting/_
+- **可能也中**：/orders（直接讀 orders.payment*status 的位置）、/tours/*（讀 tours.total*revenue）、/customers/*（若有 total*spent）、/supplier/*（若有 total*owed）、/accounting/*
 - **對應候選原則 4**
 
 ### 🔴 DB 欄位強制 NOT NULL 但代碼不寫（v2.0 新增、2026-04-22 /finance/payments）

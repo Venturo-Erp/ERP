@@ -208,7 +208,6 @@ export function useTourOperations(params: UseTourOperationsParams) {
           total_cost: 0,
           profit: 0,
           current_participants: 0,
-          quote_id: fromQuoteId || undefined,
           enable_checkin: isProposalOrTemplate ? false : newTour.enable_checkin || false,
           controller_id: isProposalOrTemplate ? undefined : newTour.controller_id || undefined,
           // SSOT：航班屬於旅遊團「行程編輯」分頁，開團時不寫入 outbound_flight / return_flight

@@ -32,7 +32,6 @@ export function TourItineraryDialog({ isOpen, onClose, tour }: TourItineraryDial
       airport_code: tour.airport_code || null,
       destination: tourDestinationDisplay || null,
       version_name: '行程版本',
-      quote_id: tour.quote_id || null,
       group_size: tour.max_participants || null,
       workspace_id: tour.workspace_id || '',
       title: tour.name,

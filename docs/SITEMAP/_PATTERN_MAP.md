@@ -37,7 +37,7 @@ npm run check:patterns P001 P020  # 只跑指定
 
 - **P001 從 🟢 → 🟠 部分**：4 路由重驗親查代碼發現 `useTabPermissions.tsx` 4 處 + `sidebar.tsx:596` + `useChannelSidebar.ts:17` 共 **6 處 isAdmin 短路** PR-1a 沒涵蓋（PR-1a scope 是 `auth-store.ts:249` / `permissions/hooks.ts:284,293` / `usePermissions.ts` 9 bool、那 3 處確實已修）
 - **新 P020**：`tour_members` ALL `auth.role()='authenticated'` policy 與 cmd-specific 4 條 workspace EXISTS 並存、PostgreSQL RLS 多 policy 是 OR、effective 結果是「任何登入者可讀寫該表」、cmd-specific 形同虛設
-- **新 P021**：`tour_destinations` / `tour_leaders` 兩張無 workspace*id 欄、4 條 policy 全 USING:true（讀寫刪都放）、屬於 P019 ❓「公版 vs 租戶」待拍板家族但比 ref*_ 嚴重（ref\__ 至少寫入 系統主管 only）
+- **新 P021**：`tour_destinations` / `tour_leaders` 兩張無 workspace*id 欄、4 條 policy 全 USING:true（讀寫刪都放）、屬於 P019 ❓「公版 vs 租戶」待拍板家族但比 ref*\_ 嚴重（ref\_\_ 至少寫入 系統主管 only）
 - **P019 名單修正**（重驗親查 DB 實證）：`workspace_roles` ✅ 全 4 條 workspace_id filter（不在紅 45 張）/ `workspace_job_roles` ✅ 4 條 employees JOIN tenant scoped（不是孤兒、是 tenant scoped、僅前端代碼遷出沒人用）/ `tour_role_assignments` ✅ 4 條 EXISTS workspace（不在紅 45 張）
 - **finance/payments DB 層全綠**：receipts / linkpay_logs / payment_methods / payment_requests / orders 4 條 policy 都有 workspace_id filter（不在 P019 紅 45 張）
 - **payment_method_id 之謎結案**：DB 真相 `is_nullable=YES`、FK SET NULL（不是 NOT NULL）— sitemap 文字錯了
@@ -316,7 +316,7 @@ npm run check:patterns P001 P020  # 只跑指定
 | 對應原則     | 4                                                                                                                                                      |
 | 業務翻譯     | 本該從原始資料即時算的數字（已收 / 已付 / 剩餘 / 利潤）被寫成 DB 欄位、每次收款都要回寫、真相分兩處容易失同步                                          |
 | 命中（已驗） | /finance/payments（`orders.payment_status` + `paid_amount` + `remaining_amount` 由 recalculateReceiptStats 回寫、`tours.total_revenue` + `profit` 同） |
-| 命中（預測） | /orders（讀 orders.payment_status）、/tours/_（讀 tours.total_revenue）、/customers/_、/supplier/_、/accounting/_                                      |
+| 命中（預測） | /orders（讀 orders.payment*status）、/tours/*（讀 tours.total*revenue）、/customers/*、/supplier/_、/accounting/_                                      |
 | 統一修法     | 移除冗餘聚合欄位、改用 view 或 helper function 即時算（按 status 分開給待確認 / 已確認）                                                               |
 | 估時         | 2 人週                                                                                                                                                 |
 | 優先級       | 🟡 上線後短期                                                                                                                                          |
@@ -875,7 +875,7 @@ scripts/pattern-detectors/check-feature-consistency.mjs
 
 **第 2 批**（客製化整族）：DROP customer_inquiries / wishlist_templates(2)+template_items(12) / tour_request_items+vouchers+messages / tour_requests(10)+progress view / tour_expenses 共 9 表+1 view、砍 features/tour-confirmation + features/tour-documents + /customized-tours + /inquiries + /p/customized + auth/line + tour-request store/entities/types
 
-**第 3 批**（供應商 portal + 確認單）：DROP confirmations(12)+customer*assigned_itineraries / 5 supplier*_ 表 / 4 fleet\__ 表+1 view / tour_confirmation_items+sheets 共 14 表+2 view、砍 features/supplier(單)+features/fleet+features/confirmations+features/tour-confirmation+/supplier+/local+/database/fleet+/confirmations、清 OrderListView/TourTabs 對 InvoiceDialog/TourPayments 引用
+**第 3 批**（供應商 portal + 確認單）：DROP confirmations(12)+customer*assigned_itineraries / 5 supplier*\_ 表 / 4 fleet\_\_ 表+1 view / tour_confirmation_items+sheets 共 14 表+2 view、砍 features/supplier(單)+features/fleet+features/confirmations+features/tour-confirmation+/supplier+/local+/database/fleet+/confirmations、清 OrderListView/TourTabs 對 InvoiceDialog/TourPayments 引用
 
 **第 4 批**（HR + 個人功能）：DROP attendance*records(2)+leave_balances/requests/types+payroll*_ (5)+tour_bonus_settings+workspace_bonus_defaults+workspace_notification_settings+leader_schedules+1 view+personal_canvases/records/expenses(3)+timebox_scheduled_boxes+pnr_schedule_changes 共 18 表+1 view、保留 employees/workspace_attendance_settings(給未來打卡)/ /hr/roles+/hr/settings、砍 13 個 /hr/_ 子路由
 

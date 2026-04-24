@@ -146,8 +146,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     let itinerary = null
     let error = null
 
-    // tier_pricings 在 quotes 表，需要透過 tours.quote_id 關聯
-    const selectFields = '*, tour:tours(quote:quotes(tier_pricings))'
+    // tier_pricings 在 quotes 表，反查 quotes.tour_id（葡萄串模型 docs/QUOTES_SSOT.md）
+    const selectFields = '*, tour:tours(quotes(tier_pricings,quote_type))'
 
     if (isUUID) {
       // 用完整 UUID 查詢
@@ -230,11 +230,14 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       showHotels: itinerary.show_hotels,
       // 詳細團費
       showPricingDetails: itinerary.show_pricing_details,
-      // 價格方案：優先讀 itinerary.price_tiers（編輯器自存），fallback 到 quote.tier_pricings
+      // 價格方案：優先讀 itinerary.price_tiers（編輯器自存），fallback 到 standard quote.tier_pricings
       priceTiers:
         (itinerary as { price_tiers?: unknown }).price_tiers ||
-        (itinerary as { tour?: { quote?: { tier_pricings?: unknown } } }).tour?.quote
-          ?.tier_pricings ||
+        (
+          itinerary as {
+            tour?: { quotes?: Array<{ tier_pricings?: unknown; quote_type?: string }> }
+          }
+        ).tour?.quotes?.find(q => q.quote_type === 'standard')?.tier_pricings ||
         null,
       showPriceTiers: itinerary.show_price_tiers,
       // 常見問題

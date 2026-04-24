@@ -80,17 +80,6 @@ export function useQuoteLoader(
 
       if (quotesData.length > 0) {
         setSelectedQuoteId(quotesData[0].id)
-      } else if (tour.quote_id) {
-        const { data: singleQuote, error: singleError } = await supabase
-          .from('quotes')
-          .select('id, code, name, status, total_amount, created_at')
-          .eq('id', tour.quote_id)
-          .single()
-
-        if (!singleError && singleQuote) {
-          setLinkedQuotes([singleQuote as LinkedQuoteInfo])
-          setSelectedQuoteId(singleQuote.id)
-        }
       }
     } catch (error) {
       logger.error(COMP_TOURS_LABELS.查找報價單失敗, error)
@@ -111,7 +100,7 @@ export function useQuoteLoader(
       return
     }
 
-    const quoteId = selectedQuoteId || linkedQuotes[0]?.id || tour.quote_id
+    const quoteId = selectedQuoteId || linkedQuotes[0]?.id
     if (!quoteId) {
       toast.error(COMP_TOURS_LABELS.此團沒有關聯的報價單)
       return

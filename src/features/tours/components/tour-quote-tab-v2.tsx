@@ -55,22 +55,16 @@ export function TourQuoteTabV2({ tour }: TourQuoteTabV2Props) {
   const [editingQuoteId, setEditingQuoteId] = useState<string | null>(null)
   const [editingName, setEditingName] = useState('')
 
-  // ========== 載入主報價單 ==========
+  // ========== 載入主報價單（反查 quotes，葡萄串模型 docs/QUOTES_SSOT.md）==========
   useEffect(() => {
     const loadMainQuote = async () => {
       setLoadingMain(true)
       try {
-        if (tour.quote_id) {
-          setMainQuoteId(tour.quote_id)
-          setLoadingMain(false)
-          return
-        }
-
         const { data, error } = await supabase
           .from('quotes')
           .select('id')
           .eq('tour_id', tour.id)
-          .or('quote_type.is.null,quote_type.eq.standard')
+          .eq('quote_type', 'standard')
           .order('created_at', { ascending: false })
           .limit(1)
           .maybeSingle()
@@ -85,7 +79,7 @@ export function TourQuoteTabV2({ tour }: TourQuoteTabV2Props) {
     }
 
     loadMainQuote()
-  }, [tour.id, tour.quote_id])
+  }, [tour.id])
 
   // ========== 載入快速報價單列表 ==========
   const loadQuickQuotes = useCallback(async () => {

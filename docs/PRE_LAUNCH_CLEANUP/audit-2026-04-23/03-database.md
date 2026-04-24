@@ -70,6 +70,7 @@ Database 模組整體乾淨，但有 **3 個設計債** 和 **1 個幽靈功能*
 
 - **檔案**：`src/app/(main)/database/transportation-rates/page.tsx:18-35`
 - **問題**：
+
   ```typescript
   // ❌ 直接 supabase.from('transportation_rates').select(...)
   const fetchRates = async (): Promise<TransportationRate[]> => {
@@ -86,6 +87,7 @@ Database 模組整體乾淨，但有 **3 個設計債** 和 **1 個幽靈功能*
   - Page 層直查 DB，違反 **SSOT（Single Source of Truth）**
   - 其他頁面（suppliers、attractions）用 `useSuppliers()` / `useAttractions()` hook
   - transportation_rates 有 entity hook `useTransportationRates` 卻不用，反而手寫
+
 - **對比**：
   - ✓ `src/features/suppliers/components/SuppliersPage.tsx` 用 `useSuppliers()`
   - ✓ `src/features/attractions/components/DatabaseManagementPage.tsx` 用 `useAttractions()`
