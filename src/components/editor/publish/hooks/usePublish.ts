@@ -20,7 +20,6 @@ interface PublishButtonData extends Partial<TourFormData> {
   tourId?: string
   meetingInfo?: unknown
   version_records?: ItineraryVersionRecord[]
-  proposalPackageId?: string // 提案套件 ID（用於關聯報價單）
 }
 
 interface UsePublishProps {

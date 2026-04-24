@@ -126,9 +126,11 @@ export interface QuoteItem extends BaseEntity {
 
 /**
  * QuoteType - 報價單類型
- * 註：快速報價單已移除，僅保留標準報價單
+ * 葡萄串模型：docs/QUOTES_SSOT.md
  */
-export type QuoteType = 'standard' // 團體報價單（複雜的旅遊行程）
+export type QuoteType =
+  | 'standard' // 團體報價單（完整方案，0 或 1 張/團）
+  | 'quick' // 快速報價單（收訂金、尾款、雜項收款，0~N 張/團）
 
 /**
  * QuoteStatus - 報價狀態
