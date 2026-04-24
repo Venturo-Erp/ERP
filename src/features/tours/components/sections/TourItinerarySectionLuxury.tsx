@@ -89,21 +89,11 @@ export function TourItinerarySectionLuxury({
           className={`flex items-center justify-between ${isMobile ? 'mb-8' : 'mb-16'} relative`}
         >
           <div>
-            <span
-              className="block mb-2 italic"
-              style={{
-                color: LUXURY.secondary,
-                fontFamily: "'Noto Serif TC', serif",
-                fontSize: isMobile ? '1rem' : '1.125rem',
-              }}
-            >
-              Day by Day
-            </span>
             <h2
               className={`font-medium ${isMobile ? 'text-2xl' : 'text-4xl'}`}
               style={{
                 color: LUXURY.text,
-                fontFamily: "'Noto Serif TC', serif",
+                fontFamily: LUXURY.font.serif,
               }}
             >
               {TOURS_LABELS.LABEL_5020}
@@ -153,13 +143,9 @@ export function TourItinerarySectionLuxury({
                   dayRefs.current[index] = el as HTMLDivElement | null
                 }}
               >
-                <motion.div
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1 }}
-                  className="bg-card rounded-2xl shadow-lg overflow-hidden group"
-                  style={{ borderColor: '#f0f0f0' }}
+                <div
+                  className="bg-card rounded-2xl overflow-hidden group border"
+                  style={{ borderColor: LUXURY.hairline, boxShadow: LUXURY.shadow.md }}
                 >
                   <div className={`grid ${isMobile ? 'grid-cols-1' : 'lg:grid-cols-12'} h-full`}>
                     {/* 左側：日期區塊 */}
@@ -172,7 +158,7 @@ export function TourItinerarySectionLuxury({
                         <div
                           className="absolute -right-4 top-1/2 -translate-y-1/2 text-9xl font-bold select-none"
                           style={{
-                            fontFamily: "'Noto Serif TC', serif",
+                            fontFamily: LUXURY.font.serif,
                             color: 'rgba(255,255,255,0.05)',
                           }}
                         >
@@ -197,7 +183,7 @@ export function TourItinerarySectionLuxury({
                         })()}
                         <h3
                           className={`${isMobile ? 'text-2xl' : 'text-4xl'} font-medium whitespace-nowrap`}
-                          style={{ fontFamily: "'Noto Serif TC', serif" }}
+                          style={{ fontFamily: LUXURY.font.serif }}
                         >
                           Day {dayNumber}
                         </h3>
@@ -207,7 +193,7 @@ export function TourItinerarySectionLuxury({
                         <div
                           className={`text-xs uppercase tracking-widest opacity-70 ${isMobile ? 'hidden' : ''}`}
                         >
-                          {day.isAlternative ? 'Alternative' : 'Location'}
+                          {day.isAlternative ? '建議行程' : '地點'}
                         </div>
                         <div
                           className={`font-medium ${isMobile ? 'text-base' : 'text-lg'}`}
@@ -321,7 +307,7 @@ export function TourItinerarySectionLuxury({
                                   className="text-lg font-medium mb-3"
                                   style={{
                                     color: LUXURY.primary,
-                                    fontFamily: "'Noto Serif TC', serif",
+                                    fontFamily: LUXURY.font.serif,
                                   }}
                                 >
                                   Highlight
@@ -463,7 +449,7 @@ export function TourItinerarySectionLuxury({
                               className="text-base font-medium mb-3"
                               style={{
                                 color: LUXURY.primary,
-                                fontFamily: "'Noto Serif TC', serif",
+                                fontFamily: LUXURY.font.serif,
                               }}
                             >
                               Highlight
@@ -606,7 +592,7 @@ export function TourItinerarySectionLuxury({
                               <div
                                 className="font-bold text-lg mb-1"
                                 style={{
-                                  fontFamily: "'Noto Serif TC', serif",
+                                  fontFamily: LUXURY.font.serif,
                                   color: LUXURY.text,
                                 }}
                               >
@@ -634,7 +620,7 @@ export function TourItinerarySectionLuxury({
                       )}
                     </div>
                   </div>
-                </motion.div>
+                </div>
               </article>
             )
           })}

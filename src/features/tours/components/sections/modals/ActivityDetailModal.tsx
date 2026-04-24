@@ -27,7 +27,7 @@ export function ActivityDetailModal({ activity, onClose }: ActivityDetailModalPr
               <DialogHeader className="p-0">
                 <DialogTitle
                   className="text-xl font-bold text-white"
-                  style={{ fontFamily: "'Noto Serif TC', serif" }}
+                  style={{ fontFamily: LUXURY.font.serif }}
                 >
                   {activity.title}
                 </DialogTitle>
@@ -47,7 +47,7 @@ export function ActivityDetailModal({ activity, onClose }: ActivityDetailModalPr
                 className="text-xl font-bold pr-8"
                 style={{
                   color: LUXURY.text,
-                  fontFamily: "'Noto Serif TC', serif",
+                  fontFamily: LUXURY.font.serif,
                 }}
               >
                 {activity.title}

@@ -7,16 +7,7 @@ import type { TourPageData } from '@/features/tours/types/tour-display.types'
 import type { PricingDetails } from '@/stores/types/tour.types'
 import { TOURS_LABELS } from './constants/labels'
 
-// Luxury 配色
-const LUXURY = {
-  primary: '#2C5F4D',
-  secondary: '#C69C6D',
-  accent: '#8F4F4F',
-  background: '#FDFBF7',
-  surface: '#FFFFFF',
-  text: '#2D3436',
-  muted: '#636E72',
-}
+import { LUXURY } from './utils/luxuryTokens'
 
 interface TourPricingSectionLuxuryProps {
   data: TourPageData
@@ -66,7 +57,7 @@ export function TourPricingSectionLuxury({ data, viewMode }: TourPricingSectionL
             className={`font-bold pl-4 ${isMobile ? 'text-xl' : 'text-2xl'}`}
             style={{
               color: LUXURY.text,
-              fontFamily: "'Noto Serif TC', serif",
+              fontFamily: LUXURY.font.serif,
               borderLeft: `4px solid ${LUXURY.secondary}`,
             }}
           >

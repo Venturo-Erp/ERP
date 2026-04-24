@@ -21,15 +21,7 @@ interface TourHeroLuxuryProps {
   viewMode: 'desktop' | 'mobile'
 }
 
-// Luxury 配色
-const LUXURY = {
-  primary: '#2C5F4D',
-  secondary: '#C69C6D',
-  accent: '#8F4F4F',
-  background: '#FDFBF7',
-  text: '#2D3436',
-  muted: '#636E72',
-}
+import { LUXURY } from './utils/luxuryTokens'
 
 /**
  * Luxury 風格 Hero Section
@@ -63,14 +55,10 @@ export function TourHeroLuxury({ data, viewMode }: TourHeroLuxuryProps) {
               style={{ borderColor: `${LUXURY.secondary}30` }}
             >
               <span
-                className="w-2 h-2 rounded-full animate-pulse"
-                style={{ backgroundColor: LUXURY.accent }}
-              />
-              <span
                 className="text-xs font-medium tracking-widest uppercase"
                 style={{
                   color: LUXURY.secondary,
-                  fontFamily: "'Noto Serif TC', serif",
+                  fontFamily: LUXURY.font.serif,
                 }}
               >
                 {data.tourCode || 'Signature Collection'}
@@ -84,7 +72,7 @@ export function TourHeroLuxury({ data, viewMode }: TourHeroLuxuryProps) {
                 className={`font-medium leading-tight ${isMobile ? 'text-4xl' : 'text-5xl lg:text-7xl'}`}
                 style={{
                   color: LUXURY.text,
-                  fontFamily: "'Noto Serif TC', serif",
+                  fontFamily: LUXURY.font.serif,
                 }}
               >
                 <span className="relative inline-block">
@@ -102,7 +90,7 @@ export function TourHeroLuxury({ data, viewMode }: TourHeroLuxuryProps) {
                   className={`font-medium ${isMobile ? 'text-2xl' : 'text-3xl lg:text-4xl'}`}
                   style={{
                     color: LUXURY.primary,
-                    fontFamily: "'Noto Serif TC', serif",
+                    fontFamily: LUXURY.font.serif,
                   }}
                 >
                   <RichText html={data.subtitle} />
@@ -173,7 +161,7 @@ export function TourHeroLuxury({ data, viewMode }: TourHeroLuxuryProps) {
                   className="text-xl font-medium"
                   style={{
                     color: LUXURY.text,
-                    fontFamily: "'Noto Serif TC', serif",
+                    fontFamily: LUXURY.font.serif,
                   }}
                 >
                   {data.departureDate || 'Coming Soon'}

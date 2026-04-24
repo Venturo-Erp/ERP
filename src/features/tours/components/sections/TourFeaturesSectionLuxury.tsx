@@ -8,46 +8,37 @@ import { Dialog, DialogContent } from '@/components/ui/dialog'
 import type { TourPageData, Feature } from '@/features/tours/types/tour-display.types'
 import { TOURS_LABELS } from './constants/labels'
 
-// Luxury 配色
-const LUXURY = {
-  primary: '#2C5F4D',
-  secondary: '#C69C6D',
-  accent: '#8F4F4F',
-  background: '#FDFBF7',
-  surface: '#FFFFFF',
-  text: '#2D3436',
-  muted: '#636E72',
-}
+import { LUXURY } from './utils/luxuryTokens'
 
 interface TourFeaturesSectionLuxuryProps {
   data: TourPageData
   viewMode: 'desktop' | 'mobile'
 }
 
-// icon 對應標籤名稱
+// icon 對應標籤名稱（業務可用 feature.tag 自訂覆寫）
 const iconToTag: Record<string, string> = {
-  restaurant: 'Gastronomy',
-  utensils: 'Gastronomy',
-  dining: 'Gastronomy',
-  food: 'Gastronomy',
-  spa: 'Wellness',
-  hot_tub: 'Wellness',
-  wellness: 'Wellness',
-  onsen: 'Wellness',
-  nature: 'Discovery',
-  landscape: 'Discovery',
-  explore: 'Discovery',
-  hiking: 'Discovery',
-  temple: 'Culture',
-  museum: 'Culture',
-  culture: 'Culture',
-  history: 'Culture',
-  adventure: 'Adventure',
-  sports: 'Adventure',
-  activity: 'Adventure',
-  star: 'Luxury',
-  diamond: 'Luxury',
-  premium: 'Luxury',
+  restaurant: '美食',
+  utensils: '美食',
+  dining: '美食',
+  food: '美食',
+  spa: '養生',
+  hot_tub: '養生',
+  wellness: '養生',
+  onsen: '養生',
+  nature: '探索',
+  landscape: '探索',
+  explore: '探索',
+  hiking: '探索',
+  temple: '文化',
+  museum: '文化',
+  culture: '文化',
+  history: '文化',
+  adventure: '體驗',
+  sports: '體驗',
+  activity: '體驗',
+  star: '精選',
+  diamond: '精選',
+  premium: '精選',
 }
 
 export function TourFeaturesSectionLuxury({ data, viewMode }: TourFeaturesSectionLuxuryProps) {
@@ -85,7 +76,7 @@ export function TourFeaturesSectionLuxury({ data, viewMode }: TourFeaturesSectio
     const iconLower = feature.icon.toLowerCase()
     if (iconToTag[iconLower]) return iconToTag[iconLower]
     // 預設標籤輪流
-    const defaultTags = ['Gastronomy', 'Wellness', 'Discovery', 'Culture', 'Adventure', 'Luxury']
+    const defaultTags = ['美食', '養生', '探索', '文化', '體驗', '精選']
     return defaultTags[index % defaultTags.length]
   }
 
@@ -118,7 +109,7 @@ export function TourFeaturesSectionLuxury({ data, viewMode }: TourFeaturesSectio
             className="block mb-2 italic"
             style={{
               color: LUXURY.secondary,
-              fontFamily: "'Noto Serif TC', serif",
+              fontFamily: LUXURY.font.serif,
               fontSize: isMobile ? '1rem' : '1.125rem',
             }}
           >
@@ -128,7 +119,7 @@ export function TourFeaturesSectionLuxury({ data, viewMode }: TourFeaturesSectio
             className={`font-bold ${isMobile ? 'text-2xl' : 'text-3xl'}`}
             style={{
               color: LUXURY.text,
-              fontFamily: "'Noto Serif TC', serif",
+              fontFamily: LUXURY.font.serif,
             }}
           >
             {TOURS_LABELS.LABEL_6890}
@@ -262,14 +253,15 @@ function FeatureCard({
     >
       {/* 圖片區 */}
       <div
-        className="relative h-64 rounded-md overflow-hidden mb-6 shadow-md border border-border cursor-pointer"
+        className="relative h-64 rounded-md overflow-hidden mb-6 cursor-pointer"
+        style={{ boxShadow: LUXURY.shadow.frame }}
         onClick={() => hasImages && onImageClick(validImages, currentImageIndex)}
       >
         {hasImages ? (
           <img
             src={validImages[isExpanded ? currentImageIndex : 0]}
             alt={feature.title}
-            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
           />
         ) : (
           <div
@@ -321,7 +313,7 @@ function FeatureCard({
           className={`font-bold mb-3 ${isMobile ? 'text-lg' : 'text-xl'}`}
           style={{
             color: LUXURY.text,
-            fontFamily: "'Noto Serif TC', serif",
+            fontFamily: LUXURY.font.serif,
           }}
         >
           {feature.title}

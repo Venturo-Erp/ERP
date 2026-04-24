@@ -6,16 +6,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import type { TourPageData, HotelInfo } from '@/features/tours/types/tour-display.types'
 import { TOURS_LABELS } from './constants/labels'
 
-// Luxury 配色
-const LUXURY = {
-  primary: '#2C5F4D',
-  secondary: '#C69C6D',
-  accent: '#8F4F4F',
-  background: '#FDFBF7',
-  surface: '#FFFFFF',
-  text: '#2D3436',
-  muted: '#636E72',
-}
+import { LUXURY } from './utils/luxuryTokens'
 
 interface TourHotelsSectionLuxuryProps {
   data: TourPageData
@@ -44,7 +35,7 @@ export function TourHotelsSectionLuxury({ data, viewMode }: TourHotelsSectionLux
             className="block mb-2 italic"
             style={{
               color: LUXURY.secondary,
-              fontFamily: "'Noto Serif TC', serif",
+              fontFamily: LUXURY.font.serif,
               fontSize: isMobile ? '1rem' : '1.125rem',
             }}
           >
@@ -54,7 +45,7 @@ export function TourHotelsSectionLuxury({ data, viewMode }: TourHotelsSectionLux
             className={`font-bold ${isMobile ? 'text-2xl' : 'text-3xl'}`}
             style={{
               color: '#ECECEC',
-              fontFamily: "'Noto Serif TC', serif",
+              fontFamily: LUXURY.font.serif,
             }}
           >
             {TOURS_LABELS.LABEL_4386}
@@ -120,12 +111,15 @@ function SingleHotelLayout({ hotel }: { hotel: HotelInfo }) {
       className="grid md:grid-cols-2 gap-12 items-center max-w-5xl mx-auto"
     >
       {/* 左側：圖片輪播 */}
-      <div className="relative aspect-[4/3] rounded-lg overflow-hidden shadow-lg group">
+      <div
+        className="relative aspect-[4/3] rounded-lg overflow-hidden group"
+        style={{ boxShadow: LUXURY.shadow.frame }}
+      >
         {currentImage ? (
           <img
             src={currentImage}
             alt={hotel.name || TOURS_LABELS.HOTEL}
-            className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
+            className="w-full h-full object-cover transition-transform duration-400 group-hover:scale-105"
           />
         ) : (
           <div
@@ -190,7 +184,7 @@ function SingleHotelLayout({ hotel }: { hotel: HotelInfo }) {
             className="text-3xl font-bold mb-4"
             style={{
               color: '#ECECEC',
-              fontFamily: "'Noto Serif TC', serif",
+              fontFamily: LUXURY.font.serif,
             }}
           >
             {hotel.name || TOURS_LABELS.SELECTED_HOTEL}
@@ -261,12 +255,15 @@ function HotelCard({
       className="group cursor-pointer"
     >
       {/* 圖片區 */}
-      <div className="relative h-64 rounded-md overflow-hidden mb-6 shadow-lg">
+      <div
+        className="relative h-64 rounded-md overflow-hidden mb-6"
+        style={{ boxShadow: LUXURY.shadow.frame }}
+      >
         {currentImage ? (
           <img
             src={currentImage}
             alt={hotel.name || TOURS_LABELS.HOTEL}
-            className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
+            className="w-full h-full object-cover transition-transform duration-400 group-hover:scale-105"
           />
         ) : (
           <div
@@ -327,7 +324,7 @@ function HotelCard({
           className={`font-medium mb-2 ${isMobile ? 'text-lg' : 'text-xl'}`}
           style={{
             color: '#ECECEC',
-            fontFamily: "'Noto Serif TC', serif",
+            fontFamily: LUXURY.font.serif,
           }}
         >
           {hotel.name || TOURS_LABELS.SELECTED_HOTEL}

@@ -4,16 +4,7 @@ import { motion } from 'framer-motion'
 import type { TourPageData } from '@/features/tours/types/tour-display.types'
 import { TOURS_LABELS } from './constants/labels'
 
-// Luxury 配色
-const LUXURY = {
-  primary: '#2C5F4D',
-  secondary: '#C69C6D',
-  accent: '#8F4F4F',
-  background: '#FDFBF7',
-  surface: '#FFFFFF',
-  text: '#2D3436',
-  muted: '#636E72',
-}
+import { LUXURY } from './utils/luxuryTokens'
 
 interface TourPriceTiersSectionLuxuryProps {
   data: TourPageData
@@ -69,7 +60,7 @@ export function TourPriceTiersSectionLuxury({ data, viewMode }: TourPriceTiersSe
             className="block mb-2 italic"
             style={{
               color: LUXURY.secondary,
-              fontFamily: "'Noto Serif TC', serif",
+              fontFamily: LUXURY.font.serif,
               fontSize: isMobile ? '1rem' : '1.125rem',
             }}
           >
@@ -79,7 +70,7 @@ export function TourPriceTiersSectionLuxury({ data, viewMode }: TourPriceTiersSe
             className={`font-bold ${isMobile ? 'text-2xl' : 'text-3xl'}`}
             style={{
               color: LUXURY.text,
-              fontFamily: "'Noto Serif TC', serif",
+              fontFamily: LUXURY.font.serif,
             }}
           >
             {TOURS_LABELS.LABEL_1385}
@@ -139,7 +130,7 @@ export function TourPriceTiersSectionLuxury({ data, viewMode }: TourPriceTiersSe
                       className={`font-bold ${isMobile ? 'text-4xl' : 'text-5xl'}`}
                       style={{
                         color: LUXURY.primary,
-                        fontFamily: "'Noto Serif TC', serif",
+                        fontFamily: LUXURY.font.serif,
                       }}
                     >
                       {formatPrice(tier.price) || '---'}

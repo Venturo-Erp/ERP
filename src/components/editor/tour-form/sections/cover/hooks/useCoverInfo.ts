@@ -30,14 +30,18 @@ export function useCoverInfo({ data, onChange }: UseCoverInfoProps) {
   }
 
   // 從資料庫載入的封面風格選項
+  // 2026-04-24 Pre-Launch Cleanup：只保留 luxury；DB 裡其他 template 暫不顯示
+  // 未來要解鎖新風格、加白名單或改成 tier/workspace 權限過濾
   const coverStyleOptions = useMemo(() => {
-    return coverTemplates.map(template => ({
-      value: template.id as CoverStyleType,
-      label: template.name,
-      description: template.description || '',
-      color: getTemplateColor(template.id),
-      previewImage: template.preview_image_url ?? undefined,
-    }))
+    return coverTemplates
+      .filter(template => template.id === 'luxury')
+      .map(template => ({
+        value: template.id as CoverStyleType,
+        label: template.name,
+        description: template.description || '',
+        color: getTemplateColor(template.id),
+        previewImage: template.preview_image_url ?? undefined,
+      }))
   }, [coverTemplates])
 
   // 取得當前風格的顏色

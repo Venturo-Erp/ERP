@@ -3,8 +3,6 @@
 import React, { useState } from 'react'
 import { ChevronUp, ChevronDown, ChevronRight, GripVertical } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { DayStylePicker } from '../../components/DayStylePicker'
-import { DreamscapeLayoutPicker } from '../../components/DreamscapeLayoutPicker'
 import { DailyImagesUploader } from '../DailyImagesUploader'
 import { DayTitleSection } from './DayTitleSection'
 import { ActivitiesSection } from './ActivitiesSection'
@@ -139,29 +137,6 @@ export function DayCard({
           )}
         </div>
         <div className="flex items-center gap-4">
-          {/* 每日風格選擇器 + 預覽編輯 - 只在藝術風格時顯示 */}
-          {data.itineraryStyle === 'art' && (
-            <DayStylePicker
-              dayIndex={dayIndex}
-              dayData={day}
-              currentStyle={day.displayStyle || 'single-image'}
-              onStyleChange={style => updateDailyItinerary(dayIndex, 'displayStyle', style)}
-              onDayUpdate={updatedDay => {
-                const newItinerary = [...data.dailyItinerary]
-                newItinerary[dayIndex] = updatedDay
-                updateField('dailyItinerary', newItinerary)
-              }}
-              departureDate={data.departureDate}
-            />
-          )}
-          {/* Dreamscape 佈局選擇器 - 只在夢幻漫遊風格時顯示 */}
-          {data.itineraryStyle === 'dreamscape' && (
-            <DreamscapeLayoutPicker
-              dayIndex={dayIndex}
-              currentLayout={day.dreamscapeLayout}
-              onLayoutChange={layout => updateDailyItinerary(dayIndex, 'dreamscapeLayout', layout)}
-            />
-          )}
           {/* 建議方案 checkbox - 不顯示在第一天 */}
           {dayIndex > 0 && (
             <label className="flex items-center gap-2 cursor-pointer">

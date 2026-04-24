@@ -2,17 +2,8 @@
 
 import { TourFormData } from '@/components/editor/tour-form/types'
 
-// Luxury 配色
-export const LUXURY = {
-  primary: '#2C5F4D',
-  secondary: '#C69C6D',
-  accent: '#8F4F4F',
-  background: '#FDFBF7',
-  surface: '#FFFFFF',
-  text: '#2D3436',
-  muted: '#636E72',
-  tableHeader: '#F0F4F3',
-}
+// Luxury 配色（從 tokens 檔 re-export、向後相容舊 import 路徑）
+export { LUXURY } from './luxuryTokens'
 
 // Day 卡片背景色循環（7天不重複）
 export const DAY_COLORS = [

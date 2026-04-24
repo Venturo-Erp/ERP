@@ -5,16 +5,7 @@ import { Phone, MapPin, Calendar, Clock, User } from 'lucide-react'
 import type { TourPageData } from '@/features/tours/types/tour-display.types'
 import { TOURS_LABELS } from './constants/labels'
 
-// Luxury 配色
-const LUXURY = {
-  primary: '#2C5F4D',
-  secondary: '#C69C6D',
-  accent: '#8F4F4F',
-  background: '#FDFBF7',
-  surface: '#FFFFFF',
-  text: '#2D3436',
-  muted: '#636E72',
-}
+import { LUXURY } from './utils/luxuryTokens'
 
 interface TourLeaderSectionLuxuryProps {
   data: TourPageData
@@ -75,7 +66,7 @@ export function TourLeaderSectionLuxury({ data, viewMode }: TourLeaderSectionLux
             className="block mb-2 italic"
             style={{
               color: LUXURY.secondary,
-              fontFamily: "'Noto Serif TC', serif",
+              fontFamily: LUXURY.font.serif,
               fontSize: isMobile ? '1rem' : '1.125rem',
             }}
           >
@@ -85,7 +76,7 @@ export function TourLeaderSectionLuxury({ data, viewMode }: TourLeaderSectionLux
             className={`font-bold ${isMobile ? 'text-2xl' : 'text-3xl'}`}
             style={{
               color: LUXURY.text,
-              fontFamily: "'Noto Serif TC', serif",
+              fontFamily: LUXURY.font.serif,
             }}
           >
             {TOURS_LABELS.LABEL_7562}
@@ -103,7 +94,7 @@ export function TourLeaderSectionLuxury({ data, viewMode }: TourLeaderSectionLux
             >
               {/* 裝飾圓形 */}
               <div
-                className="absolute top-0 right-0 w-24 h-24 rounded-bl-full -mr-12 -mt-12 transition-transform duration-500 group-hover:scale-150"
+                className="absolute top-0 right-0 w-24 h-24 rounded-bl-full -mr-12 -mt-12 transition-transform duration-300 group-hover:scale-110"
                 style={{ backgroundColor: `${LUXURY.secondary}10` }}
               />
 
@@ -139,7 +130,7 @@ export function TourLeaderSectionLuxury({ data, viewMode }: TourLeaderSectionLux
                   className={`font-bold mb-1 ${isMobile ? 'text-xl' : 'text-2xl'}`}
                   style={{
                     color: LUXURY.text,
-                    fontFamily: "'Noto Serif TC', serif",
+                    fontFamily: LUXURY.font.serif,
                   }}
                 >
                   {leader?.name || '待定'}
@@ -192,7 +183,7 @@ export function TourLeaderSectionLuxury({ data, viewMode }: TourLeaderSectionLux
             >
               {/* 裝飾圓形 */}
               <div
-                className="absolute top-0 right-0 w-24 h-24 rounded-bl-full -mr-12 -mt-12 transition-transform duration-500 group-hover:scale-150"
+                className="absolute top-0 right-0 w-24 h-24 rounded-bl-full -mr-12 -mt-12 transition-transform duration-300 group-hover:scale-110"
                 style={{ backgroundColor: `${LUXURY.primary}08` }}
               />
 
@@ -218,7 +209,7 @@ export function TourLeaderSectionLuxury({ data, viewMode }: TourLeaderSectionLux
                           className={`font-bold mb-4 ${isMobile ? 'text-lg' : 'text-xl'}`}
                           style={{
                             color: LUXURY.text,
-                            fontFamily: "'Noto Serif TC', serif",
+                            fontFamily: LUXURY.font.serif,
                           }}
                         >
                           {primaryLocation}

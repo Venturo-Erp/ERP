@@ -1,22 +1,11 @@
-import React, { useMemo } from 'react'
+import { useMemo } from 'react'
 import { logger } from '@/lib/utils/logger'
 import { TourFormData, CityOption } from '../types'
 import type { ImagePositionSettings } from '@/components/ui/image-position-editor'
-import { PreviewPanel } from '../components/PreviewPanel'
-// Hero 組件
-import { TourHeroSection } from '@/features/tours/components/sections/TourHeroSection'
-import { TourHeroNature } from '@/features/tours/components/sections/TourHeroNature'
-import { TourHeroLuxury } from '@/features/tours/components/sections/TourHeroLuxury'
-import { TourHeroArt } from '@/features/tours/components/sections/TourHeroArt'
-import { TourHeroGemini } from '@/features/tours/components/sections/TourHeroGemini'
-import { TourHeroDreamscape } from '@/features/tours/components/sections/TourHeroDreamscape'
-import { TourHeroCollage } from '@/features/tours/components/sections/TourHeroCollage'
 // 拆分的模組
 import { useCoverInfo } from './cover/hooks/useCoverInfo'
 import { AirportImageLibrary } from './cover/AirportImageLibrary'
 import { CoverInfoForm } from './cover/CoverInfoForm'
-import { COMP_EDITOR_LABELS } from '../../constants/labels'
-import { getWorkspaceCompanyName } from '@/lib/workspace-helpers'
 
 interface CoverInfoSectionProps {
   data: TourFormData
@@ -84,45 +73,6 @@ export function CoverInfoSection({
       coverImage: url,
       coverImagePosition: { x: 50, y: 50, scale: 1 },
     })
-  }
-
-  // 生成預覽用資料
-  const getHeroData = () => ({
-    coverImage: data.coverImage,
-    coverImagePosition: data.coverImagePosition, // 圖片位置調整
-    tagline: data.tagline || getWorkspaceCompanyName(),
-    title: data.title || COMP_EDITOR_LABELS.行程標題,
-    subtitle: data.subtitle || COMP_EDITOR_LABELS.副標題,
-    description: data.description || COMP_EDITOR_LABELS.此處顯示行程描述,
-    departureDate: data.departureDate || '2025/01/01',
-    tourCode: data.tourCode || 'CODE',
-    price: data.price || '',
-    priceNote: data.priceNote === '__hidden__' ? '' : data.priceNote || COMP_EDITOR_LABELS.人,
-    country: selectedCountry || '',
-    city: data.city || '',
-    dailyItinerary: data.dailyItinerary,
-  })
-
-  // 根據風格渲染對應的 Hero 組件
-  const renderHeroPreview = (viewMode: 'desktop' | 'mobile') => {
-    const heroData = getHeroData()
-
-    switch (data.coverStyle) {
-      case 'luxury':
-        return <TourHeroLuxury data={heroData} viewMode={viewMode} />
-      case 'art':
-        return <TourHeroArt data={heroData} viewMode={viewMode} />
-      case 'nature':
-        return <TourHeroNature data={heroData} viewMode={viewMode} />
-      case 'gemini':
-        return <TourHeroGemini data={heroData} viewMode={viewMode} />
-      case 'dreamscape':
-        return <TourHeroDreamscape data={heroData} viewMode={viewMode} />
-      case 'collage':
-        return <TourHeroCollage data={heroData} viewMode={viewMode} />
-      default:
-        return <TourHeroSection data={heroData} viewMode={viewMode} />
-    }
   }
 
   return (
