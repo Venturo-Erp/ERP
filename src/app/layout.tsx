@@ -11,6 +11,7 @@ const notoSansTC = Noto_Sans_TC({
 })
 import { ThemeProvider } from '@/components/layout/theme-provider'
 import { ErrorLogger } from '@/components/ErrorLogger'
+import { DevDatabaseBadge } from '@/components/dev-database-badge'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { AppInitializer } from '@/components/AppInitializer'
 import { GlobalDialogs } from '@/lib/ui/alert-dialog'
@@ -59,6 +60,7 @@ export default async function RootLayout({
             </ErrorBoundary>
           </AppInitializer>
         </IntlProvider>
+        <DevDatabaseBadge />
         <Analytics />
         <SpeedInsights />
       </body>
