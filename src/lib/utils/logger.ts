@@ -28,6 +28,57 @@ const isServer = typeof window === 'undefined'
 const LOG_LEVEL = (process.env.NEXT_PUBLIC_LOG_LEVEL || 'info') as LogLevel
 const REMOTE_LOGGING_ENABLED = process.env.NEXT_PUBLIC_REMOTE_LOGGING === 'true'
 
+// PII redact: 生產環境強制遮蔽敏感欄位、開發保留原值方便 debug
+// 敏感欄位 (完全遮蔽): password / token / secret / api_key 等
+const PII_FULL_REDACT_REGEX =
+  /^(password|password_hash|token|access_token|refresh_token|api_key|apikey|secret|authorization|bearer|session|cookie|credit_card)$/i
+// 部分遮蔽: email / phone 保留前後可辨識、中間星號
+const PII_PARTIAL_MASK_REGEX = /^(email|auth_email|user_email|phone|mobile|national_id|passport_no)$/i
+
+function maskEmail(v: string): string {
+  const [local, domain] = v.split('@')
+  if (!domain) return '***'
+  const prefix = local.length > 2 ? local.slice(0, 2) : local.slice(0, 1)
+  return `${prefix}***@${domain}`
+}
+
+function maskPartial(key: string, v: string): string {
+  if (!v) return v
+  if (/email/i.test(key)) return maskEmail(v)
+  if (v.length < 4) return '***'
+  return `***${v.slice(-4)}`
+}
+
+/**
+ * 遞迴遮蔽 PII 欄位、回傳新物件不改動原值
+ * 只在生產環境套用 (dev 保留原值方便 debug)
+ */
+function redactPII(data: unknown, depth = 0): unknown {
+  if (depth > 10) return data // 防遞迴深度爆炸
+  if (data === null || data === undefined) return data
+  if (typeof data === 'string' || typeof data === 'number' || typeof data === 'boolean') return data
+  if (Array.isArray(data)) return data.map(v => redactPII(v, depth + 1))
+  if (typeof data !== 'object') return data
+  const out: Record<string, unknown> = {}
+  for (const [k, v] of Object.entries(data as Record<string, unknown>)) {
+    if (PII_FULL_REDACT_REGEX.test(k)) {
+      out[k] = '***'
+    } else if (PII_PARTIAL_MASK_REGEX.test(k) && typeof v === 'string') {
+      out[k] = maskPartial(k, v)
+    } else if (v && typeof v === 'object') {
+      out[k] = redactPII(v, depth + 1)
+    } else {
+      out[k] = v
+    }
+  }
+  return out
+}
+
+function maybeRedact<T>(data: T): T {
+  if (isDevelopment) return data
+  return redactPII(data) as T
+}
+
 // 日誌層級權重
 const LOG_LEVEL_PRIORITY: Record<LogLevel, number> = {
   debug: 0,
@@ -73,11 +124,11 @@ function createLogEntry(
     timestamp: new Date().toISOString(),
     level,
     message,
-    context: { ...globalContext, ...context },
+    context: maybeRedact({ ...globalContext, ...context }),
   }
 
   if (data !== undefined) {
-    entry.data = data
+    entry.data = maybeRedact(data)
   }
 
   if (data instanceof Error) {
