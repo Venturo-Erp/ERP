@@ -33,7 +33,9 @@ const MODULE_LABELS: Record<string, string> = {
  * - 可按 X 暫時隱藏（下次有新通知再出現）
  */
 export function NotificationCapsule() {
-  const { user } = useAuthStore()
+  const user = useAuthStore(state => state.user)
+  const isAuthenticated = useAuthStore(state => state.isAuthenticated)
+  const hasHydrated = useAuthStore(state => state._hasHydrated)
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [dismissed, setDismissed] = useState(false)
@@ -44,25 +46,27 @@ export function NotificationCapsule() {
   const prevUnreadRef = useRef(0)
 
   const fetchNotifications = useCallback(async () => {
-    if (!user?.id) return
+    // 等 auth hydrate + session 建立完才 fetch、避免 middleware 重導 /login (HTML) 造成 JSON.parse 炸
+    if (!hasHydrated || !isAuthenticated || !user?.id) return
     try {
       const res = await fetch('/api/notifications?limit=15')
-      if (res.ok) {
-        const data = await res.json()
-        setNotifications(data.notifications || [])
-        const newCount = data.unread_count || 0
+      // 防護：middleware 若把 request 重導到 /login、會回 HTML、略過不 parse
+      const contentType = res.headers.get('content-type') || ''
+      if (!res.ok || !contentType.includes('application/json')) return
+      const data = await res.json()
+      setNotifications(data.notifications || [])
+      const newCount = data.unread_count || 0
 
-        // 如果有新通知進來，重新顯示膠囊
-        if (newCount > prevUnreadRef.current) {
-          setDismissed(false)
-        }
-        prevUnreadRef.current = newCount
-        setUnreadCount(newCount)
+      // 如果有新通知進來，重新顯示膠囊
+      if (newCount > prevUnreadRef.current) {
+        setDismissed(false)
       }
+      prevUnreadRef.current = newCount
+      setUnreadCount(newCount)
     } catch (err) {
       logger.error('載入通知失敗:', err)
     }
-  }, [user?.id])
+  }, [user?.id, hasHydrated, isAuthenticated])
 
   // 初始載入 + 每 30 秒輪詢
   useEffect(() => {
