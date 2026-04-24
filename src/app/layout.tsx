@@ -16,7 +16,6 @@ import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { AppInitializer } from '@/components/AppInitializer'
 import { GlobalDialogs } from '@/lib/ui/alert-dialog'
 import { SWRProvider } from '@/lib/swr'
-import { ReactQueryProvider } from '@/lib/react-query/provider'
 import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import { IntlProvider } from '@/components/providers/IntlProvider'
@@ -52,11 +51,9 @@ export default async function RootLayout({
         <IntlProvider locale={locale} messages={messages}>
           <AppInitializer>
             <ErrorBoundary>
-              <ReactQueryProvider>
-                <SWRProvider>
-                  <ThemeProvider>{children}</ThemeProvider>
-                </SWRProvider>
-              </ReactQueryProvider>
+              <SWRProvider>
+                <ThemeProvider>{children}</ThemeProvider>
+              </SWRProvider>
             </ErrorBoundary>
           </AppInitializer>
         </IntlProvider>
