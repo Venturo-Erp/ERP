@@ -477,3 +477,46 @@ _完整 audit 細節見 `/Users/williamchien/Projects/VENTURO_ROUTE_AUDIT/`。_
 - 或考慮整合 OAuth provider 的「保持登入」選項
 **估時**：S（30-60 分鐘）
 **優先級**：低（上線必要功能不缺、是 UX nice-to-have）
+
+---
+
+## 🟡 馬拉松 🟠 第一週清單剩餘 (2026-04-24 完成 8/12)
+
+今天完成 (此 session):
+- ✅ #9 Sentry error-tracking wrapper (commit `18f22dc8`)
+- ✅ #10 Logger PII redact 生產環境 (commit `06f0e864`)
+- ✅ #11 status 編碼統一 (X3、commit `12c607ec`、DB pending)
+- ✅ #12 Receipt confirmed 不可逆 trigger (commit `7b23225b`、DB pending)
+- ✅ #13 useDraftAutoSave hook (commit `3a9abee8`、各 form 待套)
+- ✅ #17 Cron retry + heartbeat (commit `e432b68c`)
+- ✅ #18 db-rollback / db-apply-pending scripts (commit `f0a49695`)
+- ✅ #19 ContractSignPage XSS sanitize (commit `5e2fb0ab`)
+- ✅ #20 DevDatabaseBadge dev mode 警告 (commit `52a46469`)
+
+剩餘 3 條 (規模化才痛、Corner 初期 ROI 低、列 backlog):
+
+### #14 報表全 client 端計算 (3 張: 試算 / 損益 / 資產負債)
+**動機**: 月報表全在瀏覽器算 sum / group by、資料量小看不出
+**現量**: Corner 21 訂單、月報表算秒級、無感
+**何時做**: 訂單破 500 / 月報表載入 > 3 秒、就要做
+**做法**: 寫 SQL view + RPC、前端只 SELECT、不算
+**估時**: 半天
+
+### #15 /orders 無 server-side 分頁
+**動機**: 拿全部訂單到 client 才 filter / sort
+**現量**: Corner 21 訂單、全載也才 1 個 SWR call、無感
+**現有**: `useOrdersPaginated` (orderEntity.usePaginated) 已存在、是 server-side、只是 page.tsx 沒用
+**何時做**: 訂單破 500 / 列表載入 > 2 秒、就改 page 用 useOrdersPaginated
+**估時**: 1-2 小時 (改 page UI + pagination component)
+
+### #16 Orders 跨域直 import Tours service
+**動機**: Orders 模組直接 import Tours 的 service 函數、跨界耦合
+**現況**: 不影響功能、不影響上線
+**何時做**: 拆模組成獨立 package / 加 micro-frontend 時才必要
+**估時**: 半天 (refactor 抽 service interface)
+
+---
+
+## 🟡 馬拉松 Post-Launch 14 條 (架構級、上線後處理)
+
+詳見 `docs/PRE_LAUNCH_CLEANUP/audit-2026-04-23/marathon/MARATHON-TOTAL.md` 🟡 區塊。
