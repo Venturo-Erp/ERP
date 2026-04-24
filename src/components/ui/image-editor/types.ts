@@ -15,8 +15,21 @@ import {
   Snowflake,
 } from 'lucide-react'
 
-import type { ImageAdjustments } from '@/features/designer/components/types'
-export type { ImageAdjustments }
+/**
+ * 圖片色彩調整設定（Lightroom 風格）
+ * 所有數值範圍為 -100 到 100，0 為預設值
+ */
+export interface ImageAdjustments {
+  exposure: number
+  contrast: number
+  highlights: number
+  shadows: number
+  clarity: number
+  saturation: number
+  temperature: number
+  tint: number
+  vignette: number
+}
 
 export interface ImageEditorSettings {
   /** 縮放倍率 */

@@ -23,7 +23,7 @@ import { cn } from '@/lib/utils'
 import { SortableActivityItemProps } from './types'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { UnsplashSearch } from '@/components/ui/image-uploader/UnsplashSearch'
-import { PexelsPicker } from '@/features/designer/components/PexelsPicker'
+import { PexelsPicker } from '@/components/shared/PexelsPicker'
 import { COMP_EDITOR_LABELS } from '../../../constants/labels'
 
 export function SortableActivityItem({

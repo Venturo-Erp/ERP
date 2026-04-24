@@ -18,7 +18,16 @@ import {
   PEXELS_TRAVEL_KEYWORDS,
   type PexelsPhoto,
 } from '@/lib/pexels'
-import { DESIGNER_LABELS } from './constants/labels'
+const DESIGNER_LABELS = {
+  SETTINGS_9925: '請在 .env.local 設定 NEXT_PUBLIC_PEXELS_API_KEY',
+  LABEL_1754: '前往 Pexels 申請免費 API Key',
+  SEARCH_2404: '搜尋圖片（英文效果較佳）...',
+  SEARCH_2692: '搜尋中...',
+  SEARCH: '搜尋',
+  SEARCH_6536: '熱門搜尋',
+  NOT_FOUND_2874: '找不到符合的圖片',
+  SEARCH_2947: '輸入關鍵字搜尋圖片',
+}
 
 interface PexelsPickerProps {
   onSelectImage: (imageUrl: string, attribution?: { name: string; link: string }) => void
