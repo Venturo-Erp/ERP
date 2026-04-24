@@ -414,20 +414,6 @@ export {
   invalidateCalendarEvents,
 } from './calendar-events'
 
-// Tour Add-Ons - 已停用，資料表不存在
-// export {
-//   tourAddOnEntity,
-//   useTourAddOns,
-//   useTourAddOnsSlim,
-//   useTourAddOn,
-//   useTourAddOnsPaginated,
-//   useTourAddOnDictionary,
-//   createTourAddOn,
-//   updateTourAddOn,
-//   deleteTourAddOn,
-//   invalidateTourAddOns,
-// } from './tour-addons'
-
 // ============================================
 // 代辦費用
 // ============================================
