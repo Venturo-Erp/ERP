@@ -7,7 +7,7 @@
 import { logger } from '@/lib/utils/logger'
 import { getTodayString } from '@/lib/utils/format-date'
 import { useEffect, useState } from 'react'
-import { Plus, Save, X, Copy, ExternalLink, Check, Trash2, Lock, AlertCircle } from 'lucide-react'
+import { Plus, Save, X, Copy, ExternalLink, Check, Trash2, Lock } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -82,7 +82,6 @@ export function AddReceiptDialog({
 
   // 是否為已確認狀態
   const isConfirmed = editingReceipt?.status === 'confirmed'
-  const isAbnormal = editingReceipt?.status === '2'
 
   // 權限判斷（HR 職務管理為單一標準）
   const { user } = useAuthStore()
@@ -680,82 +679,8 @@ export function AddReceiptDialog({
             </span>
           </div>
 
-          {/* 右側：異常 + 刪除 + 存檔 */}
+          {/* 右側：刪除 + 存檔 */}
           <div className="flex items-center gap-2">
-            {/* 會計專用：標記異常 */}
-            {canConfirm && (
-              <Button
-                variant="outline"
-                onClick={async () => {
-                  if (!editingReceipt) return
-                  setIsSubmitting(true)
-                  try {
-                    await handleSubmit()
-                    const updateFunc =
-                      onUpdate ||
-                      (async (id: string, data: Partial<Receipt>) => {
-                        const { supabase } = await import('@/lib/supabase/client')
-                        await supabase
-                          .from('receipts')
-                          .update(data as Record<string, unknown>)
-                          .eq('id', id)
-                      })
-                    await updateFunc(editingReceipt.id, {
-                      status: '2',
-                      updated_by: user?.id,
-                    })
-                    await recalculateReceiptStats(
-                      editingReceipt.order_id,
-                      editingReceipt.tour_id || null
-                    )
-
-                    // 通知建立人：收款單被標記異常
-                    try {
-                      const { supabase } = await import('@/lib/supabase/client')
-                      const tourId = editingReceipt.tour_id
-                      if (tourId) {
-                        const { data: tour } = await supabase
-                          .from('tours')
-                          .select('id, channel_id')
-                          .eq('id', tourId)
-                          .single()
-                        const channelId = (tour as unknown as { channel_id?: string })?.channel_id
-                        if (channelId) {
-                          await supabase.from('messages').insert({
-                            channel_id: channelId,
-                            workspace_id: user?.workspace_id,
-                            content: `⚠️ **收款單異常**\n收款單 ${editingReceipt.receipt_number} 已被標記為付款異常，請確認。`,
-                            event: 'system_notify',
-                            author: { name: 'Venturo', avatar: null, is_system: true },
-                            metadata: {
-                              event: 'receipt_abnormal',
-                              receipt_id: editingReceipt.id,
-                              receipt_number: editingReceipt.receipt_number,
-                            },
-                          })
-                        }
-                      }
-                    } catch (notifyErr) {
-                      logger.error('[Receipt] Failed to send abnormal notification:', notifyErr)
-                    }
-
-                    toast({ title: '已標記為異常' })
-                    onSuccess?.()
-                    onOpenChange(false)
-                  } catch (error) {
-                    toast({ title: '操作失敗', variant: 'destructive' })
-                  } finally {
-                    setIsSubmitting(false)
-                  }
-                }}
-                disabled={isSubmitting}
-                className="gap-2 text-morandi-red border-morandi-red/30 hover:bg-morandi-red/10"
-              >
-                <AlertCircle size={16} />
-                異常
-              </Button>
-            )}
-
             {/* 刪除按鈕：編輯模式且未確認 */}
             {isEditMode && !isConfirmed && (
               <Button

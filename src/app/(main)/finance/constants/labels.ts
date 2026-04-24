@@ -256,9 +256,6 @@ export const PAYMENT_DATA_LABELS = {
   FILL_COMPLETE_INFO: '請填寫完整資訊',
   CANNOT_GET_TOUR_CODE: '無法取得團號，請確認訂單已關聯旅遊團',
   PLEASE_LOGIN: '請先登入',
-  AMOUNT_ABNORMAL_NOTE: (expected: string, actual: string) =>
-    `[金額異常] 應收 NT$ ${expected}，實收 NT$ ${actual}`,
-  ACCOUNTANT: '會計',
   CONFIRMED_CANNOT_DELETE: '已確認的收款單無法刪除',
 }
 

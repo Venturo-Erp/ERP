@@ -93,7 +93,7 @@ export function OverviewTab({ dateRange, granularity }: OverviewTabProps) {
   const stats = useMemo(() => {
     const { startDate, endDate } = dateRange
 
-    // 只算已確認的收款單（status='1'）才算收入
+    // 只算已確認的收款單（status='confirmed'）才算收入
     const rangeReceipts = receipts.filter(r => {
       if (r.status !== 'confirmed') return false
       const d = (r.receipt_date || r.created_at)?.split('T')[0] || ''

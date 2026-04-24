@@ -82,23 +82,6 @@ export const PAYMENT_ITEM_ROW_LABELS = {
   LABEL_1670: '開啟',
 }
 
-export const RECEIPT_CONFIRM_DIALOG_LABELS = {
-  已確認: '已確認',
-  刪除中: '刪除中...',
-  未知: '未知',
-  確認成功: '確認成功',
-  收款金額已確認: '收款金額已確認',
-  確認失敗: '確認失敗',
-  請輸入有效金額: '請輸入有效金額',
-  已記錄實際收款金額_並通知建立者: '已記錄實際收款金額，並通知建立者',
-  待確認: '待確認',
-  金額正確: '金額正確',
-  金額異常: '金額異常',
-  確認後將通知建立者: (receiptNumber: string) =>
-    `確認後將通知收款單建立者：${receiptNumber} 金額異常`,
-  輸入實際金額: '輸入實際金額',
-}
-
 export const ADD_REQUEST_DIALOG_LABELS = {
   其他: '其他',
   特殊團: '特殊團',
@@ -282,31 +265,6 @@ export const BATCH_RECEIPT_FORM_LABELS = {
   LABEL_7330: '建立批量收款單',
 }
 
-export const RECEIPT_CONFIRM_LABELS = {
-  TITLE: '收款單詳情',
-  TOUR_NAME: '團名：',
-  ORDER: '訂單：',
-  STATUS: '狀態：',
-  PAYMENT_METHOD: '收款方式',
-  PAYMENT_METHOD_MAP: {
-    cash: '現金',
-    transfer: '匯款',
-    credit_card: '刷卡',
-    check: '支票',
-    linkpay: 'LinkPay',
-  } as Record<string, string>,
-  TRANSACTION_DATE: '收款日期',
-  PAYER: '付款人',
-  REMARKS: '備註',
-  RECEIVABLE: '應收金額',
-  CONFIRM: '確認',
-
-  LABEL_8417: '實收金額',
-  PLEASE_ENTER_6193: '金額異常 - 請輸入實際收到金額',
-  CANCEL: '取消',
-  CONFIRM_9972: '確認異常金額',
-  CLOSE: '關閉',
-}
 // AddReceiptDialog
 export const ADD_RECEIPT_TOAST_LABELS = {
   UPDATED: (receiptNumber: string, itemCount: number) =>
@@ -328,16 +286,6 @@ export const ADD_RECEIPT_TOAST_LABELS = {
 // BatchReceiptDialog
 export const BATCH_RECEIPT_TOAST_LABELS = {
   SUCCESS: (count: number) => `成功建立 ${count} 筆收款單`,
-}
-
-// ReceiptConfirmDialog
-export const RECEIPT_CONFIRM_TOAST_LABELS = {
-  CONFIRM_SUCCESS: '確認成功',
-  CONFIRM_FAILED: '確認失敗',
-  PLEASE_TRY_LATER: '請稍後再試',
-  DELETE_CONFIRM: (receiptNumber: string) =>
-    `確定要刪除收款單 ${receiptNumber} 嗎？此操作無法復原。`,
-  DELETED: (receiptNumber: string) => `收款單 ${receiptNumber} 已刪除`,
 }
 
 // usePaymentForm validation

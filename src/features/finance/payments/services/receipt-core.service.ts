@@ -10,7 +10,7 @@ import { supabase } from '@/lib/supabase/client'
 
 /**
  * 收款變動後重算訂單和團的統計數據
- * - 只計算 status='1'（已確認）且未刪除的收款
+ * - 只計算 status='confirmed' 且未刪除的收款
  * - 任何收款建立、確認、刪除後都應呼叫
  */
 export const recalculateReceiptStats = afterReceiptChange
@@ -30,7 +30,7 @@ export async function afterReceiptChange(
 
 /**
  * 重算訂單的已收金額和付款狀態
- * 只計算 status='1'（已確認）且未被刪除的收款
+ * 只計算 status='confirmed' 且未被刪除的收款
  */
 async function recalculateOrderPayment(orderId: string): Promise<void> {
   // 取得訂單總金額
@@ -52,7 +52,7 @@ async function recalculateOrderPayment(orderId: string): Promise<void> {
     .from('receipts')
     .select('actual_amount')
     .eq('order_id', orderId)
-    .eq('status', '1')
+    .eq('status', 'confirmed')
     .is('deleted_at', null)
 
   if (receiptsError) {
@@ -94,7 +94,7 @@ async function recalculateOrderPayment(orderId: string): Promise<void> {
 
 /**
  * 重算團的財務數據（總收入和利潤）
- * 只計算 status='1'（已確認）且未被刪除的收款
+ * 只計算 status='confirmed' 且未被刪除的收款
  */
 async function recalculateTourFinancials(tourId: string): Promise<void> {
   // 取得該團所有訂單 ID
@@ -114,7 +114,7 @@ async function recalculateTourFinancials(tourId: string): Promise<void> {
   let receiptsQuery = supabase
     .from('receipts')
     .select('actual_amount')
-    .eq('status', '1')
+    .eq('status', 'confirmed')
     .is('deleted_at', null)
 
   if (orderIds.length > 0) {

@@ -175,35 +175,21 @@ export default function PaymentsPage() {
       width: '220',
       render: (_, row) => (
         <div className="flex items-center gap-1 whitespace-nowrap">
-          {/* 待確認狀態：顯示核准和異常按鈕 */}
+          {/* 待確認狀態：顯示核准按鈕 */}
           {row.status === 'pending' && (
-            <>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={async e => {
-                  e.stopPropagation()
-                  await handleConfirmReceipt(row.id, row.receipt_amount || 0)
-                  await invalidateReceipts()
-                }}
-                className="h-7 px-2 text-xs text-morandi-green hover:text-morandi-green hover:bg-morandi-green/10"
-              >
-                <CheckSquare size={14} className="mr-1" />
-                核准
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={async e => {
-                  e.stopPropagation()
-                  await handleConfirmReceipt(row.id, row.actual_amount || 0, true)
-                  await invalidateReceipts()
-                }}
-                className="h-7 px-2 text-xs text-morandi-red hover:text-morandi-red hover:bg-morandi-red/10"
-              >
-                異常
-              </Button>
-            </>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={async e => {
+                e.stopPropagation()
+                await handleConfirmReceipt(row.id, row.receipt_amount || 0)
+                await invalidateReceipts()
+              }}
+              className="h-7 px-2 text-xs text-morandi-green hover:text-morandi-green hover:bg-morandi-green/10"
+            >
+              <CheckSquare size={14} className="mr-1" />
+              核准
+            </Button>
           )}
           <Button
             variant="ghost"

@@ -26,7 +26,7 @@ export interface Receipt {
   total_amount?: number // 所有項目金額加總
   amount: number // 金額（與 receipt_amount 同義）
   actual_amount: number // 實收金額
-  status: string // '0':待確認 '1':已確認 '2':異常（資料庫存字串）
+  status: ReceiptStatus // 'pending' | 'confirmed' | 'cancelled'
 
   // 收款方式相關欄位
   receipt_account: string | null // 付款人姓名/收款帳號
@@ -132,26 +132,26 @@ export const RECEIPT_PAYMENT_METHOD_LABELS: Record<string, string> = {
 }
 
 /**
- * 收款狀態
+ * 收款狀態（跟 payment_requests 一致的英文 enum、DB CHECK constraint 限定）
  */
-export enum ReceiptStatus {
-  PENDING = 0, // 待確認（業務建立，會計待填實收金額）
-  CONFIRMED = 1, // 已確認（會計已確認實收金額）
-}
+export type ReceiptStatus = 'pending' | 'confirmed' | 'cancelled'
 
 export const RECEIPT_STATUS_LABELS: Record<ReceiptStatus, string> = {
-  [ReceiptStatus.PENDING]: '待確認',
-  [ReceiptStatus.CONFIRMED]: '已確認',
+  pending: '待確認',
+  confirmed: '已確認',
+  cancelled: '已取消',
 }
 
 export const RECEIPT_STATUS_COLORS: Record<ReceiptStatus, string> = {
-  [ReceiptStatus.PENDING]: 'text-morandi-gold',
-  [ReceiptStatus.CONFIRMED]: 'text-morandi-green',
+  pending: 'text-morandi-gold',
+  confirmed: 'text-morandi-green',
+  cancelled: 'text-morandi-secondary',
 }
 
 export const RECEIPT_STATUS_ICONS: Record<ReceiptStatus, string> = {
-  [ReceiptStatus.PENDING]: '🟡',
-  [ReceiptStatus.CONFIRMED]: '✅',
+  pending: '🟡',
+  confirmed: '✅',
+  cancelled: '🚫',
 }
 
 /**
@@ -190,19 +190,17 @@ export function getReceiptTypeName(type: ReceiptType): string {
 }
 
 /**
- * 取得收款狀態名稱（支援數字或字串）
+ * 取得收款狀態名稱
  */
-export function getReceiptStatusName(status: ReceiptStatus | string | number): string {
-  const numStatus = typeof status === 'string' ? parseInt(status, 10) : status
-  return RECEIPT_STATUS_LABELS[numStatus as ReceiptStatus] || '未知'
+export function getReceiptStatusName(status: ReceiptStatus | string): string {
+  return RECEIPT_STATUS_LABELS[status as ReceiptStatus] || '未知'
 }
 
 /**
- * 取得收款狀態顏色（支援數字或字串）
+ * 取得收款狀態顏色
  */
-export function getReceiptStatusColor(status: ReceiptStatus | string | number): string {
-  const numStatus = typeof status === 'string' ? parseInt(status, 10) : status
-  return RECEIPT_STATUS_COLORS[numStatus as ReceiptStatus] || 'text-morandi-secondary'
+export function getReceiptStatusColor(status: ReceiptStatus | string): string {
+  return RECEIPT_STATUS_COLORS[status as ReceiptStatus] || 'text-morandi-secondary'
 }
 
 // ============================================

@@ -8,7 +8,6 @@ import {
   RECEIPT_TYPE_LABELS,
   RECEIPT_STATUS_LABELS,
   ReceiptType,
-  ReceiptStatus,
 } from '@/types/receipt.types'
 
 export async function exportReceiptsToExcel(receipts: Receipt[], filename?: string): Promise<void> {
@@ -23,7 +22,7 @@ export async function exportReceiptsToExcel(receipts: Receipt[], filename?: stri
     收款方式: RECEIPT_TYPE_LABELS[r.receipt_type as ReceiptType],
     應收金額: r.receipt_amount,
     實收金額: r.actual_amount || '-',
-    狀態: RECEIPT_STATUS_LABELS[parseInt(r.status, 10) as ReceiptStatus] || r.status,
+    狀態: RECEIPT_STATUS_LABELS[r.status] || r.status,
     經手人: r.handler_name || '-',
     帳戶資訊: r.account_info || '-',
     備註: r.notes || '-',

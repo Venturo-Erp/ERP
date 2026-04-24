@@ -330,7 +330,6 @@ export const ResponsiveHeader = memo(function ResponsiveHeader(props: Responsive
           )}
         </div>
 
-        {/* 通知鈴鐺已移至浮動膠囊（MainLayout） */}
       </div>
     </div>
   )

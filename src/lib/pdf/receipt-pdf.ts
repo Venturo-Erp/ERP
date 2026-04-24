@@ -11,7 +11,6 @@
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import type { Receipt } from '@/types/receipt.types'
-import { ReceiptStatus } from '@/types/receipt.types'
 import type { Order } from '@/types'
 import { formatDate } from '@/lib/utils'
 import { RECEIPT_TYPE_LABELS, RECEIPT_STATUS_LABELS, ReceiptType } from '@/types/receipt.types'
@@ -65,7 +64,7 @@ export async function generateReceiptPDF(data: ReceiptPDFData): Promise<void> {
   )
   yPos += 6
   doc.text(
-    `Status / 狀態: ${RECEIPT_STATUS_LABELS[parseInt(receipt.status, 10) as ReceiptStatus] || receipt.status}`,
+    `Status / 狀態: ${RECEIPT_STATUS_LABELS[receipt.status] || receipt.status}`,
     infoLeft,
     yPos
   )
