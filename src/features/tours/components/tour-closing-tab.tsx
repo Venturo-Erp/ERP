@@ -8,6 +8,7 @@
 import { useMemo, useState, useCallback, useEffect } from 'react'
 import { TourOverview } from './tour-overview'
 import { TourCosts } from './tour-costs'
+import { TourReceipts } from './tour-receipts'
 import {
   FileDown,
   FileText,
@@ -277,7 +278,8 @@ export function TourClosingTab({ tour }: TourClosingTabProps) {
       {/* 總覽卡片 — 直接使用 TourOverview */}
       <TourOverview tour={tour} />
 
-      {/* 請款總覽 — 使用共用組件 */}
+      {/* 收款總覽 + 請款總覽 — 使用共用組件 */}
+      <TourReceipts tour={tour} />
       <TourCosts tour={tour} showSummary={false} />
 
       {/* 利潤總覽 + 獎金 */}

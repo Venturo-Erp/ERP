@@ -53,6 +53,11 @@ const TourCosts = dynamic(
   { loading: () => <TabLoading /> }
 )
 
+const TourReceipts = dynamic(
+  () => import('@/features/tours/components/tour-receipts').then(m => m.TourReceipts),
+  { loading: () => <TabLoading /> }
+)
+
 const TourQuoteTabV2 = dynamic(
   () => import('@/features/tours/components/tour-quote-tab-v2').then(m => m.TourQuoteTabV2),
   { loading: () => <TabLoading /> }
@@ -163,6 +168,7 @@ export function TourTabContent({
       return (
         <div className="space-y-6">
           <TourOverview tour={tour} />
+          <TourReceipts tour={tour} />
           <TourCosts tour={tour} showSummary={false} />
         </div>
       )
