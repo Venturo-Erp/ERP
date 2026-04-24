@@ -103,20 +103,9 @@ export function usePassportValidation(): UsePassportValidationReturn {
           return null
         }
 
-        const { data: urlData, error: urlError } = await supabase.storage
-          .from('passport-images')
-          .createSignedUrl(fileName, 3600 * 24 * 365) // 1 year signed URL
-
-        if (urlError) {
-          logger.error('建立護照簽名 URL 失敗', urlError)
-          return null
-        }
-
-        const signedUrl = urlData?.signedUrl || null
-        if (signedUrl) {
-          logger.info(`護照照片上傳成功: ${fileName}`)
-        }
-        return signedUrl
+        // DB 只存 bare filename、顯示時動態簽 15 分鐘 URL
+        logger.info(`護照照片上傳成功: ${fileName}`)
+        return fileName
       } catch (error) {
         logger.error(COMP_ORDERS_LABELS.上傳護照照片異常, error)
         return null

@@ -21,17 +21,19 @@ import { toast } from 'sonner'
 import type { ActiveOrderConflict } from '@/lib/utils/sync-passport-image'
 import { batchUpdateConflictMembers, PASSPORT_FIELD_LABELS } from '@/lib/utils/sync-passport-image'
 import { PASSPORT_CONFLICT_LABELS as L } from '../constants/labels'
+import { usePassportImageUrl } from '@/lib/passport-storage/usePassportImageUrl'
 
 // 簡單圖片顯示 + 載入失敗 fallback
 function PassportImage({ url, label }: { url?: string | null; label: string }) {
   const [error, setError] = useState(false)
+  const signed = usePassportImageUrl(url)
   return (
     <div className="space-y-1.5">
       <div className="text-[11px] text-morandi-muted font-medium">{label}</div>
       <div className="relative aspect-[3/2] w-full rounded-md overflow-hidden border border-border/60 bg-morandi-container/30 flex items-center justify-center">
-        {url && !error ? (
+        {signed && !error ? (
           <img
-            src={url}
+            src={signed}
             alt={label}
             className="w-full h-full object-contain"
             onError={() => setError(true)}

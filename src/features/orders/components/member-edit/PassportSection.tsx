@@ -14,22 +14,9 @@ import { supabase } from '@/lib/supabase/client'
 import { logger } from '@/lib/utils/logger'
 import { toast } from 'sonner'
 import { syncPassportImageToMembers } from '@/lib/utils/sync-passport-image'
+import { usePassportImageUrl } from '@/lib/passport-storage/usePassportImageUrl'
+import { deletePassportImage } from '@/lib/passport-storage'
 import type { OrderMember } from '../../types/order-member.types'
-
-// 從 URL 提取檔名並刪除舊照片
-async function deleteOldPassportImage(oldUrl: string | null | undefined): Promise<void> {
-  if (!oldUrl) return
-  try {
-    const match = oldUrl.match(/passport-images\/(.+)$/)
-    if (match) {
-      const oldFileName = decodeURIComponent(match[1])
-      await supabase.storage.from('passport-images').remove([oldFileName])
-      logger.log(`Deleted old passport image: ${oldFileName}`)
-    }
-  } catch (error) {
-    logger.error('Failed to delete old passport image:', error)
-  }
-}
 
 interface PassportSectionProps {
   editingMember: OrderMember | null
@@ -50,6 +37,7 @@ export function PassportSection({
 }: PassportSectionProps) {
   const t = useTranslations()
   const [isEditorOpen, setIsEditorOpen] = useState(false)
+  const displayUrl = usePassportImageUrl(editingMember?.passport_image_url)
 
   // 圖片編輯器存檔（不做裁切）
   const handleEditorSave = (_settings: ImageEditorSettings) => {
@@ -63,7 +51,7 @@ export function PassportSection({
     try {
       const oldUrl = editingMember.passport_image_url
 
-      // 上傳裁切後的圖片
+      // 上傳裁切後的圖片，DB 只存 bare filename（顯示時才動態簽 15 分鐘 URL）
       const random = Math.random().toString(36).substring(2, 8)
       const fileName = `passport_${Date.now()}_${random}.jpg`
 
@@ -73,33 +61,26 @@ export function PassportSection({
 
       if (uploadError) throw uploadError
 
-      const { data: urlData, error: urlError } = await supabase.storage
-        .from('passport-images')
-        .createSignedUrl(fileName, 3600 * 24 * 365) // 1 year signed URL
-
-      if (urlError) throw urlError
-      const newUrl = urlData.signedUrl
-
-      // 更新成員資料
+      // 更新成員資料（存 bare filename、不存 URL）
       await supabase
         .from('order_members')
-        .update({ passport_image_url: newUrl })
+        .update({ passport_image_url: fileName })
         .eq('id', editingMember.id)
 
       // 如果成員有關聯顧客，同步護照照片
       if (editingMember.customer_id) {
         await supabase
           .from('customers')
-          .update({ passport_image_url: newUrl })
+          .update({ passport_image_url: fileName })
           .eq('id', editingMember.customer_id)
-        await syncPassportImageToMembers(editingMember.customer_id, newUrl)
+        await syncPassportImageToMembers(editingMember.customer_id, fileName)
       }
 
-      // 刪除舊照片
-      await deleteOldPassportImage(oldUrl)
+      // 刪除舊照片（接受完整 URL 或 bare filename）
+      await deletePassportImage(oldUrl)
 
       // 更新本地狀態
-      onMemberChange({ ...editingMember, passport_image_url: newUrl })
+      onMemberChange({ ...editingMember, passport_image_url: fileName })
 
       toast.success(t('passport.imageSaved'))
       setIsEditorOpen(false)
@@ -146,7 +127,7 @@ export function PassportSection({
             onClick={() => setIsEditorOpen(true)}
           >
             <img
-              src={editingMember.passport_image_url}
+              src={displayUrl ?? ''}
               alt={t('passport.image')}
               className="w-full h-full object-contain"
               draggable={false}
@@ -199,11 +180,11 @@ export function PassportSection({
       </div>
 
       {/* 圖片編輯器 */}
-      {editingMember?.passport_image_url && (
+      {editingMember?.passport_image_url && displayUrl && (
         <ImageEditor
           open={isEditorOpen}
           onClose={() => setIsEditorOpen(false)}
-          imageSrc={editingMember.passport_image_url}
+          imageSrc={displayUrl}
           aspectRatio={3 / 2} // 護照比例
           onSave={handleEditorSave}
           onCropAndSave={handleEditorCropAndSave}

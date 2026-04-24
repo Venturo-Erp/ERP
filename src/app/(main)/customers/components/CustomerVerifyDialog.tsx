@@ -20,21 +20,8 @@ import { logger } from '@/lib/utils/logger'
 import type { Customer, UpdateCustomerData } from '@/types/customer.types'
 import { useOcrRecognition } from '@/hooks'
 import { ImageEditor, type ImageEditorSettings } from '@/components/ui/image-editor'
-
-// 從 URL 提取檔名並刪除舊照片
-async function deleteOldPassportImage(oldUrl: string | null | undefined): Promise<void> {
-  if (!oldUrl) return
-  try {
-    const match = oldUrl.match(/passport-images\/(.+)$/)
-    if (match) {
-      const oldFileName = decodeURIComponent(match[1])
-      await supabase.storage.from('passport-images').remove([oldFileName])
-      logger.log(`Deleted old passport image: ${oldFileName}`)
-    }
-  } catch (error) {
-    logger.error('Failed to delete old passport image:', error)
-  }
-}
+import { usePassportImageUrl } from '@/lib/passport-storage/usePassportImageUrl'
+import { deletePassportImage, getPassportDisplayUrl } from '@/lib/passport-storage'
 
 interface CustomerVerifyDialogProps {
   open: boolean
@@ -86,27 +73,22 @@ export function CustomerVerifyDialog({
 
       if (uploadError) throw uploadError
 
-      const { data: urlData, error: urlError } = await supabase.storage
-        .from('passport-images')
-        .createSignedUrl(fileName, 3600)
-
-      if (urlError || !urlData?.signedUrl)
-        throw urlError || new Error('Failed to create signed URL')
-      const newUrl = urlData.signedUrl
-
-      // 更新本地顯示
-      setLocalImageUrl(newUrl)
+      // 本地記錄 bare filename、顯示時現場簽
+      setLocalImageUrl(fileName)
 
       toast.success(t('passport.uploadSuccess'))
 
-      // 自動進行 OCR 辨識
+      // OCR 需要真的能 HTTP GET 的 URL、臨時簽一個
       try {
-        await recognizePassport(newUrl, result => {
-          setFormData(prev => ({
-            ...prev,
-            ...result,
-          }))
-        })
+        const signed = await getPassportDisplayUrl(fileName)
+        if (signed) {
+          await recognizePassport(signed, result => {
+            setFormData(prev => ({
+              ...prev,
+              ...result,
+            }))
+          })
+        }
       } catch {
         // OCR 失敗不影響上傳成功
       }
@@ -152,7 +134,7 @@ export function CustomerVerifyDialog({
       if (localImageUrl) {
         updateData.passport_image_url = localImageUrl
         // 刪除舊照片
-        await deleteOldPassportImage(customer.passport_image_url)
+        await deletePassportImage(customer.passport_image_url)
       }
 
       await onUpdate(customer.id, updateData)
@@ -168,10 +150,12 @@ export function CustomerVerifyDialog({
 
   // OCR 再次辨識
   const handleReOcr = async () => {
-    const imageUrl = localImageUrl || customer?.passport_image_url
-    if (!imageUrl) return
+    const stored = localImageUrl || customer?.passport_image_url
+    if (!stored) return
     try {
-      await recognizePassport(imageUrl, result => {
+      const signed = await getPassportDisplayUrl(stored)
+      if (!signed) throw new Error('Failed to sign passport URL')
+      await recognizePassport(signed, result => {
         setFormData(prev => ({
           ...prev,
           ...result,
@@ -193,9 +177,9 @@ export function CustomerVerifyDialog({
     if (!customer) return
 
     try {
-      const oldUrl = localImageUrl || customer.passport_image_url
+      const oldStored = localImageUrl || customer.passport_image_url
 
-      // 上傳裁切後的圖片
+      // 上傳裁切後的圖片；DB 只存 bare filename、顯示時動態簽 15 分鐘
       const random = Math.random().toString(36).substring(2, 8)
       const fileName = `passport_${Date.now()}_${random}.jpg`
 
@@ -205,17 +189,11 @@ export function CustomerVerifyDialog({
 
       if (uploadError) throw uploadError
 
-      const { data: urlData, error: urlError } = await supabase.storage
-        .from('passport-images')
-        .createSignedUrl(fileName, 3600)
-
-      if (urlError || !urlData?.signedUrl)
-        throw urlError || new Error('Failed to create signed URL')
-      // 更新本地顯示
-      setLocalImageUrl(urlData.signedUrl)
+      // 更新本地顯示（存 bare filename）
+      setLocalImageUrl(fileName)
 
       // 刪除舊照片
-      await deleteOldPassportImage(oldUrl)
+      await deletePassportImage(oldStored)
 
       toast.success(t('passport.imageSaved'))
       setIsEditorOpen(false)
@@ -225,9 +203,10 @@ export function CustomerVerifyDialog({
     }
   }
 
-  if (!customer) return null
+  const currentStored = localImageUrl || customer?.passport_image_url
+  const displayUrl = usePassportImageUrl(currentStored)
 
-  const currentImageUrl = localImageUrl || customer.passport_image_url
+  if (!customer) return null
 
   return (
     <>
@@ -254,7 +233,7 @@ export function CustomerVerifyDialog({
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-medium text-morandi-primary">{t('passport.image')}</h3>
-                {currentImageUrl && (
+                {currentStored && (
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
@@ -278,14 +257,14 @@ export function CustomerVerifyDialog({
               </div>
 
               {/* 圖片容器 */}
-              {currentImageUrl ? (
+              {currentStored ? (
                 <div
                   className="relative overflow-hidden rounded-lg border bg-muted group cursor-pointer"
                   style={{ height: '320px' }}
                   onClick={() => setIsEditorOpen(true)}
                 >
                   <img
-                    src={currentImageUrl}
+                    src={displayUrl ?? ''}
                     alt={t('passport.title')}
                     className="w-full h-full object-contain"
                     draggable={false}
@@ -417,11 +396,11 @@ export function CustomerVerifyDialog({
       </Dialog>
 
       {/* 圖片編輯器 */}
-      {currentImageUrl && (
+      {currentStored && displayUrl && (
         <ImageEditor
           open={isEditorOpen}
           onClose={() => setIsEditorOpen(false)}
-          imageSrc={currentImageUrl}
+          imageSrc={displayUrl}
           aspectRatio={3 / 2} // 護照比例
           onSave={handleEditorSave}
           onCropAndSave={handleEditorCropAndSave}

@@ -484,12 +484,11 @@ export function usePassportUpload(options: UsePassportUploadOptions) {
 
             if (uploadError) throw uploadError
 
-            // TODO (產品化後優化): 改為存檔名 + 動態生成 URL（更安全、永不過期）
-            // 目前暫時延長為 10 年，實務上已足夠
-            // 詳見: /fixes/passport-url-fix.md
+            // 簽 1 小時 URL 僅供 OCR 確認 dialog 的預覽 HTML 使用
+            // DB 只存 storageFileName（bare filename）、顯示時再動態簽 15 分鐘
             const { data: urlData, error: urlError } = await supabase.storage
               .from('passport-images')
-              .createSignedUrl(storageFileName, 3600 * 24 * 365 * 10) // 10 years
+              .createSignedUrl(storageFileName, 3600) // 1 hour for preview only
             if (urlError || !urlData?.signedUrl)
               throw urlError || new Error('Failed to create signed URL')
 
@@ -653,7 +652,7 @@ export function usePassportUpload(options: UsePassportUploadOptions) {
 
           // 只更新護照圖片，不覆蓋其他資料
           await updateCustomer(item.existingCustomer!.id, {
-            passport_image_url: item.imageUrl,
+            passport_image_url: item.storageFileName,
           })
           autoUpdateSuccessCount++
 
@@ -683,7 +682,7 @@ export function usePassportUpload(options: UsePassportUploadOptions) {
             passport_number: item.ocrData.passport_number || item.existingCustomer?.passport_number,
             passport_name: item.ocrData.passport_name || item.existingCustomer?.passport_name,
             passport_expiry: item.ocrData.passport_expiry || item.existingCustomer?.passport_expiry,
-            passport_image_url: item.imageUrl,
+            passport_image_url: item.storageFileName,
             national_id: item.ocrData.national_id || item.existingCustomer?.national_id,
             birth_date: item.ocrData.birth_date || item.existingCustomer?.birth_date,
             gender: item.normalizedGender || item.existingCustomer?.gender,
@@ -716,7 +715,7 @@ export function usePassportUpload(options: UsePassportUploadOptions) {
             passport_number: item.ocrData.passport_number,
             passport_name: item.ocrData.passport_name,
             passport_expiry: item.ocrData.passport_expiry,
-            passport_image_url: item.imageUrl,
+            passport_image_url: item.storageFileName,
             national_id: item.ocrData.national_id,
             birth_date: item.ocrData.birth_date,
             gender: item.normalizedGender,

@@ -83,6 +83,7 @@ import type { MemberSurcharges } from '../types/member-surcharge.types'
 import { COMP_ORDERS_LABELS } from '../constants/labels'
 import { DEFAULT_SURCHARGES } from '../types/member-surcharge.types'
 import { computeRowSpans } from '../utils'
+import { usePassportImageUrl } from '@/lib/passport-storage/usePassportImageUrl'
 
 // 可切換顯示的欄位定義
 export interface ColumnVisibility {
@@ -148,6 +149,39 @@ const columnLabels: Record<keyof ColumnVisibility, string> = {
   room: COMP_ORDERS_LABELS.分房,
   vehicle: COMP_ORDERS_LABELS.分車,
   surcharges: '附加費用',
+}
+
+/**
+ * 護照照片預覽 Dialog - 小元件，負責現場簽 15 分鐘短效 URL
+ */
+function PassportPreviewDialog({
+  member,
+  onClose,
+}: {
+  member: OrderMember | null
+  onClose: () => void
+}) {
+  const signedUrl = usePassportImageUrl(member?.passport_image_url)
+  return (
+    <Dialog open={!!member} onOpenChange={open => !open && onClose()}>
+      <DialogContent nested level={2} className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>
+            {member?.chinese_name || member?.passport_name || COMP_ORDERS_LABELS.護照照片}
+          </DialogTitle>
+        </DialogHeader>
+        {member?.passport_image_url && signedUrl && (
+          <div className="flex justify-center">
+            <img
+              src={signedUrl}
+              alt={COMP_ORDERS_LABELS.護照照片}
+              className="max-w-full max-h-[70vh] object-contain rounded-lg"
+            />
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  )
 }
 
 export function OrderMembersExpandable({
@@ -1332,26 +1366,11 @@ export function OrderMembersExpandable({
 
       {/* Dialogs */}
       {/* 護照照片預覽 */}
-      <Dialog open={!!previewMember} onOpenChange={open => !open && setPreviewMember(null)}>
-        <DialogContent nested level={2} className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>
-              {previewMember?.chinese_name ||
-                previewMember?.passport_name ||
-                COMP_ORDERS_LABELS.護照照片}
-            </DialogTitle>
-          </DialogHeader>
-          {previewMember?.passport_image_url && (
-            <div className="flex justify-center">
-              <img
-                src={previewMember.passport_image_url}
-                alt={COMP_ORDERS_LABELS.護照照片}
-                className="max-w-full max-h-[70vh] object-contain rounded-lg"
-              />
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      <PassportPreviewDialog
+        member={previewMember}
+        onClose={() => setPreviewMember(null)}
+      />
+
 
       <AddMemberDialog
         isOpen={membersData.isAddDialogOpen}

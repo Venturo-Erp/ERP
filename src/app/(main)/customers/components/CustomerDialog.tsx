@@ -20,6 +20,8 @@ import { supabase } from '@/lib/supabase/client'
 import { logger } from '@/lib/utils/logger'
 import type { Customer } from '@/types/customer.types'
 import { CUSTOMER_DETAIL_LABELS as L } from '../constants/labels'
+import { usePassportImageUrl } from '@/lib/passport-storage/usePassportImageUrl'
+import { deletePassportImage } from '@/lib/passport-storage'
 
 interface CustomerDialogProps {
   open: boolean
@@ -28,6 +30,54 @@ interface CustomerDialogProps {
   mode: 'view' | 'edit'
   onModeChange?: (mode: 'view' | 'edit') => void
   onSave?: (data: Partial<Customer>) => Promise<void>
+}
+
+/**
+ * 獨立 img 元件，避免每個 hook 呼叫在主元件多佔 state。
+ */
+function CustomerDialogPassportImage({
+  stored,
+  alt,
+  className,
+}: {
+  stored: string | null | undefined
+  alt: string
+  className?: string
+}) {
+  const signed = usePassportImageUrl(stored)
+  if (!signed) return null
+  return <img src={signed} alt={alt} className={className} />
+}
+
+/**
+ * ImageEditor 包裝：先把 stored filename 簽成短效 URL 再傳給 ImageEditor
+ */
+function CustomerDialogImageEditor({
+  stored,
+  open,
+  onClose,
+  onSave,
+  onCropAndSave,
+}: {
+  stored: string
+  open: boolean
+  onClose: () => void
+  onSave: (settings: ImageEditorSettings) => void
+  onCropAndSave: (blob: Blob, settings: ImageEditorSettings) => Promise<void>
+}) {
+  const signed = usePassportImageUrl(stored)
+  if (!signed) return null
+  return (
+    <ImageEditor
+      open={open}
+      onClose={onClose}
+      imageSrc={signed}
+      aspectRatio={3 / 2}
+      onSave={onSave}
+      onCropAndSave={onCropAndSave}
+      showAi={false}
+    />
+  )
 }
 
 export function CustomerDialog({
@@ -117,9 +167,9 @@ export function CustomerDialog({
     if (!customer) return
 
     try {
-      const oldUrl = localImageUrl || customer.passport_image_url
+      const oldStored = localImageUrl || customer.passport_image_url
 
-      // 上傳裁切後的圖片
+      // 上傳裁切後的圖片；DB 只存 bare filename、顯示時動態簽 15 分鐘
       const random = Math.random().toString(36).substring(2, 8)
       const fileName = `passport_${Date.now()}_${random}.jpg`
 
@@ -129,35 +179,17 @@ export function CustomerDialog({
 
       if (uploadError) throw uploadError
 
-      const { data: urlData, error: urlError } = await supabase.storage
-        .from('passport-images')
-        .createSignedUrl(fileName, 3600)
+      // 更新本地顯示（存 bare filename、hook 會現場簽）
+      setLocalImageUrl(fileName)
 
-      if (urlError || !urlData?.signedUrl) {
-        throw urlError || new Error('Failed to create signed URL')
-      }
-
-      // 更新本地顯示
-      setLocalImageUrl(urlData.signedUrl)
-
-      // 更新資料庫
+      // 更新資料庫（bare filename）
       await supabase
         .from('customers')
-        .update({ passport_image_url: urlData.signedUrl })
+        .update({ passport_image_url: fileName })
         .eq('id', customer.id)
 
-      // 刪除舊照片
-      if (oldUrl) {
-        try {
-          const match = oldUrl.match(/passport-images\/(.+)$/)
-          if (match) {
-            const oldFileName = decodeURIComponent(match[1])
-            await supabase.storage.from('passport-images').remove([oldFileName])
-          }
-        } catch (e) {
-          logger.error('Failed to delete old image:', e)
-        }
-      }
+      // 刪除舊照片（helper 接受完整 URL 或 bare filename）
+      await deletePassportImage(oldStored)
 
       toast.success('照片已更新')
       setIsEditorOpen(false)
@@ -169,7 +201,7 @@ export function CustomerDialog({
 
   if (!customer) return null
 
-  const currentImageUrl = localImageUrl || customer.passport_image_url
+  const currentStored = localImageUrl || customer.passport_image_url
   const isVerified = customer.verification_status === 'verified'
 
   return (
@@ -186,10 +218,10 @@ export function CustomerDialog({
         <div className="flex gap-8">
           {/* 左側：護照照片（橫向） */}
           <div className="w-1/2 rounded-lg overflow-hidden bg-morandi-container relative">
-            {currentImageUrl ? (
+            {currentStored ? (
               <>
-                <img
-                  src={currentImageUrl}
+                <CustomerDialogPassportImage
+                  stored={currentStored}
                   alt={L.passport_alt(customer.name)}
                   className="w-full h-full object-cover absolute inset-0"
                 />
@@ -389,15 +421,13 @@ export function CustomerDialog({
       </ManagedDialog>
 
       {/* 圖片編輯器 */}
-      {currentImageUrl && (
-        <ImageEditor
+      {currentStored && (
+        <CustomerDialogImageEditor
+          stored={currentStored}
           open={isEditorOpen}
           onClose={() => setIsEditorOpen(false)}
-          imageSrc={currentImageUrl}
-          aspectRatio={3 / 2}
           onSave={handleEditorSave}
           onCropAndSave={handleEditorCropAndSave}
-          showAi={false}
         />
       )}
     </>

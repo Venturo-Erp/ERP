@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/select'
 import { DateCell } from '@/components/table-cells'
 import { CUSTOMER_MATCH_LABELS as CL, ADD_CUSTOMER_FORM_LABELS as FL } from '../constants/labels'
+import { usePassportImageUrl } from '@/lib/passport-storage/usePassportImageUrl'
 
 interface CustomerMatch {
   name: string
@@ -215,6 +216,7 @@ export function AddCustomerFormDialog({
   onSave,
   onBack,
 }: AddCustomerFormDialogProps) {
+  const passportDisplayUrl = usePassportImageUrl(formData.passport_image_url)
   return (
     <Dialog open={open} onOpenChange={isOpen => !isOpen && onBack()}>
       <DialogContent level={1} className="sm:max-w-4xl">
@@ -372,7 +374,7 @@ export function AddCustomerFormDialog({
               {formData.passport_image_url ? (
                 <>
                   <img
-                    src={formData.passport_image_url}
+                    src={passportDisplayUrl ?? ''}
                     alt={FL.alt_passport_scan}
                     className="w-full h-full object-contain rounded-lg"
                     style={{ maxHeight: '280px' }}

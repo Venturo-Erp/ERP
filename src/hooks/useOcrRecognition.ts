@@ -10,6 +10,7 @@
 import { useState, useCallback } from 'react'
 import { toast } from 'sonner'
 import { logger } from '@/lib/utils/logger'
+import { getPassportDisplayUrl } from '@/lib/passport-storage'
 
 /**
  * OCR 辨識結果的通用資料結構
@@ -59,9 +60,14 @@ export function useOcrRecognition() {
       try {
         let file: File
 
-        // 如果是 base64 URL，轉換為 File
         if (typeof imageSource === 'string') {
-          const response = await fetch(imageSource)
+          // bare filename (新格式) → 現場簽 15 分鐘 URL 再 fetch
+          // 完整 URL 或 base64 data URL → 直接 fetch
+          const fetchUrl = imageSource.startsWith('http') || imageSource.startsWith('data:')
+            ? imageSource
+            : await getPassportDisplayUrl(imageSource)
+          if (!fetchUrl) throw new Error('無法取得護照照片網址')
+          const response = await fetch(fetchUrl)
           const blob = await response.blob()
           file = new File([blob], 'passport.jpg', { type: 'image/jpeg' })
         } else {

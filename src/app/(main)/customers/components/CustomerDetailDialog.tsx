@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button'
 import type { Customer } from '@/types/customer.types'
 import { CUSTOMER_DETAIL_LABELS as L } from '../constants/labels'
+import { usePassportImageUrl } from '@/lib/passport-storage/usePassportImageUrl'
 
 interface CustomerDetailDialogProps {
   open: boolean
@@ -24,6 +25,7 @@ export function CustomerDetailDialog({
   customer,
   onEdit,
 }: CustomerDetailDialogProps) {
+  const passportUrl = usePassportImageUrl(customer?.passport_image_url)
   if (!customer) return null
 
   return (
@@ -43,9 +45,9 @@ export function CustomerDetailDialog({
           {/* 左側：護照照片 */}
           <div className="w-64 flex-shrink-0">
             <div className="aspect-[3/4] rounded-lg overflow-hidden bg-morandi-background border border-border shadow-sm">
-              {customer.passport_image_url ? (
+              {customer.passport_image_url && passportUrl ? (
                 <img
-                  src={customer.passport_image_url}
+                  src={passportUrl}
                   alt={L.passport_alt(customer.name)}
                   className="w-full h-full object-cover"
                   onError={e => {

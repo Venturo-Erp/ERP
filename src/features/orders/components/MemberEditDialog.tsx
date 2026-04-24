@@ -183,23 +183,18 @@ export function MemberEditDialog({
 
         if (uploadError) throw uploadError
 
-        const { data: urlData, error: urlError } = await supabase.storage
-          .from('passport-images')
-          .createSignedUrl(fileName, 3600 * 24 * 365) // 1 year signed URL
-
-        if (urlError) throw urlError
-
+        // DB 只存 bare filename、顯示時動態簽 15 分鐘 URL
         onMemberChange({
           ...editingMember,
-          passport_image_url: urlData.signedUrl,
+          passport_image_url: fileName,
         })
 
         toast.success(COMP_ORDERS_LABELS.護照照片已上傳)
 
-        // 自動進行 OCR
+        // 自動進行 OCR（傳 filename、OCR service 內部自行處理讀取）
         if (onRecognize) {
           try {
-            await onRecognize(urlData.signedUrl)
+            await onRecognize(fileName)
           } catch {
             // OCR 失敗不影響上傳
           }

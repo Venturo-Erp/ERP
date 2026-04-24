@@ -197,10 +197,31 @@ export async function POST(request: NextRequest) {
 }
 
 /**
+ * 從存儲值（可能是 bare filename 或完整 URL）產出可 fetch 的 URL。
+ */
+async function resolveImageUrl(stored: string): Promise<string | null> {
+  if (stored.startsWith('data:') || stored.startsWith('http')) return stored
+  // bare filename → 用 admin client 簽 1 小時 URL 供 fetch
+  const supabase = getSupabaseAdminClient()
+  const { data, error } = await supabase.storage
+    .from('passport-images')
+    .createSignedUrl(stored, 3600)
+  if (error || !data) {
+    logger.error('簽 passport-images URL 失敗', error)
+    return null
+  }
+  return data.signedUrl
+}
+
+/**
  * 重新處理護照圖片，提取 passport_name_print
  */
-async function reprocessPassportImage(imageUrl: string): Promise<string | null> {
+async function reprocessPassportImage(stored: string): Promise<string | null> {
   try {
+    // 接受 bare filename（新格式）或完整 URL（舊資料）
+    const imageUrl = await resolveImageUrl(stored)
+    if (!imageUrl) return null
+
     // 下載圖片並轉換為 base64
     const response = await fetch(imageUrl)
     if (!response.ok) {
