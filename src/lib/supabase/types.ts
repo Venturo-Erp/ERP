@@ -2409,6 +2409,39 @@ export type Database = {
         }
         Relationships: []
       }
+      cron_heartbeats: {
+        Row: {
+          attempts: number
+          duration_ms: number | null
+          finished_at: string | null
+          job_name: string
+          last_error: string | null
+          started_at: string | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          attempts?: number
+          duration_ms?: number | null
+          finished_at?: string | null
+          job_name: string
+          last_error?: string | null
+          started_at?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          attempts?: number
+          duration_ms?: number | null
+          finished_at?: string | null
+          job_name?: string
+          last_error?: string | null
+          started_at?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       customer_service_conversations: {
         Row: {
           ai_response: string
@@ -5729,6 +5762,7 @@ export type Database = {
           tour_code: string | null
           tour_id: string | null
           tour_name: string | null
+          transferred_pair_id: string | null
           updated_at: string | null
           updated_by: string | null
           workspace_id: string
@@ -5765,6 +5799,7 @@ export type Database = {
           tour_code?: string | null
           tour_id?: string | null
           tour_name?: string | null
+          transferred_pair_id?: string | null
           updated_at?: string | null
           updated_by?: string | null
           workspace_id: string
@@ -5801,6 +5836,7 @@ export type Database = {
           tour_code?: string | null
           tour_id?: string | null
           tour_name?: string | null
+          transferred_pair_id?: string | null
           updated_at?: string | null
           updated_by?: string | null
           workspace_id?: string

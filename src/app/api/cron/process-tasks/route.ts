@@ -9,7 +9,8 @@
 import { NextRequest } from 'next/server'
 import { processQueue } from '@/lib/tasks'
 import { logger } from '@/lib/utils/logger'
-import { successResponse, ApiError } from '@/lib/api/response'
+import { ApiError } from '@/lib/api/response'
+import { withCronHeartbeat } from '@/lib/cron/heartbeat'
 
 // 驗證 cron secret（防止未授權呼叫）
 const CRON_SECRET = process.env.CRON_SECRET
@@ -21,27 +22,13 @@ export async function GET(request: NextRequest) {
     return ApiError.unauthorized('Unauthorized')
   }
 
-  try {
+  return withCronHeartbeat('process-tasks', async () => {
     const startTime = Date.now()
     const processed = await processQueue(10)
     const duration = Date.now() - startTime
-
-    logger.info('Cron: Task queue processed', {
-      processed,
-      duration: `${duration}ms`,
-    })
-
-    return successResponse({
-      processed,
-      duration: `${duration}ms`,
-      timestamp: new Date().toISOString(),
-    })
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-    logger.error('Cron: Failed to process task queue', { error: errorMessage })
-
-    return ApiError.internal(errorMessage)
-  }
+    logger.info('Cron: Task queue processed', { processed, duration: `${duration}ms` })
+    return { processed, duration_ms: duration, timestamp: new Date().toISOString() }
+  })
 }
 
 // 也支援 POST（某些 cron 服務使用 POST）
