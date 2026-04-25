@@ -406,42 +406,43 @@ export const STATUS_CONFIGS: Record<StatusType, Record<string, StatusConfig>> = 
   // 收據狀態（資料庫存字串 '0'/'1'/'2'）
   receipt: {
     // 數字字串格式（資料庫存的格式）
+    // 統一 soft pill 樣式（同 StatusBadge tone）：text-X + bg-X/15
     '0': {
-      color: 'text-morandi-gold',
+      color: 'text-morandi-secondary',
       label: '待確認',
       icon: Clock,
-      bgColor: 'bg-morandi-gold/10',
+      bgColor: 'bg-morandi-secondary/15',
     },
     '1': {
       color: 'text-morandi-green',
       label: '已確認',
       icon: CheckCircle,
-      bgColor: 'bg-morandi-green/10',
+      bgColor: 'bg-morandi-green/15',
     },
     '2': {
       color: 'text-morandi-red',
       label: '異常',
       icon: XCircle,
-      bgColor: 'bg-morandi-red/10',
+      bgColor: 'bg-morandi-red/15',
     },
     // 英文格式（相容舊程式碼）
     pending: {
-      color: 'text-morandi-gold',
+      color: 'text-morandi-secondary',
       label: '待確認',
       icon: Clock,
-      bgColor: 'bg-morandi-gold/10',
+      bgColor: 'bg-morandi-secondary/15',
     },
     confirmed: {
       color: 'text-morandi-green',
       label: '已確認',
       icon: CheckCircle,
-      bgColor: 'bg-morandi-green/10',
+      bgColor: 'bg-morandi-green/15',
     },
     cancelled: {
       color: 'text-morandi-red',
       label: '已取消',
       icon: XCircle,
-      bgColor: 'bg-morandi-red/10',
+      bgColor: 'bg-morandi-red/15',
     },
     default: {
       color: 'text-morandi-secondary',

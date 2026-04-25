@@ -200,11 +200,19 @@ export function StatusCell({
 
   if (variant === 'badge') {
     const bgColor = getStatusBgColor(type, status)
+    // 統一樣式跟 StatusBadge 一致（soft pill，無 border、無 shadow、font-medium）
     return (
-      <Badge className={cn(bgColor, color, className)}>
+      <span
+        className={cn(
+          'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium whitespace-nowrap',
+          bgColor,
+          color,
+          className
+        )}
+      >
         {showIcon && IconComponent && <IconComponent className="w-3 h-3 mr-1" />}
         {label}
-      </Badge>
+      </span>
     )
   }
 
