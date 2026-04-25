@@ -47,7 +47,7 @@ export function TourOperationsAddButton({
       {/* Add button */}
       <button
         onClick={() => setIsDialogOpen(true)}
-        className="bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg px-3 py-1.5 rounded text-sm font-medium flex items-center transition-colors"
+        className="bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors px-3 py-1.5 rounded text-sm font-medium flex items-center transition-colors"
         title={TOUR_OPS_ADD.add_item_title}
       >
         <Plus size={14} className="mr-1" />

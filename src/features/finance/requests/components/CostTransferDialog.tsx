@@ -398,7 +398,7 @@ export function CostTransferDialog({
             <Button
               onClick={handleTransfer}
               disabled={transferring || selectedItems.size === 0 || !targetTourId}
-              className="bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg gap-2"
+              className="bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors gap-2"
             >
               {transferring ? (
                 <Loader2 size={14} className="animate-spin" />

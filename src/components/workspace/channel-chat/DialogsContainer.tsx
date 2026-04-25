@@ -399,7 +399,7 @@ export function DialogsContainer({
             </Button>
             <Button
               onClick={onUpdateChannel}
-              className="bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg gap-2"
+              className="bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors gap-2"
             >
               <Save size={16} />
               {DIALOGS_CONTAINER_LABELS.儲存變更}
@@ -444,7 +444,7 @@ export function DialogsContainer({
             </Button>
             <Button
               onClick={() => setShowShareQuoteDialog(false)}
-              className="bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg gap-2"
+              className="bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors gap-2"
             >
               <Share2 size={16} />
               {DIALOGS_CONTAINER_LABELS.分享到頻道}
@@ -489,7 +489,7 @@ export function DialogsContainer({
             </Button>
             <Button
               onClick={() => setShowShareTourDialog(false)}
-              className="bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg gap-2"
+              className="bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors gap-2"
             >
               <Share2 size={16} />
               {DIALOGS_CONTAINER_LABELS.分享到頻道}
@@ -538,7 +538,7 @@ export function DialogsContainer({
             </Button>
             <Button
               onClick={() => setShowNewPaymentDialog(false)}
-              className="bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg gap-2"
+              className="bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors gap-2"
             >
               <Plus size={16} />
               {DIALOGS_CONTAINER_LABELS.建立並分享}
@@ -587,7 +587,7 @@ export function DialogsContainer({
             </Button>
             <Button
               onClick={() => setShowNewReceiptDialog(false)}
-              className="bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg gap-2"
+              className="bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors gap-2"
             >
               <Plus size={16} />
               {DIALOGS_CONTAINER_LABELS.建立並分享}

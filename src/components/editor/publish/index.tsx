@@ -124,7 +124,7 @@ export function PublishButton({
           onClick={saveItinerary}
           disabled={saving}
           size="sm"
-          className="bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg h-8 px-3"
+          className="bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors h-8 px-3"
         >
           <Save size={14} className="mr-1.5" />
           {saving ? COMP_EDITOR_LABELS.儲存中 : COMP_EDITOR_LABELS.存檔}

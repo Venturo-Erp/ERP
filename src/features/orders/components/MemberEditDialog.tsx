@@ -282,7 +282,7 @@ export function MemberEditDialog({
               className={
                 editMode === 'verify'
                   ? 'bg-status-success hover:bg-morandi-green text-white px-8 font-medium'
-                  : 'bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg px-8 font-medium'
+                  : 'bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors px-8 font-medium'
               }
             >
               {isSaving

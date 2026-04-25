@@ -493,7 +493,7 @@ export const MessageInput = memo(function MessageInput({
         <Button
           type="submit"
           disabled={(!value.trim() && attachedFiles.length === 0) || uploadingFiles || isDisabled}
-          className="bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+          className="bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {uploadingFiles ? (
             <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />

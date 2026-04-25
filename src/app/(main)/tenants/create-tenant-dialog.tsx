@@ -275,7 +275,7 @@ export function CreateTenantDialog({
               <Button
                 onClick={() => setStep(2)}
                 disabled={!isStep1Valid}
-                className="flex-1 bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg"
+                className="flex-1 bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors"
               >
                 {LABELS.BTN_NEXT}
               </Button>
@@ -346,7 +346,7 @@ export function CreateTenantDialog({
               <Button
                 onClick={handleCreate}
                 disabled={!isStep2Valid || creating}
-                className="flex-1 bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg"
+                className="flex-1 bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors"
               >
                 {creating ? LABELS.BTN_CREATING : LABELS.BTN_CREATE}
               </Button>
@@ -388,7 +388,7 @@ export function CreateTenantDialog({
               </Button>
               <Button
                 onClick={handleCopyLoginInfo}
-                className="flex-1 bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg gap-2"
+                className="flex-1 bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors gap-2"
               >
                 {copied ? <Check size={16} /> : <Copy size={16} />}
                 {LABELS.COPY_ALL}

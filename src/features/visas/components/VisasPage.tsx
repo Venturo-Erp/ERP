@@ -325,7 +325,7 @@ export default function VisasPage() {
                   disabled={!buttonAvailability.submit}
                   className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
                     buttonAvailability.submit
-                      ? 'bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg'
+                      ? 'bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors'
                       : 'bg-morandi-container text-morandi-secondary/50 cursor-not-allowed'
                   }`}
                   title={VISAS_LABELS.LABEL_6162}
@@ -408,7 +408,7 @@ export default function VisasPage() {
                       await fetchTours() // 按需載入 tours
                       setIsDialogOpen(true)
                     }}
-                    className="bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg"
+                    className="bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors"
                   >
                     {VISAS_LABELS.ADD_2407}
                   </Button>

@@ -221,7 +221,7 @@ export default function HRSettingsPage() {
         <Button
           onClick={handleSave}
           disabled={saving}
-          className="bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg"
+          className="bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors"
         >
           {saving ? '儲存中...' : '儲存設定'}
         </Button>
@@ -515,7 +515,7 @@ export default function HRSettingsPage() {
                     <Button
                       onClick={handleLineSetup}
                       disabled={lineSaving || !lineToken || !lineSecret}
-                      className="w-full bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg"
+                      className="w-full bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors"
                     >
                       {lineSaving ? '設定中...' : '完成設定'}
                     </Button>

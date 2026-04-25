@@ -596,7 +596,7 @@ export default function TodosPage() {
                                   <div className="flex gap-2">
                                     <Button
                                       size="sm"
-                                      className="h-7 text-xs bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg"
+                                      className="h-7 text-xs bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors"
                                       onClick={() => handleQuickAdd(column.id)}
                                       disabled={!quickAddValue.trim() || isSubmitting}
                                     >
@@ -678,7 +678,7 @@ export default function TodosPage() {
                           <div className="flex gap-2">
                             <Button
                               size="sm"
-                              className="h-7 text-xs bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg"
+                              className="h-7 text-xs bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors"
                               onClick={handleAddColumn}
                               disabled={!newColumnName.trim()}
                             >
@@ -849,7 +849,7 @@ function AddTodoForm({
       <div className="flex gap-2 pt-4">
         <Button
           type="submit"
-          className="flex-1 bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 text-morandi-primary ring-1 ring-border/50 hover:from-morandi-gold/60 hover:to-morandi-container/80 shadow-md hover:shadow-lg gap-2"
+          className="flex-1 bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors gap-2"
         >
           <Plus size={16} />
           {LABELS.LABEL_1974}
