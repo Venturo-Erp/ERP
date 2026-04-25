@@ -16,6 +16,7 @@ import { Users, Edit2, UserX, Bot, Download } from 'lucide-react'
 import type { UserRole } from '@/lib/rbac-config'
 import { TableColumn } from '@/components/ui/enhanced-table'
 import { DateCell, ActionCell } from '@/components/table-cells'
+import { StatusBadge, type StatusTone } from '@/components/ui/status-badge'
 import { ConfirmDialog } from '@/components/dialog/confirm-dialog'
 import { useConfirmDialog } from '@/hooks/useConfirmDialog'
 import { useAuthStore } from '@/stores/auth-store'
@@ -72,14 +73,14 @@ export default function HRPage() {
     return statusMap[status]
   }
 
-  const getStatusColor = (status: EmployeeFull['status']) => {
-    const colorMap = {
-      active: 'text-morandi-primary bg-morandi-container',
-      probation: 'text-status-warning bg-status-warning-bg',
-      leave: 'text-status-info bg-status-info-bg',
-      terminated: 'text-morandi-red bg-morandi-red/10',
+  const getStatusTone = (status: EmployeeFull['status']): StatusTone => {
+    const toneMap: Record<EmployeeFull['status'], StatusTone> = {
+      active: 'neutral',
+      probation: 'warning',
+      leave: 'info',
+      terminated: 'danger',
     }
-    return colorMap[status]
+    return toneMap[status]
   }
 
   const handleEmployeeClick = (employee: EmployeeFull) => {
@@ -186,11 +187,10 @@ export default function HRPage() {
         sortable: true,
         width: '70px',
         render: (_value, employee: EmployeeFull) => (
-          <span
-            className={`px-2 py-1 rounded text-sm font-medium ${getStatusColor(employee.status)}`}
-          >
-            {getStatusLabel(employee.status)}
-          </span>
+          <StatusBadge
+            tone={getStatusTone(employee.status)}
+            label={getStatusLabel(employee.status)}
+          />
         ),
       },
       {

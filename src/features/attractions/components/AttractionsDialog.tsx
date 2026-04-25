@@ -7,6 +7,7 @@ import type { Country, Region, City } from '@/stores/region-store'
 import { prompt, alert } from '@/lib/ui/alert-dialog'
 import { logger } from '@/lib/utils/logger'
 import { useAttractionForm } from '../hooks/useAttractionForm'
+import { StatusBadge } from '@/components/ui/status-badge'
 import { AttractionForm } from './attraction-dialog/AttractionForm'
 import { AttractionImageUpload } from './attraction-dialog/AttractionImageUpload'
 import { useAuthStore } from '@/stores/auth-store'
@@ -372,12 +373,7 @@ export function AttractionsDialog({
         </Button>
       )}
       {/* 已驗證標示 */}
-      {attraction && isVerified && (
-        <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs text-morandi-green bg-morandi-green/10 border border-morandi-green/30 rounded-full">
-          <CheckCircle2 size={12} />
-          已驗證
-        </span>
-      )}
+      {attraction && isVerified && <StatusBadge tone="success" label="已驗證" />}
       {showAiSuggest && attraction && (
         <Button
           type="button"

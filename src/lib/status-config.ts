@@ -51,31 +51,31 @@ export const STATUS_CONFIGS: Record<StatusType, Record<string, StatusConfig>> = 
   // 付款狀態
   payment: {
     pending: {
-      color: 'text-morandi-gold',
+      color: 'text-morandi-secondary',
       label: '待確認',
       icon: Clock,
-      bgColor: 'bg-morandi-gold/10',
+      bgColor: 'bg-morandi-secondary/15',
       borderColor: 'border-morandi-gold',
     },
     confirmed: {
       color: 'text-morandi-green',
       label: '已確認',
       icon: CheckCircle,
-      bgColor: 'bg-morandi-green/10',
+      bgColor: 'bg-morandi-green/15',
       borderColor: 'border-morandi-green',
     },
     completed: {
       color: 'text-morandi-primary',
       label: '已完成',
       icon: FileCheck,
-      bgColor: 'bg-morandi-primary/10',
+      bgColor: 'bg-morandi-primary/15',
       borderColor: 'border-morandi-primary',
     },
     cancelled: {
       color: 'text-morandi-red',
       label: '已取消',
       icon: XCircle,
-      bgColor: 'bg-morandi-red/10',
+      bgColor: 'bg-morandi-red/15',
       borderColor: 'border-morandi-red',
     },
     default: {
@@ -88,22 +88,22 @@ export const STATUS_CONFIGS: Record<StatusType, Record<string, StatusConfig>> = 
   // 出納單狀態（實際使用：pending → confirmed → paid）
   disbursement: {
     pending: {
-      color: 'text-morandi-gold',
+      color: 'text-morandi-secondary',
       label: '待確認',
       icon: Clock,
-      bgColor: 'bg-morandi-gold/10',
+      bgColor: 'bg-morandi-secondary/15',
     },
     confirmed: {
       color: 'text-morandi-green',
       label: '已確認',
       icon: CheckCircle,
-      bgColor: 'bg-morandi-green/10',
+      bgColor: 'bg-morandi-green/15',
     },
     paid: {
       color: 'text-morandi-primary',
       label: '已付款',
       icon: DollarSign,
-      bgColor: 'bg-morandi-primary/10',
+      bgColor: 'bg-morandi-primary/15',
     },
     default: {
       color: 'text-morandi-secondary',
@@ -115,28 +115,28 @@ export const STATUS_CONFIGS: Record<StatusType, Record<string, StatusConfig>> = 
   // 待辦事項狀態
   todo: {
     pending: {
-      color: 'text-morandi-gold',
+      color: 'text-morandi-secondary',
       label: '待處理',
       icon: Clock,
-      bgColor: 'bg-morandi-gold/10',
+      bgColor: 'bg-morandi-secondary/15',
     },
     in_progress: {
       color: 'text-morandi-primary',
       label: '待出發',
       icon: Package,
-      bgColor: 'bg-morandi-primary/10',
+      bgColor: 'bg-morandi-primary/15',
     },
     completed: {
       color: 'text-morandi-green',
       label: '已完成',
       icon: CheckCircle,
-      bgColor: 'bg-morandi-green/10',
+      bgColor: 'bg-morandi-green/15',
     },
     cancelled: {
       color: 'text-morandi-secondary',
       label: '已取消',
       icon: XCircle,
-      bgColor: 'bg-morandi-secondary/10',
+      bgColor: 'bg-morandi-secondary/15',
     },
     default: {
       color: 'text-morandi-secondary',
@@ -151,61 +151,61 @@ export const STATUS_CONFIGS: Record<StatusType, Record<string, StatusConfig>> = 
       color: 'text-morandi-secondary',
       label: '草稿',
       icon: FileText,
-      bgColor: 'bg-morandi-secondary/10',
+      bgColor: 'bg-morandi-secondary/15',
     },
     pending: {
-      color: 'text-morandi-gold',
+      color: 'text-morandi-secondary',
       label: '待處理',
       icon: Clock,
-      bgColor: 'bg-morandi-gold/10',
+      bgColor: 'bg-morandi-secondary/15',
     },
     scheduled: {
       color: 'text-status-info',
       label: '預約中',
       icon: Clock,
-      bgColor: 'bg-status-info/10',
+      bgColor: 'bg-status-info/15',
     },
     issued: {
       color: 'text-morandi-green',
       label: '已開立',
       icon: CheckCircle,
-      bgColor: 'bg-morandi-green/10',
+      bgColor: 'bg-morandi-green/15',
     },
     voided: {
       color: 'text-morandi-red',
       label: '已作廢',
       icon: XCircle,
-      bgColor: 'bg-morandi-red/10',
+      bgColor: 'bg-morandi-red/15',
     },
     allowance: {
       color: 'text-status-info',
       label: '已折讓',
       icon: FileText,
-      bgColor: 'bg-status-info/10',
+      bgColor: 'bg-status-info/15',
     },
     failed: {
       color: 'text-morandi-red',
       label: '失敗',
       icon: AlertCircle,
-      bgColor: 'bg-morandi-red/10',
+      bgColor: 'bg-morandi-red/15',
     },
     approved: {
       color: 'text-morandi-green',
       label: '已核准',
       icon: CheckCircle,
-      bgColor: 'bg-morandi-green/10',
+      bgColor: 'bg-morandi-green/15',
     },
     paid: {
       color: 'text-morandi-primary',
       label: '已付款',
       icon: DollarSign,
-      bgColor: 'bg-morandi-primary/10',
+      bgColor: 'bg-morandi-primary/15',
     },
     rejected: {
       color: 'text-morandi-red',
       label: '已駁回',
       icon: XCircle,
-      bgColor: 'bg-morandi-red/10',
+      bgColor: 'bg-morandi-red/15',
     },
     default: {
       color: 'text-morandi-secondary',
@@ -224,31 +224,31 @@ export const STATUS_CONFIGS: Record<StatusType, Record<string, StatusConfig>> = 
       borderColor: 'border-morandi-muted/30',
     },
     proposal: {
-      color: 'text-morandi-gold',
+      color: 'text-morandi-secondary',
       label: '提案',
       icon: FileText,
-      bgColor: 'bg-morandi-gold/10',
+      bgColor: 'bg-morandi-secondary/15',
       borderColor: 'border-morandi-gold/30',
     },
     upcoming: {
       color: 'text-morandi-green',
       label: '待出發',
       icon: Truck,
-      bgColor: 'bg-morandi-green/10',
+      bgColor: 'bg-morandi-green/15',
       borderColor: 'border-morandi-green/30',
     },
     ongoing: {
       color: 'text-morandi-green',
       label: '進行中',
       icon: Truck,
-      bgColor: 'bg-morandi-green/10',
+      bgColor: 'bg-morandi-green/15',
       borderColor: 'border-morandi-green',
     },
     returned: {
       color: 'text-morandi-red',
       label: '未結團',
       icon: Clock,
-      bgColor: 'bg-morandi-red/10',
+      bgColor: 'bg-morandi-red/15',
       borderColor: 'border-morandi-red/30',
     },
     closed: {
@@ -270,28 +270,28 @@ export const STATUS_CONFIGS: Record<StatusType, Record<string, StatusConfig>> = 
   // 訂單狀態（注意：訂單主要使用 payment_status，此為 order.status）
   order: {
     pending: {
-      color: 'text-morandi-gold',
+      color: 'text-morandi-secondary',
       label: '待確認',
       icon: Clock,
-      bgColor: 'bg-morandi-gold/10',
+      bgColor: 'bg-morandi-secondary/15',
     },
     confirmed: {
       color: 'text-morandi-primary',
       label: '已確認',
       icon: CheckCircle,
-      bgColor: 'bg-morandi-primary/10',
+      bgColor: 'bg-morandi-primary/15',
     },
     completed: {
       color: 'text-morandi-green',
       label: '已完成',
       icon: FileCheck,
-      bgColor: 'bg-morandi-green/10',
+      bgColor: 'bg-morandi-green/15',
     },
     cancelled: {
       color: 'text-morandi-red',
       label: '已取消',
       icon: XCircle,
-      bgColor: 'bg-morandi-red/10',
+      bgColor: 'bg-morandi-red/15',
     },
     default: {
       color: 'text-morandi-secondary',
@@ -303,34 +303,34 @@ export const STATUS_CONFIGS: Record<StatusType, Record<string, StatusConfig>> = 
   // 簽證狀態
   visa: {
     pending: {
-      color: 'text-morandi-gold',
+      color: 'text-morandi-secondary',
       label: '待送件',
       icon: Clock,
-      bgColor: 'bg-morandi-gold/10',
+      bgColor: 'bg-morandi-secondary/15',
     },
     submitted: {
       color: 'text-morandi-primary',
       label: '已送件',
       icon: Package,
-      bgColor: 'bg-morandi-primary/10',
+      bgColor: 'bg-morandi-primary/15',
     },
     collected: {
       color: 'text-morandi-green',
       label: '已取件',
       icon: CheckCircle,
-      bgColor: 'bg-morandi-green/10',
+      bgColor: 'bg-morandi-green/15',
     },
     rejected: {
       color: 'text-morandi-red',
       label: '退件',
       icon: XCircle,
-      bgColor: 'bg-morandi-red/10',
+      bgColor: 'bg-morandi-red/15',
     },
     returned: {
       color: 'text-morandi-secondary',
       label: '已歸還',
       icon: FileCheck,
-      bgColor: 'bg-morandi-secondary/10',
+      bgColor: 'bg-morandi-secondary/15',
     },
     default: {
       color: 'text-morandi-secondary',
@@ -342,22 +342,22 @@ export const STATUS_CONFIGS: Record<StatusType, Record<string, StatusConfig>> = 
   // eSIM 網卡狀態（參考 CornerERP）
   esim: {
     0: {
-      color: 'text-morandi-gold',
+      color: 'text-morandi-secondary',
       label: '待確認',
       icon: Clock,
-      bgColor: 'bg-morandi-gold/10',
+      bgColor: 'bg-morandi-secondary/15',
     },
     1: {
       color: 'text-morandi-green',
       label: '已確認',
       icon: CheckCircle,
-      bgColor: 'bg-morandi-green/10',
+      bgColor: 'bg-morandi-green/15',
     },
     2: {
       color: 'text-morandi-red',
       label: '錯誤',
       icon: XCircle,
-      bgColor: 'bg-morandi-red/10',
+      bgColor: 'bg-morandi-red/15',
     },
     default: {
       color: 'text-morandi-secondary',
@@ -369,31 +369,31 @@ export const STATUS_CONFIGS: Record<StatusType, Record<string, StatusConfig>> = 
   // 會計傳票狀態
   voucher: {
     draft: {
-      color: 'text-morandi-gold',
+      color: 'text-morandi-secondary',
       label: '草稿',
       icon: FileText,
-      bgColor: 'bg-morandi-gold/10',
+      bgColor: 'bg-morandi-secondary/15',
       borderColor: 'border-morandi-gold',
     },
     posted: {
       color: 'text-morandi-green',
       label: '已過帳',
       icon: CheckCircle,
-      bgColor: 'bg-morandi-green/10',
+      bgColor: 'bg-morandi-green/15',
       borderColor: 'border-morandi-green',
     },
     reversed: {
       color: 'text-morandi-red',
       label: '已沖銷',
       icon: XCircle,
-      bgColor: 'bg-morandi-red/10',
+      bgColor: 'bg-morandi-red/15',
       borderColor: 'border-morandi-red',
     },
     locked: {
       color: 'text-morandi-primary',
       label: '已鎖定',
       icon: FileCheck,
-      bgColor: 'bg-morandi-primary/10',
+      bgColor: 'bg-morandi-primary/15',
       borderColor: 'border-morandi-primary',
     },
     default: {
@@ -457,43 +457,43 @@ export const STATUS_CONFIGS: Record<StatusType, Record<string, StatusConfig>> = 
       color: 'text-morandi-secondary',
       label: '草稿',
       icon: FileText,
-      bgColor: 'bg-morandi-secondary/10',
+      bgColor: 'bg-morandi-secondary/15',
     },
     proposed: {
-      color: 'text-morandi-gold',
+      color: 'text-morandi-secondary',
       label: '開團',
       icon: Clock,
-      bgColor: 'bg-morandi-gold/10',
+      bgColor: 'bg-morandi-secondary/15',
     },
     revised: {
       color: 'text-status-info',
       label: '修改中',
       icon: FileText,
-      bgColor: 'bg-status-info/10',
+      bgColor: 'bg-status-info/15',
     },
     待出發: {
       color: 'text-status-info',
       label: '待出發',
       icon: Truck,
-      bgColor: 'bg-status-info/10',
+      bgColor: 'bg-status-info/15',
     },
     approved: {
       color: 'text-morandi-green',
       label: '已核准',
       icon: CheckCircle,
-      bgColor: 'bg-morandi-green/10',
+      bgColor: 'bg-morandi-green/15',
     },
     converted: {
       color: 'text-morandi-primary',
       label: '已轉單',
       icon: FileCheck,
-      bgColor: 'bg-morandi-primary/10',
+      bgColor: 'bg-morandi-primary/15',
     },
     rejected: {
       color: 'text-morandi-red',
       label: '已拒絕',
       icon: XCircle,
-      bgColor: 'bg-morandi-red/10',
+      bgColor: 'bg-morandi-red/15',
     },
     default: {
       color: 'text-morandi-secondary',
@@ -505,10 +505,10 @@ export const STATUS_CONFIGS: Record<StatusType, Record<string, StatusConfig>> = 
   // 需求單狀態
   tour_request: {
     pending: {
-      color: 'text-morandi-gold',
+      color: 'text-morandi-secondary',
       label: '待處理',
       icon: Clock,
-      bgColor: 'bg-morandi-gold/10',
+      bgColor: 'bg-morandi-secondary/15',
     },
     draft: {
       color: 'text-morandi-muted',
@@ -520,31 +520,31 @@ export const STATUS_CONFIGS: Record<StatusType, Record<string, StatusConfig>> = 
       color: 'text-morandi-primary',
       label: '處理中',
       icon: Package,
-      bgColor: 'bg-morandi-primary/10',
+      bgColor: 'bg-morandi-primary/15',
     },
     replied: {
       color: 'text-status-info',
       label: '已回復',
       icon: FileText,
-      bgColor: 'bg-status-info/10',
+      bgColor: 'bg-status-info/15',
     },
     confirmed: {
       color: 'text-morandi-green',
       label: '已確認',
       icon: CheckCircle,
-      bgColor: 'bg-morandi-green/10',
+      bgColor: 'bg-morandi-green/15',
     },
     completed: {
       color: 'text-morandi-primary',
       label: '已完成',
       icon: FileCheck,
-      bgColor: 'bg-morandi-primary/10',
+      bgColor: 'bg-morandi-primary/15',
     },
     cancelled: {
       color: 'text-morandi-red',
       label: '已取消',
       icon: XCircle,
-      bgColor: 'bg-morandi-red/10',
+      bgColor: 'bg-morandi-red/15',
     },
     default: {
       color: 'text-morandi-secondary',

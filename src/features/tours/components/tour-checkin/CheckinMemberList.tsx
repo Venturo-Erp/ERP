@@ -13,6 +13,7 @@ export interface CheckinMember {
   checked_in_at: string | null
 }
 import { Input } from '@/components/ui/input'
+import { StatusBadge } from '@/components/ui/status-badge'
 import { Search, RefreshCw, Check, X, UserCheck, UserX, Users, Loader2, Clock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { COMP_TOURS_LABELS, CHECKIN_MEMBER_LIST_LABELS } from '../../constants/labels'
@@ -200,9 +201,10 @@ export function CheckinMemberList({
                     {member.chinese_name || member.passport_name || COMP_TOURS_LABELS.未知}
                   </span>
                   {member.checked_in && (
-                    <span className="text-xs bg-morandi-green/20 text-morandi-green px-2 py-0.5 rounded">
-                      {CHECKIN_MEMBER_LIST_LABELS.已報到_狀態標籤}
-                    </span>
+                    <StatusBadge
+                      tone="success"
+                      label={CHECKIN_MEMBER_LIST_LABELS.已報到_狀態標籤}
+                    />
                   )}
                 </div>
                 <div className="flex items-center gap-3 text-xs text-morandi-secondary mt-0.5">

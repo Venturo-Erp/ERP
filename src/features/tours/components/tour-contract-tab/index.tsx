@@ -17,6 +17,7 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
+import { StatusBadge } from '@/components/ui/status-badge'
 import { Tour, Order } from '@/stores/types'
 import { ContractTemplate } from '@/types/tour.types'
 import { useTourDisplay } from '@/features/tours/utils/tour-display'
@@ -602,9 +603,7 @@ export function TourContractTab({ tour }: TourContractTabProps) {
                           等 {contract.member_ids.length} 人
                         </span>
                       )}
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-morandi-red/10 text-morandi-red">
-                        已取消
-                      </span>
+                      <StatusBadge tone="danger" label="已取消" />
                     </div>
                     <div className="text-xs text-morandi-secondary mt-1">
                       {CONTRACT_TEMPLATE_LABELS[contract.template as ContractTemplate]} ·{' '}
