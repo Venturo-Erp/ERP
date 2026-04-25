@@ -653,3 +653,72 @@ await updateDestination({
 **關鍵洞察：**
 
 Google Maps URL + Place ID 是多語言的基礎，有這兩個就能自動取得任何語言的名稱。
+
+---
+
+## 🧱 頁面必含元素（防 cleanup 砍錯）
+
+> 2026-04-25 新增。為什麼存在：2026-04-22 的大規模 cleanup（commit 258d6220c）把 `tour-payments.tsx`（299 行）當孤兒砍了、連同 `<TourPayments />` 引用一起拔、結果總覽 / 結案分頁收款表消失。type-check 不會抓、肉眼又顧不過來。下次 cleanup AI / 工程師動到這些 component 前、先讀這份。
+
+**規則**：
+1. 拔下方任一 component 前、必須在 BUSINESS_MAP 標註替代方案（不能純拔）
+2. 拔的當下、跑 `npm run dev` 點一次該 page tab 確認還能渲染
+3. PR description 列「受影響 page」+ smoke test 結果
+
+### `/tours/[code]?tab=overview`（旅遊團 · 總覽）
+
+| 必含 component | 為什麼不能砍 |
+|---|---|
+| `TourOverview` | 4 格統計卡（收入/支出/利潤/訂單數）— 業務一眼看財務 |
+| `TourReceipts` | **收款明細表（綠色）— 2026-04-25 補回**。業務要看實收紀錄 |
+| `TourCosts` | 請款明細表（紅色、`showSummary={false}`）— 業務要看付出去的錢 |
+
+掛載點：`src/features/tours/components/TourTabs.tsx` `case 'overview'`
+
+### `/tours/[code]?tab=closing`（旅遊團 · 結案）
+
+| 必含 component | 為什麼不能砍 |
+|---|---|
+| `TourOverview` | 同上 |
+| `TourReceipts` | 同上 — 結案要對帳收款 |
+| `TourCosts` | 同上 — 結案要對帳請款 |
+| `ProfitTab` | 利潤計算（金色卡片 + 兩欄）— 結案核心數字 |
+| `BonusSettingTab` | 獎金設定 — 結案後分配獎金依據 |
+| 結案狀態列 + PDF 按鈕 | 「標記結團」+「生成結案報告」業務動作 |
+
+掛載點：`src/features/tours/components/tour-closing-tab.tsx`
+
+### `/tours/[code]?tab=quote`（旅遊團 · 報價）
+
+| 必含 component | 為什麼不能砍 |
+|---|---|
+| `TourQuoteTabV2`（左：⭐主報價 + 多張快速報價列表 / 右：選中內容） | 葡萄串模型核心 UI（docs/QUOTES_SSOT.md） |
+
+關鍵業務規則（不能改設計）：
+- 主報價（standard）= 完整方案，0 或 1 張/團
+- 快速報價（quick）= 收訂金/尾款/雜項，0~N 張/團
+- 找主報價：`quotes.tour_id + quote_type='standard'` 反查（不要再加 `tours.quote_id` 捷徑、會破壞 SSOT）
+
+### `/tours/[code]?tab=itinerary`（旅遊團 · 行程）
+
+| 必含 component | 為什麼不能砍 |
+|---|---|
+| `TourItineraryTab` | 行程編輯主畫面（含天數、景點、餐食、住宿） |
+
+寫入目標：`tour_itinerary_items` 表（核心表 SSOT、見本檔開頭「世界樹」）
+
+### `/quotes`（報價列表）
+
+| 必含 component | 為什麼不能砍 |
+|---|---|
+| 報價列表 table | 搜尋、新增快速報價（X 系列）入口 |
+
+⚠️ `data/entities/quotes.ts` 的 select 字串若拔欄位、要同步驗證列表頁不爆。
+
+---
+
+**新增頁面到本清單的時機**：
+- 業務說「這頁畫面消失了」
+- cleanup PR 拔 component
+- 加新分頁 / 路由
+
