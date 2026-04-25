@@ -34,6 +34,7 @@ interface PaymentRequestWithItems {
   [key: string]: unknown
 }
 import { Receipt, Plus, Truck, Hotel, Utensils, MapPin, X, HandCoins } from 'lucide-react'
+import { StatusBadge, type StatusTone } from '@/components/ui/status-badge'
 import { formatCurrency } from '@/lib/utils/format-currency'
 import { AddRequestDialog } from '@/features/finance/requests/components/AddRequestDialog'
 import type { PaymentRequest } from '@/types/finance.types'
@@ -452,12 +453,12 @@ function PaymentRequestOverviewTable({ tour }: { tour: Tour }) {
     return d.toLocaleDateString('zh-TW', { month: '2-digit', day: '2-digit' })
   }
 
-  const statusMap: Record<string, { label: string; style: string }> = {
-    pending: { label: '待處理', style: 'bg-morandi-secondary/20 text-morandi-secondary' },
-    confirmed: { label: '已確認', style: 'bg-morandi-gold/20 text-morandi-gold' },
-    billed: { label: '已出帳', style: 'bg-morandi-green/20 text-morandi-green' },
-    approved: { label: '已核准', style: 'bg-morandi-gold/20 text-morandi-gold' },
-    paid: { label: '已付', style: 'bg-morandi-green/20 text-morandi-green' },
+  const statusMap: Record<string, { label: string; tone: StatusTone }> = {
+    pending: { label: '待處理', tone: 'pending' },
+    confirmed: { label: '已確認', tone: 'info' },
+    billed: { label: '已出帳', tone: 'success' },
+    approved: { label: '已核准', tone: 'info' },
+    paid: { label: '已付', tone: 'success' },
   }
 
   return (
@@ -531,7 +532,7 @@ function PaymentRequestOverviewTable({ tour }: { tour: Tour }) {
               })
               const statusInfo = statusMap[pr.status || ''] ?? {
                 label: pr.status || '待處理',
-                style: 'bg-morandi-secondary/20 text-morandi-secondary',
+                tone: 'pending' as StatusTone,
               }
 
               if (items.length === 0) {
@@ -567,11 +568,7 @@ function PaymentRequestOverviewTable({ tour }: { tour: Tour }) {
                       -
                     </td>
                     <td className="px-4 py-2 text-center">
-                      <span
-                        className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${statusInfo.style}`}
-                      >
-                        {statusInfo.label}
-                      </span>
+                      <StatusBadge tone={statusInfo.tone} label={statusInfo.label} />
                     </td>
                     <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-red font-medium">
                       -{formatCurrency(Number(pr.amount) || 0)}
@@ -625,11 +622,7 @@ function PaymentRequestOverviewTable({ tour }: { tour: Tour }) {
                   {idx === 0 ? (
                     <>
                       <td className="px-4 py-2 text-center" rowSpan={items.length}>
-                        <span
-                          className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${statusInfo.style}`}
-                        >
-                          {statusInfo.label}
-                        </span>
+                        <StatusBadge tone={statusInfo.tone} label={statusInfo.label} />
                       </td>
                       <td
                         className="px-4 py-2 text-right font-mono tabular-nums text-morandi-red font-medium"

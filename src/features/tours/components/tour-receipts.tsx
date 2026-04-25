@@ -18,6 +18,7 @@ import { useReceipts, useOrdersSlim } from '@/data'
 import { usePaymentMethodsCached } from '@/data/hooks'
 import { formatCurrency } from '@/lib/utils/format-currency'
 import { AddReceiptDialog } from '@/features/finance/payments/components/AddReceiptDialog'
+import { StatusBadge, type StatusTone } from '@/components/ui/status-badge'
 
 interface TourReceiptsProps {
   tour: Tour
@@ -33,10 +34,10 @@ const PAYMENT_METHOD_FALLBACK_LABELS: Record<string, string> = {
   linkpay: 'LinkPay',
 }
 
-const STATUS_MAP: Record<string, { label: string; style: string }> = {
-  pending: { label: '待確認', style: 'bg-morandi-secondary/20 text-morandi-secondary' },
-  confirmed: { label: '已確認', style: 'bg-morandi-green/20 text-morandi-green' },
-  cancelled: { label: '已取消', style: 'bg-morandi-red/20 text-morandi-red' },
+const STATUS_MAP: Record<string, { label: string; tone: StatusTone }> = {
+  pending: { label: '待確認', tone: 'pending' },
+  confirmed: { label: '已確認', tone: 'success' },
+  cancelled: { label: '已取消', tone: 'danger' },
 }
 
 function formatDate(dateStr: string | null | undefined) {
@@ -119,7 +120,7 @@ export const TourReceipts = React.memo(function TourReceipts({
             receipts.map(r => {
               const statusInfo = STATUS_MAP[r.status || ''] ?? {
                 label: r.status || '待確認',
-                style: 'bg-morandi-secondary/20 text-morandi-secondary',
+                tone: 'pending' as StatusTone,
               }
               const amount = Number(r.actual_amount) || Number(r.receipt_amount) || 0
               return (
@@ -143,11 +144,7 @@ export const TourReceipts = React.memo(function TourReceipts({
                   <td className="px-4 py-2 text-morandi-secondary">{r.receipt_account || '-'}</td>
                   <td className="px-4 py-2 text-morandi-secondary">{r.notes || '-'}</td>
                   <td className="px-4 py-2 text-center">
-                    <span
-                      className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${statusInfo.style}`}
-                    >
-                      {statusInfo.label}
-                    </span>
+                    <StatusBadge tone={statusInfo.tone} label={statusInfo.label} />
                   </td>
                   <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-green font-medium">
                     +{formatCurrency(amount)}

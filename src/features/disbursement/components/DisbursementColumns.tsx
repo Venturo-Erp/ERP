@@ -4,17 +4,16 @@
  */
 
 import { useMemo } from 'react'
-import { Badge } from '@/components/ui/badge'
+import { StatusBadge, type StatusTone } from '@/components/ui/status-badge'
 import { Button } from '@/components/ui/button'
 import { TableColumn } from '@/components/ui/enhanced-table'
 import { DateCell, CurrencyCell, TextCell, ActionCell } from '@/components/table-cells'
 import { Trash2, Printer } from 'lucide-react'
-import { cn } from '@/lib/utils'
 import {
   PAYMENT_REQUEST_STATUS_LABELS,
-  PAYMENT_REQUEST_STATUS_COLORS,
+  PAYMENT_REQUEST_STATUS_TONES,
   DISBURSEMENT_STATUS_LABELS,
-  DISBURSEMENT_STATUS_COLORS,
+  DISBURSEMENT_STATUS_TONES,
 } from '../constants'
 import { DisbursementOrder, PaymentRequest } from '../types'
 import { DISBURSEMENT_LABELS } from '../constants/labels'
@@ -92,16 +91,15 @@ export function usePendingColumns({ selectedRequests, onSelectRequest }: UsePend
       {
         key: 'status',
         label: DISBURSEMENT_LABELS.狀態,
-        render: (value: unknown) => (
-          <Badge
-            className={cn(
-              'text-white',
-              PAYMENT_REQUEST_STATUS_COLORS[value as keyof typeof PAYMENT_REQUEST_STATUS_COLORS]
-            )}
-          >
-            {PAYMENT_REQUEST_STATUS_LABELS[value as keyof typeof PAYMENT_REQUEST_STATUS_LABELS]}
-          </Badge>
-        ),
+        render: (value: unknown) => {
+          const k = value as keyof typeof PAYMENT_REQUEST_STATUS_TONES
+          return (
+            <StatusBadge
+              tone={(PAYMENT_REQUEST_STATUS_TONES[k] || 'pending') as StatusTone}
+              label={PAYMENT_REQUEST_STATUS_LABELS[k] || String(value)}
+            />
+          )
+        },
       },
     ],
     [selectedRequests, onSelectRequest]
@@ -219,16 +217,15 @@ export function useHistoryColumns({ onPrintPDF, getEmployeeName }: UseHistoryCol
       {
         key: 'status',
         label: DISBURSEMENT_LABELS.狀態,
-        render: (value: unknown) => (
-          <Badge
-            className={cn(
-              'text-white',
-              DISBURSEMENT_STATUS_COLORS[value as keyof typeof DISBURSEMENT_STATUS_COLORS]
-            )}
-          >
-            {DISBURSEMENT_STATUS_LABELS[value as keyof typeof DISBURSEMENT_STATUS_LABELS]}
-          </Badge>
-        ),
+        render: (value: unknown) => {
+          const k = value as keyof typeof DISBURSEMENT_STATUS_TONES
+          return (
+            <StatusBadge
+              tone={(DISBURSEMENT_STATUS_TONES[k] || 'pending') as StatusTone}
+              label={DISBURSEMENT_STATUS_LABELS[k] || String(value)}
+            />
+          )
+        },
       },
       {
         key: 'created_at',

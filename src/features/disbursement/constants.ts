@@ -33,9 +33,23 @@ export const PAYMENT_REQUEST_STATUS_LABELS = {
   billed: DISBURSEMENT_LABELS.已出帳,
 } as const
 
-// 請款單狀態顏色
+// 請款單狀態顏色（@deprecated - 改用 StatusBadge tone）
 export const PAYMENT_REQUEST_STATUS_COLORS = {
   pending: 'bg-morandi-gold',
   confirmed: 'bg-status-info',
   billed: 'bg-morandi-green',
+} as const
+
+// 請款單狀態 → StatusBadge tone（統一樣式）
+export const PAYMENT_REQUEST_STATUS_TONES = {
+  pending: 'pending',
+  confirmed: 'info',
+  billed: 'success',
+} as const
+
+// 出納單狀態 → StatusBadge tone
+export const DISBURSEMENT_STATUS_TONES = {
+  pending: 'pending',
+  confirmed: 'info',
+  paid: 'success',
 } as const

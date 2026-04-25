@@ -1,10 +1,10 @@
 import { useMemo, useCallback } from 'react'
 import { TableColumn, useEnhancedTable } from '@/components/ui/enhanced-table'
 import { PaymentRequest } from '@/stores/types'
-import { Badge } from '@/components/ui/badge'
-import { cn } from '@/lib/utils'
+import { StatusBadge, type StatusTone } from '@/components/ui/status-badge'
 import { DateCell, CurrencyCell } from '@/components/table-cells'
-import { statusLabels, statusColors } from '../types' // Assuming statusLabels and statusColors are now correctly typed
+import { statusLabels } from '../types' // Assuming statusLabels and statusColors are now correctly typed
+import { PAYMENT_REQUEST_STATUS_TONES } from '@/features/disbursement/constants'
 import {
   REQUEST_DATE_INPUT_LABELS,
   REQUEST_DETAIL_DIALOG_LABELS,
@@ -82,12 +82,10 @@ export function useRequestTable(payment_requests: PaymentRequest[]) {
         label: USE_REQUEST_TABLE_LABELS.狀態,
         sortable: true,
         render: (value: unknown) => {
-          const statusBadge = getStatusBadge(value as PaymentRequest['status'])
-          return (
-            <Badge className={cn('text-xs text-white', statusBadge.color)}>
-              {statusBadge.label}
-            </Badge>
-          )
+          const status = (value || 'pending') as keyof typeof PAYMENT_REQUEST_STATUS_TONES
+          const tone = (PAYMENT_REQUEST_STATUS_TONES[status] || 'pending') as StatusTone
+          const label = statusLabels[status as 'pending' | 'confirmed' | 'billed'] || ''
+          return <StatusBadge tone={tone} label={label} />
         },
       },
     ],
@@ -173,11 +171,4 @@ export function useRequestTable(payment_requests: PaymentRequest[]) {
   }
 }
 
-// Helper function for status badge, explicitly typed
-function getStatusBadge(status: PaymentRequest['status']) {
-  const currentStatus = (status || 'pending') as 'pending' | 'confirmed' | 'billed' // Default to 'pending' if null
-  return {
-    label: statusLabels[currentStatus],
-    color: statusColors[currentStatus],
-  }
-}
+// getStatusBadge helper 已移除（改用 StatusBadge component + PAYMENT_REQUEST_STATUS_TONES）
