@@ -1,6 +1,8 @@
 'use client'
 
 import { useMemo } from 'react'
+import { DollarSign, HandCoins } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import type { Tour } from '@/stores/types'
 import {
   useReceipts,
@@ -34,24 +36,30 @@ function formatAmount(amount: number): string {
 
 function ProfitTableColumn({ title, rows }: { title: string; rows: ProfitTableRow[] }) {
   return (
-    <div className="flex-1 min-w-[280px]">
-      <h4 className="text-sm font-semibold mb-2 text-muted-foreground">{title}</h4>
-      <div className="border rounded-lg overflow-hidden">
-        <table className="w-full text-sm">
-          <tbody>
-            {rows.map((row, i) => (
-              <tr key={i} className={i > 0 ? 'border-t' : ''}>
-                <td className="px-3 py-2">{row.label}</td>
-                <td
-                  className={`px-3 py-2 text-right font-mono tabular-nums ${row.amount < 0 ? 'text-morandi-red' : ''}`}
-                >
-                  ${formatAmount(row.amount)}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+    <div className="flex-1">
+      <div className="bg-morandi-container/30 px-4 py-2 text-xs font-medium text-morandi-secondary border-b border-border">
+        {title}
       </div>
+      <table className="w-full text-sm">
+        <tbody>
+          {rows.map((row, i) => (
+            <tr
+              key={i}
+              className="border-b border-border last:border-b-0 hover:bg-morandi-bg/50"
+            >
+              <td className="px-4 py-2 text-morandi-secondary">{row.label}</td>
+              <td
+                className={cn(
+                  'px-4 py-2 text-right font-mono tabular-nums',
+                  row.amount < 0 ? 'text-morandi-red font-medium' : 'text-morandi-primary'
+                )}
+              >
+                ${formatAmount(row.amount)}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   )
 }
@@ -152,92 +160,118 @@ export function ProfitTab({ tour }: ProfitTabProps) {
   }, [receipts, normalExpenses, bonusSettings, memberCount, employeeDict])
 
   const { left, right } = useMemo(() => generateProfitTableData(profitResult), [profitResult])
+  const allBonuses = [...profitResult.team_bonuses, ...profitResult.employee_bonuses]
+  const netProfit = profitResult.net_profit
 
   return (
-    <div className="space-y-6">
-      {/* 利潤計算表（兩欄並排） */}
-      <section>
-        <h3 className="text-base font-semibold mb-2">{PROFIT_TAB_LABELS.profit_table}</h3>
-        <div className="flex flex-col md:flex-row gap-4">
+    <div className="space-y-4">
+      {/* 利潤計算 — 跟 TourReceipts/TourCosts 同樣的卡片風格、金色主題 */}
+      <div className="border border-border rounded-lg overflow-hidden bg-card">
+        <div className="px-4 py-2 bg-morandi-gold/10 flex items-center gap-2">
+          <DollarSign className="w-4 h-4 text-morandi-gold" />
+          <span className="text-sm font-medium text-morandi-gold">
+            {PROFIT_TAB_LABELS.profit_table}
+          </span>
+          <span
+            className={cn(
+              'ml-auto text-xs font-mono tabular-nums font-medium',
+              netProfit >= 0 ? 'text-morandi-green' : 'text-morandi-red'
+            )}
+          >
+            {PROFIT_TAB_LABELS.bonus_detail.replace('明細', '')}：
+            {netProfit >= 0 ? '+' : ''}${formatAmount(netProfit)}
+          </span>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-border">
           <ProfitTableColumn title={PROFIT_TAB_LABELS.left_column} rows={left} />
           <ProfitTableColumn title={PROFIT_TAB_LABELS.right_column} rows={right} />
         </div>
-      </section>
+      </div>
 
       {/* 獎金明細 */}
-      <section>
-        <h3 className="text-base font-semibold mb-2">{PROFIT_TAB_LABELS.bonus_detail}</h3>
-        {profitResult.net_profit < 0 ? (
-          <div className="bg-status-warning-bg border border-status-warning/30 rounded-lg p-4 text-status-warning text-sm">
+      <div className="border border-border rounded-lg overflow-hidden bg-card">
+        <div className="px-4 py-2 bg-morandi-secondary/10 flex items-center gap-2">
+          <HandCoins className="w-4 h-4 text-morandi-secondary" />
+          <span className="text-sm font-medium text-morandi-secondary">
+            {PROFIT_TAB_LABELS.bonus_detail} ({allBonuses.length + bonusExpenses.length})
+          </span>
+        </div>
+        {netProfit < 0 ? (
+          <div className="px-4 py-3 text-status-warning text-sm bg-status-warning-bg/50">
             {PROFIT_TABLE_LABELS.no_bonus}
           </div>
+        ) : allBonuses.length === 0 && bonusExpenses.length === 0 ? (
+          <div className="px-4 py-12 text-center text-morandi-secondary text-sm">
+            <HandCoins size={24} className="mx-auto mb-3 opacity-50" />
+            <p>{TOURS_LABELS.SETTINGS_6822}</p>
+          </div>
         ) : (
-          <div className="space-y-2">
-            {[...profitResult.team_bonuses, ...profitResult.employee_bonuses].length === 0 ? (
-              <div className="text-muted-foreground text-sm py-4 text-center">
-                {TOURS_LABELS.SETTINGS_6822}
-              </div>
-            ) : (
-              <div className="border rounded-lg overflow-hidden">
-                <table className="w-full text-sm">
-                  <thead className="bg-muted/50">
-                    <tr>
-                      <th className="text-left px-3 py-2 font-medium">{TOURS_LABELS.TYPE}</th>
-                      <th className="text-left px-3 py-2 font-medium">{TOURS_LABELS.LABEL_2076}</th>
-                      <th className="text-right px-3 py-2 font-medium">{TOURS_LABELS.AMOUNT}</th>
+          <>
+            {allBonuses.length > 0 && (
+              <table className="w-full text-sm">
+                <thead className="border-b border-border">
+                  <tr className="text-xs text-morandi-secondary">
+                    <th className="text-left px-4 py-2 font-medium">{TOURS_LABELS.TYPE}</th>
+                    <th className="text-left px-4 py-2 font-medium">{TOURS_LABELS.LABEL_2076}</th>
+                    <th className="text-right px-4 py-2 font-medium">{TOURS_LABELS.AMOUNT}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {allBonuses.map((b, i) => (
+                    <tr
+                      key={i}
+                      className="border-b border-border last:border-b-0 hover:bg-morandi-bg/50"
+                    >
+                      <td className="px-4 py-2">
+                        <span
+                          className={cn(
+                            'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium',
+                            BONUS_TYPE_BADGE_VARIANTS[b.setting.type as BonusSettingType] || ''
+                          )}
+                        >
+                          {BONUS_TYPE_LABELS[b.setting.type as BonusSettingType]}
+                        </span>
+                      </td>
+                      <td className="px-4 py-2 text-morandi-secondary">{b.employee_name || '-'}</td>
+                      <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-primary font-medium">
+                        ${formatAmount(b.amount)}
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {[...profitResult.team_bonuses, ...profitResult.employee_bonuses].map(
-                      (b, i) => (
-                        <tr key={i} className="border-t">
-                          <td className="px-3 py-2">
-                            <span
-                              className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${BONUS_TYPE_BADGE_VARIANTS[b.setting.type as BonusSettingType] || ''}`}
-                            >
-                              {BONUS_TYPE_LABELS[b.setting.type as BonusSettingType]}
-                            </span>
-                          </td>
-                          <td className="px-3 py-2 text-muted-foreground">
-                            {b.employee_name || '-'}
-                          </td>
-                          <td className="px-3 py-2 text-right font-mono">
-                            ${formatAmount(b.amount)}
-                          </td>
-                        </tr>
-                      )
-                    )}
-                  </tbody>
-                </table>
-              </div>
+                  ))}
+                </tbody>
+              </table>
             )}
 
-            {/* 獎金請款 */}
             {bonusExpenses.length > 0 && (
-              <div className="mt-4">
-                <h4 className="text-sm font-medium mb-2 text-muted-foreground">
+              <>
+                <div className="px-4 py-2 bg-morandi-container/30 text-xs font-medium text-morandi-secondary border-y border-border">
                   {TOURS_LABELS.LABEL_8378}
-                </h4>
-                <div className="border rounded-lg overflow-hidden">
-                  <table className="w-full text-sm">
-                    <tbody>
-                      {bonusExpenses.map(pr => (
-                        <tr key={pr.id} className="border-t first:border-t-0">
-                          <td className="px-3 py-2">{pr.code || pr.request_number}</td>
-                          <td className="px-3 py-2">{pr.supplier_name || '-'}</td>
-                          <td className="px-3 py-2 text-right font-mono">
-                            ${formatAmount(pr.amount)}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
                 </div>
-              </div>
+                <table className="w-full text-sm">
+                  <tbody>
+                    {bonusExpenses.map(pr => (
+                      <tr
+                        key={pr.id}
+                        className="border-b border-border last:border-b-0 hover:bg-morandi-bg/50"
+                      >
+                        <td className="px-4 py-2 text-morandi-secondary">
+                          {pr.code || pr.request_number || '-'}
+                        </td>
+                        <td className="px-4 py-2 text-morandi-secondary">
+                          {pr.supplier_name || '-'}
+                        </td>
+                        <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-red font-medium">
+                          -${formatAmount(pr.amount ?? 0)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </>
             )}
-          </div>
+          </>
         )}
-      </section>
+      </div>
     </div>
   )
 }
