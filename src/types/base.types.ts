@@ -168,7 +168,6 @@ export interface Todo {
 
   // 任務類型與關聯（新增）
   task_type?: TodoTaskType // 任務類型（決定右半部顯示什麼表單）
-  tour_request_id?: string // 連結需求單
   tour_id?: string // 連結團
 
   // 看板欄位（Trello 風格）

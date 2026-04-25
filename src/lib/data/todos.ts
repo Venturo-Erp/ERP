@@ -28,7 +28,7 @@ export async function getAllTodos(workspaceId: string): Promise<Todo[]> {
   const { data, error } = await supabase
     .from('todos')
     .select(
-      'id, title, status, priority, deadline, completed, assignee, tour_id, task_type, tour_request_id, visibility, related_items, sub_tasks, notes, enabled_quick_actions, is_public, needs_creator_notification, column_id, workspace_id, created_at, created_by, updated_at'
+      'id, title, status, priority, deadline, completed, assignee, tour_id, task_type, visibility, related_items, sub_tasks, notes, enabled_quick_actions, is_public, needs_creator_notification, column_id, workspace_id, created_at, created_by, updated_at'
     )
     .eq('workspace_id', workspaceId) // 🔒 Workspace 過濾
     .order('created_at', { ascending: false })
@@ -55,7 +55,7 @@ export async function getTodoById(id: string, workspaceId: string): Promise<Todo
   const { data, error } = await supabase
     .from('todos')
     .select(
-      'id, title, status, priority, deadline, completed, assignee, tour_id, task_type, tour_request_id, visibility, related_items, sub_tasks, notes, enabled_quick_actions, is_public, needs_creator_notification, column_id, workspace_id, created_at, created_by, updated_at'
+      'id, title, status, priority, deadline, completed, assignee, tour_id, task_type, visibility, related_items, sub_tasks, notes, enabled_quick_actions, is_public, needs_creator_notification, column_id, workspace_id, created_at, created_by, updated_at'
     )
     .eq('id', id)
     .eq('workspace_id', workspaceId) // 🔒 Workspace 過濾
@@ -82,7 +82,7 @@ export async function getTodosByStatus(status: string, workspaceId: string): Pro
   const { data, error } = await supabase
     .from('todos')
     .select(
-      'id, title, status, priority, deadline, completed, assignee, tour_id, task_type, tour_request_id, visibility, related_items, sub_tasks, notes, enabled_quick_actions, is_public, needs_creator_notification, column_id, workspace_id, created_at, created_by, updated_at'
+      'id, title, status, priority, deadline, completed, assignee, tour_id, task_type, visibility, related_items, sub_tasks, notes, enabled_quick_actions, is_public, needs_creator_notification, column_id, workspace_id, created_at, created_by, updated_at'
     )
     .eq('status', status)
     .eq('workspace_id', workspaceId) // 🔒 Workspace 過濾
@@ -110,7 +110,7 @@ export async function getTodosByAssignee(assigneeId: string, workspaceId: string
   const { data, error } = await supabase
     .from('todos')
     .select(
-      'id, title, status, priority, deadline, completed, assignee, tour_id, task_type, tour_request_id, visibility, related_items, sub_tasks, notes, enabled_quick_actions, is_public, needs_creator_notification, column_id, workspace_id, created_at, created_by, updated_at'
+      'id, title, status, priority, deadline, completed, assignee, tour_id, task_type, visibility, related_items, sub_tasks, notes, enabled_quick_actions, is_public, needs_creator_notification, column_id, workspace_id, created_at, created_by, updated_at'
     )
     .eq('assignee', assigneeId)
     .eq('workspace_id', workspaceId) // 🔒 Workspace 過濾
@@ -143,7 +143,7 @@ export async function getTodosByEntity(
   const { data, error } = await supabase
     .from('todos')
     .select(
-      'id, title, status, priority, deadline, completed, assignee, tour_id, task_type, tour_request_id, visibility, related_items, sub_tasks, notes, enabled_quick_actions, is_public, needs_creator_notification, column_id, workspace_id, created_at, created_by, updated_at'
+      'id, title, status, priority, deadline, completed, assignee, tour_id, task_type, visibility, related_items, sub_tasks, notes, enabled_quick_actions, is_public, needs_creator_notification, column_id, workspace_id, created_at, created_by, updated_at'
     )
     .contains('related_items', [{ type: entityType, id: entityId }])
     .eq('workspace_id', workspaceId) // 🔒 Workspace 過濾
