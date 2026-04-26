@@ -3,7 +3,7 @@
  * 收款管理頁面（重構版）
  *
  * 功能：
- * 1. 收款單列表
+ * 1. 收款單列表（含 [全部 / 團體收款 / 公司收款] 三 tab）
  * 2. 支援 5 種收款方式（現金/匯款/刷卡/支票/LinkPay）
  * 3. LinkPay 自動生成付款連結
  * 4. 會計確認實收金額流程
@@ -15,9 +15,10 @@ import { useAuthStore } from '@/stores'
 import { useTabPermissions } from '@/lib/permissions'
 import { UnauthorizedPage } from '@/components/unauthorized-page'
 import { ModuleLoading } from '@/components/module-loading'
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
+import { cn } from '@/lib/utils'
 import { FinanceLabels, PAYMENT_METHOD_MAP } from '../constants/labels'
 import { ListPageLayout } from '@/components/layout/list-page-layout'
 import { Button } from '@/components/ui/button'
@@ -25,6 +26,23 @@ import { TableColumn } from '@/components/ui/enhanced-table'
 import { Plus, Edit2, CheckSquare, Loader2 } from 'lucide-react'
 import { alert } from '@/lib/ui/alert-dialog'
 import { DateCell, StatusCell, ActionCell, CurrencyCell } from '@/components/table-cells'
+
+type ReceiptTabValue = 'all' | 'tour' | 'company'
+
+interface ReceiptTabConfig {
+  value: ReceiptTabValue
+  label: string
+}
+
+// 團體收款 = 有 tour_id（直接綁團、或有 order_id 透過 order 綁團）
+function isTourReceipt(r: Receipt): boolean {
+  return !!r.tour_id || !!r.order_id
+}
+
+// 公司收款 = 沒綁 tour 也沒綁 order（公司其他進帳：退稅、利息、佣金等）
+function isCompanyReceipt(r: Receipt): boolean {
+  return !r.tour_id && !r.order_id
+}
 
 // Dynamic imports for dialogs (reduce initial bundle)
 const AddReceiptDialog = dynamic(
@@ -69,6 +87,33 @@ export default function PaymentsPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isBatchDialogOpen, setIsBatchDialogOpen] = useState(false)
   const [editingReceipt, setEditingReceipt] = useState<Receipt | null>(null)
+  const [activeTab, setActiveTab] = useState<ReceiptTabValue>('all')
+
+  // 根據 capability 顯示 tab
+  const canTour = canRead('finance', 'payments')
+  const canCompany = canRead('finance', 'payments-company')
+
+  const visibleTabs = useMemo<ReceiptTabConfig[]>(() => {
+    const tabs: ReceiptTabConfig[] = []
+    if (canTour || canCompany) tabs.push({ value: 'all', label: '全部' })
+    if (canTour) tabs.push({ value: 'tour', label: '🧳 團體收款' })
+    if (canCompany) tabs.push({ value: 'company', label: '🏢 公司收款' })
+    return tabs
+  }, [canTour, canCompany])
+
+  // Tab filter
+  const filteredByTab = useMemo(() => {
+    if (activeTab === 'all') {
+      return receipts.filter(r => {
+        if (canTour && isTourReceipt(r)) return true
+        if (canCompany && isCompanyReceipt(r)) return true
+        return false
+      })
+    }
+    if (activeTab === 'tour') return receipts.filter(isTourReceipt)
+    if (activeTab === 'company') return receipts.filter(isCompanyReceipt)
+    return receipts
+  }, [receipts, activeTab, canTour, canCompany])
 
   // 如果有 URL 參數，自動開啟新增對話框
   useEffect(() => {
@@ -209,13 +254,13 @@ export default function PaymentsPage() {
   ]
 
   if (permLoading) return <ModuleLoading fullscreen />
-  if (!canRead('finance', 'payments')) return <UnauthorizedPage />
+  if (!canTour && !canCompany) return <UnauthorizedPage />
 
   return (
     <>
       <ListPageLayout
         title={FinanceLabels.paymentManagement}
-        data={receipts}
+        data={filteredByTab}
         loading={loading}
         columns={columns}
         searchFields={['receipt_number', 'tour_name']}
@@ -224,14 +269,30 @@ export default function PaymentsPage() {
         defaultSort={{ key: 'receipt_date', direction: 'desc' }}
         initialPageSize={15}
         headerActions={
-          <button
-            type="button"
-            onClick={() => setIsDialogOpen(true)}
-            className="bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors px-4 py-2 rounded-lg text-sm font-medium flex items-center transition-colors"
-          >
-            <Plus className="w-4 h-4 mr-2" />
+          <Button variant="soft-gold" onClick={() => setIsDialogOpen(true)}>
+            <Plus size={16} />
             {FinanceLabels.addPayment}
-          </button>
+          </Button>
+        }
+        beforeTable={
+          visibleTabs.length > 1 ? (
+            <div className="flex items-center gap-1 border-b border-border mb-4">
+              {visibleTabs.map(tab => (
+                <button
+                  key={tab.value}
+                  onClick={() => setActiveTab(tab.value)}
+                  className={cn(
+                    'px-4 py-2 text-sm font-medium transition-colors border-b-2',
+                    activeTab === tab.value
+                      ? 'text-morandi-gold border-morandi-gold'
+                      : 'text-morandi-secondary border-transparent hover:text-morandi-primary hover:border-morandi-container'
+                  )}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          ) : null
         }
       />
 

@@ -114,6 +114,7 @@ export const MODULES: ModuleDefinition[] = [
       { code: 'payments-confirm', name: '確認核帳', description: '收款確認與核帳' },
       { code: 'requests', name: '請款管理', description: '團體請款' },
       { code: 'requests-company', name: '公司請款', description: '非團體的公司支出' },
+      { code: 'requests-salary', name: '薪資請款', description: '員工薪資請款（與公司請款權限隔離）' },
       { code: 'treasury', name: '金庫總覽', description: '資金狀況總覽' },
       { code: 'disbursement', name: '出納管理', description: '撥款作業' },
       { code: 'reports', name: '報表管理', description: '財務報表' },
