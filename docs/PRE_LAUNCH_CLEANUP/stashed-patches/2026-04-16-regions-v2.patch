@@ -1,0 +1,825 @@
+diff --git a/src/app/(main)/settings/workspaces/page.tsx b/src/app/(main)/settings/workspaces/page.tsx
+index b6292c164..03ac8c6b3 100644
+--- a/src/app/(main)/settings/workspaces/page.tsx
++++ b/src/app/(main)/settings/workspaces/page.tsx
+@@ -20,6 +20,7 @@ import { toast } from 'sonner'
+ import { alert } from '@/lib/ui/alert-dialog'
+ import { logger } from '@/lib/utils/logger'
+ import { supabase } from '@/lib/supabase/client'
++import useSWR from 'swr'
+ import { LABELS } from '../constants/labels'
+ 
+ const WORKSPACE_TYPES = [
+@@ -57,7 +58,17 @@ export default function WorkspacesPage() {
+     code: '',
+     type: '',
+     description: '',
++    home_country_code: 'TW',
+   })
++
++  const { data: refCountries = [] } = useSWR('ref_countries:list', async () => {
++    const { data } = await supabase
++      .from('ref_countries')
++      .select('code, name_zh')
++      .eq('is_active', true)
++      .order('name_zh')
++    return data || []
++  }, { revalidateOnFocus: false })
+   const [codeError, setCodeError] = useState('')
+ 
+   // Create Admin Dialog state
+@@ -170,6 +181,7 @@ export default function WorkspacesPage() {
+         type: newWorkspace.type || null,
+         description: newWorkspace.description,
+         is_active: true,
++        home_country_code: newWorkspace.home_country_code || 'TW',
+       })
+ 
+       if (createdWs) {
+@@ -202,7 +214,7 @@ export default function WorkspacesPage() {
+         setCreatedWorkspaceId(createdWs.id)
+         setCreatedWorkspaceCode(newWorkspace.code)
+         setShowAddDialog(false)
+-        setNewWorkspace({ name: '', code: '', type: '', description: '' })
++        setNewWorkspace({ name: '', code: '', type: '', description: '', home_country_code: 'TW' })
+         setCodeError('')
+         setAdminForm({ employeeNumber: 'E001', name: '', password: '12345678' })
+         setShowAdminDialog(true)
+@@ -535,6 +547,32 @@ export default function WorkspacesPage() {
+               </Select>
+             </div>
+ 
++            <div>
++              <label className="text-sm font-medium text-morandi-primary mb-2 block">
++                公司所在國
++              </label>
++              <Select
++                value={newWorkspace.home_country_code}
++                onValueChange={value =>
++                  setNewWorkspace(prev => ({ ...prev, home_country_code: value }))
++                }
++              >
++                <SelectTrigger className="border-morandi-container/30">
++                  <SelectValue placeholder="選擇公司所在國" />
++                </SelectTrigger>
++                <SelectContent>
++                  {refCountries.map(c => (
++                    <SelectItem key={c.code} value={c.code}>
++                      {c.name_zh} ({c.code})
++                    </SelectItem>
++                  ))}
++                </SelectContent>
++              </Select>
++              <p className="text-xs text-morandi-secondary mt-1">
++                公司所在的國家，在系統中會歸類為「國內」
++              </p>
++            </div>
++
+             <div>
+               <label className="text-sm font-medium text-morandi-primary mb-2 block">
+                 {LABELS.WORKSPACE_DESCRIPTION_LABEL}
+diff --git a/src/components/documents/ItineraryVersionPicker.tsx b/src/components/documents/ItineraryVersionPicker.tsx
+index 20840d6de..444a99436 100644
+--- a/src/components/documents/ItineraryVersionPicker.tsx
++++ b/src/components/documents/ItineraryVersionPicker.tsx
+@@ -23,7 +23,8 @@ import {
+ import { Button } from '@/components/ui/button'
+ import { cn } from '@/lib/utils'
+ import { useAuthStore } from '@/stores'
+-import { useItineraries, createItinerary, updateItinerary, useCountries, useCities } from '@/data'
++import { useItineraries, createItinerary, updateItinerary, useCities } from '@/data'
++import { useEnabledCountries as useCountries } from '@/data/hooks/useEnabledCountries'
+ import type { Tour, Itinerary } from '@/stores/types'
+ import { logger } from '@/lib/utils/logger'
+ import { stripHtml } from '@/lib/utils/string-utils'
+diff --git a/src/components/editor/tour-form/hooks/useRegionData.ts b/src/components/editor/tour-form/hooks/useRegionData.ts
+index 360c371d3..8fb4f5ea6 100644
+--- a/src/components/editor/tour-form/hooks/useRegionData.ts
++++ b/src/components/editor/tour-form/hooks/useRegionData.ts
+@@ -1,5 +1,6 @@
+ import React from 'react'
+-import { useCountries, useCities } from '@/data'
++import { useCities } from '@/data'
++import { useEnabledCountries as useCountries } from '@/data/hooks/useEnabledCountries'
+ import { logger } from '@/lib/utils/logger'
+ import { CityOption } from '../types'
+ import { COMP_EDITOR_LABELS } from '../../constants/labels'
+diff --git a/src/components/selectors/CountryAirportSelector.tsx b/src/components/selectors/CountryAirportSelector.tsx
+index a82d504ac..16d8e7e48 100644
+--- a/src/components/selectors/CountryAirportSelector.tsx
++++ b/src/components/selectors/CountryAirportSelector.tsx
+@@ -5,7 +5,8 @@ import { Combobox } from '@/components/ui/combobox'
+ import { Input } from '@/components/ui/input'
+ import { FormDialog } from '@/components/dialog/form-dialog'
+ import { useAirports, type Airport } from '@/features/tours/hooks/useAirports'
+-import { useCountries, invalidateCountries } from '@/data' // 🔧 核心表架構
++import { invalidateCountries } from '@/data' // 🔧 核心表架構
++import { useEnabledCountries as useCountries } from '@/data/hooks/useEnabledCountries'
+ import { SELECTORS_LABELS } from './constants/labels'
+ import { logger } from '@/lib/utils/logger'
+ 
+diff --git a/src/components/shared/destination-selector.tsx b/src/components/shared/destination-selector.tsx
+index 90a8806f7..1a610490b 100644
+--- a/src/components/shared/destination-selector.tsx
++++ b/src/components/shared/destination-selector.tsx
+@@ -3,7 +3,8 @@
+ import React, { useState, useEffect } from 'react'
+ import { Input } from '@/components/ui/input'
+ import { Combobox } from '@/components/ui/combobox'
+-import { useCountries, useCities } from '@/data'
++import { useCities } from '@/data'
++import { useEnabledCountries as useCountries } from '@/data/hooks/useEnabledCountries'
+ import { SHARED_LABELS } from './constants/labels'
+ 
+ interface DestinationSelectorProps {
+diff --git a/src/data/entities/cities.ts b/src/data/entities/cities.ts
+index 7d5348187..e0b826607 100644
+--- a/src/data/entities/cities.ts
++++ b/src/data/entities/cities.ts
+@@ -11,11 +11,11 @@ import type { City } from '@/stores/region-store'
+ export const cityEntity = createEntityHook<City>('cities', {
+   list: {
+     select:
+-      'id,country_id,region_id,name,name_en,description,timezone,display_order,is_active,created_at,updated_at,airport_code,background_image_url,background_image_url_2,primary_image,is_major,parent_city_id,workspace_id,usage_count',
++      'id,country_id,country_code,region_id,name,name_en,description,timezone,display_order,is_active,created_at,updated_at,airport_code,background_image_url,background_image_url_2,primary_image,is_major,parent_city_id,workspace_id,usage_count',
+     orderBy: { column: 'display_order', ascending: true },
+   },
+   slim: {
+-    select: 'id,name,name_en,airport_code,country_id',
++    select: 'id,name,name_en,airport_code,country_id,country_code',
+   },
+   detail: { select: '*' },
+   cache: CACHE_PRESETS.low, // 基礎資料，變動少
+diff --git a/src/data/entities/workspaces.ts b/src/data/entities/workspaces.ts
+index 5094f654a..c6a1db1f0 100644
+--- a/src/data/entities/workspaces.ts
++++ b/src/data/entities/workspaces.ts
+@@ -17,13 +17,14 @@ export interface WorkspaceEntity extends BaseEntity {
+   is_active: boolean | null
+   seal_image_url?: string | null
+   contract_seal_image_url?: string | null
++  home_country_code?: string | null
+   created_by?: string | null
+ }
+ 
+ export const workspaceEntity = createEntityHook<WorkspaceEntity>('workspaces', {
+   list: {
+     select:
+-      'id,name,description,icon,is_active,created_at,updated_at,created_by,code,type,employee_number_prefix,default_password,logo_url,address,phone,fax,tax_id,bank_name,bank_branch,bank_account,bank_account_name,company_seal_url,email,website,invoice_seal_image_url,updated_by,legal_name,subtitle,contract_seal_image_url,personal_seal_url,premium_enabled,custom_domain',
++      'id,name,description,icon,is_active,created_at,updated_at,created_by,code,type,employee_number_prefix,default_password,logo_url,address,phone,fax,tax_id,bank_name,bank_branch,bank_account,bank_account_name,company_seal_url,email,website,invoice_seal_image_url,updated_by,legal_name,subtitle,contract_seal_image_url,personal_seal_url,premium_enabled,custom_domain,home_country_code',
+     orderBy: { column: 'created_at', ascending: false },
+   },
+   slim: {
+diff --git a/src/features/attractions/components/DatabaseManagementPage.tsx b/src/features/attractions/components/DatabaseManagementPage.tsx
+index 276246a07..e326d11b3 100644
+--- a/src/features/attractions/components/DatabaseManagementPage.tsx
++++ b/src/features/attractions/components/DatabaseManagementPage.tsx
+@@ -7,7 +7,7 @@ import { Combobox } from '@/components/ui/combobox'
+ import { ContentPageLayout } from '@/components/layout/content-page-layout'
+ import { Tabs, TabsContent } from '@/components/ui/tabs'
+ import { useAttractionsDialog } from '../hooks/useAttractionsDialog'
+-import { useCountries } from '@/data'
++import { useEnabledCountries as useCountries } from '@/data/hooks/useEnabledCountries'
+ import { useAuthStore } from '@/stores'
+ import { ATTRACTIONS_DIALOG_LABELS, DATABASE_MANAGEMENT_PAGE_LABELS } from '../constants/labels'
+ import type { TabItem } from '@/components/layout/list-page-layout'
+diff --git a/src/features/attractions/components/tabs/AttractionsTab.tsx b/src/features/attractions/components/tabs/AttractionsTab.tsx
+index c00a6339f..bd6fabb1b 100644
+--- a/src/features/attractions/components/tabs/AttractionsTab.tsx
++++ b/src/features/attractions/components/tabs/AttractionsTab.tsx
+@@ -17,7 +17,8 @@ import { useAttractionsDialog } from '../../hooks/useAttractionsDialog'
+ import { useAttractionsReorder } from '../../hooks/useAttractionsReorder'
+ import { AttractionsList } from '../AttractionsList'
+ import { SortableAttractionsList } from '../SortableAttractionsList'
+-import { useCountries, useRegions, useCities } from '@/data'
++import { useRegions, useCities } from '@/data'
++import { useEnabledCountries as useCountries } from '@/data/hooks/useEnabledCountries'
+ import { Button } from '@/components/ui/button'
+ import { ArrowUpDown, List, SortAsc, Loader2 } from 'lucide-react'
+ import { ATTRACTIONS_TAB_LABELS } from '../../constants/labels'
+diff --git a/src/features/attractions/components/tabs/RegionsTab.tsx b/src/features/attractions/components/tabs/RegionsTab.tsx
+index 4bdf06336..2e8a4cba7 100644
+--- a/src/features/attractions/components/tabs/RegionsTab.tsx
++++ b/src/features/attractions/components/tabs/RegionsTab.tsx
+@@ -3,28 +3,48 @@
+ /**
+  * RegionsTab - 地區管理標籤頁
+  *
+- * 按子區域（東北亞/東南亞/西歐…）分組顯示國家。
+- * 資料來自舊 countries 表 + ref_countries.sub_region 合併。
+- * Stage 4a：可切換國家啟用/停用（workspace_countries overlay）。
++ * 直接從 ref_countries 讀取（全域 SSOT），按 sub_region 分組。
++ * 啟用/停用 toggle 寫入 workspace_countries overlay。
++ * 城市計數透過 cities.country_code 關聯。
+  */
+ 
+ import { useState, useMemo, useCallback } from 'react'
+-import { Check, ChevronDown, ChevronRight } from 'lucide-react'
++import { Check, ChevronDown, ChevronRight, Plus } from 'lucide-react'
+ import useSWR, { mutate } from 'swr'
+-import { useCountries, useRegions, useCities } from '@/data'
++import { useRegions, useCities } from '@/data'
+ import { supabase } from '@/lib/supabase/client'
+ import { Button } from '@/components/ui/button'
++import { Card } from '@/components/ui/card'
+ import { Switch } from '@/components/ui/switch'
+ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
++import { Input } from '@/components/ui/input'
+ import { REGIONS_TAB_LABELS } from '../../constants/labels'
+ import { toast } from 'sonner'
+ 
+-type Country = NonNullable<ReturnType<typeof useCountries>['items']>[number]
++interface RefCountry {
++  code: string
++  name_zh: string
++  name_en: string
++  continent: string | null
++  sub_region: string | null
++  is_active: boolean
++}
++
++interface CountryWithEnabled extends RefCountry {
++  is_enabled: boolean
++}
++
+ type City = NonNullable<ReturnType<typeof useCities>['items']>[number]
+ 
++const DOMESTIC_LABEL = '國內'
++
+ const SUB_REGION_ORDER = [
++  DOMESTIC_LABEL,
+   '東北亞',
+   '東南亞',
++  '中國',
++  '南亞',
++  '中亞',
+   '中東',
+   '西歐',
+   '南歐',
+@@ -37,51 +57,65 @@ const SUB_REGION_ORDER = [
+   '其他',
+ ]
+ 
+-interface RefCountryInfo {
+-  sub_region: string
+-  is_enabled: boolean
+-}
++const CACHE_KEY = 'ref_countries:with_enabled'
+ 
+-const WC_CACHE_KEY = 'workspace_countries:map'
++async function fetchHomeCountryCode(): Promise<string | null> {
++  const { data } = await supabase
++    .from('workspaces')
++    .select('home_country_code')
++    .limit(1)
++    .single()
++  return data?.home_country_code || null
++}
+ 
+-async function fetchRefAndWorkspaceCountries(): Promise<Record<string, RefCountryInfo>> {
++async function fetchCountriesWithEnabled(): Promise<CountryWithEnabled[]> {
+   const [refRes, wcRes] = await Promise.all([
+-    supabase.from('ref_countries').select('code, sub_region'),
++    supabase
++      .from('ref_countries')
++      .select('code, name_zh, name_en, continent, sub_region, is_active')
++      .order('name_zh'),
+     supabase.from('workspace_countries').select('country_code, is_enabled'),
+   ])
+ 
+-  const map: Record<string, RefCountryInfo> = {}
+-  for (const row of refRes.data || []) {
+-    map[row.code] = {
+-      sub_region: row.sub_region || '其他',
+-      is_enabled: true,
+-    }
+-  }
++  const enabledMap = new Map<string, boolean>()
+   for (const row of wcRes.data || []) {
+-    if (map[row.country_code]) {
+-      map[row.country_code].is_enabled = row.is_enabled
+-    }
++    enabledMap.set(row.country_code, row.is_enabled)
+   }
+-  return map
++
++  return (refRes.data || []).map(c => ({
++    ...c,
++    is_enabled: enabledMap.get(c.code) ?? true,
++  }))
+ }
+ 
+ export default function RegionsTab() {
+-  const { items: countries = [], loading: countriesLoading } = useCountries()
+   const { items: regions = [] } = useRegions()
+   const { items: cities = [] } = useCities()
+ 
+-  const { data: refMap = {} } = useSWR(WC_CACHE_KEY, fetchRefAndWorkspaceCountries, {
++  const { data: countries = [], isLoading } = useSWR(CACHE_KEY, fetchCountriesWithEnabled, {
+     revalidateOnFocus: false,
+     dedupingInterval: 60000,
+   })
+ 
+-  const [collapsedRegions, setCollapsedRegions] = useState<Set<string>>(new Set())
++  const { data: homeCountryCode } = useSWR('workspace:home_country_code', fetchHomeCountryCode, {
++    revalidateOnFocus: false,
++    dedupingInterval: 300000,
++  })
++
++  const [expandedRegions, setExpandedRegions] = useState<Set<string>>(new Set())
+   const [isCitiesDialogOpen, setIsCitiesDialogOpen] = useState(false)
+-  const [selectedCountry, setSelectedCountry] = useState<Country | null>(null)
++  const [selectedCountry, setSelectedCountry] = useState<CountryWithEnabled | null>(null)
+   const [toggling, setToggling] = useState<string | null>(null)
+ 
++  const [addDialogOpen, setAddDialogOpen] = useState(false)
++  const [addRegion, setAddRegion] = useState('')
++  const [newName, setNewName] = useState('')
++  const [newNameEn, setNewNameEn] = useState('')
++  const [newCode, setNewCode] = useState('')
++  const [adding, setAdding] = useState(false)
++
+   const toggleRegion = (region: string) => {
+-    setCollapsedRegions(prev => {
++    setExpandedRegions(prev => {
+       const next = new Set(prev)
+       if (next.has(region)) next.delete(region)
+       else next.add(region)
+@@ -97,9 +131,8 @@ export default function RegionsTab() {
+           .from('workspace_countries')
+           .update({ is_enabled: !currentEnabled })
+           .eq('country_code', countryCode)
+-
+         if (error) throw error
+-        await mutate(WC_CACHE_KEY)
++        await mutate(CACHE_KEY)
+       } catch {
+         toast.error('更新失敗')
+       } finally {
+@@ -109,31 +142,92 @@ export default function RegionsTab() {
+     []
+   )
+ 
++  const handleOpenAdd = (subRegion: string) => {
++    setAddRegion(subRegion)
++    setNewName('')
++    setNewNameEn('')
++    setNewCode('')
++    setAddDialogOpen(true)
++  }
++
++  const handleAdd = async () => {
++    const code = newCode.trim().toUpperCase()
++    const name = newName.trim()
++    if (!code || code.length !== 2 || !name) return
++
++    setAdding(true)
++    try {
++      const continent =
++        addRegion === '非洲'
++          ? 'Africa'
++          : ['北美', '南美'].includes(addRegion)
++            ? addRegion === '北美'
++              ? 'North America'
++              : 'South America'
++            : addRegion === '大洋洲'
++              ? 'Oceania'
++              : ['西歐', '南歐', '北歐', '中東歐'].includes(addRegion)
++                ? 'Europe'
++                : 'Asia'
++
++      const { error: refErr } = await supabase.from('ref_countries').insert({
++        code,
++        name_zh: name,
++        name_en: newNameEn.trim() || name,
++        continent,
++        sub_region: addRegion,
++        is_active: true,
++      })
++      if (refErr) throw refErr
++
++      await supabase.from('workspace_countries').insert(
++        await supabase
++          .from('workspaces')
++          .select('id')
++          .then(({ data }) =>
++            (data || []).map(w => ({
++              workspace_id: w.id,
++              country_code: code,
++              is_enabled: true,
++            }))
++          )
++      )
++
++      toast.success(`${name} 已新增`)
++      setAddDialogOpen(false)
++      await mutate(CACHE_KEY)
++    } catch (err) {
++      toast.error(`新增失敗：${err instanceof Error ? err.message : '未知錯誤'}`)
++    } finally {
++      setAdding(false)
++    }
++  }
++
+   const grouped = useMemo(() => {
+-    const groups: Record<string, Country[]> = {}
++    const groups: Record<string, CountryWithEnabled[]> = {}
+     for (const c of countries) {
+-      const info = c.code ? refMap[c.code] : undefined
+-      const sub = info?.sub_region || '其他'
++      const sub =
++        homeCountryCode && c.code === homeCountryCode ? DOMESTIC_LABEL : c.sub_region || '其他'
+       if (!groups[sub]) groups[sub] = []
+       groups[sub].push(c)
+     }
+     return SUB_REGION_ORDER.filter(r => groups[r]?.length).map(r => ({
+       region: r,
+-      countries: groups[r].sort((a, b) => a.name.localeCompare(b.name, 'zh-TW')),
++      countries: groups[r].sort((a, b) => a.name_zh.localeCompare(b.name_zh, 'zh-TW')),
+     }))
+-  }, [countries, refMap])
++  }, [countries, homeCountryCode])
+ 
+-  const getCityCount = (countryId: string) =>
+-    cities.filter(c => c.country_id === countryId).length
++  const getCityCount = (countryCode: string) =>
++    cities.filter(c => c.country_code === countryCode).length
+ 
+-  const handleOpenCitiesDialog = (country: Country) => {
++  const handleOpenCitiesDialog = (country: CountryWithEnabled) => {
+     setSelectedCountry(country)
+     setIsCitiesDialogOpen(true)
+   }
+ 
+   const countryCities = useMemo(() => {
+     if (!selectedCountry) return []
+-    return cities.filter(c => c.country_id === selectedCountry.id)
++    return cities.filter(c => c.country_code === selectedCountry.code)
+   }, [cities, selectedCountry])
+ 
+   const citiesByRegion = useMemo(() => {
+@@ -152,7 +246,7 @@ export default function RegionsTab() {
+     return region?.name || regionId
+   }
+ 
+-  if (countriesLoading) {
++  if (isLoading) {
+     return (
+       <div className="flex items-center justify-center h-full text-muted-foreground">
+         載入中...
+@@ -163,87 +257,161 @@ export default function RegionsTab() {
+   return (
+     <div className="h-full flex flex-col">
+       <div className="flex-1 overflow-auto">
+-        <div className="divide-y divide-border/40">
++        <div className="grid gap-3">
+           {grouped.map(({ region, countries: regionCountries }) => {
+-            const isCollapsed = collapsedRegions.has(region)
+-            const enabledCount = regionCountries.filter(
+-              c => c.code && refMap[c.code]?.is_enabled !== false
+-            ).length
++            const isExpanded = expandedRegions.has(region)
++            const enabledCount = regionCountries.filter(c => c.is_enabled).length
+             return (
+-              <div key={region}>
+-                <button
+-                  className="w-full flex items-center gap-3 px-4 py-3 bg-morandi-container/30 hover:bg-morandi-container/50 transition-colors text-left"
+-                  onClick={() => toggleRegion(region)}
+-                >
+-                  {isCollapsed ? (
+-                    <ChevronRight size={16} className="text-morandi-muted" />
+-                  ) : (
+-                    <ChevronDown size={16} className="text-morandi-muted" />
+-                  )}
+-                  <span className="text-sm font-semibold text-morandi-primary">{region}</span>
+-                  <span className="text-xs text-morandi-secondary">
+-                    {enabledCount}/{regionCountries.length} 啟用
+-                  </span>
+-                </button>
+-
+-                {!isCollapsed && (
+-                  <div className="divide-y divide-border/20">
++              <Card key={region} className="border-border/40 overflow-hidden">
++                <div className="flex items-center">
++                  <button
++                    className="flex-1 flex items-center gap-3 px-4 py-3.5 text-left hover:bg-muted/20 transition-colors"
++                    onClick={() => toggleRegion(region)}
++                  >
++                    {isExpanded ? (
++                      <ChevronDown size={16} className="text-morandi-muted shrink-0" />
++                    ) : (
++                      <ChevronRight size={16} className="text-morandi-muted shrink-0" />
++                    )}
++                    <span className="text-sm font-semibold text-morandi-primary">{region}</span>
++                    <span className="text-xs text-morandi-secondary ml-auto">
++                      {enabledCount}/{regionCountries.length} 啟用
++                    </span>
++                  </button>
++                  <Button
++                    variant="ghost"
++                    size="sm"
++                    className="mr-3 h-7 px-2 text-xs text-morandi-secondary hover:text-morandi-primary"
++                    onClick={() => handleOpenAdd(region)}
++                  >
++                    <Plus size={14} className="mr-1" />
++                    新增
++                  </Button>
++                </div>
++
++                {isExpanded && (
++                  <div className="border-t border-border/30 divide-y divide-border/20">
+                     {regionCountries.map(country => {
+-                      const cityCount = getCityCount(country.id)
+-                      const info = country.code ? refMap[country.code] : undefined
+-                      const isEnabled = info?.is_enabled !== false
++                      const cityCount = getCityCount(country.code)
+                       return (
+                         <div
+-                          key={country.id}
++                          key={country.code}
+                           className={`flex items-center px-4 py-2.5 transition-colors ${
+-                            isEnabled ? 'hover:bg-muted/30' : 'opacity-50 bg-muted/10'
++                            country.is_enabled ? 'hover:bg-muted/30' : 'opacity-50 bg-muted/10'
+                           }`}
+                         >
+                           <div className="w-10">
+                             <Switch
+-                              checked={isEnabled}
++                              checked={country.is_enabled}
+                               disabled={toggling === country.code}
+                               onCheckedChange={() =>
+-                                country.code && handleToggleCountry(country.code, isEnabled)
++                                handleToggleCountry(country.code, country.is_enabled)
+                               }
+                             />
+                           </div>
+                           <div className="flex-1 min-w-0 ml-2">
+                             <div className="font-medium text-sm text-foreground">
+-                              {country.name}
++                              {country.name_zh}
+                             </div>
+                             <div className="text-xs text-muted-foreground">{country.name_en}</div>
+                           </div>
+                           <div className="w-16 text-center">
+                             <span className="text-xs font-mono text-muted-foreground">
+-                              {country.code || '-'}
++                              {country.code}
+                             </span>
+                           </div>
+                           <div className="w-24 text-right">
+-                            <Button
+-                              variant="ghost"
+-                              size="sm"
+-                              onClick={() => handleOpenCitiesDialog(country)}
+-                              className="h-7 px-2 text-xs"
+-                            >
+-                              {cityCount} 城市
+-                            </Button>
++                            {cityCount > 0 ? (
++                              <Button
++                                variant="ghost"
++                                size="sm"
++                                onClick={() => handleOpenCitiesDialog(country)}
++                                className="h-7 px-2 text-xs"
++                              >
++                                {cityCount} 城市
++                              </Button>
++                            ) : (
++                              <span className="text-xs text-muted-foreground">—</span>
++                            )}
+                           </div>
+                         </div>
+                       )
+                     })}
+                   </div>
+                 )}
+-              </div>
++              </Card>
+             )
+           })}
+         </div>
+       </div>
+ 
++      {/* 新增國家 Dialog */}
++      <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
++        <DialogContent level={1} className="max-w-sm">
++          <DialogHeader>
++            <DialogTitle>新增國家 — {addRegion}</DialogTitle>
++          </DialogHeader>
++          <div className="space-y-3">
++            <div>
++              <label className="text-sm font-medium text-morandi-primary mb-1 block">
++                國家名稱
++              </label>
++              <Input
++                value={newName}
++                onChange={e => setNewName(e.target.value)}
++                placeholder="例：馬爾地夫"
++              />
++            </div>
++            <div>
++              <label className="text-sm font-medium text-morandi-primary mb-1 block">
++                英文名稱
++              </label>
++              <Input
++                value={newNameEn}
++                onChange={e => setNewNameEn(e.target.value)}
++                placeholder="例：Maldives"
++              />
++            </div>
++            <div>
++              <label className="text-sm font-medium text-morandi-primary mb-1 block">
++                ISO 代碼（2 碼）
++              </label>
++              <Input
++                value={newCode}
++                onChange={e =>
++                  setNewCode(
++                    e.target.value
++                      .toUpperCase()
++                      .replace(/[^A-Z]/g, '')
++                      .slice(0, 2)
++                  )
++                }
++                placeholder="例：MV"
++                maxLength={2}
++                className="font-mono"
++              />
++            </div>
++          </div>
++          <div className="flex gap-2 mt-4">
++            <Button variant="outline" onClick={() => setAddDialogOpen(false)} className="flex-1">
++              取消
++            </Button>
++            <Button
++              onClick={handleAdd}
++              disabled={!newName.trim() || newCode.trim().length !== 2 || adding}
++              className="flex-1 bg-morandi-gold hover:bg-morandi-gold-hover text-white"
++            >
++              {adding ? '新增中...' : '新增'}
++            </Button>
++          </div>
++        </DialogContent>
++      </Dialog>
++
++      {/* 城市列表 Dialog */}
+       <Dialog open={isCitiesDialogOpen} onOpenChange={setIsCitiesDialogOpen}>
+         <DialogContent level={1} className="max-w-2xl max-h-[90vh] overflow-y-auto">
+           <DialogHeader>
+-            <DialogTitle>{selectedCountry?.name} - 城市列表</DialogTitle>
++            <DialogTitle>{selectedCountry?.name_zh} - 城市列表</DialogTitle>
+           </DialogHeader>
+ 
+           {countryCities.length === 0 ? (
+diff --git a/src/features/itinerary/components/GeminiItineraryForm.tsx b/src/features/itinerary/components/GeminiItineraryForm.tsx
+index be6137044..e4f56b667 100644
+--- a/src/features/itinerary/components/GeminiItineraryForm.tsx
++++ b/src/features/itinerary/components/GeminiItineraryForm.tsx
+@@ -5,7 +5,8 @@ import React, { useEffect, useState } from 'react'
+ import { InputIME } from '@/components/ui/input-ime'
+ import { Button } from '@/components/ui/button'
+ import { Plus, Trash2, Sparkles, Loader2, ImageIcon } from 'lucide-react'
+-import { useCountries, useCities } from '@/data'
++import { useCities } from '@/data'
++import { useEnabledCountries as useCountries } from '@/data/hooks/useEnabledCountries'
+ import { alert } from '@/lib/ui/alert-dialog'
+ import { logger } from '@/lib/utils/logger'
+ import {
+diff --git a/src/features/itinerary/components/PrintItineraryForm.tsx b/src/features/itinerary/components/PrintItineraryForm.tsx
+index 1be57745e..2ba12d7fc 100644
+--- a/src/features/itinerary/components/PrintItineraryForm.tsx
++++ b/src/features/itinerary/components/PrintItineraryForm.tsx
+@@ -5,7 +5,8 @@ import { InputIME } from '@/components/ui/input-ime'
+ import { TimeInput } from '@/components/ui/time-input'
+ import { Button } from '@/components/ui/button'
+ import { Plus, Trash2 } from 'lucide-react'
+-import { useCountries, useCities } from '@/data'
++import { useCities } from '@/data'
++import { useEnabledCountries as useCountries } from '@/data/hooks/useEnabledCountries'
+ import {
+   Select,
+   SelectContent,
+diff --git a/src/features/tours/components/tour-display-itinerary-tab.tsx b/src/features/tours/components/tour-display-itinerary-tab.tsx
+index 991e5e795..5be4a2490 100644
+--- a/src/features/tours/components/tour-display-itinerary-tab.tsx
++++ b/src/features/tours/components/tour-display-itinerary-tab.tsx
+@@ -15,7 +15,8 @@ import { PrintItineraryForm } from '@/features/itinerary/components/PrintItinera
+ import { PrintItineraryPreview } from '@/features/itinerary/components/PrintItineraryPreview'
+ import { Button } from '@/components/ui/button'
+ import { Badge } from '@/components/ui/badge'
+-import { useItineraries, updateTour, useCountries } from '@/data'
++import { useItineraries, updateTour } from '@/data'
++import { useEnabledCountries as useCountries } from '@/data/hooks/useEnabledCountries'
+ import type {
+   FlightInfo,
+   Feature,
+diff --git a/src/features/tours/hooks/useTourEdit.ts b/src/features/tours/hooks/useTourEdit.ts
+index e5c2f4d58..8f39698b6 100644
+--- a/src/features/tours/hooks/useTourEdit.ts
++++ b/src/features/tours/hooks/useTourEdit.ts
+@@ -3,7 +3,7 @@
+ import { useState, useEffect, useCallback, useRef } from 'react'
+ import { Tour, Itinerary, DailyItineraryDay } from '@/stores/types'
+ import type { Json } from '@/types/database.types'
+-import { useCountries } from '@/data'
++import { useEnabledCountries as useCountries } from '@/data/hooks/useEnabledCountries'
+ import { useAirports } from '@/features/tours/hooks/useAirports'
+ import { supabase } from '@/lib/supabase/client'
+ import { toast } from 'sonner'
+diff --git a/src/features/tours/utils/tour-display.ts b/src/features/tours/utils/tour-display.ts
+index 45b0a5653..b0e4512b8 100644
+--- a/src/features/tours/utils/tour-display.ts
++++ b/src/features/tours/utils/tour-display.ts
+@@ -10,7 +10,7 @@
+  */
+ 
+ import { useMemo } from 'react'
+-import { useCountries } from '@/data'
++import { useEnabledCountries as useCountries } from '@/data/hooks/useEnabledCountries'
+ import { useAirports } from '@/features/tours/hooks/useAirports'
+ import type { Tour } from '@/types/tour.types'
+ 
+diff --git a/src/lib/supabase/types.ts b/src/lib/supabase/types.ts
+index 52b158f37..a304b0711 100644
+--- a/src/lib/supabase/types.ts
++++ b/src/lib/supabase/types.ts
+@@ -20112,6 +20112,7 @@ export type Database = {
+           updated_at: string | null
+           updated_by: string | null
+           website: string | null
++          home_country_code: string | null
+         }
+         Insert: {
+           _deleted?: boolean | null
+@@ -20149,6 +20150,7 @@ export type Database = {
+           updated_at?: string | null
+           updated_by?: string | null
+           website?: string | null
++          home_country_code?: string | null
+         }
+         Update: {
+           _deleted?: boolean | null
+@@ -20186,6 +20188,7 @@ export type Database = {
+           updated_at?: string | null
+           updated_by?: string | null
+           website?: string | null
++          home_country_code?: string | null
+         }
+         Relationships: [
+           {
+diff --git a/src/stores/region-store.ts b/src/stores/region-store.ts
+index 66b41e14a..0f880616b 100644
+--- a/src/stores/region-store.ts
++++ b/src/stores/region-store.ts
+@@ -35,6 +35,7 @@ export interface Region {
+ export interface City {
+   id: string
+   country_id: string
++  country_code?: string
+   region_id?: string
+   name: string
+   name_en?: string
+diff --git a/src/stores/workspace/types.ts b/src/stores/workspace/types.ts
+index 5de5a8ebc..2b06fd553 100644
+--- a/src/stores/workspace/types.ts
++++ b/src/stores/workspace/types.ts
+@@ -8,8 +8,9 @@ export interface Workspace {
+   description?: string | null
+   icon?: string | null
+   is_active: boolean | null
+-  seal_image_url?: string | null // 公司大小章圖片 URL
+-  contract_seal_image_url?: string | null // 合約專用章圖片 URL
++  seal_image_url?: string | null
++  contract_seal_image_url?: string | null
++  home_country_code?: string | null
+   created_by?: string | null
+   created_at?: string | null
+   updated_at?: string | null
+diff --git a/src/types/database.types.ts b/src/types/database.types.ts
+index 5c9a467df..8efb64a9f 100644
+--- a/src/types/database.types.ts
++++ b/src/types/database.types.ts
+@@ -21709,6 +21709,7 @@ export type Database = {
+           updated_at: string | null
+           updated_by: string | null
+           website: string | null
++          home_country_code: string | null
+         }
+         Insert: {
+           _deleted?: boolean | null
+@@ -21749,6 +21750,7 @@ export type Database = {
+           updated_at?: string | null
+           updated_by?: string | null
+           website?: string | null
++          home_country_code?: string | null
+         }
+         Update: {
+           _deleted?: boolean | null
+@@ -21789,6 +21791,7 @@ export type Database = {
+           updated_at?: string | null
+           updated_by?: string | null
+           website?: string | null
++          home_country_code?: string | null
+         }
+         Relationships: [
+           {
