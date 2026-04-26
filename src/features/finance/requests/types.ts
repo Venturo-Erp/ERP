@@ -31,7 +31,6 @@ export interface RequestItem {
   description: string
   unit_price: number
   quantity: number
-  tour_request_id?: string | null // 關聯的需求單 ID
   confirmation_item_id?: string | null // 關聯的確認單項目 ID
   is_employee?: boolean // 標記此項目對象是員工（存檔時 supplier_id 設空避免 FK 衝突）
   selected_id?: string // Combobox 顯示用的選中 ID（員工或供應商皆存）

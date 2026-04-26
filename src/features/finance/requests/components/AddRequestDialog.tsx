@@ -378,7 +378,6 @@ export function AddRequestDialog({
         description: item.description,
         unit_price: item.unit_price ?? (item as unknown as { unitprice?: number }).unitprice ?? 0,
         quantity: item.quantity,
-        tour_request_id: item.tour_request_id,
         confirmation_item_id: (item as unknown as Record<string, unknown>).confirmation_item_id as
           | string
           | undefined,

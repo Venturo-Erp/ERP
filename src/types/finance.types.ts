@@ -91,7 +91,6 @@ export interface PaymentRequestItem {
   request_id: string // 所屬請款單ID
   item_number: string // PR000001-A, PR000001-B...
   tour_id?: string | null // 品項關聯的團號（可獨立移動到不同團）
-  tour_request_id?: string | null // 關聯的需求單 ID，用於追蹤請款來源
   category: PaymentItemCategory
   supplier_id: string
   supplier_name: string | null // 付款對象名稱（可能是供應商、員工、旅行社）
