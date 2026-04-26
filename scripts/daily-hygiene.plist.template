@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Venturo 每日衛生機器人 launchd 設定範本
+
+  安裝步驟：
+  1. cp scripts/daily-hygiene.plist.template ~/Library/LaunchAgents/com.venturo.hygiene.plist
+  2. 編輯 ~/Library/LaunchAgents/com.venturo.hygiene.plist：
+     - 改 PROJECT_PATH（已預設 /Users/williamchien/Projects/venturo-erp）
+     - 改 StartCalendarInterval（預設早上 9:00）
+  3. 載入：launchctl load ~/Library/LaunchAgents/com.venturo.hygiene.plist
+  4. 立即測試：launchctl start com.venturo.hygiene
+  5. 看報告：tail -50 /tmp/venturo-hygiene.log
+
+  停用：launchctl unload ~/Library/LaunchAgents/com.venturo.hygiene.plist
+-->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.venturo.hygiene</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>-c</string>
+    <string>cd /Users/williamchien/Projects/venturo-erp && SKIP_TYPE_CHECK=1 ./scripts/daily-hygiene-check.sh > /tmp/venturo-hygiene.log 2>&1; osascript -e 'display notification "今日衛生報告已產出。tail -50 /tmp/venturo-hygiene.log 看詳情" with title "Venturo 衛生機器人" sound name "Glass"'</string>
+  </array>
+
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Hour</key>
+    <integer>9</integer>
+    <key>Minute</key>
+    <integer>0</integer>
+  </dict>
+
+  <key>StandardOutPath</key>
+  <string>/tmp/venturo-hygiene.stdout</string>
+
+  <key>StandardErrorPath</key>
+  <string>/tmp/venturo-hygiene.stderr</string>
+
+  <key>RunAtLoad</key>
+  <false/>
+</dict>
+</plist>
