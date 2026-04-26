@@ -25,6 +25,10 @@ const buttonVariants = cva(
         // Morandi 色系常用組合（避免各檔案手寫 className）
         'morandi-gold':
           'text-morandi-gold border border-morandi-gold/50 hover:bg-morandi-gold/10 hover:border-morandi-gold',
+        // Soft gold：列表頁「新增 X」按鈕標準樣式（淺金平面、無 shadow、跟 status pill 視覺一致）
+        // 取代 89 處手刻 className（2026-04-26 commit 99c54bcc8）
+        'soft-gold':
+          'bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors',
         'morandi-destructive':
           'text-morandi-red border border-morandi-red/30 hover:bg-morandi-red/10',
         'morandi-destructive-ghost':

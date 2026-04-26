@@ -782,3 +782,54 @@ const statusMap = { pending: { style: 'bg-morandi-X/20 text-morandi-X' } }
 - `src/features/tours/components/tour-receipts.tsx:37-41` — STATUS_MAP inline、可遷移到 `status-config.ts` 的 `receipt` entity（需改用 StatusCell）
 - `src/features/tours/components/tour-costs.tsx:455-461` — statusMap inline、需先在 `status-config.ts` 新增 `payment_request` entity、再改用 StatusCell
 
+
+---
+
+## 🔘 按鈕樣式 SSOT 規則（防再手刻）
+
+> 2026-04-26 新增。事件回顧：全站 89 處按鈕（list page「新增 X」+ Dialog 內各種按鈕）都手刻同一段「金色立體」className（含 shadow + ring + gradient）、視覺累加突兀、跟剛統一的 soft pill 斷層。已批次 commit 99c54bcc8 改成淺金平面、但類別寫死在 className、仍會被新人手刻復發。
+
+### 唯一准用組件
+
+```tsx
+import { Button } from '@/components/ui/button'
+
+// 列表頁「新增 X」按鈕
+<Button variant="soft-gold">
+  <Plus />
+  新增客戶
+</Button>
+
+// 主 CTA（儲存/確認/下單）
+<Button variant="default">儲存</Button>
+
+// 危險動作
+<Button variant="destructive">刪除</Button>
+
+// 次要操作
+<Button variant="outline">取消</Button>
+```
+
+### Button 變體（已有）
+
+| variant | 用途 | 視覺 |
+|---|---|---|
+| `default` | 主 CTA（儲存/確認/下單） | 飽和金漸層 + 白字 + shadow |
+| `soft-gold`（2026-04-26 新增） | 列表頁「新增 X」 | 淺金平面 + 邊框、無 shadow |
+| `outline` | 次要操作 | 邊框 + 微漸層底 |
+| `secondary` | 中性按鈕 | 灰底 |
+| `ghost` | 文字按鈕 | 無框、hover 才有底 |
+| `destructive` | 刪除 | 紅底 + 白字 |
+| `morandi-gold` | 金色強調 + 邊框 | 金邊 + 金字 |
+| `morandi-destructive` / `-ghost` | 紅色變體 | 紅邊 / 紅字 |
+
+### 禁止 pattern（PR 會被退回）
+
+```tsx
+// ❌ 手刻 className 重複 89 處的事件
+<button className="bg-gradient-to-br from-morandi-gold/40 to-morandi-container/60 ... shadow-md hover:shadow-lg">
+
+// ❌ 手刻淺金平面（不該用 native button、用 Button variant="soft-gold"）
+<button className="bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 ...">
+```
+

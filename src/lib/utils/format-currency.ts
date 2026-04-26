@@ -16,9 +16,9 @@ export function formatCurrency(
   if (amount === null || amount === undefined) return ''
 
   const prefix = {
-    TWD: 'NT$ ',
-    USD: '$ ',
-    CNY: '¥ ',
+    TWD: 'NT$',
+    USD: '$',
+    CNY: '¥',
   }[currency]
 
   const sign = amount < 0 ? '-' : ''
