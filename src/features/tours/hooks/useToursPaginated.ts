@@ -91,7 +91,7 @@ export function useToursPaginated(params: UseToursPaginatedParams): UseToursPagi
         .range(from, to) // ✅ Server-side pagination
         .order(sortBy, { ascending: sortOrder === 'asc' })
 
-      // ✅ Server-side status filtering（過渡期：tour_type 欄位即將 DB migration 併進 status）
+      // ✅ Server-side status filtering（tour_type 已併入 status：template/proposal/upcoming/ongoing/returned/closed）
       // 「upcoming / ongoing / returned」顯示層可再用 departure_date / return_date 細分
       const todayStr = new Date().toISOString().split('T')[0]
 

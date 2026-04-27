@@ -405,7 +405,7 @@ export interface FAQ {
 export interface Tour extends BaseEntity {
   code: string // 團號（統一使用 code）
   name: string // 團名
-  tour_type?: TourType | null // 團類型：official/proposal/template
+  // tour_type 欄位 2026-04-23 已 drop、tour 類型（official/proposal/template）併進 status 欄位
   days_count?: number | null // 天數（提案/模板用）
   /**
    * @deprecated 已退役欄位（原為「目的地」字串，現由 country_id + airport_code 衍生）。
@@ -529,13 +529,6 @@ export type ContractTemplate =
 /**
  * TourCategory - 旅遊團分類
  */
-/**
- * TourType - 旅遊團類型
- * - official: 正式開團（有日期、有團號）
- * - proposal: 提案（沒有日期，開團時補日期產生團號）
- * - template: 模板（沒有日期，開團時複製一份新團）
- */
-export type TourType = 'official' | 'proposal' | 'template'
 
 /**
  * TourServiceType - 團服務類型
@@ -567,7 +560,7 @@ export type TourCategory =
 export interface CreateTourData {
   code?: string // 可選，由 createStore 自動生成
   name: string
-  tour_type?: TourType
+  // tour_type 已 drop（2026-04-23）、用 status 欄位區分 template/proposal/official
   days_count?: number | null
   location: string
   departure_date: string | null
@@ -590,7 +583,7 @@ export interface CreateTourData {
 export interface UpdateTourData {
   code?: string
   name?: string
-  tour_type?: TourType
+  // tour_type 已 drop（2026-04-23）、用 status 區分
   days_count?: number | null
   location?: string
   departure_date?: string | null
@@ -648,7 +641,7 @@ export interface TourListItem {
   id: string
   code: string
   name: string
-  tour_type?: TourType | null
+  // tour_type 已 drop、用 status 區分
   days_count?: number | null
   location: string
   departure_date: string | null
