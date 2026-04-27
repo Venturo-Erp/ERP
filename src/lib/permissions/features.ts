@@ -160,15 +160,6 @@ export const FEATURES: FeatureDefinition[] = [
   //   category: 'premium',
   //   routes: ['/quotes', '/quotes/[id]', '/quotes/quick/[id]'],
   // },
-  // ===== 進階功能（付費）- AI & 機器人管理 =====
-  {
-    code: 'ai_bot',
-    name: 'AI & 機器人管理',
-    description: 'LINE/IG/FB 平台連線、AI 客服、對話記錄',
-    category: 'premium',
-    routes: ['/ai-bot'],
-  },
-
   // ===== 企業功能 =====
   {
     code: 'departments',

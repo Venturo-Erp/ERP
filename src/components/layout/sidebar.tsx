@@ -18,7 +18,6 @@ import {
   MapPinArea,
   Palette as PhPalette,
   ReadCvLogo,
-  Robot,
   TipJar,
   User,
   UserCircleGear,
@@ -595,14 +594,6 @@ export function Sidebar() {
         <ul className="space-y-px">
           {visibleMenuItems.map(item => renderMenuItem(item))}
           {visiblePersonalToolItems.map(item => renderMenuItem(item))}
-
-          {/* AI & 機器人管理（需付費功能 ai_bot 開啟） */}
-          {isFeatureEnabled('ai_bot') &&
-            renderMenuItem({
-              href: '/ai-bot',
-              label: 'AI & 機器人',
-              icon: Robot,
-            })}
 
           {/* 設定 */}
           {renderMenuItem({

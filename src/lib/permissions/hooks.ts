@@ -26,7 +26,6 @@ const PREMIUM_FEATURE_CODES = [
   'customers',
   'itinerary',
   'office',
-  'ai_bot',
   'fleet',
   'local',
   'supplier_portal',
