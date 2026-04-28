@@ -22,20 +22,7 @@ interface WidgetSettingsDialogProps {
 }
 
 export function WidgetSettingsDialog({ activeWidgets, onToggleWidget }: WidgetSettingsDialogProps) {
-  const { isAdmin } = useAuthStore()
-
-  // 過濾可見的 widgets
-  const visibleWidgets = useMemo(() => {
-    return AVAILABLE_WIDGETS.filter(widget => {
-      // 沒有權限限制的 widget 所有人都看得到
-      if (!widget.requiredPermission) return true
-      // admin_only：需要管理員資格才看得到
-      if (widget.requiredPermission === 'admin_only') {
-        return isAdmin
-      }
-      return true
-    })
-  }, [isAdmin])
+  const visibleWidgets = AVAILABLE_WIDGETS
 
   return (
     <Dialog>

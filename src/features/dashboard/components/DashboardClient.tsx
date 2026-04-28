@@ -58,22 +58,10 @@ export function DashboardClient() {
   const [isLoading, setIsLoading] = useState(true)
   const { activeWidgets, toggleWidget, reorderWidgets, isLoading: widgetsLoading } = useWidgets()
 
-  const { isAdmin } = useAuthStore()
-
-  // 過濾可渲染的 widgets（過濾掉沒權限的）
+  // 過濾可渲染的 widgets（確認 widget 在清單裡）
   const filteredActiveWidgets = useMemo(() => {
-    return activeWidgets.filter(widgetId => {
-      const widget = AVAILABLE_WIDGETS.find(w => w.id === widgetId)
-      if (!widget) return false
-      // 沒有權限限制的 widget 所有人都看得到
-      if (!widget.requiredPermission) return true
-      // admin_only：需要管理員資格才看得到
-      if (widget.requiredPermission === 'admin_only') {
-        return isAdmin
-      }
-      return true
-    })
-  }, [activeWidgets, isAdmin])
+    return activeWidgets.filter(widgetId => AVAILABLE_WIDGETS.some(w => w.id === widgetId))
+  }, [activeWidgets])
 
   // 設定拖拽感應器（長按 500ms 才觸發，避免影響正常互動）
   const sensors = useSensors(
