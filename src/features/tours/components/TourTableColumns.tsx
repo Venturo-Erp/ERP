@@ -159,26 +159,7 @@ export function useTemplateTableColumns({ onConvert }: UseTemplateTableColumnsPa
         width: '120px',
         render: value => <DateCell date={value as string | null} showIcon={false} />,
       },
-      {
-        key: 'actions',
-        label: TOUR_TABLE.col_actions,
-        width: '100px',
-        render: (_value, row) => {
-          const tour = row as Tour
-          return (
-            <button
-              onClick={e => {
-                e.stopPropagation()
-                onConvert?.(tour)
-              }}
-              className="text-xs px-3 py-1 rounded-md bg-morandi-gold text-white hover:bg-morandi-gold-hover transition-colors"
-            >
-              {TOUR_TABLE.convert_to_tour}
-            </button>
-          )
-        },
-      },
     ],
-    [onConvert, resolveDisplay]
+    [resolveDisplay]
   )
 }
