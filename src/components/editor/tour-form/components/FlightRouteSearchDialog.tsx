@@ -20,7 +20,7 @@ import { Search, Loader2, Plane, Clock, MapPin } from 'lucide-react'
 import {
   searchAirportDeparturesAction,
   AirportFlightItem,
-} from '@/features/dashboard/actions/flight-actions'
+} from '@/lib/actions/flight-actions'
 import { alert } from '@/lib/ui/alert-dialog'
 import { cn } from '@/lib/utils'
 import { COMP_EDITOR_LABELS } from '../../constants/labels'

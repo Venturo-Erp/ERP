@@ -2,7 +2,7 @@
 
 import { getTodayString, formatDate } from '@/lib/utils/format-date'
 import { useState, useCallback } from 'react'
-import { searchFlightAction, type FlightData } from '@/features/dashboard/actions/flight-actions'
+import { searchFlightAction, type FlightData } from '@/lib/actions/flight-actions'
 import { alertError, alert } from '@/lib/ui/alert-dialog'
 import { FlightInfo, FlightSegmentInfo } from '@/types/flight.types'
 

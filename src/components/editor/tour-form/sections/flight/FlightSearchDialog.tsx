@@ -4,7 +4,7 @@ import { getTodayString } from '@/lib/utils/format-date'
 
 import React, { useState, useCallback } from 'react'
 import { TourFormData } from '../../types'
-import { searchFlightAction, type FlightData } from '@/features/dashboard/actions/flight-actions'
+import { searchFlightAction, type FlightData } from '@/lib/actions/flight-actions'
 import { alert } from '@/lib/ui/alert-dialog'
 import { parseDate } from './utils'
 import { COMP_EDITOR_LABELS } from '../../../constants/labels'

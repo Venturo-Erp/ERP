@@ -5,3 +5,4 @@
 
 export { getWorkspaceMembers } from './user-actions'
 export { getOrCreateDmChannel } from './channel-actions'
+export { searchFlightAction } from './flight-actions'
