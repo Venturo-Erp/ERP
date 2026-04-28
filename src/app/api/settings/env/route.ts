@@ -1,4 +1,5 @@
 import { getSupabaseAdminClient } from '@/lib/supabase/admin'
+import { hasAdminCapability } from '@/app/api/lib/check-capability'
 import { getServerAuth } from '@/lib/auth/server-auth'
 import { ApiError, successResponse } from '@/lib/api/response'
 
@@ -52,27 +53,6 @@ async function getGeminiUsage(): Promise<string | undefined> {
   return getApiUsage('gemini', 1500) // 每分鐘 60 次，保守估算每日 50 次 × 30 天
 }
 
-async function hasAdminCapability(employeeId: string): Promise<boolean> {
-  const adminClient = getSupabaseAdminClient()
-  const { data: employee } = await adminClient
-    .from('employees')
-    .select('job_info')
-    .eq('id', employeeId)
-    .single()
-
-  if (!employee) return false
-
-  const jobInfo = employee.job_info as { role_id?: string } | null
-  if (!jobInfo?.role_id) return false
-
-  const { data: role } = await adminClient
-    .from('workspace_roles')
-    .select('is_admin')
-    .eq('id', jobInfo.role_id)
-    .single()
-
-  return role?.is_admin === true
-}
 
 export async function GET() {
   // 🔒 安全檢查：需要登入

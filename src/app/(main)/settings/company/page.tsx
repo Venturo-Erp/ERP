@@ -28,6 +28,7 @@ import { ContentPageLayout } from '@/components/layout/content-page-layout'
 import { SettingsTabs } from '../components/SettingsTabs'
 import { supabase } from '@/lib/supabase/client'
 import { useAuthStore } from '@/stores/auth-store'
+import { CAPABILITIES, useCapabilities } from '@/lib/permissions'
 import { logger } from '@/lib/utils/logger'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
@@ -221,7 +222,8 @@ function ImageUploadField({
 }
 
 export default function CompanySettingsPage() {
-  const { user, isAdmin } = useAuthStore()
+  const { user } = useAuthStore()
+  const { can } = useCapabilities()
   const [form, setForm] = useState<CompanyFormData>(INITIAL_FORM)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -321,7 +323,7 @@ export default function CompanySettingsPage() {
   }
 
   // 權限檢查
-  if (!isAdmin) {
+  if (!can(CAPABILITIES.SETTINGS_MANAGE_COMPANY)) {
     return (
       <ContentPageLayout title={COMPANY_LABELS.TITLE}>
         <div className="max-w-4xl mx-auto p-6">

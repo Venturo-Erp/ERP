@@ -10,7 +10,7 @@
 
 import { useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { useTabPermissions } from '@/lib/permissions'
+import { useCapabilities, CAPABILITIES } from '@/lib/permissions'
 import { UnauthorizedPage } from '@/components/unauthorized-page'
 import { ModuleLoading } from '@/components/module-loading'
 import { ContentPageLayout } from '@/components/layout/content-page-layout'
@@ -45,7 +45,7 @@ interface TransactionRow {
 }
 
 export default function TreasuryPage() {
-  const { canRead, loading: permLoading } = useTabPermissions()
+  const { can, loading: permLoading } = useCapabilities()
   const router = useRouter()
   const { items: receipts, loading: receiptsLoading } = useReceipts()
   const { items: paymentRequests, loading: prLoading } = usePaymentRequests()
@@ -134,7 +134,7 @@ export default function TreasuryPage() {
   const monthLabel = format(new Date(), 'yyyy年M月', { locale: zhTW })
 
   if (permLoading) return <ModuleLoading fullscreen />
-  if (!canRead('finance', 'treasury')) return <UnauthorizedPage />
+  if (!can(CAPABILITIES.FINANCE_READ_TREASURY)) return <UnauthorizedPage />
 
   return (
     <ContentPageLayout title="金庫總覽" icon={Landmark} className="space-y-6">

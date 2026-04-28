@@ -22,6 +22,7 @@ import { Shield, Plus, Trash2, Save, Loader2, Users, Star, Check } from 'lucide-
 import { useAuthStore } from '@/stores'
 import { MODULES, type ModuleDefinition, type TabPermission } from '@/lib/permissions'
 import { useWorkspaceFeatures } from '@/lib/permissions/hooks'
+import { CAPABILITIES, useCapabilities } from '@/lib/permissions'
 import { Badge } from '@/components/ui/badge'
 import { Switch } from '@/components/ui/switch'
 import { ChevronRight, ChevronDown } from 'lucide-react'
@@ -32,8 +33,9 @@ import { useRoles, type Role } from '@/data/hooks/useRoles'
 
 export default function RolesPage() {
   const router = useRouter()
-  const { user, isAdmin } = useAuthStore()
+  const { user } = useAuthStore()
   const { toast } = useToast()
+  const { can } = useCapabilities()
   const { isFeatureEnabled, isTabEnabled, loading: featuresLoading } = useWorkspaceFeatures()
 
   // 只顯示這個 workspace 已啟用的模組、且過濾掉 workspace 沒開通的 tab
@@ -310,7 +312,7 @@ export default function RolesPage() {
   const renderModuleRow = (module: ModuleDefinition) => {
     const hasTabs = module.tabs.length > 0
     const isExpanded = expandedModules.includes(module.code)
-    const isAdmin = selectedRole?.is_admin
+    const isAdminRole = selectedRole?.is_admin
 
     const readFully = isModuleFullyEnabled(module, 'can_read')
     const readPartial = isModulePartiallyEnabled(module, 'can_read')
@@ -348,12 +350,12 @@ export default function RolesPage() {
           <div className="w-32 p-4 flex justify-center">
             <div className="relative">
               <Switch
-                checked={isAdmin || readFully}
+                checked={isAdminRole || readFully}
                 onCheckedChange={() => toggleModuleAll(module, 'can_read')}
-                disabled={isAdmin}
+                disabled={isAdminRole}
                 className="data-[state=checked]:bg-morandi-green"
               />
-              {readPartial && !isAdmin && (
+              {readPartial && !isAdminRole && (
                 <div className="absolute -top-1 -right-1 w-2 h-2 bg-morandi-gold rounded-full" />
               )}
             </div>
@@ -361,12 +363,12 @@ export default function RolesPage() {
           <div className="w-32 p-4 flex justify-center">
             <div className="relative">
               <Switch
-                checked={isAdmin || writeFully}
+                checked={isAdminRole || writeFully}
                 onCheckedChange={() => toggleModuleAll(module, 'can_write')}
-                disabled={isAdmin}
+                disabled={isAdminRole}
                 className="data-[state=checked]:bg-morandi-gold"
               />
-              {writePartial && !isAdmin && (
+              {writePartial && !isAdminRole && (
                 <div className="absolute -top-1 -right-1 w-2 h-2 bg-morandi-gold rounded-full" />
               )}
             </div>
@@ -380,7 +382,7 @@ export default function RolesPage() {
             const perm = getPermission(module.code, tab.code)
             // 下拉資格 tab：admin 也可個別取消（例：老闆不想出現在代墊款下拉）
             const adminCanEdit = tab.isEligibility === true
-            const effectiveDisabled = isAdmin && !adminCanEdit
+            const effectiveDisabled = isAdminRole && !adminCanEdit
             return (
               <div key={tab.code} className="flex items-center border-t border-border bg-card">
                 <div className="flex-1 p-4 pl-12 flex items-center gap-2">
@@ -394,7 +396,7 @@ export default function RolesPage() {
                 </div>
                 <div className="w-32 p-4 flex justify-center">
                   <Switch
-                    checked={(isAdmin && !adminCanEdit) || (perm?.can_read ?? false)}
+                    checked={(isAdminRole && !adminCanEdit) || (perm?.can_read ?? false)}
                     onCheckedChange={() => toggleTabPermission(module.code, tab.code, 'can_read')}
                     disabled={effectiveDisabled}
                     className="data-[state=checked]:bg-morandi-green"
@@ -402,7 +404,7 @@ export default function RolesPage() {
                 </div>
                 <div className="w-32 p-4 flex justify-center">
                   <Switch
-                    checked={(isAdmin && !adminCanEdit) || (perm?.can_write ?? false)}
+                    checked={(isAdminRole && !adminCanEdit) || (perm?.can_write ?? false)}
                     onCheckedChange={() => toggleTabPermission(module.code, tab.code, 'can_write')}
                     disabled={effectiveDisabled}
                     className="data-[state=checked]:bg-morandi-gold"
@@ -416,7 +418,7 @@ export default function RolesPage() {
   }
 
   // 權限檢查：只有 admin 能管理職務與權限
-  if (!isAdmin) {
+  if (!can(CAPABILITIES.HR_MANAGE_ROLES)) {
     return (
       <ContentPageLayout
         title="職務管理"

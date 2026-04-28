@@ -12,7 +12,7 @@
 
 import { logger } from '@/lib/utils/logger'
 import { useAuthStore } from '@/stores'
-import { useTabPermissions } from '@/lib/permissions'
+import { useCapabilities, CAPABILITIES } from '@/lib/permissions'
 import { UnauthorizedPage } from '@/components/unauthorized-page'
 import { ModuleLoading } from '@/components/module-loading'
 import { useState, useEffect, useCallback, useMemo } from 'react'
@@ -78,7 +78,7 @@ export default function PaymentsPage() {
     handleDeleteReceipt,
   } = usePaymentData()
   const { user } = useAuthStore()
-  const { canRead, loading: permLoading } = useTabPermissions()
+  const { can, loading: permLoading } = useCapabilities()
 
   // 讀取 URL 參數（從快速收款按鈕傳入）
   const urlOrderId = searchParams.get('order_id')
@@ -90,8 +90,8 @@ export default function PaymentsPage() {
   const [activeTab, setActiveTab] = useState<ReceiptTabValue>('all')
 
   // 根據 capability 顯示 tab
-  const canTour = canRead('finance', 'payments')
-  const canCompany = canRead('finance', 'payments-company')
+  const canTour = can(CAPABILITIES.FINANCE_READ_PAYMENTS)
+  const canCompany = can(CAPABILITIES.FINANCE_READ_PAYMENTS_COMPANY)
 
   const visibleTabs = useMemo<ReceiptTabConfig[]>(() => {
     const tabs: ReceiptTabConfig[] = []

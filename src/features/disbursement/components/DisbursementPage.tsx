@@ -36,7 +36,7 @@ import { logger } from '@/lib/utils/logger'
 import { DISBURSEMENT_STATUS } from '../constants'
 import { DISBURSEMENT_LABELS } from '../constants/labels'
 import { useAuthStore } from '@/stores/auth-store'
-import { useTabPermissions } from '@/lib/permissions'
+import { useCapabilities, CAPABILITIES } from '@/lib/permissions'
 import { UnauthorizedPage } from '@/components/unauthorized-page'
 import { ModuleLoading } from '@/components/module-loading'
 import { recalculateExpenseStats } from '@/features/finance/payments/services/expense-core.service'
@@ -48,8 +48,8 @@ export function DisbursementPage() {
   const { items: payment_request_items } = usePaymentRequestItems()
 
   const user = useAuthStore(state => state.user)
-  const { canRead, canWrite, loading: permLoading } = useTabPermissions()
-  const canManage = canWrite('finance', 'disbursement')
+  const { can, canRead, loading: permLoading } = useCapabilities()
+  const canManage = can(CAPABILITIES.FINANCE_MANAGE_DISBURSEMENT)
 
   // 狀態
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
@@ -271,7 +271,7 @@ export function DisbursementPage() {
   }, [])
 
   if (permLoading) return <ModuleLoading fullscreen />
-  if (!canRead('finance', 'disbursement')) return <UnauthorizedPage />
+  if (!can(CAPABILITIES.FINANCE_READ_DISBURSEMENT)) return <UnauthorizedPage />
 
   return (
     <>

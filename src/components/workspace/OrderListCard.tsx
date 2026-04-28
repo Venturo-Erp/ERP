@@ -5,7 +5,7 @@ import { Receipt, ChevronDown, ChevronUp, DollarSign, Check } from 'lucide-react
 import type { Order } from '@/stores/types'
 import { CurrencyCell } from '@/components/table-cells'
 import { Button } from '@/components/ui/button'
-import { useTabPermissions } from '@/lib/permissions'
+import { useCapabilities, CAPABILITIES } from '@/lib/permissions'
 
 // 使用統一的型別定義
 import type { SharedOrderList } from '@/stores/workspace/types'
@@ -24,10 +24,10 @@ export function OrderListCard({
   onCreateReceipt,
 }: OrderListCardProps) {
   const [isExpanded, setIsExpanded] = useState(false)
-  const { canWrite } = useTabPermissions()
+  const { can } = useCapabilities()
 
   const totalGap = orderList.orders.reduce((sum, order) => sum + order.gap, 0)
-  const canProcess = canWrite('finance', 'payments')
+  const canProcess = can(CAPABILITIES.FINANCE_MANAGE_PAYMENTS)
 
   const getOrderStatus = (order: {
     total_amount: number

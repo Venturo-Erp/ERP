@@ -11,27 +11,7 @@ import { resetEmployeePasswordSchema } from '@/lib/validations/api-schemas'
 /**
  * 檢查員工是否擁有管理員資格
  */
-async function hasAdminCapability(employeeId: string): Promise<boolean> {
-  const adminClient = getSupabaseAdminClient()
-  const { data: employee, error } = await adminClient
-    .from('employees')
-    .select('role_id')
-    .eq('id', employeeId)
-    .single()
-
-  if (error || !employee) return false
-
-  const roleId = (employee as { role_id?: string | null }).role_id
-  if (!roleId) return false
-
-  const { data: role } = await adminClient
-    .from('workspace_roles')
-    .select('is_admin')
-    .eq('id', roleId)
-    .single()
-
-  return role?.is_admin ?? false
-}
+import { hasAdminCapability } from '@/app/api/lib/check-capability'
 
 /**
  * 重設員工密碼 API

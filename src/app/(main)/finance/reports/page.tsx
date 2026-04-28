@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useMemo } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { useTabPermissions } from '@/lib/permissions'
+import { useCapabilities, CAPABILITIES } from '@/lib/permissions'
 import { UnauthorizedPage } from '@/components/unauthorized-page'
 import { ModuleLoading } from '@/components/module-loading'
 import { ContentPageLayout } from '@/components/layout/content-page-layout'
@@ -59,7 +59,7 @@ function getDefaultRange(): DateRange {
 }
 
 export default function ReportsPage() {
-  const { canRead, loading: permLoading } = useTabPermissions()
+  const { can, loading: permLoading } = useCapabilities()
   const searchParams = useSearchParams()
   const router = useRouter()
   const initialTab = (searchParams.get('tab') as TabValue) || 'overview'
@@ -95,7 +95,7 @@ export default function ReportsPage() {
   )
 
   if (permLoading) return <ModuleLoading fullscreen />
-  if (!canRead('finance', 'reports')) return <UnauthorizedPage />
+  if (!can(CAPABILITIES.FINANCE_READ_REPORTS)) return <UnauthorizedPage />
 
   return (
     <ContentPageLayout

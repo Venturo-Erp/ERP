@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { UnauthorizedPage } from '@/components/unauthorized-page'
 import { ModuleLoading } from '@/components/module-loading'
-import { useTabPermissions } from '@/lib/permissions'
+import { useCapabilities, CAPABILITIES } from '@/lib/permissions'
 import { ContentPageLayout } from '@/components/layout/content-page-layout'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -120,7 +120,7 @@ interface ExpenseCategory {
 }
 
 export default function FinanceSettingsPage() {
-  const { canRead, loading: permLoading } = useTabPermissions()
+  const { can, loading: permLoading } = useCapabilities()
   const [activeSection, setActiveSection] = useState<
     'receipt' | 'payment' | 'bank' | 'category' | 'company_expense' | 'company_income' | 'bonus'
   >('receipt')
@@ -433,7 +433,7 @@ export default function FinanceSettingsPage() {
   }
 
   if (permLoading) return <ModuleLoading fullscreen />
-  if (!canRead('finance', 'settings')) return <UnauthorizedPage />
+  if (!can(CAPABILITIES.FINANCE_READ_SETTINGS)) return <UnauthorizedPage />
 
   return (
     <ContentPageLayout

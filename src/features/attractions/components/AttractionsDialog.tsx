@@ -12,7 +12,7 @@ import { AttractionForm } from './attraction-dialog/AttractionForm'
 import { AttractionImageUpload } from './attraction-dialog/AttractionImageUpload'
 import { useAuthStore } from '@/stores/auth-store'
 import { isFeatureAvailable } from '@/lib/feature-restrictions'
-import { useTabPermissions } from '@/lib/permissions'
+import { useCapabilities, CAPABILITIES } from '@/lib/permissions'
 import { Button } from '@/components/ui/button'
 import { Sparkles, Loader2, CheckCircle2, Trash2 } from 'lucide-react'
 import { ATTRACTIONS_DIALOG_LABELS } from '../constants/labels'
@@ -52,8 +52,8 @@ export function AttractionsDialog({
   fixedCategory,
   onDelete,
 }: AttractionsDialogProps) {
-  const { canWrite } = useTabPermissions()
-  const readOnly = !!attraction && !canWrite('database', 'attractions')
+  const { can } = useCapabilities()
+  const readOnly = !!attraction && !can(CAPABILITIES.DATABASE_MANAGE_ATTRACTIONS)
 
   const {
     formData,
@@ -387,7 +387,7 @@ export function AttractionsDialog({
           {ATTRACTIONS_DIALOG_LABELS.AI_補充}
         </Button>
       )}
-      {attraction && onDelete && canWrite('/database') && (
+      {attraction && onDelete && can(CAPABILITIES.DATABASE_MANAGE_ATTRACTIONS) && (
         <Button
           type="button"
           variant="outline"

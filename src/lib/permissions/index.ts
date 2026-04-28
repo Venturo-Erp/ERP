@@ -3,6 +3,8 @@ export * from './features'
 export * from './hooks'
 export * from './module-tabs'
 export * from './useTabPermissions'
+export * from './capabilities'
+export { useCapabilities } from './useCapabilities'
 
 export interface PermissionConfig {
   id: string

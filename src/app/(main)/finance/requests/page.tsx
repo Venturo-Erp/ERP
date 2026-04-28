@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { useTabPermissions } from '@/lib/permissions'
+import { useCapabilities, CAPABILITIES } from '@/lib/permissions'
 import { UnauthorizedPage } from '@/components/unauthorized-page'
 import { ModuleLoading } from '@/components/module-loading'
 import dynamic from 'next/dynamic'
@@ -46,7 +46,7 @@ function isTour(r: PaymentRequest): boolean {
 }
 
 export default function RequestsPage() {
-  const { canRead, loading: permLoading } = useTabPermissions()
+  const { can, loading: permLoading } = useCapabilities()
   const searchParams = useSearchParams()
   const router = useRouter()
   const { payment_requests, loading, loadPaymentRequests } = usePayments()
@@ -79,9 +79,9 @@ export default function RequestsPage() {
   }
 
   // 根據 capability 顯示 tab
-  const canTour = canRead('finance', 'requests')
-  const canCompany = canRead('finance', 'requests-company')
-  const canSalary = canRead('finance', 'requests-salary')
+  const canTour = can(CAPABILITIES.FINANCE_READ_REQUESTS)
+  const canCompany = can(CAPABILITIES.FINANCE_READ_REQUESTS_COMPANY)
+  const canSalary = can(CAPABILITIES.FINANCE_READ_REQUESTS_SALARY)
 
   const visibleTabs = useMemo<TabConfig[]>(() => {
     const tabs: TabConfig[] = []

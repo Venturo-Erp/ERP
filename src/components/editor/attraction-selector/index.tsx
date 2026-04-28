@@ -16,7 +16,7 @@ import { Attraction } from '@/features/attractions/types'
 import { AttractionSearchBar } from './AttractionSearchBar'
 import { AttractionList } from './AttractionList'
 import { useAttractionSearch } from './hooks/useAttractionSearch'
-import { useTabPermissions } from '@/lib/permissions'
+import { useCapabilities, CAPABILITIES } from '@/lib/permissions'
 import { ATTRACTION_SELECTOR_LABELS } from './constants/labels'
 
 // 使用 Next.js dynamic import 並禁用 SSR
@@ -83,8 +83,8 @@ export function AttractionSelector({
   })
 
   // 權限檢查：是否能編輯資料庫（database.attractions 寫入權限）
-  const { canWrite } = useTabPermissions()
-  const canEditDatabase = canWrite('database', 'attractions')
+  const { can } = useCapabilities()
+  const canEditDatabase = can(CAPABILITIES.DATABASE_MANAGE_ATTRACTIONS)
 
   // 選擇狀態
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())

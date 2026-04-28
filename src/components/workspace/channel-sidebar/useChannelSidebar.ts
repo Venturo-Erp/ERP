@@ -1,17 +1,17 @@
 import { useState, useMemo, useEffect } from 'react'
-import { useTabPermissions } from '@/lib/permissions'
+import { useCapabilities, CAPABILITIES } from '@/lib/permissions'
 import type { Channel } from '@/stores/workspace-store'
 
 export function useChannelSidebar(channels: Channel[], searchQuery: string, channelFilter: string) {
-  const { canWrite } = useTabPermissions()
+  const { can } = useCapabilities()
 
   const [expandedSections, setExpandedSections] = useState({
     favorites: true,
     ungrouped: true,
   })
 
-  // workspace 模組無 tab、用 module-level 寫入權判定能否管理成員（admin 已 backfill）
-  const canManageMembers = useMemo(() => canWrite('workspace'), [canWrite])
+  // workspace 模組無 tab、用 capability 判定能否管理成員
+  const canManageMembers = useMemo(() => can(CAPABILITIES.WORKSPACE_MANAGE_MEMBERS), [can])
 
   // 篩選頻道
   const filteredChannels = useMemo(() => {

@@ -28,7 +28,7 @@ import type { PaymentItem } from '../types'
 import { Input } from '@/components/ui/input'
 import type { Receipt } from '@/stores'
 import { useAuthStore } from '@/stores'
-import { useTabPermissions } from '@/lib/permissions'
+import { useCapabilities, CAPABILITIES } from '@/lib/permissions'
 import { ADD_RECEIPT_DIALOG_LABELS, ADD_RECEIPT_TOAST_LABELS } from '../../constants/labels'
 import { usePaymentMethodsCached } from '@/data/hooks'
 
@@ -86,9 +86,9 @@ export function AddReceiptDialog({
 
   // 權限判斷（HR 職務管理為單一標準）
   const { user } = useAuthStore()
-  const { canWrite } = useTabPermissions()
-  const canManagePayments = canWrite('finance', 'payments')
-  const canConfirmCheck = canWrite('finance', 'payments-confirm')
+  const { can } = useCapabilities()
+  const canManagePayments = can(CAPABILITIES.FINANCE_MANAGE_PAYMENTS)
+  const canConfirmCheck = can(CAPABILITIES.FINANCE_CONFIRM_PAYMENTS)
 
   // 是否可編輯（未確認 or 有收款寫入權）
   const canEdit = !isConfirmed || canManagePayments
