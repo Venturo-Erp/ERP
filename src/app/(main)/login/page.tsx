@@ -64,7 +64,12 @@ export default function LoginPage() {
 
       const result = await validateLogin(username.trim(), password, trimmedCode)
       if (result.success) {
-        window.location.href = getRedirectPath()
+        if (result.mustChangePassword) {
+          // 首次登入強制改密碼：跳到改密碼頁，改完才能進入系統
+          window.location.href = '/change-password?reason=first_login'
+        } else {
+          window.location.href = getRedirectPath()
+        }
       } else {
         setError(result.message || LABELS.ERROR_INVALID_CREDENTIALS)
       }

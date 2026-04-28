@@ -68,7 +68,7 @@ interface AuthState {
     username: string,
     password: string,
     code?: string
-  ) => Promise<{ success: boolean; message?: string; needsSetup?: boolean }>
+  ) => Promise<{ success: boolean; message?: string; needsSetup?: boolean; mustChangePassword?: boolean }>
   refreshUserData: () => Promise<void>
   toggleSidebar: () => void
   setSidebarCollapsed: (collapsed: boolean) => void
@@ -141,13 +141,15 @@ export const useAuthStore = create<AuthState>()(
             return { success: false, message: errMsg || '帳號或密碼錯誤' }
           }
 
-          const { employee, workspace, authEmail, permissions, isAdmin } = validateResult.data as {
-            employee: EmployeeRow
-            workspace: { id: string; code: string; name: string | null; type: string | null }
-            authEmail: string
-            permissions: string[]
-            isAdmin: boolean
-          }
+          const { employee, workspace, authEmail, permissions, isAdmin, mustChangePassword } =
+            validateResult.data as {
+              employee: EmployeeRow
+              workspace: { id: string; code: string; name: string | null; type: string | null }
+              authEmail: string
+              permissions: string[]
+              isAdmin: boolean
+              mustChangePassword: boolean
+            }
 
           // 2. 用 auth email 在 client 建立 Supabase session
           const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
@@ -179,7 +181,7 @@ export const useAuthStore = create<AuthState>()(
 
           get().setUser(user, isAdmin)
           logger.log(`✅ 登入成功: ${employee.display_name} (admin: ${isAdmin})`)
-          return { success: true }
+          return { success: true, mustChangePassword: mustChangePassword === true }
         } catch (error) {
           logger.error('💥 Login validation error:', error)
           return { success: false, message: '系統錯誤，請稍後再試' }
