@@ -2,7 +2,7 @@ import { ReactNode } from 'react'
 import { QUOTE_CATEGORY_LABELS } from '../constants/labels'
 
 // 資源類型
-export type CostItemResourceType = 'restaurant' | 'hotel' | 'attraction' | 'supplier'
+type CostItemResourceType = 'restaurant' | 'hotel' | 'attraction' | 'supplier'
 
 export interface CostItem {
   id: string
@@ -73,7 +73,7 @@ export interface ParticipantCounts {
   infant: number // 嬰兒
 }
 
-export interface RoomTypePrice {
+interface RoomTypePrice {
   adult: number
   child: number
 }
@@ -122,7 +122,7 @@ export const costCategories: CostCategory[] = [
   { id: 'guide', name: QUOTE_CATEGORY_LABELS.LEADER_GUIDE, items: [], total: 0 },
 ]
 
-export const categoryIcons: Record<string, string> = {
+const categoryIcons: Record<string, string> = {
   transport: 'Car',
   'group-transport': 'Users',
   accommodation: 'Home',

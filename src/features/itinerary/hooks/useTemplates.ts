@@ -6,7 +6,7 @@ import { TEMPLATE_LABELS } from '../constants/labels'
  * 暫時使用空陣列，後續可連接資料庫
  */
 
-export interface Template {
+interface Template {
   id: string
   name: string
   description?: string

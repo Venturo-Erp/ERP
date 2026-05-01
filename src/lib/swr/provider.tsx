@@ -25,4 +25,3 @@ export function SWRProvider({ children }: SWRProviderProps) {
   return <SWRConfig value={swrConfig}>{children}</SWRConfig>
 }
 
-export default SWRProvider

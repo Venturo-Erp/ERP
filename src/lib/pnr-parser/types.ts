@@ -3,7 +3,7 @@
  */
 
 /** PNR 解析來源格式 */
-export type PnrSourceFormat =
+type PnrSourceFormat =
   | 'ticket_order_detail'
   | 'e_ticket'
   | 'amadeus_pnr'

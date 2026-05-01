@@ -17,7 +17,7 @@ import { COMP_TOURS_LABELS } from '../constants/labels'
 // Types
 // ================================
 
-export interface EditFormData {
+interface EditFormData {
   name: string
   // 🔧 核心表架構：統一用 countryId + countryName + airportCode
   countryId: string // countries.id (如 "japan")

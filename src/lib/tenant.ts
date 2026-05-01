@@ -26,7 +26,7 @@ export function getCurrentYear(): number {
  * 取得版權聲明（自動更新年份 + 公司名稱）
  * @param companyName - 可選的公司名稱（預設使用 COMPANY_NAME）
  */
-export function getCopyright(companyName?: string): string {
+function getCopyright(companyName?: string): string {
   const name = companyName || COMPANY_NAME
   const year = getCurrentYear()
   return `© ${year} ${name}`

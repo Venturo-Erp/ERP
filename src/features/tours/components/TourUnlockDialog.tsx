@@ -27,7 +27,7 @@ interface TourUnlockDialogProps {
   onUnlocked?: () => void
 }
 
-export function TourUnlockDialog({ tour, open, onOpenChange, onUnlocked }: TourUnlockDialogProps) {
+function TourUnlockDialog({ tour, open, onOpenChange, onUnlocked }: TourUnlockDialogProps) {
   const [password, setPassword] = useState('')
   const [reason, setReason] = useState('')
   const [showPassword, setShowPassword] = useState(false)

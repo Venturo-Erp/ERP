@@ -33,7 +33,7 @@ import { toast } from 'sonner'
 import { ResourceOverrideDialog } from './ResourceOverrideDialog'
 import { logger } from '@/lib/utils/logger'
 
-export type ResourceType = 'attraction' | 'hotel' | 'restaurant'
+type ResourceType = 'attraction' | 'hotel' | 'restaurant'
 
 interface ResourceDetailDialogProps {
   open: boolean

@@ -69,8 +69,8 @@ export const createPackageSchema = z.object({
 })
 
 // Type exports
-export type CreateProposalInput = z.infer<typeof createProposalSchema>
-export type CreateTourInput = z.infer<typeof createTourSchema>
-export type CreatePaymentRequestInput = z.infer<typeof createPaymentRequestSchema>
-export type CreateDisbursementInput = z.infer<typeof createDisbursementSchema>
-export type AddManualRequestInput = z.infer<typeof addManualRequestSchema>
+type CreateProposalInput = z.infer<typeof createProposalSchema>
+type CreateTourInput = z.infer<typeof createTourSchema>
+type CreatePaymentRequestInput = z.infer<typeof createPaymentRequestSchema>
+type CreateDisbursementInput = z.infer<typeof createDisbursementSchema>
+type AddManualRequestInput = z.infer<typeof addManualRequestSchema>

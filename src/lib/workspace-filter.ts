@@ -10,7 +10,7 @@ import { logger } from '@/lib/utils/logger'
  * 取得當前選擇的 workspace ID（如果有的話）
  * @returns workspace ID 或 null（表示查看全部）
  */
-export function getCurrentWorkspaceFilter(): string | null {
+function getCurrentWorkspaceFilter(): string | null {
   if (typeof window === 'undefined') return null
 
   const workspaceId = localStorage.getItem('current_workspace_filter')
@@ -69,7 +69,7 @@ const WORKSPACE_ENABLED_TABLES = [
 /**
  * 檢查表格是否支援 workspace 篩選
  */
-export function isWorkspaceFilterEnabled(tableName: string): boolean {
+function isWorkspaceFilterEnabled(tableName: string): boolean {
   return WORKSPACE_ENABLED_TABLES.includes(tableName)
 }
 
@@ -79,7 +79,7 @@ export function isWorkspaceFilterEnabled(tableName: string): boolean {
  * @param tableName - 表格名稱
  * @returns workspace_id 或 null（不篩選）
  */
-export async function getWorkspaceFilterForQuery(tableName: string): Promise<string | null> {
+async function getWorkspaceFilterForQuery(tableName: string): Promise<string | null> {
   // 檢查表格是否支援 workspace 篩選
   if (!isWorkspaceFilterEnabled(tableName)) {
     return null

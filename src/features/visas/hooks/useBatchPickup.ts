@@ -24,7 +24,7 @@ async function deleteOldPassportImage(oldUrl: string | null | undefined): Promis
   }
 }
 
-export interface PassportOCRResult {
+interface PassportOCRResult {
   fileName: string
   success: boolean
   imageBase64?: string

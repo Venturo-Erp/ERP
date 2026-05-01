@@ -97,7 +97,7 @@ export async function validateBody<T>(
  * const result = validateQuery(request, QuerySchema)
  * if (!result.success) return result.error
  */
-export function validateQuery<T>(request: NextRequest, schema: ZodSchema<T>): ValidationResult<T> {
+function validateQuery<T>(request: NextRequest, schema: ZodSchema<T>): ValidationResult<T> {
   const searchParams = request.nextUrl.searchParams
   const params: Record<string, string | string[]> = {}
 
@@ -137,7 +137,7 @@ export function validateQuery<T>(request: NextRequest, schema: ZodSchema<T>): Va
  *   if (!result.success) return result.error
  * }
  */
-export function validateParams<T>(
+function validateParams<T>(
   params: Record<string, string | string[]>,
   schema: ZodSchema<T>
 ): ValidationResult<T> {
@@ -156,7 +156,7 @@ export function validateParams<T>(
 /**
  * 常用的 Zod schema 片段
  */
-export const CommonSchemas = {
+const CommonSchemas = {
   /** UUID 格式 */
   uuid: z.string().uuid('無效的 ID 格式'),
 

@@ -43,7 +43,7 @@ let _config: IndexedDBCacheConfig = { ...DEFAULT_CONFIG }
 /**
  * 覆寫預設配置（可選）
  */
-export function configure_idb_cache(overrides: Partial<IndexedDBCacheConfig>): void {
+function configure_idb_cache(overrides: Partial<IndexedDBCacheConfig>): void {
   _config = { ...DEFAULT_CONFIG, ...overrides }
 }
 
@@ -166,7 +166,7 @@ export async function set_cache<T = unknown>(key: string, data: T): Promise<void
 /**
  * 清空所有快取
  */
-export async function clear_cache(): Promise<void> {
+async function clear_cache(): Promise<void> {
   try {
     const db = await open_db()
     return new Promise<void>(resolve => {
@@ -185,7 +185,7 @@ export async function clear_cache(): Promise<void> {
 /**
  * 清除過期的快取項目
  */
-export async function clear_expired(): Promise<number> {
+async function clear_expired(): Promise<number> {
   try {
     const db = await open_db()
     const now = Date.now()

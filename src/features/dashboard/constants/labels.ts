@@ -170,7 +170,7 @@ export const DASHBOARD_LABELS = {
   DEFAULT_RATE_PREFIX: '預設匯率: ',
 }
 
-export const FLIGHT_WIDGET_LABELS = {
+const FLIGHT_WIDGET_LABELS = {
   DEPARTURE: '出發',
   ARRIVAL: '抵達',
   TAKEOFF: '起飛',

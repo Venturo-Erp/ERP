@@ -22,7 +22,7 @@ export interface BreadcrumbItem {
 /**
  * useBreadcrumb Hook 選項
  */
-export interface UseBreadcrumbOptions {
+interface UseBreadcrumbOptions {
   /**
    * 自訂項目（用於覆蓋或擴展自動生成的 breadcrumb）
    * 如果提供，這些項目會替換自動生成的項目
@@ -184,7 +184,7 @@ function generateBreadcrumb(
  * @param pathname - 路由路徑
  * @returns 頁面標題或 undefined
  */
-export function getPageTitle(pathname: string): string | undefined {
+function getPageTitle(pathname: string): string | undefined {
   const config = getBreadcrumbConfig(pathname)
   return config?.label
 }
@@ -195,10 +195,10 @@ export function getPageTitle(pathname: string): string | undefined {
  * @param pathname - 路由路徑
  * @returns 父路由路徑或 undefined
  */
-export function getParentPath(pathname: string): string | undefined {
+function getParentPath(pathname: string): string | undefined {
   const config = getBreadcrumbConfig(pathname)
   return config?.parent
 }
 
 // 匯出類型
-export type { BreadcrumbConfig }
+

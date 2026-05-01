@@ -10,7 +10,7 @@
 import useSWR from 'swr'
 import { supabase } from '@/lib/supabase/client'
 
-export interface AirportOption {
+interface AirportOption {
   value: string // IATA code 或 city slug
   label: string // "台北 (TPE)" 或 "華欣（陸路）"
   type: 'airport' | 'city'

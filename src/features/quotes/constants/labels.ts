@@ -109,7 +109,7 @@ export const LOCAL_PRICING_DIALOG_LABELS = {
   元每人: '${unitPrice}/人',
 }
 
-export const PARTICIPANT_COUNT_EDITOR_LABELS = {
+const PARTICIPANT_COUNT_EDITOR_LABELS = {
   請輸入有效的人數: '請輸入有效的人數',
   輸入人數_如_20_30_40: '輸入人數（如：20、30、40）',
 
@@ -128,7 +128,7 @@ export const PRICE_SUMMARY_CARD_LABELS = {
   LABEL_7705: '利潤',
 }
 
-export const PRINTABLE_QUICK_QUOTE_LABELS = {
+const PRINTABLE_QUICK_QUOTE_LABELS = {
   公司_Logo_Alt: 'Company Logo',
   報價請款單: '報價請款單',
 }
@@ -308,7 +308,7 @@ export const QUOTES_LIST_LABELS = {
   刪除報價單: '刪除報價單',
 }
 
-export const QUOTES_PAGE_LABELS = {
+const QUOTES_PAGE_LABELS = {
   依團顯示: '依團顯示',
   獨立報價單: '獨立報價單',
   團號: '團號',
@@ -328,13 +328,13 @@ export const QUOTES_PAGE_LABELS = {
   人數: '人數',
 }
 
-export const RESOURCE_SELECT_BUTTON_LABELS = {
+const RESOURCE_SELECT_BUTTON_LABELS = {
   選擇餐廳: '選擇餐廳',
   選擇飯店: '選擇飯店',
   選擇景點: '選擇景點',
 }
 
-export const SAVE_VERSION_DIALOG_LABELS = {
+const SAVE_VERSION_DIALOG_LABELS = {
   保存版本: '保存版本',
   例如_初版_修正版_最終版等: '例如：初版、修正版、最終版等',
   取消: '取消',
@@ -406,7 +406,7 @@ export const QUOTATION_PRICING_TABLE_LABELS = {
   LABEL_2056: '基本報價',
 }
 
-export const QUICK_QUOTE_VERSION_PANEL_LABELS = {
+const QUICK_QUOTE_VERSION_PANEL_LABELS = {
   刪除版本: '刪除版本',
   版本名稱: '版本名稱',
 
@@ -419,7 +419,7 @@ export const QUICK_QUOTE_VERSION_PANEL_LABELS = {
   CANCEL: '取消',
 }
 
-export const QUICK_QUOTE_LABELS = {
+const QUICK_QUOTE_LABELS = {
   TITLE: '快速報價單',
   ADD_TITLE: '新增快速報價單',
   CUSTOMER_NAME: '客戶名稱',
@@ -455,7 +455,7 @@ export const QUICK_QUOTE_LABELS = {
 }
 
 // Quote-Itinerary Sync
-export const QUOTE_ITINERARY_SYNC_LABELS = {
+const QUOTE_ITINERARY_SYNC_LABELS = {
   QUOTE_NOT_FOUND: '找不到報價單',
   NO_LINKED_ITINERARY: '無關聯行程表，跳過同步',
   ITINERARY_NOT_FOUND: '找不到行程表',

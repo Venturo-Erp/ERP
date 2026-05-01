@@ -13,7 +13,7 @@ import type {
 } from '@/types/tour-departure.types'
 import { COMP_TOURS_LABELS } from '../constants/labels'
 
-export function useTourDepartureData(tourId: string, open: boolean) {
+function useTourDepartureData(tourId: string, open: boolean) {
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [data, setData] = useState<TourDepartureData | null>(null)

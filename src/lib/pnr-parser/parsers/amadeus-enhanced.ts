@@ -19,7 +19,7 @@ import type { EnhancedFlightSegment } from '../enhancers/cabin-class-enhancer'
 import type { ConnectionInfo } from '../analyzers/connection-analyzer'
 import type { TicketNumberValidation } from '../validators/ticket-validator'
 
-export interface EnhancedParsedPNR extends ParsedPNR {
+interface EnhancedParsedPNR extends ParsedPNR {
   // 年齡驗證
   ageValidations: PassengerAgeValidation[]
   infantRatioCheck: { isValid: boolean; error?: string }
@@ -48,7 +48,7 @@ export interface EnhancedParsedPNR extends ParsedPNR {
  * @param rawPNR - PNR 電報原始文字
  * @returns 包含基礎解析 + 所有驗證結果的增強型 PNR
  */
-export function parseAmadeusPNREnhanced(rawPNR: string): EnhancedParsedPNR {
+function parseAmadeusPNREnhanced(rawPNR: string): EnhancedParsedPNR {
   // 1. 基礎解析
   const basic = parseAmadeusPNR(rawPNR)
 

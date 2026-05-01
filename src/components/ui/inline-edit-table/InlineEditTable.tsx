@@ -19,7 +19,7 @@ export interface InlineEditColumn<T> {
   }) => React.ReactNode
 }
 
-export interface InlineEditTableProps<T> {
+interface InlineEditTableProps<T> {
   title?: React.ReactNode
   rows: T[]
   columns: InlineEditColumn<T>[]

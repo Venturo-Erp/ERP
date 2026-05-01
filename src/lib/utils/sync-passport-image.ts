@@ -51,7 +51,7 @@ interface ConflictMember {
  * @param passportData - 要同步的護照資料
  * @returns 有衝突的成員列表
  */
-export async function checkMemberConflicts(
+async function checkMemberConflicts(
   customerId: string,
   passportData: PassportData
 ): Promise<ConflictMember[]> {
@@ -141,7 +141,7 @@ export async function checkMemberConflicts(
  * @param passportData - 要同步的護照資料
  * @returns 更新的成員數量
  */
-export async function syncPassportDataToMembers(
+async function syncPassportDataToMembers(
   customerId: string,
   passportData: PassportData
 ): Promise<number> {
@@ -410,7 +410,7 @@ export async function batchUpdateConflictMembers(
  *
  * @returns 更新的成員總數
  */
-export async function syncAllPassportImages(): Promise<number> {
+async function syncAllPassportImages(): Promise<number> {
   try {
     // 找出所有有護照照片的顧客，但關聯成員沒有的情況
     const { data: customersWithImages, error: fetchError } = await supabase

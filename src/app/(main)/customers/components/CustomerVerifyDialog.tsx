@@ -30,7 +30,7 @@ interface CustomerVerifyDialogProps {
   onUpdate: (id: string, data: Partial<UpdateCustomerData>) => Promise<void>
 }
 
-export function CustomerVerifyDialog({
+function CustomerVerifyDialog({
   open,
   onOpenChange,
   customer,

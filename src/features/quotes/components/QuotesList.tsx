@@ -28,7 +28,7 @@ interface QuotesListProps {
   onReject?: (quoteId: string, e: React.MouseEvent) => void
 }
 
-export const QuotesList: React.FC<QuotesListProps> = ({
+const QuotesList: React.FC<QuotesListProps> = ({
   quotes,
   tours,
   searchTerm,

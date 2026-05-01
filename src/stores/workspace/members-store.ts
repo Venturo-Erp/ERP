@@ -112,4 +112,4 @@ export const useMembersStore = () => {
 /**
  * Hook 型別（方便使用）
  */
-export type MembersStoreType = ReturnType<typeof useMembersStore>
+type MembersStoreType = ReturnType<typeof useMembersStore>

@@ -30,7 +30,7 @@ const AIRLINE_TICKET_PREFIX: Record<string, string> = {
 /**
  * 驗證單一票號
  */
-export function validateTicketNumber(
+function validateTicketNumber(
   ticketNumber: string,
   passengerName: string | null,
   expectedAirlineCode?: string

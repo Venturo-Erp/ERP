@@ -1,19 +1,19 @@
 import { supabase } from '@/lib/supabase/client'
 import { v4 as uuidv4 } from 'uuid'
 
-export interface StorageUploadProgress {
+interface StorageUploadProgress {
   loaded: number
   total: number
   percentage: number
 }
 
-export interface StorageUploadOptions {
+interface StorageUploadOptions {
   bucket?: string
   folder?: string
   onProgress?: (progress: StorageUploadProgress) => void
 }
 
-export interface StorageUploadResult {
+interface StorageUploadResult {
   id: string
   fileName: string
   fileSize: number
@@ -72,11 +72,11 @@ export async function uploadFileToStorage(
   }
 }
 
-export interface UploadMultipleOptions extends Omit<StorageUploadOptions, 'onProgress'> {
+interface UploadMultipleOptions extends Omit<StorageUploadOptions, 'onProgress'> {
   onFileProgress?: (fileIndex: number, progress: StorageUploadProgress) => void
 }
 
-export async function uploadFilesToStorage(
+async function uploadFilesToStorage(
   files: File[],
   options: UploadMultipleOptions = {}
 ): Promise<StorageUploadResult[]> {
@@ -95,7 +95,7 @@ export async function uploadFilesToStorage(
   return results
 }
 
-export async function removeFileFromStorage(path: string, bucket: string = DEFAULT_BUCKET) {
+async function removeFileFromStorage(path: string, bucket: string = DEFAULT_BUCKET) {
   const { error } = await supabase.storage.from(bucket).remove([path])
 
   if (error) {
@@ -109,7 +109,7 @@ export function getPublicUrlFromStorage(path: string, bucket: string = DEFAULT_B
   return data.publicUrl
 }
 
-export async function listFilesInStorage(folder?: string, bucket: string = DEFAULT_BUCKET) {
+async function listFilesInStorage(folder?: string, bucket: string = DEFAULT_BUCKET) {
   const { data, error } = await supabase.storage.from(bucket).list(folder, {
     limit: 100,
     offset: 0,

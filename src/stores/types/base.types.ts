@@ -9,6 +9,6 @@ export type {
   Payment,
   Company,
   CompanyContact,
-  AirportImageSeason,
+  
   AirportImage,
 } from '@/types/base.types'

@@ -10,7 +10,7 @@ import type {
 } from '@/stores/types/tour.types'
 
 // 本地類型別名（供此檔案內使用）
-export type LeaderInfo = LeaderInfoType
+type LeaderInfo = LeaderInfoType
 export type DailyImage = DailyImageType
 export type HotelInfo = HotelInfoType
 export type PricingItem = PricingItemType
@@ -71,10 +71,10 @@ export interface Meals {
 // DailyImage 已從 stores/types/tour.types.ts 統一匯出
 
 // 每日行程展示風格
-export type DayDisplayStyle = 'single-image' | 'multi-image' | 'card-grid' | 'timeline'
+type DayDisplayStyle = 'single-image' | 'multi-image' | 'card-grid' | 'timeline'
 
 // Dreamscape 每日行程佈局風格
-export type DreamscapeDayLayout = 'blobLeft' | 'blobRight' | 'fullHero' | 'glassCard'
+type DreamscapeDayLayout = 'blobLeft' | 'blobRight' | 'fullHero' | 'glassCard'
 
 export interface DailyItinerary {
   dayLabel: string

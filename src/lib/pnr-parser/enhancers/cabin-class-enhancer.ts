@@ -7,7 +7,7 @@
 
 import type { FlightSegment } from '../types'
 
-export interface CabinClassInfo {
+interface CabinClassInfo {
   code: string
   airlineCode: string
   category: 'Economy' | 'Premium Economy' | 'Business' | 'First' | 'Unknown'
@@ -84,7 +84,7 @@ const DEFAULT_PRICE_ORDER: Record<string, number> = {
 /**
  * 取得艙等資訊
  */
-export function getCabinClassInfo(airlineCode: string, cabinCode: string): CabinClassInfo {
+function getCabinClassInfo(airlineCode: string, cabinCode: string): CabinClassInfo {
   const category = CABIN_CATEGORY_MAP[cabinCode] || 'Unknown'
   const priceOrder = DEFAULT_PRICE_ORDER[cabinCode] || 99
 

@@ -146,7 +146,7 @@ export const TOUR_CONVERT = {
 // ============================================================
 // TourFlightInfo
 // ============================================================
-export const TOUR_FLIGHT_INFO = {
+const TOUR_FLIGHT_INFO = {
   section_title: '航班資訊（選填）',
   outbound_label: '去程航班',
   return_label: '回程航班',
@@ -166,7 +166,7 @@ export const TOUR_ORDER_SECTION = {
 // ============================================================
 // TourSettings
 // ============================================================
-export const TOUR_SETTINGS = {
+const TOUR_SETTINGS = {
   controller_label: '團控人員',
   controller_optional: '(選填)',
   controller_placeholder: '選擇團控人員...',
@@ -263,7 +263,7 @@ export const TOUR_OPS_ADD = {
 // ============================================================
 // TourConfirmationDialog
 // ============================================================
-export const TOUR_CONFIRMATION = {
+const TOUR_CONFIRMATION = {
   title: (code: string, name: string) => `團確單管理 - ${code} ${name}`,
 } as const
 
@@ -312,14 +312,14 @@ export const TOUR_LINK_ITINERARY = {
 // ============================================================
 // TourItineraryDialog
 // ============================================================
-export const TOUR_ITINERARY_DIALOG = {
+const TOUR_ITINERARY_DIALOG = {
   loading: '載入行程表...',
 } as const
 
 // ============================================================
 // TourActionButtons
 // ============================================================
-export const TOUR_ACTIONS = {
+const TOUR_ACTIONS = {
   view_versions: '查看版本',
   versions: '版本',
   edit: '編輯',
@@ -343,7 +343,7 @@ export const TOUR_ACTIONS = {
 // ============================================================
 // TourClosingDialog
 // ============================================================
-export const TOUR_CLOSING = {
+const TOUR_CLOSING = {
   title: (code: string) => `結案 - ${code}`,
   label_name: '團名',
   label_orders: '訂單數',

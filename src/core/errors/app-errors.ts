@@ -1,4 +1,4 @@
-export class AppError extends Error {
+class AppError extends Error {
   constructor(
     message: string,
     public code?: string
@@ -20,13 +20,13 @@ export class NotFoundError extends AppError {
   }
 }
 
-export class DuplicateError extends AppError {
+class DuplicateError extends AppError {
   constructor(resource: string, field: string) {
     super(`${resource} with this ${field} already exists`, 'DUPLICATE_ERROR')
   }
 }
 
-export class NetworkError extends AppError {
+class NetworkError extends AppError {
   constructor(message: string = 'Network request failed') {
     super(message, 'NETWORK_ERROR')
   }

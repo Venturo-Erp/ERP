@@ -218,4 +218,3 @@ export function DisbursementPrintDialog({
   )
 }
 
-export default DisbursementPrintDialog

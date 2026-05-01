@@ -32,7 +32,7 @@ interface DisbursementDialogProps {
   onCancel: () => void
 }
 
-export function DisbursementDialog({
+function DisbursementDialog({
   open,
   onOpenChange,
   pendingRequests,

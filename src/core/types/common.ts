@@ -19,14 +19,14 @@ export interface PageResponse<T> {
   pageSize: number
 }
 
-export interface ApiResponse<T> {
+interface ApiResponse<T> {
   success: boolean
   data?: T
   error?: string
   message?: string
 }
 
-export type CrudActions<T> = {
+type CrudActions<T> = {
   create: (data: Omit<T, keyof BaseEntity>) => Promise<T>
   update: (id: string, data: Partial<T>) => Promise<T>
   delete: (id: string) => Promise<boolean>
@@ -41,7 +41,7 @@ export interface UseEntityResult<T> {
   actions: CrudActions<T>
 }
 
-export interface UseEntityDetailsResult<T> {
+interface UseEntityDetailsResult<T> {
   entity: T | null
   loading: boolean
   error: string | null

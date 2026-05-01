@@ -14,7 +14,7 @@ import useSWR, { mutate } from 'swr'
 import { supabase } from '@/lib/supabase/client'
 import { logger } from '@/lib/utils/logger'
 
-export interface Airport {
+interface Airport {
   iata_code: string
   icao_code: string | null
   english_name: string | null

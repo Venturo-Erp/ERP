@@ -3,7 +3,7 @@
  * 用於地圖預設中心點
  */
 
-export interface AirportCoordinate {
+interface AirportCoordinate {
   code: string
   name: string
   city: string
@@ -11,7 +11,7 @@ export interface AirportCoordinate {
   longitude: number
 }
 
-export const AIRPORT_COORDINATES: Record<string, AirportCoordinate> = {
+const AIRPORT_COORDINATES: Record<string, AirportCoordinate> = {
   // 日本
   FUK: { code: 'FUK', name: '福岡機場', city: '福岡', latitude: 33.5859, longitude: 130.4507 },
   NRT: { code: 'NRT', name: '成田機場', city: '東京', latitude: 35.772, longitude: 140.3929 },

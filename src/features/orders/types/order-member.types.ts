@@ -101,7 +101,7 @@ export interface ExportColumnsConfig {
   balance: boolean
 }
 
-export const DEFAULT_EXPORT_COLUMNS: ExportColumnsConfig = {
+const DEFAULT_EXPORT_COLUMNS: ExportColumnsConfig = {
   identity: false,
   chinese_name: true,
   passport_name: true,
@@ -142,7 +142,7 @@ export interface OrderMembersExpandableProps {
   onPnrMatchSuccess?: () => void
 }
 
-export interface MemberRowProps {
+interface MemberRowProps {
   member: OrderMember
   index: number
   isEditMode: boolean
@@ -162,7 +162,7 @@ export interface MemberRowProps {
   onCustomCostChange: (fieldId: string, memberId: string, value: string) => void
 }
 
-export interface MemberEditDialogProps {
+interface MemberEditDialogProps {
   member: OrderMember | null
   isOpen: boolean
   mode: 'verify' | 'edit'
@@ -173,7 +173,7 @@ export interface MemberEditDialogProps {
   onFormChange: (field: keyof OrderMember, value: string | null) => void
 }
 
-export interface PassportUploadZoneProps {
+interface PassportUploadZoneProps {
   processedFiles: ProcessedFile[]
   isUploading: boolean
   isDragging: boolean
@@ -186,7 +186,7 @@ export interface PassportUploadZoneProps {
   onBatchUpload: () => void
 }
 
-export interface AddMemberDialogProps {
+interface AddMemberDialogProps {
   isOpen: boolean
   memberCount: number | ''
   onClose: () => void
@@ -194,7 +194,7 @@ export interface AddMemberDialogProps {
   onCountChange: (count: number | '') => void
 }
 
-export interface ExportDialogProps {
+interface ExportDialogProps {
   isOpen: boolean
   columns: ExportColumnsConfig
   members: OrderMember[]

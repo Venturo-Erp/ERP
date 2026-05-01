@@ -11,7 +11,7 @@ import { createEntityHook } from '../core/createEntityHook'
 import { CACHE_PRESETS } from '../core/types'
 import type { TourItineraryDay } from '@/features/tours/types/tour-itinerary-day.types'
 
-export const tourItineraryDayEntity = createEntityHook<TourItineraryDay>('tour_itinerary_days', {
+const tourItineraryDayEntity = createEntityHook<TourItineraryDay>('tour_itinerary_days', {
   workspaceScoped: true,
   list: {
     select:
@@ -27,10 +27,10 @@ export const tourItineraryDayEntity = createEntityHook<TourItineraryDay>('tour_i
 
 // Hooks
 export const useTourItineraryDays = tourItineraryDayEntity.useList
-export const useTourItineraryDay = tourItineraryDayEntity.useDetail
+const useTourItineraryDay = tourItineraryDayEntity.useDetail
 
 // Actions
 export const createTourItineraryDay = tourItineraryDayEntity.create
-export const updateTourItineraryDay = tourItineraryDayEntity.update
+const updateTourItineraryDay = tourItineraryDayEntity.update
 export const deleteTourItineraryDay = tourItineraryDayEntity.delete
-export const invalidateTourItineraryDays = tourItineraryDayEntity.invalidate
+const invalidateTourItineraryDays = tourItineraryDayEntity.invalidate

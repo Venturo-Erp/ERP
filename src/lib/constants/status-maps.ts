@@ -23,7 +23,7 @@ export const TOUR_STATUS_LIST = [
   'closed',
 ] as const
 
-export type TourStatusValue = (typeof TOUR_STATUS_LIST)[number]
+type TourStatusValue = (typeof TOUR_STATUS_LIST)[number]
 
 /**
  * 旅遊團狀態常數 - 避免魔法字串
@@ -40,7 +40,7 @@ export const TOUR_STATUS = {
 /**
  * 狀態值 → 中文顯示 label
  */
-export const TOUR_STATUS_LABELS: Record<TourStatusValue, string> = {
+const TOUR_STATUS_LABELS: Record<TourStatusValue, string> = {
   template: '模板',
   proposal: '提案',
   upcoming: '待出發',
@@ -86,8 +86,8 @@ export const ORDER_STATUS_REVERSE_MAP = {
   已取消: 'cancelled',
 } as const
 
-export type OrderStatusKey = keyof typeof ORDER_STATUS_MAP
-export type OrderStatusValue = (typeof ORDER_STATUS_MAP)[OrderStatusKey]
+type OrderStatusKey = keyof typeof ORDER_STATUS_MAP
+type OrderStatusValue = (typeof ORDER_STATUS_MAP)[OrderStatusKey]
 
 // ============================================
 // 付款狀態對照表
@@ -107,8 +107,8 @@ export const PAYMENT_STATUS_REVERSE_MAP = {
   已退款: 'refunded',
 } as const
 
-export type PaymentStatusKey = keyof typeof PAYMENT_STATUS_MAP
-export type PaymentStatusValue = (typeof PAYMENT_STATUS_MAP)[PaymentStatusKey]
+type PaymentStatusKey = keyof typeof PAYMENT_STATUS_MAP
+type PaymentStatusValue = (typeof PAYMENT_STATUS_MAP)[PaymentStatusKey]
 
 // ============================================
 // 報價單狀態對照表
@@ -124,7 +124,7 @@ export const QUOTE_STATUS_MAP = {
   rejected: '已拒絕',
 } as const
 
-export const QUOTE_STATUS_REVERSE_MAP = {
+const QUOTE_STATUS_REVERSE_MAP = {
   草稿: 'draft',
   提案: 'proposed',
   修改中: 'revised',
@@ -134,8 +134,8 @@ export const QUOTE_STATUS_REVERSE_MAP = {
   已拒絕: 'rejected',
 } as const
 
-export type QuoteStatusKey = keyof typeof QUOTE_STATUS_MAP
-export type QuoteStatusValue = (typeof QUOTE_STATUS_MAP)[QuoteStatusKey]
+type QuoteStatusKey = keyof typeof QUOTE_STATUS_MAP
+type QuoteStatusValue = (typeof QUOTE_STATUS_MAP)[QuoteStatusKey]
 
 // ============================================
 // 財務類型對照表
@@ -147,14 +147,14 @@ export const FINANCE_TYPE_MAP = {
   disbursement: '出納',
 } as const
 
-export const FINANCE_TYPE_REVERSE_MAP = {
+const FINANCE_TYPE_REVERSE_MAP = {
   收款: 'receipt',
   請款: 'request',
   出納: 'disbursement',
 } as const
 
-export type FinanceTypeKey = keyof typeof FINANCE_TYPE_MAP
-export type FinanceTypeValue = (typeof FINANCE_TYPE_MAP)[FinanceTypeKey]
+type FinanceTypeKey = keyof typeof FINANCE_TYPE_MAP
+type FinanceTypeValue = (typeof FINANCE_TYPE_MAP)[FinanceTypeKey]
 
 // ============================================
 // 合約狀態對照表
@@ -165,13 +165,13 @@ export const CONTRACT_STATUS_MAP = {
   signed: '已簽署',
 } as const
 
-export const CONTRACT_STATUS_REVERSE_MAP = {
+const CONTRACT_STATUS_REVERSE_MAP = {
   未簽署: 'unsigned',
   已簽署: 'signed',
 } as const
 
-export type ContractStatusKey = keyof typeof CONTRACT_STATUS_MAP
-export type ContractStatusValue = (typeof CONTRACT_STATUS_MAP)[ContractStatusKey]
+type ContractStatusKey = keyof typeof CONTRACT_STATUS_MAP
+type ContractStatusValue = (typeof CONTRACT_STATUS_MAP)[ContractStatusKey]
 
 // ============================================
 // 付款方式對照表
@@ -184,15 +184,15 @@ export const PAYMENT_METHOD_MAP = {
   check: '支票',
 } as const
 
-export const PAYMENT_METHOD_REVERSE_MAP = {
+const PAYMENT_METHOD_REVERSE_MAP = {
   現金: 'cash',
   匯款: 'transfer',
   刷卡: 'card',
   支票: 'check',
 } as const
 
-export type PaymentMethodKey = keyof typeof PAYMENT_METHOD_MAP
-export type PaymentMethodValue = (typeof PAYMENT_METHOD_MAP)[PaymentMethodKey]
+type PaymentMethodKey = keyof typeof PAYMENT_METHOD_MAP
+type PaymentMethodValue = (typeof PAYMENT_METHOD_MAP)[PaymentMethodKey]
 
 // ============================================
 // 簽證狀態對照表
@@ -206,7 +206,7 @@ export const VISA_STATUS_MAP = {
   returned: '已歸還',
 } as const
 
-export const VISA_STATUS_REVERSE_MAP = {
+const VISA_STATUS_REVERSE_MAP = {
   待送件: 'pending',
   已送件: 'submitted',
   已取件: 'collected',
@@ -214,8 +214,8 @@ export const VISA_STATUS_REVERSE_MAP = {
   已歸還: 'returned',
 } as const
 
-export type VisaStatusKey = keyof typeof VISA_STATUS_MAP
-export type VisaStatusValue = (typeof VISA_STATUS_MAP)[VisaStatusKey]
+type VisaStatusKey = keyof typeof VISA_STATUS_MAP
+type VisaStatusValue = (typeof VISA_STATUS_MAP)[VisaStatusKey]
 
 // ============================================
 // 輔助函數

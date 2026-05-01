@@ -46,7 +46,7 @@ export async function getAISetting(
 /**
  * 取得某分類的全部設定
  */
-export async function getAISettings(
+async function getAISettings(
   workspaceId: string,
   category: string
 ): Promise<Record<string, string>> {
@@ -66,7 +66,7 @@ export async function getAISettings(
 /**
  * 更新設定值
  */
-export async function updateAISetting(
+async function updateAISetting(
   workspaceId: string,
   category: string,
   key: string,
@@ -96,7 +96,7 @@ export async function updateAISetting(
  * 替換通知模板中的變數
  * 例如："{customer_name} 的 {tour_name}" → "王小明 的 日本五日遊"
  */
-export function renderTemplate(template: string, vars: Record<string, string>): string {
+function renderTemplate(template: string, vars: Record<string, string>): string {
   let result = template
   for (const [key, value] of Object.entries(vars)) {
     result = result.replace(new RegExp(`\\{${key}\\}`, 'g'), value)

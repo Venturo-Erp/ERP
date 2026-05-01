@@ -69,7 +69,7 @@ const STEPS: { key: WizardStep; label: string; icon: typeof FileText }[] = [
   { key: 'confirm', label: TOUR_WIZARD.step_confirm, icon: Lock },
 ]
 
-export function TourConfirmationWizard({
+function TourConfirmationWizard({
   tour,
   open,
   onOpenChange,

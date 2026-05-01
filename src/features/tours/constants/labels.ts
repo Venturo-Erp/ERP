@@ -636,7 +636,7 @@ export const CHECKIN_QR_CODE_LABELS = {
 }
 
 // BasicInfoSection 模組的 UI 標籤
-export const BASIC_INFO_SECTION_LABELS = {
+const BASIC_INFO_SECTION_LABELS = {
   旅遊團名稱_必填: '旅遊團名稱 *',
   國家地區: '國家/地區',
   城市: '城市',
@@ -704,7 +704,7 @@ export const TOUR_PRINT_DIALOG_LABELS = {
 }
 
 // TourPnrToolDialog 模組的 UI 標籤
-export const TOUR_PNR_TOOL_DIALOG_LABELS = {
+const TOUR_PNR_TOOL_DIALOG_LABELS = {
   PNR_電報工具: 'PNR 電報工具',
   從剪貼簿貼上: '從剪貼簿貼上',
   解析電報: '解析電報',
@@ -954,7 +954,7 @@ export const TOUR_COSTS_LABELS = {
 }
 
 // FlightInfoSection 模組的 UI 標籤
-export const FLIGHT_INFO_SECTION_LABELS = {
+const FLIGHT_INFO_SECTION_LABELS = {
   航班資訊_選填: '航班資訊（選填）',
   去程航班: '去程航班',
   回程航班: '回程航班',
@@ -976,7 +976,7 @@ export const FLIGHT_INFO_SECTION_LABELS = {
   _2h_15m: '2h 15m',
 }
 
-export const INVOICE_LABELS = {
+const INVOICE_LABELS = {
   ISSUE_DATE: '開立日期',
   RELATED_ORDER: '關聯訂單',
   DECLARATION_NOTE: '申報註記',
@@ -1000,7 +1000,7 @@ export const INVOICE_LABELS = {
   CANCEL: '取消',
 }
 
-export const ADD_PAYMENT_LABELS = {
+const ADD_PAYMENT_LABELS = {
   TITLE: '新增收款紀錄',
   RELATED_ORDER: '關聯訂單 (選填)',
   AMOUNT: '收款金額',
@@ -1020,7 +1020,7 @@ export const ADD_PAYMENT_LABELS = {
   ADD: '新增',
 }
 
-export const FLIGHT_SECTION_LABELS = {
+const FLIGHT_SECTION_LABELS = {
   FLIGHT_NUMBER: '航班號碼',
   AIRLINE: '航空公司',
   DEPARTURE_AIRPORT: '出發機場',
@@ -1054,7 +1054,7 @@ export const TOUR_SERVICE_LABELS = {
 // ============================================================
 // Tour Payments Hook
 // ============================================================
-export const TOUR_PAYMENTS_LABELS = {
+const TOUR_PAYMENTS_LABELS = {
   CONFIRMED: '已確認' as const,
   PENDING: '待確認' as const,
   UNIT: '式',
@@ -1099,7 +1099,7 @@ export const TOURS_ADVANCED_LABELS = {
 // ============================================================
 // Tour Form Hook
 // ============================================================
-export const TOUR_FORM_LABELS = {
+const TOUR_FORM_LABELS = {
   ENTER_FLIGHT_NUMBER: '請先輸入航班號碼',
   FLIGHT_FOUND: (airline: string, flightNumber: string) =>
     `已查詢到航班: ${airline} ${flightNumber}`,
@@ -1152,7 +1152,7 @@ export const TOUR_CHANNEL_LABELS = {
 // ============================================================
 // Link Documents Dialog
 // ============================================================
-export const LINK_DOCUMENTS_LABELS = {
+const LINK_DOCUMENTS_LABELS = {
   CREATE_QUOTE_FAILED: '建立團體報價單失敗',
   CREATE_QUICK_QUOTE_FAILED: '建立快速報價單失敗',
   QUOTE_DELETED: '報價單已刪除',
@@ -1163,7 +1163,7 @@ export const LINK_DOCUMENTS_LABELS = {
 // ============================================================
 // Tour Webpage Tab
 // ============================================================
-export const TOUR_WEBPAGE_TAB_LABELS = {
+const TOUR_WEBPAGE_TAB_LABELS = {
   SAVE_LEADER_CONFIRM: (name: string) =>
     `要將「${name}」新增到領隊資料庫嗎？\n下次可以直接搜尋選用。`,
   SAVE_LEADER_TITLE: '儲存領隊資料',
@@ -1177,7 +1177,7 @@ export const TOUR_WEBPAGE_TAB_LABELS = {
 // ============================================================
 // Tour Navigation
 // ============================================================
-export const TOUR_NAVIGATION_LABELS = {
+const TOUR_NAVIGATION_LABELS = {
   HOME: '首頁',
   FLIGHT: '航班',
   FEATURES: '特色',
@@ -1192,7 +1192,7 @@ export const TOUR_NAVIGATION_LABELS = {
 // ============================================================
 // Tour Leader Section
 // ============================================================
-export const TOUR_LEADER_LABELS = {
+const TOUR_LEADER_LABELS = {
   TBD: '待定',
   WEEKDAYS: ['日', '一', '二', '三', '四', '五', '六'] as const,
   LEADER: '領隊',
@@ -1206,14 +1206,14 @@ export const TOUR_LEADER_LABELS = {
 // ============================================================
 // Tour Itinerary Section
 // ============================================================
-export const TOUR_ITINERARY_SECTION_LABELS = {
+const TOUR_ITINERARY_SECTION_LABELS = {
   SELF_ARRANGED: '敬請自理',
 }
 
 // ============================================================
 // PNR Tool Dialog
 // ============================================================
-export const PNR_TOOL_LABELS = {
+const PNR_TOOL_LABELS = {
   DAYS_WITHIN: (days: number) => `${days} 天內`,
   DAYS_AFTER: (days: number) => `${days} 天後`,
   PNR_OVERWRITE_CONFIRM: (names: string) => `以下團員的 PNR 將被覆蓋：\n${names}\n\n確定要繼續嗎？`,
@@ -1271,7 +1271,7 @@ export const TOUR_HEALTH_LABELS = {
 // Add missing tab labels used by TourTabs
 // (If not already in COMP_TOURS_LABELS above, they're in the large generated object)
 
-export const TOUR_REQUEST_FORM_LABELS = {
+const TOUR_REQUEST_FORM_LABELS = {
   COMPANY: '公司：',
   PHONE: '電話：',
   FAX: '傳真：',
@@ -1296,21 +1296,21 @@ export const TOUR_REQUEST_FORM_LABELS = {
   PRINT: '列印',
 }
 
-export const ADD_MANUAL_REQUEST_DIALOG_LABELS = {
+const ADD_MANUAL_REQUEST_DIALOG_LABELS = {
   間數: '間數',
   人數: '人數',
   台數: '台數',
   數量: '數量',
 }
 
-export const PACKAGE_LIST_PANEL_LABELS = {
+const PACKAGE_LIST_PANEL_LABELS = {
   住宿: '住宿',
   餐飲: '餐飲',
   交通: '交通',
   其他: '其他',
 }
 
-export const TOUR_REQUEST_FORM_DIALOG_LABELS = {
+const TOUR_REQUEST_FORM_DIALOG_LABELS = {
   日期: '日期',
   房型: '房型',
   餐別: '餐別',

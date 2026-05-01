@@ -36,7 +36,7 @@ const RESTAURANT_SELECT_FIELDS = [
   'fax',
 ].join(',')
 
-export const restaurantEntity = createEntityHook<Attraction>('restaurants', {
+const restaurantEntity = createEntityHook<Attraction>('restaurants', {
   list: {
     select: RESTAURANT_SELECT_FIELDS,
     orderBy: { column: 'name', ascending: true },
@@ -49,8 +49,8 @@ export const restaurantEntity = createEntityHook<Attraction>('restaurants', {
 })
 
 export const useRestaurants = restaurantEntity.useList
-export const useRestaurant = restaurantEntity.useDetail
-export const useRestaurantsPaginated = restaurantEntity.usePaginated
+const useRestaurant = restaurantEntity.useDetail
+const useRestaurantsPaginated = restaurantEntity.usePaginated
 
 export const createRestaurant = restaurantEntity.create
 export const updateRestaurant = restaurantEntity.update

@@ -2,7 +2,7 @@
  * Shared print styles for printable components
  */
 
-export const PRINT_STYLES = `
+const PRINT_STYLES = `
   @media print {
     *, *::before, *::after {
       box-sizing: border-box !important;

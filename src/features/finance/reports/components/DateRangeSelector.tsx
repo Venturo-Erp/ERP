@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { DatePicker } from '@/components/ui/date-picker'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
-export type Granularity = 'month' | 'quarter' | 'year' | 'custom'
+type Granularity = 'month' | 'quarter' | 'year' | 'custom'
 
 export interface DateRange {
   startDate: string

@@ -85,7 +85,7 @@ export function useVirtualList<T>({
  * 虛擬表格 Hook
  * 專門用於表格的虛擬化
  */
-export function useVirtualTable<T>({
+function useVirtualTable<T>({
   data,
   estimateSize = 48,
   overscan = 10,

@@ -26,4 +26,4 @@ export const useChannelGroupStore = createStore<ChannelGroupEntity>({
 /**
  * Hook 型別（方便使用）
  */
-export type ChannelGroupStoreType = ReturnType<typeof useChannelGroupStore>
+type ChannelGroupStoreType = ReturnType<typeof useChannelGroupStore>

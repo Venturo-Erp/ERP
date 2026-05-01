@@ -7,7 +7,7 @@
 import { createEntityHook } from '../core/createEntityHook'
 import { CACHE_PRESETS } from '../core/types'
 
-export interface Note {
+interface Note {
   id: string
   content: string
   tab_id: string
@@ -19,7 +19,7 @@ export interface Note {
   updated_at: string | null
 }
 
-export const noteEntity = createEntityHook<Note>('notes', {
+const noteEntity = createEntityHook<Note>('notes', {
   list: {
     select:
       'id,user_id,tab_id,tab_name,content,tab_order,created_at,updated_at,workspace_id,created_by,updated_by',
@@ -32,13 +32,13 @@ export const noteEntity = createEntityHook<Note>('notes', {
   cache: CACHE_PRESETS.high,
 })
 
-export const useNotes = noteEntity.useList
-export const useNotesSlim = noteEntity.useListSlim
-export const useNote = noteEntity.useDetail
-export const useNotesPaginated = noteEntity.usePaginated
-export const useNoteDictionary = noteEntity.useDictionary
+const useNotes = noteEntity.useList
+const useNotesSlim = noteEntity.useListSlim
+const useNote = noteEntity.useDetail
+const useNotesPaginated = noteEntity.usePaginated
+const useNoteDictionary = noteEntity.useDictionary
 
-export const createNote = noteEntity.create
-export const updateNote = noteEntity.update
-export const deleteNote = noteEntity.delete
-export const invalidateNotes = noteEntity.invalidate
+const createNote = noteEntity.create
+const updateNote = noteEntity.update
+const deleteNote = noteEntity.delete
+const invalidateNotes = noteEntity.invalidate

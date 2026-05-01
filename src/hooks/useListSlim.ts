@@ -80,7 +80,7 @@ const ITINERARIES_LIST_FIELDS = ['id', 'tour_id'].join(',')
 /**
  * 瘦身版 Itineraries hook - 只抓連結功能需要的欄位
  */
-export const useItinerariesListSlim = createCloudHook<Itinerary>('itineraries', {
+const useItinerariesListSlim = createCloudHook<Itinerary>('itineraries', {
   select: ITINERARIES_LIST_FIELDS,
   orderBy: { column: 'created_at', ascending: false },
 })
@@ -95,6 +95,6 @@ const MEMBERS_COUNT_FIELDS = ['id', 'order_id'].join(',')
  * 瘦身版 Members hook - 只抓計算人數需要的欄位
  * payload 從 select('*') 的 ~25 欄位縮減到 2 欄位（-92%）
  */
-export const useMembersCountSlim = createCloudHook<Member>('members', {
+const useMembersCountSlim = createCloudHook<Member>('members', {
   select: MEMBERS_COUNT_FIELDS,
 })

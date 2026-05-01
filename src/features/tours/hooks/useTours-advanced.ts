@@ -44,7 +44,7 @@ async function fetchTours(): Promise<Tour[]> {
   return (data || []) as Tour[]
 }
 
-export function useTours(params?: PageRequest): UseEntityResult<Tour> {
+function useTours(params?: PageRequest): UseEntityResult<Tour> {
   // ✅ 優化：讀取不等 auth hydration，讓 SWR 立即從快取顯示
   const swrKey = TOURS_KEY
 

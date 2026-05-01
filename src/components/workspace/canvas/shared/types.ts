@@ -10,7 +10,7 @@ export interface CanvasEditorProps {
   canvasId?: string
 }
 
-export interface PersonalCanvasProps {
+interface PersonalCanvasProps {
   canvasId?: string
 }
 

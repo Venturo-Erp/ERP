@@ -57,7 +57,7 @@ export function captureException(error: unknown, context?: ErrorContext): void {
   }
 }
 
-export function captureMessage(message: string, level: ErrorLevel = 'info'): void {
+function captureMessage(message: string, level: ErrorLevel = 'info'): void {
   const logFn =
     level === 'error' || level === 'fatal'
       ? console.error
@@ -80,14 +80,14 @@ export function captureMessage(message: string, level: ErrorLevel = 'info'): voi
   }
 }
 
-export function setUser(userId: string | null): void {
+function setUser(userId: string | null): void {
   _currentUserId = userId
   if (SENTRY_ENABLED) {
     Sentry.setUser(userId ? { id: userId } : null)
   }
 }
 
-export async function withErrorTracking<T>(
+async function withErrorTracking<T>(
   module: string,
   fn: () => Promise<T>,
   extra?: Record<string, unknown>

@@ -250,7 +250,7 @@ interface UseErrorHandlerReturn {
  * }
  * ```
  */
-export function useErrorHandler(): UseErrorHandlerReturn {
+function useErrorHandler(): UseErrorHandlerReturn {
   const [error, setError] = useState<Error | null>(null)
 
   const showError = useCallback((err: Error) => {
@@ -305,7 +305,7 @@ interface ErrorFallbackProps {
  * </ErrorBoundary>
  * ```
  */
-export function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
+function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
   return <ErrorDisplay error={error} onRetry={resetError || (() => window.location.reload())} />
 }
 
@@ -313,4 +313,3 @@ export function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
 // Default Export
 // ============================================
 
-export default ErrorBoundary

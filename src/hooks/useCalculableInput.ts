@@ -86,7 +86,7 @@ interface UseCalculableInputReturn {
  *   className={isExpression ? 'bg-status-warning-bg' : ''}
  * />
  */
-export function useCalculableInput(
+function useCalculableInput(
   value: number | null | undefined,
   onChange: (value: number | null) => void,
   options: UseCalculableInputOptions = {}

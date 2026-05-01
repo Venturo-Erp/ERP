@@ -8,26 +8,26 @@
 
 // 從 tour-form 統一匯出基礎類型
 export type {
-  FlightInfo,
+  
   Feature,
-  FocusCard,
-  DailyItinerary,
-  Activity,
-  Meals,
-  MeetingPoint,
-  PricingDetails,
-  PriceTier,
-  FAQ,
-  HeroStatCard,
-  ImagePositionSettings,
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   CoverStyleType,
-  FlightStyleType,
-  ItineraryStyleType,
-  FeaturesStyleType,
+  
+  
+  
 } from '@/components/editor/tour-form/types'
 
 // 從 stores 匯出共用類型
-export type { LeaderInfo, HotelInfo } from '@/stores/types/tour.types'
+export type {  HotelInfo } from '@/stores/types/tour.types'
 
 import type {
   FlightInfo,

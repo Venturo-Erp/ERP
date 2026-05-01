@@ -36,7 +36,7 @@ export interface ParsedRow<T = Record<string, string | null>> {
 }
 
 /** 匯入解析結果 */
-export interface ImportParseResult<T = Record<string, string | null>> {
+interface ImportParseResult<T = Record<string, string | null>> {
   /** 成功解析的資料列 */
   rows: ParsedRow<T>[]
   /** 全域錯誤訊息（如檔案格式錯誤） */
@@ -48,7 +48,7 @@ export interface ImportParseResult<T = Record<string, string | null>> {
 }
 
 /** 驗證規則 */
-export interface ValidationRule {
+interface ValidationRule {
   /** 驗證函式，回傳 null 表示通過，回傳字串表示錯誤訊息 */
   validate: (value: string | null, row: Record<string, string | null>) => string | null
 }

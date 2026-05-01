@@ -9,7 +9,7 @@
 
 // ============ 型別定義 ============
 
-export interface City {
+interface City {
   id: string
   name: string
   nameEn?: string
@@ -17,14 +17,14 @@ export interface City {
   region?: string
 }
 
-export interface Region {
+interface Region {
   id: string
   name: string
   nameEn?: string
   cities: City[]
 }
 
-export interface Country {
+interface Country {
   id: string
   name: string
   nameEn: string
@@ -32,7 +32,7 @@ export interface Country {
   cities?: City[] // 沒有地區分類的國家直接用城市
 }
 
-export interface SelectedRegion {
+interface SelectedRegion {
   country: string
   countryName: string
   region?: string

@@ -6,7 +6,7 @@ import type { Supplier } from '@/types/supplier.types'
 
 export type { Supplier }
 
-export interface SupplierFormData {
+interface SupplierFormData {
   supplier_code: string
   name: string
   country: string
@@ -24,7 +24,7 @@ export interface SupplierFormData {
   note: string
 }
 
-export interface SupplierFilters {
+interface SupplierFilters {
   searchQuery: string
   statusFilter?: 'active' | 'inactive'
   typeFilter?: 'hotel' | 'restaurant' | 'bus_company' | 'airline' | 'attraction' | 'other'

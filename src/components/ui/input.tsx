@@ -3,7 +3,7 @@ import * as React from 'react'
 import { cn } from '@/lib/utils'
 import { toHalfWidth, tryCalculateMath } from '@/lib/utils/text'
 
-export interface InputProps extends React.ComponentProps<'input'> {
+interface InputProps extends React.ComponentProps<'input'> {
   /**
    * 是否啟用數學計算（失焦時自動計算數學表達式）
    * @default true（數字類型輸入框）
@@ -152,4 +152,4 @@ Input.displayName = 'Input'
 // 保留舊的 _Input 以防有其他地方使用
 const _Input = Input
 
-export { Input, _Input }
+export { Input,  }

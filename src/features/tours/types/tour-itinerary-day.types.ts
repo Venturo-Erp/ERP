@@ -7,7 +7,7 @@
  *   - tour_itinerary_days  存 day-level（每天的 route/note/flag 一 row）
  */
 
-export type MealPreset = 'hotel' | 'self' | 'airline' | null
+type MealPreset = 'hotel' | 'self' | 'airline' | null
 
 export interface TourItineraryDay {
   id: string

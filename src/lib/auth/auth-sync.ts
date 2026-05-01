@@ -209,7 +209,7 @@ export async function ensureAuthSync(options?: SyncOptions): Promise<boolean> {
 /**
  * 取得同步狀態
  */
-export function getAuthSyncState(): SyncState {
+function getAuthSyncState(): SyncState {
   return { ...syncState }
 }
 
@@ -229,7 +229,7 @@ export function resetAuthSyncState(): void {
  * 設定 Auth 狀態監聽器
  * 只處理登出，其他情況不需要自動同步（登入時已處理）
  */
-export function setupAuthSyncListener(): () => void {
+function setupAuthSyncListener(): () => void {
   const {
     data: { subscription },
   } = supabase.auth.onAuthStateChange(event => {

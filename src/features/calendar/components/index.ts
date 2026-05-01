@@ -1,5 +1,5 @@
-export { CalendarGrid } from './CalendarGrid'
-export { CalendarLegend } from './CalendarLegend'
+
+
 export { CalendarStyles } from './CalendarStyles'
 export { AddEventDialog } from './AddEventDialog'
 export { EditEventDialog } from './EditEventDialog'

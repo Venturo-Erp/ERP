@@ -11,7 +11,7 @@ const FULL_FEATURE_WORKSPACES = ['TP', 'TC', 'CORNER', 'CORNERTC']
 /**
  * 檢查 workspace 是否擁有完整功能
  */
-export function hasFullFeatures(workspaceCode: string | undefined | null): boolean {
+function hasFullFeatures(workspaceCode: string | undefined | null): boolean {
   if (!workspaceCode) return false
   return FULL_FEATURE_WORKSPACES.includes(workspaceCode.toUpperCase())
 }
@@ -64,7 +64,7 @@ export function isFeatureAvailable(
 /**
  * 可用的付款方式
  */
-export function getAvailablePaymentMethods(workspaceCode: string | undefined | null): string[] {
+function getAvailablePaymentMethods(workspaceCode: string | undefined | null): string[] {
   const baseMethods = ['現金', '匯款', '刷卡', '支票']
 
   if (hasFullFeatures(workspaceCode)) {

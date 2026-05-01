@@ -73,7 +73,7 @@ function getExpectedPassengerType(ageInYears: number): 'ADT' | 'CHD' | 'INF' {
 /**
  * 驗證單一旅客的年齡
  */
-export function validatePassengerAge(
+function validatePassengerAge(
   passenger: PassengerInfo,
   departureDate: Date
 ): PassengerAgeValidation {

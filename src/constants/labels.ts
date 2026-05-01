@@ -11,7 +11,7 @@ export const ACCOMMODATION_ITEM_ROW_LABELS = {
   刪除: '刪除',
 }
 
-export const CATEGORY_SECTION_LABELS = {
+const CATEGORY_SECTION_LABELS = {
   車資: '車資',
   展開: '展開',
   收合: '收合',
@@ -19,7 +19,7 @@ export const CATEGORY_SECTION_LABELS = {
   成人: '成人',
 }
 
-export const COST_ITEM_ROW_LABELS = {
+const COST_ITEM_ROW_LABELS = {
   兒童: '兒童',
   嬰兒: '嬰兒',
   輸入項目名稱: '輸入項目名稱',
@@ -30,7 +30,7 @@ export const COST_ITEM_ROW_LABELS = {
   設為自理: '設為自理',
 }
 
-export const IMPORT_ACTIVITIES_DIALOG_LABELS = {
+const IMPORT_ACTIVITIES_DIALOG_LABELS = {
   取消全選: '取消全選',
   全選: '全選',
 }
@@ -41,12 +41,12 @@ export const IMPORT_MEALS_DIALOG_LABELS = {
   晚餐: '晚餐',
 }
 
-export const LINK_TOUR_DIALOG_LABELS = {
+const LINK_TOUR_DIALOG_LABELS = {
   取消: '取消',
   未命名旅遊團: '未命名旅遊團',
 }
 
-export const LOCAL_PRICING_DIALOG_LABELS = {
+const LOCAL_PRICING_DIALOG_LABELS = {
   人數: '人數',
   LOCAL報價: 'Local 報價',
   目前總人數: '目前總人數：',
@@ -69,12 +69,12 @@ export const LOCAL_PRICING_DIALOG_LABELS = {
   元每人: '${unitPrice}/人',
 }
 
-export const PARTICIPANT_COUNT_EDITOR_LABELS = {
+const PARTICIPANT_COUNT_EDITOR_LABELS = {
   請輸入有效的人數: '請輸入有效的人數',
   輸入人數_如_20_30_40: '輸入人數（如：20、30、40）',
 }
 
-export const PRICE_SUMMARY_CARD_LABELS = {
+const PRICE_SUMMARY_CARD_LABELS = {
   單人房: '單人房',
   小孩: '小孩',
   不佔床: '不佔床',
@@ -110,18 +110,18 @@ export const PRINTABLE_QUICK_QUOTE_LABELS = {
   版權前綴: '©',
 }
 
-export const PRINTABLE_QUOTATION_LABELS = {
+const PRINTABLE_QUOTATION_LABELS = {
   旅遊報價單: '旅遊報價單',
 }
 
-export const QUICK_QUOTE_DETAIL_LABELS = {
+const QUICK_QUOTE_DETAIL_LABELS = {
   至少需要保留一個版本: '至少需要保留一個版本',
   刪除版本失敗: '刪除版本失敗',
   儲存中: '儲存中...',
   儲存: '儲存',
 }
 
-export const QUICK_QUOTE_DIALOG_LABELS = {
+const QUICK_QUOTE_DIALOG_LABELS = {
   輸入客戶姓名: '輸入客戶姓名',
   輸入聯絡電話: '輸入聯絡電話',
   輸入通訊地址: '輸入通訊地址',
@@ -141,7 +141,7 @@ export const QUICK_QUOTE_SECTION_LABELS = {
   輸入整體報價說明_例如_含機票_住宿_餐食: '輸入整體報價說明，例如：含機票、住宿、餐食...',
 }
 
-export const QUOTE_CONFIRMATION_SECTION_LABELS = {
+const QUOTE_CONFIRMATION_SECTION_LABELS = {
   未確認: '未確認',
   待確認: '待確認',
   客戶已確認: '客戶已確認',
@@ -168,7 +168,7 @@ export const QUOTE_CONFIRMATION_SECTION_LABELS = {
   確認報價: '確認報價',
 }
 
-export const QUOTE_DETAIL_EMBED_LABELS = {
+const QUOTE_DETAIL_EMBED_LABELS = {
   特殊團: '特殊團',
   更新狀態失敗_請稍後再試: '更新狀態失敗，請稍後再試',
   同步功能開發中: '同步功能開發中',
@@ -178,7 +178,7 @@ export const QUOTE_DETAIL_EMBED_LABELS = {
   進行中: '待出發',
 }
 
-export const QUOTE_DIALOG_LABELS = {
+const QUOTE_DIALOG_LABELS = {
   獨立報價單_無旅遊團: '獨立報價單（無旅遊團）',
   搜尋或選擇旅遊團: '搜尋或選擇旅遊團...',
   找不到旅遊團: '找不到旅遊團',
@@ -186,7 +186,7 @@ export const QUOTE_DIALOG_LABELS = {
   例如_JP_BASIC_EU_LUXURY: '例如：JP-BASIC, EU-LUXURY',
 }
 
-export const QUOTE_HEADER_LABELS = {
+const QUOTE_HEADER_LABELS = {
   返回旅遊團: '返回旅遊團',
   返回: '返回',
   旅遊團編號: '旅遊團編號',
@@ -231,13 +231,13 @@ export const QUOTES_PAGE_LABELS = {
   人數: '人數',
 }
 
-export const RESOURCE_SELECT_BUTTON_LABELS = {
+const RESOURCE_SELECT_BUTTON_LABELS = {
   選擇餐廳: '選擇餐廳',
   選擇飯店: '選擇飯店',
   選擇景點: '選擇景點',
 }
 
-export const SAVE_VERSION_DIALOG_LABELS = {
+const SAVE_VERSION_DIALOG_LABELS = {
   保存版本: '保存版本',
   例如_初版_修正版_最終版等: '例如：初版、修正版、最終版等',
   取消: '取消',
@@ -246,11 +246,11 @@ export const SAVE_VERSION_DIALOG_LABELS = {
   版本名稱: '版本名稱',
 }
 
-export const SELLING_PRICE_SECTION_LABELS = {
+const SELLING_PRICE_SECTION_LABELS = {
   已儲存: '已儲存',
 }
 
-export const SYNC_TO_ITINERARY_DIALOG_LABELS = {
+const SYNC_TO_ITINERARY_DIALOG_LABELS = {
   同步餐飲到行程表: '同步餐飲到行程表',
   自理: '自理',
   取消: '取消',
@@ -265,27 +265,27 @@ export const SYNC_TO_ITINERARY_DIALOG_LABELS = {
   空: '（空）',
 }
 
-export const QUICK_QUOTE_ITEMS_TABLE_LABELS = {
+const QUICK_QUOTE_ITEMS_TABLE_LABELS = {
   可輸入算式: '可輸入算式',
   點擊_新增項目_開始: '，點擊「新增項目」開始',
 }
 
-export const QUOTATION_INFO_LABELS = {
+const QUOTATION_INFO_LABELS = {
   精選旅遊行程: '精選旅遊行程',
 }
 
-export const QUOTATION_PRICING_TABLE_LABELS = {
+const QUOTATION_PRICING_TABLE_LABELS = {
   小孩佔床: '小孩佔床',
   小孩不佔床: '小孩不佔床',
   單人房差價: '單人房差價',
 }
 
-export const QUICK_QUOTE_VERSION_PANEL_LABELS = {
+const QUICK_QUOTE_VERSION_PANEL_LABELS = {
   刪除版本: '刪除版本',
   版本名稱: '版本名稱',
 }
 
-export const QUOTATION_TERMS_LABELS = {
+const QUOTATION_TERMS_LABELS = {
   本報價單有效期限至: '本報價單有效期限至 {validUntil}，逾期請重新報價。',
   出發前30天內取消: '出發前 30 天內取消，需支付團費 30% 作為取消費。',
   出發前14天內取消: '出發前 14 天內取消，需支付團費 50% 作為取消費。',
@@ -296,7 +296,7 @@ export const QUOTATION_INCLUSIONS_LABELS = {
   旅遊責任險: '旅遊責任險 500 萬元',
 }
 
-export const PRINT_FOOTER_LABELS = {
+const PRINT_FOOTER_LABELS = {
   版權格式: '{companyName} © {year}',
 }
 
@@ -307,18 +307,18 @@ export const PAYMENT_INFO_LABELS = {
   未設定銀行資訊: '請至公司設定填寫銀行資訊',
 }
 
-export const QUOTE_DIALOG_LABELS_EXTRA = {
+const QUOTE_DIALOG_LABELS_EXTRA = {
   不填寫則自動生成Q開頭編號: '不填寫則自動生成 Q 開頭的編號',
   新增_Enter: '新增 <span className="ml-1 text-xs opacity-70">(Enter)</span>',
   placeholder_1: '1',
 }
 
-export const ACCOMMODATION_ITEM_ROW_LABELS_EXTRA = {
+const ACCOMMODATION_ITEM_ROW_LABELS_EXTRA = {
   DAY: 'DAY{day}',
   續住: '續住 ({prevDayHotelName})',
 }
 
-export const TRAVEL_INVOICE_LABELS = {
+const TRAVEL_INVOICE_LABELS = {
   BASIC_INFO: '基本資訊',
   INVOICE_NUMBER: '發票號碼',
   NOT_OBTAINED_YET: '尚未取得',
@@ -362,7 +362,7 @@ export const TRAVEL_INVOICE_LABELS = {
 
 // === timebox 模組標籤 ===
 
-export const WEEK_REVIEW_DIALOG_LABELS = {
+const WEEK_REVIEW_DIALOG_LABELS = {
   週複盤: '週複盤 - {weekRange}',
   本週統計: '本週統計',
   完成率: '完成率',
@@ -379,7 +379,7 @@ export const WEEK_REVIEW_DIALOG_LABELS = {
   儲存: '儲存',
 }
 
-export const WORKOUT_DIALOG_LABELS = {
+const WORKOUT_DIALOG_LABELS = {
   動作名稱: '動作名稱 *',
   例槓鈴臥推: '例: 槓鈴臥推',
   總動作數: '總動作數:',
@@ -389,7 +389,7 @@ export const WORKOUT_DIALOG_LABELS = {
   儲存訓練: '儲存訓練',
 }
 
-export const STATISTICS_PANEL_LABELS = {
+const STATISTICS_PANEL_LABELS = {
   今日運動時間: '今日運動時間',
   本週統計: '本週統計',
   重訓: '重訓',
@@ -400,7 +400,7 @@ export const STATISTICS_PANEL_LABELS = {
   訓練次數: '訓練次數',
 }
 
-export const BASIC_DIALOG_LABELS = {
+const BASIC_DIALOG_LABELS = {
   開始時間: '開始時間',
   持續時間: '持續時間',
   預計用時: '預計用時：',
@@ -411,7 +411,7 @@ export const BASIC_DIALOG_LABELS = {
 // === designer 模組標籤 ===
 
 // TemplateDataPanel 專用標籤
-export const TEMPLATE_DATA_PANEL_LABELS = {
+const TEMPLATE_DATA_PANEL_LABELS = {
   模板數據: '模板數據',
   修改後自動更新畫布: '修改後自動更新畫布',
   請先選擇模板: '請先選擇模板',
@@ -511,7 +511,7 @@ export const DIALOGS_CONTAINER_LABELS = {
   取消: '取消',
 }
 
-export const COMP_WORKSPACE_LABELS = {
+const COMP_WORKSPACE_LABELS = {
   已編輯: ' (已編輯)',
   天內沒有需要關注的開票狀況: ' 天內沒有需要關注的開票狀況',
   _1_個月: '1 個月',
@@ -732,7 +732,7 @@ export const COMP_WORKSPACE_LABELS = {
 
 // === accounting 模組標籤 ===
 
-export const ACCOUNTING_PAGE_LABELS = {
+const ACCOUNTING_PAGE_LABELS = {
   ACCOUNTING_MANAGEMENT: '記帳管理',
   HOME: '首頁',
   ACCOUNT_MANAGEMENT: '帳戶管理',
@@ -770,7 +770,7 @@ export const ACCOUNTING_PAGE_LABELS = {
   ACCOUNTING_FAILED: '記帳失敗，請稍後再試',
 }
 
-export const PERIOD_CLOSING_LABELS = {
+const PERIOD_CLOSING_LABELS = {
   月結: '月結',
   季結: '季結',
   年結: '年結',
@@ -783,7 +783,7 @@ export const PERIOD_CLOSING_LABELS = {
   執行結轉: '執行結轉',
 }
 
-export const BALANCE_SHEET_LABELS = {
+const BALANCE_SHEET_LABELS = {
   資產: '資產 {amount}',
   負債: '負債 {amount}',
   權益: '權益 {amount}',
@@ -796,7 +796,7 @@ export const BALANCE_SHEET_LABELS = {
   股東權益: '股東權益',
 }
 
-export const INCOME_STATEMENT_LABELS = {
+const INCOME_STATEMENT_LABELS = {
   損益表: '損益表',
   營業收入: '營業收入',
   營業成本: '營業成本',
@@ -807,7 +807,7 @@ export const INCOME_STATEMENT_LABELS = {
   本期淨利: '本期淨利',
 }
 
-export const CASH_FLOW_LABELS = {
+const CASH_FLOW_LABELS = {
   現金流量表: '現金流量表',
   營業活動: '營業活動',
   投資活動: '投資活動',
@@ -816,7 +816,7 @@ export const CASH_FLOW_LABELS = {
   期末現金: '期末現金',
 }
 
-export const TRIAL_BALANCE_LABELS = {
+const TRIAL_BALANCE_LABELS = {
   試算表: '試算表',
   科目代號: '科目代號',
   科目名稱: '科目名稱',

@@ -313,7 +313,7 @@ export function prepareContractData(
 /**
  * 替換合約範本中的變數
  */
-export function replaceContractVariables(template: string, data: Partial<ContractData>): string {
+function replaceContractVariables(template: string, data: Partial<ContractData>): string {
   let result = template
 
   // 替換所有 {{變數名}} 格式的變數

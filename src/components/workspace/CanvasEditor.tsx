@@ -7,4 +7,4 @@
  */
 
 export { CanvasEditor } from './canvas/canvas-editor'
-export type { CanvasEditorProps } from './canvas/shared/types'
+

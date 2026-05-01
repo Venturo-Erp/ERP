@@ -3,15 +3,15 @@
 // ============================
 
 export type {
-  FlightSegment,
-  FlightInfo,
+  
+  
   Tour,
   Member,
-  TourAddOn,
-  ItineraryFeature,
-  FocusCard,
+  
+  
+  
   LeaderInfo,
-  MeetingInfo,
+  
   HotelInfo,
   DailyActivity,
   DailyMeals,
@@ -23,13 +23,13 @@ export type {
   Itinerary,
   PriceTier,
   FAQ,
-  TourStatus,
-  ContractStatus,
-  ContractTemplate,
-  TourCategory,
-  CreateTourData,
-  UpdateTourData,
-  TourFilter,
-  TourListItem,
-  TourStats,
+  
+  
+  
+  
+  
+  
+  
+  
+  
 } from '@/types/tour.types'

@@ -5,7 +5,7 @@ import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-r
 import { cn } from '@/lib/utils'
 import { UI_LABELS } from './constants/labels'
 
-export interface CalendarProps {
+interface CalendarProps {
   mode?: 'single' | 'range'
   selected?: Date | { from: Date; to?: Date }
   onSelect?: (date: Date | { from: Date; to?: Date } | undefined) => void

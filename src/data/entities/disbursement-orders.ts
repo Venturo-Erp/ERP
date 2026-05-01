@@ -8,7 +8,7 @@ import { createEntityHook } from '../core/createEntityHook'
 import { CACHE_PRESETS } from '../core/types'
 import type { DisbursementOrder } from '@/stores/types'
 
-export const disbursementOrderEntity = createEntityHook<DisbursementOrder>('disbursement_orders', {
+const disbursementOrderEntity = createEntityHook<DisbursementOrder>('disbursement_orders', {
   list: {
     select:
       'id,code,amount,payment_method,status,handled_by,handled_at,notes,created_at,updated_at,workspace_id,payment_request_ids,updated_by,order_number,disbursement_date,confirmed_by,confirmed_at,created_by,pdf_url,disbursement_type,refund_id,bank_account_id',
@@ -22,12 +22,12 @@ export const disbursementOrderEntity = createEntityHook<DisbursementOrder>('disb
 })
 
 export const useDisbursementOrders = disbursementOrderEntity.useList
-export const useDisbursementOrdersSlim = disbursementOrderEntity.useListSlim
-export const useDisbursementOrder = disbursementOrderEntity.useDetail
-export const useDisbursementOrdersPaginated = disbursementOrderEntity.usePaginated
-export const useDisbursementOrderDictionary = disbursementOrderEntity.useDictionary
+const useDisbursementOrdersSlim = disbursementOrderEntity.useListSlim
+const useDisbursementOrder = disbursementOrderEntity.useDetail
+const useDisbursementOrdersPaginated = disbursementOrderEntity.usePaginated
+const useDisbursementOrderDictionary = disbursementOrderEntity.useDictionary
 
-export const createDisbursementOrder = disbursementOrderEntity.create
+const createDisbursementOrder = disbursementOrderEntity.create
 export const updateDisbursementOrder = disbursementOrderEntity.update
 export const deleteDisbursementOrder = disbursementOrderEntity.delete
 export const invalidateDisbursementOrders = disbursementOrderEntity.invalidate

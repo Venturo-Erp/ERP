@@ -545,7 +545,7 @@ export async function searchAirportDeparturesAction(
 /**
  * 查詢機場抵達航班
  */
-export async function searchAirportArrivalsAction(
+async function searchAirportArrivalsAction(
   airportCode: string,
   date: string,
   originFilter?: string

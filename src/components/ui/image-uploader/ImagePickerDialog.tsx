@@ -8,7 +8,7 @@ import { ImageUploader } from './index'
 import { UnsplashSearch } from './UnsplashSearch'
 import { IMAGE_UPLOADER_LABELS } from './constants/labels'
 
-export interface ImagePickerDialogProps {
+interface ImagePickerDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   /** 對話框標題 */
@@ -31,7 +31,7 @@ export interface ImagePickerDialogProps {
  * 圖片選擇對話框
  * 整合「上傳檔案」和「Unsplash 搜尋」兩種方式
  */
-export function ImagePickerDialog({
+function ImagePickerDialog({
   open,
   onOpenChange,
   title = '選擇圖片',

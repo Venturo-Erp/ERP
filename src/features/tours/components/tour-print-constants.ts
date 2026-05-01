@@ -60,7 +60,7 @@ export const CLASS_NAMES: Record<string, string> = {
 }
 
 // 狀態代碼對照表
-export const STATUS_NAMES: Record<string, string> = {
+const STATUS_NAMES: Record<string, string> = {
   HK: 'OK',
   TK: COMP_TOURS_LABELS.已開票,
   UC: COMP_TOURS_LABELS.未確認,

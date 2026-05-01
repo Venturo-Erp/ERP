@@ -6,7 +6,7 @@ import { logger } from '@/lib/utils/logger'
  * 統一管理各種 API 的使用量追蹤
  */
 
-export interface ApiUsageCheckResult {
+interface ApiUsageCheckResult {
   canUse: boolean
   used: number
   limit: number
@@ -23,7 +23,7 @@ export const API_LIMITS = {
   gemini_suggest: 500, // Gemini 景點建議月度限制
 } as const
 
-export type ApiName = keyof typeof API_LIMITS
+type ApiName = keyof typeof API_LIMITS
 
 /**
  * 檢查 API 使用量並回傳剩餘次數
@@ -141,7 +141,7 @@ export async function updateApiUsage(
 /**
  * 取得 API 當月使用量資訊
  */
-export async function getApiUsage(apiName: ApiName): Promise<{
+async function getApiUsage(apiName: ApiName): Promise<{
   used: number
   limit: number
   remaining: number

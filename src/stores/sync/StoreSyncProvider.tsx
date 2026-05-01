@@ -28,7 +28,7 @@ interface StoreSyncProviderProps {
   children: React.ReactNode
 }
 
-export function StoreSyncProvider({ children }: StoreSyncProviderProps) {
+function StoreSyncProvider({ children }: StoreSyncProviderProps) {
   // 設定同步訂閱
   useStoreSyncSetup()
 

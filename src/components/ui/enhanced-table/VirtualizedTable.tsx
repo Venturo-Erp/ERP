@@ -6,7 +6,7 @@ import { useVirtualList } from '@/hooks/useVirtualList'
 import type { TableColumn, RowData } from './types'
 import { ENHANCED_TABLE_LABELS } from './constants/labels'
 
-export interface VirtualizedTableProps<T extends RowData = RowData> {
+interface VirtualizedTableProps<T extends RowData = RowData> {
   columns: TableColumn<T>[]
   data: T[]
   /** Container height (required for virtualization) */
@@ -41,7 +41,7 @@ export interface VirtualizedTableProps<T extends RowData = RowData> {
  * />
  * ```
  */
-export function VirtualizedTable<T extends RowData = RowData>({
+function VirtualizedTable<T extends RowData = RowData>({
   columns,
   data,
   height = 600,

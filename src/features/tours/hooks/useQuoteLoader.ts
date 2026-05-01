@@ -44,7 +44,7 @@ interface LinkedQuoteInfo {
   created_at: string
 }
 
-export function useQuoteLoader(
+function useQuoteLoader(
   tour: Tour,
   open: boolean,
   data: TourDepartureData | null,

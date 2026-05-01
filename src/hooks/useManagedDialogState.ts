@@ -41,7 +41,7 @@
 
 import { useState, useCallback, useRef } from 'react'
 
-export interface UseManagedDialogStateOptions<T> {
+interface UseManagedDialogStateOptions<T> {
   /**
    * Dialog 關閉時的回調
    */
@@ -66,7 +66,7 @@ export interface UseManagedDialogStateOptions<T> {
   initialData?: T | null
 }
 
-export interface UseManagedDialogStateReturn<T> {
+interface UseManagedDialogStateReturn<T> {
   /**
    * Dialog 是否開啟
    */
@@ -117,7 +117,7 @@ export interface UseManagedDialogStateReturn<T> {
 /**
  * Dialog 狀態管理 Hook（帶生命週期管理）
  */
-export function useManagedDialogState<T = unknown>(
+function useManagedDialogState<T = unknown>(
   options: UseManagedDialogStateOptions<T> = {}
 ): UseManagedDialogStateReturn<T> {
   const { onClose, onConfirmClose, resetOnClose = true, initialData = null } = options
@@ -204,7 +204,7 @@ export function useManagedDialogState<T = unknown>(
  * 簡化版：單純的開關狀態
  * 適用於不需要數據的簡單 Dialog
  */
-export function useSimpleDialogState(options?: {
+function useSimpleDialogState(options?: {
   onClose?: () => void
   onConfirmClose?: () => boolean | Promise<boolean>
 }) {

@@ -21,7 +21,7 @@ import useSWR from 'swr'
 import { supabase } from '@/lib/supabase/client'
 import { useAuthStore } from '@/stores/auth-store'
 
-export interface EligibleEmployee {
+interface EligibleEmployee {
   id: string
   employee_number: string | null
   chinese_name: string | null

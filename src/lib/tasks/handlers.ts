@@ -134,7 +134,7 @@ registerTaskHandler<CleanupOldDataPayload>(TaskTypes.CLEANUP_OLD_DATA, async (pa
 })
 
 // 導出所有已註冊的處理器（用於檢查）
-export const taskHandlers = {
+const taskHandlers = {
   [TaskTypes.GENERATE_REPORT]: true,
   [TaskTypes.SEND_EMAIL]: true,
   [TaskTypes.SEND_NOTIFICATION]: true,

@@ -86,7 +86,7 @@ export const useMemberStore = createStore<Member>({
  * 員工 Store
  * ⚠️ 不啟用 Workspace 隔離（全局共享基礎資料）
  */
-export const useEmployeeStore = createStore<Employee>({
+const useEmployeeStore = createStore<Employee>({
   tableName: 'employees',
   workspaceScoped: false,
 })
@@ -95,21 +95,21 @@ export const useEmployeeStore = createStore<Employee>({
 // 地區型別 re-export（供既有 import 使用）
 // ============================================
 
-export type { Country, City, Region as RegionNew, RegionStats } from './region-store'
+
 
 // ============================================
 // 保留的特殊 Stores（認證、UI 狀態）
 // ============================================
 
 export { useAuthStore } from './auth-store'
-export { useThemeStore } from './theme-store'
+
 
 // ============================================
 // 暫時保留的複雜 Stores（待重構）
 // ============================================
 
-export { useUserStore } from './user-store'
-export { useAccountingStore } from './accounting-store'
+
+
 export { useCalendarStore } from './calendar-store'
 export { useWorkspaceStore } from './workspace-store'
 
@@ -117,71 +117,34 @@ export { useWorkspaceStore } from './workspace-store'
 // 型別匯出（方便使用）
 // ============================================
 
-export type {
-  Tour,
-  Itinerary,
-  Order,
-  Member,
-  Customer,
-  Payment,
-  PaymentRequest,
-  DisbursementOrder,
-  Quote,
-  QuoteItem,
-  Employee,
-  Todo,
-  Visa,
-  Supplier,
-}
+
 
 // 企業客戶系統型別
-export type { Company, CompanyContact } from './types'
+export type { Company,  } from './types'
 
 // 財務收款系統型別
 export type {
   Receipt,
-  LinkPayLog,
-  ReceiptType,
-  ReceiptStatus,
-  LinkPayStatus,
-  CreateReceiptData,
-  UpdateReceiptData,
+  
+  
+  
+  
+  
+  
   ReceiptItem,
-  RECEIPT_TYPE_LABELS,
-  RECEIPT_STATUS_LABELS,
-  RECEIPT_STATUS_COLORS,
-  LINKPAY_STATUS_LABELS,
-  LINKPAY_STATUS_COLORS,
+  
+  
+  
+  
+  
 } from '@/types/receipt.types'
 
 // ============================================
 // Store 同步系統
 // ============================================
 
-export {
-  storeEvents,
-  setupStoreSyncListeners,
-  STORE_SYNC_RELATIONS,
-  type StoreEventType,
-  type StoreSource,
-  type TourEventPayload,
-  type OrderEventPayload,
-  type MemberEventPayload,
-  type StoreSyncConfig,
-} from './sync'
 
-export {
-  emitCreated,
-  emitUpdated,
-  emitDeleted,
-  TOUR_SYNC_CONFIG,
-  ORDER_SYNC_CONFIG,
-  MEMBER_SYNC_CONFIG,
-  ITINERARY_SYNC_CONFIG,
-  PAYMENT_REQUEST_SYNC_CONFIG,
-  RECEIPT_ORDER_SYNC_CONFIG,
-  type SyncEventConfig,
-  type SyncEntityType,
-} from './sync/with-sync-events'
 
-export { useStoreSyncSetup } from './sync'
+
+
+

@@ -19,7 +19,7 @@ import {
 /**
  * 狀態配置介面
  */
-export interface StatusConfig {
+interface StatusConfig {
   color: string
   label: string
   icon?: LucideIcon
@@ -618,4 +618,4 @@ export function getStatusOptions(type: StatusType): Array<{ value: string; label
 /**
  * 直接導出 STATUS_CONFIG 供組件使用
  */
-export const STATUS_CONFIG = STATUS_CONFIGS
+const STATUS_CONFIG = STATUS_CONFIGS

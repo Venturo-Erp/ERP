@@ -10,7 +10,7 @@ import type { Database } from '@/lib/supabase/types'
  * Supabase 表格名稱類型（用於 .from() 方法）
  * 從 typed-client 統一匯出
  */
-export type { SupabaseTableName } from '@/lib/supabase/typed-client'
+
 import type { SupabaseTableName } from '@/lib/supabase/typed-client'
 
 /**
@@ -103,7 +103,7 @@ export interface StoreConfig {
 /**
  * 同步狀態
  */
-export interface SyncState {
+interface SyncState {
   isPending: boolean
   lastSyncedAt: string | null
   pendingCount: number
@@ -112,7 +112,7 @@ export interface SyncState {
 /**
  * 適配器介面
  */
-export interface StorageAdapter<T extends BaseEntity> {
+interface StorageAdapter<T extends BaseEntity> {
   getAll: () => Promise<T[]>
   getById: (id: string) => Promise<T | null>
   put: (item: T) => Promise<void>
@@ -124,7 +124,7 @@ export interface StorageAdapter<T extends BaseEntity> {
 /**
  * 遠端適配器介面（Supabase）
  */
-export interface RemoteAdapter<T extends BaseEntity> extends StorageAdapter<T> {
+interface RemoteAdapter<T extends BaseEntity> extends StorageAdapter<T> {
   fetchAll: (signal?: AbortSignal) => Promise<T[]>
   insert: (data: Omit<T, 'id' | 'created_at' | 'updated_at'>) => Promise<T>
 }

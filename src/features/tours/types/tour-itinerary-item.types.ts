@@ -16,7 +16,7 @@ export const ITINERARY_ITEM_CATEGORIES = {
   GUIDE: 'guide',
 } as const
 
-export type ItineraryItemCategory =
+type ItineraryItemCategory =
   (typeof ITINERARY_ITEM_CATEGORIES)[keyof typeof ITINERARY_ITEM_CATEGORIES]
 
 // === Sub-category 常量 ===
@@ -29,25 +29,25 @@ export const MEAL_SUB_CATEGORIES = {
 export type MealSubCategory = (typeof MEAL_SUB_CATEGORIES)[keyof typeof MEAL_SUB_CATEGORIES]
 
 // === Status 常量 ===
-export const ITEM_QUOTE_STATUS = {
+const ITEM_QUOTE_STATUS = {
   NONE: 'none',
   DRAFTED: 'drafted',
   CONFIRMED: 'confirmed',
 } as const
 
-export const ITEM_CONFIRMATION_STATUS = {
+const ITEM_CONFIRMATION_STATUS = {
   NONE: 'none',
   PENDING: 'pending',
   CONFIRMED: 'confirmed',
 } as const
 
-export const ITEM_LEADER_STATUS = {
+const ITEM_LEADER_STATUS = {
   NONE: 'none',
   FILLED: 'filled',
   REVIEWED: 'reviewed',
 } as const
 
-export const ITEM_REQUEST_STATUS = {
+const ITEM_REQUEST_STATUS = {
   NONE: 'none',
   SENT: 'sent',
   REPLIED: 'replied',
@@ -154,13 +154,13 @@ export interface TourItineraryItem {
 }
 
 // === 建立/更新用的 Partial 型別 ===
-export type TourItineraryItemCreate = Omit<
+type TourItineraryItemCreate = Omit<
   TourItineraryItem,
   'id' | 'created_at' | 'updated_at'
 > & {
   id?: string
 }
 
-export type TourItineraryItemUpdate = Partial<
+type TourItineraryItemUpdate = Partial<
   Omit<TourItineraryItem, 'id' | 'created_at' | 'updated_at'>
 >

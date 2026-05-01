@@ -41,16 +41,6 @@ export * from './entities'
 // Core（進階使用：自訂 entity）
 // ============================================
 
-export { createEntityHook } from './core/createEntityHook'
-export type {
-  BaseEntity,
-  EntityConfig,
-  EntityHook,
-  ListResult,
-  DetailResult,
-  PaginatedParams,
-  PaginatedResult,
-  DictionaryResult,
-  CacheConfig,
-} from './core/types'
-export { CACHE_PRESETS, DEFAULT_CACHE_CONFIG } from './core/types'
+
+
+

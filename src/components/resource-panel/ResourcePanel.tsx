@@ -16,7 +16,7 @@ import { logger } from '@/lib/utils/logger'
 // 資源類型定義
 // ============================================
 
-export type ResourceType = 'attraction' | 'hotel' | 'restaurant'
+type ResourceType = 'attraction' | 'hotel' | 'restaurant'
 
 interface ResourceItem {
   id: string

@@ -7,7 +7,7 @@
 
 import { useAuthStore } from '@/stores/auth-store'
 
-export interface CompanyInfo {
+interface CompanyInfo {
   name: string
   fullName: string
   address: string

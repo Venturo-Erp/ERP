@@ -8,7 +8,7 @@ import type { BreadcrumbItem, TabItem } from './list-page-layout'
 /**
  * ContentPageLayout 屬性
  */
-export interface ContentPageLayoutProps {
+interface ContentPageLayoutProps {
   // ========== 頁面配置 ==========
   /** 頁面標題 */
   title: string

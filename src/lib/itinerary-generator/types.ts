@@ -48,7 +48,7 @@ export interface GenerateItineraryResult {
 }
 
 // 景點分類（用於排程）
-export type AttractionCategory = '景點' | '餐廳' | '購物' | '交通' | '住宿'
+type AttractionCategory = '景點' | '餐廳' | '購物' | '交通' | '住宿'
 
 // 帶距離資訊的景點
 export interface AttractionWithDistance extends Attraction {

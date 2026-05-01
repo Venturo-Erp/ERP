@@ -8,7 +8,7 @@ import { createEntityHook } from '../core/createEntityHook'
 import { CACHE_PRESETS } from '../core/types'
 import type { Region } from '@/stores/region-store'
 
-export const regionEntity = createEntityHook<Region>('regions', {
+const regionEntity = createEntityHook<Region>('regions', {
   list: {
     select:
       'id,country_id,name,name_en,description,display_order,is_active,created_at,updated_at,workspace_id',
@@ -22,12 +22,12 @@ export const regionEntity = createEntityHook<Region>('regions', {
 })
 
 export const useRegions = regionEntity.useList
-export const useRegionsSlim = regionEntity.useListSlim
-export const useRegion = regionEntity.useDetail
-export const useRegionsPaginated = regionEntity.usePaginated
-export const useRegionDictionary = regionEntity.useDictionary
+const useRegionsSlim = regionEntity.useListSlim
+const useRegion = regionEntity.useDetail
+const useRegionsPaginated = regionEntity.usePaginated
+const useRegionDictionary = regionEntity.useDictionary
 
-export const createRegion = regionEntity.create
-export const updateRegion = regionEntity.update
-export const deleteRegion = regionEntity.delete
-export const invalidateRegions = regionEntity.invalidate
+const createRegion = regionEntity.create
+const updateRegion = regionEntity.update
+const deleteRegion = regionEntity.delete
+const invalidateRegions = regionEntity.invalidate

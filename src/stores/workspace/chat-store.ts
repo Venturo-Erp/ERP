@@ -517,4 +517,4 @@ export const useChatStore = () => {
 /**
  * Hook 型別（方便使用）
  */
-export type ChatStoreType = ReturnType<typeof useChatStore>
+type ChatStoreType = ReturnType<typeof useChatStore>

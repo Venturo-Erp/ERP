@@ -7,7 +7,7 @@ import { COMP_TOURS_LABELS } from '../../constants/labels'
 import { DroppableZone } from './DroppableZone'
 import { useRestaurants } from '@/data'
 
-export type ItineraryBlock =
+type ItineraryBlock =
   | { type: 'text'; content: string }
   | { type: 'attraction'; id: string; name: string; verified?: boolean }
 

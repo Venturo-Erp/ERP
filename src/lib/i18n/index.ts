@@ -1,2 +1,2 @@
-export const locales = ['zh-TW']
+const locales = ['zh-TW']
 export const defaultLocale = 'zh-TW'

@@ -37,8 +37,8 @@ import {
 } from './types'
 
 // Re-export types
-export type { ImageAdjustments, ImageEditorSettings } from './types'
-export { DEFAULT_ADJUSTMENTS, DEFAULT_SETTINGS } from './types'
+export type {  ImageEditorSettings } from './types'
+
 
 // ============ Props ============
 

@@ -250,7 +250,7 @@ export const COMPANY_LABELS = {
   UPLOAD_FAILED: '上傳失敗',
 }
 
-export const API_SETTINGS_LABELS = {
+const API_SETTINGS_LABELS = {
   LOADING: '載入中...',
   API_KEY_WARNING: '請勿將 API Key 分享給非授權人員',
   SETUP_GUIDE: '設定方式',
@@ -273,7 +273,7 @@ export const API_SETTINGS_LABELS = {
   ENV_FILE_PREFIX: '在專案根目錄建立或編輯',
 }
 
-export const DEVTOOLS_LABELS = {
+const DEVTOOLS_LABELS = {
   TITLE: '開發者工具',
   ONE_CLICK_ENV: '一鍵設定 .env.local',
   STEP_COPY: '點擊「複製指令」按鈕',
@@ -295,7 +295,7 @@ export const DEVTOOLS_LABELS = {
   STEP_CLAUDE_AUTO: 'Claude Code 會自動建立 .env.local 檔案',
 }
 
-export const MODULE_MANAGEMENT_LABELS = {
+const MODULE_MANAGEMENT_LABELS = {
   TITLE: '系統模組管理',
   AUTH_MANAGEMENT: '模組授權管理',
 
@@ -306,7 +306,7 @@ export const MODULE_MANAGEMENT_LABELS = {
   LABEL_3126: '查看各模組的功能特性',
 }
 
-export const OTHER_SETTINGS_LABELS = {
+const OTHER_SETTINGS_LABELS = {
   TITLE: '其他設定',
   LANGUAGE_SETTING: '語言設定',
   LANGUAGE_VALUE: '繁體中文（預設）',
@@ -316,7 +316,7 @@ export const OTHER_SETTINGS_LABELS = {
   BACKUP_VALUE: '自動備份：每日凌晨 2:00',
 }
 
-export const PREFERRED_FEATURES_LABELS = {
+const PREFERRED_FEATURES_LABELS = {
   SAVING: '儲存中...',
   SAVED: '已儲存',
   PENDING_SAVE: '變更待儲存...',
@@ -389,7 +389,7 @@ export const PREFERRED_FEATURES_LABELS = {
   NO_PERMISSION: '(無權限)',
 }
 
-export const WORKSPACE_SWITCHER_LABELS = {
+const WORKSPACE_SWITCHER_LABELS = {
   TITLE: '工作空間切換',
   VIEW_ALL: '查看全部辦公室',
 
@@ -397,7 +397,7 @@ export const WORKSPACE_SWITCHER_LABELS = {
   SWITCH_HINT: '💡 切換後，所有列表（旅遊團、訂單、客戶等）都會只顯示該辦公室的資料',
 }
 
-export const MODULES_PAGE_LABELS = {
+const MODULES_PAGE_LABELS = {
   STATUS: '狀態',
   EXPIRY_DATE: '到期日',
   FEATURES: '功能特性',

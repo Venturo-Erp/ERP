@@ -1,4 +1,4 @@
-export interface ChannelMemberProfile {
+interface ChannelMemberProfile {
   id: string
   displayName: string
   englishName?: string | null

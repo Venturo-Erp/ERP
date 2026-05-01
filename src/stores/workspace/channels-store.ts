@@ -360,4 +360,4 @@ export const useChannelsStore = () => {
 /**
  * Hook 型別（方便使用）
  */
-export type ChannelsStoreType = ReturnType<typeof useChannelsStore>
+type ChannelsStoreType = ReturnType<typeof useChannelsStore>

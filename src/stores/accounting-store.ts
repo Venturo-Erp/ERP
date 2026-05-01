@@ -37,7 +37,7 @@ export interface Transaction {
   updated_at: string
 }
 
-export interface AccountingStats {
+interface AccountingStats {
   total_assets: number
   total_income: number
   total_expense: number

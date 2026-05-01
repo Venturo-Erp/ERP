@@ -13,7 +13,7 @@ export const DISBURSEMENT_STATUS_LABELS = {
 } as const
 
 // 出納單狀態顏色
-export const DISBURSEMENT_STATUS_COLORS = {
+const DISBURSEMENT_STATUS_COLORS = {
   pending: 'bg-morandi-gold',
   confirmed: 'bg-morandi-green',
   paid: 'bg-morandi-primary',
@@ -34,7 +34,7 @@ export const PAYMENT_REQUEST_STATUS_LABELS = {
 } as const
 
 // 請款單狀態顏色（@deprecated - 改用 StatusBadge tone）
-export const PAYMENT_REQUEST_STATUS_COLORS = {
+const PAYMENT_REQUEST_STATUS_COLORS = {
   pending: 'bg-morandi-gold',
   confirmed: 'bg-status-info',
   billed: 'bg-morandi-green',

@@ -35,7 +35,7 @@ interface PendingListProps {
   onAddToDisbursement: () => void
 }
 
-export function PendingList({
+function PendingList({
   data,
   selectedRequests,
   selectedAmount,
@@ -106,7 +106,7 @@ interface CurrentOrderListProps {
   onPrintPDF: (order: DisbursementOrder) => void
 }
 
-export function CurrentOrderList({
+function CurrentOrderList({
   currentOrder,
   requests,
   searchTerm,
@@ -172,7 +172,7 @@ interface EmptyCurrentOrderProps {
   onNavigate: () => void
 }
 
-export function EmptyCurrentOrder({ onNavigate }: EmptyCurrentOrderProps) {
+function EmptyCurrentOrder({ onNavigate }: EmptyCurrentOrderProps) {
   return (
     <div className="text-center py-12">
       <Calendar className="h-16 w-16 text-morandi-secondary mx-auto mb-4 opacity-50" />
@@ -194,7 +194,7 @@ interface HistoryListProps {
   onPrintPDF: (order: DisbursementOrder) => void
 }
 
-export function HistoryList({ data, searchTerm, onPrintPDF }: HistoryListProps) {
+function HistoryList({ data, searchTerm, onPrintPDF }: HistoryListProps) {
   const { get: getEmployee } = useEmployeeDictionary()
   const getEmployeeName = (id: string) => {
     if (!id) return '-'

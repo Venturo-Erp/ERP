@@ -11,7 +11,7 @@ import { AlertCircle, AlertTriangle, Info, Trash2, X } from 'lucide-react'
 
 export type ConfirmDialogType = 'danger' | 'warning' | 'info'
 
-export interface ConfirmDialogProps {
+interface ConfirmDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   type?: ConfirmDialogType

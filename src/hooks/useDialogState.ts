@@ -31,7 +31,7 @@ import { useState, useCallback } from 'react'
  * ```
  */
 
-export interface UseDialogStateOptions<T = null> {
+interface UseDialogStateOptions<T = null> {
   /** 初始資料 */
   initialData?: T
   /** 開啟時的回調 */
@@ -40,7 +40,7 @@ export interface UseDialogStateOptions<T = null> {
   onClose?: () => void
 }
 
-export interface UseDialogStateReturn<T = null> {
+interface UseDialogStateReturn<T = null> {
   /** Dialog 是否開啟 */
   isOpen: boolean
   /** 關聯的資料 */
@@ -59,7 +59,7 @@ export interface UseDialogStateReturn<T = null> {
   toggle: () => void
 }
 
-export function useDialogState<T = null>(
+function useDialogState<T = null>(
   options?: UseDialogStateOptions<T>
 ): UseDialogStateReturn<T> {
   const [isOpen, setIsOpenState] = useState(false)
@@ -141,7 +141,7 @@ export function useDialogState<T = null>(
  * <EditDialog open={dialogs.isOpen('edit')} data={dialogs.getData('edit')} />
  * ```
  */
-export function useMultiDialogState<K extends string, T = unknown>(keys: readonly K[]) {
+function useMultiDialogState<K extends string, T = unknown>(keys: readonly K[]) {
   const [states, setStates] = useState<Record<K, { isOpen: boolean; data: T | null }>>(() => {
     const initial = {} as Record<K, { isOpen: boolean; data: T | null }>
     keys.forEach(key => {

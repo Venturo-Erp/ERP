@@ -60,7 +60,7 @@ export interface DailyScheduleItem {
 }
 
 /** AI 主題選項 */
-export interface AiThemeOption {
+interface AiThemeOption {
   value: string
   label: string
   description: string

@@ -8,7 +8,7 @@ import { createEntityHook } from '../core/createEntityHook'
 import { CACHE_PRESETS } from '../core/types'
 import type { PaymentRequestItem } from '@/stores/types'
 
-export const paymentRequestItemEntity = createEntityHook<PaymentRequestItem>(
+const paymentRequestItemEntity = createEntityHook<PaymentRequestItem>(
   'payment_request_items',
   {
     list: {
@@ -33,12 +33,12 @@ export const paymentRequestItemEntity = createEntityHook<PaymentRequestItem>(
 )
 
 export const usePaymentRequestItems = paymentRequestItemEntity.useList
-export const usePaymentRequestItemsSlim = paymentRequestItemEntity.useListSlim
-export const usePaymentRequestItem = paymentRequestItemEntity.useDetail
-export const usePaymentRequestItemsPaginated = paymentRequestItemEntity.usePaginated
-export const usePaymentRequestItemDictionary = paymentRequestItemEntity.useDictionary
+const usePaymentRequestItemsSlim = paymentRequestItemEntity.useListSlim
+const usePaymentRequestItem = paymentRequestItemEntity.useDetail
+const usePaymentRequestItemsPaginated = paymentRequestItemEntity.usePaginated
+const usePaymentRequestItemDictionary = paymentRequestItemEntity.useDictionary
 
-export const createPaymentRequestItem = paymentRequestItemEntity.create
-export const updatePaymentRequestItem = paymentRequestItemEntity.update
-export const deletePaymentRequestItem = paymentRequestItemEntity.delete
+const createPaymentRequestItem = paymentRequestItemEntity.create
+const updatePaymentRequestItem = paymentRequestItemEntity.update
+const deletePaymentRequestItem = paymentRequestItemEntity.delete
 export const invalidatePaymentRequestItems = paymentRequestItemEntity.invalidate

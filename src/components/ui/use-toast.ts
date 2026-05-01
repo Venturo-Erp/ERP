@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react'
 
-export interface Toast {
+interface Toast {
   id: string
   title?: string
   description?: string

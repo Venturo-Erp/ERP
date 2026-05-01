@@ -322,7 +322,7 @@ export const userStoreHelpers = {
 }
 
 // 相容性 alias（保留舊的 API）
-export const useUserStoreCompat = () => {
+const useUserStoreCompat = () => {
   const store = useUserStore()
 
   return {

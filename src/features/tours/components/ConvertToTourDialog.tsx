@@ -18,7 +18,7 @@ import { toast } from 'sonner'
 import { TourOrderSection } from './tour-form'
 import type { OrderFormData } from '@/features/orders/components/add-order-form'
 
-export interface ConvertOrderData {
+interface ConvertOrderData {
   contact_person?: string
   sales_person?: string
   assistant?: string

@@ -3,7 +3,7 @@
  * 新增簽證類型只需要在這裡加，訂單快速開單和簽證管理都會自動更新
  */
 
-export interface VisaTypeGroup {
+interface VisaTypeGroup {
   /** 分組標籤 */
   label: string
   /** 該分組下的簽證類型 */
@@ -11,7 +11,7 @@ export interface VisaTypeGroup {
 }
 
 /** 簽證類型標籤 */
-export const VISA_TYPE_LABELS = {
+const VISA_TYPE_LABELS = {
   // 分組
   group_passport: '護照',
   group_taiwan: '台胞證',

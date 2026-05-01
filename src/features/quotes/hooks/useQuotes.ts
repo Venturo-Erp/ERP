@@ -14,7 +14,7 @@ import { Quote } from '@/stores/types'
  * Feature-level quotes hook
  * 包裝 @/data 的 CRUD 操作 + 業務邏輯方法
  */
-export const useQuotesFeature = () => {
+const useQuotesFeature = () => {
   const { items: quotes, loading } = useQuotesData()
 
   return {

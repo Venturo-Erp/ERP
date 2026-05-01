@@ -101,7 +101,7 @@ export const FINANCE_PAGE_LABELS = {
     `共 ${total} 筆交易，目前在第 ${page} / ${totalPages} 頁`,
 }
 
-export const BATCH_CONFIRM_LABELS = {
+const BATCH_CONFIRM_LABELS = {
   NO_PENDING_ITEMS: '沒有待確認的收款品項',
   ALL_CONFIRMED: '所有收款品項都已確認完成',
 
@@ -128,7 +128,7 @@ export const BATCH_CONFIRM_LABELS = {
   TOTAL_PREFIX: '總計：',
 }
 
-export const TOUR_PNL_LABELS = {
+const TOUR_PNL_LABELS = {
   INCOME: '收入',
   COST: '成本',
   GROSS_PROFIT: '毛利',
@@ -171,7 +171,7 @@ export const TOUR_PNL_LABELS = {
   SEARCH_PLACEHOLDER: '搜尋團號、團名...',
 }
 
-export const UNCLOSED_TOURS_LABELS = {
+const UNCLOSED_TOURS_LABELS = {
   DESCRIPTION: '此報表顯示<strong>回程日 + 7 天已過</strong>但尚未執行結團的團體。',
   DESCRIPTION_SUFFIX: '建議儘快完成結團作業以確保財務數據準確。',
 
@@ -266,7 +266,7 @@ export const REQUESTS_PAGE_LABELS = {
   ADD_9640: '新增請款',
 }
 
-export const TRAVEL_INVOICE_LABELS = {
+const TRAVEL_INVOICE_LABELS = {
   LOADING: '載入中...',
   BASIC_INFO: '基本資訊',
   INVOICE_NUMBER: '發票號碼',
@@ -297,7 +297,7 @@ export const TRAVEL_INVOICE_LABELS = {
 }
 
 // Additional TRAVEL_INVOICE_LABELS - append to existing
-export const TRAVEL_INVOICE_DETAIL_LABELS = {
+const TRAVEL_INVOICE_DETAIL_LABELS = {
   PRODUCT_DETAILS: '商品明細',
   INVOICE_INFO: '發票資訊',
   RANDOM_CODE: '隨機碼',

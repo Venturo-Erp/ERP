@@ -15,7 +15,7 @@ import { supabase } from '@/lib/supabase/client'
  */
 export const recalculateReceiptStats = afterReceiptChange
 
-export async function afterReceiptChange(
+async function afterReceiptChange(
   orderId: string | null | undefined,
   tourId: string | null | undefined
 ): Promise<void> {

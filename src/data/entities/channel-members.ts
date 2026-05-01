@@ -7,7 +7,7 @@
 import { createEntityHook } from '../core/createEntityHook'
 import { CACHE_PRESETS } from '../core/types'
 
-export interface ChannelMember {
+interface ChannelMember {
   id: string
   channel_id: string
   employee_id: string
@@ -18,7 +18,7 @@ export interface ChannelMember {
   updated_at: string | null
 }
 
-export const channelMemberEntity = createEntityHook<ChannelMember>('channel_members', {
+const channelMemberEntity = createEntityHook<ChannelMember>('channel_members', {
   workspaceScoped: true,
   list: {
     select: 'id,workspace_id,channel_id,employee_id,role,status,created_at,updated_at',
@@ -31,13 +31,13 @@ export const channelMemberEntity = createEntityHook<ChannelMember>('channel_memb
   cache: CACHE_PRESETS.high,
 })
 
-export const useChannelMembers = channelMemberEntity.useList
-export const useChannelMembersSlim = channelMemberEntity.useListSlim
-export const useChannelMember = channelMemberEntity.useDetail
-export const useChannelMembersPaginated = channelMemberEntity.usePaginated
-export const useChannelMemberDictionary = channelMemberEntity.useDictionary
+const useChannelMembers = channelMemberEntity.useList
+const useChannelMembersSlim = channelMemberEntity.useListSlim
+const useChannelMember = channelMemberEntity.useDetail
+const useChannelMembersPaginated = channelMemberEntity.usePaginated
+const useChannelMemberDictionary = channelMemberEntity.useDictionary
 
 export const createChannelMember = channelMemberEntity.create
-export const updateChannelMember = channelMemberEntity.update
-export const deleteChannelMember = channelMemberEntity.delete
-export const invalidateChannelMembers = channelMemberEntity.invalidate
+const updateChannelMember = channelMemberEntity.update
+const deleteChannelMember = channelMemberEntity.delete
+const invalidateChannelMembers = channelMemberEntity.invalidate

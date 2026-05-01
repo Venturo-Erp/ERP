@@ -51,4 +51,4 @@ export const LUXURY = {
   },
 } as const
 
-export type LuxuryTokenKey = keyof typeof LUXURY
+type LuxuryTokenKey = keyof typeof LUXURY

@@ -4,7 +4,7 @@ import { createEntityHook } from '../core/createEntityHook'
 import { CACHE_PRESETS } from '../core/types'
 import type { WorkspaceBonusDefault } from '@/types/bonus.types'
 
-export const workspaceBonusDefaultEntity = createEntityHook<WorkspaceBonusDefault>(
+const workspaceBonusDefaultEntity = createEntityHook<WorkspaceBonusDefault>(
   'workspace_bonus_defaults',
   {
     list: {
@@ -20,12 +20,12 @@ export const workspaceBonusDefaultEntity = createEntityHook<WorkspaceBonusDefaul
 )
 
 export const useWorkspaceBonusDefaults = workspaceBonusDefaultEntity.useList
-export const useWorkspaceBonusDefaultsSlim = workspaceBonusDefaultEntity.useListSlim
-export const useWorkspaceBonusDefault = workspaceBonusDefaultEntity.useDetail
-export const useWorkspaceBonusDefaultsPaginated = workspaceBonusDefaultEntity.usePaginated
-export const useWorkspaceBonusDefaultDictionary = workspaceBonusDefaultEntity.useDictionary
+const useWorkspaceBonusDefaultsSlim = workspaceBonusDefaultEntity.useListSlim
+const useWorkspaceBonusDefault = workspaceBonusDefaultEntity.useDetail
+const useWorkspaceBonusDefaultsPaginated = workspaceBonusDefaultEntity.usePaginated
+const useWorkspaceBonusDefaultDictionary = workspaceBonusDefaultEntity.useDictionary
 
-export const createWorkspaceBonusDefault = workspaceBonusDefaultEntity.create
-export const updateWorkspaceBonusDefault = workspaceBonusDefaultEntity.update
-export const deleteWorkspaceBonusDefault = workspaceBonusDefaultEntity.delete
-export const invalidateWorkspaceBonusDefaults = workspaceBonusDefaultEntity.invalidate
+const createWorkspaceBonusDefault = workspaceBonusDefaultEntity.create
+const updateWorkspaceBonusDefault = workspaceBonusDefaultEntity.update
+const deleteWorkspaceBonusDefault = workspaceBonusDefaultEntity.delete
+const invalidateWorkspaceBonusDefaults = workspaceBonusDefaultEntity.invalidate

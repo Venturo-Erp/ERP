@@ -116,7 +116,7 @@ export function isLastMainDay(
 }
 
 // 圖片資訊介面
-export interface ImageInfo {
+interface ImageInfo {
   url: string
   title?: string
   description?: string

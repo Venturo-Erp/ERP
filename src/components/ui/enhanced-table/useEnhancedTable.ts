@@ -3,7 +3,7 @@
 import { useState, useMemo, useCallback } from 'react'
 import { RowData } from './types'
 
-export interface UseEnhancedTableResult<T> {
+interface UseEnhancedTableResult<T> {
   data: T[]
   handleSort: (column: string, direction: 'asc' | 'desc') => void
   handleFilter: (filters: Record<string, string>) => void

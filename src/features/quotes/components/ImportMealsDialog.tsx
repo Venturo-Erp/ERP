@@ -33,7 +33,7 @@ interface ImportMealsDialogProps {
   onImport: (items: CostItem[]) => void
 }
 
-export function ImportMealsDialog({ isOpen, onClose, meals, onImport }: ImportMealsDialogProps) {
+function ImportMealsDialog({ isOpen, onClose, meals, onImport }: ImportMealsDialogProps) {
   const [selectedMeals, setSelectedMeals] = useState<Set<string>>(new Set())
   const [includeBreakfast, setIncludeBreakfast] = useState(false)
   const [isLoading, setIsLoading] = useState(false)

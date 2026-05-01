@@ -13,11 +13,11 @@ import { ImagePreview } from './ImagePreview'
 import { IMAGE_UPLOADER_LABELS } from './constants/labels'
 
 // 導出新組件
-export { UnsplashSearch } from './UnsplashSearch'
-export { ImagePickerDialog } from './ImagePickerDialog'
-export type { ImagePickerDialogProps } from './ImagePickerDialog'
 
-export interface ImageUploaderProps {
+
+
+
+interface ImageUploaderProps {
   /** 當前圖片 URL */
   value?: string | null
   /** 圖片變更回調 */
@@ -156,7 +156,7 @@ export function ImageUploader({
  * 多圖上傳組件
  * 用於每日行程圖片等需要多張圖片的場景
  */
-export interface MultiImageUploaderProps {
+interface MultiImageUploaderProps {
   /** 當前圖片 URL 列表 */
   value: string[]
   /** 圖片變更回調 */
@@ -177,7 +177,7 @@ export interface MultiImageUploaderProps {
   disabled?: boolean
 }
 
-export function MultiImageUploader({
+function MultiImageUploader({
   value = [],
   onChange,
   maxCount = 10,

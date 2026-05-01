@@ -9,7 +9,7 @@ interface CacheItem<T> {
   hits: number
 }
 
-export class LRUCache<T = any> {
+class LRUCache<T = any> {
   private cache: Map<string, CacheItem<T>> = new Map()
   private maxSize: number
   private ttl: number
@@ -112,7 +112,7 @@ export class LRUCache<T = any> {
 export const memoryCache = new LRUCache()
 
 // 快取 key 產生器
-export const cacheKeys = {
+const cacheKeys = {
   tour: (id: string) => `tour:${id}`,
   tourList: (filter?: string) => `tours:list:${filter || 'all'}`,
   order: (id: string) => `order:${id}`,

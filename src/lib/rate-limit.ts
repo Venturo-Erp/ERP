@@ -58,7 +58,7 @@ function rateLimitInMemory(key: string, limit: number, windowMs: number): boolea
 /**
  * Get client IP from request headers
  */
-export function getClientIp(request: Request): string {
+function getClientIp(request: Request): string {
   return (
     request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
     request.headers.get('x-real-ip') ||

@@ -8,7 +8,7 @@ import { createEntityHook } from '../core/createEntityHook'
 import { CACHE_PRESETS } from '../core/types'
 import type { Employee } from '@/stores/types'
 
-export const employeeEntity = createEntityHook<Employee>('employees', {
+const employeeEntity = createEntityHook<Employee>('employees', {
   list: {
     select:
       'id,employee_number,display_name,chinese_name,english_name,email,avatar_url,birth_date,id_number,employee_type,status,is_bot,roles,monthly_salary,supabase_user_id,user_id,must_change_password,last_login_at,workspace_id,created_at,updated_at,updated_by',
@@ -25,11 +25,11 @@ export const employeeEntity = createEntityHook<Employee>('employees', {
 
 export const useEmployees = employeeEntity.useList
 export const useEmployeesSlim = employeeEntity.useListSlim
-export const useEmployee = employeeEntity.useDetail
-export const useEmployeesPaginated = employeeEntity.usePaginated
+const useEmployee = employeeEntity.useDetail
+const useEmployeesPaginated = employeeEntity.usePaginated
 export const useEmployeeDictionary = employeeEntity.useDictionary
 
-export const createEmployee = employeeEntity.create
-export const updateEmployee = employeeEntity.update
-export const deleteEmployee = employeeEntity.delete
-export const invalidateEmployees = employeeEntity.invalidate
+const createEmployee = employeeEntity.create
+const updateEmployee = employeeEntity.update
+const deleteEmployee = employeeEntity.delete
+const invalidateEmployees = employeeEntity.invalidate

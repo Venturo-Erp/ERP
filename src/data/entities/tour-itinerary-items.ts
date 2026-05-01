@@ -10,7 +10,7 @@ import { createEntityHook } from '../core/createEntityHook'
 import { CACHE_PRESETS } from '../core/types'
 import type { TourItineraryItem } from '@/features/tours/types/tour-itinerary-item.types'
 
-export const tourItineraryItemEntity = createEntityHook<TourItineraryItem>('tour_itinerary_items', {
+const tourItineraryItemEntity = createEntityHook<TourItineraryItem>('tour_itinerary_items', {
   workspaceScoped: true,
   list: {
     select:
@@ -27,13 +27,13 @@ export const tourItineraryItemEntity = createEntityHook<TourItineraryItem>('tour
 
 // Hooks
 export const useTourItineraryItems = tourItineraryItemEntity.useList
-export const useTourItineraryItemsSlim = tourItineraryItemEntity.useListSlim
-export const useTourItineraryItem = tourItineraryItemEntity.useDetail
-export const useTourItineraryItemsPaginated = tourItineraryItemEntity.usePaginated
-export const useTourItineraryItemDictionary = tourItineraryItemEntity.useDictionary
+const useTourItineraryItemsSlim = tourItineraryItemEntity.useListSlim
+const useTourItineraryItem = tourItineraryItemEntity.useDetail
+const useTourItineraryItemsPaginated = tourItineraryItemEntity.usePaginated
+const useTourItineraryItemDictionary = tourItineraryItemEntity.useDictionary
 
 // Actions
-export const createTourItineraryItem = tourItineraryItemEntity.create
-export const updateTourItineraryItem = tourItineraryItemEntity.update
-export const deleteTourItineraryItem = tourItineraryItemEntity.delete
+const createTourItineraryItem = tourItineraryItemEntity.create
+const updateTourItineraryItem = tourItineraryItemEntity.update
+const deleteTourItineraryItem = tourItineraryItemEntity.delete
 export const invalidateTourItineraryItems = tourItineraryItemEntity.invalidate
