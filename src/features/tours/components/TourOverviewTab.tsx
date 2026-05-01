@@ -15,7 +15,7 @@ interface TourOverviewTabProps {
   tour: Tour
 }
 
-export function TourOverviewTab({ tour }: TourOverviewTabProps) {
+function TourOverviewTab({ tour }: TourOverviewTabProps) {
   const { items: quotes } = useQuotes()
   const { items: orders } = useOrdersSlim()
   const { displayString: tourDestinationDisplay } = useTourDisplay(tour)

@@ -7,7 +7,7 @@
 import { createEntityHook } from '../core/createEntityHook'
 import { CACHE_PRESETS } from '../core/types'
 
-export interface ImageLibraryItem {
+interface ImageLibraryItem {
   id: string
   name: string
   file_path: string
@@ -28,7 +28,7 @@ export interface ImageLibraryItem {
   updated_at: string
 }
 
-export const imageLibraryEntity = createEntityHook<ImageLibraryItem>('image_library', {
+const imageLibraryEntity = createEntityHook<ImageLibraryItem>('image_library', {
   workspaceScoped: true,
   list: {
     select:
@@ -42,13 +42,13 @@ export const imageLibraryEntity = createEntityHook<ImageLibraryItem>('image_libr
   cache: CACHE_PRESETS.medium,
 })
 
-export const useImageLibrary = imageLibraryEntity.useList
-export const useImageLibrarySlim = imageLibraryEntity.useListSlim
-export const useImageLibraryItem = imageLibraryEntity.useDetail
-export const useImageLibraryPaginated = imageLibraryEntity.usePaginated
-export const useImageLibraryDictionary = imageLibraryEntity.useDictionary
+const useImageLibrary = imageLibraryEntity.useList
+const useImageLibrarySlim = imageLibraryEntity.useListSlim
+const useImageLibraryItem = imageLibraryEntity.useDetail
+const useImageLibraryPaginated = imageLibraryEntity.usePaginated
+const useImageLibraryDictionary = imageLibraryEntity.useDictionary
 
 export const createImageLibraryItem = imageLibraryEntity.create
-export const updateImageLibraryItem = imageLibraryEntity.update
-export const deleteImageLibraryItem = imageLibraryEntity.delete
-export const invalidateImageLibrary = imageLibraryEntity.invalidate
+const updateImageLibraryItem = imageLibraryEntity.update
+const deleteImageLibraryItem = imageLibraryEntity.delete
+const invalidateImageLibrary = imageLibraryEntity.invalidate

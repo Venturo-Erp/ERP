@@ -15,7 +15,7 @@ import type { Order } from '@/stores/types'
 // Entity 定義
 // ============================================
 
-export const orderEntity = createEntityHook<Order>('orders', {
+const orderEntity = createEntityHook<Order>('orders', {
   list: {
     select:
       'id,code,order_number,tour_id,tour_name,contact_person,contact_phone,contact_email,customer_id,sales_person,assistant,status,payment_status,paid_amount,remaining_amount,total_amount,member_count,adult_count,is_active,workspace_id,created_at,created_by,updated_at,updated_by',
@@ -45,13 +45,13 @@ export const useOrders = orderEntity.useList
 export const useOrdersSlim = orderEntity.useListSlim
 
 /** 單筆 Order（支援 skip pattern）*/
-export const useOrder = orderEntity.useDetail
+const useOrder = orderEntity.useDetail
 
 /** 分頁 Orders（server-side pagination + filter + search）*/
-export const useOrdersPaginated = orderEntity.usePaginated
+const useOrdersPaginated = orderEntity.usePaginated
 
 /** Order Dictionary（O(1) 查詢）*/
-export const useOrderDictionary = orderEntity.useDictionary
+const useOrderDictionary = orderEntity.useDictionary
 
 // ============================================
 // CRUD Export

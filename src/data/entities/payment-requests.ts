@@ -8,7 +8,7 @@ import { createEntityHook } from '../core/createEntityHook'
 import { CACHE_PRESETS } from '../core/types'
 import type { PaymentRequest } from '@/stores/types'
 
-export const paymentRequestEntity = createEntityHook<PaymentRequest>('payment_requests', {
+const paymentRequestEntity = createEntityHook<PaymentRequest>('payment_requests', {
   list: {
     // 2026-04-23 補 accounting_subject_id / accounting_voucher_id / budget_warning：
     // DB 有這 3 欄、payment_request.service.ts 有 SELECT、entity hook 原本沒、
@@ -30,10 +30,10 @@ export const paymentRequestEntity = createEntityHook<PaymentRequest>('payment_re
 })
 
 export const usePaymentRequests = paymentRequestEntity.useList
-export const usePaymentRequestsSlim = paymentRequestEntity.useListSlim
-export const usePaymentRequest = paymentRequestEntity.useDetail
-export const usePaymentRequestsPaginated = paymentRequestEntity.usePaginated
-export const usePaymentRequestDictionary = paymentRequestEntity.useDictionary
+const usePaymentRequestsSlim = paymentRequestEntity.useListSlim
+const usePaymentRequest = paymentRequestEntity.useDetail
+const usePaymentRequestsPaginated = paymentRequestEntity.usePaginated
+const usePaymentRequestDictionary = paymentRequestEntity.useDictionary
 
 export const createPaymentRequest = paymentRequestEntity.create
 export const updatePaymentRequest = paymentRequestEntity.update

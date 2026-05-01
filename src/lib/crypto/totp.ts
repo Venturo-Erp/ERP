@@ -16,7 +16,7 @@ function base32ToBytes(base32: string): Buffer {
   return Buffer.from(bytes)
 }
 
-export interface TotpResult {
+interface TotpResult {
   code: string
   remaining: number
 }

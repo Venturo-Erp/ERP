@@ -15,7 +15,7 @@ export interface ImagePositionSettings {
 }
 
 // 預設值
-export const defaultImagePosition: ImagePositionSettings = {
+const defaultImagePosition: ImagePositionSettings = {
   x: 50,
   y: 50,
   scale: 1,
@@ -59,7 +59,7 @@ export function getImagePositionStyle(
 }
 
 // 解析舊格式字串為新格式
-export function parseImagePosition(
+function parseImagePosition(
   value?: string | ImagePositionSettings | null
 ): ImagePositionSettings {
   if (!value) return { ...defaultImagePosition }

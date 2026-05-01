@@ -24,7 +24,7 @@
 import { getSupabaseAdminClient } from '@/lib/supabase/admin'
 import { logger } from '@/lib/utils/logger'
 
-export type WebhookSource = 'linkpay' | 'line' | 'meta'
+type WebhookSource = 'linkpay' | 'line' | 'meta'
 
 interface HandlerResult {
   status: number

@@ -9,13 +9,13 @@ import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { getSupabaseAdminClient } from '@/lib/supabase/admin'
 import { User } from '@supabase/supabase-js'
 
-export interface ServerAuthResult {
+interface ServerAuthResult {
   user: User
   workspaceId: string
   employeeId: string
 }
 
-export interface ServerAuthError {
+interface ServerAuthError {
   error: string
   code: 'NOT_AUTHENTICATED' | 'NO_WORKSPACE' | 'EMPLOYEE_NOT_FOUND'
 }
@@ -129,7 +129,7 @@ export async function getServerAuth(): Promise<AuthResult> {
  * 簡化版：只檢查是否已登入，不需要 workspace
  * 用於不需要 workspace 隔離的操作（如發送訊息）
  */
-export async function getServerUser(): Promise<{ user: User } | { error: string }> {
+async function getServerUser(): Promise<{ user: User } | { error: string }> {
   const supabase = await createSupabaseServerClient()
 
   const {

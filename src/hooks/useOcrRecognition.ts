@@ -16,7 +16,7 @@ import { getPassportDisplayUrl } from '@/lib/passport-storage'
  * OCR 辨識結果的通用資料結構
  * 適用於顧客和訂單成員
  */
-export interface OcrParsedData {
+interface OcrParsedData {
   name?: string
   passport_name?: string
   passport_romanization?: string

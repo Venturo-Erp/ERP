@@ -19,7 +19,7 @@ const DEFAULT_TTL_SECONDS = 15 * 60
  *   - signed URL: ".../object/sign/passport-images/passport_XXX.jpg?token=..."
  *   - base64 data URL: "data:image/jpeg;base64,..."（返回 null；不是 storage-based）
  */
-export function extractPassportPath(stored: string | null | undefined): string | null {
+function extractPassportPath(stored: string | null | undefined): string | null {
   if (!stored) return null
   if (stored.startsWith('data:')) return null
   const match = stored.match(/passport-images\/([^?]+)/)
@@ -48,7 +48,7 @@ export async function getPassportDisplayUrl(
  * 上傳護照照片，返回 bare filename（存 DB 用）。
  * 不簽章、不回完整 URL — 顯示時呼叫 getPassportDisplayUrl 現場簽。
  */
-export async function uploadPassportImage(file: File | Blob, filename?: string): Promise<string> {
+async function uploadPassportImage(file: File | Blob, filename?: string): Promise<string> {
   const actualFilename =
     filename ?? `passport_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.jpg`
   const { error } = await supabase.storage.from(BUCKET).upload(actualFilename, file, {

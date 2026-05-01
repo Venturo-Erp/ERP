@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 
-export interface DatePickerProps {
+interface DatePickerProps {
   value?: string | Date | null
   onChange?: (date: string) => void
   placeholder?: string
@@ -150,7 +150,7 @@ export function DatePicker({
 /**
  * 日期範圍選擇器
  */
-export interface DateRangePickerProps {
+interface DateRangePickerProps {
   startValue?: string | null
   endValue?: string | null
   onStartChange?: (date: string) => void
@@ -162,7 +162,7 @@ export interface DateRangePickerProps {
   format?: 'dash' | 'slash'
 }
 
-export function DateRangePicker({
+function DateRangePicker({
   startValue,
   endValue,
   onStartChange,

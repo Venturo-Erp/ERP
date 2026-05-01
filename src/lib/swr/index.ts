@@ -2,4 +2,4 @@
 // SWR 模組統一導出
 
 export { SWRProvider } from './provider'
-export { swrConfig, localStorageProvider, clearSWRCache, CACHE_STRATEGY } from './config'
+export {    CACHE_STRATEGY } from './config'

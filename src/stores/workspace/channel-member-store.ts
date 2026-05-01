@@ -14,7 +14,7 @@ import type { BaseEntity } from '@/types'
 /**
  * Channel Member 基礎型別（對應 Supabase 表格）
  */
-export interface ChannelMemberBase {
+interface ChannelMemberBase {
   id: string
   workspace_id: string
   channel_id: string
@@ -43,4 +43,4 @@ export const useChannelMemberStore = createStore<ChannelMemberBase & BaseEntity>
 /**
  * Hook 型別（方便使用）
  */
-export type ChannelMemberStoreType = ReturnType<typeof useChannelMemberStore>
+type ChannelMemberStoreType = ReturnType<typeof useChannelMemberStore>

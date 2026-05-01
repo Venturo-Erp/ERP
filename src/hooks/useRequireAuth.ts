@@ -38,7 +38,7 @@ interface AuthInfo {
   showWorkspaceMissing: (message?: string) => void
 }
 
-export function useRequireAuth(): AuthInfo {
+function useRequireAuth(): AuthInfo {
   // ✅ 使用 React hook 方式（支援自動重新渲染）
   const user = useAuthStore(state => state.user)
   const isAuthenticated = useAuthStore(state => state.isAuthenticated)

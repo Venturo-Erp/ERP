@@ -15,7 +15,7 @@ interface ContractDialogState {
   mode: 'create' | 'edit'
 }
 
-export interface UseToursDialogsReturn {
+interface UseToursDialogsReturn {
   // Itinerary Dialog (for design)
   itineraryDialogTour: Tour | null
   openItineraryDialog: (tour: Tour) => void

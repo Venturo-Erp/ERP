@@ -107,7 +107,7 @@ export const CUSTOMER_DETAIL_LABELS = {
   btn_edit: '編輯資料',
 }
 
-export const RESET_PASSWORD_LABELS = {
+const RESET_PASSWORD_LABELS = {
   title: '重置會員密碼',
   resetting_for: '正在為',
   reset_password_suffix: '重置密碼',
@@ -128,7 +128,7 @@ export const RESET_PASSWORD_LABELS = {
   toast_failed: '重置密碼失敗',
 }
 
-export const CUSTOMER_SEARCH_LABELS = {
+const CUSTOMER_SEARCH_LABELS = {
   title: '進階搜尋',
   section_basic: '基本條件',
   label_keyword: '關鍵字',
@@ -281,7 +281,7 @@ export const CUSTOMER_PASSPORT_UPLOAD_LABELS = {
 // ============================================================
 // Customer Verify
 // ============================================================
-export const CUSTOMER_VERIFY_LABELS = {
+const CUSTOMER_VERIFY_LABELS = {
   VERIFY_SUCCESS: '已驗證',
   VERIFY_FAILED: '驗證失敗',
 }

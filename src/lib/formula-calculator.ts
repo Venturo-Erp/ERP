@@ -1,11 +1,11 @@
 // Excel-like formula calculator for custom fields
 
-export interface FormulaContext {
+interface FormulaContext {
   [fieldName: string]: number | string
 }
 
 // 欄位名稱映射表 - 將中文欄位名映射到實際數據
-export const FIELD_MAP: Record<string, string> = {
+const FIELD_MAP: Record<string, string> = {
   姓名: 'name',
   英文姓名: 'nameEn',
   年齡: 'age',
@@ -17,7 +17,7 @@ export const FIELD_MAP: Record<string, string> = {
 }
 
 // 欄位座標映射 - Excel 式座標系統
-export const FIELD_COORDINATES: Record<string, string> = {
+const FIELD_COORDINATES: Record<string, string> = {
   C1: 'name', // 姓名
   D1: 'nameEn', // 英文姓名
   E1: 'birth_date', // 生日
@@ -271,7 +271,7 @@ export function getMemberContext(
 }
 
 // 預設的公式範例
-export const FORMULA_EXAMPLES = [
+const FORMULA_EXAMPLES = [
   { name: '總費用', formula: '=基本費用+加購費用', description: '計算基本費用加上加購費用' },
   { name: '折扣後費用', formula: '=總費用*0.9', description: '總費用打9折' },
   {

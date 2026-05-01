@@ -42,7 +42,7 @@ export interface TourTheme {
 // 各風格主題定義
 // ============================================
 
-export const themes: Record<TourStyle, TourTheme> = {
+const themes: Record<TourStyle, TourTheme> = {
   original: {
     name: 'original',
     colors: {
@@ -224,7 +224,7 @@ export function getTheme(style: TourStyle): TourTheme {
  * 根據 coverStyle 推斷 flightStyle
  * 保持向後相容
  */
-export function inferFlightStyle(coverStyle: TourStyle): TourStyle {
+function inferFlightStyle(coverStyle: TourStyle): TourStyle {
   // 大部分情況下航班風格跟隨封面風格
   return coverStyle
 }
@@ -232,7 +232,7 @@ export function inferFlightStyle(coverStyle: TourStyle): TourStyle {
 /**
  * CSS 變數產生器 - 可用於 style prop
  */
-export function themeToCSS(theme: TourTheme): Record<string, string> {
+function themeToCSS(theme: TourTheme): Record<string, string> {
   return {
     '--tour-primary': theme.colors.primary,
     '--tour-secondary': theme.colors.secondary,

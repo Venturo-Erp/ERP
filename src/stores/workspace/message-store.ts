@@ -34,4 +34,4 @@ export const useMessageStore = createStore<MessageEntity>({
 /**
  * Hook 型別（方便使用）
  */
-export type MessageStoreType = ReturnType<typeof useMessageStore>
+type MessageStoreType = ReturnType<typeof useMessageStore>

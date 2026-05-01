@@ -10,7 +10,7 @@ import type {
 } from '@/types/tour-departure.types'
 import type { Tour } from '@/types/tour.types'
 
-export function useTourDepartureTotals(
+function useTourDepartureTotals(
   meals: TourDepartureMeal[],
   accommodations: TourDepartureAccommodation[],
   activities: TourDepartureActivity[],

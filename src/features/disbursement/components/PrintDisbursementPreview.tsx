@@ -1059,4 +1059,3 @@ export const PrintDisbursementPreview = forwardRef<HTMLDivElement, PrintDisburse
   }
 )
 
-export default PrintDisbursementPreview

@@ -9,7 +9,7 @@ import { supabase } from '@/lib/supabase/client'
 import { logger } from '@/lib/utils/logger'
 import { TOUR_DEPENDENCY_LABELS } from '../constants/labels'
 
-export interface TourDependencyCheck {
+interface TourDependencyCheck {
   blockers: string[]
   hasBlockers: boolean
 }
@@ -79,7 +79,7 @@ export async function deleteTourConfigurationData(tourId: string): Promise<void>
 /**
  * 檢查旅遊團是否有已付款訂單
  */
-export async function checkTourPaidOrders(
+async function checkTourPaidOrders(
   tourId: string
 ): Promise<{ hasPaidOrders: boolean; count: number }> {
   const { data: paidOrders, error } = await supabase

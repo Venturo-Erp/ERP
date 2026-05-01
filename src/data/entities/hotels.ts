@@ -36,7 +36,7 @@ const HOTEL_SELECT_FIELDS = [
   'fax',
 ].join(',')
 
-export const hotelEntity = createEntityHook<Attraction>('hotels', {
+const hotelEntity = createEntityHook<Attraction>('hotels', {
   list: {
     select: HOTEL_SELECT_FIELDS,
     orderBy: { column: 'name', ascending: true },
@@ -49,8 +49,8 @@ export const hotelEntity = createEntityHook<Attraction>('hotels', {
 })
 
 export const useHotels = hotelEntity.useList
-export const useHotel = hotelEntity.useDetail
-export const useHotelsPaginated = hotelEntity.usePaginated
+const useHotel = hotelEntity.useDetail
+const useHotelsPaginated = hotelEntity.usePaginated
 
 export const createHotel = hotelEntity.create
 export const updateHotel = hotelEntity.update

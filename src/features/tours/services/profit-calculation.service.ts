@@ -28,7 +28,7 @@ interface ReceiptData {
 const DEFAULT_ADMIN_COST_PER_PERSON = 10
 
 /** 計算收款總額 */
-export function calculateReceiptTotal(receipts: ReceiptData[]): number {
+function calculateReceiptTotal(receipts: ReceiptData[]): number {
   return receipts.reduce((sum, r) => {
     if (r.payment_items && r.payment_items.length > 0) {
       return sum + r.payment_items.reduce((s, item) => s + (item.amount || 0), 0)
@@ -38,7 +38,7 @@ export function calculateReceiptTotal(receipts: ReceiptData[]): number {
 }
 
 /** 計算付款總額（排除獎金類型的請款） */
-export function calculateExpenseTotal(
+function calculateExpenseTotal(
   expenses: Array<{
     items?: Array<{ unit_price: number; quantity: number; category?: string }>
     amount?: number
@@ -53,19 +53,19 @@ export function calculateExpenseTotal(
 }
 
 /** 計算行政費用 */
-export function calculateAdministrativeCost(memberCount: number, costPerPerson: number): number {
+function calculateAdministrativeCost(memberCount: number, costPerPerson: number): number {
   return memberCount * costPerPerson
 }
 
 /** 取得每人行政費用（從設定中取最大值，預設 10） */
-export function getAdminCostPerPerson(settings: TourBonusSetting[]): number {
+function getAdminCostPerPerson(settings: TourBonusSetting[]): number {
   const adminSettings = settings.filter(s => s.type === BonusSettingType.ADMINISTRATIVE_EXPENSES)
   if (adminSettings.length === 0) return DEFAULT_ADMIN_COST_PER_PERSON
   return Math.max(...adminSettings.map(s => Number(s.bonus)), DEFAULT_ADMIN_COST_PER_PERSON)
 }
 
 /** 計算營收（未扣稅） */
-export function calculateProfitBeforeTax(
+function calculateProfitBeforeTax(
   receiptTotal: number,
   expenseTotal: number,
   adminCost: number
@@ -74,7 +74,7 @@ export function calculateProfitBeforeTax(
 }
 
 /** 取得稅率（從 PROFIT_TAX 設定中取） */
-export function getTaxRate(settings: TourBonusSetting[]): number {
+function getTaxRate(settings: TourBonusSetting[]): number {
   const taxSetting = settings.find(
     s => s.type === BonusSettingType.PROFIT_TAX && s.bonus_type === BonusCalculationType.PERCENT
   )
@@ -82,18 +82,18 @@ export function getTaxRate(settings: TourBonusSetting[]): number {
 }
 
 /** 計算營收稅額 */
-export function calculateProfitTax(profitBeforeTax: number, taxRate: number): number {
+function calculateProfitTax(profitBeforeTax: number, taxRate: number): number {
   if (profitBeforeTax <= 0) return 0
   return Math.round((profitBeforeTax * taxRate) / 100)
 }
 
 /** 計算淨利 */
-export function calculateNetProfit(profitBeforeTax: number, profitTax: number): number {
+function calculateNetProfit(profitBeforeTax: number, profitTax: number): number {
   return profitBeforeTax - profitTax
 }
 
 /** 計算單項獎金 */
-export function calculateBonus(netProfit: number, setting: TourBonusSetting): number {
+function calculateBonus(netProfit: number, setting: TourBonusSetting): number {
   const bonus = Number(setting.bonus)
   switch (setting.bonus_type) {
     case BonusCalculationType.PERCENT:
@@ -110,7 +110,7 @@ export function calculateBonus(netProfit: number, setting: TourBonusSetting): nu
 }
 
 /** 計算所有獎金 */
-export function calculateAllBonuses(
+function calculateAllBonuses(
   netProfit: number,
   settings: TourBonusSetting[],
   employeeDict?: Record<string, string>
@@ -150,7 +150,7 @@ export function calculateAllBonuses(
 }
 
 /** 計算公司盈餘 */
-export function calculateCompanyProfit(netProfit: number, totalBonuses: number): number {
+function calculateCompanyProfit(netProfit: number, totalBonuses: number): number {
   return netProfit - totalBonuses
 }
 

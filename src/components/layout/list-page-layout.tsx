@@ -22,7 +22,7 @@ export interface TabItem {
 /**
  * ListPageLayout 屬性
  */
-export interface ListPageLayoutProps<T extends Record<string, any>> {
+interface ListPageLayoutProps<T extends Record<string, any>> {
   // ========== 頁面配置 ==========
   /** 頁面標題 */
   title: string

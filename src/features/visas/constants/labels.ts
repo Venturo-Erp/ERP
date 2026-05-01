@@ -1,6 +1,6 @@
 // 簽證模組 UI 標籤常量
 
-export const VISA_PAGE_LABELS = {
+const VISA_PAGE_LABELS = {
   page_title: '簽證管理',
   breadcrumb_home: '首頁',
   breadcrumb_visas: '簽證管理',
@@ -28,7 +28,7 @@ export const VISA_PAGE_LABELS = {
     `請先在簽證頁面設定 ${year} 年預設簽證團，或在表單中選擇團號`,
 }
 
-export const VISA_TAB_LABELS = {
+const VISA_TAB_LABELS = {
   all: '全部',
   pending: '待送件',
   submitted: '已送件',

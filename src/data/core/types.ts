@@ -31,7 +31,7 @@ export interface BaseEntity {
 // 快取配置
 // ============================================
 
-export interface CacheConfig {
+interface CacheConfig {
   /** 快取存活時間（毫秒） */
   ttl?: number
   /** 資料視為新鮮的時間（毫秒） */
@@ -88,7 +88,7 @@ export const CACHE_PRESETS = {
 // Entity 配置
 // ============================================
 
-export interface ListConfig {
+interface ListConfig {
   /** 要選取的欄位 */
   select: string
   /** 排序設定 */
@@ -123,7 +123,7 @@ export interface EntityConfig {
 // Hook 選項
 // ============================================
 
-export interface ListOptions {
+interface ListOptions {
   /** 是否啟用載入（false 時不會發送請求） */
   enabled?: boolean
 }

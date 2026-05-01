@@ -30,7 +30,7 @@ interface ItineraryPreviewProps {
   onPrint: () => void
 }
 
-export function ItineraryPreview({
+function ItineraryPreview({
   isOpen,
   onClose,
   title,

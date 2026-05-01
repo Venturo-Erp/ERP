@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils'
 import { ImagePositionSettings, getImagePositionStyle } from '../image-position-editor'
 import { IMAGE_UPLOADER_LABELS } from './constants/labels'
 
-export interface ImagePreviewProps {
+interface ImagePreviewProps {
   value: string
   position?: ImagePositionSettings | null
   uploading: boolean

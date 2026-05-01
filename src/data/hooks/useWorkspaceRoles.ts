@@ -1,7 +1,7 @@
 import useSWR from 'swr'
 import { useAuthStore } from '@/stores'
 
-export interface WorkspaceRole {
+interface WorkspaceRole {
   id: string
   name: string
 }

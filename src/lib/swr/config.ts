@@ -37,7 +37,7 @@ interface StoredCache {
  *
  * SWR provider 需要回傳一個函數，該函數回傳 Map
  */
-export function localStorageProvider() {
+function localStorageProvider() {
   // 初始化：從 localStorage 讀取快取
   const stored = loadFromStorage()
   const map = new Map<string, unknown>(
@@ -257,7 +257,7 @@ export const swrConfig: SWRConfiguration = {
 /**
  * 清除所有 SWR 快取（登出時使用）
  */
-export function clearSWRCache(): void {
+function clearSWRCache(): void {
   if (typeof window === 'undefined') return
 
   try {

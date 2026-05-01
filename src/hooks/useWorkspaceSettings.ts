@@ -53,7 +53,7 @@ const SELECT_FIELDS =
  * - 列印文件：max-width: 150px, max-height: 40px
  * - 網頁 Header：max-width: 120px, max-height: 36px
  */
-export const LOGO_CONSTRAINTS = {
+const LOGO_CONSTRAINTS = {
   print: {
     maxWidth: 150,
     maxHeight: 40,

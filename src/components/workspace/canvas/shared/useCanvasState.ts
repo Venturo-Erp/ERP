@@ -5,7 +5,7 @@
 import { useState, useCallback } from 'react'
 import { ViewMode, EditMode, DocumentFilter, EditorState } from './types'
 
-export function useCanvasState() {
+function useCanvasState() {
   const [viewMode, setViewMode] = useState<ViewMode>('grid')
   const [editMode, setEditMode] = useState<EditMode>('view')
   const [searchTerm, setSearchTerm] = useState('')

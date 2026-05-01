@@ -13,7 +13,7 @@ import { logger } from '@/lib/utils/logger'
 // 類型定義
 // ============================================
 
-export type FontStyle = 'normal' | 'bold' | 'italic' | 'bolditalic'
+type FontStyle = 'normal' | 'bold' | 'italic' | 'bolditalic'
 
 interface FontInfo {
   /** jsPDF 中的字體名稱 */
@@ -226,7 +226,7 @@ async function addFontToDoc(doc: jsPDF, fontFamily: string, fontInfo: FontInfo):
  * @param doc - jsPDF 實例
  * @param fontFamilies - 需要的字體列表
  */
-export async function loadFontsForPDF(doc: jsPDF, fontFamilies: string[]): Promise<void> {
+async function loadFontsForPDF(doc: jsPDF, fontFamilies: string[]): Promise<void> {
   // 確保預設字體一定會載入
   const fontsToLoad = new Set([DEFAULT_FONT, ...fontFamilies])
 

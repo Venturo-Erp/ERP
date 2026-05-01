@@ -8,7 +8,7 @@ import { createEntityHook } from '../core/createEntityHook'
 import { CACHE_PRESETS } from '../core/types'
 import type { VendorCost } from '@/stores/types'
 
-export const vendorCostEntity = createEntityHook<VendorCost>('vendor_costs', {
+const vendorCostEntity = createEntityHook<VendorCost>('vendor_costs', {
   list: {
     select: 'id,vendor_name,visa_type,cost,created_at,updated_at',
     orderBy: { column: 'vendor_name', ascending: true },
@@ -21,12 +21,12 @@ export const vendorCostEntity = createEntityHook<VendorCost>('vendor_costs', {
 })
 
 export const useVendorCosts = vendorCostEntity.useList
-export const useVendorCostsSlim = vendorCostEntity.useListSlim
-export const useVendorCost = vendorCostEntity.useDetail
-export const useVendorCostsPaginated = vendorCostEntity.usePaginated
-export const useVendorCostDictionary = vendorCostEntity.useDictionary
+const useVendorCostsSlim = vendorCostEntity.useListSlim
+const useVendorCost = vendorCostEntity.useDetail
+const useVendorCostsPaginated = vendorCostEntity.usePaginated
+const useVendorCostDictionary = vendorCostEntity.useDictionary
 
 export const createVendorCost = vendorCostEntity.create
 export const updateVendorCost = vendorCostEntity.update
-export const deleteVendorCost = vendorCostEntity.delete
-export const invalidateVendorCosts = vendorCostEntity.invalidate
+const deleteVendorCost = vendorCostEntity.delete
+const invalidateVendorCosts = vendorCostEntity.invalidate

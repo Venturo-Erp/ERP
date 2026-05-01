@@ -19,7 +19,7 @@ import type { Tour } from '@/stores/types'
 // Entity 定義
 // ============================================
 
-export const tourEntity = createEntityHook<Tour>('tours', {
+const tourEntity = createEntityHook<Tour>('tours', {
   list: {
     select:
       'id,code,name,departure_date,return_date,status,location,current_participants,max_participants,price,profit,total_cost,total_revenue,archived,is_active,contract_status,contract_completed,contract_template,contract_archived_date,controller_id,country_id,airport_code,itinerary_id,locked_at,locked_by,locked_itinerary_id,locked_itinerary_version,locked_quote_id,locked_quote_version,last_unlocked_at,last_unlocked_by,closing_date,closed_by,enable_checkin,workspace_id,created_at,created_by,updated_at,updated_by',
@@ -129,7 +129,7 @@ export const useToursSlim = tourEntity.useListSlim
 export const useTour = tourEntity.useDetail
 
 /** 分頁 Tours（server-side pagination + filter + search）*/
-export const useToursPaginated = tourEntity.usePaginated
+const useToursPaginated = tourEntity.usePaginated
 
 /** Tour Dictionary（O(1) 查詢）*/
 export const useTourDictionary = tourEntity.useDictionary

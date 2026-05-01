@@ -96,7 +96,7 @@ export const ATTRACTION_IMAGE_UPLOAD_LABELS = {
   EDIT_4224: '雙擊圖片開啟編輯器，可調整位置、色彩、AI 美化。建議尺寸 1920x1080',
 }
 
-export const ATTRACTION_PREVIEW_LABELS = {
+const ATTRACTION_PREVIEW_LABELS = {
   未命名景點: '未命名景點',
   未設定: '未設定',
 
@@ -117,7 +117,7 @@ export const ATTRACTIONS_TAB_LABELS = {
   LABEL_3804: '拖拽排序',
 }
 
-export const MICHELIN_RESTAURANTS_TAB_LABELS = {
+const MICHELIN_RESTAURANTS_TAB_LABELS = {
   載入失敗: '載入失敗：',
   確定要刪除此餐廳: '確定要刪除此餐廳？',
   刪除餐廳: '刪除餐廳',
@@ -143,7 +143,7 @@ export const MICHELIN_RESTAURANTS_TAB_LABELS = {
   SAVE: '儲存',
 }
 
-export const PREMIUM_EXPERIENCES_TAB_LABELS = {
+const PREMIUM_EXPERIENCES_TAB_LABELS = {
   更新失敗: '更新失敗',
   確定要刪除此體驗: '確定要刪除此體驗？',
   刪除體驗: '刪除體驗',

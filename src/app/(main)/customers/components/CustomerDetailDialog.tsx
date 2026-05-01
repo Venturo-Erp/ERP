@@ -19,7 +19,7 @@ interface CustomerDetailDialogProps {
   onEdit: (customer: Customer) => void
 }
 
-export function CustomerDetailDialog({
+function CustomerDetailDialog({
   open,
   onOpenChange,
   customer,

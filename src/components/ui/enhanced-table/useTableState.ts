@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useCallback } from 'react'
 
-export interface UseTableStateProps<T> {
+interface UseTableStateProps<T> {
   data: T[]
   searchTerm?: string
   searchableFields?: (keyof T)[]

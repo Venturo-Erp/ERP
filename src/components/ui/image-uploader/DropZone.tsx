@@ -5,7 +5,7 @@ import { Loader2, ImageIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { IMAGE_UPLOADER_LABELS } from './constants/labels'
 
-export interface DropZoneProps {
+interface DropZoneProps {
   uploading: boolean
   isDragOver: boolean
   disabled: boolean

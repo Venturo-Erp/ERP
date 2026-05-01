@@ -40,7 +40,7 @@ const COLUMN_LABELS: Record<keyof ExportColumnsConfig, string> = {
   balance: EXPORT_DIALOG_LABELS.COL_BALANCE,
 }
 
-export function ExportDialog({
+function ExportDialog({
   isOpen,
   columns,
   members,

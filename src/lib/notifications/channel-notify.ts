@@ -14,7 +14,7 @@ const supabase = createClient(
 )
 
 // 通知類型
-export type NotifyEvent =
+type NotifyEvent =
   | 'request_sent' // 發出需求單
   | 'request_replied' // 供應商回覆
   | 'request_confirmed' // 確認需求
@@ -38,7 +38,7 @@ interface NotifyPayload {
 /**
  * 發送頻道通知
  */
-export async function sendChannelNotify(payload: NotifyPayload): Promise<boolean> {
+async function sendChannelNotify(payload: NotifyPayload): Promise<boolean> {
   try {
     // 1. 找到團的頻道
     const { data: tour } = await supabase

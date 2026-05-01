@@ -58,7 +58,7 @@ export function getCurrentWorkspaceCode(): string | null {
  *
  * @returns workspace 物件或 null
  */
-export function getCurrentWorkspace() {
+function getCurrentWorkspace() {
   const { user } = useAuthStore.getState()
   const workspaceStore = useWorkspaceStoreData.getState()
   const workspaces = (workspaceStore.items || []) as WorkspaceWithCode[]
@@ -91,7 +91,7 @@ export function getCurrentWorkspace() {
  * @param targetWorkspaceId - 目標 workspace ID
  * @returns boolean
  */
-export function canManageWorkspace(targetWorkspaceId: string): boolean {
+function canManageWorkspace(targetWorkspaceId: string): boolean {
   const { user, isAdmin } = useAuthStore.getState()
 
   if (!user || !isAdmin) {
@@ -106,7 +106,7 @@ export function canManageWorkspace(targetWorkspaceId: string): boolean {
  *
  * @returns 公司名稱或空字串
  */
-export function getWorkspaceCompanyName(): string {
+function getWorkspaceCompanyName(): string {
   const { user } = useAuthStore.getState()
   return user?.workspace_name || ''
 }
@@ -116,7 +116,7 @@ export function getWorkspaceCompanyName(): string {
  *
  * @returns 標語字串
  */
-export function getWorkspaceTagline(): string {
+function getWorkspaceTagline(): string {
   const name = getWorkspaceCompanyName()
   const year = new Date().getFullYear()
   return name ? `${name} ${year}` : String(year)
@@ -127,7 +127,7 @@ export function getWorkspaceTagline(): string {
  *
  * @returns workspace 陣列
  */
-export function getAvailableWorkspaces() {
+function getAvailableWorkspaces() {
   const { user } = useAuthStore.getState()
   const workspaceStore = useWorkspaceStoreData.getState()
   const workspaces = (workspaceStore.items || []) as WorkspaceWithCode[]

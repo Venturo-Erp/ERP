@@ -22,7 +22,7 @@ import {
 /**
  * 驗證 AMADEUS PNR 格式
  */
-export function validateAmadeusPNR(rawPNR: string): ValidationResult {
+function validateAmadeusPNR(rawPNR: string): ValidationResult {
   const errors: string[] = []
   const warnings: string[] = []
   const suggestions: string[] = []
@@ -81,7 +81,7 @@ export function validateAmadeusPNR(rawPNR: string): ValidationResult {
 /**
  * 從 Amadeus 電報解析票價資訊
  */
-export function parseFareFromTelegram(rawPNR: string): ParsedFareData | null {
+function parseFareFromTelegram(rawPNR: string): ParsedFareData | null {
   const lines = rawPNR.split('\n').map(line => line.trim())
   const fullText = rawPNR.toUpperCase()
 

@@ -5,9 +5,9 @@ import { alert } from '@/lib/ui/alert-dialog'
 import type { OrderMember } from '@/features/orders/types/order-member.types'
 import { EXPORT_DIALOG_LABELS } from '../constants/labels'
 
-export type ExportColumns = Record<string, boolean>
+type ExportColumns = Record<string, boolean>
 
-export const EXPORT_COLUMN_LABELS: Record<string, string> = {
+const EXPORT_COLUMN_LABELS: Record<string, string> = {
   identity: EXPORT_DIALOG_LABELS.COL_IDENTITY,
   chinese_name: EXPORT_DIALOG_LABELS.COL_CHINESE_NAME,
   passport_name: EXPORT_DIALOG_LABELS.COL_PASSPORT_PINYIN,

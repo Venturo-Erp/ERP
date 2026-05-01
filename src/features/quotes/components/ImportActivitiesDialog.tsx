@@ -31,7 +31,7 @@ interface ImportActivitiesDialogProps {
   onImport: (items: CostItem[]) => void
 }
 
-export function ImportActivitiesDialog({
+function ImportActivitiesDialog({
   isOpen,
   onClose,
   activities,

@@ -19,7 +19,7 @@ const SELECTION_COMPATIBILITY: Record<VisaStatus, VisaStatus[]> = {
  * 按鈕可用性規則
  * 根據已勾選的狀態，決定哪些按鈕可以按
  */
-export const BUTTON_AVAILABILITY: Record<
+const BUTTON_AVAILABILITY: Record<
   VisaStatus,
   {
     submit: boolean // 送件

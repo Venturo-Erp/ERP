@@ -20,7 +20,7 @@ function getTokenBlacklist(): Set<string> {
 /**
  * Add token to blacklist in localStorage
  */
-export function addTokenToBlacklist(token: string): void {
+function addTokenToBlacklist(token: string): void {
   if (typeof window === 'undefined') return
   try {
     const blacklist = getTokenBlacklist()
@@ -34,14 +34,14 @@ export function addTokenToBlacklist(token: string): void {
 /**
  * Check if token is in blacklist
  */
-export function isTokenBlacklisted(token: string): boolean {
+function isTokenBlacklisted(token: string): boolean {
   return getTokenBlacklist().has(token)
 }
 
 /**
  * Clear all tokens from blacklist (for testing/cleanup)
  */
-export function clearTokenBlacklist(): void {
+function clearTokenBlacklist(): void {
   if (typeof window === 'undefined') return
   localStorage.removeItem(TOKEN_BLACKLIST_KEY)
 }

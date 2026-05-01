@@ -25,7 +25,7 @@ import { formatDate } from '@/lib/utils/format-date'
 import { TOUR_SERVICE_LABELS, TOURS_ADVANCED_LABELS } from '../constants/labels'
 import { TOUR_STATUS } from '@/lib/constants/status-maps'
 
-export interface UseToursPaginatedParams {
+interface UseToursPaginatedParams {
   page: number
   pageSize: number
   // 'all' | 'template' | 'proposal' | 'upcoming' | 'ongoing' | 'returned' | 'closed' | 'archived'
@@ -334,7 +334,7 @@ export function useToursPaginated(params: UseToursPaginatedParams): UseToursPagi
  * Hook for single tour details (with skip pattern)
  * Only fetches when tourId is provided
  */
-export function useTourDetailsPaginated(tourId: string | null) {
+function useTourDetailsPaginated(tourId: string | null) {
   const {
     data: tour,
     error,

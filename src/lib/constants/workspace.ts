@@ -3,7 +3,7 @@
  */
 
 // 佈局尺寸
-export const WORKSPACE_LAYOUT = {
+const WORKSPACE_LAYOUT = {
   MAX_HEIGHT: 600,
   SIDEBAR_WIDTH: 280,
   SIDEBAR_WIDTH_COLLAPSED: 60,
@@ -13,7 +13,7 @@ export const WORKSPACE_LAYOUT = {
 } as const
 
 // 限制
-export const WORKSPACE_LIMITS = {
+const WORKSPACE_LIMITS = {
   MAX_FILE_SIZE: 10 * 1024 * 1024, // 10MB
   MAX_MESSAGE_LENGTH: 5000,
   MAX_MEMBERS_PER_CHANNEL: 100,
@@ -22,7 +22,7 @@ export const WORKSPACE_LIMITS = {
 } as const
 
 // 延遲時間
-export const WORKSPACE_DELAYS = {
+const WORKSPACE_DELAYS = {
   AUTO_SAVE: 2000, // 2s
   TYPING_INDICATOR: 3000, // 3s
   MESSAGE_FADE: 5000, // 5s
@@ -30,7 +30,7 @@ export const WORKSPACE_DELAYS = {
 } as const
 
 // 訊息類型
-export const MESSAGE_TYPES = {
+const MESSAGE_TYPES = {
   TEXT: 'text',
   IMAGE: 'image',
   FILE: 'file',
@@ -43,7 +43,7 @@ export const MESSAGE_TYPES = {
 } as const
 
 // Channel 類型
-export const CHANNEL_TYPES = {
+const CHANNEL_TYPES = {
   TEAM: 'team',
   TOUR: 'tour',
   PROJECT: 'project',
@@ -51,7 +51,7 @@ export const CHANNEL_TYPES = {
 } as const
 
 // 檔案類型
-export const ALLOWED_FILE_TYPES = {
+const ALLOWED_FILE_TYPES = {
   IMAGES: ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/webp'],
   DOCUMENTS: [
     'application/pdf',
@@ -66,7 +66,7 @@ export const ALLOWED_FILE_TYPES = {
 export const SYSTEM_BOT_ID = '00000000-0000-0000-0000-000000000001'
 
 // 預設值
-export const WORKSPACE_DEFAULTS = {
+const WORKSPACE_DEFAULTS = {
   CHANNEL_NAME: '新頻道',
   CHANNEL_DESCRIPTION: '',
   MESSAGE_PLACEHOLDER: '輸入訊息...',

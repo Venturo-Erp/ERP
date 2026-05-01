@@ -25,7 +25,7 @@ import { forwardRef, ReactNode } from 'react'
 import { cn } from '@/lib/utils'
 
 // A4 尺寸常數（mm）
-export const A4 = {
+const A4 = {
   width: 210,
   height: 297,
   // 預設邊距
@@ -44,7 +44,7 @@ export const A4 = {
   },
 }
 
-export interface PrintTemplateProps {
+interface PrintTemplateProps {
   /** 頁首內容 */
   header?: ReactNode
   /** 頁尾內容 */
@@ -68,7 +68,7 @@ export interface PrintTemplateProps {
   showBorder?: boolean
 }
 
-export const PrintTemplate = forwardRef<HTMLDivElement, PrintTemplateProps>(function PrintTemplate(
+const PrintTemplate = forwardRef<HTMLDivElement, PrintTemplateProps>(function PrintTemplate(
   {
     header,
     footer,
@@ -140,14 +140,14 @@ export const PrintTemplate = forwardRef<HTMLDivElement, PrintTemplateProps>(func
 /**
  * 列印時的分頁符號
  */
-export function PageBreak() {
+function PageBreak() {
   return <div style={{ pageBreakAfter: 'always' }} />
 }
 
 /**
  * 不可分割區塊（避免被分頁切斷）
  */
-export function NoBreak({ children, className }: { children: ReactNode; className?: string }) {
+function NoBreak({ children, className }: { children: ReactNode; className?: string }) {
   return (
     <div style={{ pageBreakInside: 'avoid' }} className={className}>
       {children}

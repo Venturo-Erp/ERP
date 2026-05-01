@@ -8,7 +8,7 @@ import { createEntityHook } from '../core/createEntityHook'
 import { CACHE_PRESETS } from '../core/types'
 import type { Itinerary } from '@/stores/types'
 
-export const itineraryEntity = createEntityHook<Itinerary>('itineraries', {
+const itineraryEntity = createEntityHook<Itinerary>('itineraries', {
   list: {
     // 註：移除已廢棄的 city / country / erp_itinerary_id（Online 已暫停）欄位
     select:
@@ -23,12 +23,12 @@ export const itineraryEntity = createEntityHook<Itinerary>('itineraries', {
 })
 
 export const useItineraries = itineraryEntity.useList
-export const useItinerariesSlim = itineraryEntity.useListSlim
-export const useItinerary = itineraryEntity.useDetail
-export const useItinerariesPaginated = itineraryEntity.usePaginated
-export const useItineraryDictionary = itineraryEntity.useDictionary
+const useItinerariesSlim = itineraryEntity.useListSlim
+const useItinerary = itineraryEntity.useDetail
+const useItinerariesPaginated = itineraryEntity.usePaginated
+const useItineraryDictionary = itineraryEntity.useDictionary
 
 export const createItinerary = itineraryEntity.create
 export const updateItinerary = itineraryEntity.update
-export const deleteItinerary = itineraryEntity.delete
-export const invalidateItineraries = itineraryEntity.invalidate
+const deleteItinerary = itineraryEntity.delete
+const invalidateItineraries = itineraryEntity.invalidate

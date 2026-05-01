@@ -9,7 +9,7 @@ import { ATTRACTIONS_FORM_HOOK_LABELS } from '../constants/labels'
 
 export type ImagePosition = 'top' | 'center' | 'bottom'
 
-export interface UseAttractionFormProps {
+interface UseAttractionFormProps {
   attraction?: Attraction | null
   initialFormData: AttractionFormData
   open: boolean

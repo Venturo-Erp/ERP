@@ -15,8 +15,8 @@ import type { Database } from '@/lib/supabase/types'
 
 // Leader Availability type from Supabase schema
 export type LeaderAvailability = Database['public']['Tables']['leader_availability']['Row']
-export type CreateLeaderAvailability = Database['public']['Tables']['leader_availability']['Insert']
-export type UpdateLeaderAvailability = Database['public']['Tables']['leader_availability']['Update']
+type CreateLeaderAvailability = Database['public']['Tables']['leader_availability']['Insert']
+type UpdateLeaderAvailability = Database['public']['Tables']['leader_availability']['Update']
 
 // Status types for leader availability
 export type LeaderAvailabilityStatus = 'available' | 'tentative' | 'blocked'
@@ -43,7 +43,7 @@ export const useLeaderAvailability = createCloudHook<LeaderAvailability>('leader
 /**
  * Helper function to check if a leader is available on a specific date
  */
-export function isLeaderAvailableOnDate(
+function isLeaderAvailableOnDate(
   availability: LeaderAvailability[],
   leaderId: string,
   date: Date
@@ -68,7 +68,7 @@ export function isLeaderAvailableOnDate(
 /**
  * Helper function to get available leaders for a date range
  */
-export function getAvailableLeadersForDateRange(
+function getAvailableLeadersForDateRange(
   availability: LeaderAvailability[],
   leaderIds: string[],
   startDate: Date,

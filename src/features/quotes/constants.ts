@@ -7,7 +7,7 @@ import { Calculator, FileText } from 'lucide-react'
 /**
  * 報價單狀態篩選選項
  */
-export const STATUS_FILTERS = [
+const STATUS_FILTERS = [
   { value: 'all', label: '全部', icon: Calculator },
   { value: 'proposed', label: '開團', icon: FileText },
   { value: '待出發', label: '待出發', icon: FileText },

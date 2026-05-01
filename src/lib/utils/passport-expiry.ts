@@ -3,9 +3,9 @@
  * 檢查護照是否已過期或距離出發日不足 6 個月
  */
 
-export type PassportExpiryStatus = 'expired' | 'insufficient' | 'valid' | 'unknown'
+type PassportExpiryStatus = 'expired' | 'insufficient' | 'valid' | 'unknown'
 
-export interface PassportExpiryResult {
+interface PassportExpiryResult {
   status: PassportExpiryStatus
   label: string
   color: string // Tailwind CSS class

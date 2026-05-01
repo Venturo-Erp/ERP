@@ -31,4 +31,4 @@ export const useSharedOrderListStore = createStore<SharedOrderListEntity>({
 /**
  * Hook 型別（方便使用）
  */
-export type SharedOrderListStoreType = ReturnType<typeof useSharedOrderListStore>
+type SharedOrderListStoreType = ReturnType<typeof useSharedOrderListStore>

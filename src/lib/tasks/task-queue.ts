@@ -7,14 +7,14 @@ import { supabase } from '@/lib/supabase/client'
 import { logger } from '@/lib/utils/logger'
 import type { Json } from '@/lib/supabase/types'
 
-export type TaskStatus = 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled'
-export type TaskPriority = 'low' | 'normal' | 'high' | 'critical'
+type TaskStatus = 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled'
+type TaskPriority = 'low' | 'normal' | 'high' | 'critical'
 
-export interface TaskPayload {
+interface TaskPayload {
   [key: string]: unknown
 }
 
-export interface Task<T = TaskPayload> {
+interface Task<T = TaskPayload> {
   id: string
   type: string
   payload: T
@@ -33,7 +33,7 @@ export interface Task<T = TaskPayload> {
   updated_at: string
 }
 
-export interface TaskHandler<T = TaskPayload> {
+interface TaskHandler<T = TaskPayload> {
   (payload: T, task: Task<T>): Promise<unknown>
 }
 
@@ -54,7 +54,7 @@ export function registerTaskHandler<T = TaskPayload>(
 /**
  * 建立新任務
  */
-export async function createTask<T = TaskPayload>(options: {
+async function createTask<T = TaskPayload>(options: {
   type: string
   payload: T
   workspaceId: string
@@ -103,7 +103,7 @@ export async function createTask<T = TaskPayload>(options: {
 /**
  * 取得待處理任務
  */
-export async function getPendingTasks(limit = 10): Promise<Task[]> {
+async function getPendingTasks(limit = 10): Promise<Task[]> {
   const now = new Date().toISOString()
 
   const { data, error } = await supabase
@@ -128,7 +128,7 @@ export async function getPendingTasks(limit = 10): Promise<Task[]> {
 /**
  * 處理單一任務
  */
-export async function processTask(task: Task): Promise<boolean> {
+async function processTask(task: Task): Promise<boolean> {
   const handler = taskHandlers.get(task.type)
 
   if (!handler) {
@@ -228,7 +228,7 @@ export async function processQueue(batchSize = 5): Promise<number> {
 /**
  * 取消任務
  */
-export async function cancelTask(taskId: string): Promise<boolean> {
+async function cancelTask(taskId: string): Promise<boolean> {
   const { error } = await supabase
     .from('background_tasks')
     .update({
@@ -249,7 +249,7 @@ export async function cancelTask(taskId: string): Promise<boolean> {
 /**
  * 取得任務統計
  */
-export async function getTaskStats(workspaceId?: string): Promise<{
+async function getTaskStats(workspaceId?: string): Promise<{
   pending: number
   processing: number
   completed: number
@@ -292,4 +292,4 @@ export const TaskTypes = {
   SEND_NOTIFICATION: 'send_notification',
 } as const
 
-export type TaskType = (typeof TaskTypes)[keyof typeof TaskTypes]
+type TaskType = (typeof TaskTypes)[keyof typeof TaskTypes]

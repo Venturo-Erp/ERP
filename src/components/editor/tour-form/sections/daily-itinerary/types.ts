@@ -11,7 +11,7 @@ export interface AttractionWithCity {
 }
 
 // 飯店資料型別
-export interface HotelData {
+interface HotelData {
   id: string
   name: string
   name_en?: string
@@ -23,7 +23,7 @@ export interface HotelData {
 }
 
 // 餐廳資料型別
-export interface RestaurantData {
+interface RestaurantData {
   id: string
   name: string
   name_en?: string
@@ -37,7 +37,7 @@ export interface RestaurantData {
 }
 
 // Props 型別
-export interface DailyItinerarySectionProps {
+interface DailyItinerarySectionProps {
   data: TourFormData
   updateField: (field: string, value: unknown) => void
   addDailyItinerary: () => void

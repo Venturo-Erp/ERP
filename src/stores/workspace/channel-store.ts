@@ -28,4 +28,4 @@ export const useChannelStore = createStore<ChannelEntity>({
 /**
  * Hook 型別（方便使用）
  */
-export type ChannelStoreType = ReturnType<typeof useChannelStore>
+type ChannelStoreType = ReturnType<typeof useChannelStore>

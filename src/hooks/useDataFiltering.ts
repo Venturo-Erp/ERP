@@ -3,7 +3,7 @@ import { useMemo } from 'react'
 /**
  * 過濾配置介面
  */
-export interface FilterConfig<T> {
+interface FilterConfig<T> {
   /** 狀態欄位名稱 */
   statusField?: keyof T
   /** 用於搜尋的欄位列表 */
@@ -154,7 +154,7 @@ export function useDataFiltering<T extends Record<string, unknown>>(
  * );
  * ```
  */
-export function useMultiStatusFiltering<T extends Record<string, unknown>>(
+function useMultiStatusFiltering<T extends Record<string, unknown>>(
   data: T[],
   statusFilters: string[],
   searchTerm: string,
@@ -222,7 +222,7 @@ export function useMultiStatusFiltering<T extends Record<string, unknown>>(
  * );
  * ```
  */
-export function useDateRangeFiltering<T extends Record<string, unknown>>(
+function useDateRangeFiltering<T extends Record<string, unknown>>(
   data: T[],
   dateField: keyof T,
   startDate?: string,

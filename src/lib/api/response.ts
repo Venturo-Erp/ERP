@@ -16,7 +16,7 @@ import { NextResponse } from 'next/server'
 /**
  * 標準 API 回應格式
  */
-export interface ApiResponse<T = unknown> {
+interface ApiResponse<T = unknown> {
   success: boolean
   data?: T
   error?: string
@@ -51,7 +51,7 @@ export const ErrorCode = {
   OPERATION_FAILED: 'OPERATION_FAILED',
 } as const
 
-export type ErrorCodeType = (typeof ErrorCode)[keyof typeof ErrorCode]
+type ErrorCodeType = (typeof ErrorCode)[keyof typeof ErrorCode]
 
 /**
  * 建立成功回應

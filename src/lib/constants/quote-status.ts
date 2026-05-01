@@ -22,7 +22,7 @@ export const QUOTE_STATUS_LABELS: Record<QuoteStatus, string> = {
 }
 
 // 報價單狀態顏色（與 status-config.ts 保持一致）
-export const QUOTE_STATUS_COLORS: Record<QuoteStatus, string> = {
+const QUOTE_STATUS_COLORS: Record<QuoteStatus, string> = {
   draft: 'bg-morandi-secondary text-white',
   proposed: 'bg-morandi-gold text-white',
   revised: 'bg-status-info text-white',
@@ -33,7 +33,7 @@ export const QUOTE_STATUS_COLORS: Record<QuoteStatus, string> = {
 }
 
 // 狀態篩選選項
-export const QUOTE_STATUS_FILTERS = [
+const QUOTE_STATUS_FILTERS = [
   { value: 'all', label: '全部' },
   { value: 'draft', label: '草稿' },
   { value: 'proposed', label: '開團' },

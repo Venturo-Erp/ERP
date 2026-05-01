@@ -13,27 +13,17 @@
 export * from './types'
 
 // 匯出常量
-export { SSR_CATEGORIES, OSI_KEYWORDS, MONTH_MAP, MONTH_NAMES } from './constants'
+
 
 // 匯出工具函數
-export {
-  mergeMultilineEntries,
-  parseAmadeusDate,
-  formatSegment,
-  extractImportantDates,
-  isUrgent,
-  parseEnhancedSSR,
-  parseEnhancedOSI,
-  extractAirportCode,
-  extractTripComAirportCode,
-} from './utils'
+
 
 // 匯出各格式解析器
-export { validateAmadeusPNR, parseAmadeusPNR, parseFareFromTelegram } from './parsers/amadeus'
-export { parseHTMLConfirmation } from './parsers/html-confirmation'
-export { parseETicketConfirmation } from './parsers/e-ticket'
-export { parseTicketOrderDetail } from './parsers/ticket-order-detail'
-export { parseTripComConfirmation } from './parsers/trip-com'
+
+
+
+
+
 
 // 導入解析器供智能入口使用
 import { ParsedPNR, ParsedHTMLConfirmation } from './types'
@@ -112,23 +102,10 @@ export function parseFlightConfirmation(input: string): ParsedHTMLConfirmation |
 }
 
 // 匯出增強型解析器（2026-03-02 新增）
-export { parseAmadeusPNREnhanced, type EnhancedParsedPNR } from './parsers/amadeus-enhanced'
+
 
 // 匯出驗證器和分析器
-export {
-  validateAllPassengerAges,
-  validateInfantAdultRatio,
-  type PassengerAgeValidation,
-} from './validators/age-validator'
-export {
-  enhanceAllSegmentsCabinClass,
-  getCabinClassInfo,
-  type CabinClassInfo,
-  type EnhancedFlightSegment,
-} from './enhancers/cabin-class-enhancer'
-export { analyzeAllConnections, type ConnectionInfo } from './analyzers/connection-analyzer'
-export {
-  validateTicketNumbers,
-  validateTicketNumber,
-  type TicketNumberValidation,
-} from './validators/ticket-validator'
+
+
+
+

@@ -32,7 +32,7 @@ type StatusType =
   | 'quote'
   | 'tour_request'
 
-export interface DateCellProps {
+interface DateCellProps {
   date?: string | Date | null
   format?: 'short' | 'long' | 'time'
   fallback?: string
@@ -40,7 +40,7 @@ export interface DateCellProps {
   showIcon?: boolean
 }
 
-export interface StatusCellProps {
+interface StatusCellProps {
   type: StatusType
   status: string
   variant?: 'badge' | 'text'
@@ -48,7 +48,7 @@ export interface StatusCellProps {
   className?: string
 }
 
-export interface CurrencyCellProps {
+interface CurrencyCellProps {
   amount: number
   currency?: 'TWD' | 'USD' | 'CNY'
   variant?: 'default' | 'income' | 'expense'
@@ -56,7 +56,7 @@ export interface CurrencyCellProps {
   className?: string
 }
 
-export interface DateRangeCellProps {
+interface DateRangeCellProps {
   start?: string | Date | null
   end?: string | Date | null
   format?: 'short' | 'long'
@@ -64,7 +64,7 @@ export interface DateRangeCellProps {
   className?: string
 }
 
-export interface ActionButton {
+interface ActionButton {
   icon: LucideIcon
   label: string
   onClick: () => void
@@ -72,28 +72,28 @@ export interface ActionButton {
   disabled?: boolean
 }
 
-export interface ActionCellProps {
+interface ActionCellProps {
   actions: ActionButton[]
   className?: string
   /** 只顯示圖示、不顯示文字（報價單等空間極度有限的情況用） */
   iconOnly?: boolean
 }
 
-export interface AvatarCellProps {
+interface AvatarCellProps {
   name: string
   imageUrl?: string | null
   subtitle?: string
   className?: string
 }
 
-export interface LinkCellProps {
+interface LinkCellProps {
   href: string
   text: string
   external?: boolean
   className?: string
 }
 
-export interface BadgeCellProps {
+interface BadgeCellProps {
   text: string
   variant?: 'default' | 'success' | 'warning' | 'danger' | 'info'
   className?: string
@@ -273,7 +273,7 @@ export function CurrencyCell({
  * <DateRangeCell start={tour.departure_date} end={tour.return_date} showDuration />
  * ```
  */
-export function DateRangeCell({
+function DateRangeCell({
   start,
   end,
   format = 'short',
@@ -402,7 +402,7 @@ export function TextCell({
  * <NumberCell value={tour.max_participants} suffix="人" />
  * ```
  */
-export function NumberCell({
+function NumberCell({
   value,
   prefix,
   suffix,
@@ -433,7 +433,7 @@ export function NumberCell({
  * <AvatarCell name="李四" imageUrl="/avatars/li.jpg" />
  * ```
  */
-export function AvatarCell({ name, imageUrl, subtitle, className }: AvatarCellProps) {
+function AvatarCell({ name, imageUrl, subtitle, className }: AvatarCellProps) {
   // 取名字第一個字作為頭像文字
   const initial = name?.charAt(0) || '?'
 
@@ -471,7 +471,7 @@ export function AvatarCell({ name, imageUrl, subtitle, className }: AvatarCellPr
  * <LinkCell href="https://example.com" text="外部連結" external />
  * ```
  */
-export function LinkCell({ href, text, external = false, className }: LinkCellProps) {
+function LinkCell({ href, text, external = false, className }: LinkCellProps) {
   const linkClass = cn(
     'text-sm text-morandi-gold hover:text-morandi-gold-dark hover:underline transition-colors',
     className
@@ -503,7 +503,7 @@ export function LinkCell({ href, text, external = false, className }: LinkCellPr
  * <BadgeCell text="新品" variant="success" />
  * ```
  */
-export function BadgeCell({ text, variant = 'default', className }: BadgeCellProps) {
+function BadgeCell({ text, variant = 'default', className }: BadgeCellProps) {
   const variantClass = cn(
     'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium',
     variant === 'default' && 'bg-morandi-container text-morandi-primary',

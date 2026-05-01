@@ -18,7 +18,7 @@ export const BONUS_CALCULATION_LABELS: Record<BonusCalculationType, string> = {
 }
 
 /** 獎金類型顏色 */
-export const BONUS_TYPE_COLORS: Record<BonusSettingType, string> = {
+const BONUS_TYPE_COLORS: Record<BonusSettingType, string> = {
   [BonusSettingType.PROFIT_TAX]: 'text-morandi-red',
   [BonusSettingType.OP_BONUS]: 'text-status-info',
   [BonusSettingType.SALE_BONUS]: 'text-morandi-green',

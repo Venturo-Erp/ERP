@@ -1,8 +1,8 @@
 import { create } from 'zustand'
 
-export type ThemeType = 'morandi' | 'iron' | 'airtable'
+type ThemeType = 'morandi' | 'iron' | 'airtable'
 
-export const THEMES: {
+const THEMES: {
   value: ThemeType
   label: string
   description: string

@@ -4,7 +4,7 @@ import { createEntityHook } from '../core/createEntityHook'
 import { CACHE_PRESETS } from '../core/types'
 import type { WorkspaceModule } from '@/types/accounting-pro.types'
 
-export const workspaceModuleEntity = createEntityHook<WorkspaceModule>('workspace_modules', {
+const workspaceModuleEntity = createEntityHook<WorkspaceModule>('workspace_modules', {
   list: {
     select: 'id,workspace_id,module_name,is_enabled,enabled_at,expires_at,created_at,updated_at',
     orderBy: { column: 'module_name', ascending: true },
@@ -17,14 +17,14 @@ export const workspaceModuleEntity = createEntityHook<WorkspaceModule>('workspac
 })
 
 // Hooks
-export const useWorkspaceModules = workspaceModuleEntity.useList
-export const useWorkspaceModulesSlim = workspaceModuleEntity.useListSlim
-export const useWorkspaceModule = workspaceModuleEntity.useDetail
-export const useWorkspaceModulesPaginated = workspaceModuleEntity.usePaginated
-export const useWorkspaceModuleDictionary = workspaceModuleEntity.useDictionary
+const useWorkspaceModules = workspaceModuleEntity.useList
+const useWorkspaceModulesSlim = workspaceModuleEntity.useListSlim
+const useWorkspaceModule = workspaceModuleEntity.useDetail
+const useWorkspaceModulesPaginated = workspaceModuleEntity.usePaginated
+const useWorkspaceModuleDictionary = workspaceModuleEntity.useDictionary
 
 // Actions
-export const createWorkspaceModule = workspaceModuleEntity.create
-export const updateWorkspaceModule = workspaceModuleEntity.update
-export const deleteWorkspaceModule = workspaceModuleEntity.delete
-export const invalidateWorkspaceModules = workspaceModuleEntity.invalidate
+const createWorkspaceModule = workspaceModuleEntity.create
+const updateWorkspaceModule = workspaceModuleEntity.update
+const deleteWorkspaceModule = workspaceModuleEntity.delete
+const invalidateWorkspaceModules = workspaceModuleEntity.invalidate

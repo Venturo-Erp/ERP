@@ -28,7 +28,7 @@ export interface PexelsPhoto {
   alt: string
 }
 
-export interface PexelsSearchResult {
+interface PexelsSearchResult {
   total_results: number
   page: number
   per_page: number
@@ -92,7 +92,7 @@ export async function searchPexelsPhotos(
 /**
  * 取得精選圖片
  */
-export async function getCuratedPhotos(options?: {
+async function getCuratedPhotos(options?: {
   page?: number
   perPage?: number
 }): Promise<PexelsSearchResult> {

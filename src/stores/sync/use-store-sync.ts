@@ -226,7 +226,7 @@ export function useStoreSyncSetup(): void {
  *
  * 用於在 store 外部（如 API route、Realtime callback）觸發同步
  */
-export function emitTourUpdated(tourId: string, changedFields?: string[]): void {
+function emitTourUpdated(tourId: string, changedFields?: string[]): void {
   storeEvents.emit('TOUR_UPDATED', {
     tourId,
     source: 'external',
@@ -234,14 +234,14 @@ export function emitTourUpdated(tourId: string, changedFields?: string[]): void 
   })
 }
 
-export function emitTourDeleted(tourId: string): void {
+function emitTourDeleted(tourId: string): void {
   storeEvents.emit('TOUR_DELETED', {
     tourId,
     source: 'external',
   })
 }
 
-export function emitOrderUpdated(orderId: string, tourId?: string, changedFields?: string[]): void {
+function emitOrderUpdated(orderId: string, tourId?: string, changedFields?: string[]): void {
   storeEvents.emit('ORDER_UPDATED', {
     orderId,
     tourId,
@@ -250,7 +250,7 @@ export function emitOrderUpdated(orderId: string, tourId?: string, changedFields
   })
 }
 
-export function emitOrderDeleted(orderId: string, tourId?: string): void {
+function emitOrderDeleted(orderId: string, tourId?: string): void {
   storeEvents.emit('ORDER_DELETED', {
     orderId,
     tourId,
@@ -258,7 +258,7 @@ export function emitOrderDeleted(orderId: string, tourId?: string): void {
   })
 }
 
-export function emitMemberUpdated(memberId: string, orderId?: string, tourId?: string): void {
+function emitMemberUpdated(memberId: string, orderId?: string, tourId?: string): void {
   storeEvents.emit('MEMBER_UPDATED', {
     memberId,
     orderId,
@@ -267,7 +267,7 @@ export function emitMemberUpdated(memberId: string, orderId?: string, tourId?: s
   })
 }
 
-export function emitMemberDeleted(memberId: string, orderId?: string, tourId?: string): void {
+function emitMemberDeleted(memberId: string, orderId?: string, tourId?: string): void {
   storeEvents.emit('MEMBER_DELETED', {
     memberId,
     orderId,

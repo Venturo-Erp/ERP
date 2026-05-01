@@ -89,13 +89,13 @@ function addFontsToDoc(doc: jsPDF, normalFont: string, boldFont: string): void {
  * @param doc - jsPDF 實例
  * @param style - 'normal' | 'bold'
  */
-export function setChineseFont(doc: jsPDF, style: 'normal' | 'bold' = 'normal'): void {
+function setChineseFont(doc: jsPDF, style: 'normal' | 'bold' = 'normal'): void {
   doc.setFont('ChironHeiHK', style)
 }
 
 /**
  * 取得 autoTable 使用的字體設定
  */
-export function getAutoTableFontOptions(): { font: string } {
+function getAutoTableFontOptions(): { font: string } {
   return { font: 'ChironHeiHK' }
 }

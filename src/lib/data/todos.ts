@@ -46,7 +46,7 @@ export async function getAllTodos(workspaceId: string): Promise<Todo[]> {
  * 根據 ID 取得單一待辦事項
  * 🔒 需要傳入 workspaceId
  */
-export async function getTodoById(id: string, workspaceId: string): Promise<Todo | null> {
+async function getTodoById(id: string, workspaceId: string): Promise<Todo | null> {
   if (!workspaceId) {
     logger.error('getTodoById: workspaceId 必須提供')
     return null
@@ -73,7 +73,7 @@ export async function getTodoById(id: string, workspaceId: string): Promise<Todo
  * 根據狀態取得待辦事項
  * 🔒 需要傳入 workspaceId
  */
-export async function getTodosByStatus(status: string, workspaceId: string): Promise<Todo[]> {
+async function getTodosByStatus(status: string, workspaceId: string): Promise<Todo[]> {
   if (!workspaceId) {
     logger.error('getTodosByStatus: workspaceId 必須提供')
     return []
@@ -101,7 +101,7 @@ export async function getTodosByStatus(status: string, workspaceId: string): Pro
  * 根據指派者取得待辦事項
  * 🔒 需要傳入 workspaceId
  */
-export async function getTodosByAssignee(assigneeId: string, workspaceId: string): Promise<Todo[]> {
+async function getTodosByAssignee(assigneeId: string, workspaceId: string): Promise<Todo[]> {
   if (!workspaceId) {
     logger.error('getTodosByAssignee: workspaceId 必須提供')
     return []
@@ -129,7 +129,7 @@ export async function getTodosByAssignee(assigneeId: string, workspaceId: string
  * 根據關聯實體取得待辦事項
  * 🔒 需要傳入 workspaceId
  */
-export async function getTodosByEntity(
+async function getTodosByEntity(
   entityType: string,
   entityId: string,
   workspaceId: string

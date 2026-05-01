@@ -17,7 +17,7 @@ interface TourOperationsAddButtonProps {
   setTourExtraFields: React.Dispatch<React.SetStateAction<Record<string, TourExtraFields>>>
 }
 
-export function TourOperationsAddButton({
+function TourOperationsAddButton({
   tour,
   tourExtraFields,
   setTourExtraFields,

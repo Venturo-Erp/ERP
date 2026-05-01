@@ -25,4 +25,4 @@ export const useWorkspaceStoreData = createStore<WorkspaceEntity>({
 /**
  * Hook 型別（方便使用）
  */
-export type WorkspaceStoreDataType = ReturnType<typeof useWorkspaceStoreData>
+type WorkspaceStoreDataType = ReturnType<typeof useWorkspaceStoreData>

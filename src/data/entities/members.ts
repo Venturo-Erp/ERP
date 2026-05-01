@@ -15,7 +15,7 @@ import type { Member } from '@/stores/types'
 // Entity 定義
 // ============================================
 
-export const memberEntity = createEntityHook<Member>('order_members', {
+const memberEntity = createEntityHook<Member>('order_members', {
   list: {
     select:
       'id,order_id,chinese_name,passport_name,passport_name_print,passport_number,passport_expiry,id_number,birth_date,age,gender,identity,member_type,customer_id,sort_order,selling_price,cost_price,profit,deposit_amount,deposit_receipt_no,balance_amount,balance_receipt_no,total_payable,flight_cost,transport_cost,misc_cost,flight_self_arranged,pnr,ticket_number,ticketing_deadline,special_meal,hotel_1_name,hotel_1_checkin,hotel_1_checkout,hotel_2_name,hotel_2_checkin,hotel_2_checkout,checked_in,checked_in_at,contract_created_at,workspace_id,created_at,created_by,updated_by',
@@ -45,19 +45,19 @@ export const useMembers = memberEntity.useList
 export const useMembersSlim = memberEntity.useListSlim
 
 /** 單筆 Member（支援 skip pattern）*/
-export const useMember = memberEntity.useDetail
+const useMember = memberEntity.useDetail
 
 /** 分頁 Members */
-export const useMembersPaginated = memberEntity.usePaginated
+const useMembersPaginated = memberEntity.usePaginated
 
 /** Member Dictionary */
-export const useMemberDictionary = memberEntity.useDictionary
+const useMemberDictionary = memberEntity.useDictionary
 
 // ============================================
 // CRUD Export
 // ============================================
 
-export const createMember = memberEntity.create
+const createMember = memberEntity.create
 export const updateMember = memberEntity.update
 export const deleteMember = memberEntity.delete
-export const invalidateMembers = memberEntity.invalidate
+const invalidateMembers = memberEntity.invalidate

@@ -7,7 +7,7 @@ import { supabase } from '@/lib/supabase/client'
 import { logger } from '@/lib/utils/logger'
 
 // 類型定義
-export interface Airline {
+interface Airline {
   iata_code: string
   icao_code: string | null
   english_name: string | null
@@ -16,7 +16,7 @@ export interface Airline {
   alliance: string | null
 }
 
-export interface Airport {
+interface Airport {
   iata_code: string
   icao_code: string | null
   english_name: string | null
@@ -27,21 +27,21 @@ export interface Airport {
   timezone: string | null
 }
 
-export interface BookingClass {
+interface BookingClass {
   code: string
   cabin_type: string | null
   description: string | null
   priority: number | null
 }
 
-export interface SSRCode {
+interface SSRCode {
   code: string
   category: string | null
   description_en: string | null
   description_zh: string | null
 }
 
-export interface StatusCode {
+interface StatusCode {
   code: string
   category: string | null
   description_en: string | null

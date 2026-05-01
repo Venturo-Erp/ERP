@@ -12,4 +12,4 @@ export { useChannelOperations } from './useChannelOperations'
 export { useChannelEffects } from './useChannelEffects'
 export { useMessageHandlers } from './useMessageHandlers'
 export { useThreadState } from './useThreadState'
-export { useBotResponse } from './useBotResponse'
+

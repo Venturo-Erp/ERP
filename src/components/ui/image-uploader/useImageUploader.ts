@@ -7,7 +7,7 @@ import { alert } from '@/lib/ui/alert-dialog'
 import { logger } from '@/lib/utils/logger'
 import { ImagePositionSettings } from '../image-position-editor'
 
-export interface UseImageUploaderProps {
+interface UseImageUploaderProps {
   value?: string | null
   onChange: (url: string) => void
   position?: ImagePositionSettings | null

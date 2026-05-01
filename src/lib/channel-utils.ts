@@ -90,7 +90,7 @@ export async function createChannelForTour({
 /**
  * 封存團的頻道（結團時呼叫）
  */
-export async function archiveChannelForTour(tourId: string): Promise<boolean> {
+async function archiveChannelForTour(tourId: string): Promise<boolean> {
   try {
     logger.log('🔵 [封存頻道] 開始:', tourId)
 

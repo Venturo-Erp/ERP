@@ -8,11 +8,11 @@ export type {
   PaymentRequest,
   PaymentItemCategory,
   PaymentRequestItem,
-  TourAllocation,
+  
   DisbursementOrder,
-  ReceiptOrder,
-  OrderAllocation,
-  ReceiptPaymentItem,
+  
+  
+  
   Visa,
   VendorCost,
 } from '@/types/finance.types'

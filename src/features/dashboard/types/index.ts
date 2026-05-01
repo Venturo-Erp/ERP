@@ -11,7 +11,7 @@ export interface WidgetConfig {
 }
 
 // 統計項目類型
-export type StatType =
+type StatType =
   | 'todos'
   | 'paymentsThisWeek'
   | 'paymentsNextWeek'
@@ -19,7 +19,7 @@ export type StatType =
   | 'toursThisWeek'
   | 'toursThisMonth'
 
-export interface StatConfig {
+interface StatConfig {
   id: StatType
   label: string
   value: string | number

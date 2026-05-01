@@ -420,5 +420,5 @@ export const prompt = (
 // 便捷方法
 export const alertSuccess = (message: string, title?: string) => alert(message, 'success', title)
 export const alertError = (message: string, title?: string) => alert(message, 'error', title)
-export const alertWarning = (message: string, title?: string) => alert(message, 'warning', title)
-export const alertInfo = (message: string, title?: string) => alert(message, 'info', title)
+const alertWarning = (message: string, title?: string) => alert(message, 'warning', title)
+const alertInfo = (message: string, title?: string) => alert(message, 'info', title)

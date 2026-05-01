@@ -1,6 +1,6 @@
 import { CALENDAR_LABELS } from '../constants/labels'
 
-export function CalendarLegend() {
+function CalendarLegend() {
   return (
     <div className="mt-6 flex flex-wrap gap-4 p-4 bg-morandi-container/10 rounded-lg">
       <div className="text-sm font-medium text-morandi-secondary">{CALENDAR_LABELS.LEGEND}</div>

@@ -31,4 +31,4 @@ export const useAdvanceListStore = createStore<AdvanceListEntity>({
 /**
  * Hook 型別（方便使用）
  */
-export type AdvanceListStoreType = ReturnType<typeof useAdvanceListStore>
+type AdvanceListStoreType = ReturnType<typeof useAdvanceListStore>

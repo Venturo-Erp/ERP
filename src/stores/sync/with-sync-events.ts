@@ -37,7 +37,7 @@ import { logger } from '@/lib/utils/logger'
 /**
  * 實體類型
  */
-export type SyncEntityType =
+type SyncEntityType =
   | 'tour'
   | 'order'
   | 'member'
@@ -48,7 +48,7 @@ export type SyncEntityType =
 /**
  * 同步事件配置
  */
-export interface SyncEventConfig<T> {
+interface SyncEventConfig<T> {
   /** 實體類型 */
   entityType: SyncEntityType
   /** 取得實體 ID */
@@ -86,7 +86,7 @@ interface ZustandStore<T> {
 /**
  * 發送 CREATED 事件
  */
-export function emitCreated<T>(config: SyncEventConfig<T>, item: T): void {
+function emitCreated<T>(config: SyncEventConfig<T>, item: T): void {
   const { entityType, getEntityId, getTourId, getOrderId } = config
   const payload = buildEventPayload(entityType, item, getEntityId, getTourId, getOrderId)
 
@@ -96,7 +96,7 @@ export function emitCreated<T>(config: SyncEventConfig<T>, item: T): void {
 /**
  * 發送 UPDATED 事件
  */
-export function emitUpdated<T>(
+function emitUpdated<T>(
   config: SyncEventConfig<T>,
   item: T,
   changedFields?: string[]
@@ -117,7 +117,7 @@ export function emitUpdated<T>(
 /**
  * 發送 DELETED 事件
  */
-export function emitDeleted<T>(config: SyncEventConfig<T>, entityId: string, item?: T): void {
+function emitDeleted<T>(config: SyncEventConfig<T>, entityId: string, item?: T): void {
   const { entityType, getTourId, getOrderId } = config
 
   const tourId = item && getTourId ? getTourId(item) : undefined
@@ -266,36 +266,36 @@ function buildDeletePayload(
  */
 
 // 預設的同步配置
-export const TOUR_SYNC_CONFIG: SyncEventConfig<{ id: string }> = {
+const TOUR_SYNC_CONFIG: SyncEventConfig<{ id: string }> = {
   entityType: 'tour',
   getEntityId: item => item.id,
 }
 
-export const ORDER_SYNC_CONFIG: SyncEventConfig<{ id: string; tour_id?: string }> = {
+const ORDER_SYNC_CONFIG: SyncEventConfig<{ id: string; tour_id?: string }> = {
   entityType: 'order',
   getEntityId: item => item.id,
   getTourId: item => item.tour_id,
 }
 
-export const MEMBER_SYNC_CONFIG: SyncEventConfig<{ id: string; order_id?: string }> = {
+const MEMBER_SYNC_CONFIG: SyncEventConfig<{ id: string; order_id?: string }> = {
   entityType: 'member',
   getEntityId: item => item.id,
   getOrderId: item => item.order_id,
 }
 
-export const ITINERARY_SYNC_CONFIG: SyncEventConfig<{ id: string; tour_id?: string }> = {
+const ITINERARY_SYNC_CONFIG: SyncEventConfig<{ id: string; tour_id?: string }> = {
   entityType: 'itinerary',
   getEntityId: item => item.id,
   getTourId: item => item.tour_id,
 }
 
-export const PAYMENT_REQUEST_SYNC_CONFIG: SyncEventConfig<{ id: string; tour_id?: string }> = {
+const PAYMENT_REQUEST_SYNC_CONFIG: SyncEventConfig<{ id: string; tour_id?: string }> = {
   entityType: 'payment_request',
   getEntityId: item => item.id,
   getTourId: item => item.tour_id,
 }
 
-export const RECEIPT_ORDER_SYNC_CONFIG: SyncEventConfig<{
+const RECEIPT_ORDER_SYNC_CONFIG: SyncEventConfig<{
   id: string
   tour_id?: string
   order_id?: string

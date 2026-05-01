@@ -28,7 +28,7 @@ export const DIALOG_SIZES = {
   full: 'max-w-[95vw]', // 幾乎全螢幕
 } as const
 
-export type DialogSize = keyof typeof DIALOG_SIZES
+type DialogSize = keyof typeof DIALOG_SIZES
 
 /**
  * Dialog 層級系統
@@ -242,7 +242,7 @@ export {
   DialogTitle,
   DialogDescription,
   // Types
-  type DialogContentProps,
+  
   // Constants
-  DIALOG_Z_INDEX,
+  
 }

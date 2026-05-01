@@ -3,7 +3,7 @@ import type { Channel, ChannelGroup } from '@/stores/workspace/types'
 /**
  * 排序頻道（依名稱）
  */
-export function sortChannels(channels: Channel[]): Channel[] {
+function sortChannels(channels: Channel[]): Channel[] {
   return [...channels].sort((a, b) => a.name.localeCompare(b.name, 'zh-TW'))
 }
 

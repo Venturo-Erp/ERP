@@ -4,7 +4,7 @@ import { createEntityHook } from '../core/createEntityHook'
 import { CACHE_PRESETS } from '../core/types'
 import type { SupplierCategory } from '@/types/supplier-category.types'
 
-export const supplierCategoryEntity = createEntityHook<SupplierCategory>('supplier_categories', {
+const supplierCategoryEntity = createEntityHook<SupplierCategory>('supplier_categories', {
   list: {
     select: 'id,name,icon,color,display_order,is_active,created_at,updated_at',
     orderBy: { column: 'display_order', ascending: true },
@@ -17,14 +17,14 @@ export const supplierCategoryEntity = createEntityHook<SupplierCategory>('suppli
 })
 
 // Hooks
-export const useSupplierCategories = supplierCategoryEntity.useList
-export const useSupplierCategoriesSlim = supplierCategoryEntity.useListSlim
-export const useSupplierCategory = supplierCategoryEntity.useDetail
-export const useSupplierCategoriesPaginated = supplierCategoryEntity.usePaginated
-export const useSupplierCategoryDictionary = supplierCategoryEntity.useDictionary
+const useSupplierCategories = supplierCategoryEntity.useList
+const useSupplierCategoriesSlim = supplierCategoryEntity.useListSlim
+const useSupplierCategory = supplierCategoryEntity.useDetail
+const useSupplierCategoriesPaginated = supplierCategoryEntity.usePaginated
+const useSupplierCategoryDictionary = supplierCategoryEntity.useDictionary
 
 // Actions
-export const createSupplierCategory = supplierCategoryEntity.create
-export const updateSupplierCategory = supplierCategoryEntity.update
-export const deleteSupplierCategory = supplierCategoryEntity.delete
-export const invalidateSupplierCategories = supplierCategoryEntity.invalidate
+const createSupplierCategory = supplierCategoryEntity.create
+const updateSupplierCategory = supplierCategoryEntity.update
+const deleteSupplierCategory = supplierCategoryEntity.delete
+const invalidateSupplierCategories = supplierCategoryEntity.invalidate

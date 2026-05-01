@@ -143,7 +143,7 @@ export const USA_ESTA_NOTES: string[] = [
 
 export { formatCurrency } from '@/lib/utils/format-currency'
 
-export function buildVisaInfoText(): string {
+function buildVisaInfoText(): string {
   const sections = [
     {
       title: '護照',
@@ -197,4 +197,4 @@ export function buildVisaInfoText(): string {
   return lines.join('\n')
 }
 
-export const VISA_INFO_TEXT = buildVisaInfoText()
+const VISA_INFO_TEXT = buildVisaInfoText()

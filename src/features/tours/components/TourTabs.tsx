@@ -102,7 +102,7 @@ export const TOUR_TABS = [
   { value: 'closing', label: COMP_TOURS_LABELS.結案 },
 ] as const
 
-export type TourTabValue = (typeof TOUR_TABS)[number]['value']
+type TourTabValue = (typeof TOUR_TABS)[number]['value']
 
 // ============================================================================
 // TourTabContent - 只渲染內容（不含頁籤列）
@@ -193,7 +193,7 @@ interface TourTabsProps {
   onAddRequest?: () => void
 }
 
-export function TourTabs({
+function TourTabs({
   tour,
   defaultTab = 'members',
   onTabChange,

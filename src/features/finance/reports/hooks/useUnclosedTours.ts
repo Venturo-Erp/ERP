@@ -35,7 +35,7 @@ function daysBetween(date1: string, date2: Date): number {
   return Math.floor(diffTime / (1000 * 60 * 60 * 24))
 }
 
-export interface UseUnclosedToursResult {
+interface UseUnclosedToursResult {
   tours: UnclosedTourData[]
   loading: boolean
   error: string | null

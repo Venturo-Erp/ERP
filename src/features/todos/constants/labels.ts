@@ -146,7 +146,7 @@ export const SHARE_LABELS = {
 }
 
 // 訊息生成函數
-export const getPublicTodoMessages = () => ({
+const getPublicTodoMessages = () => ({
   title: '這是公開的待辦事項',
   subtitle: '只有建立者和共享者可以編輯',
 })

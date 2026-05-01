@@ -36,7 +36,7 @@ interface QuoteDialogProps {
   onClose: () => void
 }
 
-export const QuoteDialog: React.FC<QuoteDialogProps> = ({
+const QuoteDialog: React.FC<QuoteDialogProps> = ({
   open,
   onOpenChange,
   formData,

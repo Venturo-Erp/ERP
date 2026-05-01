@@ -115,7 +115,7 @@ export const CONTRACT_FORM_LABELS = {
   PHONE_EXTENSION_SUFFIX: ' #）',
 }
 
-export const ENVELOPE_LABELS = {
+const ENVELOPE_LABELS = {
   SENDER: '寄件人',
   PHONE_PREFIX: '電話：',
   RECIPIENT: '收件人',

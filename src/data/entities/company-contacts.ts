@@ -8,7 +8,7 @@ import { createEntityHook } from '../core/createEntityHook'
 import { CACHE_PRESETS } from '../core/types'
 import type { CompanyContact } from '@/stores/types'
 
-export const companyContactEntity = createEntityHook<CompanyContact>('company_contacts', {
+const companyContactEntity = createEntityHook<CompanyContact>('company_contacts', {
   list: {
     select:
       'id,workspace_id,company_id,name,english_name,title,department,phone,mobile,email,line_id,is_primary,is_active,notes,created_at,updated_at,created_by,updated_by',
@@ -21,13 +21,13 @@ export const companyContactEntity = createEntityHook<CompanyContact>('company_co
   cache: CACHE_PRESETS.low,
 })
 
-export const useCompanyContacts = companyContactEntity.useList
-export const useCompanyContactsSlim = companyContactEntity.useListSlim
-export const useCompanyContact = companyContactEntity.useDetail
-export const useCompanyContactsPaginated = companyContactEntity.usePaginated
-export const useCompanyContactDictionary = companyContactEntity.useDictionary
+const useCompanyContacts = companyContactEntity.useList
+const useCompanyContactsSlim = companyContactEntity.useListSlim
+const useCompanyContact = companyContactEntity.useDetail
+const useCompanyContactsPaginated = companyContactEntity.usePaginated
+const useCompanyContactDictionary = companyContactEntity.useDictionary
 
-export const createCompanyContact = companyContactEntity.create
-export const updateCompanyContact = companyContactEntity.update
-export const deleteCompanyContact = companyContactEntity.delete
-export const invalidateCompanyContacts = companyContactEntity.invalidate
+const createCompanyContact = companyContactEntity.create
+const updateCompanyContact = companyContactEntity.update
+const deleteCompanyContact = companyContactEntity.delete
+const invalidateCompanyContacts = companyContactEntity.invalidate

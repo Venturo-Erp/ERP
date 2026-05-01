@@ -18,7 +18,7 @@ import { useAuthStore } from '@/stores/auth-store'
  * 從 auth store 取得 workspace_id（非 React 環境）
  * 直接讀取 Zustand store state
  */
-export function getWorkspaceId(): string | null {
+function getWorkspaceId(): string | null {
   const user = useAuthStore.getState().user
   return user?.workspace_id || null
 }
@@ -48,7 +48,7 @@ export function useWorkspaceId(): string | null {
  * React Hook：取得必要的 workspace_id
  * 如果沒有值會拋出錯誤（應該在有 auth guard 的頁面使用）
  */
-export function useRequiredWorkspaceId(): string {
+function useRequiredWorkspaceId(): string {
   const workspaceId = useWorkspaceId()
   if (!workspaceId) {
     throw new Error('無法取得 workspace_id，請重新登入')
@@ -60,7 +60,7 @@ export function useRequiredWorkspaceId(): string {
  * 為 create 操作注入 workspace_id
  * 用於確保所有 RLS 操作都有正確的 workspace_id
  */
-export function withWorkspaceId<T extends Record<string, unknown>>(
+function withWorkspaceId<T extends Record<string, unknown>>(
   data: T
 ): T & { workspace_id: string } {
   const workspaceId = getRequiredWorkspaceId()

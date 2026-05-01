@@ -4,12 +4,12 @@
  */
 
 // Header
-export const HEADER_HEIGHT = 72 // px
+const HEADER_HEIGHT = 72 // px
 export const HEADER_HEIGHT_PX = '72px'
 
 // Sidebar
-export const SIDEBAR_WIDTH_EXPANDED = 180 // px (與 Sidebar 的 w-[180px] 一致)
-export const SIDEBAR_WIDTH_COLLAPSED = 64 // px (與 Sidebar 的 w-16 一致)
+const SIDEBAR_WIDTH_EXPANDED = 180 // px (與 Sidebar 的 w-[180px] 一致)
+const SIDEBAR_WIDTH_COLLAPSED = 64 // px (與 Sidebar 的 w-16 一致)
 export const SIDEBAR_WIDTH_EXPANDED_PX = '180px'
 export const SIDEBAR_WIDTH_COLLAPSED_PX = '64px'
 

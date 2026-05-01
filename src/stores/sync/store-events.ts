@@ -404,7 +404,7 @@ export const storeEvents = new StoreEventManager()
  * cleanup()
  * ```
  */
-export interface StoreSyncConfig {
+interface StoreSyncConfig {
   /** 當 Tour 建立時 */
   onTourCreated?: (tourId: string, payload: TourEventPayload) => void
   /** 當 Tour 更新時 */
@@ -439,7 +439,7 @@ export interface StoreSyncConfig {
   ignoreSources?: StoreSource[]
 }
 
-export function setupStoreSyncListeners(config: StoreSyncConfig): () => void {
+function setupStoreSyncListeners(config: StoreSyncConfig): () => void {
   const subscriptions: Subscription[] = []
   const { ignoreSources } = config
 
@@ -572,7 +572,7 @@ export function setupStoreSyncListeners(config: StoreSyncConfig): () => void {
  * Member 更新時：
  * - Order: 可能需要更新統計（人數、金額等）
  */
-export const STORE_SYNC_RELATIONS = {
+const STORE_SYNC_RELATIONS = {
   // Tour 事件會影響的 stores
   TOUR_UPDATED: ['order'] as const,
   TOUR_DELETED: ['order', 'member', 'itinerary', 'payment_request', 'receipt_order'] as const,

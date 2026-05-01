@@ -6,7 +6,7 @@ interface GalleryOptions {
   viewMode: 'desktop' | 'mobile'
 }
 
-export function useTourGallery({ viewMode }: GalleryOptions) {
+function useTourGallery({ viewMode }: GalleryOptions) {
   const [showGallery, setShowGallery] = useState(false)
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const galleryRef = useRef<HTMLElement>(null)

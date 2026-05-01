@@ -109,7 +109,7 @@ export async function recalculateOrderAmount(order_id: string): Promise<void> {
  *
  * @param order_id - 訂單 ID
  */
-export async function recalculatePaymentStatus(order_id: string): Promise<void> {
+async function recalculatePaymentStatus(order_id: string): Promise<void> {
   try {
     const { data: order, error: orderError } = await supabase
       .from('orders')

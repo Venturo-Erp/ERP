@@ -30,7 +30,7 @@ import { Button } from '@/components/ui/button'
 import { ReactNode } from 'react'
 import { Save, X } from 'lucide-react'
 
-export interface FormDialogProps {
+interface FormDialogProps {
   /** 對話框開啟狀態 */
   open: boolean
   /** 對話框狀態變更回調 */

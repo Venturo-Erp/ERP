@@ -416,13 +416,13 @@ export function RichTextInput({
 }
 
 // 輔助函數：將 HTML 轉為純文字
-export function htmlToPlainText(html: string): string {
+function htmlToPlainText(html: string): string {
   if (!html) return ''
   return html.replace(/<[^>]*>/g, '')
 }
 
 // 輔助函數：安全渲染 HTML
-export function RichTextDisplay({ html, className }: { html: string; className?: string }) {
+function RichTextDisplay({ html, className }: { html: string; className?: string }) {
   if (!html) return null
   return <span className={className} dangerouslySetInnerHTML={{ __html: sanitizeHtml(html) }} />
 }

@@ -37,7 +37,7 @@ import { Button } from '@/components/ui/button'
 import { AlertTriangle, Save, X } from 'lucide-react'
 import { DIALOG_LABELS } from './constants/labels'
 
-export interface ManagedDialogRenderProps {
+interface ManagedDialogRenderProps {
   /**
    * 設置 dirty 狀態（表單是否已修改）
    */
@@ -54,7 +54,7 @@ export interface ManagedDialogRenderProps {
   resetDirty: () => void
 }
 
-export interface ManagedDialogProps {
+interface ManagedDialogProps {
   /**
    * Dialog 開啟狀態
    */

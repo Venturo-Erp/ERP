@@ -171,4 +171,3 @@ export function useReferenceData(options: UseReferenceDataOptions = {}): UseRefe
   }
 }
 
-export default useReferenceData

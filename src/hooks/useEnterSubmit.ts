@@ -7,7 +7,7 @@ import { KeyboardEvent, useState, useCallback } from 'react'
  * const { handleKeyDown, compositionProps } = useEnterSubmit(handleSubmit);
  * <Input onKeyDown={handleKeyDown} {...compositionProps} />
  */
-export function useEnterSubmit(onSubmit: () => void) {
+function useEnterSubmit(onSubmit: () => void) {
   const [isComposing, setIsComposing] = useState(false)
 
   const handleKeyDown = useCallback(

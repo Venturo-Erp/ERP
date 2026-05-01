@@ -17,7 +17,7 @@ export async function updateMembersTicketingDeadline(
 }
 
 /** 批量插入房間分配（2026-04-23：tour_room_assignments 砍除、stub） */
-export async function insertRoomAssignments(
+async function insertRoomAssignments(
   _assignments: Array<{ room_id: string; order_member_id: string }>
 ): Promise<void> {
   // 分房功能砍除、之後重做時恢復

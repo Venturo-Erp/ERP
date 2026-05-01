@@ -10,11 +10,11 @@
 
 // Tours
 export {
-  tourEntity,
+  
   useTours,
   useToursSlim,
   useTour,
-  useToursPaginated,
+  
   useTourDictionary,
   useToursForCalendar,
   fetchTourIdByCode,
@@ -26,12 +26,12 @@ export {
 
 // Orders
 export {
-  orderEntity,
+  
   useOrders,
   useOrdersSlim,
-  useOrder,
-  useOrdersPaginated,
-  useOrderDictionary,
+  
+  
+  
   createOrder,
   updateOrder,
   deleteOrder,
@@ -40,26 +40,26 @@ export {
 
 // Members
 export {
-  memberEntity,
+  
   useMembers,
   useMembersSlim,
-  useMember,
-  useMembersPaginated,
-  useMemberDictionary,
-  createMember,
-  updateMember,
+  
+  
+  
+  
+  
   deleteMember,
-  invalidateMembers,
+  
 } from './members'
 
 // Customers
 export {
-  customerEntity,
+  
   useCustomers,
   useCustomersSlim,
-  useCustomer,
-  useCustomersPaginated,
-  useCustomerDictionary,
+  
+  
+  
   createCustomer,
   updateCustomer,
   deleteCustomer,
@@ -72,12 +72,12 @@ export {
 
 // Quotes
 export {
-  quoteEntity,
+  
   useQuotes,
-  useQuotesSlim,
+  
   useQuote,
-  useQuotesPaginated,
-  useQuoteDictionary,
+  
+  
   createQuote,
   updateQuote,
   deleteQuote,
@@ -86,16 +86,16 @@ export {
 
 // Itineraries
 export {
-  itineraryEntity,
+  
   useItineraries,
-  useItinerariesSlim,
-  useItinerary,
-  useItinerariesPaginated,
-  useItineraryDictionary,
+  
+  
+  
+  
   createItinerary,
   updateItinerary,
-  deleteItinerary,
-  invalidateItineraries,
+  
+  
 } from './itineraries'
 
 // ============================================
@@ -104,12 +104,12 @@ export {
 
 // Payment Requests
 export {
-  paymentRequestEntity,
+  
   usePaymentRequests,
-  usePaymentRequestsSlim,
-  usePaymentRequest,
-  usePaymentRequestsPaginated,
-  usePaymentRequestDictionary,
+  
+  
+  
+  
   createPaymentRequest,
   updatePaymentRequest,
   deletePaymentRequest,
@@ -118,12 +118,12 @@ export {
 
 // Receipts (收款)
 export {
-  receiptEntity,
+  
   useReceipts,
-  useReceiptsSlim,
-  useReceipt,
-  useReceiptsPaginated,
-  useReceiptDictionary,
+  
+  
+  
+  
   createReceipt,
   updateReceipt,
   deleteReceipt,
@@ -132,13 +132,13 @@ export {
 
 // Disbursement Orders
 export {
-  disbursementOrderEntity,
+  
   useDisbursementOrders,
-  useDisbursementOrdersSlim,
-  useDisbursementOrder,
-  useDisbursementOrdersPaginated,
-  useDisbursementOrderDictionary,
-  createDisbursementOrder,
+  
+  
+  
+  
+  
   updateDisbursementOrder,
   deleteDisbursementOrder,
   invalidateDisbursementOrders,
@@ -146,31 +146,20 @@ export {
 
 // Accounting Subjects
 export {
-  accountingSubjectEntity,
+  
   useAccountingSubjects,
-  useAccountingSubjectsSlim,
-  useAccountingSubject,
-  useAccountingSubjectsPaginated,
-  useAccountingSubjectDictionary,
-  createAccountingSubject,
-  updateAccountingSubject,
-  deleteAccountingSubject,
-  invalidateAccountingSubjects,
+  
+  
+  
+  
+  
+  
+  
+  
 } from './accounting-subjects'
 
 // Workspace Modules
-export {
-  workspaceModuleEntity,
-  useWorkspaceModules,
-  useWorkspaceModulesSlim,
-  useWorkspaceModule,
-  useWorkspaceModulesPaginated,
-  useWorkspaceModuleDictionary,
-  createWorkspaceModule,
-  updateWorkspaceModule,
-  deleteWorkspaceModule,
-  invalidateWorkspaceModules,
-} from './workspace-modules'
+
 
 // ============================================
 // 人員管理
@@ -178,16 +167,16 @@ export {
 
 // Employees
 export {
-  employeeEntity,
+  
   useEmployees,
   useEmployeesSlim,
-  useEmployee,
-  useEmployeesPaginated,
+  
+  
   useEmployeeDictionary,
-  createEmployee,
-  updateEmployee,
-  deleteEmployee,
-  invalidateEmployees,
+  
+  
+  
+  
 } from './employees'
 
 // ============================================
@@ -196,12 +185,12 @@ export {
 
 // Visas
 export {
-  visaEntity,
+  
   useVisas,
-  useVisasSlim,
-  useVisa,
-  useVisasPaginated,
-  useVisaDictionary,
+  
+  
+  
+  
   createVisa,
   updateVisa,
   deleteVisa,
@@ -210,26 +199,26 @@ export {
 
 // Todos
 export {
-  todoEntity,
+  
   useTodos,
-  useTodosSlim,
-  useTodo,
-  useTodosPaginated,
-  useTodoDictionary,
-  createTodo,
+  
+  
+  
+  
+  
   updateTodo,
-  deleteTodo,
-  invalidateTodos,
+  
+  
 } from './todos'
 
 // Suppliers
 export {
-  supplierEntity,
+  
   useSuppliers,
   useSuppliersSlim,
-  useSupplier,
-  useSuppliersPaginated,
-  useSupplierDictionary,
+  
+  
+  
   createSupplier,
   updateSupplier,
   deleteSupplier,
@@ -238,16 +227,16 @@ export {
 
 // Airport Images
 export {
-  airportImageEntity,
+  
   useAirportImages,
-  useAirportImagesSlim,
-  useAirportImage,
-  useAirportImagesPaginated,
-  useAirportImageDictionary,
+  
+  
+  
+  
   createAirportImage,
-  updateAirportImage,
+  
   deleteAirportImage,
-  invalidateAirportImages,
+  
 } from './airport-images'
 
 // ============================================
@@ -256,22 +245,22 @@ export {
 
 // Countries
 export {
-  countryEntity,
+  
   useCountries,
-  useCountriesSlim,
-  useCountry,
-  useCountriesPaginated,
-  useCountryDictionary,
-  createCountry,
+  
+  
+  
+  
+  
   updateCountry,
-  deleteCountry,
+  
   invalidateCountries,
 } from './countries'
-export type { Country } from '@/stores/region-store'
+
 
 export {
   useDepartments,
-  useDepartment,
+  
   createDepartment,
   updateDepartment,
   deleteDepartment,
@@ -281,41 +270,41 @@ export type { Department } from './departments'
 
 // Regions
 export {
-  regionEntity,
+  
   useRegions,
-  useRegionsSlim,
-  useRegion,
-  useRegionsPaginated,
-  useRegionDictionary,
-  createRegion,
-  updateRegion,
-  deleteRegion,
-  invalidateRegions,
+  
+  
+  
+  
+  
+  
+  
+  
 } from './regions'
 
 // Cities
 export {
-  cityEntity,
+  
   useCities,
-  useCitiesSlim,
-  useCity,
-  useCitiesPaginated,
-  useCityDictionary,
-  createCity,
+  
+  
+  
+  
+  
   updateCity,
-  deleteCity,
-  invalidateCities,
+  
+  
 } from './cities'
-export type { City } from '@/stores/region-store'
+
 
 // Attractions
 export {
-  attractionEntity,
+  
   useAttractions,
-  useAttractionsSlim,
-  useAttraction,
-  useAttractionsPaginated,
-  useAttractionDictionary,
+  
+  
+  
+  
   createAttraction,
   updateAttraction,
   deleteAttraction,
@@ -324,10 +313,10 @@ export {
 
 // Hotels
 export {
-  hotelEntity,
+  
   useHotels,
-  useHotel,
-  useHotelsPaginated,
+  
+  
   createHotel,
   updateHotel,
   deleteHotel,
@@ -336,10 +325,10 @@ export {
 
 // Restaurants
 export {
-  restaurantEntity,
+  
   useRestaurants,
-  useRestaurant,
-  useRestaurantsPaginated,
+  
+  
   createRestaurant,
   updateRestaurant,
   deleteRestaurant,
@@ -352,31 +341,20 @@ export {
 
 // Companies
 export {
-  companyEntity,
+  
   useCompanies,
-  useCompaniesSlim,
-  useCompany,
-  useCompaniesPaginated,
-  useCompanyDictionary,
+  
+  
+  
+  
   createCompany,
   updateCompany,
   deleteCompany,
-  invalidateCompanies,
+  
 } from './companies'
 
 // Company Contacts
-export {
-  companyContactEntity,
-  useCompanyContacts,
-  useCompanyContactsSlim,
-  useCompanyContact,
-  useCompanyContactsPaginated,
-  useCompanyContactDictionary,
-  createCompanyContact,
-  updateCompanyContact,
-  deleteCompanyContact,
-  invalidateCompanyContacts,
-} from './company-contacts'
+
 
 // ============================================
 // 領隊管理
@@ -384,16 +362,16 @@ export {
 
 // Tour Leaders
 export {
-  tourLeaderEntity,
+  
   useTourLeaders,
-  useTourLeadersSlim,
-  useTourLeader,
-  useTourLeadersPaginated,
-  useTourLeaderDictionary,
+  
+  
+  
+  
   createTourLeader,
   updateTourLeader,
   deleteTourLeader,
-  invalidateTourLeaders,
+  
 } from './tour-leaders'
 
 // ============================================
@@ -402,12 +380,12 @@ export {
 
 // Calendar Events
 export {
-  calendarEventEntity,
+  
   useCalendarEvents,
-  useCalendarEventsSlim,
-  useCalendarEvent,
-  useCalendarEventsPaginated,
-  useCalendarEventDictionary,
+  
+  
+  
+  
   createCalendarEvent,
   updateCalendarEvent,
   deleteCalendarEvent,
@@ -420,44 +398,44 @@ export {
 
 // Vendor Costs
 export {
-  vendorCostEntity,
+  
   useVendorCosts,
-  useVendorCostsSlim,
-  useVendorCost,
-  useVendorCostsPaginated,
-  useVendorCostDictionary,
+  
+  
+  
+  
   createVendorCost,
   updateVendorCost,
-  deleteVendorCost,
-  invalidateVendorCosts,
+  
+  
 } from './vendor-costs'
 
 // Payment Request Items
 export {
-  paymentRequestItemEntity,
+  
   usePaymentRequestItems,
-  usePaymentRequestItemsSlim,
-  usePaymentRequestItem,
-  usePaymentRequestItemsPaginated,
-  usePaymentRequestItemDictionary,
-  createPaymentRequestItem,
-  updatePaymentRequestItem,
-  deletePaymentRequestItem,
+  
+  
+  
+  
+  
+  
+  
   invalidatePaymentRequestItems,
 } from './payment-request-items'
 
 // LinkPay Logs
 export {
-  linkPayLogEntity,
+  
   useLinkPayLogs,
-  useLinkPayLogsSlim,
-  useLinkPayLog,
-  useLinkPayLogsPaginated,
-  useLinkPayLogDictionary,
-  createLinkPayLog,
-  updateLinkPayLog,
-  deleteLinkPayLog,
-  invalidateLinkPayLogs,
+  
+  
+  
+  
+  
+  
+  
+  
 } from './linkpay-logs'
 
 // ============================================
@@ -465,36 +443,14 @@ export {
 // ============================================
 
 // Cost Templates
-export {
-  costTemplateEntity,
-  useCostTemplates,
-  useCostTemplatesSlim,
-  useCostTemplate,
-  useCostTemplatesPaginated,
-  useCostTemplateDictionary,
-  createCostTemplate,
-  updateCostTemplate,
-  deleteCostTemplate,
-  invalidateCostTemplates,
-} from './cost-templates'
+
 
 // ============================================
 // 供應商類別
 // ============================================
 
 // Supplier Categories
-export {
-  supplierCategoryEntity,
-  useSupplierCategories,
-  useSupplierCategoriesSlim,
-  useSupplierCategory,
-  useSupplierCategoriesPaginated,
-  useSupplierCategoryDictionary,
-  createSupplierCategory,
-  updateSupplierCategory,
-  deleteSupplierCategory,
-  invalidateSupplierCategories,
-} from './supplier-categories'
+
 
 // ============================================
 // 報價單項目
@@ -526,25 +482,25 @@ export * from './workspaces'
 
 // Tour Itinerary Items
 export {
-  tourItineraryItemEntity,
+  
   useTourItineraryItems,
-  useTourItineraryItemsSlim,
-  useTourItineraryItem,
-  useTourItineraryItemsPaginated,
-  useTourItineraryItemDictionary,
-  createTourItineraryItem,
-  updateTourItineraryItem,
-  deleteTourItineraryItem,
+  
+  
+  
+  
+  
+  
+  
   invalidateTourItineraryItems,
 } from './tour-itinerary-items'
 
 // Tour Itinerary Days（day-level metadata，補足 tour_itinerary_items 缺的每日資料）
 export {
-  tourItineraryDayEntity,
+  
   useTourItineraryDays,
-  useTourItineraryDay,
+  
   createTourItineraryDay,
-  updateTourItineraryDay,
+  
   deleteTourItineraryDay,
-  invalidateTourItineraryDays,
+  
 } from './tour-itinerary-days'

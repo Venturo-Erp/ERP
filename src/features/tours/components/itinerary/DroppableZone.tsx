@@ -2,7 +2,7 @@
 
 import { useDroppable } from '@dnd-kit/core'
 
-export type DropZoneAcceptType = 'attraction' | 'hotel' | 'restaurant'
+type DropZoneAcceptType = 'attraction' | 'hotel' | 'restaurant'
 
 interface DroppableZoneProps {
   id: string

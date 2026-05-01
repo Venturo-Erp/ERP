@@ -3,7 +3,7 @@
  * 支援結構化日誌、遠端收集、多層級輸出
  */
 
-export type LogLevel = 'debug' | 'info' | 'warn' | 'error'
+type LogLevel = 'debug' | 'info' | 'warn' | 'error'
 
 interface LogContext {
   userId?: string
@@ -94,14 +94,14 @@ let globalContext: LogContext = {}
 /**
  * 設定全域 context（通常在登入後設定）
  */
-export function setLogContext(context: LogContext): void {
+function setLogContext(context: LogContext): void {
   globalContext = { ...globalContext, ...context }
 }
 
 /**
  * 清除全域 context（登出時呼叫）
  */
-export function clearLogContext(): void {
+function clearLogContext(): void {
   globalContext = {}
 }
 

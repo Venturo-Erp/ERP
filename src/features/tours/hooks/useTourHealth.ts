@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase/client'
 import { logger } from '@/lib/utils/logger'
 import { TOUR_HEALTH_LABELS } from '../constants/labels'
 
-export interface TourHealthData {
+interface TourHealthData {
   isLoading: boolean
   error: string | null
   requirements: {
@@ -40,7 +40,7 @@ export interface TourHealthData {
   }
 }
 
-export function useTourHealth(tourId: string): TourHealthData {
+function useTourHealth(tourId: string): TourHealthData {
   const [data, setData] = useState<TourHealthData>({
     isLoading: true,
     error: null,

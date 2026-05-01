@@ -8,7 +8,7 @@ import type { BaseEntity } from '../core/types'
  * Workspace 型別（對應 workspaces 表）
  * 注意：workspaces 表不需要 workspace 隔離（它本身就是列出所有 workspace）
  */
-export interface WorkspaceEntity extends BaseEntity {
+interface WorkspaceEntity extends BaseEntity {
   name: string
   code?: string | null
   type?: string | null
@@ -36,14 +36,14 @@ export const workspaceEntity = createEntityHook<WorkspaceEntity>('workspaces', {
 })
 
 // Hooks
-export const useWorkspaces = workspaceEntity.useList
-export const useWorkspacesSlim = workspaceEntity.useListSlim
-export const useWorkspace = workspaceEntity.useDetail
-export const useWorkspacesPaginated = workspaceEntity.usePaginated
-export const useWorkspaceDictionary = workspaceEntity.useDictionary
+const useWorkspaces = workspaceEntity.useList
+const useWorkspacesSlim = workspaceEntity.useListSlim
+const useWorkspace = workspaceEntity.useDetail
+const useWorkspacesPaginated = workspaceEntity.usePaginated
+const useWorkspaceDictionary = workspaceEntity.useDictionary
 
 // Actions
 export const createWorkspace = workspaceEntity.create
 export const updateWorkspace = workspaceEntity.update
-export const deleteWorkspace = workspaceEntity.delete
+const deleteWorkspace = workspaceEntity.delete
 export const invalidateWorkspaces = workspaceEntity.invalidate

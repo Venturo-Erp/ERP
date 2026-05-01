@@ -49,7 +49,7 @@ interface UseOrderMembersReturn {
   refreshVehicleAssignments: () => Promise<void>
 }
 
-export function useOrderMembers({
+function useOrderMembers({
   orderId,
   tourId,
   workspaceId,

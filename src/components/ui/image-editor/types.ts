@@ -81,7 +81,7 @@ export type AiEditAction =
   | 'season_autumn'
   | 'season_winter'
 
-export interface AiAction {
+interface AiAction {
   action: AiEditAction
   label: string
   icon: React.ElementType

@@ -1,11 +1,11 @@
 import { COMP_WORKSPACE_LABELS } from '../constants/labels'
-export const DEFAULT_CHANNEL_NAME = COMP_WORKSPACE_LABELS.一般討論
+const DEFAULT_CHANNEL_NAME = COMP_WORKSPACE_LABELS.一般討論
 export const BOT_CHANNEL_NAME = COMP_WORKSPACE_LABELS.機器人助手
 export const LAST_CHANNEL_STORAGE_KEY = 'workspace_last_channel_id'
 
 export const CHANNEL_SWITCH_DELAY = 150
 
-export const DIALOG_TYPES = {
+const DIALOG_TYPES = {
   SHARE_QUOTE: 'shareQuote',
   SHARE_TOUR: 'shareTour',
   NEW_PAYMENT: 'newPayment',

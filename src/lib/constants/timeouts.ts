@@ -30,7 +30,7 @@ export const UI_DELAYS = {
 /**
  * 資料同步延遲（毫秒）
  */
-export const SYNC_DELAYS = {
+const SYNC_DELAYS = {
   /** IndexedDB 初始化超時 */
   INDEXEDDB_INIT_TIMEOUT: 3000,
   /** IndexedDB 單一操作超時 */
@@ -46,7 +46,7 @@ export const SYNC_DELAYS = {
 /**
  * 網路請求超時（毫秒）
  */
-export const REQUEST_TIMEOUTS = {
+const REQUEST_TIMEOUTS = {
   /** 一般 API 請求 */
   DEFAULT: 10000,
   /** 檔案上傳 */
@@ -58,7 +58,7 @@ export const REQUEST_TIMEOUTS = {
 /**
  * 動畫時間（毫秒）
  */
-export const ANIMATION_DURATIONS = {
+const ANIMATION_DURATIONS = {
   /** 快速動畫 */
   FAST: 150,
   /** 一般動畫 */
@@ -70,7 +70,7 @@ export const ANIMATION_DURATIONS = {
 /**
  * 輪詢間隔（毫秒）
  */
-export const POLLING_INTERVALS = {
+const POLLING_INTERVALS = {
   /** 即時更新 */
   REAL_TIME: 1000,
   /** 頻繁更新 */
@@ -84,7 +84,7 @@ export const POLLING_INTERVALS = {
 /**
  * 特殊延遲（毫秒）
  */
-export const SPECIAL_DELAYS = {
+const SPECIAL_DELAYS = {
   /** 立即執行（nextTick） */
   NEXT_TICK: 0,
 } as const

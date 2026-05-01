@@ -6,9 +6,9 @@ import { DisbursementOrder, PaymentRequest } from '@/stores/types'
 
 export type { DisbursementOrder, PaymentRequest }
 
-export type DisbursementTab = 'pending' | 'current' | 'all'
+type DisbursementTab = 'pending' | 'current' | 'all'
 
-export interface DisbursementPageState {
+interface DisbursementPageState {
   activeTab: DisbursementTab
   selectedRequests: string[]
   selectedRequestsForNew: string[]

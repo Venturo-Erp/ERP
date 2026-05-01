@@ -1,6 +1,6 @@
 // itinerary 模組 UI 標籤常量
 
-export const ITINERARY_LABELS = {
+const ITINERARY_LABELS = {
   // GeminiItineraryForm
   基本資訊: '基本資訊',
   封面圖片: '封面圖片',
@@ -106,7 +106,7 @@ export const TEMPLATE_LABELS = {
 }
 
 // Corner Flight Itinerary
-export const FLIGHT_ITINERARY_LABELS = {
+const FLIGHT_ITINERARY_LABELS = {
   TITLE: '航班行程表',
   PASSENGER: '旅客',
   FLIGHT: '航班',
@@ -121,7 +121,7 @@ export const FLIGHT_ITINERARY_LABELS = {
 }
 
 // Gemini Itinerary
-export const GEMINI_LABELS = {
+const GEMINI_LABELS = {
   GENERATE: '用 AI 生成行程',
   GENERATING: '生成中...',
   GENERATE_FAILED: '生成失敗',
@@ -134,7 +134,7 @@ export const GEMINI_LABELS = {
 }
 
 // Itinerary hooks messages
-export const ITINERARY_HOOKS_LABELS = {
+const ITINERARY_HOOKS_LABELS = {
   // useItineraryForm
   LOAD_FAILED: '載入行程表失敗',
   SAVE_SUCCESS: '行程表已儲存',
@@ -171,7 +171,7 @@ export const ITINERARY_HOOKS_LABELS = {
 }
 
 // Itinerary page
-export const ITINERARY_PAGE_LABELS = {
+const ITINERARY_PAGE_LABELS = {
   BREADCRUMB_HOME: '首頁',
   BREADCRUMB_ITINERARY: '行程管理',
   NEW_ITINERARY: '新增行程',

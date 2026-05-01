@@ -40,7 +40,7 @@ export interface TransportationRate {
   deleted_by: string | null
 }
 
-export const transportationRateEntity = createEntityHook<TransportationRate>(
+const transportationRateEntity = createEntityHook<TransportationRate>(
   'transportation_rates',
   {
     list: {
@@ -56,13 +56,13 @@ export const transportationRateEntity = createEntityHook<TransportationRate>(
   }
 )
 
-export const useTransportationRates = transportationRateEntity.useList
-export const useTransportationRatesSlim = transportationRateEntity.useListSlim
-export const useTransportationRate = transportationRateEntity.useDetail
-export const useTransportationRatesPaginated = transportationRateEntity.usePaginated
-export const useTransportationRateDictionary = transportationRateEntity.useDictionary
+const useTransportationRates = transportationRateEntity.useList
+const useTransportationRatesSlim = transportationRateEntity.useListSlim
+const useTransportationRate = transportationRateEntity.useDetail
+const useTransportationRatesPaginated = transportationRateEntity.usePaginated
+const useTransportationRateDictionary = transportationRateEntity.useDictionary
 
 export const createTransportationRate = transportationRateEntity.create
 export const updateTransportationRate = transportationRateEntity.update
 export const deleteTransportationRate = transportationRateEntity.delete
-export const invalidateTransportationRates = transportationRateEntity.invalidate
+const invalidateTransportationRates = transportationRateEntity.invalidate

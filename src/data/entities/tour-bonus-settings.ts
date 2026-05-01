@@ -4,7 +4,7 @@ import { createEntityHook } from '../core/createEntityHook'
 import { CACHE_PRESETS } from '../core/types'
 import type { TourBonusSetting } from '@/types/bonus.types'
 
-export const tourBonusSettingEntity = createEntityHook<TourBonusSetting>('tour_bonus_settings', {
+const tourBonusSettingEntity = createEntityHook<TourBonusSetting>('tour_bonus_settings', {
   list: {
     select: 'id,workspace_id,tour_id,type,bonus,bonus_type,employee_id,created_at,updated_at',
     orderBy: { column: 'type', ascending: true },
@@ -17,10 +17,10 @@ export const tourBonusSettingEntity = createEntityHook<TourBonusSetting>('tour_b
 })
 
 export const useTourBonusSettings = tourBonusSettingEntity.useList
-export const useTourBonusSettingsSlim = tourBonusSettingEntity.useListSlim
-export const useTourBonusSetting = tourBonusSettingEntity.useDetail
-export const useTourBonusSettingsPaginated = tourBonusSettingEntity.usePaginated
-export const useTourBonusSettingDictionary = tourBonusSettingEntity.useDictionary
+const useTourBonusSettingsSlim = tourBonusSettingEntity.useListSlim
+const useTourBonusSetting = tourBonusSettingEntity.useDetail
+const useTourBonusSettingsPaginated = tourBonusSettingEntity.usePaginated
+const useTourBonusSettingDictionary = tourBonusSettingEntity.useDictionary
 
 export const createTourBonusSetting = tourBonusSettingEntity.create
 export const updateTourBonusSetting = tourBonusSettingEntity.update

@@ -26,7 +26,7 @@ export interface ComboboxOption<T = unknown> {
  * Combobox 組件的屬性
  * @template T - 選項額外資料的類型
  */
-export interface ComboboxProps<T = unknown> {
+interface ComboboxProps<T = unknown> {
   /** 當前選中的值 */
   value: string
   /** 值改變時的回調函數 */

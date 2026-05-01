@@ -20,7 +20,7 @@ export interface Department {
   updated_at: string
 }
 
-export const departmentEntity = createEntityHook<Department>('departments', {
+const departmentEntity = createEntityHook<Department>('departments', {
   list: {
     select:
       'id,workspace_id,name,code,description,is_active,display_order,created_at,updated_at,created_by,updated_by',
@@ -32,7 +32,7 @@ export const departmentEntity = createEntityHook<Department>('departments', {
 })
 
 export const useDepartments = departmentEntity.useList
-export const useDepartment = departmentEntity.useDetail
+const useDepartment = departmentEntity.useDetail
 export const createDepartment = departmentEntity.create
 export const updateDepartment = departmentEntity.update
 export const deleteDepartment = departmentEntity.delete

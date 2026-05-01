@@ -8,7 +8,7 @@ import { logger } from '@/lib/utils/logger'
  * 3. 統一的字體和樣式
  */
 
-export interface PrintOptions {
+interface PrintOptions {
   /** 文件標題 */
   title?: string
   /** 紙張方向 */
@@ -139,7 +139,7 @@ export function printHtml(html: string, options: PrintOptions = {}): void {
 /**
  * 從 ref 元素列印
  */
-export function printElement(element: HTMLElement | null, options: PrintOptions = {}): void {
+function printElement(element: HTMLElement | null, options: PrintOptions = {}): void {
   if (!element) {
     logger.warn('[printElement] Element is null')
     return

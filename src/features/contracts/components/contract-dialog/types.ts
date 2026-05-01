@@ -54,7 +54,7 @@ export interface ContractData {
   companyExtension: string
 }
 
-export interface ContractTemplateOption {
+interface ContractTemplateOption {
   value: ContractTemplate
   label: string
 }

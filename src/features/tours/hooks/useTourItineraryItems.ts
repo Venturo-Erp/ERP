@@ -90,7 +90,7 @@ export function useTourItineraryItemsByTour(tour_id: string | null) {
 }
 
 // === 根據 itinerary_id 取得核心項目 ===
-export function useTourItineraryItemsByItinerary(itinerary_id: string | null) {
+function useTourItineraryItemsByItinerary(itinerary_id: string | null) {
   const { data, error, isLoading, mutate } = useSWR(
     itinerary_id ? `tour_itinerary_items:itinerary:${itinerary_id}` : null,
     async () => {

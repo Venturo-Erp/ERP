@@ -87,7 +87,7 @@ export function tryCalculateMath(str: string): string {
  * React Input onChange 事件包裝器
  * 自動將全形轉換為半形
  */
-export function withHalfWidthConversion<T extends HTMLInputElement | HTMLTextAreaElement>(
+function withHalfWidthConversion<T extends HTMLInputElement | HTMLTextAreaElement>(
   originalOnChange?: React.ChangeEventHandler<T>
 ): React.ChangeEventHandler<T> {
   return e => {

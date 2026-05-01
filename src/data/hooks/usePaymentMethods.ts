@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import useSWR from 'swr'
 import { useAuthStore } from '@/stores'
 
-export interface PaymentMethod {
+interface PaymentMethod {
   id: string
   code: string
   name: string

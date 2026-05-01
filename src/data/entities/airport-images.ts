@@ -8,7 +8,7 @@ import { createEntityHook } from '../core/createEntityHook'
 import { CACHE_PRESETS } from '../core/types'
 import type { AirportImage } from '@/stores/types'
 
-export const airportImageEntity = createEntityHook<AirportImage>('airport_images', {
+const airportImageEntity = createEntityHook<AirportImage>('airport_images', {
   list: {
     select:
       'id,airport_code,image_url,label,season,is_default,display_order,uploaded_by,workspace_id,created_at,updated_at',
@@ -24,12 +24,12 @@ export const airportImageEntity = createEntityHook<AirportImage>('airport_images
 })
 
 export const useAirportImages = airportImageEntity.useList
-export const useAirportImagesSlim = airportImageEntity.useListSlim
-export const useAirportImage = airportImageEntity.useDetail
-export const useAirportImagesPaginated = airportImageEntity.usePaginated
-export const useAirportImageDictionary = airportImageEntity.useDictionary
+const useAirportImagesSlim = airportImageEntity.useListSlim
+const useAirportImage = airportImageEntity.useDetail
+const useAirportImagesPaginated = airportImageEntity.usePaginated
+const useAirportImageDictionary = airportImageEntity.useDictionary
 
 export const createAirportImage = airportImageEntity.create
-export const updateAirportImage = airportImageEntity.update
+const updateAirportImage = airportImageEntity.update
 export const deleteAirportImage = airportImageEntity.delete
-export const invalidateAirportImages = airportImageEntity.invalidate
+const invalidateAirportImages = airportImageEntity.invalidate

@@ -18,7 +18,7 @@ export interface Workspace {
   _synced_at?: string | null
 }
 
-export interface Bulletin {
+interface Bulletin {
   id: string
   workspace_id: string
   title: string
@@ -134,7 +134,7 @@ export type RawMessage = Omit<Message, 'attachments' | 'created_at'> & {
   created_at: string | null
 }
 
-export interface PersonalCanvas {
+interface PersonalCanvas {
   id: string
   channelId: string
   name: string
@@ -146,14 +146,14 @@ export interface PersonalCanvas {
   updated_at?: string
 }
 
-export interface DocumentFormatData {
+interface DocumentFormatData {
   version: string
   blocks?: unknown[]
   styles?: Record<string, unknown>
   metadata?: Record<string, unknown>
 }
 
-export interface RichDocument {
+interface RichDocument {
   id: string
   canvas_id: string
   title: string

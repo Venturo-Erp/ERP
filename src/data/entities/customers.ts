@@ -8,7 +8,7 @@ import { createEntityHook } from '../core/createEntityHook'
 import { CACHE_PRESETS } from '../core/types'
 import type { Customer } from '@/stores/types'
 
-export const customerEntity = createEntityHook<Customer>('customers', {
+const customerEntity = createEntityHook<Customer>('customers', {
   list: {
     // 排除 passport_image_url 以避免載入大量 base64 圖片資料
     // 護照圖片只在詳情頁面需要時才載入
@@ -26,9 +26,9 @@ export const customerEntity = createEntityHook<Customer>('customers', {
 
 export const useCustomers = customerEntity.useList
 export const useCustomersSlim = customerEntity.useListSlim
-export const useCustomer = customerEntity.useDetail
-export const useCustomersPaginated = customerEntity.usePaginated
-export const useCustomerDictionary = customerEntity.useDictionary
+const useCustomer = customerEntity.useDetail
+const useCustomersPaginated = customerEntity.usePaginated
+const useCustomerDictionary = customerEntity.useDictionary
 
 export const createCustomer = customerEntity.create
 export const updateCustomer = customerEntity.update

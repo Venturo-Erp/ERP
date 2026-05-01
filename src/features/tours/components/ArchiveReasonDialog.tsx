@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils'
 import { TOUR_ARCHIVE } from '../constants'
 
 // 封存原因選項
-export const ARCHIVE_REASONS = [
+const ARCHIVE_REASONS = [
   {
     value: 'no_deal',
     label: TOUR_ARCHIVE.reason_no_deal,

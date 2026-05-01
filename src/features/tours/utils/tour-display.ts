@@ -26,7 +26,7 @@ interface AirportLite {
 }
 
 /** 從 country_id 解析國家中文名 */
-export function getTourCountryName(
+function getTourCountryName(
   tour: Pick<Tour, 'country_id'> | null | undefined,
   countries: CountryLite[]
 ): string {
@@ -35,7 +35,7 @@ export function getTourCountryName(
 }
 
 /** 從 airport_code 解析城市中文名（PVG → 上海） */
-export function getTourCityName(
+function getTourCityName(
   tour: Pick<Tour, 'airport_code'> | null | undefined,
   airports: AirportLite[]
 ): string {
@@ -48,7 +48,7 @@ export function getTourCityName(
  * 優先順序：城市名 → 國家名 → 機場代碼 → 空字串
  * 例如「上海」、「日本」、「PVG」
  */
-export function getTourDestinationDisplay(
+function getTourDestinationDisplay(
   tour: Pick<Tour, 'country_id' | 'airport_code'> | null | undefined,
   countries: CountryLite[],
   airports: AirportLite[]
@@ -65,7 +65,7 @@ export function getTourDestinationDisplay(
  * 是否為國內團（台灣團）。
  * 規則：tour.country_id 對應的國家名稱為「台灣」
  */
-export function isDomesticTour(
+function isDomesticTour(
   tour: Pick<Tour, 'country_id'> | null | undefined,
   countries: CountryLite[]
 ): boolean {

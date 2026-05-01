@@ -53,7 +53,7 @@ export interface City {
   updated_at: string
 }
 
-export interface RegionStats {
+interface RegionStats {
   city_id: string
   attractions_count: number
   cost_templates_count: number

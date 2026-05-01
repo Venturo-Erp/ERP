@@ -266,4 +266,4 @@ export const useWidgetsStore = () => {
 /**
  * Hook 型別（方便使用）
  */
-export type WidgetsStoreType = ReturnType<typeof useWidgetsStore>
+type WidgetsStoreType = ReturnType<typeof useWidgetsStore>
