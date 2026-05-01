@@ -16,7 +16,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
-import { UNPAID_ORDERS_LABELS } from '../../constants/labels'
+import { useTranslations } from 'next-intl'
 
 interface UnpaidOrder {
   id: string
@@ -38,12 +38,14 @@ const PAYMENT_STATUS_MAP: Record<
   string,
   { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }
 > = {
-  unpaid: { label: UNPAID_ORDERS_LABELS.STATUS_UNPAID, variant: 'destructive' },
-  partial: { label: UNPAID_ORDERS_LABELS.STATUS_PARTIAL, variant: 'secondary' },
-  pending_deposit: { label: UNPAID_ORDERS_LABELS.STATUS_PENDING_DEPOSIT, variant: 'outline' },
+  unpaid: { label: t('unpaidOrders.statusUnpaid'), variant: 'destructive' },
+  partial: { label: t('unpaidOrders.statusPartial'), variant: 'secondary' },
+  pending_deposit: { label: t('unpaidOrders.statusPendingDeposit'), variant: 'outline' },
 }
 
 export default function UnpaidOrdersPage() {
+  const t = useTranslations('finance')
+
   const [data, setData] = useState<UnpaidOrder[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<string>('all')
@@ -109,7 +111,7 @@ export default function UnpaidOrdersPage() {
       setData(mapped)
     } catch (err) {
       logger.error('Failed to fetch unpaid orders:', err)
-      toast.error(UNPAID_ORDERS_LABELS.TOAST_LOAD_FAILED)
+      toast.error(t('unpaidOrders.toastLoadFailed'))
     } finally {
       setLoading(false)
     }
@@ -127,18 +129,18 @@ export default function UnpaidOrdersPage() {
   )
 
   const columns: TableColumn<UnpaidOrder>[] = [
-    { key: 'order_number', label: UNPAID_ORDERS_LABELS.COL_ORDER_NUMBER, sortable: true },
-    { key: 'contact_person', label: UNPAID_ORDERS_LABELS.COL_CONTACT_PERSON, sortable: true },
-    { key: 'tour_code', label: UNPAID_ORDERS_LABELS.COL_TOUR_CODE, sortable: true },
+    { key: 'order_number', label: t('unpaidOrders.colOrderNumber'), sortable: true },
+    { key: 'contact_person', label: t('unpaidOrders.colContactPerson'), sortable: true },
+    { key: 'tour_code', label: t('unpaidOrders.colTourCode'), sortable: true },
     {
       key: 'departure_date',
-      label: UNPAID_ORDERS_LABELS.COL_DEPARTURE_DATE,
+      label: t('unpaidOrders.colDepartureDate'),
       sortable: true,
       render: value => <DateCell date={value as string} />,
     },
     {
       key: 'payment_status',
-      label: UNPAID_ORDERS_LABELS.COL_PAYMENT_STATUS,
+      label: t('unpaidOrders.colPaymentStatus'),
       sortable: true,
       render: (_value, row) => {
         const info = PAYMENT_STATUS_MAP[row.payment_status]
@@ -151,21 +153,21 @@ export default function UnpaidOrdersPage() {
     },
     {
       key: 'total_amount',
-      label: UNPAID_ORDERS_LABELS.COL_TOTAL_AMOUNT,
+      label: t('unpaidOrders.colTotalAmount'),
       sortable: true,
       align: 'right',
       render: value => <CurrencyCell amount={Number(value)} />,
     },
     {
       key: 'paid_amount',
-      label: UNPAID_ORDERS_LABELS.COL_PAID_AMOUNT,
+      label: t('unpaidOrders.colPaidAmount'),
       sortable: true,
       align: 'right',
       render: value => <CurrencyCell amount={Number(value)} />,
     },
     {
       key: 'remaining_amount',
-      label: UNPAID_ORDERS_LABELS.COL_REMAINING_AMOUNT,
+      label: t('unpaidOrders.colRemainingAmount'),
       sortable: true,
       align: 'right',
       render: (_value, row) => (
@@ -176,7 +178,7 @@ export default function UnpaidOrdersPage() {
     },
     {
       key: 'days_since_departure',
-      label: UNPAID_ORDERS_LABELS.COL_DAYS_SINCE_DEPARTURE,
+      label: t('unpaidOrders.colDaysSinceDeparture'),
       sortable: true,
       align: 'center',
       render: (_value, row) => {
@@ -184,47 +186,47 @@ export default function UnpaidOrdersPage() {
           return (
             <Badge variant="destructive">
               {row.days_since_departure}
-              {UNPAID_ORDERS_LABELS.DAYS_SUFFIX}
+              {t('unpaidOrders.daysSuffix')}
             </Badge>
           )
         }
         if (row.days_since_departure === 0)
-          return <span className="text-muted-foreground">{UNPAID_ORDERS_LABELS.TODAY}</span>
-        return <span className="text-muted-foreground">{UNPAID_ORDERS_LABELS.NOT_DEPARTED}</span>
+          return <span className="text-muted-foreground">{t('unpaidOrders.today')}</span>
+        return <span className="text-muted-foreground">{t('unpaidOrders.notDeparted')}</span>
       },
     },
   ]
 
   return (
     <ListPageLayout
-      title={UNPAID_ORDERS_LABELS.LABEL_1474}
+      title={t('unpaidOrders.label1474')}
       breadcrumb={[
-        { label: UNPAID_ORDERS_LABELS.BREADCRUMB_HOME, href: '/dashboard' },
-        { label: UNPAID_ORDERS_LABELS.BREADCRUMB_FINANCE, href: '/finance' },
-        { label: UNPAID_ORDERS_LABELS.BREADCRUMB_REPORTS, href: '/finance/reports' },
-        { label: UNPAID_ORDERS_LABELS.LABEL_1474, href: '/finance/reports/unpaid-orders' },
+        { label: t('unpaidOrders.breadcrumbHome'), href: '/dashboard' },
+        { label: t('unpaidOrders.breadcrumbFinance'), href: '/finance' },
+        { label: t('unpaidOrders.breadcrumbReports'), href: '/finance/reports' },
+        { label: t('unpaidOrders.label1474'), href: '/finance/reports/unpaid-orders' },
       ]}
       headerActions={
         <div className="flex items-center gap-3">
           <div className="text-sm text-muted-foreground">
-            {UNPAID_ORDERS_LABELS.TOTAL_REMAINING_PREFIX}
+            {t('unpaidOrders.totalRemainingPrefix')}
             <span className="font-semibold text-foreground">
               NT${totalRemaining.toLocaleString()}
             </span>
             （{filtered.length}
-            {UNPAID_ORDERS_LABELS.COUNT_SUFFIX}）
+            {t('unpaidOrders.countSuffix')}）
           </div>
           <Select value={filter} onValueChange={setFilter}>
             <SelectTrigger className="w-[160px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">{UNPAID_ORDERS_LABELS.ALL}</SelectItem>
-              <SelectItem value="overdue">{UNPAID_ORDERS_LABELS.OVERDUE}</SelectItem>
-              <SelectItem value="unpaid">{UNPAID_ORDERS_LABELS.UNPAID}</SelectItem>
-              <SelectItem value="partial">{UNPAID_ORDERS_LABELS.PARTIAL}</SelectItem>
+              <SelectItem value="all">{t('unpaidOrders.all')}</SelectItem>
+              <SelectItem value="overdue">{t('unpaidOrders.overdue')}</SelectItem>
+              <SelectItem value="unpaid">{t('unpaidOrders.unpaid')}</SelectItem>
+              <SelectItem value="partial">{t('unpaidOrders.partial')}</SelectItem>
               <SelectItem value="pending_deposit">
-                {UNPAID_ORDERS_LABELS.PENDING_DEPOSIT}
+                {t('unpaidOrders.pendingDeposit')}
               </SelectItem>
             </SelectContent>
           </Select>
@@ -233,7 +235,7 @@ export default function UnpaidOrdersPage() {
       loading={loading}
       columns={columns}
       data={filtered}
-      searchPlaceholder={UNPAID_ORDERS_LABELS.SEARCH_PLACEHOLDER}
+      searchPlaceholder={t('unpaidOrders.searchPlaceholder')}
     />
   )
 }

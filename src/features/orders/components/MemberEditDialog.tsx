@@ -21,7 +21,7 @@ import { supabase } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { logger } from '@/lib/utils/logger'
 import type { OrderMember } from '../types/order-member.types'
-import { COMP_ORDERS_LABELS } from '../constants/labels'
+import { useTranslations } from 'next-intl'
 
 type EditMode = 'edit' | 'verify'
 
@@ -63,7 +63,7 @@ async function compressImage(file: File): Promise<File> {
         canvas.height = height
         const ctx = canvas.getContext('2d')
         if (!ctx) {
-          reject(new Error(COMP_ORDERS_LABELS.無法取得_canvas_context))
+          reject(new Error(t('common.無法取得_canvas_context')))
           return
         }
         ctx.drawImage(img, 0, 0, width, height)
@@ -72,7 +72,7 @@ async function compressImage(file: File): Promise<File> {
             if (blob) {
               resolve(new File([blob], file.name, { type: 'image/jpeg' }))
             } else {
-              reject(new Error(COMP_ORDERS_LABELS.壓縮失敗))
+              reject(new Error(t('common.壓縮失敗')))
             }
           },
           'image/jpeg',
@@ -112,12 +112,14 @@ export function MemberEditDialog({
   onSave,
   onRecognize,
 }: MemberEditDialogProps) {
+  const t = useTranslations('orders')
+
   const [isSyncing, setIsSyncing] = useState(false)
 
   // 從顧客主檔同步資料
   const handleSyncFromCustomer = useCallback(async () => {
     if (!editingMember?.customer_id) {
-      toast.error(COMP_ORDERS_LABELS.此成員尚未關聯顧客)
+      toast.error(t('common.此成員尚未關聯顧客'))
       return
     }
 
@@ -132,7 +134,7 @@ export function MemberEditDialog({
         .single()
 
       if (error || !customer) {
-        toast.error(COMP_ORDERS_LABELS.找不到關聯的顧客資料)
+        toast.error(t('common.找不到關聯的顧客資料'))
         return
       }
 
@@ -158,9 +160,9 @@ export function MemberEditDialog({
         })
       }
 
-      toast.success(COMP_ORDERS_LABELS.已從顧客主檔同步資料)
+      toast.success(t('common.已從顧客主檔同步資料'))
     } catch {
-      toast.error(COMP_ORDERS_LABELS.同步失敗)
+      toast.error(t('common.同步失敗'))
     } finally {
       setIsSyncing(false)
     }
@@ -189,7 +191,7 @@ export function MemberEditDialog({
           passport_image_url: fileName,
         })
 
-        toast.success(COMP_ORDERS_LABELS.護照照片已上傳)
+        toast.success(t('common.護照照片已上傳'))
 
         // 自動進行 OCR（傳 filename、OCR service 內部自行處理讀取）
         if (onRecognize) {
@@ -200,8 +202,8 @@ export function MemberEditDialog({
           }
         }
       } catch (error) {
-        logger.error(COMP_ORDERS_LABELS.上傳護照照片失敗, error)
-        toast.error(COMP_ORDERS_LABELS.上傳失敗_請稍後再試)
+        logger.error(t('common.上傳護照照片失敗'), error)
+        toast.error(t('common.上傳失敗_請稍後再試'))
       }
     },
     [editingMember, onMemberChange, onRecognize]
@@ -225,12 +227,12 @@ export function MemberEditDialog({
             {editMode === 'verify' ? (
               <>
                 <AlertTriangle className="text-status-warning" size={20} />
-                {COMP_ORDERS_LABELS.驗證成員資料}
+                {t('common.驗證成員資料')}
               </>
             ) : (
               <>
                 <Pencil className="text-morandi-blue" size={20} />
-                {COMP_ORDERS_LABELS.編輯成員資料}
+                {t('common.編輯成員資料')}
               </>
             )}
           </DialogTitle>
@@ -264,7 +266,7 @@ export function MemberEditDialog({
                 disabled={isSyncing || isSaving}
               >
                 <RefreshCw size={14} className={isSyncing ? 'animate-spin' : ''} />
-                {COMP_ORDERS_LABELS.從顧客同步}
+                {t('common.從顧客同步')}
               </Button>
             )}
           </div>
@@ -273,7 +275,7 @@ export function MemberEditDialog({
           <div className="flex gap-3">
             <Button variant="outline" className="gap-1" onClick={onClose} disabled={isSaving}>
               <X size={16} />
-              {COMP_ORDERS_LABELS.取消}
+              {t('common.取消')}
             </Button>
             <Button
               onClick={onSave}
@@ -286,10 +288,10 @@ export function MemberEditDialog({
               }
             >
               {isSaving
-                ? COMP_ORDERS_LABELS.儲存中
+                ? t('common.儲存中')
                 : editMode === 'verify'
-                  ? COMP_ORDERS_LABELS.確認驗證
-                  : COMP_ORDERS_LABELS.儲存變更}
+                  ? t('common.確認驗證')
+                  : t('common.儲存變更')}
             </Button>
           </div>
         </div>

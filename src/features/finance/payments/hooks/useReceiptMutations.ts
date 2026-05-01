@@ -6,11 +6,11 @@
 import { logger } from '@/lib/utils/logger'
 import { useCallback } from 'react'
 import { useToast } from '@/components/ui/use-toast'
-import { RECEIPT_MUTATION_LABELS } from '../../constants/labels'
 import type { PaymentItem, PaymentFormData } from '../types'
 import { RECEIPT_TYPES } from '../types'
 import type { Receipt } from '@/types/receipt.types'
 import { recalculateReceiptStats } from '../services/receipt-core.service'
+import { useTranslations } from 'next-intl'
 
 /** receipt_type 數字 → payment_method 字串（DB constraint 限定英文） */
 const PAYMENT_METHOD_MAP: Record<number, string> = {
@@ -87,6 +87,8 @@ interface UpdateReceiptWithItemsResult {
 }
 
 export function useReceiptMutations() {
+  const t = useTranslations('finance')
+
   const { toast } = useToast()
 
   /**
@@ -155,7 +157,7 @@ export function useReceiptMutations() {
       const tourCode = tourInfo?.code || ''
 
       if (!tourCode) {
-        throw new Error(RECEIPT_MUTATION_LABELS.CANNOT_GET_TOUR_CODE)
+        throw new Error(t('receiptMutation.cannotGetTourCode'))
       }
 
       // 查詢 payment_methods 取得 ID 對照表
@@ -260,7 +262,7 @@ export function useReceiptMutations() {
         })
 
         if (!createdReceipt?.id) {
-          throw new Error(RECEIPT_MUTATION_LABELS.CREATE_FAILED)
+          throw new Error(t('receiptMutation.createFailed'))
         }
 
         // 第一筆的 ID 作為 batch_id（多筆時）

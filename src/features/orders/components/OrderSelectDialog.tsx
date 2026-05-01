@@ -15,7 +15,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Combobox } from '@/components/ui/combobox'
 import { Check, X } from 'lucide-react'
-import { COMP_ORDERS_LABELS } from '../constants/labels'
+import { useTranslations } from 'next-intl'
 
 interface TourOrder {
   id: string
@@ -30,12 +30,14 @@ interface OrderSelectDialogProps {
 }
 
 export function OrderSelectDialog({ isOpen, orders, onClose, onSelect }: OrderSelectDialogProps) {
+  const t = useTranslations('orders')
+
   const [selectedOrderId, setSelectedOrderId] = useState<string>('')
 
   // 將 orders 轉換為 Combobox 選項格式
   const orderOptions = orders.map(order => ({
     value: order.id,
-    label: order.order_number || COMP_ORDERS_LABELS.未命名訂單,
+    label: order.order_number || t('common.未命名訂單'),
     data: order,
   }))
 
@@ -70,19 +72,19 @@ export function OrderSelectDialog({ isOpen, orders, onClose, onSelect }: OrderSe
         }}
       >
         <DialogHeader>
-          <DialogTitle>{COMP_ORDERS_LABELS.選擇訂單}</DialogTitle>
+          <DialogTitle>{t('common.選擇訂單')}</DialogTitle>
         </DialogHeader>
 
         <div className="py-4">
           <label className="text-sm font-medium text-morandi-primary mb-2 block">
-            {COMP_ORDERS_LABELS.PLEASE_SELECT_2473}
+            {t('common.pleaseSelect2473')}
           </label>
           <Combobox
             options={orderOptions}
             value={selectedOrderId}
             onChange={setSelectedOrderId}
-            placeholder={COMP_ORDERS_LABELS.搜尋或選擇訂單}
-            emptyMessage={COMP_ORDERS_LABELS.找不到符合的訂單}
+            placeholder={t('common.搜尋或選擇訂單')}
+            emptyMessage={t('common.找不到符合的訂單')}
             showSearchIcon
             showClearButton
           />
@@ -91,7 +93,7 @@ export function OrderSelectDialog({ isOpen, orders, onClose, onSelect }: OrderSe
         <DialogFooter>
           <Button variant="outline" onClick={handleClose} className="gap-2">
             <X size={16} />
-            {COMP_ORDERS_LABELS.取消}
+            {t('common.取消')}
           </Button>
           <Button
             onClick={handleConfirm}
@@ -99,7 +101,7 @@ export function OrderSelectDialog({ isOpen, orders, onClose, onSelect }: OrderSe
             className="bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors gap-2"
           >
             <Check size={16} />
-            {COMP_ORDERS_LABELS.選擇訂單}
+            {t('common.選擇訂單')}
           </Button>
         </DialogFooter>
       </DialogContent>

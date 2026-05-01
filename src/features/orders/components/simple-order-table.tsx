@@ -15,9 +15,9 @@ import { cn } from '@/lib/utils'
 import { Order, Tour } from '@/stores/types'
 import { confirm, alert } from '@/lib/ui/alert-dialog'
 import { OrderMembersExpandable } from '@/features/orders/components/OrderMembersExpandable'
-import { COMP_ORDERS_LABELS, SIMPLE_ORDER_TABLE_LABELS } from '../constants/labels'
 import { EnhancedTable } from '@/components/ui/enhanced-table'
 import type { TableColumn } from '@/components/ui/enhanced-table'
+import { useTranslations } from 'next-intl'
 
 interface SimpleOrderTableProps {
   orders: Order[]
@@ -44,6 +44,8 @@ export const SimpleOrderTable = React.memo(function SimpleOrderTable({
   onQuickVisa,
   onAdd,
 }: SimpleOrderTableProps) {
+  const t = useTranslations('orders')
+
   const router = useRouter()
   const workspaceId = useAuthStore(state => state.user?.workspace_id) || ''
   const [expanded, setExpanded] = useState<string[]>([])
@@ -78,8 +80,8 @@ export const SimpleOrderTable = React.memo(function SimpleOrderTable({
     }
 
     const confirmed = await confirm(
-      SIMPLE_ORDER_TABLE_LABELS.DELETE_CONFIRM(order.order_number || ''),
-      { title: COMP_ORDERS_LABELS.刪除訂單, type: 'warning' }
+      `確定要刪除訂單「${order.order_number || ''}」嗎？\n\n此操作無法復原。`,
+      { title: t('common.刪除訂單'), type: 'warning' }
     )
     if (!confirmed) return
 
@@ -107,7 +109,7 @@ export const SimpleOrderTable = React.memo(function SimpleOrderTable({
       if (msg.includes('foreign key')) {
         await alert('此訂單還有其他關聯資料、無法刪除。請聯繫工程確認。', 'error')
       } else {
-        await alert(COMP_ORDERS_LABELS.刪除失敗_請稍後再試, 'error')
+        await alert(t('common.刪除失敗_請稍後再試'), 'error')
       }
     }
   }, [])
@@ -121,7 +123,7 @@ export const SimpleOrderTable = React.memo(function SimpleOrderTable({
   const columns: TableColumn<Order>[] = [
     {
       key: 'order_number',
-      label: COMP_ORDERS_LABELS.LABEL_7017,
+      label: t('common.label7017'),
       sortable: true,
       width: '150px',
       render: value => <span className="font-medium">{String(value || '')}</span>,
@@ -130,7 +132,7 @@ export const SimpleOrderTable = React.memo(function SimpleOrderTable({
       ? ([
           {
             key: 'tour_name',
-            label: COMP_ORDERS_LABELS.LABEL_8875,
+            label: t('common.label8875'),
             sortable: true,
             width: '220px',
           },
@@ -138,7 +140,7 @@ export const SimpleOrderTable = React.memo(function SimpleOrderTable({
       : []),
     {
       key: 'contact_person',
-      label: COMP_ORDERS_LABELS.LABEL_7009,
+      label: t('common.label7009'),
       sortable: true,
       width: '130px',
       render: value => (
@@ -150,7 +152,7 @@ export const SimpleOrderTable = React.memo(function SimpleOrderTable({
     },
     {
       key: 'sales_person',
-      label: COMP_ORDERS_LABELS.LABEL_8362,
+      label: t('common.label8362'),
       sortable: true,
       width: '90px',
     },
@@ -178,7 +180,7 @@ export const SimpleOrderTable = React.memo(function SimpleOrderTable({
           <div className="flex justify-end">
             <Button variant="default" size="sm" className="h-7 px-3 text-xs" onClick={onAdd}>
               <Plus size={12} className="mr-1" />
-              {COMP_ORDERS_LABELS.新增}
+              {t('common.新增')}
             </Button>
           </div>
         ) : undefined
@@ -186,7 +188,7 @@ export const SimpleOrderTable = React.memo(function SimpleOrderTable({
       emptyState={
         <div className="flex flex-col items-center justify-center py-12 text-morandi-secondary">
           <FileText size={32} className="mb-2 opacity-30" />
-          <p className="text-sm">{COMP_ORDERS_LABELS.尚無訂單}</p>
+          <p className="text-sm">{t('common.尚無訂單')}</p>
         </div>
       }
       expandable={{

@@ -26,7 +26,7 @@ import {
 
 import type { HotelColumn, RoomOption, RoomMemberInfo } from '../hooks/useRoomVehicleAssignments'
 import { RoomAssignmentCell } from './member-row/RoomAssignmentCell'
-import { ORDERS_LABELS } from './constants/labels'
+import { useTranslations } from 'next-intl'
 
 interface MemberRowProps {
   member: OrderMember
@@ -124,6 +124,8 @@ export function MemberRow({
   tourInfo,
   getOrderInfo,
 }: MemberRowProps) {
+  const t = useTranslations('orders')
+
   const [isComposing, setIsComposing] = useState(false)
 
   // 拖曳排序功能
@@ -422,7 +424,7 @@ export function MemberRow({
           {member.ticket_number ? (
             <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-morandi-green/20 text-morandi-green text-xs rounded-full font-medium">
               <Check size={10} />
-              {ORDERS_LABELS.LABEL_9032}
+              {t('orders.label9032')}
             </span>
           ) : isEditMode ? (
             <input

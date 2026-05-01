@@ -28,13 +28,13 @@ import { supabase } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { logger } from '@/lib/utils/logger'
+import { useTranslations } from 'next-intl'
 import {
   findBestMatch,
   normalizeName,
   splitPassportName,
   calculateSimilarity,
 } from './pnr-name-matcher'
-import { COMP_ORDERS_LABELS } from '../constants/labels'
 
 interface TourMember {
   id: string
@@ -94,6 +94,8 @@ export function PnrMatchDialog({
   orders = [],
   onSuccess,
 }: PnrMatchDialogProps) {
+  const t = useTranslations('orders')
+
   const [rawPnr, setRawPnr] = useState('')
   const [parsedPnr, setParsedPnr] = useState<ParsedPNR | null>(null)
   const [matchResults, setMatchResults] = useState<MatchResult[]>([])
@@ -185,7 +187,7 @@ export function PnrMatchDialog({
 
         return suggestions
       } catch (error) {
-        logger.error(COMP_ORDERS_LABELS.搜尋客戶失敗, error)
+        logger.error(t('common.搜尋客戶失敗'), error)
         return {}
       }
     },
@@ -195,7 +197,7 @@ export function PnrMatchDialog({
   // 解析 PNR 並進行配對
   const handleParse = useCallback(async () => {
     if (!rawPnr.trim()) {
-      toast.error(COMP_ORDERS_LABELS.請先貼上_PNR_電報)
+      toast.error(t('common.請先貼上_PNR_電報'))
       return
     }
 
@@ -244,25 +246,25 @@ export function PnrMatchDialog({
 
     if (noneCount === 0 && partialCount === 0) {
       toast.success(
-        `${COMP_ORDERS_LABELS.全部配對成功}${results.length}${COMP_ORDERS_LABELS.位旅客}`
+        `${t('common.全部配對成功')}${results.length}${t('common.位旅客')}`
       )
     } else if (suggestedCount > 0) {
       toast.info(
-        `${COMP_ORDERS_LABELS.配對完成}${exactCount} ${COMP_ORDERS_LABELS.完全符合}, ${partialCount} ${COMP_ORDERS_LABELS.部分符合}, ${noneCount} ${COMP_ORDERS_LABELS.未配對}${COMP_ORDERS_LABELS.找到}${suggestedCount}${COMP_ORDERS_LABELS.位可能的客戶建議}`
+        `${t('common.配對完成')}${exactCount} ${t('common.完全符合')}, ${partialCount} ${t('common.部分符合')}, ${noneCount} ${t('common.未配對')}${t('common.找到')}${suggestedCount}${t('common.位可能的客戶建議')}`
       )
     } else {
       toast.info(
-        `${COMP_ORDERS_LABELS.配對完成}${exactCount} ${COMP_ORDERS_LABELS.完全符合}, ${partialCount} ${COMP_ORDERS_LABELS.部分符合}, ${noneCount} ${COMP_ORDERS_LABELS.未配對}`
+        `${t('common.配對完成')}${exactCount} ${t('common.完全符合')}, ${partialCount} ${t('common.部分符合')}, ${noneCount} ${t('common.未配對')}`
       )
     }
 
     // 顯示票價解析結果（僅機票訂單明細格式）
     if (parsed.fareData && parsed.sourceFormat === 'ticket_order_detail') {
       toast.success(
-        `${COMP_ORDERS_LABELS.已解析機票金額}${parsed.fareData.totalFare.toLocaleString()}${COMP_ORDERS_LABELS.元_人}`
+        `${t('common.已解析機票金額')}${parsed.fareData.totalFare.toLocaleString()}${t('common.元_人')}`
       )
     } else if (parsed.sourceFormat === 'ticket_order_detail' && !parsed.fareData) {
-      toast.warning(COMP_ORDERS_LABELS.機票訂單明細格式但未能解析金額_請檢查格式)
+      toast.warning(t('common.機票訂單明細格式但未能解析金額_請檢查格式'))
     }
   }, [rawPnr, members, searchCustomersForPassengers])
 
@@ -371,7 +373,7 @@ export function PnrMatchDialog({
     const selectedCustomers = finalResults.filter(r => r.selectedCustomerId && !r.matchedMember)
 
     if (matchedMembers.length === 0 && selectedCustomers.length === 0) {
-      toast.error(COMP_ORDERS_LABELS.沒有可儲存的配對)
+      toast.error(t('common.沒有可儲存的配對'))
       return
     }
 
@@ -382,12 +384,12 @@ export function PnrMatchDialog({
         const missingOrders = selectedCustomers.filter(r => !selectedOrderIds[r.pnrPassenger])
         if (missingOrders.length > 0) {
           toast.error(
-            `${COMP_ORDERS_LABELS.請為}${missingOrders.length}${COMP_ORDERS_LABELS.位旅客選擇所屬訂單}`
+            `${t('common.請為')}${missingOrders.length}${t('common.位旅客選擇所屬訂單')}`
           )
           return
         }
       } else if (!orderId) {
-        toast.error(COMP_ORDERS_LABELS.無法建立新成員_缺少訂單資訊)
+        toast.error(t('common.無法建立新成員_缺少訂單資訊'))
         return
       }
     }
@@ -504,13 +506,13 @@ export function PnrMatchDialog({
             flight_cost: perPersonFare,
             ticketing_deadline: parsedPnr.ticketingDeadline?.toISOString() || null,
             member_type: 'adult',
-            identity: COMP_ORDERS_LABELS.大人,
+            identity: t('common.大人'),
           }
 
           const { error } = await supabase.from('order_members').insert(newMember)
 
           if (error) {
-            logger.error(COMP_ORDERS_LABELS.建立成員失敗, error)
+            logger.error(t('common.建立成員失敗'), error)
           } else {
             createdCount++
           }
@@ -524,15 +526,15 @@ export function PnrMatchDialog({
       // 顯示結果
       // 注意：不更新 tours 的團體航班，PNR 是個人機票資訊，跟團體航班是分開的
       const messages: string[] = []
-      if (updatedCount > 0) messages.push(`${updatedCount}${COMP_ORDERS_LABELS.位團員已更新PNR}`)
-      if (createdCount > 0) messages.push(`${createdCount}${COMP_ORDERS_LABELS.位新成員已建立}`)
-      toast.success(`${messages.join('，')}${COMP_ORDERS_LABELS.訂位代號} ${recordLocator}`)
+      if (updatedCount > 0) messages.push(`${updatedCount}${t('common.位團員已更新PNR')}`)
+      if (createdCount > 0) messages.push(`${createdCount}${t('common.位新成員已建立')}`)
+      toast.success(`${messages.join('，')}${t('common.訂位代號')} ${recordLocator}`)
 
       onSuccess?.()
       handleClose()
     } catch (error) {
-      logger.error(COMP_ORDERS_LABELS.儲存失敗_2, error)
-      toast.error(COMP_ORDERS_LABELS.儲存失敗)
+      logger.error(t('common.儲存失敗_2'), error)
+      toast.error(t('common.儲存失敗'))
     } finally {
       setIsSaving(false)
     }
@@ -586,7 +588,7 @@ export function PnrMatchDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Plane size={20} className="text-morandi-gold" />
-            {COMP_ORDERS_LABELS.PNR_配對}
+            {t('common.pnr配對')}
           </DialogTitle>
         </DialogHeader>
 
@@ -594,12 +596,12 @@ export function PnrMatchDialog({
           {/* 輸入區域 */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-morandi-primary">
-              {COMP_ORDERS_LABELS.貼上_PNR_電報}
+              {t('common.貼上_PNR_電報')}
             </label>
             <Textarea
               value={rawPnr}
               onChange={e => setRawPnr(e.target.value)}
-              placeholder={COMP_ORDERS_LABELS.貼上_PNR_電報_placeholder}
+              placeholder={t('common.貼上_PNR_電報_placeholder')}
               className="min-h-[120px] font-mono text-xs"
             />
             <div className="flex gap-2">
@@ -609,13 +611,13 @@ export function PnrMatchDialog({
                   className={cn('mr-1', isSearchingCustomers && 'animate-spin')}
                 />
                 {isSearchingCustomers
-                  ? COMP_ORDERS_LABELS.搜尋客戶中
-                  : COMP_ORDERS_LABELS.解析並配對}
+                  ? t('common.搜尋客戶中')
+                  : t('common.解析並配對')}
               </Button>
               {parsedPnr && (
                 <span className="text-sm text-morandi-secondary self-center">
-                  {COMP_ORDERS_LABELS.訂位代號}{' '}
-                  <strong>{parsedPnr.recordLocator || COMP_ORDERS_LABELS.未識別}</strong>
+                  {t('common.訂位代號')}{' '}
+                  <strong>{parsedPnr.recordLocator || t('common.未識別')}</strong>
                 </span>
               )}
             </div>
@@ -623,7 +625,7 @@ export function PnrMatchDialog({
             {members.length === 0 && (
               <p className="text-xs text-morandi-gold bg-morandi-gold/10 px-3 py-2 rounded-lg">
                 <AlertCircle size={12} className="inline mr-1" />
-                {COMP_ORDERS_LABELS.無團員提示}
+                {t('common.無團員提示')}
               </p>
             )}
           </div>
@@ -633,25 +635,25 @@ export function PnrMatchDialog({
             <div className="space-y-3">
               {/* 統計 */}
               <div className="flex items-center gap-4 p-3 bg-morandi-container/30 rounded-lg flex-wrap">
-                <span className="text-sm font-medium">{COMP_ORDERS_LABELS.配對結果}</span>
+                <span className="text-sm font-medium">{t('common.配對結果')}</span>
                 <span className="flex items-center gap-1 text-sm text-morandi-green">
-                  <Check size={14} /> {stats.exact} {COMP_ORDERS_LABELS.完全符合}
+                  <Check size={14} /> {stats.exact} {t('common.完全符合')}
                 </span>
                 <span className="flex items-center gap-1 text-sm text-morandi-gold">
-                  <AlertCircle size={14} /> {stats.partial} {COMP_ORDERS_LABELS.部分符合}
+                  <AlertCircle size={14} /> {stats.partial} {t('common.部分符合')}
                 </span>
                 <span className="flex items-center gap-1 text-sm text-morandi-red">
-                  <X size={14} /> {stats.none} {COMP_ORDERS_LABELS.未配對}
+                  <X size={14} /> {stats.none} {t('common.未配對')}
                 </span>
                 {stats.withSuggestions > 0 && (
                   <span className="flex items-center gap-1 text-sm text-status-info">
-                    <Users size={14} /> {stats.withSuggestions} {COMP_ORDERS_LABELS.位有建議客戶}
+                    <Users size={14} /> {stats.withSuggestions} {t('common.位有建議客戶')}
                   </span>
                 )}
                 {stats.selectedCustomers > 0 && (
                   <span className="flex items-center gap-1 text-sm text-morandi-secondary">
                     <UserPlus size={14} /> {stats.selectedCustomers}{' '}
-                    {COMP_ORDERS_LABELS.位已選擇客戶}
+                    {t('common.位已選擇客戶')}
                   </span>
                 )}
               </div>
@@ -660,14 +662,14 @@ export function PnrMatchDialog({
               {stats.withSuggestions > 0 && (orderId || isTourMode) && (
                 <div className="p-2 bg-status-info/10 rounded-lg text-xs text-status-info">
                   <Users size={12} className="inline mr-1" />
-                  {COMP_ORDERS_LABELS.建議客戶說明}
-                  {isTourMode && COMP_ORDERS_LABELS.請同時選擇每位旅客所屬的訂單}
+                  {t('common.建議客戶說明')}
+                  {isTourMode && t('common.請同時選擇每位旅客所屬的訂單')}
                 </div>
               )}
               {stats.withSuggestions > 0 && !orderId && !isTourMode && (
                 <div className="p-2 bg-morandi-gold/10 rounded-lg text-xs text-morandi-gold">
                   <AlertCircle size={12} className="inline mr-1" />
-                  {COMP_ORDERS_LABELS.建議客戶無訂單說明}
+                  {t('common.建議客戶無訂單說明')}
                 </div>
               )}
 
@@ -675,16 +677,16 @@ export function PnrMatchDialog({
               {isTourMode && stats.withSuggestions > 0 && (
                 <div className="flex items-center gap-2 p-2 bg-morandi-container/20 rounded-lg">
                   <span className="text-xs text-morandi-secondary">
-                    {COMP_ORDERS_LABELS.快速設定所有人訂單}
+                    {t('common.快速設定所有人訂單')}
                   </span>
                   <select
                     onChange={e => handleSetAllOrders(e.target.value)}
                     className="text-xs border rounded px-2 py-1"
                   >
-                    <option value="">{COMP_ORDERS_LABELS.請選擇}</option>
+                    <option value="">{t('common.請選擇')}</option>
                     {orders.map(o => (
                       <option key={o.id} value={o.id}>
-                        {o.order_number} - {o.contact_person || COMP_ORDERS_LABELS.無聯絡人}
+                        {o.order_number} - {o.contact_person || t('common.無聯絡人')}
                       </option>
                     ))}
                   </select>
@@ -697,26 +699,26 @@ export function PnrMatchDialog({
                   <thead className="bg-morandi-container/40">
                     <tr>
                       <th className="px-3 py-2 text-left font-medium whitespace-nowrap">
-                        {COMP_ORDERS_LABELS.PNR_旅客}
+                        {t('common.pnr旅客')}
                       </th>
                       <th className="px-3 py-2 text-left font-medium whitespace-nowrap">
-                        {COMP_ORDERS_LABELS.配對狀態}
+                        {t('common.配對狀態')}
                       </th>
                       <th className="px-3 py-2 text-left font-medium whitespace-nowrap">
-                        {COMP_ORDERS_LABELS.團員護照拼音}
+                        {t('common.團員護照拼音')}
                       </th>
                       <th className="px-3 py-2 text-left font-medium whitespace-nowrap">
-                        {COMP_ORDERS_LABELS.中文姓名}
+                        {t('common.中文姓名')}
                       </th>
                       <th className="px-3 py-2 text-left font-medium whitespace-nowrap">
-                        {COMP_ORDERS_LABELS.手動選擇}
+                        {t('common.手動選擇')}
                       </th>
                       <th className="px-3 py-2 text-left font-medium whitespace-nowrap">
-                        {COMP_ORDERS_LABELS.建議客戶}
+                        {t('common.建議客戶')}
                       </th>
                       {isTourMode && (
                         <th className="px-3 py-2 text-left font-medium whitespace-nowrap">
-                          {COMP_ORDERS_LABELS.選擇訂單}
+                          {t('common.選擇訂單')}
                         </th>
                       )}
                     </tr>
@@ -742,19 +744,19 @@ export function PnrMatchDialog({
                         <td className="px-3 py-2 whitespace-nowrap">
                           {result.selectedCustomerId ? (
                             <span className="flex items-center gap-1 text-morandi-secondary">
-                              <UserPlus size={14} /> {COMP_ORDERS_LABELS.已選客戶}
+                              <UserPlus size={14} /> {t('common.已選客戶')}
                             </span>
                           ) : result.confidence === 'exact' ? (
                             <span className="flex items-center gap-1 text-morandi-green">
-                              <Check size={14} /> {COMP_ORDERS_LABELS.完全符合}
+                              <Check size={14} /> {t('common.完全符合')}
                             </span>
                           ) : result.confidence === 'partial' ? (
                             <span className="flex items-center gap-1 text-morandi-gold">
-                              <AlertCircle size={14} /> {COMP_ORDERS_LABELS.部分符合}
+                              <AlertCircle size={14} /> {t('common.部分符合')}
                             </span>
                           ) : (
                             <span className="flex items-center gap-1 text-morandi-red">
-                              <X size={14} /> {COMP_ORDERS_LABELS.未配對}
+                              <X size={14} /> {t('common.未配對')}
                             </span>
                           )}
                         </td>
@@ -777,8 +779,8 @@ export function PnrMatchDialog({
                             className="text-xs border rounded px-2 py-1 w-full max-w-[150px]"
                             disabled={!!result.selectedCustomerId}
                           >
-                            <option value="">{COMP_ORDERS_LABELS.自動配對}</option>
-                            <option value="__NONE__">{COMP_ORDERS_LABELS.取消配對}</option>
+                            <option value="">{t('common.自動配對')}</option>
+                            <option value="__NONE__">{t('common.取消配對')}</option>
                             {members.map(m => (
                               <option key={m.id} value={m.id}>
                                 {m.chinese_name || m.passport_name}
@@ -800,7 +802,7 @@ export function PnrMatchDialog({
                               )}
                               disabled={!!result.matchedMember && !result.selectedCustomerId}
                             >
-                              <option value="">{COMP_ORDERS_LABELS.選擇客戶}</option>
+                              <option value="">{t('common.選擇客戶')}</option>
                               {result.suggestedCustomers.map(c => (
                                 <option key={c.id} value={c.id}>
                                   {c.name} ({c.passport_name}) {c.score}%
@@ -809,7 +811,7 @@ export function PnrMatchDialog({
                             </select>
                           ) : (
                             <span className="text-xs text-morandi-muted">
-                              {COMP_ORDERS_LABELS.無建議}
+                              {t('common.無建議')}
                             </span>
                           )}
                         </td>
@@ -824,11 +826,11 @@ export function PnrMatchDialog({
                                   'border-status-info bg-status-info/10'
                               )}
                             >
-                              <option value="">{COMP_ORDERS_LABELS.選擇訂單_placeholder}</option>
+                              <option value="">{t('common.選擇訂單_placeholder')}</option>
                               {orders.map(o => (
                                 <option key={o.id} value={o.id}>
                                   {o.order_number} -{' '}
-                                  {o.contact_person || COMP_ORDERS_LABELS.無聯絡人}
+                                  {o.contact_person || t('common.無聯絡人')}
                                 </option>
                               ))}
                             </select>
@@ -844,8 +846,8 @@ export function PnrMatchDialog({
               {unmatchedMembers.length > 0 && (
                 <div className="p-3 bg-morandi-gold/10 rounded-lg">
                   <p className="text-sm font-medium text-morandi-gold mb-2">
-                    {COMP_ORDERS_LABELS.未在PNR中的團員} ({unmatchedMembers.length}{' '}
-                    {COMP_ORDERS_LABELS.人})：
+                    {t('common.未在PNR中的團員')} ({unmatchedMembers.length}{' '}
+                    {t('common.人')})：
                   </p>
                   <div className="flex flex-wrap gap-2">
                     {unmatchedMembers.map(m => (
@@ -864,7 +866,7 @@ export function PnrMatchDialog({
               {parsedPnr && parsedPnr.segments.length > 0 && (
                 <div className="p-3 bg-status-info/10 rounded-lg">
                   <p className="text-sm font-medium text-status-info mb-2">
-                    {COMP_ORDERS_LABELS.航班資訊}
+                    {t('common.航班資訊')}
                   </p>
                   <div className="space-y-1">
                     {parsedPnr.segments.map((seg, i) => (
@@ -876,7 +878,7 @@ export function PnrMatchDialog({
                         </span>
                         {seg.via && seg.via.length > 0 && (
                           <span className="ml-2 text-status-warning bg-status-warning/10 px-1.5 py-0.5 rounded">
-                            {COMP_ORDERS_LABELS.經停}{' '}
+                            {t('common.經停')}{' '}
                             {seg.via
                               .map(v => `${v.city}${v.duration ? ` (${v.duration})` : ''}`)
                               .join(', ')}
@@ -894,7 +896,7 @@ export function PnrMatchDialog({
         <DialogFooter className="gap-2">
           <Button variant="outline" className="gap-1" onClick={handleClose}>
             <X size={16} />
-            {COMP_ORDERS_LABELS.取消}
+            {t('common.取消')}
           </Button>
           <Button
             onClick={handleSave}
@@ -903,8 +905,8 @@ export function PnrMatchDialog({
           >
             <Save size={16} className="mr-1" />
             {isSaving
-              ? COMP_ORDERS_LABELS.儲存中
-              : `${COMP_ORDERS_LABELS.儲存配對} (${savableCount} ${COMP_ORDERS_LABELS.人})`}
+              ? t('common.儲存中')
+              : `${t('common.儲存配對')} (${savableCount} ${t('common.人')})`}
           </Button>
         </DialogFooter>
       </DialogContent>

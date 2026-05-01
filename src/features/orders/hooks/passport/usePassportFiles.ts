@@ -12,7 +12,7 @@ import { useState, useCallback } from 'react'
 import { logger } from '@/lib/utils/logger'
 import { alert } from '@/lib/ui/alert-dialog'
 import type { ProcessedFile } from '../../types/order-member.types'
-import { COMP_ORDERS_LABELS } from '../../constants/labels'
+import { useTranslations } from 'next-intl'
 
 interface UsePassportFilesReturn {
   // 狀態
@@ -117,8 +117,8 @@ export function usePassportFiles(): UsePassportFilesReturn {
         const newFiles = await processFiles(files)
         setProcessedFiles(prev => [...prev, ...newFiles])
       } catch (error) {
-        logger.error(COMP_ORDERS_LABELS.處理檔案失敗, error)
-        void alert(COMP_ORDERS_LABELS.檔案處理失敗_請重試, 'error')
+        logger.error(t('common.處理檔案失敗'), error)
+        void alert(t('common.檔案處理失敗_請重試'), 'error')
       } finally {
         setIsProcessing(false)
       }
@@ -153,8 +153,8 @@ export function usePassportFiles(): UsePassportFilesReturn {
         const newFiles = await processFiles(files)
         setProcessedFiles(prev => [...prev, ...newFiles])
       } catch (error) {
-        logger.error(COMP_ORDERS_LABELS.處理檔案失敗, error)
-        void alert(COMP_ORDERS_LABELS.檔案處理失敗_請重試, 'error')
+        logger.error(t('common.處理檔案失敗'), error)
+        void alert(t('common.檔案處理失敗_請重試'), 'error')
       } finally {
         setIsProcessing(false)
       }
@@ -250,7 +250,7 @@ export function usePassportFiles(): UsePassportFilesReturn {
                   resolve(compressedFile)
                 }
               } else {
-                reject(new Error(COMP_ORDERS_LABELS.壓縮失敗))
+                reject(new Error(t('common.壓縮失敗')))
               }
             },
             'image/jpeg',

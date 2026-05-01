@@ -5,19 +5,17 @@ import { StatusBadge, type StatusTone } from '@/components/ui/status-badge'
 import { DateCell, CurrencyCell } from '@/components/table-cells'
 import { statusLabels } from '../types' // Assuming statusLabels and statusColors are now correctly typed
 import { PAYMENT_REQUEST_STATUS_TONES } from '@/features/disbursement/constants'
-import {
-  REQUEST_DATE_INPUT_LABELS,
-  REQUEST_DETAIL_DIALOG_LABELS,
-  USE_REQUEST_TABLE_LABELS,
-} from '../../constants/labels'
+import { useTranslations } from 'next-intl'
 
 export function useRequestTable(payment_requests: PaymentRequest[]) {
+  const t = useTranslations('finance')
+
   // Table columns configuration
   const tableColumns: TableColumn<PaymentRequest>[] = useMemo(
     () => [
       {
         key: 'code',
-        label: REQUEST_DETAIL_DIALOG_LABELS.請款單號,
+        label: t('requestDetailDialog.請款單號'),
         sortable: true,
         render: (value: unknown, row: PaymentRequest) => {
           // 優先顯示 code，fallback 到 request_number
@@ -31,7 +29,7 @@ export function useRequestTable(payment_requests: PaymentRequest[]) {
       },
       {
         key: 'tour_name',
-        label: REQUEST_DETAIL_DIALOG_LABELS.團名,
+        label: t('requestDetailDialog.團名'),
         sortable: true,
         render: (value: unknown, row: PaymentRequest) => {
           // 顯示團名，fallback 到團號
@@ -45,7 +43,7 @@ export function useRequestTable(payment_requests: PaymentRequest[]) {
       },
       {
         key: 'order_number',
-        label: REQUEST_DETAIL_DIALOG_LABELS.訂單編號,
+        label: t('requestDetailDialog.訂單編號'),
         sortable: true,
         render: (value: unknown, row: PaymentRequest) => {
           const displayValue = value as string
@@ -58,7 +56,7 @@ export function useRequestTable(payment_requests: PaymentRequest[]) {
       },
       {
         key: 'request_date',
-        label: REQUEST_DATE_INPUT_LABELS.請款日期,
+        label: t('requestDateInput.請款日期'),
         sortable: true,
         render: (value: unknown, row: PaymentRequest) => (
           <div className="text-sm">
@@ -71,7 +69,7 @@ export function useRequestTable(payment_requests: PaymentRequest[]) {
       },
       {
         key: 'amount',
-        label: USE_REQUEST_TABLE_LABELS.金額,
+        label: t('useRequestTable.金額'),
         sortable: true,
         render: (value: unknown) => (
           <CurrencyCell amount={value as number} className="font-semibold text-morandi-gold" />
@@ -79,7 +77,7 @@ export function useRequestTable(payment_requests: PaymentRequest[]) {
       },
       {
         key: 'status',
-        label: USE_REQUEST_TABLE_LABELS.狀態,
+        label: t('useRequestTable.狀態'),
         sortable: true,
         render: (value: unknown) => {
           const status = (value || 'pending') as keyof typeof PAYMENT_REQUEST_STATUS_TONES

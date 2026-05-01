@@ -1,5 +1,6 @@
 import { PaymentRequest, PaymentRequestItem } from '@/stores/types'
 import { PaymentRequestCategory, CompanyExpenseType } from '@/stores/types/finance.types'
+import { useTranslations } from 'next-intl'
 
 export interface RequestFormData {
   request_category: PaymentRequestCategory // 請款類別（團體/公司）
@@ -40,12 +41,10 @@ export interface RequestItem {
   accounting_subject_name?: string | null // 會計科目名稱（顯示用）
 }
 
-import { REQUEST_TYPE_LABELS } from '../constants/labels'
-
 export const statusLabels: Record<'pending' | 'confirmed' | 'billed', string> = {
-  pending: REQUEST_TYPE_LABELS.STATUS_PENDING,
-  confirmed: REQUEST_TYPE_LABELS.STATUS_CONFIRMED,
-  billed: REQUEST_TYPE_LABELS.STATUS_BILLED,
+  pending: t('requestType.statusPending'),
+  confirmed: t('requestType.statusConfirmed'),
+  billed: t('requestType.statusBilled'),
 }
 
 export const statusColors: Record<'pending' | 'confirmed' | 'billed', string> = {
@@ -55,19 +54,19 @@ export const statusColors: Record<'pending' | 'confirmed' | 'billed', string> = 
 }
 
 export const categoryOptions = [
-  { value: REQUEST_TYPE_LABELS.CAT_ACCOMMODATION, label: REQUEST_TYPE_LABELS.CAT_ACCOMMODATION },
-  { value: REQUEST_TYPE_LABELS.CAT_TRANSPORTATION, label: REQUEST_TYPE_LABELS.CAT_TRANSPORTATION },
-  { value: REQUEST_TYPE_LABELS.CAT_MEAL, label: REQUEST_TYPE_LABELS.CAT_MEAL },
-  { value: REQUEST_TYPE_LABELS.CAT_TICKET, label: REQUEST_TYPE_LABELS.CAT_TICKET },
-  { value: REQUEST_TYPE_LABELS.CAT_GUIDE, label: REQUEST_TYPE_LABELS.CAT_GUIDE },
-  { value: REQUEST_TYPE_LABELS.CAT_INSURANCE, label: REQUEST_TYPE_LABELS.CAT_INSURANCE },
-  { value: REQUEST_TYPE_LABELS.CAT_TOUR_ADVANCE, label: REQUEST_TYPE_LABELS.CAT_TOUR_ADVANCE },
-  { value: REQUEST_TYPE_LABELS.CAT_TOUR_RETURN, label: REQUEST_TYPE_LABELS.CAT_TOUR_RETURN },
+  { value: t('requestType.catAccommodation'), label: t('requestType.catAccommodation') },
+  { value: t('requestType.catTransportation'), label: t('requestType.catTransportation') },
+  { value: t('requestType.catMeal'), label: t('requestType.catMeal') },
+  { value: t('requestType.catTicket'), label: t('requestType.catTicket') },
+  { value: t('requestType.catGuide'), label: t('requestType.catGuide') },
+  { value: t('requestType.catInsurance'), label: t('requestType.catInsurance') },
+  { value: t('requestType.catTourAdvance'), label: t('requestType.catTourAdvance') },
+  { value: t('requestType.catTourReturn'), label: t('requestType.catTourReturn') },
   {
-    value: REQUEST_TYPE_LABELS.CAT_EMPLOYEE_ADVANCE,
-    label: REQUEST_TYPE_LABELS.CAT_EMPLOYEE_ADVANCE,
+    value: t('requestType.catEmployeeAdvance'),
+    label: t('requestType.catEmployeeAdvance'),
   },
   { value: 'ESIM', label: 'ESIM' },
-  { value: REQUEST_TYPE_LABELS.CAT_PEER, label: REQUEST_TYPE_LABELS.CAT_PEER },
-  { value: REQUEST_TYPE_LABELS.CAT_OTHER, label: REQUEST_TYPE_LABELS.CAT_OTHER },
+  { value: t('requestType.catPeer'), label: t('requestType.catPeer') },
+  { value: t('requestType.catOther'), label: t('requestType.catOther') },
 ] as const

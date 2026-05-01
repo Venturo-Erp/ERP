@@ -19,7 +19,6 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { cn } from '@/lib/utils'
-import { FinanceLabels, PAYMENT_METHOD_MAP } from '../constants/labels'
 import { ListPageLayout } from '@/components/layout/list-page-layout'
 import { Button } from '@/components/ui/button'
 import { TableColumn } from '@/components/ui/enhanced-table'
@@ -61,8 +60,11 @@ import { usePaymentData } from './hooks/usePaymentData'
 
 // Types
 import type { Receipt, ReceiptItem } from '@/stores'
+import { useTranslations } from 'next-intl'
 
 export default function PaymentsPage() {
+  const t = useTranslations('finance')
+
   const searchParams = useSearchParams()
   const router = useRouter()
 
@@ -153,34 +155,34 @@ export default function PaymentsPage() {
       await handleCreateReceipt(data)
       setIsDialogOpen(false)
     } catch (error) {
-      logger.error(FinanceLabels.createReceiptFailedPrefix + ':', error)
-      void alert(FinanceLabels.createReceiptFailedTitle, 'error')
+      logger.error(t('finance.createReceiptFailedPrefix') + ':', error)
+      void alert(t('finance.createReceiptFailedTitle'), 'error')
     }
   }
 
   // 表格欄位
   const columns: TableColumn<Receipt>[] = [
-    { key: 'receipt_number', label: FinanceLabels.receiptNumber, sortable: true, width: '155' },
+    { key: 'receipt_number', label: t('finance.receiptNumber'), sortable: true, width: '155' },
     {
       key: 'receipt_date',
-      label: FinanceLabels.receiptDate,
+      label: t('finance.receiptDate'),
       sortable: true,
       width: '85',
       render: value => <DateCell date={String(value)} showIcon={false} />,
     },
     {
       key: 'receipt_account',
-      label: FinanceLabels.orderNumber,
+      label: t('finance.orderNumber'),
       width: '120',
       render: value => {
         const info = String(value || '-')
         return <span className="text-sm text-morandi-secondary">{info}</span>
       },
     },
-    { key: 'tour_name', label: FinanceLabels.tourName, sortable: true },
+    { key: 'tour_name', label: t('finance.tourName'), sortable: true },
     {
       key: 'receipt_amount',
-      label: FinanceLabels.receiptAmount,
+      label: t('finance.receiptAmount'),
       sortable: true,
       width: '130',
       render: value => (
@@ -191,7 +193,7 @@ export default function PaymentsPage() {
     },
     {
       key: 'actual_amount',
-      label: FinanceLabels.actualAmount,
+      label: t('finance.actualAmount'),
       sortable: true,
       width: '130',
       render: value => (
@@ -202,7 +204,7 @@ export default function PaymentsPage() {
     },
     {
       key: 'payment_method',
-      label: FinanceLabels.paymentMethod,
+      label: t('finance.paymentMethod'),
       width: '80',
       render: value => (
         <span className="text-sm">{PAYMENT_METHOD_MAP[String(value)] || String(value || '-')}</span>
@@ -210,13 +212,13 @@ export default function PaymentsPage() {
     },
     {
       key: 'status',
-      label: FinanceLabels.status,
+      label: t('finance.status'),
       width: '110',
       render: value => <StatusCell type="receipt" status={String(value)} />,
     },
     {
       key: 'actions',
-      label: FinanceLabels.actions,
+      label: t('finance.actions'),
       width: '220',
       render: (_, row) => (
         <div className="flex items-center gap-1 whitespace-nowrap">
@@ -246,7 +248,7 @@ export default function PaymentsPage() {
             className="h-7 px-2 text-xs text-morandi-secondary hover:text-morandi-primary"
           >
             <Edit2 size={14} className="mr-1" />
-            {row.status === 'confirmed' ? FinanceLabels.view : FinanceLabels.edit}
+            {row.status === 'confirmed' ? t('finance.view') : t('finance.edit')}
           </Button>
         </div>
       ),
@@ -259,19 +261,19 @@ export default function PaymentsPage() {
   return (
     <>
       <ListPageLayout
-        title={FinanceLabels.paymentManagement}
+        title={t('finance.paymentManagement')}
         data={filteredByTab}
         loading={loading}
         columns={columns}
         searchFields={['receipt_number', 'tour_name']}
-        searchPlaceholder={FinanceLabels.searchReceiptPlaceholder}
+        searchPlaceholder={t('finance.searchReceiptPlaceholder')}
         onRowClick={handleRowClick}
         defaultSort={{ key: 'receipt_date', direction: 'desc' }}
         initialPageSize={15}
         headerActions={
           <Button variant="soft-gold" onClick={() => setIsDialogOpen(true)}>
             <Plus size={16} />
-            {FinanceLabels.addPayment}
+            {t('finance.addPayment')}
           </Button>
         }
         beforeTable={

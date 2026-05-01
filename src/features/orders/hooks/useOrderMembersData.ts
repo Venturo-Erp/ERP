@@ -20,9 +20,8 @@ import { toast } from 'sonner'
 import type { OrderMember } from '../types/order-member.types'
 import type { RealtimePostgresChangesPayload } from '@supabase/supabase-js'
 import { deleteMember } from '@/data'
-import { COMP_ORDERS_LABELS } from '../constants/labels'
 import { recalculateParticipants } from '@/features/tours/services/tour-stats.service'
-import { MEMBER_DATA_LABELS } from '../constants/labels'
+import { useTranslations } from 'next-intl'
 
 // 快取已同步的顧客 ID，避免重複同步
 const syncedCustomerIds = new Set<string>()
@@ -45,6 +44,8 @@ export function useOrderMembersData({
   workspaceId,
   mode,
 }: UseOrderMembersDataParams) {
+  const t = useTranslations('orders')
+
   // ========== 成員資料狀態 ==========
   const [members, setMembers] = useState<OrderMember[]>([])
   const [loading, setLoading] = useState(false)
@@ -78,7 +79,7 @@ export function useOrderMembersData({
       setDepartureDate(data?.departure_date || null)
       setReturnDate(data?.return_date || null)
     } catch (error) {
-      logger.error(COMP_ORDERS_LABELS.載入出發日期失敗, error)
+      logger.error(t('common.載入出發日期失敗'), error)
     }
   }, [tourId])
 
@@ -283,7 +284,7 @@ export function useOrderMembersData({
 
       setMembers(membersWithStatus)
     } catch (error) {
-      logger.error(COMP_ORDERS_LABELS.載入成員失敗, error)
+      logger.error(t('common.載入成員失敗'), error)
     } finally {
       setLoading(false)
     }
@@ -298,7 +299,7 @@ export function useOrderMembersData({
     if (mode === 'tour') {
       // 團體模式：需要先選擇訂單
       if (tourOrders.length === 0) {
-        await alert(COMP_ORDERS_LABELS.此團尚無訂單_請先建立訂單, 'warning')
+        await alert(t('common.此團尚無訂單_請先建立訂單'), 'warning')
         return
       }
       if (tourOrders.length === 1) {
@@ -324,7 +325,7 @@ export function useOrderMembersData({
     // 團體模式使用選擇的訂單 ID，單一訂單模式使用 prop 的 orderId
     const targetOrderId = mode === 'tour' ? selectedOrderIdForAdd : orderId
     if (!targetOrderId) {
-      await alert(COMP_ORDERS_LABELS.請選擇訂單, 'warning')
+      await alert(t('common.請選擇訂單'), 'warning')
       return
     }
 
@@ -333,7 +334,7 @@ export function useOrderMembersData({
         order_id: targetOrderId,
         workspace_id: workspaceId,
         member_type: 'adult',
-        identity: COMP_ORDERS_LABELS.大人,
+        identity: t('common.大人'),
       }))
 
       const { data, error } = await supabase.from('order_members').insert(newMembers).select()
@@ -343,8 +344,8 @@ export function useOrderMembersData({
       setIsAddDialogOpen(false)
       setMemberCountToAdd(1)
     } catch (error) {
-      logger.error(COMP_ORDERS_LABELS.新增成員失敗, error)
-      await alert(COMP_ORDERS_LABELS.新增失敗, 'error')
+      logger.error(t('common.新增成員失敗'), error)
+      await alert(t('common.新增失敗'), 'error')
     }
   }
 
@@ -373,8 +374,8 @@ export function useOrderMembersData({
         )
       )
     } catch (error) {
-      logger.error(COMP_ORDERS_LABELS.更新排序失敗, error)
-      toast.error(COMP_ORDERS_LABELS.排序更新失敗)
+      logger.error(t('common.更新排序失敗'), error)
+      toast.error(t('common.排序更新失敗'))
       // 重新載入以恢復正確順序
       loadMembers()
     }
@@ -387,10 +388,10 @@ export function useOrderMembersData({
     // 找到要刪除的成員，顯示名稱讓使用者確認
     const memberToDelete = members.find(m => m.id === memberId)
     const memberName =
-      memberToDelete?.chinese_name || memberToDelete?.passport_name || COMP_ORDERS_LABELS.此成員
+      memberToDelete?.chinese_name || memberToDelete?.passport_name || t('common.此成員')
 
-    const confirmed = await confirm(MEMBER_DATA_LABELS.DELETE_CONFIRM(memberName), {
-      title: COMP_ORDERS_LABELS.刪除成員,
+    const confirmed = await confirm(`確定要刪除「${memberName}」嗎？`, {
+      title: t('common.刪除成員'),
       type: 'warning',
     })
     if (!confirmed) return
@@ -406,8 +407,8 @@ export function useOrderMembersData({
         })
       }
     } catch (error) {
-      logger.error(COMP_ORDERS_LABELS.刪除成員失敗, error)
-      await alert(COMP_ORDERS_LABELS.刪除失敗, 'error')
+      logger.error(t('common.刪除成員失敗'), error)
+      await alert(t('common.刪除失敗'), 'error')
     }
   }
 
@@ -468,7 +469,7 @@ export function useOrderMembersData({
             // 新增成員 - 檢查是否已存在（避免重複）
             setMembers(prev => {
               if (prev.some(m => m.id === newRecord.id)) return prev
-              toast.success(COMP_ORDERS_LABELS.新成員已加入, { duration: 2000 })
+              toast.success(t('common.新成員已加入'), { duration: 2000 })
               return [...prev, newRecord]
             })
           } else if (payload.eventType === 'UPDATE' && newRecord) {

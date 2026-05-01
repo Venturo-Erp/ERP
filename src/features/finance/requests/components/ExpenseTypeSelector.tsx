@@ -2,7 +2,7 @@
 
 import { Combobox } from '@/components/ui/combobox'
 import { CompanyExpenseType, EXPENSE_TYPE_CONFIG } from '@/stores/types/finance.types'
-import { EXPENSE_TYPE_SELECTOR_LABELS } from '../../constants/labels'
+import { useTranslations } from 'next-intl'
 
 interface ExpenseTypeSelectorProps {
   value: CompanyExpenseType | ''
@@ -23,16 +23,18 @@ export function ExpenseTypeSelector({
   disabled = false,
   className,
 }: ExpenseTypeSelectorProps) {
+  const t = useTranslations('finance')
+
   return (
     <div className={className}>
       <label className="text-sm font-medium text-morandi-primary">
-        {EXPENSE_TYPE_SELECTOR_LABELS.LABEL_6005}
+        {t('expenseTypeSelector.label6005')}
       </label>
       <Combobox
         options={expenseTypeOptions}
         value={value}
         onChange={v => onChange(v as CompanyExpenseType | '')}
-        placeholder={EXPENSE_TYPE_SELECTOR_LABELS.選擇費用類型}
+        placeholder={t('expenseTypeSelector.選擇費用類型')}
         disabled={disabled}
         className="mt-1"
       />

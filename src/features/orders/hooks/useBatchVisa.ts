@@ -5,9 +5,8 @@ import { supabase } from '@/lib/supabase/client'
 import { createVisa } from '@/data/entities/visas'
 import { toast } from 'sonner'
 import { logger } from '@/lib/utils/logger'
-import { BATCH_VISA_LABELS as L } from '../constants/labels'
 import type { Order } from '@/stores/types'
-import { EXPORT_DIALOG_LABELS } from '../constants/labels'
+import { useTranslations } from 'next-intl'
 
 interface MemberRow {
   id: string
@@ -26,17 +25,19 @@ interface VisaSelection {
  */
 function calculateFee(visaType: string): number {
   if (visaType.includes('ESTA')) return 1000
-  if (visaType.includes(EXPORT_DIALOG_LABELS.VISA_CHILD)) return 1500
-  if (visaType.includes(EXPORT_DIALOG_LABELS.VISA_FIRST)) return 800
+  if (visaType.includes(t('exportDialog.visaChild'))) return 1500
+  if (visaType.includes(t('exportDialog.visaFirst'))) return 800
   if (
-    visaType.includes(EXPORT_DIALOG_LABELS.VISA_TW_PASS) &&
-    visaType.includes(EXPORT_DIALOG_LABELS.VISA_LOST)
+    visaType.includes(t('exportDialog.visaTwPass')) &&
+    visaType.includes(t('exportDialog.visaLost'))
   )
     return 2900
   return 1800
 }
 
 export function useBatchVisa() {
+  const t = useTranslations('orders')
+
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [members, setMembers] = useState<MemberRow[]>([])
   const [isLoadingMembers, setIsLoadingMembers] = useState(false)
@@ -63,7 +64,7 @@ export function useBatchVisa() {
   const submitBatchVisa = useCallback(
     async (order: Order, selections: VisaSelection[], membersMap: Map<string, MemberRow>) => {
       if (selections.length === 0) {
-        toast.warning(L.toast_no_selection)
+        toast.warning(t('batchVisa.toastNoSelection'))
         return false
       }
 
@@ -94,11 +95,11 @@ export function useBatchVisa() {
           createdCount++
         }
 
-        toast.success(L.toast_success(createdCount))
+        toast.success(`已建立 ${createdCount} 筆簽證`)
         return true
       } catch (err) {
         logger.error('批次建立簽證失敗', err)
-        toast.error(L.toast_fail)
+        toast.error(t('batchVisa.toastFail'))
         return false
       } finally {
         setIsSubmitting(false)

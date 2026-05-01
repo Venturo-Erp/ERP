@@ -7,7 +7,7 @@
 import React, { useCallback, useRef } from 'react'
 import type { ColumnVisibility } from './OrderMembersExpandable'
 import type { HotelColumn } from '../hooks/useRoomVehicleAssignments'
-import { MEMBER_TABLE_HEADER_LABELS as L } from '../constants/labels'
+import { useTranslations } from 'next-intl'
 
 interface MemberTableHeaderProps {
   mode: 'order' | 'tour'
@@ -138,6 +138,8 @@ export function MemberTableHeader({
   columnWidths = {},
   onColumnResize,
 }: MemberTableHeaderProps) {
+  const t = useTranslations('orders')
+
   const cv = columnVisibility || {
     passport_name: true,
     birth_date: true,
@@ -177,7 +179,7 @@ export function MemberTableHeader({
           onResize={onColumnResize}
           className={`${thStickyClass} ${seqLeft}`}
         >
-          {L.seq}
+          {t('memberTableHeader.seq')}
         </ResizableTh>
 
         {/* 凍結欄位：中文姓名 */}
@@ -187,7 +189,7 @@ export function MemberTableHeader({
           onResize={onColumnResize}
           className={`${thStickyClass} ${nameLeft}`}
         >
-          {L.chinese_name}
+          {t('memberTableHeader.chineseName')}
         </ResizableTh>
 
         {/* 團體模式：訂單編號 */}
@@ -198,7 +200,7 @@ export function MemberTableHeader({
             onResize={onColumnResize}
             className={thBaseClass}
           >
-            {L.order_code}
+            {t('memberTableHeader.orderCode')}
           </ResizableTh>
         )}
 
@@ -210,7 +212,7 @@ export function MemberTableHeader({
             onResize={onColumnResize}
             className={thBaseClass}
           >
-            {L.identity}
+            {t('memberTableHeader.identity')}
           </ResizableTh>
         )}
 
@@ -221,7 +223,7 @@ export function MemberTableHeader({
             onResize={onColumnResize}
             className={thBaseClass}
           >
-            {L.passport_name}
+            {t('memberTableHeader.passportName')}
           </ResizableTh>
         )}
         {cv.birth_date && (
@@ -231,7 +233,7 @@ export function MemberTableHeader({
             onResize={onColumnResize}
             className={thBaseClass}
           >
-            {L.birth_date}
+            {t('memberTableHeader.birthDate')}
           </ResizableTh>
         )}
         {cv.gender && (
@@ -241,7 +243,7 @@ export function MemberTableHeader({
             onResize={onColumnResize}
             className={thBaseClass}
           >
-            {L.gender}
+            {t('memberTableHeader.gender')}
           </ResizableTh>
         )}
         {cv.id_number && (
@@ -251,7 +253,7 @@ export function MemberTableHeader({
             onResize={onColumnResize}
             className={thBaseClass}
           >
-            {L.id_number}
+            {t('memberTableHeader.idNumber')}
           </ResizableTh>
         )}
 
@@ -263,7 +265,7 @@ export function MemberTableHeader({
             onResize={onColumnResize}
             className={thBaseClass}
           >
-            {L.passport_number}
+            {t('memberTableHeader.passportNumber')}
           </ResizableTh>
         )}
         {cv.passport_expiry && (
@@ -273,7 +275,7 @@ export function MemberTableHeader({
             onResize={onColumnResize}
             className={thBaseClass}
           >
-            {L.passport_expiry}
+            {t('memberTableHeader.passportExpiry')}
           </ResizableTh>
         )}
 
@@ -285,7 +287,7 @@ export function MemberTableHeader({
             onResize={onColumnResize}
             className={thBaseClass}
           >
-            {L.special_meal}
+            {t('memberTableHeader.specialMeal')}
           </ResizableTh>
         )}
 
@@ -297,7 +299,7 @@ export function MemberTableHeader({
             onResize={onColumnResize}
             className={thBaseClass}
           >
-            {L.total_payable}
+            {t('memberTableHeader.totalPayable')}
           </ResizableTh>
         )}
         {cv.deposit_amount && (
@@ -307,7 +309,7 @@ export function MemberTableHeader({
             onResize={onColumnResize}
             className={thBaseClass}
           >
-            {L.deposit_amount}
+            {t('memberTableHeader.depositAmount')}
           </ResizableTh>
         )}
         {cv.balance && (
@@ -317,7 +319,7 @@ export function MemberTableHeader({
             onResize={onColumnResize}
             className={thBaseClass}
           >
-            {L.balance}
+            {t('memberTableHeader.balance')}
           </ResizableTh>
         )}
 
@@ -329,7 +331,7 @@ export function MemberTableHeader({
             onResize={onColumnResize}
             className={thBaseClass}
           >
-            {L.remarks}
+            {t('memberTableHeader.remarks')}
           </ResizableTh>
         )}
 
@@ -359,7 +361,7 @@ export function MemberTableHeader({
             onResize={onColumnResize}
             className={thBaseClass}
           >
-            {L.room}
+            {t('memberTableHeader.room')}
           </ResizableTh>
         )}
 
@@ -371,7 +373,7 @@ export function MemberTableHeader({
             onResize={onColumnResize}
             className={thBaseClass}
           >
-            {L.vehicle}
+            {t('memberTableHeader.vehicle')}
           </ResizableTh>
         )}
 
@@ -395,7 +397,7 @@ export function MemberTableHeader({
             onResize={onColumnResize}
             className={thBaseClass}
           >
-            {L.ticket_number}
+            {t('memberTableHeader.ticketNumber')}
           </ResizableTh>
         )}
 
@@ -407,7 +409,7 @@ export function MemberTableHeader({
             onResize={onColumnResize}
             className={thBaseClass}
           >
-            {L.ticketing_deadline}
+            {t('memberTableHeader.ticketingDeadline')}
           </ResizableTh>
         )}
 
@@ -419,7 +421,7 @@ export function MemberTableHeader({
             onResize={onColumnResize}
             className={thBaseClass}
           >
-            {L.flight_cost}
+            {t('memberTableHeader.flightCost')}
           </ResizableTh>
         )}
 
@@ -431,7 +433,7 @@ export function MemberTableHeader({
             onResize={onColumnResize}
             className={thBaseClass}
           >
-            {L.LABEL_7281}
+            {t('memberTableHeader.label7281')}
           </ResizableTh>
         )}
 
@@ -451,7 +453,7 @@ export function MemberTableHeader({
 
         {/* 操作 */}
         <th className={`${thBaseClass} text-left`} style={{ minWidth: '80px' }}>
-          {L.actions}
+          {t('memberTableHeader.actions')}
         </th>
       </tr>
     </thead>

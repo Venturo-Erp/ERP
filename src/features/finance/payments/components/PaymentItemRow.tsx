@@ -21,11 +21,7 @@ import {
 import { cn } from '@/lib/utils'
 import type { PaymentItem, ReceiptType } from '../types'
 import { BANK_ACCOUNTS } from '../types'
-import {
-  ADD_RECEIPT_DIALOG_LABELS,
-  BATCH_RECEIPT_DIALOG_LABELS,
-  PAYMENT_ITEM_ROW_LABELS,
-} from '../../constants/labels'
+import { useTranslations } from 'next-intl'
 
 interface PaymentItemRowProps {
   item: PaymentItem
@@ -70,6 +66,8 @@ export function PaymentItemRow({
   paymentMethods: propPaymentMethods,
   canConfirmReceipt = false,
 }: PaymentItemRowProps) {
+  const t = useTranslations('finance')
+
   const { toast } = useToast()
   const [isGenerating, setIsGenerating] = useState(false)
   const [generatedLink, setGeneratedLink] = useState<string | null>(null)
@@ -123,8 +121,8 @@ export function PaymentItemRow({
   const handleGenerateLink = async () => {
     if (!item.email || !item.amount || !item.pay_dateline) {
       toast({
-        title: PAYMENT_ITEM_ROW_LABELS.請填寫必要欄位,
-        description: PAYMENT_ITEM_ROW_LABELS.Email_金額_付款截止日為必填,
+        title: t('paymentItemRow.請填寫必要欄位'),
+        description: t('paymentItemRow.email金額付款截止日為必填'),
         variant: 'destructive',
       })
       return
@@ -152,16 +150,16 @@ export function PaymentItemRow({
       if (data.success && data.data?.payment_link) {
         setGeneratedLink(data.data.payment_link)
         toast({
-          title: PAYMENT_ITEM_ROW_LABELS.連結產生成功,
-          description: PAYMENT_ITEM_ROW_LABELS.可複製連結發送給客戶,
+          title: t('paymentItemRow.連結產生成功'),
+          description: t('paymentItemRow.可複製連結發送給客戶'),
         })
       } else {
-        throw new Error(data.error || PAYMENT_ITEM_ROW_LABELS.產生連結失敗)
+        throw new Error(data.error || t('paymentItemRow.產生連結失敗'))
       }
     } catch (error) {
       toast({
-        title: PAYMENT_ITEM_ROW_LABELS.產生連結失敗,
-        description: error instanceof Error ? error.message : ADD_RECEIPT_DIALOG_LABELS.請稍後再試,
+        title: t('paymentItemRow.產生連結失敗'),
+        description: error instanceof Error ? error.message : t('addReceiptDialog.請稍後再試'),
         variant: 'destructive',
       })
     } finally {
@@ -246,7 +244,7 @@ export function PaymentItemRow({
           <DatePicker
             value={item.transaction_date}
             onChange={date => onUpdate(item.id, { transaction_date: date })}
-            placeholder={PAYMENT_ITEM_ROW_LABELS.選擇日期}
+            placeholder={t('paymentItemRow.選擇日期')}
             buttonClassName="h-auto p-0 border-0 shadow-none bg-transparent"
           />
         </td>
@@ -293,7 +291,7 @@ export function PaymentItemRow({
             type="text"
             value={item.notes || ''}
             onChange={e => onUpdate(item.id, { notes: e.target.value })}
-            placeholder={PAYMENT_ITEM_ROW_LABELS.備註_選填}
+            placeholder={t('paymentItemRow.備註_選填')}
             className="input-no-focus w-full bg-transparent text-sm"
           />
         </td>
@@ -335,7 +333,7 @@ export function PaymentItemRow({
               <button
                 onClick={() => onRemove(item.id)}
                 className="text-morandi-secondary/50 hover:text-morandi-red transition-colors p-1 rounded hover:bg-morandi-red/10"
-                title={ADD_RECEIPT_DIALOG_LABELS.刪除}
+                title={t('addReceiptDialog.刪除')}
               >
                 <Trash2 size={14} />
               </button>
@@ -349,10 +347,10 @@ export function PaymentItemRow({
         <tr className="text-xs text-morandi-primary font-medium bg-card">
           <th className="text-left py-2.5 px-3 border-b border-border/50">Email *</th>
           <th className="text-left py-2.5 px-3 border-b border-border/50">
-            {PAYMENT_ITEM_ROW_LABELS.LABEL_6186}
+            {t('paymentItemRow.label6186')}
           </th>
           <th className="text-left py-2.5 px-3 border-b border-border/50" colSpan={2}>
-            {PAYMENT_ITEM_ROW_LABELS.LABEL_4673}
+            {t('paymentItemRow.label4673')}
           </th>
           <th className="border-b border-border/50" colSpan={2}></th>
         </tr>
@@ -374,7 +372,7 @@ export function PaymentItemRow({
             <DatePicker
               value={item.pay_dateline || ''}
               onChange={date => onUpdate(item.id, { pay_dateline: date })}
-              placeholder={PAYMENT_ITEM_ROW_LABELS.選擇日期}
+              placeholder={t('paymentItemRow.選擇日期')}
               buttonClassName="h-auto p-0 border-0 shadow-none bg-transparent"
             />
           </td>
@@ -383,7 +381,7 @@ export function PaymentItemRow({
               type="text"
               value={item.payment_name || ''}
               onChange={e => onUpdate(item.id, { payment_name: e.target.value })}
-              placeholder={PAYMENT_ITEM_ROW_LABELS.例如_峇里島五日遊_尾款}
+              placeholder={t('paymentItemRow.例如_峇里島五日遊_尾款')}
               className="input-no-focus w-full bg-transparent text-sm"
             />
           </td>
@@ -398,12 +396,12 @@ export function PaymentItemRow({
               {isGenerating ? (
                 <>
                   <Loader2 size={14} className="animate-spin" />
-                  {PAYMENT_ITEM_ROW_LABELS.LABEL_3875}
+                  {t('paymentItemRow.label3875')}
                 </>
               ) : (
                 <>
                   <Link2 size={14} />
-                  {PAYMENT_ITEM_ROW_LABELS.LABEL_2899}
+                  {t('paymentItemRow.label2899')}
                 </>
               )}
             </Button>
@@ -415,7 +413,7 @@ export function PaymentItemRow({
       {(currentCode === 'LINKPAY' || currentCode === 'LINEPAY') && generatedLink && (
         <tr className="bg-morandi-gold/10">
           <td className="py-2 px-3 border-b border-border/50 text-xs text-morandi-secondary">
-            {PAYMENT_ITEM_ROW_LABELS.LABEL_1487}
+            {t('paymentItemRow.label1487')}
           </td>
           <td className="py-2 px-3 border-b border-border/50" colSpan={3}>
             <input
@@ -431,14 +429,14 @@ export function PaymentItemRow({
               onClick={handleCopyLink}
               className="text-morandi-gold hover:text-morandi-gold-hover text-sm mr-3"
             >
-              {copied ? '✓ 已複製' : PAYMENT_ITEM_ROW_LABELS.複製}
+              {copied ? '✓ 已複製' : t('paymentItemRow.複製')}
             </button>
             <button
               type="button"
               onClick={() => window.open(generatedLink, '_blank')}
               className="text-morandi-secondary hover:text-morandi-primary text-sm"
             >
-              {PAYMENT_ITEM_ROW_LABELS.LABEL_1670}
+              {t('paymentItemRow.label1670')}
             </button>
           </td>
         </tr>
