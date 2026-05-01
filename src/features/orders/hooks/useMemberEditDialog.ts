@@ -6,7 +6,7 @@ import { supabase } from '@/lib/supabase/client'
 import { useCustomersSlim, updateCustomer, createCustomer } from '@/data'
 import { alert } from '@/lib/ui/alert-dialog'
 import type { OrderMember } from '@/features/orders/types/order-member.types'
-import { COMP_ORDERS_LABELS } from '../constants/labels'
+import { useTranslations } from 'next-intl'
 // 2025-06-27: 移除 useImageEditor 依賴 (改用統一的 ImageEditor 元件)
 
 interface UseMemberEditDialogParams {
@@ -15,6 +15,8 @@ interface UseMemberEditDialogParams {
 }
 
 export function useMemberEditDialog({ members, setMembers }: UseMemberEditDialogParams) {
+  const t = useTranslations('orders')
+
   const [editingMember, setEditingMember] = useState<OrderMember | null>(null)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [editMode, setEditMode] = useState<'verify' | 'edit'>('edit')
@@ -97,7 +99,7 @@ export function useMemberEditDialog({ members, setMembers }: UseMemberEditDialog
           .eq('id', editingMember.customer_id)
 
         if (customerError) {
-          logger.error(COMP_ORDERS_LABELS.更新顧客失敗, customerError)
+          logger.error(t('common.更新顧客失敗'), customerError)
         }
       } else if (
         editFormData.chinese_name ||
@@ -203,14 +205,14 @@ export function useMemberEditDialog({ members, setMembers }: UseMemberEditDialog
       setIsEditDialogOpen(false)
       setEditingMember(null)
       void alert(
-        editMode === 'verify' ? COMP_ORDERS_LABELS.驗證完成 : COMP_ORDERS_LABELS.儲存成功,
+        editMode === 'verify' ? t('common.驗證完成') : t('common.儲存成功'),
         'success'
       )
     } catch (error) {
-      logger.error(COMP_ORDERS_LABELS.儲存失敗_2, error)
+      logger.error(t('common.儲存失敗_2'), error)
       void alert(
-        COMP_ORDERS_LABELS.儲存失敗_3 +
-          (error instanceof Error ? error.message : COMP_ORDERS_LABELS.未知錯誤),
+        t('common.儲存失敗_3') +
+          (error instanceof Error ? error.message : t('common.未知錯誤')),
         'error'
       )
     } finally {

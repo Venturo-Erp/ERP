@@ -1,7 +1,5 @@
 'use client'
 
-import { FINANCE_PAGE_LABELS } from './constants/labels'
-
 import React, { useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import { ContentPageLayout } from '@/components/layout/content-page-layout'
@@ -22,8 +20,11 @@ import {
   AlertTriangle,
 } from 'lucide-react'
 import { ModuleLoading } from '@/components/module-loading'
+import { useTranslations } from 'next-intl'
 
 export default function FinancePage() {
+  const t = useTranslations('finance')
+
   const {
     transactions,
     stats,
@@ -55,7 +56,7 @@ export default function FinancePage() {
     () => [
       {
         key: 'type',
-        label: FINANCE_PAGE_LABELS.COL_TYPE,
+        label: t('financePage.colType'),
         sortable: true,
         render: (_value, transaction) => {
           const typeIcons: Record<string, React.ReactNode> = {
@@ -64,9 +65,9 @@ export default function FinancePage() {
             transfer: <DollarSign size={16} className="text-morandi-gold" />,
           }
           const typeLabels: Record<string, string> = {
-            income: FINANCE_PAGE_LABELS.TYPE_INCOME,
-            expense: FINANCE_PAGE_LABELS.TYPE_EXPENSE,
-            transfer: FINANCE_PAGE_LABELS.TYPE_TRANSFER,
+            income: t('financePage.typeIncome'),
+            expense: t('financePage.typeExpense'),
+            transfer: t('financePage.typeTransfer'),
           }
           return (
             <div className="flex items-center space-x-2">
@@ -78,7 +79,7 @@ export default function FinancePage() {
       },
       {
         key: 'description',
-        label: FINANCE_PAGE_LABELS.COL_DESCRIPTION,
+        label: t('financePage.colDescription'),
         sortable: true,
         render: (_value, transaction) => (
           <span className="text-sm text-morandi-primary">{transaction.description}</span>
@@ -86,7 +87,7 @@ export default function FinancePage() {
       },
       {
         key: 'amount',
-        label: FINANCE_PAGE_LABELS.COL_AMOUNT,
+        label: t('financePage.colAmount'),
         sortable: true,
         render: (_value, transaction) => (
           <CurrencyCell
@@ -98,7 +99,7 @@ export default function FinancePage() {
       },
       {
         key: 'date',
-        label: FINANCE_PAGE_LABELS.COL_DATE,
+        label: t('financePage.colDate'),
         sortable: true,
         render: (_value, transaction) => <DateCell date={transaction.date} showIcon={false} />,
       },
@@ -108,29 +109,29 @@ export default function FinancePage() {
 
   const financeModules = [
     {
-      title: FINANCE_PAGE_LABELS.MODULE_FINANCE_TITLE,
-      description: FINANCE_PAGE_LABELS.MODULE_FINANCE_DESC,
+      title: t('financePage.moduleFinanceTitle'),
+      description: t('financePage.moduleFinanceDesc'),
       icon: CreditCard,
       href: '/finance/payments',
-      stats: FINANCE_PAGE_LABELS.MODULE_FINANCE_STATS(transactionsCount),
+      stats: `${transactionsCount} 筆記錄`,
       color: 'text-morandi-green',
       bgColor: 'bg-morandi-green/10',
     },
     {
-      title: FINANCE_PAGE_LABELS.MODULE_TREASURY_TITLE,
-      description: FINANCE_PAGE_LABELS.MODULE_TREASURY_DESC,
+      title: t('financePage.moduleTreasuryTitle'),
+      description: t('financePage.moduleTreasuryDesc'),
       icon: Wallet,
       href: '/finance/treasury',
-      stats: FINANCE_PAGE_LABELS.MODULE_TREASURY_STATS,
+      stats: t('financePage.moduleTreasuryStats'),
       color: 'text-morandi-gold',
       bgColor: 'bg-morandi-gold/10',
     },
     {
-      title: FINANCE_PAGE_LABELS.MODULE_REPORTS_TITLE,
-      description: FINANCE_PAGE_LABELS.MODULE_REPORTS_DESC,
+      title: t('financePage.moduleReportsTitle'),
+      description: t('financePage.moduleReportsDesc'),
       icon: BarChart3,
       href: '/finance/reports',
-      stats: FINANCE_PAGE_LABELS.MODULE_REPORTS_STATS,
+      stats: t('financePage.moduleReportsStats'),
       color: 'text-morandi-primary',
       bgColor: 'bg-morandi-primary/10',
     },
@@ -144,7 +145,7 @@ export default function FinancePage() {
 
   return (
     <ContentPageLayout
-      title={FINANCE_PAGE_LABELS.MANAGE_8421}
+      title={t('financePage.manage8421')}
       contentClassName="flex-1 overflow-auto"
     >
       <div className="space-y-6">
@@ -154,7 +155,7 @@ export default function FinancePage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-morandi-secondary mb-1">
-                  {FINANCE_PAGE_LABELS.TOTAL_INCOME}
+                  {t('financePage.totalIncome')}
                 </p>
                 <div className="text-2xl font-bold">
                   <CurrencyCell amount={totalReceivable} variant="income" />
@@ -168,7 +169,7 @@ export default function FinancePage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-morandi-secondary mb-1">
-                  {FINANCE_PAGE_LABELS.TOTAL_EXPENSE}
+                  {t('financePage.totalExpense')}
                 </p>
                 <div className="text-2xl font-bold">
                   <CurrencyCell amount={totalPayable} variant="expense" />
@@ -182,7 +183,7 @@ export default function FinancePage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-morandi-secondary mb-1">
-                  {FINANCE_PAGE_LABELS.NET_PROFIT}
+                  {t('financePage.netProfit')}
                 </p>
                 <div className="text-2xl font-bold">
                   <CurrencyCell
@@ -199,7 +200,7 @@ export default function FinancePage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-morandi-secondary mb-1">
-                  {FINANCE_PAGE_LABELS.PENDING_ITEMS}
+                  {t('financePage.pendingItems')}
                 </p>
                 <div className="text-2xl font-bold text-morandi-gold">
                   <CurrencyCell amount={pendingPayments} />
@@ -237,31 +238,27 @@ export default function FinancePage() {
         {/* 交易紀錄 */}
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-morandi-primary">
-            {FINANCE_PAGE_LABELS.TRANSACTION_RECORDS}
+            {t('financePage.transactionRecords')}
           </h3>
           <EnhancedTable columns={transactionColumns as TableColumn[]} data={transactions} />
 
           {/* Pagination Controls */}
           <div className="flex items-center justify-between pt-4">
             <div className="text-sm text-morandi-secondary">
-              {FINANCE_PAGE_LABELS.PAGINATION_SUMMARY(
-                transactionsCount,
-                transactionsPage,
-                totalPages
-              )}
+              {`共 ${transactionsCount} 筆交易，目前在第 ${transactionsPage} / ${totalPages} 頁`}
             </div>
             <div className="flex gap-2">
               <Button
                 onClick={() => fetchTransactions(transactionsPage - 1)}
                 disabled={transactionsPage <= 1 || isLoading}
               >
-                {FINANCE_PAGE_LABELS.LABEL_5163}
+                {t('financePage.label5163')}
               </Button>
               <Button
                 onClick={() => fetchTransactions(transactionsPage + 1)}
                 disabled={transactionsPage >= totalPages || isLoading}
               >
-                {FINANCE_PAGE_LABELS.LABEL_9383}
+                {t('financePage.label9383')}
               </Button>
             </div>
           </div>

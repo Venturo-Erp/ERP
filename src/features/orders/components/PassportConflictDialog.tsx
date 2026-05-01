@@ -20,8 +20,8 @@ import { logger } from '@/lib/utils/logger'
 import { toast } from 'sonner'
 import type { ActiveOrderConflict } from '@/lib/utils/sync-passport-image'
 import { batchUpdateConflictMembers, PASSPORT_FIELD_LABELS } from '@/lib/utils/sync-passport-image'
-import { PASSPORT_CONFLICT_LABELS as L } from '../constants/labels'
 import { usePassportImageUrl } from '@/lib/passport-storage/usePassportImageUrl'
+import { useTranslations } from 'next-intl'
 
 // 簡單圖片顯示 + 載入失敗 fallback
 function PassportImage({ url, label }: { url?: string | null; label: string }) {
@@ -74,6 +74,8 @@ export function PassportConflictDialog({
   passportData,
   onComplete,
 }: PassportConflictDialogProps) {
+  const t = useTranslations('orders')
+
   const [isUpdating, setIsUpdating] = useState(false)
 
   const handleUpdate = useCallback(async () => {
@@ -81,12 +83,12 @@ export function PassportConflictDialog({
     try {
       const memberIds = conflicts.map(c => c.memberId)
       const count = await batchUpdateConflictMembers(memberIds, passportData)
-      toast.success(L.success.replace('{count}', String(count)))
+      toast.success(t('passportConflict.success').replace('{count}', String(count)))
       onOpenChange(false)
       onComplete?.()
     } catch (error) {
-      logger.error(L.fail, error)
-      toast.error(L.fail)
+      logger.error(t('passportConflict.fail'), error)
+      toast.error(t('passportConflict.fail'))
     } finally {
       setIsUpdating(false)
     }
@@ -103,8 +105,8 @@ export function PassportConflictDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent level={2} className="max-w-2xl max-h-[80vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle>{L.title}</DialogTitle>
-          <DialogDescription>{L.desc}</DialogDescription>
+          <DialogTitle>{t('passportConflict.title')}</DialogTitle>
+          <DialogDescription>{t('passportConflict.desc')}</DialogDescription>
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto space-y-3 py-2">
@@ -112,13 +114,13 @@ export function PassportConflictDialog({
             <div key={conflict.memberId} className="border rounded-lg p-3 space-y-3 text-sm">
               <div className="flex gap-4 text-muted-foreground">
                 <span>
-                  {L.order}: {conflict.orderCode}
+                  {t('passportConflict.order')}: {conflict.orderCode}
                 </span>
                 <span>
-                  {L.tour}: {conflict.tourName}
+                  {t('passportConflict.tour')}: {conflict.tourName}
                 </span>
                 <span>
-                  {L.member}: {conflict.memberName}
+                  {t('passportConflict.member')}: {conflict.memberName}
                 </span>
               </div>
 
@@ -131,9 +133,9 @@ export function PassportConflictDialog({
               <table className="w-full text-xs">
                 <thead>
                   <tr className="border-b">
-                    <th className="text-left py-1">{L.field}</th>
-                    <th className="text-left py-1">{L.old_value}</th>
-                    <th className="text-left py-1">{L.new_value}</th>
+                    <th className="text-left py-1">{t('passportConflict.field')}</th>
+                    <th className="text-left py-1">{t('passportConflict.oldValue')}</th>
+                    <th className="text-left py-1">{t('passportConflict.newValue')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -152,10 +154,10 @@ export function PassportConflictDialog({
 
         <DialogFooter className="gap-2">
           <Button variant="outline" onClick={handleSkip} disabled={isUpdating}>
-            {L.skip}
+            {t('passportConflict.skip')}
           </Button>
           <Button onClick={handleUpdate} disabled={isUpdating}>
-            {isUpdating ? L.updating : L.update_all}
+            {isUpdating ? t('passportConflict.updating') : t('passportConflict.updateAll')}
           </Button>
         </DialogFooter>
       </DialogContent>

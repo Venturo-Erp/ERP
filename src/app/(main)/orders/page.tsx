@@ -1,7 +1,5 @@
 'use client'
 
-import { LABELS } from './constants/labels'
-
 import React, { useState, useEffect, useMemo } from 'react'
 import { ContentPageLayout } from '@/components/layout/content-page-layout'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -13,9 +11,11 @@ import { AddOrderForm } from '@/features/orders/components/add-order-form'
 import type { Order } from '@/stores/types'
 import { logger } from '@/lib/utils/logger'
 import { alert as showAlert } from '@/lib/ui/alert-dialog'
-import { ORDERS_PAGE_LABELS } from '@/features/orders/constants/labels'
+import { useTranslations } from 'next-intl'
 
 export default function OrdersPage() {
+  const t = useTranslations('orders')
+
   const { items: orders, create: addOrder } = useOrdersListSlim()
   const { items: tours } = useToursListSlim()
   const { currentWorkspace, loadWorkspaces } = useWorkspaceChannels()
@@ -37,8 +37,8 @@ export default function OrdersPage() {
 
   const filteredOrders = orders.filter(order => {
     const isVisaOrEsim =
-      order.tour_name?.includes(ORDERS_PAGE_LABELS.VISA_TOUR) ||
-      order.tour_name?.includes(ORDERS_PAGE_LABELS.ESIM_TOUR)
+      order.tour_name?.includes(t('ordersPage.visaTour')) ||
+      order.tour_name?.includes(t('ordersPage.esimTour'))
     if (isVisaOrEsim) return false
 
     // 改用金額算、不再依賴 payment_status enum (SSOT 簡化、收多少錢才是事實)
@@ -77,15 +77,15 @@ export default function OrdersPage() {
   }) => {
     const selectedTour = tours.find(t => t.id === orderData.tour_id)
     if (!selectedTour) {
-      void showAlert(LABELS.SELECT_TOUR, 'warning')
+      void showAlert(t('labels.selectTour'), 'warning')
       return
     }
     if (!currentWorkspace) {
-      void showAlert(LABELS.WORKSPACE_ERROR, 'error')
+      void showAlert(t('labels.workspaceError'), 'error')
       return
     }
     if (!orderData.sales_person?.trim()) {
-      void showAlert(LABELS.SELECT_SALES, 'warning')
+      void showAlert(t('labels.selectSales'), 'warning')
       return
     }
 
@@ -119,28 +119,28 @@ export default function OrdersPage() {
       setIsAddDialogOpen(false)
     } catch (error) {
       logger.error('[Orders] 新增訂單失敗:', error)
-      void showAlert(error instanceof Error ? error.message : LABELS.ADD_ORDER_FAILED, 'error')
+      void showAlert(error instanceof Error ? error.message : t('labels.addOrderFailed'), 'error')
     }
   }
 
   return (
     <ContentPageLayout
-      title={LABELS.MANAGE_949}
+      title={t('labels.manage949')}
       icon={ShoppingCart}
       showSearch={true}
       searchTerm={searchQuery}
       onSearchChange={setSearchQuery}
-      searchPlaceholder={LABELS.SEARCH_PLACEHOLDER}
+      searchPlaceholder={t('labels.searchPlaceholder')}
       tabs={[
-        { value: 'all', label: ORDERS_PAGE_LABELS.TAB_ALL, icon: ShoppingCart },
-        { value: 'unpaid', label: ORDERS_PAGE_LABELS.TAB_UNPAID, icon: AlertCircle },
-        { value: 'partial', label: ORDERS_PAGE_LABELS.TAB_PARTIAL, icon: Clock },
-        { value: 'paid', label: ORDERS_PAGE_LABELS.TAB_PAID, icon: CheckCircle },
+        { value: 'all', label: t('ordersPage.tabAll'), icon: ShoppingCart },
+        { value: 'unpaid', label: t('ordersPage.tabUnpaid'), icon: AlertCircle },
+        { value: 'partial', label: t('ordersPage.tabPartial'), icon: Clock },
+        { value: 'paid', label: t('ordersPage.tabPaid'), icon: CheckCircle },
       ]}
       activeTab={statusFilter}
       onTabChange={setStatusFilter}
       onAdd={() => setIsAddDialogOpen(true)}
-      addLabel={LABELS.ADD_ORDER}
+      addLabel={t('labels.addOrder')}
       contentClassName="flex-1 overflow-auto flex flex-col"
     >
       <OrderListView className="flex-1" orders={sortedOrders} tours={tours} showTourInfo={true} />
@@ -149,7 +149,7 @@ export default function OrdersPage() {
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
         <DialogContent level={1} className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>{LABELS.ADD_ORDER}</DialogTitle>
+            <DialogTitle>{t('labels.addOrder')}</DialogTitle>
           </DialogHeader>
           <AddOrderForm onSubmit={handleAddOrder} onCancel={() => setIsAddDialogOpen(false)} />
         </DialogContent>

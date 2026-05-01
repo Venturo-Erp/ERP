@@ -8,7 +8,7 @@ import { useState, useCallback, useMemo, useEffect } from 'react'
 import { useOrdersSlim } from '@/data'
 import type { PaymentFormData, PaymentItem } from '../types'
 import { RECEIPT_TYPES } from '../types'
-import { PAYMENT_FORM_LABELS } from '../../constants/labels'
+import { useTranslations } from 'next-intl'
 
 interface TourSlim {
   id: string
@@ -17,6 +17,8 @@ interface TourSlim {
 }
 
 export function usePaymentForm() {
+  const t = useTranslations('finance')
+
   const { items: orders } = useOrdersSlim()
 
   // 只載入正式團（從 API 層過濾，省流量）
@@ -131,34 +133,34 @@ export function usePaymentForm() {
     // 團體收款需要 tour_id 和 order_id
     // 公司收款不需要（允許 NULL）
     if (formData.tour_id && !formData.order_id) {
-      errors.push(PAYMENT_FORM_LABELS.SELECT_ORDER)
+      errors.push(t('paymentForm.selectOrder'))
     }
 
     if (paymentItems.length === 0) {
-      errors.push(PAYMENT_FORM_LABELS.AT_LEAST_ONE_ITEM)
+      errors.push(t('paymentForm.atLeastOneItem'))
     }
 
     if (totalAmount <= 0) {
-      errors.push(PAYMENT_FORM_LABELS.TOTAL_MUST_GT_ZERO)
+      errors.push(t('paymentForm.totalMustGtZero'))
     }
 
     // 驗證每個收款項目
     paymentItems.forEach((item, index) => {
       if (!item.amount || item.amount <= 0) {
-        errors.push(PAYMENT_FORM_LABELS.ITEM_AMOUNT_GT_ZERO(index + 1))
+        errors.push(`收款項目 ${index + 1}: 金額必須大於 0`)
       }
 
       if (!item.transaction_date) {
-        errors.push(PAYMENT_FORM_LABELS.ITEM_SELECT_DATE(index + 1))
+        errors.push(`收款項目 ${index + 1}: 請選擇收款日期`)
       }
 
       // LinkPay 專屬驗證
       if (item.receipt_type === RECEIPT_TYPES.LINK_PAY) {
         if (!item.email) {
-          errors.push(PAYMENT_FORM_LABELS.ITEM_LINKPAY_EMAIL(index + 1))
+          errors.push(`收款項目 ${index + 1}: LinkPay 需要 Email`)
         }
         if (!item.pay_dateline) {
-          errors.push(PAYMENT_FORM_LABELS.ITEM_LINKPAY_DEADLINE(index + 1))
+          errors.push(`收款項目 ${index + 1}: LinkPay 需要付款截止日`)
         }
       }
 

@@ -7,9 +7,9 @@
 import React, { useState } from 'react'
 import { AlertTriangle, Pencil, Trash2, Crown, Plane } from 'lucide-react'
 import type { OrderMember } from '../../types/order-member.types'
-import { COMP_ORDERS_LABELS } from '../../constants/labels'
 import { QuickVisaDialog } from '@/features/visas/components/QuickVisaDialog'
 import { useWorkspaceFeatures } from '@/lib/permissions/hooks'
+import { useTranslations } from 'next-intl'
 
 interface MemberActionsProps {
   member: OrderMember
@@ -34,7 +34,9 @@ export function MemberActions({
   tourInfo,
   orderInfo,
 }: MemberActionsProps) {
-  const isLeader = member.identity === COMP_ORDERS_LABELS.領隊_2
+  const t = useTranslations('orders')
+
+  const isLeader = member.identity === t('common.領隊_2')
   const [visaOpen, setVisaOpen] = useState(false)
   const { isFeatureEnabled } = useWorkspaceFeatures()
   const canOpenVisa = !!tourInfo && !!orderInfo && isFeatureEnabled('visas')
@@ -50,7 +52,7 @@ export function MemberActions({
               onEdit(member, 'verify')
             }}
             className="inline-flex items-center gap-1 text-status-warning hover:text-morandi-gold hover:bg-morandi-gold/10 transition-colors px-1.5 py-1 rounded text-xs"
-            title={COMP_ORDERS_LABELS.待驗證_點擊驗證}
+            title={t('common.待驗證_點擊驗證')}
           >
             <AlertTriangle size={14} />
             <span>待驗證</span>
@@ -68,7 +70,7 @@ export function MemberActions({
                 ? 'text-morandi-gold bg-morandi-gold/10 hover:bg-morandi-gold/20'
                 : 'text-morandi-secondary hover:text-morandi-gold hover:bg-morandi-gold/10'
             }`}
-            title={isLeader ? '取消領隊' : COMP_ORDERS_LABELS.勾選設為領隊}
+            title={isLeader ? '取消領隊' : t('common.勾選設為領隊')}
           >
             <Crown size={14} />
             <span>{isLeader ? '取消領隊' : '設為領隊'}</span>
@@ -95,7 +97,7 @@ export function MemberActions({
             onEdit(member, 'edit')
           }}
           className="inline-flex items-center gap-1 text-morandi-secondary hover:text-morandi-gold hover:bg-morandi-gold/10 transition-colors px-1.5 py-1 rounded text-xs"
-          title={COMP_ORDERS_LABELS.編輯成員}
+          title={t('common.編輯成員')}
         >
           <Pencil size={14} />
           <span>編輯</span>
@@ -107,7 +109,7 @@ export function MemberActions({
             onDelete(member.id)
           }}
           className="inline-flex items-center gap-1 text-morandi-secondary hover:text-morandi-red hover:bg-morandi-red/10 transition-colors px-1.5 py-1 rounded text-xs"
-          title={COMP_ORDERS_LABELS.刪除成員}
+          title={t('common.刪除成員')}
         >
           <Trash2 size={14} />
           <span>刪除</span>

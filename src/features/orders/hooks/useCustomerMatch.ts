@@ -5,7 +5,7 @@ import { logger } from '@/lib/utils/logger'
 import { supabase } from '@/lib/supabase/client'
 import type { Customer } from '@/types/customer.types'
 import type { OrderMember } from '@/features/orders/types/order-member.types'
-import { COMP_ORDERS_LABELS } from '../constants/labels'
+import { useTranslations } from 'next-intl'
 
 export type MatchType = 'name' | 'id_number'
 
@@ -26,6 +26,8 @@ export function useCustomerMatch(
     memberIndex: number,
     memberData: Partial<OrderMember>
   ) => {
+  const t = useTranslations('orders')
+
     if (!name || name.length < 2) {
       return
     }
@@ -98,7 +100,7 @@ export function useCustomerMatch(
           .eq('id', member.id)
 
         if (error) {
-          logger.error(COMP_ORDERS_LABELS.更新成員資料失敗, error)
+          logger.error(t('common.更新成員資料失敗'), error)
         } else {
           logger.info(`自動辨識性別：${gender === 'M' ? '男性' : '女性'}`)
         }
@@ -160,7 +162,7 @@ export function useCustomerMatch(
         })
         .eq('id', member.id)
     } catch (error) {
-      logger.error(COMP_ORDERS_LABELS.更新成員資料失敗, error)
+      logger.error(t('common.更新成員資料失敗'), error)
     }
 
     // 關閉對話框

@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Search, User, X } from 'lucide-react'
 import type { Customer } from '@/types/customer.types'
 import type { MatchType } from '../hooks/useCustomerMatch'
-import { COMP_ORDERS_LABELS } from '../constants/labels'
+import { useTranslations } from 'next-intl'
 
 interface CustomerMatchDialogProps {
   isOpen: boolean
@@ -27,8 +27,10 @@ export function CustomerMatchDialog({
   onClose,
   onSelect,
 }: CustomerMatchDialogProps) {
+  const t = useTranslations('orders')
+
   const matchTypeLabel =
-    matchType === 'name' ? COMP_ORDERS_LABELS.姓名 : COMP_ORDERS_LABELS.身分證號
+    matchType === 'name' ? t('common.姓名') : t('common.身分證號')
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -36,7 +38,7 @@ export function CustomerMatchDialog({
         <DialogHeader className="flex-shrink-0">
           <DialogTitle className="flex items-center gap-2">
             <Search size={20} className="text-morandi-blue" />
-            {COMP_ORDERS_LABELS.找到N位符合的顧客(customers.length, matchTypeLabel)}
+            {`找到 ${customers.length} 位符合的顧客（依 ${matchTypeLabel}）`}
           </DialogTitle>
         </DialogHeader>
 
@@ -60,7 +62,7 @@ export function CustomerMatchDialog({
                       <span className="font-medium text-morandi-primary">{customer.name}</span>
                       {customer.verification_status === 'verified' && (
                         <span className="text-xs px-2 py-0.5 bg-status-success-bg text-status-success rounded">
-                          {COMP_ORDERS_LABELS.LABEL_499}
+                          {t('common.label499')}
                         </span>
                       )}
                       {customer.is_vip && (
@@ -73,7 +75,7 @@ export function CustomerMatchDialog({
                       {customer.passport_name && (
                         <div>
                           <span className="text-xs text-morandi-muted">
-                            {COMP_ORDERS_LABELS.LABEL_9672}
+                            {t('common.label9672')}
                           </span>
                           {customer.passport_name}
                         </div>
@@ -81,7 +83,7 @@ export function CustomerMatchDialog({
                       {customer.national_id && (
                         <div>
                           <span className="text-xs text-morandi-muted">
-                            {COMP_ORDERS_LABELS.LABEL_2866}
+                            {t('common.label2866')}
                           </span>
                           {customer.national_id}
                         </div>
@@ -89,7 +91,7 @@ export function CustomerMatchDialog({
                       {customer.passport_number && (
                         <div>
                           <span className="text-xs text-morandi-muted">
-                            {COMP_ORDERS_LABELS.LABEL_9593}
+                            {t('common.label9593')}
                           </span>
                           {customer.passport_number}
                         </div>
@@ -97,7 +99,7 @@ export function CustomerMatchDialog({
                       {customer.birth_date && (
                         <div>
                           <span className="text-xs text-morandi-muted">
-                            {COMP_ORDERS_LABELS.LABEL_94}
+                            {t('common.label94')}
                           </span>
                           {customer.birth_date}
                         </div>
@@ -105,7 +107,7 @@ export function CustomerMatchDialog({
                       {customer.phone && (
                         <div>
                           <span className="text-xs text-morandi-muted">
-                            {COMP_ORDERS_LABELS.LABEL_9704}
+                            {t('common.label9704')}
                           </span>
                           {customer.phone}
                         </div>
@@ -113,12 +115,12 @@ export function CustomerMatchDialog({
                       {customer.gender && (
                         <div>
                           <span className="text-xs text-morandi-muted">
-                            {COMP_ORDERS_LABELS.LABEL_8424}
+                            {t('common.label8424')}
                           </span>
                           {customer.gender === 'M'
-                            ? COMP_ORDERS_LABELS.男
+                            ? t('common.男')
                             : customer.gender === 'F'
-                              ? COMP_ORDERS_LABELS.女
+                              ? t('common.女')
                               : customer.gender}
                         </div>
                       )}
@@ -133,7 +135,7 @@ export function CustomerMatchDialog({
         <div className="flex-shrink-0 flex justify-end pt-4 border-t">
           <Button variant="outline" className="gap-1" onClick={onClose}>
             <X size={16} />
-            {COMP_ORDERS_LABELS.取消}
+            {t('common.取消')}
           </Button>
         </div>
       </DialogContent>

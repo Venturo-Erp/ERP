@@ -80,10 +80,10 @@ import type {
 } from '../types/order-member.types'
 import type { EditFormData } from './MemberEditDialog'
 import type { MemberSurcharges } from '../types/member-surcharge.types'
-import { COMP_ORDERS_LABELS } from '../constants/labels'
 import { DEFAULT_SURCHARGES } from '../types/member-surcharge.types'
 import { computeRowSpans } from '../utils'
 import { usePassportImageUrl } from '@/lib/passport-storage/usePassportImageUrl'
+import { useTranslations } from 'next-intl'
 
 // 可切換顯示的欄位定義
 export interface ColumnVisibility {
@@ -131,23 +131,23 @@ const defaultColumnVisibility: ColumnVisibility = {
 
 // 欄位標籤對照
 const columnLabels: Record<keyof ColumnVisibility, string> = {
-  passport_name: COMP_ORDERS_LABELS.護照拼音,
-  birth_date: COMP_ORDERS_LABELS.出生年月日,
-  gender: COMP_ORDERS_LABELS.性別,
-  id_number: COMP_ORDERS_LABELS.身分證號,
-  passport_number: COMP_ORDERS_LABELS.護照號碼,
-  passport_expiry: COMP_ORDERS_LABELS.護照效期,
-  special_meal: COMP_ORDERS_LABELS.飲食禁忌,
-  total_payable: COMP_ORDERS_LABELS.應付金額,
-  deposit_amount: COMP_ORDERS_LABELS.訂金,
-  balance: COMP_ORDERS_LABELS.尾款,
-  remarks: COMP_ORDERS_LABELS.備註,
+  passport_name: t('common.護照拼音'),
+  birth_date: t('common.出生年月日'),
+  gender: t('common.性別'),
+  id_number: t('common.身分證號'),
+  passport_number: t('common.護照號碼'),
+  passport_expiry: t('common.護照效期'),
+  special_meal: t('common.飲食禁忌'),
+  total_payable: t('common.應付金額'),
+  deposit_amount: t('common.訂金'),
+  balance: t('common.尾款'),
+  remarks: t('common.備註'),
   pnr: 'PNR',
-  ticket_number: COMP_ORDERS_LABELS.機票號碼,
-  ticketing_deadline: COMP_ORDERS_LABELS.開票期限,
-  flight_cost: COMP_ORDERS_LABELS.機票金額,
-  room: COMP_ORDERS_LABELS.分房,
-  vehicle: COMP_ORDERS_LABELS.分車,
+  ticket_number: t('common.機票號碼'),
+  ticketing_deadline: t('common.開票期限'),
+  flight_cost: t('common.機票金額'),
+  room: t('common.分房'),
+  vehicle: t('common.分車'),
   surcharges: '附加費用',
 }
 
@@ -167,14 +167,14 @@ function PassportPreviewDialog({
       <DialogContent nested level={2} className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>
-            {member?.chinese_name || member?.passport_name || COMP_ORDERS_LABELS.護照照片}
+            {member?.chinese_name || member?.passport_name || t('common.護照照片')}
           </DialogTitle>
         </DialogHeader>
         {member?.passport_image_url && signedUrl && (
           <div className="flex justify-center">
             <img
               src={signedUrl}
-              alt={COMP_ORDERS_LABELS.護照照片}
+              alt={t('common.護照照片')}
               className="max-w-full max-h-[70vh] object-contain rounded-lg"
             />
           </div>
@@ -528,7 +528,7 @@ export function OrderMembersExpandable({
     logger.info(`[同步] 找到 ${membersWithCustomer.length} 位有關聯顧客的成員`)
 
     if (membersWithCustomer.length === 0) {
-      toast.info(COMP_ORDERS_LABELS.沒有成員關聯顧客)
+      toast.info(t('common.沒有成員關聯顧客'))
       return
     }
 
@@ -549,15 +549,15 @@ export function OrderMembersExpandable({
         .limit(500)
 
       if (error) {
-        logger.error(COMP_ORDERS_LABELS.同步_取得顧客資料失敗, error)
-        toast.error(COMP_ORDERS_LABELS.取得顧客資料失敗)
+        logger.error(t('common.同步_取得顧客資料失敗'), error)
+        toast.error(t('common.取得顧客資料失敗'))
         return
       }
 
       logger.info(`[同步] 取得 ${customers?.length || 0} 位顧客資料`)
 
       if (!customers || customers.length === 0) {
-        toast.info(COMP_ORDERS_LABELS.找不到關聯的顧客資料)
+        toast.info(t('common.找不到關聯的顧客資料'))
         return
       }
 
@@ -608,15 +608,15 @@ export function OrderMembersExpandable({
 
       if (updatedCount > 0) {
         toast.success(
-          `${COMP_ORDERS_LABELS.已同步成員資料}${updatedCount}${COMP_ORDERS_LABELS.位成員資料}`
+          `${t('common.已同步成員資料')}${updatedCount}${t('common.位成員資料')}`
         )
         membersData.loadMembers() // 重新載入成員資料
       } else {
-        toast.info(COMP_ORDERS_LABELS.顧客主檔沒有額外的護照資料可同步)
+        toast.info(t('common.顧客主檔沒有額外的護照資料可同步'))
       }
     } catch (err) {
-      logger.error(COMP_ORDERS_LABELS.同步_發生錯誤, err)
-      toast.error(COMP_ORDERS_LABELS.同步失敗)
+      logger.error(t('common.同步_發生錯誤'), err)
+      toast.error(t('common.同步失敗'))
     } finally {
       setIsSyncingFromCustomers(false)
     }
@@ -628,27 +628,27 @@ export function OrderMembersExpandable({
       const currentMember = membersData.members.find(m => m.id === memberId)
       if (!currentMember) return
 
-      const isAlreadyLeader = currentMember.identity === COMP_ORDERS_LABELS.領隊_2
+      const isAlreadyLeader = currentMember.identity === t('common.領隊_2')
 
       try {
         if (isAlreadyLeader) {
           // 取消領隊：改回成人
           await updateMember(memberId, {
-            identity: COMP_ORDERS_LABELS.大人,
+            identity: t('common.大人'),
           } as Parameters<typeof updateMember>[1])
 
           membersData.setMembers(
             membersData.members.map(m =>
-              m.id === memberId ? { ...m, identity: COMP_ORDERS_LABELS.大人 } : m
+              m.id === memberId ? { ...m, identity: t('common.大人') } : m
             )
           )
         } else {
           // 1. 先將所有團員的身份設為成人（取消之前的領隊）
           const resetPromises = membersData.members
-            .filter(m => m.identity === COMP_ORDERS_LABELS.領隊_2)
+            .filter(m => m.identity === t('common.領隊_2'))
             .map(m =>
               updateMember(m.id, {
-                identity: COMP_ORDERS_LABELS.大人,
+                identity: t('common.大人'),
               } as Parameters<typeof updateMember>[1])
             )
 
@@ -656,16 +656,16 @@ export function OrderMembersExpandable({
 
           // 2. 設定新領隊（不動排序）
           await updateMember(memberId, {
-            identity: COMP_ORDERS_LABELS.領隊_2,
+            identity: t('common.領隊_2'),
           } as Parameters<typeof updateMember>[1])
 
           // 3. 更新本地狀態
           membersData.setMembers(
             membersData.members.map(m =>
               m.id === memberId
-                ? { ...m, identity: COMP_ORDERS_LABELS.領隊_2 }
-                : m.identity === COMP_ORDERS_LABELS.領隊_2
-                  ? { ...m, identity: COMP_ORDERS_LABELS.大人 }
+                ? { ...m, identity: t('common.領隊_2') }
+                : m.identity === t('common.領隊_2')
+                  ? { ...m, identity: t('common.大人') }
                   : m
             )
           )
@@ -679,8 +679,8 @@ export function OrderMembersExpandable({
         // 重新載入資料以確保順序正確
         setTimeout(() => membersData.loadMembers(), 100)
       } catch (error) {
-        logger.error(COMP_ORDERS_LABELS.設定領隊失敗, error)
-        toast.error(COMP_ORDERS_LABELS.設定領隊失敗)
+        logger.error(t('common.設定領隊失敗'), error)
+        toast.error(t('common.設定領隊失敗'))
       }
     },
     [membersData]
@@ -705,31 +705,31 @@ export function OrderMembersExpandable({
             const memberIds = samePnrMembers.map(m => m.id)
             await updateMembersTicketingDeadline(memberIds, deadlineValue)
           } catch (error) {
-            logger.error(COMP_ORDERS_LABELS.更新欄位失敗, error)
+            logger.error(t('common.更新欄位失敗'), error)
           }
           return
         }
       }
 
       // 領隊自動排第一：當設為領隊時，把該成員的 sort_order 改成 0
-      if (field === 'identity' && value === COMP_ORDERS_LABELS.領隊_2) {
+      if (field === 'identity' && value === t('common.領隊_2')) {
         const currentMember = membersData.members.find(m => m.id === memberId)
         if (currentMember) {
           // 更新本地狀態：領隊排第一，其他人順序不變
           membersData.setMembers(
             membersData.members.map(m =>
-              m.id === memberId ? { ...m, identity: COMP_ORDERS_LABELS.領隊_2, sort_order: 0 } : m
+              m.id === memberId ? { ...m, identity: t('common.領隊_2'), sort_order: 0 } : m
             )
           )
           // 更新資料庫
           try {
             await updateMember(memberId, {
-              identity: COMP_ORDERS_LABELS.領隊_2,
+              identity: t('common.領隊_2'),
               sort_order: 0,
             } as Parameters<typeof updateMember>[1])
             logger.info(`已將 ${currentMember.chinese_name} 設為領隊並排到第一位`)
           } catch (error) {
-            logger.error(COMP_ORDERS_LABELS.設定領隊失敗, error)
+            logger.error(t('common.設定領隊失敗'), error)
           }
           return
         }
@@ -742,7 +742,7 @@ export function OrderMembersExpandable({
       try {
         await updateMember(memberId, { [field]: value })
       } catch (error) {
-        logger.error(COMP_ORDERS_LABELS.更新欄位失敗, error)
+        logger.error(t('common.更新欄位失敗'), error)
       }
     },
     [membersData]
@@ -842,6 +842,8 @@ export function OrderMembersExpandable({
       let nextFieldIndex = currentFieldIndex
 
       const navigate = (mDelta: number, fDelta: number) => {
+  const t = useTranslations('orders')
+
         nextMemberIndex = (memberIndex + mDelta + members.length) % members.length
         nextFieldIndex =
           (currentFieldIndex + fDelta + editableFields.length) % editableFields.length
@@ -996,10 +998,10 @@ export function OrderMembersExpandable({
       >
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium text-morandi-primary">
-            {COMP_ORDERS_LABELS.團員名單}
+            {t('common.團員名單')}
           </span>
           <span className="text-sm text-morandi-secondary">
-            ({sortedMembers.length} {COMP_ORDERS_LABELS.人})
+            ({sortedMembers.length} {t('common.人')})
           </span>
         </div>
         <div className="flex items-center gap-1">
@@ -1013,7 +1015,7 @@ export function OrderMembersExpandable({
                 onClick={() => setShowPnrMatchDialog(true)}
               >
                 <Plane size={14} className="mr-1" />
-                {COMP_ORDERS_LABELS.PNR_配對}
+                {t('common.pnr配對')}
               </Button>
             </>
           )}
@@ -1024,12 +1026,12 @@ export function OrderMembersExpandable({
             onClick={handleToggleEditMode}
             title={
               isAllEditMode
-                ? COMP_ORDERS_LABELS.關閉全部編輯模式
-                : COMP_ORDERS_LABELS.開啟全部編輯模式
+                ? t('common.關閉全部編輯模式')
+                : t('common.開啟全部編輯模式')
             }
           >
             <Pencil size={14} />
-            {isAllEditMode ? COMP_ORDERS_LABELS.關閉編輯 : COMP_ORDERS_LABELS.全部編輯}
+            {isAllEditMode ? t('common.關閉編輯') : t('common.全部編輯')}
           </Button>
           {mode === 'tour' && (
             <Button
@@ -1037,9 +1039,9 @@ export function OrderMembersExpandable({
               size="sm"
               className="h-8 px-2"
               onClick={async () => {
-                const name = await prompt(COMP_ORDERS_LABELS.輸入費用欄位名稱_例如_簽證費_小費, {
-                  title: COMP_ORDERS_LABELS.新增費用欄位,
-                  placeholder: COMP_ORDERS_LABELS.例如_簽證費_小費,
+                const name = await prompt(t('common.輸入費用欄位名稱_例如_簽證費_小費'), {
+                  title: t('common.新增費用欄位'),
+                  placeholder: t('common.例如_簽證費_小費'),
                 })
                 if (name?.trim()) {
                   const newField = { id: `cost_${Date.now()}`, name: name.trim(), values: {} }
@@ -1077,7 +1079,7 @@ export function OrderMembersExpandable({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48 max-h-[70vh] overflow-y-auto">
               <DropdownMenuLabel className="text-xs">
-                {COMP_ORDERS_LABELS.顯示欄位}
+                {t('common.顯示欄位')}
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuCheckboxItem
@@ -1183,7 +1185,7 @@ export function OrderMembersExpandable({
                     }
                     className={!roomVehicle.showRoomColumn ? 'opacity-50 cursor-not-allowed' : ''}
                   >
-                    {columnLabels.room} {!roomVehicle.showRoomColumn && COMP_ORDERS_LABELS.無資料}
+                    {columnLabels.room} {!roomVehicle.showRoomColumn && t('common.無資料')}
                   </DropdownMenuCheckboxItem>
                   <DropdownMenuCheckboxItem
                     checked={columnVisibility.vehicle && roomVehicle.showVehicleColumn}
@@ -1195,7 +1197,7 @@ export function OrderMembersExpandable({
                     }
                   >
                     {columnLabels.vehicle}{' '}
-                    {!roomVehicle.showVehicleColumn && COMP_ORDERS_LABELS.無資料}
+                    {!roomVehicle.showVehicleColumn && t('common.無資料')}
                   </DropdownMenuCheckboxItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuCheckboxItem
@@ -1217,7 +1219,7 @@ export function OrderMembersExpandable({
               onClick={membersData.handleAddMember}
             >
               <Plus size={14} />
-              {COMP_ORDERS_LABELS.新增}
+              {t('common.新增')}
             </Button>
           )}
         </div>
@@ -1370,7 +1372,6 @@ export function OrderMembersExpandable({
         member={previewMember}
         onClose={() => setPreviewMember(null)}
       />
-
 
       <AddMemberDialog
         isOpen={membersData.isAddDialogOpen}

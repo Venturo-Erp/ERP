@@ -5,10 +5,10 @@ import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { ArrowLeft, ArrowRight, Send } from 'lucide-react'
-import { BATCH_VISA_LABELS as L } from '../constants/labels'
 import { useBatchVisa } from '../hooks/useBatchVisa'
 import { VISA_TYPE_GROUPS } from '@/constants/visa-types'
 import type { Order } from '@/stores/types'
+import { useTranslations } from 'next-intl'
 
 interface BatchVisaDialogProps {
   open: boolean
@@ -17,6 +17,8 @@ interface BatchVisaDialogProps {
 }
 
 export function BatchVisaDialog({ open, onOpenChange, order }: BatchVisaDialogProps) {
+  const t = useTranslations('orders')
+
   const [step, setStep] = useState<1 | 2>(1)
   const [selectedTypes, setSelectedTypes] = useState<Set<string>>(new Set())
   // key: `${memberId}::${visaType}`
@@ -95,12 +97,12 @@ export function BatchVisaDialog({ open, onOpenChange, order }: BatchVisaDialogPr
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent level={2} className="max-w-2xl max-h-[80vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle>{L.dialog_title}</DialogTitle>
+          <DialogTitle>{t('batchVisa.dialogTitle')}</DialogTitle>
         </DialogHeader>
 
         {step === 1 && (
           <div className="flex-1 overflow-y-auto py-4 space-y-4">
-            <p className="text-sm text-morandi-secondary">{L.step_select_type}</p>
+            <p className="text-sm text-morandi-secondary">{t('batchVisa.stepSelectType')}</p>
             {VISA_TYPE_GROUPS.map(group => (
               <div key={group.label} className="space-y-2">
                 <p className="text-xs font-semibold text-morandi-secondary">{group.label}</p>
@@ -126,13 +128,13 @@ export function BatchVisaDialog({ open, onOpenChange, order }: BatchVisaDialogPr
         {step === 2 && (
           <div className="flex-1 overflow-y-auto py-4">
             <div className="flex items-center justify-between mb-3">
-              <p className="text-sm text-morandi-secondary">{L.step_select_members}</p>
+              <p className="text-sm text-morandi-secondary">{t('batchVisa.stepSelectMembers')}</p>
               <div className="flex gap-2">
                 <Button size="sm" variant="ghost" onClick={handleSelectAll}>
-                  {L.btn_select_all}
+                  {t('batchVisa.btnSelectAll')}
                 </Button>
                 <Button size="sm" variant="ghost" onClick={handleDeselectAll}>
-                  {L.btn_deselect_all}
+                  {t('batchVisa.btnDeselectAll')}
                 </Button>
               </div>
             </div>
@@ -140,14 +142,14 @@ export function BatchVisaDialog({ open, onOpenChange, order }: BatchVisaDialogPr
             {isLoadingMembers ? (
               <div className="text-center py-8 text-morandi-secondary">...</div>
             ) : members.length === 0 ? (
-              <div className="text-center py-8 text-morandi-secondary">{L.no_members}</div>
+              <div className="text-center py-8 text-morandi-secondary">{t('batchVisa.noMembers')}</div>
             ) : (
               <div className="border border-border rounded-lg overflow-hidden">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="bg-morandi-container/40 border-b border-border">
                       <th className="text-left py-2 px-3 font-medium text-morandi-secondary">
-                        {L.col_name}
+                        {t('batchVisa.colName')}
                       </th>
                       {typesArray.map(type => (
                         <th
@@ -190,10 +192,10 @@ export function BatchVisaDialog({ open, onOpenChange, order }: BatchVisaDialogPr
           {step === 1 ? (
             <>
               <Button variant="ghost" onClick={() => onOpenChange(false)}>
-                {L.btn_cancel}
+                {t('batchVisa.btnCancel')}
               </Button>
               <Button onClick={goToStep2} disabled={selectedTypes.size === 0}>
-                {L.btn_next}
+                {t('batchVisa.btnNext')}
                 <ArrowRight className="ml-1" size={16} />
               </Button>
             </>
@@ -201,10 +203,10 @@ export function BatchVisaDialog({ open, onOpenChange, order }: BatchVisaDialogPr
             <>
               <Button variant="ghost" onClick={() => setStep(1)}>
                 <ArrowLeft className="mr-1" size={16} />
-                {L.btn_back}
+                {t('batchVisa.btnBack')}
               </Button>
               <Button onClick={handleSubmit} disabled={isSubmitting || checkedCells.size === 0}>
-                {isSubmitting ? L.btn_submitting : L.btn_submit}
+                {isSubmitting ? t('batchVisa.btnSubmitting') : t('batchVisa.btnSubmit')}
                 {!isSubmitting && <Send className="ml-1" size={16} />}
               </Button>
             </>
