@@ -9,12 +9,6 @@
 @import '../lib/design-tokens/primitives.css';
 @import '../lib/design-tokens/semantic.css';
 
-/* 模組化樣式層 */
-@import '../styles/fonts.css';
-@import '../styles/tokens.css';
-@import '../styles/scrollbars.css';
-@import '../styles/utilities.css';
-@import '../styles/animations.css';
 
 body {
   background: var(--background);
