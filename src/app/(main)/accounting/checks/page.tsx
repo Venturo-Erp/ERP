@@ -230,12 +230,11 @@ export default function ChecksPage() {
             columns={columns}
             loading={isLoading}
             searchable={false}
-            headerActions={
-              <Button onClick={handleCreate} className="gap-2">
-                <Plus size={16} />
-                新增票據
-              </Button>
-            }
+            primaryAction={{
+              label: '新增票據',
+              icon: Plus,
+              onClick: handleCreate,
+            }}
           />
         </div>
       </div>

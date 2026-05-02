@@ -141,12 +141,11 @@ export default function RequestsPage() {
         searchable={false}
         onRowClick={handleRowClick}
         onSort={handleSort}
-        headerActions={
-          <Button variant="soft-gold" onClick={() => setIsAddDialogOpen(true)}>
-            <Plus size={16} />
-            {REQUESTS_PAGE_LABELS.ADD_9640}
-          </Button>
-        }
+        primaryAction={{
+          label: REQUESTS_PAGE_LABELS.ADD_9640,
+          icon: Plus,
+          onClick: () => setIsAddDialogOpen(true),
+        }}
         beforeTable={
           visibleTabs.length > 1 ? (
             <div className="flex items-center gap-1 border-b border-border mb-4">

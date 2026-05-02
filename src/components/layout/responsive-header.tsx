@@ -4,6 +4,7 @@ import { useState, memo } from 'react'
 import Link from 'next/link'
 import { useAuthStore } from '@/stores/auth-store'
 import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
 import {
   Select,
   SelectContent,
@@ -13,7 +14,24 @@ import {
 } from '@/components/ui/select'
 import { useBreadcrumb, type BreadcrumbItem } from '@/hooks/useBreadcrumb'
 import { ChevronRight } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import { COMP_LAYOUT_LABELS } from './constants/labels'
+
+/**
+ * Header 結構化按鈕設定
+ *
+ * SSOT 規則：頁面右上角的按鈕一律走這個結構、不准在 layout 裡塞 raw <Button>。
+ * 樣式由 ResponsiveHeader 統一決定、頁面端只給意圖（label / icon / onClick）。
+ *
+ * - primaryAction（第一/唯一按鈕）→ header-outline 樣式（漸層 + shadow）
+ * - secondaryAction（第二按鈕）→ header-filled 樣式（實底金）、視覺上排在 primary 右邊
+ */
+export interface HeaderActionConfig {
+  label: string
+  icon?: LucideIcon
+  onClick: () => void
+  disabled?: boolean
+}
 
 interface ResponsiveHeaderProps {
   title: string
@@ -41,9 +59,12 @@ interface ResponsiveHeaderProps {
   }[]
   activeTab?: string
   onTabChange?: (value: string) => void
-  onAdd?: () => void
-  addLabel?: string
+  /** 第一/唯一按鈕（header-outline 樣式） */
+  primaryAction?: HeaderActionConfig
+  /** 第二按鈕（header-filled 樣式、排在 primary 右邊） */
+  secondaryAction?: HeaderActionConfig
   children?: React.ReactNode
+  /** Escape hatch：給「不是按鈕」的元件用（date input / filter / select）。不准放 Button。 */
   actions?: React.ReactNode
   showBackButton?: boolean
   onBack?: () => void
@@ -65,8 +86,6 @@ interface ResponsiveHeaderProps {
   // 清除篩選按鈕
   showClearFilters?: boolean
   onClearFilters?: () => void
-  // 自訂操作按鈕（顯示在 tabs 右邊）
-  customActions?: React.ReactNode
 }
 
 export const ResponsiveHeader = memo(function ResponsiveHeader(props: ResponsiveHeaderProps) {
@@ -306,29 +325,30 @@ export const ResponsiveHeader = memo(function ResponsiveHeader(props: Responsive
           </div>
         )}
 
-        {/* 自訂操作按鈕 */}
-        {props.customActions && <div className="flex items-center">{props.customActions}</div>}
-
-        {/* 新增按鈕 */}
-        <div className="flex items-center gap-3">
-          {props.onAdd && (
-            <button
-              onClick={props.onAdd}
-              data-create-box
-              className="bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors px-4 py-2 rounded-lg text-sm font-medium flex items-center transition-all"
-            >
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 4v16m8-8H4"
-                />
-              </svg>
-              {props.addLabel || COMP_LAYOUT_LABELS.新增}
-            </button>
-          )}
-        </div>
+        {/* Header 按鈕：primary（第一/唯一）+ secondary（第二）— 結構化、由 ResponsiveHeader 統一畫 */}
+        {props.primaryAction && (
+          <Button
+            variant="header-outline"
+            size="sm"
+            onClick={props.primaryAction.onClick}
+            disabled={props.primaryAction.disabled}
+            data-create-box
+          >
+            {props.primaryAction.icon && <props.primaryAction.icon />}
+            {props.primaryAction.label}
+          </Button>
+        )}
+        {props.secondaryAction && (
+          <Button
+            variant="header-filled"
+            size="sm"
+            onClick={props.secondaryAction.onClick}
+            disabled={props.secondaryAction.disabled}
+          >
+            {props.secondaryAction.icon && <props.secondaryAction.icon />}
+            {props.secondaryAction.label}
+          </Button>
+        )}
 
       </div>
     </div>

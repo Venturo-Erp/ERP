@@ -14,7 +14,7 @@ import { Switch } from '@/components/ui/switch'
 import { useToast } from '@/components/ui/use-toast'
 import { alert as showAlert } from '@/lib/ui/alert-dialog'
 import { supabase } from '@/lib/supabase/client'
-import { Building2, Save, Loader2, Sparkles, Users, Settings2 } from 'lucide-react'
+import { Building2, Save, Sparkles, Users, Settings2 } from 'lucide-react'
 import { ModuleLoading } from '@/components/module-loading'
 import { invalidateFeatureCache } from '@/lib/permissions/hooks'
 import {
@@ -231,20 +231,12 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
         { label: '租戶管理', href: '/tenants' },
         { label: workspace?.name || '詳情', href: `/tenants/${id}` },
       ]}
-      headerActions={
-        <Button
-          onClick={handleSave}
-          disabled={saving}
-          className="bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors"
-        >
-          {saving ? (
-            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-          ) : (
-            <Save className="h-4 w-4 mr-2" />
-          )}
-          儲存
-        </Button>
-      }
+      primaryAction={{
+        label: saving ? '儲存中...' : '儲存',
+        icon: Save,
+        onClick: handleSave,
+        disabled: saving,
+      }}
     >
       <div className="space-y-6">
         {/* 租戶資訊卡片 */}

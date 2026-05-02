@@ -12,7 +12,7 @@ import { EmployeeFull } from '@/stores/types'
 import { EmployeeForm } from '@/features/hr/components/EmployeeForm'
 import { useRouter } from 'next/navigation'
 import { HR_ADMIN_TABS } from './components/hr-admin-tabs'
-import { Users, Edit2, UserX, Bot, Download } from 'lucide-react'
+import { Users, Edit2, UserX, Bot, Download, Plus } from 'lucide-react'
 import type { UserRole } from '@/lib/rbac-config'
 import { TableColumn } from '@/components/ui/enhanced-table'
 import { DateCell, ActionCell } from '@/components/table-cells'
@@ -250,8 +250,11 @@ export default function HRPage() {
         actionsWidth="280px"
         bordered={true}
         defaultSort={{ key: 'employee_number', direction: 'asc' }}
-        onAdd={() => setIsAddDialogOpen(true)}
-        addLabel={LABELS.ADD_EMPLOYEE}
+        primaryAction={{
+          label: LABELS.ADD_EMPLOYEE,
+          icon: Plus,
+          onClick: () => setIsAddDialogOpen(true),
+        }}
       />
 
       {expandedEmployee && (

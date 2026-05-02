@@ -2,6 +2,7 @@
 
 import React from 'react'
 import { ResponsiveHeader } from '@/components/layout/responsive-header'
+import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -52,16 +53,14 @@ export const TourFilters: React.FC<TourFiltersProps> = ({
       tabs={tabs}
       activeTab={activeTab}
       onTabChange={onTabChange}
-      customActions={
+      actions={
+        // Dropdown trigger 不能塞進結構化 primaryAction、走 headerActions escape hatch、Trigger 用 header-outline 統一視覺
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button
-              type="button"
-              className="bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors px-4 py-2 rounded-lg text-sm font-medium flex items-center transition-all"
-            >
-              <Plus className="w-4 h-4 mr-2" />
+            <Button variant="header-outline" size="sm">
+              <Plus />
               新增專案
-            </button>
+            </Button>
           </DropdownMenuTrigger>
 
           <DropdownMenuContent align="end">

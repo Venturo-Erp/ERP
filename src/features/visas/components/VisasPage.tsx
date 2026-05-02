@@ -309,7 +309,8 @@ export default function VisasPage() {
         { label: '首頁', href: '/dashboard' },
         { label: '簽證管理', href: '/visas' },
       ]}
-      customActions={
+      headerActions={
+        // TODO: 內部複合 toolbar 仍用手刻樣式、後續可拆成「資訊 / 匯入 / 新增」三顆走結構化 + 批次 toolbar 留 headerActions
         <div className="flex items-center gap-3">
           {canManageVisas && selectedRows.length > 0 ? (
             <div className="flex items-center gap-2">

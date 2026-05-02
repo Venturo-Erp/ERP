@@ -90,12 +90,11 @@ export default function TransportationRatesPage() {
           href: '/database/transportation-rates',
         },
       ]}
-      headerActions={
-        <Button onClick={() => setIsAddingNewCountry(true)} className="gap-2" size="sm">
-          <Plus size={16} />
-          {TRANSPORTATION_RATES_LABELS.ADD_COUNTRY}
-        </Button>
-      }
+      primaryAction={{
+        label: TRANSPORTATION_RATES_LABELS.ADD_COUNTRY,
+        icon: Plus,
+        onClick: () => setIsAddingNewCountry(true),
+      }}
     >
       <CountryList rates={rates} loading={loading} onOpenCountry={handleOpenCountry} />
 

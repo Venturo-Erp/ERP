@@ -99,7 +99,7 @@ export default function CalendarPage() {
     <>
       <ContentPageLayout
         title={CALENDAR_LABELS.PAGE_TITLE}
-        customActions={
+        headerActions={
           <div className="flex items-center gap-3">
             {/* 月份切換（點中間 = 回今天） */}
             <div className="flex items-center gap-2 bg-card border border-border rounded-lg shadow-sm">
@@ -194,20 +194,16 @@ export default function CalendarPage() {
             </Button>
 
             <CalendarSettingsDialog />
-
-            <Button
-              size="sm"
-              onClick={() => {
-                const today = getTodayString()
-                setAddEventDialog({ open: true, selectedDate: today })
-              }}
-              className="h-9 bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors transition-all font-medium rounded-lg"
-            >
-              <Plus size={16} className="mr-1.5" />
-              {CALENDAR_LABELS.ADD_EVENT}
-            </Button>
           </div>
         }
+        secondaryAction={{
+          label: CALENDAR_LABELS.ADD_EVENT,
+          icon: Plus,
+          onClick: () => {
+            const today = getTodayString()
+            setAddEventDialog({ open: true, selectedDate: today })
+          },
+        }}
         contentClassName="flex-1 overflow-hidden"
       >
         <div className="h-full bg-card rounded-lg border border-border shadow-sm flex flex-col overflow-hidden">

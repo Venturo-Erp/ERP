@@ -237,12 +237,13 @@ export default function VouchersPage() {
             >
               清除
             </Button>
-            <Button onClick={handleCreate} className="gap-2 ml-2">
-              <Plus size={16} />
-              新增傳票
-            </Button>
           </div>
         }
+        primaryAction={{
+          label: '新增傳票',
+          icon: Plus,
+          onClick: handleCreate,
+        }}
       />
 
       <CreateVoucherDialog

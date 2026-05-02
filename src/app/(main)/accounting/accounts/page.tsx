@@ -322,12 +322,13 @@ export default function AccountsPage() {
             <Button variant="outline" size="sm" onClick={() => setExpandedIds(new Set())}>
               全部折疊
             </Button>
-            <Button onClick={handleCreate} className="gap-2">
-              <Plus size={16} />
-              新增科目
-            </Button>
           </div>
         }
+        primaryAction={{
+          label: '新增科目',
+          icon: Plus,
+          onClick: handleCreate,
+        }}
       />
 
       <CreateAccountDialog

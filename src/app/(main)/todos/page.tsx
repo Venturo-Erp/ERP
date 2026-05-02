@@ -463,8 +463,11 @@ export default function TodosPage() {
       searchTerm={searchTerm}
       onSearchChange={setSearchTerm}
       searchPlaceholder={LABELS.SEARCH_PLACEHOLDER}
-      onAdd={() => setIsAddDialogOpen(true)}
-      addLabel={LABELS.ADD_TASK}
+      primaryAction={{
+        label: LABELS.ADD_TASK,
+        icon: Plus,
+        onClick: () => setIsAddDialogOpen(true),
+      }}
       className="h-full flex flex-col -m-4 lg:-m-6"
       contentClassName="flex-1 overflow-hidden"
     >

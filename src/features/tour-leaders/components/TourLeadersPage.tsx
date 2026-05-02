@@ -6,7 +6,7 @@
 import { logger } from '@/lib/utils/logger'
 import React, { useState, useCallback } from 'react'
 import { ContentPageLayout } from '@/components/layout/content-page-layout'
-import { Users } from 'lucide-react'
+import { Users, Plus } from 'lucide-react'
 import { TourLeadersList } from './TourLeadersList'
 import { TourLeadersDialog } from './TourLeadersDialog'
 import { LeaderAvailabilityDialog } from './LeaderAvailabilityDialog'
@@ -190,8 +190,11 @@ export const TourLeadersPage: React.FC = () => {
       searchTerm={searchQuery}
       onSearchChange={setSearchQuery}
       searchPlaceholder={TOUR_LEADERS_LABELS.SEARCH_PLACEHOLDER}
-      onAdd={handleOpenAddDialog}
-      addLabel={TOUR_LEADERS_LABELS.ADD_LEADER}
+      primaryAction={{
+        label: TOUR_LEADERS_LABELS.ADD_LEADER,
+        icon: Plus,
+        onClick: handleOpenAddDialog,
+      }}
     >
       <TourLeadersList
         items={filteredItems}

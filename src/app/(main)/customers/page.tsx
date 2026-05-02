@@ -332,37 +332,27 @@ export default function CustomersPage() {
       onSearchChange={setSearchQuery}
       searchPlaceholder="搜尋姓名 / 電話 / 公司名"
       headerActions={
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => router.push('/customer-groups')}
-            className="gap-2"
-          >
-            <Users size={16} />
-            <span className="hidden sm:inline">{L.btn_groups}</span>
-          </Button>
-
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setIsImportDialogOpen(true)}
-            className="gap-2"
-          >
-            <FileSpreadsheet size={16} />
-            <span className="hidden sm:inline">{CUSTOMER_IMPORT_LABELS.btn_select_file}</span>
-          </Button>
-
-          <Button
-            onClick={() => setIsAddDialogOpen(true)}
-            className="bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors gap-2"
-            size="sm"
-          >
-            <Plus size={16} />
-            <span className="hidden sm:inline">{L.btn_add_customer}</span>
-          </Button>
-        </div>
+        // 客戶群組是 navigation 不算「主操作」、留 escape hatch；匯入/新增走結構化
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => router.push('/customer-groups')}
+          className="gap-2"
+        >
+          <Users size={16} />
+          <span className="hidden sm:inline">{L.btn_groups}</span>
+        </Button>
       }
+      primaryAction={{
+        label: CUSTOMER_IMPORT_LABELS.btn_select_file,
+        icon: FileSpreadsheet,
+        onClick: () => setIsImportDialogOpen(true),
+      }}
+      secondaryAction={{
+        label: L.btn_add_customer,
+        icon: Plus,
+        onClick: () => setIsAddDialogOpen(true),
+      }}
     >
       <div className="flex-1 min-h-0 flex flex-col">
         <div className="flex-1 min-h-0">

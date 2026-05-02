@@ -2,7 +2,7 @@
 
 import { useState, lazy, Suspense, useEffect, useCallback } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { MapPin, Star, Sparkles, Globe, Hotel, UtensilsCrossed } from 'lucide-react'
+import { MapPin, Star, Sparkles, Globe, Hotel, UtensilsCrossed, Plus } from 'lucide-react'
 import { Combobox } from '@/components/ui/combobox'
 import { ContentPageLayout } from '@/components/layout/content-page-layout'
 import { Tabs, TabsContent } from '@/components/ui/tabs'
@@ -199,8 +199,11 @@ export default function DatabaseManagementPage() {
       }
       showClearFilters={activeTab !== 'regions' && Boolean(hasActiveFilters)}
       onClearFilters={clearFilters}
-      onAdd={tabsWithAdd.includes(activeTab) ? handleAdd : undefined}
-      addLabel={addLabel}
+      primaryAction={
+        tabsWithAdd.includes(activeTab)
+          ? { label: addLabel, icon: Plus, onClick: handleAdd }
+          : undefined
+      }
     >
       <Tabs value={activeTab} onValueChange={handleTabChange} className="h-full flex flex-col">
         {/* 分頁內容 - 只載入已訪問過的 tab */}

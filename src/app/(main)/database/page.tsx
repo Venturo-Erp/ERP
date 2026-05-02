@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { MapPin, Bus, Building2, ImageIcon, Archive, Building } from 'lucide-react'
+import { MapPin, Bus, Building2, ImageIcon, Archive, Building, Plus } from 'lucide-react'
 
 import { ContentPageLayout } from '@/components/layout/content-page-layout'
 import { Button } from '@/components/ui/button'
@@ -62,10 +62,13 @@ export default function DatabasePage() {
   return (
     <ContentPageLayout
       title={DATABASE_LABELS.PAGE_TITLE}
-      onAdd={() => {
-        /* 批次匯入邏輯 */
+      primaryAction={{
+        label: DATABASE_LABELS.BATCH_IMPORT,
+        icon: Plus,
+        onClick: () => {
+          /* 批次匯入邏輯 */
+        },
       }}
-      addLabel={DATABASE_LABELS.BATCH_IMPORT}
     >
       <div className="pb-6">
         {/* 概覽卡片 */}

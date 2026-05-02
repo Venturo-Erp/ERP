@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { useOrdersPaginated, createOrder } from '@/data'
 import { useToursListSlim } from '@/hooks/useListSlim'
 import { useAuthStore } from '@/stores/auth-store'
-import { ShoppingCart } from 'lucide-react'
+import { ShoppingCart, Plus } from 'lucide-react'
 import { OrderListView } from '@/features/orders/components/OrderListView'
 import { AddOrderForm } from '@/features/orders/components/add-order-form'
 import type { Order } from '@/stores/types'
@@ -99,8 +99,11 @@ export default function OrdersPage() {
       searchTerm={searchQuery}
       onSearchChange={setSearchQuery}
       searchPlaceholder="搜尋團號 / 團名"
-      onAdd={() => setIsAddDialogOpen(true)}
-      addLabel={LABELS.ADD_ORDER}
+      primaryAction={{
+        label: LABELS.ADD_ORDER,
+        icon: Plus,
+        onClick: () => setIsAddDialogOpen(true),
+      }}
       contentClassName="flex-1 overflow-auto flex flex-col"
     >
       <OrderListView

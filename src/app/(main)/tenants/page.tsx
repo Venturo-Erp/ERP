@@ -6,7 +6,7 @@ import React, { useState, useMemo, useCallback } from 'react'
 import useSWR from 'swr'
 import { useRouter } from 'next/navigation'
 import { ListPageLayout } from '@/components/layout/list-page-layout'
-import { Building2, Pencil } from 'lucide-react'
+import { Building2, Pencil, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useWorkspaceChannels } from '@/stores/workspace'
 import type { Workspace } from '@/stores/workspace'
@@ -159,22 +159,11 @@ export default function TenantsPage() {
         bordered={true}
         emptyMessage={LABELS.EMPTY_MESSAGE}
         onRowClick={handleRowClick}
-        headerActions={
-          <Button
-            onClick={() => setIsCreateOpen(true)}
-            className="bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors px-4 py-2 rounded-lg text-sm font-medium flex items-center"
-          >
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 4v16m8-8H4"
-              />
-            </svg>
-            {LABELS.ADD_TENANT}
-          </Button>
-        }
+        primaryAction={{
+          label: LABELS.ADD_TENANT,
+          icon: Plus,
+          onClick: () => setIsCreateOpen(true),
+        }}
       />
 
       <CreateTenantDialog

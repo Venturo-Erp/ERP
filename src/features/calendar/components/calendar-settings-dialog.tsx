@@ -24,11 +24,7 @@ export function CalendarSettingsDialog() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button
-          variant="outline"
-          size="sm"
-          className="h-9 gap-2 border-morandi-gold/30 bg-card text-morandi-secondary hover:bg-morandi-gold/10 hover:text-morandi-gold hover:border-morandi-gold transition-all shadow-sm"
-        >
+        <Button variant="header-outline" size="sm">
           <Settings size={16} />
           {CALENDAR_LABELS.SETTINGS_1131}
         </Button>

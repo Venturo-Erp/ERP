@@ -267,8 +267,11 @@ export default function PaymentsPage() {
         onRowClick={handleRowClick}
         defaultSort={{ key: 'receipt_date', direction: 'desc' }}
         initialPageSize={15}
-        onAdd={() => setIsDialogOpen(true)}
-        addLabel={FinanceLabels.addPayment}
+        primaryAction={{
+          label: FinanceLabels.addPayment,
+          icon: Plus,
+          onClick: () => setIsDialogOpen(true),
+        }}
         statusTabs={visibleTabs.length > 1 ? visibleTabs : undefined}
         activeStatusTab={activeTab}
         onStatusTabChange={tab => setActiveTab(tab as ReceiptTabValue)}

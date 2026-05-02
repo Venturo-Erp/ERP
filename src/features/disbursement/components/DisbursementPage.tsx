@@ -12,6 +12,7 @@
  */
 
 import { useCallback, useState, useMemo } from 'react'
+import { Plus } from 'lucide-react'
 import { ListPageLayout } from '@/components/layout/list-page-layout'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -281,8 +282,11 @@ export function DisbursementPage() {
         columns={columns}
         searchFields={['order_number']}
         searchPlaceholder={DISBURSEMENT_LABELS.搜尋出納單號}
-        onAdd={canManage ? handleAdd : undefined}
-        addLabel={canManage ? DISBURSEMENT_LABELS.新增出納單 : undefined}
+        primaryAction={
+          canManage
+            ? { label: DISBURSEMENT_LABELS.新增出納單, icon: Plus, onClick: handleAdd }
+            : undefined
+        }
         onRowClick={handleRowClick}
         initialPageSize={15}
         renderActions={(row: DisbursementOrder) => (

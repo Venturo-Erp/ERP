@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useMemo } from 'react'
-import { ResponsiveHeader } from './responsive-header'
+import { ResponsiveHeader, type HeaderActionConfig } from './responsive-header'
 import { EnhancedTable, TableColumn, RowData } from '../ui/enhanced-table'
 import { useDataFiltering } from '@/hooks'
 import type { LucideIcon } from 'lucide-react'
@@ -68,16 +68,14 @@ interface ListPageLayoutProps<T extends object> {
   /** Tab 切換回調 */
   onStatusTabChange?: (tab: string) => void
 
-  // ========== 新增操作 ==========
-  /** 新增按鈕點擊事件 */
-  onAdd?: () => void
-  /** 新增按鈕文字 */
-  addLabel?: string
-  /** 新增按鈕是否禁用 */
-  addDisabled?: boolean
+  // ========== Header 結構化按鈕（SSOT） ==========
+  /** 第一/唯一按鈕（header-outline 樣式） */
+  primaryAction?: HeaderActionConfig
+  /** 第二按鈕（header-filled 樣式、視覺上排在 primary 右邊） */
+  secondaryAction?: HeaderActionConfig
 
   // ========== 自訂擴展 ==========
-  /** Header 右側自訂操作 */
+  /** Header 右側 escape hatch：給「不是按鈕」的元件用（date input / filter / select）。不准放 Button。 */
   headerActions?: React.ReactNode
   /** 操作欄位寬度（例如 "200px"），給有 renderActions 的列表用 */
   actionsWidth?: string
@@ -136,8 +134,7 @@ interface ListPageLayoutProps<T extends object> {
  *     { value: 'all', label: '全部' },
  *     { value: 'active', label: '待出發' },
  *   ]}
- *   onAdd={() => openDialog('create')}
- *   addLabel="新增旅遊團"
+ *   primaryAction={{ label: '新增旅遊團', icon: Plus, onClick: () => openDialog('create') }}
  * />
  * ```
  */
@@ -160,9 +157,8 @@ export function ListPageLayout<T extends object>({
   defaultStatusTab = 'all',
   activeStatusTab: externalActiveTab,
   onStatusTabChange,
-  onAdd,
-  addLabel = COMP_LAYOUT_LABELS.新增,
-  addDisabled = false,
+  primaryAction,
+  secondaryAction,
   headerActions,
   actionsWidth,
   beforeTable,
@@ -219,8 +215,8 @@ export function ListPageLayout<T extends object>({
         tabs={statusTabs}
         activeTab={activeStatusTab}
         onTabChange={handleTabChange}
-        onAdd={onAdd}
-        addLabel={addLabel}
+        primaryAction={primaryAction}
+        secondaryAction={secondaryAction}
         actions={headerActions}
         badge={badge}
       >

@@ -148,15 +148,11 @@ export default function CompaniesPage() {
         searchFields={['company_name', 'tax_id'] as (keyof Company)[]}
         searchPlaceholder={L.SEARCH_PLACEHOLDER}
         onRowClick={handleViewDetail}
-        headerActions={
-          <Button
-            onClick={handleOpenCreateDialog}
-            className="bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors"
-          >
-            <Plus size={16} className="mr-2" />
-            {L.ADD_COMPANY}
-          </Button>
-        }
+        primaryAction={{
+          label: L.ADD_COMPANY,
+          icon: Plus,
+          onClick: handleOpenCreateDialog,
+        }}
         defaultSort={{ key: 'created_at', direction: 'desc' }}
       />
 

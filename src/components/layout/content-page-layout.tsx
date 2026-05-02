@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { ResponsiveHeader } from './responsive-header'
+import { ResponsiveHeader, type HeaderActionConfig } from './responsive-header'
 import type { LucideIcon } from 'lucide-react'
 import type { BreadcrumbItem, TabItem } from './list-page-layout'
 
@@ -41,11 +41,11 @@ interface ContentPageLayoutProps {
   /** 搜尋框佔位符 */
   searchPlaceholder?: string
 
-  // ========== 新增操作 ==========
-  /** 新增按鈕點擊事件 */
-  onAdd?: () => void
-  /** 新增按鈕文字 */
-  addLabel?: string
+  // ========== Header 結構化按鈕（SSOT） ==========
+  /** 第一/唯一按鈕（header-outline 樣式） */
+  primaryAction?: HeaderActionConfig
+  /** 第二按鈕（header-filled 樣式、視覺上排在 primary 右邊） */
+  secondaryAction?: HeaderActionConfig
 
   // ========== 返回按鈕 ==========
   /** 是否顯示返回按鈕 */
@@ -54,10 +54,8 @@ interface ContentPageLayoutProps {
   onBack?: () => void
 
   // ========== 自訂擴展 ==========
-  /** Header 右側自訂操作（actions slot） */
+  /** Header 右側 escape hatch：給「不是按鈕」的元件用（date input / filter / select）。不准放 Button。 */
   headerActions?: React.ReactNode
-  /** Header 自訂操作按鈕（customActions slot） */
-  customActions?: React.ReactNode
   /** Header children（功能區域） */
   headerChildren?: React.ReactNode
   /** 徽章 */
@@ -127,12 +125,11 @@ export function ContentPageLayout({
   searchTerm,
   onSearchChange,
   searchPlaceholder,
-  onAdd,
-  addLabel,
+  primaryAction,
+  secondaryAction,
   showBackButton,
   onBack,
   headerActions,
-  customActions,
   headerChildren,
   badge,
   showFilter,
@@ -163,12 +160,11 @@ export function ContentPageLayout({
         tabs={tabs}
         activeTab={activeTab}
         onTabChange={onTabChange}
-        onAdd={onAdd}
-        addLabel={addLabel}
+        primaryAction={primaryAction}
+        secondaryAction={secondaryAction}
         showBackButton={showBackButton}
         onBack={onBack}
         actions={headerActions}
-        customActions={customActions}
         badge={badge}
         showFilter={showFilter}
         filterOptions={filterOptions}
@@ -182,9 +178,8 @@ export function ContentPageLayout({
         {headerChildren}
       </ResponsiveHeader>
 
-      {/* 內容區域 — 預設 flex col 讓子元件可用 flex-1 填滿高度
-          padding p-4：給卡片 box-shadow 留空間、避免被 overflow-auto 截掉 */}
-      <div className={contentClassName || 'flex-1 overflow-auto flex flex-col min-h-0 p-4'}>
+      {/* 內容區域 — 預設 flex col 讓子元件可用 flex-1 填滿高度 */}
+      <div className={contentClassName || 'flex-1 overflow-auto flex flex-col min-h-0'}>
         {children}
       </div>
     </div>

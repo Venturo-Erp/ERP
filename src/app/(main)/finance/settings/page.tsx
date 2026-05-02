@@ -420,16 +420,8 @@ export default function FinanceSettingsPage() {
       },
     }
     const config = buttonConfig[activeSection]
-    if (!config) return null
-    return (
-      <Button
-        onClick={config.onClick}
-        className="bg-morandi-gold hover:bg-morandi-gold/90 text-white"
-      >
-        <Plus className="h-4 w-4 mr-2" />
-        {config.label}
-      </Button>
-    )
+    if (!config) return undefined
+    return { label: config.label, icon: Plus, onClick: config.onClick }
   }
 
   if (permLoading) return <ModuleLoading fullscreen />
@@ -442,7 +434,7 @@ export default function FinanceSettingsPage() {
       tabs={tabs}
       activeTab={activeSection}
       onTabChange={value => setActiveSection(value as typeof activeSection)}
-      headerActions={renderAddButton()}
+      primaryAction={renderAddButton()}
     >
       {/* 內容區 */}
       <div>

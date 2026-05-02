@@ -7,7 +7,7 @@ import { logger } from '@/lib/utils/logger'
 import React, { useState, useCallback } from 'react'
 import { ContentPageLayout } from '@/components/layout/content-page-layout'
 import { Button } from '@/components/ui/button'
-import { Building2, FileSpreadsheet } from 'lucide-react'
+import { Building2, FileSpreadsheet, Plus } from 'lucide-react'
 import { SuppliersList } from './SuppliersList'
 import { SuppliersDialog } from './SuppliersDialog'
 import { ImportSuppliersDialog } from './ImportSuppliersDialog'
@@ -234,19 +234,16 @@ export const SuppliersPage: React.FC = () => {
       searchTerm={searchQuery}
       onSearchChange={setSearchQuery}
       searchPlaceholder={LABELS.searchPlaceholder}
-      onAdd={handleOpenAddDialog}
-      addLabel={LABELS.addSupplier}
-      headerActions={
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setIsImportDialogOpen(true)}
-          className="gap-2"
-        >
-          <FileSpreadsheet size={16} />
-          <span className="hidden sm:inline">{SUPPLIER_IMPORT_LABELS.btn_select_file}</span>
-        </Button>
-      }
+      primaryAction={{
+        label: SUPPLIER_IMPORT_LABELS.btn_select_file,
+        icon: FileSpreadsheet,
+        onClick: () => setIsImportDialogOpen(true),
+      }}
+      secondaryAction={{
+        label: LABELS.addSupplier,
+        icon: Plus,
+        onClick: handleOpenAddDialog,
+      }}
     >
       <SuppliersList suppliers={filteredSuppliers} onEdit={handleEdit} onDelete={handleDelete} />
 

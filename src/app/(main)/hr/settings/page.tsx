@@ -217,15 +217,11 @@ export default function HRSettingsPage() {
     <ContentPageLayout
       title="人資設定"
       icon={Settings}
-      headerActions={
-        <Button
-          onClick={handleSave}
-          disabled={saving}
-          className="bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors"
-        >
-          {saving ? '儲存中...' : '儲存設定'}
-        </Button>
-      }
+      primaryAction={{
+        label: saving ? '儲存中...' : '儲存設定',
+        onClick: handleSave,
+        disabled: saving,
+      }}
     >
       <div className="space-y-4">
         {/* 打卡時間 */}

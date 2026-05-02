@@ -27,11 +27,7 @@ export function WidgetSettingsDialog({ activeWidgets, onToggleWidget }: WidgetSe
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button
-          variant="outline"
-          size="sm"
-          className="gap-2 bg-gradient-to-br from-card to-morandi-container/30 border border-morandi-gold/30 text-morandi-primary hover:from-morandi-gold/10 hover:to-morandi-gold/20 hover:border-morandi-gold/50 shadow-md hover:shadow-lg transition-all rounded-xl"
-        >
+        <Button variant="header-outline" size="sm">
           <Settings className="h-4 w-4" />
           {DASHBOARD_LABELS.SETTINGS_4196}
         </Button>

@@ -449,8 +449,11 @@ export default function RolesPage() {
         { label: '人資管理', href: '/hr' },
         { label: '職務管理', href: '/hr/roles' },
       ]}
-      onAdd={() => setIsDialogOpen(true)}
-      addLabel="新增職務"
+      primaryAction={{
+        label: '新增職務',
+        icon: Plus,
+        onClick: () => setIsDialogOpen(true),
+      }}
       contentClassName="flex-1 overflow-hidden flex flex-col min-h-0 p-0"
     >
       <>
