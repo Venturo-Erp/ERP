@@ -29,7 +29,8 @@ import {
 import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useWorkspaceFeatures, useTabPermissions } from '@/lib/permissions'
+import { useWorkspaceFeatures } from '@/lib/permissions'
+import { useMyCapabilities } from '@/lib/permissions/useMyCapabilities'
 import {
   ChevronRight,
   ChevronDown,
@@ -346,7 +347,7 @@ export function Sidebar() {
   const pathname = usePathname()
   const { user } = useAuthStore()
   const { isFeatureEnabled, enabledFeatures } = useWorkspaceFeatures()
-  const { canReadAny } = useTabPermissions()
+  const { canReadAnyInModule } = useMyCapabilities()
   const [mounted, setMounted] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false) // 點擊固定展開
   const [isHovered, setIsHovered] = useState(false) // 滑鼠懸停暫時展開
@@ -412,8 +413,6 @@ export function Sidebar() {
     [user?.preferred_features]
   )
 
-  const { isAdmin } = useAuthStore()
-
   const visibleMenuItems = useMemo(() => {
     const workspaceCode = user?.workspace_code
 
@@ -447,9 +446,8 @@ export function Sidebar() {
             return null
           }
           if (!item.requiredPermission) return item
-          // HR canReadAny：模組層任一 tab 有讀取權即顯示
-          // admin role 已 backfill 全 module 權限、自動回 true
-          return canReadAny(item.requiredPermission) ? item : null
+          // 模組層任一 capability：role_capabilities 中存在 ${module}.*.read 即顯示
+          return canReadAnyInModule(item.requiredPermission) ? item : null
         })
         .filter((item): item is MenuItem => item !== null)
     }
@@ -457,9 +455,8 @@ export function Sidebar() {
   }, [
     user?.id,
     user?.workspace_code,
-    isAdmin,
     preferredFeatures,
-    canReadAny,
+    canReadAnyInModule,
     isFeatureEnabled,
     enabledFeatures,
   ])
@@ -468,9 +465,9 @@ export function Sidebar() {
     return personalToolItems.filter(item => {
       if (!user) return !item.requiredPermission
       if (!item.requiredPermission) return true
-      return canReadAny(item.requiredPermission)
+      return canReadAnyInModule(item.requiredPermission)
     })
-  }, [user?.id, isAdmin, canReadAny])
+  }, [user?.id, canReadAnyInModule])
 
   // 渲染菜單項目
   const renderMenuItem = (item: MenuItem, isChild = false) => {

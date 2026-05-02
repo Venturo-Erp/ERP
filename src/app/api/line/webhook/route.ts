@@ -491,7 +491,14 @@ async function saveConversationToDb(
 
   try {
     // 只儲存現有的欄位
-    const conversationData: any = {
+    const conversationData: {
+      platform: string
+      platform_user_id: string
+      user_display_name: string | null
+      user_message: string
+      ai_response: string
+      created_at: string
+    } = {
       platform: platform,
       platform_user_id: platformUserId,
       user_display_name: userDisplayName,

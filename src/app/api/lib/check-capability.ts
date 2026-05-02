@@ -1,18 +1,29 @@
 /**
- * API 層的統一權限檢查函數
+ * API 層權限檢查（2026-05-01 改走新 capability 系統）
  *
- * 替代 hasAdminCapability，支援任意的 capability 檢查
+ * 內部資料源：role_capabilities 表（取代舊 role_tab_permissions）
+ * 介面保留 (employeeId, {module, tab, action})、舊 caller 不必動。
+ * Step 4 清場時、callers 直接改用 capability code 字串、本檔可整個刪。
  */
 
 import { getSupabaseAdminClient } from '@/lib/supabase/admin'
-import type { Capability } from '@/lib/permissions/capabilities'
+
+/**
+ * 把舊三元組翻譯成 capability code 字串
+ *   tab 為 null → "{module}.{action}"
+ *   tab 不為 null → "{module}.{tab}.{action}"
+ */
+function toCapabilityCode(capability: {
+  module: string
+  tab: string | null
+  action: 'read' | 'write'
+}): string {
+  const { module, tab, action } = capability
+  return tab ? `${module}.${tab}.${action}` : `${module}.${action}`
+}
 
 /**
  * 檢查員工是否擁有某個權限資格
- *
- * @param employeeId 員工 ID
- * @param capability 要檢查的權限（來自 CAPABILITIES 常數）
- * @returns 是否擁有該權限
  */
 export async function checkCapability(
   employeeId: string,
@@ -20,7 +31,6 @@ export async function checkCapability(
 ): Promise<boolean> {
   const adminClient = getSupabaseAdminClient()
 
-  // Step 1：取得員工的 role_id
   const { data: employee, error: empError } = await adminClient
     .from('employees')
     .select('role_id')
@@ -32,39 +42,56 @@ export async function checkCapability(
   const roleId = (employee as { role_id?: string | null }).role_id
   if (!roleId) return false
 
-  // Step 2：查 role_tab_permissions 檢查該 role 對該 capability 的權限
-  let query = adminClient
-    .from('role_tab_permissions')
-    .select('can_read, can_write')
+  const code = toCapabilityCode(capability)
+
+  const { data, error } = await adminClient
+    .from('role_capabilities')
+    .select('enabled')
     .eq('role_id', roleId)
-    .eq('module_code', capability.module)
+    .eq('capability_code', code)
+    .eq('enabled', true)
+    .maybeSingle()
 
-  // tab 可能是 null（模組沒有分頁）
-  if (capability.tab === null) {
-    query = query.is('tab_code', null)
-  } else {
-    query = query.eq('tab_code', capability.tab)
-  }
-
-  const { data: permission, error: permError } = await query.single()
-
-  if (permError || !permission) return false
-
-  // Step 3：判讀寫權限
-  if (capability.action === 'write') {
-    return permission.can_write ?? false
-  }
-  return permission.can_read ?? false
+  if (error) return false
+  return data !== null
 }
 
 /**
- * 舊版 hasAdminCapability（為了 backward compatibility）
- * 改成查 hr.roles 的寫權限（= 系統主管資格）
+ * 直接用 capability code 字串檢查（新 caller 用這個）
+ */
+export async function hasCapabilityByCode(
+  employeeId: string,
+  code: string
+): Promise<boolean> {
+  const adminClient = getSupabaseAdminClient()
+
+  const { data: employee, error: empError } = await adminClient
+    .from('employees')
+    .select('role_id')
+    .eq('id', employeeId)
+    .single()
+
+  if (empError || !employee) return false
+
+  const roleId = (employee as { role_id?: string | null }).role_id
+  if (!roleId) return false
+
+  const { data, error } = await adminClient
+    .from('role_capabilities')
+    .select('enabled')
+    .eq('role_id', roleId)
+    .eq('capability_code', code)
+    .eq('enabled', true)
+    .maybeSingle()
+
+  if (error) return false
+  return data !== null
+}
+
+/**
+ * 舊版 hasAdminCapability（保留為 backward compat 殼）
+ * 等價於「能寫 hr.roles」(=系統主管才能)
  */
 export async function hasAdminCapability(employeeId: string): Promise<boolean> {
-  return checkCapability(employeeId, {
-    module: 'hr',
-    tab: 'roles',
-    action: 'write',
-  })
+  return hasCapabilityByCode(employeeId, 'hr.roles.write')
 }

@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button'
 import { useWorkspaceWidgets } from '@/stores/workspace-store'
 import { useEmployeesSlim } from '@/data'
 import { Combobox } from '@/components/ui/combobox'
-import type { Employee } from '@/types/models.types'
 import { alert } from '@/lib/ui/alert-dialog'
 import {
   Dialog,
@@ -49,14 +48,9 @@ export function ShareAdvanceDialog({
     { name: '', description: '', amount: '', advance_person: '' },
   ])
 
-  // 篩選活躍員工
+  // 篩選活躍員工（離職員工 status 會切到非 'active'，無需另外擋）
   const activeEmployees = useMemo(() => {
-    return employees.filter(emp => {
-      const empWithMeta = emp as unknown as Employee & { _deleted?: boolean }
-      const notDeleted = !empWithMeta._deleted
-      const isActive = empWithMeta.status === 'active'
-      return notDeleted && isActive
-    })
+    return employees.filter(emp => emp.status === 'active')
   }, [employees])
 
   const addRow = () => {

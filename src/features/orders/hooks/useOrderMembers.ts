@@ -10,9 +10,9 @@ import { supabase } from '@/lib/supabase/client'
 import { logger } from '@/lib/utils/logger'
 import { confirm } from '@/lib/ui/alert-dialog'
 import type { OrderMember, CustomCostField } from '../types/order-member.types'
+import { COMP_ORDERS_LABELS } from '../constants/labels'
 import { recalculateParticipants } from '@/features/tours/services/tour-stats.service'
 import { recalculateOrderAmount } from '@/features/orders/services/order-stats.service'
-import { useTranslations } from 'next-intl'
 
 interface UseOrderMembersParams {
   orderId?: string
@@ -78,7 +78,7 @@ function useOrderMembers({
       setDepartureDate(data?.departure_date || null)
       setReturnDate(data?.return_date || null)
     } catch (error) {
-      logger.error(t('common.載入出發日期失敗'), error)
+      logger.error(COMP_ORDERS_LABELS.載入出發日期失敗, error)
     }
   }, [tourId])
 
@@ -176,7 +176,7 @@ function useOrderMembers({
 
       setMembers(membersData)
     } catch (error) {
-      logger.error(t('common.載入成員失敗'), error)
+      logger.error(COMP_ORDERS_LABELS.載入成員失敗, error)
     } finally {
       setLoading(false)
     }
@@ -192,7 +192,7 @@ function useOrderMembers({
           order_id: orderId,
           workspace_id: workspaceId,
           member_type: 'adult' as const,
-          identity: t('common.大人'),
+          identity: COMP_ORDERS_LABELS.大人,
         }))
 
         const { data, error } = await supabase.from('order_members').insert(newMembers).select()
@@ -216,7 +216,7 @@ function useOrderMembers({
           })
         }
       } catch (error) {
-        logger.error(t('common.新增成員失敗'), error)
+        logger.error(COMP_ORDERS_LABELS.新增成員失敗, error)
         throw error
       }
     },
@@ -226,9 +226,9 @@ function useOrderMembers({
   // 刪除成員
   const deleteMember = useCallback(
     async (memberId: string): Promise<boolean> => {
-      const confirmed = await confirm(t('common.確定要刪除此成員嗎'), {
-        confirmText: t('common.刪除'),
-        cancelText: t('common.取消'),
+      const confirmed = await confirm(COMP_ORDERS_LABELS.確定要刪除此成員嗎, {
+        confirmText: COMP_ORDERS_LABELS.刪除,
+        cancelText: COMP_ORDERS_LABELS.取消,
       })
 
       if (!confirmed) return false
@@ -255,7 +255,7 @@ function useOrderMembers({
 
         return true
       } catch (error) {
-        logger.error(t('common.刪除成員失敗'), error)
+        logger.error(COMP_ORDERS_LABELS.刪除成員失敗, error)
         return false
       }
     },
@@ -291,7 +291,7 @@ function useOrderMembers({
           }
         }
       } catch (error) {
-        logger.error(t('common.更新成員失敗'), error)
+        logger.error(COMP_ORDERS_LABELS.更新成員失敗, error)
       }
     },
     [members]
@@ -323,7 +323,7 @@ function useOrderMembers({
           }
         }
       } catch (error) {
-        logger.error(t('common.更新成員失敗'), error)
+        logger.error(COMP_ORDERS_LABELS.更新成員失敗, error)
         throw error
       }
     },

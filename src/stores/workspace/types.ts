@@ -13,9 +13,6 @@ export interface Workspace {
   created_at?: string | null
   updated_at?: string | null
   max_employees?: number | null
-  _deleted?: boolean | null
-  _needs_sync?: boolean | null
-  _synced_at?: string | null
 }
 
 interface Bulletin {
@@ -54,9 +51,6 @@ export interface Channel {
   updated_at?: string | null
   /** DM 頻道專用：對方的 employee ID（從創建者角度）*/
   dm_target_id?: string | null
-  _deleted?: boolean | null
-  _needs_sync?: boolean | null
-  _synced_at?: string | null
 }
 
 export interface ChannelGroup {
@@ -69,9 +63,6 @@ export interface ChannelGroup {
   system_type?: string | null
   created_at: string | null
   updated_at?: string | null
-  _deleted?: boolean | null
-  _needs_sync?: boolean | null
-  _synced_at?: string | null
 }
 
 export interface MessageAttachment {
@@ -113,9 +104,7 @@ export interface Message {
   }
   // 訊息額外資料（機器人卡片等）
   metadata?: MessageMetadata | null
-  _deleted?: boolean | null
-  _needs_sync?: boolean | null
-  _synced_at?: string | null
+  _deleted?: boolean | null // 軟刪除標記（chat 軟刪除真有業務邏輯，frozen module）
 }
 
 /** 訊息元資料型別 - 允許任意 JSON 值 */

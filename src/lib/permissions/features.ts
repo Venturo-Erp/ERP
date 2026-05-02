@@ -162,13 +162,6 @@ export const FEATURES: FeatureDefinition[] = [
   // },
   // ===== 企業功能 =====
   {
-    code: 'departments',
-    name: '部門管理',
-    description: '部門分類、團號帶入部門代號',
-    category: 'premium',
-    routes: [],
-  },
-  {
     code: 'tour_controller',
     name: '團控功能',
     description: '指派團控人員，團控為必填欄位',

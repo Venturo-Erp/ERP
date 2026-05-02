@@ -13,7 +13,7 @@ import { Plus } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useRequestTable } from '@/features/finance/requests/hooks/useRequestTable'
 import { PaymentRequest } from '@/stores/types'
-import { useTranslations } from 'next-intl'
+import { REQUESTS_PAGE_LABELS } from '../constants/labels'
 
 // Dynamic imports for dialogs (reduce initial bundle)
 const AddRequestDialog = dynamic(
@@ -46,8 +46,6 @@ function isTour(r: PaymentRequest): boolean {
 }
 
 export default function RequestsPage() {
-  const t = useTranslations('finance')
-
   const { can, loading: permLoading } = useCapabilities()
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -136,7 +134,7 @@ export default function RequestsPage() {
   return (
     <>
       <ListPageLayout
-        title={t('requestsPage.manage3483')}
+        title={REQUESTS_PAGE_LABELS.MANAGE_3483}
         data={filteredByTab}
         loading={loading}
         columns={tableColumns}
@@ -146,7 +144,7 @@ export default function RequestsPage() {
         headerActions={
           <Button variant="soft-gold" onClick={() => setIsAddDialogOpen(true)}>
             <Plus size={16} />
-            {t('requestsPage.add9640')}
+            {REQUESTS_PAGE_LABELS.ADD_9640}
           </Button>
         }
         beforeTable={

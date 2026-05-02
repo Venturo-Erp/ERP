@@ -8,6 +8,7 @@ import { useAuthStore } from '@/stores/auth-store'
 import { useWorkspaceStoreData } from '@/stores/workspace/workspace-store'
 import type { Workspace } from '@/stores/workspace/types'
 import { logger } from '@/lib/utils/logger'
+import { hasCapabilitySync } from '@/lib/permissions/useMyCapabilities'
 
 // 定義 Workspace 擴展型別（包含 code 欄位）
 interface WorkspaceWithCode extends Workspace {
@@ -92,9 +93,9 @@ function getCurrentWorkspace() {
  * @returns boolean
  */
 function canManageWorkspace(targetWorkspaceId: string): boolean {
-  const { user, isAdmin } = useAuthStore.getState()
-
-  if (!user || !isAdmin) {
+  const { user } = useAuthStore.getState()
+  // hasCapabilitySync 從 cache 拿、登入後第一次抓 capabilities 之後就有值
+  if (!user || !hasCapabilitySync('platform.is_admin')) {
     return false
   }
 

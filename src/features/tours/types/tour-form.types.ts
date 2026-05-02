@@ -33,7 +33,6 @@ export interface NewTourData {
   enable_checkin?: boolean
   controller_id?: string
   role_assignments?: Record<string, string>
-  department_id?: string
 }
 
 export interface TourExtraFields {

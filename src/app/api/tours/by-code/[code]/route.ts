@@ -24,7 +24,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       'id, code, name, location, departure_date, return_date, status, current_participants, max_participants'
     )
     .eq('code', code)
-    .eq('is_deleted', false)
+    .eq('is_active', true)
     .single()
 
   if (error || !data) {

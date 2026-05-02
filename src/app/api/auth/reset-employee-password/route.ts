@@ -42,10 +42,10 @@ export async function POST(request: NextRequest) {
 
     const supabaseAdmin = getSupabaseAdminClient()
 
-    // 1. 查詢員工的 supabase_user_id + workspace_id（P003-C 2026-04-22：加 workspace 守門）
+    // 1. 查詢員工的 user_id + workspace_id（P003-C 2026-04-22：加 workspace 守門）
     const { data: employee, error: empError } = await supabaseAdmin
       .from('employees')
-      .select('id, supabase_user_id, display_name, workspace_id')
+      .select('id, user_id, display_name, workspace_id')
       .eq('id', employee_id)
       .single()
 
@@ -65,13 +65,13 @@ export async function POST(request: NextRequest) {
       return errorResponse('不能重設其他公司員工的密碼', 403, ErrorCode.FORBIDDEN)
     }
 
-    if (!employee.supabase_user_id) {
+    if (!employee.user_id) {
       return errorResponse('此員工尚未綁定登入帳號', 400, ErrorCode.VALIDATION_ERROR)
     }
 
     // 2. 更新 Supabase Auth 密碼
     const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
-      employee.supabase_user_id,
+      employee.user_id,
       { password: new_password }
     )
 

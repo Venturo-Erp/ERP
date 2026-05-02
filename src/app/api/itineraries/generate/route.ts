@@ -62,6 +62,7 @@ export async function POST(request: NextRequest) {
     if (!validation.success) return validation.error
     const body: RequestBody = validation.data as RequestBody
     const supabase = getSupabaseAdminClient()
+    const workspaceId = auth.data.workspaceId
 
     // 2. 處理城市 ID（支持 UUID、城市代碼、或名稱）
     let cityId = body.cityId
@@ -79,6 +80,7 @@ export async function POST(request: NextRequest) {
       const { data: cityByCode } = await supabase
         .from('cities')
         .select('id, name, country_id')
+        .eq('workspace_id', workspaceId)
         .eq('airport_code', cityId.toUpperCase())
         .single()
 
@@ -90,6 +92,7 @@ export async function POST(request: NextRequest) {
           const { data: country } = await supabase
             .from('countries')
             .select('id, name')
+            .eq('workspace_id', workspaceId)
             .eq('id', cityByCode.country_id)
             .single()
           if (country) {
@@ -110,6 +113,7 @@ export async function POST(request: NextRequest) {
       const { data: countryByName } = await supabase
         .from('countries')
         .select('id, name')
+        .eq('workspace_id', workspaceId)
         .ilike('name', `%${countryId}%`)
         .limit(1)
         .single()
@@ -131,6 +135,7 @@ export async function POST(request: NextRequest) {
         const { data: cityData } = await supabase
           .from('cities')
           .select('id, name')
+          .eq('workspace_id', workspaceId)
           .ilike('name', `%${body.destination}%`)
           .limit(1)
           .single()
@@ -146,6 +151,7 @@ export async function POST(request: NextRequest) {
         const { data: attractionCity } = await supabase
           .from('attractions')
           .select('city_id')
+          .eq('workspace_id', workspaceId)
           .or(`name.ilike.%${body.destination}%,address.ilike.%${body.destination}%`)
           .limit(1)
           .single()
@@ -160,6 +166,7 @@ export async function POST(request: NextRequest) {
         const { data: firstCity } = await supabase
           .from('cities')
           .select('id, name')
+          .eq('workspace_id', workspaceId)
           .eq('country_id', countryId)
           .eq('is_active', true)
           .order('display_order', { ascending: true })
@@ -202,7 +209,7 @@ export async function POST(request: NextRequest) {
     }
     const cityIdArray = Array.from(involvedCityIds)
 
-    // 7. 查詢景點（根據城市或國家）
+    // 7. 查詢景點（根據城市或國家、限定當前 workspace）
     let attractionsQuery = supabase
       .from('attractions')
       .select(
@@ -234,6 +241,7 @@ export async function POST(request: NextRequest) {
         updated_at
       `
       )
+      .eq('workspace_id', workspaceId)
       .eq('is_active', true)
       .order('display_order', { ascending: true })
 
@@ -261,6 +269,7 @@ export async function POST(request: NextRequest) {
       const { data: city } = await supabase
         .from('cities')
         .select('id, name, country_id')
+        .eq('workspace_id', workspaceId)
         .eq('id', cityId)
         .single()
       if (city) {
@@ -270,6 +279,7 @@ export async function POST(request: NextRequest) {
           const { data: country } = await supabase
             .from('countries')
             .select('name')
+            .eq('workspace_id', workspaceId)
             .eq('id', city.country_id)
             .single()
           if (country) {
@@ -282,6 +292,7 @@ export async function POST(request: NextRequest) {
       const { data: country } = await supabase
         .from('countries')
         .select('name')
+        .eq('workspace_id', workspaceId)
         .eq('id', countryId)
         .single()
       if (country) {

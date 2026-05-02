@@ -20,23 +20,6 @@ export interface BaseEntity {
   updated_by?: string | null
 }
 
-/**
- * SyncableEntity - 可同步實體的基礎介面
- * 繼承 BaseEntity 並加入同步相關欄位
- *
- * FastIn 架構欄位說明：
- * - _needs_sync: 是否需要同步到 Supabase（true = 待同步）
- * - _synced_at: 最後同步時間（null = 尚未同步）
- * - _deleted: 軟刪除標記（用於延遲刪除同步）
- *
- * 注意：使用 null 而非 undefined 以符合 Supabase PostgreSQL 規範
- */
-export interface SyncableEntity extends BaseEntity {
-  _needs_sync: boolean | null // 是否待同步（Supabase 可能回傳 null）
-  _synced_at: string | null // 最後同步時間 (ISO 8601)
-  _deleted?: boolean | null // 軟刪除標記
-}
-
 // ============================================
 // 分頁相關型別
 // ============================================
@@ -270,25 +253,31 @@ export interface Company {
   notes: string | null
 
   // 系統欄位
+  is_active: boolean
   created_at: string
   updated_at: string
   created_by: string | null
+  updated_by: string | null
 }
 
 export interface CompanyContact {
   id: string
-  company_id: string
+  workspace_id: string
+  company_id: string | null
 
   // 聯絡人資訊
   name: string
+  english_name: string | null
   title: string | null // 職稱
   department: string | null // 部門
   phone: string | null
   mobile: string | null
   email: string | null
+  line_id: string | null
 
   // 主要聯絡人標記
   is_primary: boolean
+  is_active: boolean
 
   // 備註
   notes: string | null
@@ -296,6 +285,8 @@ export interface CompanyContact {
   // 系統欄位
   created_at: string
   updated_at: string
+  created_by: string | null
+  updated_by: string | null
 }
 
 // 機場圖片季節類型

@@ -24,7 +24,6 @@ import { logger } from '@/lib/utils/logger'
 type StoreModule = {
   useTourStore?: ReturnType<typeof import('../index').useTourStore.getState>
   useOrderStore?: ReturnType<typeof import('../index').useOrderStore.getState>
-  useMemberStore?: ReturnType<typeof import('../index').useMemberStore.getState>
 }
 
 /**
@@ -32,12 +31,15 @@ type StoreModule = {
  *
  * 功能：
  * 1. Tour 更新時，重新載入相關 Orders
- * 2. Order 更新時，重新載入相關 Members
- * 3. Tour 刪除時，清理相關 Orders 和 Members
+ * 2. Tour 刪除時，重新載入相關 Orders
  *
  * 避免無限循環的機制：
  * - 每個事件都帶有 source 標記
  * - 訂閱時可指定 ignoreSources 來忽略特定來源的事件
+ *
+ * 注意（2026-05-02）：
+ * - 原 Member 同步邏輯已移除（members 表已 DROP、改用 order_members）
+ * - Member 統計由 UI 層計算、不需 store-level 同步
  */
 export function useStoreSyncSetup(): void {
   const setupDone = useRef(false)
@@ -92,9 +94,8 @@ export function useStoreSyncSetup(): void {
         logger.log(`[StoreSync] Tour ${tourId} 刪除，清理相關資料`)
 
         try {
-          const { useOrderStore, useMemberStore } = await import('../index')
+          const { useOrderStore } = await import('../index')
           const orderState = useOrderStore.getState()
-          const memberState = useMemberStore.getState()
 
           // 找出被影響的訂單
           const affectedOrders = orderState.items.filter(order => order.tour_id === tourId)
@@ -105,12 +106,7 @@ export function useStoreSyncSetup(): void {
             // 觸發重新載入以同步資料庫狀態
             await orderState.fetchAll()
 
-            // 同時更新 members
-            await memberState.fetchAll()
-
-            logger.log(
-              `[StoreSync] 已同步 ${affectedOrders.length} 筆受影響的 Orders 和相關 Members`
-            )
+            logger.log(`[StoreSync] 已同步 ${affectedOrders.length} 筆受影響的 Orders`)
           }
         } catch (error) {
           logger.error('[StoreSync] 清理相關資料失敗:', error)
@@ -122,53 +118,8 @@ export function useStoreSyncSetup(): void {
     // Order 事件處理
     // ====================================================
 
-    // Order 更新時，重新載入相關 Members
-    subscriptions.push(
-      storeEvents.on(
-        'ORDER_UPDATED',
-        async ({ orderId, source }) => {
-          // 避免由 member store 觸發的事件再次觸發 member 重載
-          if (source === 'member') return
-
-          logger.log(`[StoreSync] Order ${orderId} 更新，重新載入相關 Members`)
-
-          try {
-            const { useMemberStore } = await import('../index')
-            const memberState = useMemberStore.getState()
-
-            // 只更新該 Order 的成員（精準更新）
-            const affectedMembers = memberState.items.filter(member => member.order_id === orderId)
-
-            if (affectedMembers.length > 0) {
-              // 重新取得這些成員的最新資料
-              await Promise.all(affectedMembers.map(member => memberState.fetchById(member.id)))
-              logger.log(`[StoreSync] 已重新載入 ${affectedMembers.length} 筆 Members`)
-            }
-          } catch (error) {
-            logger.error('[StoreSync] 重新載入 Members 失敗:', error)
-          }
-        },
-        { ignoreSources: ['member'] }
-      )
-    )
-
-    // Order 刪除時，清理相關 Members
-    subscriptions.push(
-      storeEvents.on('ORDER_DELETED', async ({ orderId }) => {
-        logger.log(`[StoreSync] Order ${orderId} 刪除，清理相關 Members`)
-
-        try {
-          const { useMemberStore } = await import('../index')
-          const memberState = useMemberStore.getState()
-
-          // 重新載入以同步資料庫狀態
-          await memberState.fetchAll()
-          logger.log('[StoreSync] 已同步 Members 狀態')
-        } catch (error) {
-          logger.error('[StoreSync] 清理 Members 失敗:', error)
-        }
-      })
-    )
+    // Order 更新/刪除時的 Member 同步邏輯已移除（2026-05-02、members 表已 DROP）
+    // 改用 @/data 的 order_members entity hook、不需 store-level 同步
 
     // ====================================================
     // Order 建立時，更新 Tour 的訂單列表

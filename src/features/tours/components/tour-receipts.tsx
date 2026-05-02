@@ -64,7 +64,7 @@ export const TourReceipts = React.memo(function TourReceipts({
   const receipts = useMemo(
     () =>
       (allReceipts ?? [])
-        .filter(r => !r.deleted_at)
+        .filter(r => r.is_active !== false)
         .filter(r => r.tour_id === tour.id || (r.order_id && orderIds.has(r.order_id)))
         .filter(r => !orderFilter || r.order_id === orderFilter)
         .sort(

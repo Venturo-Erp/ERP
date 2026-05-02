@@ -10,7 +10,8 @@ import { formatPassportExpiryWithStatus } from '@/lib/utils/passport-expiry'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import type { OrderMember } from '../../types/order-member.types'
 import type { ColumnVisibility } from '../OrderMembersExpandable'
-import { useTranslations } from 'next-intl'
+import { COMP_ORDERS_LABELS } from '../../constants/labels'
+import { MEMBER_DATA_LABELS } from '../../constants/labels'
 
 interface MemberPassportInfoProps {
   member: OrderMember
@@ -33,8 +34,6 @@ export function MemberPassportInfo({
   onKeyDown,
   onPaste,
 }: MemberPassportInfoProps) {
-  const t = useTranslations('orders')
-
   // 預設欄位顯示設定（訂金/尾款/應付金額 預設關閉）
   const cv = columnVisibility || {
     passport_name: true,
@@ -130,9 +129,9 @@ export function MemberPassportInfo({
                 }
                 // 詳細說明
                 const detailLabel =
-                  expiryInfo.statusLabel === t('common.效期不足')
-                    ? `護照需有效至 ${getRequiredDate()}`
-                    : t('common.護照已過期')
+                  expiryInfo.statusLabel === COMP_ORDERS_LABELS.效期不足
+                    ? MEMBER_DATA_LABELS.PASSPORT_REQUIRED_DATE(getRequiredDate())
+                    : COMP_ORDERS_LABELS.護照已過期
                 return (
                   <Tooltip>
                     <TooltipTrigger>

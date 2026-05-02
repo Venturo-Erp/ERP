@@ -98,17 +98,10 @@ export async function GET(request: NextRequest) {
       .single()
 
     if (error || !data) {
-      // 檢查是否是已確認的報價單（token 已清除）
-      const { data: confirmedQuote } = await supabase
-        .from('quotes')
-        .select('code, confirmation_status, confirmed_at, confirmed_by_name')
-        .in('confirmation_status', ['customer_confirmed', 'staff_confirmed', 'closed'])
-        .limit(1)
-
-      if (confirmedQuote && confirmedQuote.length > 0) {
-        return successResponse({ error: '此報價單已確認', already_confirmed: true })
-      }
-
+      // 找不到 token 對應的報價單：
+      // 可能 token 已被清除（已確認）、或 token 不存在、或過期
+      // 不再做跨租戶 fallback 查詢（曾用 .in() 沒篩 workspace、會跨租戶）
+      // 統一回 notFound、避免資訊洩露
       return ApiError.notFound('報價單')
     }
 

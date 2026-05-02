@@ -1,51 +1,54 @@
 /**
  * 統一的權限常數定義
  *
- * 所有權限檢查都通過這些常數，避免到處寫 canWrite('hr', 'roles')
- * 改權限邏輯時只需改這個檔案
+ * 2026-05-01：值從 (module, tab, action) 三元組改成 capability_code 字串、
+ * 跟 role_capabilities 表的 capability_code 欄位 1:1 對應。
  */
 
 export const CAPABILITIES = {
   // ========== HR 系統 ==========
-  HR_MANAGE_ROLES: { module: 'hr', tab: 'roles', action: 'write' } as const,
-  HR_READ_ROLES: { module: 'hr', tab: 'roles', action: 'read' } as const,
-  HR_MANAGE_EMPLOYEES: { module: 'hr', tab: 'employees', action: 'write' } as const,
-  HR_READ_EMPLOYEES: { module: 'hr', tab: 'employees', action: 'read' } as const,
-  HR_MANAGE_SETTINGS: { module: 'hr', tab: 'settings', action: 'write' } as const,
-  HR_READ_SETTINGS: { module: 'hr', tab: 'settings', action: 'read' } as const,
+  HR_MANAGE_ROLES: 'hr.roles.write',
+  HR_READ_ROLES: 'hr.roles.read',
+  HR_MANAGE_EMPLOYEES: 'hr.employees.write',
+  HR_READ_EMPLOYEES: 'hr.employees.read',
+  HR_MANAGE_SETTINGS: 'hr.settings.write',
+  HR_READ_SETTINGS: 'hr.settings.read',
 
   // ========== 系統設定 ==========
-  SETTINGS_MANAGE_COMPANY: { module: 'settings', tab: 'company', action: 'write' } as const,
-  SETTINGS_READ_COMPANY: { module: 'settings', tab: 'company', action: 'read' } as const,
-  SETTINGS_MANAGE_PERSONAL: { module: 'settings', tab: 'personal', action: 'write' } as const,
-  MANAGE_ENV_SETTINGS: { module: 'settings', tab: 'env', action: 'write' } as const,
+  SETTINGS_MANAGE_COMPANY: 'settings.company.write',
+  SETTINGS_READ_COMPANY: 'settings.company.read',
+  SETTINGS_MANAGE_PERSONAL: 'settings.personal.write',
+  MANAGE_ENV_SETTINGS: 'settings.env.write',
 
   // ========== 財務系統 ==========
-  FINANCE_MANAGE_PAYMENTS: { module: 'finance', tab: 'payments', action: 'write' } as const,
-  FINANCE_READ_PAYMENTS: { module: 'finance', tab: 'payments', action: 'read' } as const,
-  FINANCE_READ_PAYMENTS_COMPANY: { module: 'finance', tab: 'payments-company', action: 'read' } as const,
-  FINANCE_CONFIRM_PAYMENTS: { module: 'finance', tab: 'payments-confirm', action: 'write' } as const,
-  FINANCE_MANAGE_REQUESTS: { module: 'finance', tab: 'requests', action: 'write' } as const,
-  FINANCE_READ_REQUESTS: { module: 'finance', tab: 'requests', action: 'read' } as const,
-  FINANCE_READ_REQUESTS_COMPANY: { module: 'finance', tab: 'requests-company', action: 'read' } as const,
-  FINANCE_READ_REQUESTS_SALARY: { module: 'finance', tab: 'requests-salary', action: 'read' } as const,
-  FINANCE_MANAGE_SETTINGS: { module: 'finance', tab: 'settings', action: 'write' } as const,
-  FINANCE_READ_SETTINGS: { module: 'finance', tab: 'settings', action: 'read' } as const,
-  FINANCE_READ_TREASURY: { module: 'finance', tab: 'treasury', action: 'read' } as const,
-  FINANCE_READ_REPORTS: { module: 'finance', tab: 'reports', action: 'read' } as const,
-  FINANCE_MANAGE_DISBURSEMENT: { module: 'finance', tab: 'disbursement', action: 'write' } as const,
-  FINANCE_READ_DISBURSEMENT: { module: 'finance', tab: 'disbursement', action: 'read' } as const,
+  FINANCE_MANAGE_PAYMENTS: 'finance.payments.write',
+  FINANCE_READ_PAYMENTS: 'finance.payments.read',
+  FINANCE_READ_PAYMENTS_COMPANY: 'finance.payments-company.read',
+  FINANCE_CONFIRM_PAYMENTS: 'finance.payments-confirm.write',
+  FINANCE_MANAGE_REQUESTS: 'finance.requests.write',
+  FINANCE_READ_REQUESTS: 'finance.requests.read',
+  FINANCE_READ_REQUESTS_COMPANY: 'finance.requests-company.read',
+  FINANCE_READ_REQUESTS_SALARY: 'finance.requests-salary.read',
+  FINANCE_MANAGE_SETTINGS: 'finance.settings.write',
+  FINANCE_READ_SETTINGS: 'finance.settings.read',
+  FINANCE_READ_TREASURY: 'finance.treasury.read',
+  FINANCE_READ_REPORTS: 'finance.reports.read',
+  FINANCE_MANAGE_DISBURSEMENT: 'finance.disbursement.write',
+  FINANCE_READ_DISBURSEMENT: 'finance.disbursement.read',
 
   // ========== 資料庫 ==========
-  DATABASE_MANAGE_ATTRACTIONS: { module: 'database', tab: 'attractions', action: 'write' } as const,
-  DATABASE_READ_ATTRACTIONS: { module: 'database', tab: 'attractions', action: 'read' } as const,
+  DATABASE_MANAGE_ATTRACTIONS: 'database.attractions.write',
+  DATABASE_READ_ATTRACTIONS: 'database.attractions.read',
 
   // ========== Workspace/Channel ==========
-  WORKSPACE_MANAGE_CHANNELS: { module: 'workspace', tab: null, action: 'write' } as const,
-  WORKSPACE_MANAGE_MEMBERS: { module: 'workspace', tab: null, action: 'write' } as const,
+  WORKSPACE_MANAGE_CHANNELS: 'workspace.write',
+  WORKSPACE_MANAGE_MEMBERS: 'workspace.write',
 
   // ========== 日曆 ==========
-  CALENDAR_MANAGE: { module: 'calendar', tab: null, action: 'write' } as const,
+  CALENDAR_MANAGE: 'calendar.write',
+
+  // ========== 平台 admin（取代散落 isAdmin flag） ==========
+  PLATFORM_IS_ADMIN: 'platform.is_admin',
 } as const
 
 export type Capability = typeof CAPABILITIES[keyof typeof CAPABILITIES]

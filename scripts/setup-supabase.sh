@@ -45,12 +45,12 @@ npx supabase db push
 
 echo ""
 echo -e "${BLUE}📋 Step 3: Generate TypeScript types${NC}"
-npx supabase gen types typescript --project-id $PROJECT_REF > src/lib/types/supabase.ts
+npx supabase gen types typescript --project-id $PROJECT_REF > src/lib/supabase/types.ts
 
 echo ""
 echo -e "${GREEN}✅ Setup complete!${NC}"
 echo ""
 echo "📝 Next steps:"
-echo "  1. Check the generated types at: src/lib/types/supabase.ts"
+echo "  1. Check the generated types at: src/lib/supabase/types.ts"
 echo "  2. Restart your dev server if needed"
 echo "  3. All workspace features should now work with Supabase!"

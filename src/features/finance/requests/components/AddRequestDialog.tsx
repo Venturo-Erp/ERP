@@ -49,7 +49,18 @@ import {
   deletePaymentRequest as deletePaymentRequestApi,
 } from '@/data'
 import { supabase } from '@/lib/supabase/client'
-import { useTranslations } from 'next-intl'
+import {
+  ADD_RECEIPT_DIALOG_LABELS,
+  ADD_REQUEST_DIALOG_LABELS,
+  BATCH_RECEIPT_DIALOG_LABELS,
+  PAYMENT_ITEM_ROW_LABELS,
+  ADD_REQUEST_FORM_LABELS,
+  REQUEST_TYPE_LABELS,
+  REQUEST_LABELS,
+  ADD_REQUEST_EXTRA_LABELS,
+  REQUEST_DETAIL_DIALOG_LABELS,
+  REQUEST_DETAIL_FORM_LABELS,
+} from '../../constants/labels'
 
 // COMPANY_PAYMENT_ROLES 已移除 — 權限改用 role_tab_permissions
 
@@ -69,20 +80,20 @@ interface AddRequestDialogProps {
 
 // 類別對應的圖標和顏色
 const CATEGORY_CONFIG: Record<string, { icon: string; color: string }> = {
-  [t('requestType.catAccommodation')]: { icon: '🏨', color: 'text-status-info' },
+  [REQUEST_TYPE_LABELS.CAT_ACCOMMODATION]: { icon: '🏨', color: 'text-status-info' },
   accommodation: { icon: '🏨', color: 'text-status-info' },
-  [t('requestType.catTransportation')]: { icon: '🚌', color: 'text-morandi-green' },
+  [REQUEST_TYPE_LABELS.CAT_TRANSPORTATION]: { icon: '🚌', color: 'text-morandi-green' },
   transportation: { icon: '🚌', color: 'text-morandi-green' },
-  [t('requestType.catTicket')]: { icon: '🎫', color: 'text-morandi-secondary' },
+  [REQUEST_TYPE_LABELS.CAT_TICKET]: { icon: '🎫', color: 'text-morandi-secondary' },
   ticket: { icon: '🎫', color: 'text-morandi-secondary' },
   activity: { icon: '🎫', color: 'text-morandi-secondary' },
-  [t('requestType.catMeal')]: { icon: '🍽️', color: 'text-status-warning' },
+  [REQUEST_TYPE_LABELS.CAT_MEAL]: { icon: '🍽️', color: 'text-status-warning' },
   meal: { icon: '🍽️', color: 'text-status-warning' },
-  [t('requestType.catOther')]: { icon: '📦', color: 'text-morandi-secondary' },
+  [REQUEST_TYPE_LABELS.CAT_OTHER]: { icon: '📦', color: 'text-morandi-secondary' },
 }
 
 function getCategoryConfig(category: string) {
-  return CATEGORY_CONFIG[category] || CATEGORY_CONFIG[t('addRequestDialog.其他')]
+  return CATEGORY_CONFIG[category] || CATEGORY_CONFIG[ADD_REQUEST_DIALOG_LABELS.其他]
 }
 
 // 批量請款的團分配類型
@@ -104,8 +115,6 @@ export function AddRequestDialog({
   editingRequest,
   readOnly = false,
 }: AddRequestDialogProps) {
-  const t = useTranslations('finance')
-
   // === 共用 Hooks ===
   const {
     formData,
@@ -243,12 +252,11 @@ export function AddRequestDialog({
   // 過濾掉已封存和特殊團
   const activeTours = useMemo(() => {
     return tours.filter(tour => {
-      const t = tour as unknown as { is_deleted?: boolean; deleted_at?: string | null }
+      const t = tour as unknown as { is_active?: boolean | null }
       return (
         !tour.archived &&
-        !t.is_deleted &&
-        !t.deleted_at &&
-        tour.status !== t('addRequestDialog.特殊團')
+        t.is_active !== false &&
+        tour.status !== ADD_REQUEST_DIALOG_LABELS.特殊團
       )
     })
   }, [tours])
@@ -556,11 +564,11 @@ export function AddRequestDialog({
   const handleDelete = async () => {
     if (!currentRequest || isSubmitting) return
     const deleteMessage = isEditBatch
-      ? `確定要刪除此請款單（${currentRequest.code}）嗎？此操作無法復原。\n\n注意：只會刪除當前選中的請款單，同批次的其他請款單不受影響。`
-      : t('requestDetailDialog.確定要刪除此請款單嗎_此操作無法復原')
+      ? REQUEST_LABELS.確定要刪除此請款單(currentRequest.code)
+      : REQUEST_DETAIL_DIALOG_LABELS.確定要刪除此請款單嗎_此操作無法復原
 
     const confirmed = await confirm(deleteMessage, {
-      title: t('requestDetailDialog.刪除請款單'),
+      title: REQUEST_DETAIL_DIALOG_LABELS.刪除請款單,
       type: 'warning',
     })
     if (!confirmed) return
@@ -571,7 +579,7 @@ export function AddRequestDialog({
       if (currentRequest.tour_id) {
         await recalculateExpenseStats(currentRequest.tour_id)
       }
-      await alert(t('requestDetailDialog.請款單已刪除'), 'success')
+      await alert(REQUEST_DETAIL_DIALOG_LABELS.請款單已刪除, 'success')
 
       if (isEditBatch && editBatchRequests.length > 1) {
         const remainingRequests = editBatchRequests.filter(r => r.id !== currentRequest.id)
@@ -582,7 +590,7 @@ export function AddRequestDialog({
       }
     } catch (error) {
       logger.error('刪除請款單失敗:', error)
-      await alert(t('requestDetailDialog.刪除請款單失敗'), 'error')
+      await alert(REQUEST_DETAIL_DIALOG_LABELS.刪除請款單失敗, 'error')
     } finally {
       setIsSubmitting(false)
     }
@@ -688,7 +696,7 @@ export function AddRequestDialog({
 
     // 重置批量請款（預設兩個空白行）
     setBatchDate(getTodayString())
-    setBatchCategory(t('requestType.catOther') as PaymentItemCategory)
+    setBatchCategory(REQUEST_TYPE_LABELS.CAT_OTHER as PaymentItemCategory)
     setBatchSupplierId('')
     setBatchDescription('')
     setBatchTotalAmount(0)
@@ -732,19 +740,19 @@ export function AddRequestDialog({
   const previewCode = useMemo(() => {
     if (activeTab === 'company') {
       if (!formData.expense_type || !formData.request_date)
-        return t('addRequestDialog.請選擇費用類型和日期')
+        return ADD_REQUEST_DIALOG_LABELS.請選擇費用類型和日期
       return generateCompanyRequestCode(
         formData.expense_type as CompanyExpenseType,
         formData.request_date
       )
     } else if (activeTab === 'batch') {
       return tourAllocations.length > 0
-        ? `將建立 ${tourAllocations.length} 筆請款單`
-        : t('addRequestDialog.請新增旅遊團分配')
+        ? ADD_REQUEST_FORM_LABELS.將建立N筆請款單(tourAllocations.length)
+        : ADD_REQUEST_DIALOG_LABELS.請新增旅遊團分配
     } else {
       return selectedTour
         ? generateRequestCode(selectedTour.code)
-        : t('addRequestDialog.請先選擇旅遊團')
+        : ADD_REQUEST_DIALOG_LABELS.請先選擇旅遊團
     }
   }, [
     activeTab,
@@ -764,7 +772,7 @@ export function AddRequestDialog({
 
   const orderOptions = filteredOrders.map(order => ({
     value: order.id,
-    label: `${order.order_number} - ${order.contact_person || t('addReceiptDialog.無聯絡人')}`,
+    label: `${order.order_number} - ${order.contact_person || ADD_RECEIPT_DIALOG_LABELS.無聯絡人}`,
   }))
 
   // === 操作 ===
@@ -773,7 +781,7 @@ export function AddRequestDialog({
     setImportFromRequests(false)
     setSelectedRequestItems({})
     setBatchDate(getTodayString())
-    setBatchCategory(t('requestType.catOther') as PaymentItemCategory)
+    setBatchCategory(REQUEST_TYPE_LABELS.CAT_OTHER as PaymentItemCategory)
     setBatchSupplierId('')
     setBatchDescription('')
     setBatchTotalAmount(0)
@@ -792,7 +800,7 @@ export function AddRequestDialog({
     try {
       // 檢查 workspace_id
       if (!workspaceId) {
-        void alert(t('addRequestDialog.無法取得工作空間_請重新登入'), 'warning')
+        void alert(ADD_REQUEST_DIALOG_LABELS.無法取得工作空間_請重新登入, 'warning')
         return
       }
 
@@ -801,16 +809,16 @@ export function AddRequestDialog({
         const toSubmit = tourAllocations.filter(a => a.tour_id && a.allocated_amount > 0)
 
         if (toSubmit.length === 0) {
-          void alert(t('addRequestDialog.請至少選擇一個旅遊團並輸入金額'), 'warning')
+          void alert(ADD_REQUEST_DIALOG_LABELS.請至少選擇一個旅遊團並輸入金額, 'warning')
           return
         }
         if (batchTotalAmount === 0) {
-          void alert(t('addRequestDialog.請款金額不能為_0'), 'warning')
+          void alert(ADD_REQUEST_DIALOG_LABELS.請款金額不能為_0, 'warning')
           return
         }
         if (unallocatedAmount !== 0) {
           void alert(
-            `還有 NT$ ${formatMoney(Math.abs(unallocatedAmount))} ${unallocatedAmount > 0 ? t('addRequestForm.未分配') : t('batchReceiptDialog.超出')}，請確認分配金額`,
+            `還有 NT$ ${formatMoney(Math.abs(unallocatedAmount))} ${unallocatedAmount > 0 ? ADD_REQUEST_FORM_LABELS.未分配 : BATCH_RECEIPT_DIALOG_LABELS.超出}，請確認分配金額`,
             'warning'
           )
           return
@@ -835,7 +843,7 @@ export function AddRequestDialog({
               amount: 0,
               status: 'pending',
               notes: batchNote,
-              request_type: t('addRequestDialog.供應商支出'),
+              request_type: ADD_REQUEST_DIALOG_LABELS.供應商支出,
               request_category: 'tour',
               batch_id: batchId, // 批次 ID：同批請款單共用此 ID
               payment_method_id: batchPaymentMethodId || null,
@@ -860,16 +868,16 @@ export function AddRequestDialog({
         }
 
         if (errorCount > 0) {
-          await alert(`建立完成：成功 ${successCount} 筆，失敗 ${errorCount} 筆。請檢查失敗的請款單品項。`, 'warning')
+          await alert(REQUEST_LABELS.建立完成(successCount, errorCount), 'warning')
         } else {
-          await alert(`成功建立 ${successCount} 筆請款單（批次 ID: ${batchId}）`, 'success')
+          await alert(REQUEST_LABELS.成功建立(successCount, batchId), 'success')
         }
         handleCancel()
         onSuccess?.()
       } else if (activeTab === 'company') {
         // 公司請款
         if (!formData.expense_type) {
-          void alert(t('addRequestDialog.請選擇費用類型和日期'), 'warning')
+          void alert(ADD_REQUEST_DIALOG_LABELS.請選擇費用類型和日期, 'warning')
           return
         }
         await createRequest(
@@ -888,7 +896,7 @@ export function AddRequestDialog({
         const selectedOrder = orders.find(o => o.id === formData.order_id)
 
         if (!selectedTour) {
-          void alert(t('addRequestDialog.請先選擇旅遊團'), 'warning')
+          void alert(ADD_REQUEST_DIALOG_LABELS.請先選擇旅遊團, 'warning')
           return
         }
 
@@ -952,7 +960,7 @@ export function AddRequestDialog({
           ? error.message
           : typeof error === 'object' && error !== null && 'message' in error
             ? String((error as { message: string }).message)
-            : t('addRequestExtra.createFailed')
+            : ADD_REQUEST_EXTRA_LABELS.CREATE_FAILED
       void alert(message, 'error')
     } finally {
       setIsSubmitting(false)
@@ -990,14 +998,14 @@ export function AddRequestDialog({
               <div className="flex items-center gap-4">
                 <TabsList className="w-fit h-10">
                   <TabsTrigger value="tour" disabled={isEditMode}>
-                    {t('addRequestForm.label7551')}
+                    {ADD_REQUEST_FORM_LABELS.LABEL_7551}
                   </TabsTrigger>
                   <TabsTrigger value="batch" disabled={isEditMode}>
-                    {t('addRequestForm.label163')}
+                    {ADD_REQUEST_FORM_LABELS.LABEL_163}
                   </TabsTrigger>
                   {canCreateCompanyPayment && (
                     <TabsTrigger value="company" disabled={isEditMode}>
-                      {t('addRequestForm.label9152')}
+                      {ADD_REQUEST_FORM_LABELS.LABEL_9152}
                     </TabsTrigger>
                   )}
                 </TabsList>
@@ -1012,8 +1020,8 @@ export function AddRequestDialog({
                         onChange={value =>
                           setFormData(prev => ({ ...prev, tour_id: value, order_id: '' }))
                         }
-                        placeholder={t('addRequestDialog.搜尋團號或團名')}
-                        emptyMessage={t('addReceiptDialog.找不到團體')}
+                        placeholder={ADD_REQUEST_DIALOG_LABELS.搜尋團號或團名}
+                        emptyMessage={ADD_RECEIPT_DIALOG_LABELS.找不到團體}
                         className="w-[350px]"
                         maxHeight="300px"
                         disabled={isEditMode}
@@ -1026,8 +1034,8 @@ export function AddRequestDialog({
                         onChange={value => setFormData(prev => ({ ...prev, order_id: value }))}
                         placeholder={
                           !formData.tour_id
-                            ? t('addRequestDialog.請先選擇旅遊團')
-                            : t('batchReceiptDialog.搜尋訂單')
+                            ? ADD_REQUEST_DIALOG_LABELS.請先選擇旅遊團
+                            : BATCH_RECEIPT_DIALOG_LABELS.搜尋訂單
                         }
                         disabled={!formData.tour_id}
                         className="w-[300px]"
@@ -1065,7 +1073,7 @@ export function AddRequestDialog({
                       </Badge>
                     </>
                   ) : (
-                    t('addRequestForm.新增請款單')
+                    ADD_REQUEST_FORM_LABELS.新增請款單
                   )}
                 </DialogTitle>
               </div>
@@ -1142,18 +1150,18 @@ export function AddRequestDialog({
             >
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label>{t('addRequestForm.請款日期')}</Label>
+                  <Label>{ADD_REQUEST_FORM_LABELS.請款日期}</Label>
                   <DatePicker
                     value={batchDate}
                     onChange={date => setBatchDate(date)}
-                    placeholder={t('paymentItemRow.選擇日期')}
+                    placeholder={PAYMENT_ITEM_ROW_LABELS.選擇日期}
                   />
                 </div>
                 <div>
-                  <Label>{t('addRequestForm.總金額')}</Label>
+                  <Label>{ADD_REQUEST_FORM_LABELS.總金額}</Label>
                   <Input
                     type="number"
-                    placeholder={t('addRequestDialog.輸入總金額')}
+                    placeholder={ADD_REQUEST_DIALOG_LABELS.輸入總金額}
                     value={batchTotalAmount || ''}
                     onChange={e => setBatchTotalAmount(parseFloat(e.target.value) || 0)}
                   />
@@ -1162,11 +1170,11 @@ export function AddRequestDialog({
 
               <div className="space-y-4 pt-4 border-t border-morandi-container/30">
                 <h3 className="text-sm font-medium text-morandi-primary">
-                  {t('addRequestForm.請款項目資訊')}
+                  {ADD_REQUEST_FORM_LABELS.請款項目資訊}
                 </h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label>{t('addRequestForm.類別')}</Label>
+                    <Label>{ADD_REQUEST_FORM_LABELS.類別}</Label>
                     <Select
                       value={batchCategory}
                       onValueChange={value => setBatchCategory(value as PaymentItemCategory)}
@@ -1184,12 +1192,12 @@ export function AddRequestDialog({
                     </Select>
                   </div>
                   <div>
-                    <Label>{t('addRequestForm.供應商_label')}</Label>
+                    <Label>{ADD_REQUEST_FORM_LABELS.供應商_label}</Label>
                     <Combobox
                       value={batchSupplierId}
                       onChange={setBatchSupplierId}
                       options={suppliers.map(s => ({ value: s.id, label: s.name || '' }))}
-                      placeholder={t('addRequestDialog.選擇供應商_選填')}
+                      placeholder={ADD_REQUEST_DIALOG_LABELS.選擇供應商_選填}
                       showSearchIcon={false}
                       onCreate={handleCreateSupplier}
                       disablePortal
@@ -1198,9 +1206,9 @@ export function AddRequestDialog({
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label>{t('addRequestForm.說明')}</Label>
+                    <Label>{ADD_REQUEST_FORM_LABELS.說明}</Label>
                     <Input
-                      placeholder={t('addRequestDialog.請款說明_選填')}
+                      placeholder={ADD_REQUEST_DIALOG_LABELS.請款說明_選填}
                       value={batchDescription}
                       onChange={e => setBatchDescription(e.target.value)}
                     />
@@ -1228,13 +1236,13 @@ export function AddRequestDialog({
 
               <div className="space-y-3 pt-4 border-t border-morandi-container/30">
                 <InlineEditTable<TourAllocation>
-                  title={t('addRequestForm.旅遊團分配')}
+                  title={ADD_REQUEST_FORM_LABELS.旅遊團分配}
                   rows={tourAllocations}
                   columns={
                     [
                       {
                         key: 'tour',
-                        label: t('addRequestForm.旅遊團'),
+                        label: ADD_REQUEST_FORM_LABELS.旅遊團,
                         render: ({ row, index }) => (
                           <Combobox
                             options={[
@@ -1253,13 +1261,13 @@ export function AddRequestDialog({
                             ]}
                             value={row.tour_id}
                             onChange={value => selectTour(index, value)}
-                            placeholder={t('addRequestDialog.搜尋旅遊團')}
+                            placeholder={ADD_REQUEST_DIALOG_LABELS.搜尋旅遊團}
                           />
                         ),
                       },
                       {
                         key: 'allocated_amount',
-                        label: t('addRequestForm.分配金額'),
+                        label: ADD_REQUEST_FORM_LABELS.分配金額,
                         width: '160px',
                         align: 'right',
                         render: ({ row, onUpdate }) => (
@@ -1280,8 +1288,8 @@ export function AddRequestDialog({
                   onAdd={addTourAllocation}
                   onRemove={removeTourAllocation}
                   canRemove={() => true}
-                  addLabel={t('addRequestForm.新增旅遊團')}
-                  emptyMessage={t('addRequestForm.add3774')}
+                  addLabel={ADD_REQUEST_FORM_LABELS.新增旅遊團}
+                  emptyMessage={ADD_REQUEST_FORM_LABELS.ADD_3774}
                   headerExtra={
                     <Button
                       size="sm"
@@ -1289,13 +1297,13 @@ export function AddRequestDialog({
                       onClick={distributeEvenly}
                       disabled={tourAllocations.length === 0 || batchTotalAmount === 0}
                     >
-                      {t('addRequestForm.平均分配')}
+                      {ADD_REQUEST_FORM_LABELS.平均分配}
                     </Button>
                   }
                   footer={
                     <tr className="bg-morandi-container/20 font-medium">
                       <td className="py-2.5 px-3 text-sm text-morandi-primary">
-                        {`共 ${tourAllocations.length} 行`}
+                        {ADD_REQUEST_FORM_LABELS.共N行(tourAllocations.length)}
                       </td>
                       <td className="py-2.5 px-3 text-right">
                         <CurrencyCell amount={totalAllocatedAmount} className="text-sm" />
@@ -1308,16 +1316,16 @@ export function AddRequestDialog({
                 {/* 未分配提示 */}
                 <UnallocatedAmountWarning
                   amount={unallocatedAmount}
-                  underMessage={t('addRequestForm.還有金額未分配')}
-                  overMessage={t('batchReceiptDialog.分配金額超過總金額')}
-                  labelSuffix={t('addRequestForm.未分配')}
+                  underMessage={ADD_REQUEST_FORM_LABELS.還有金額未分配}
+                  overMessage={BATCH_RECEIPT_DIALOG_LABELS.分配金額超過總金額}
+                  labelSuffix={ADD_REQUEST_FORM_LABELS.未分配}
                 />
               </div>
 
               <div>
-                <Label>{t('addRequestForm.備註')}</Label>
+                <Label>{ADD_REQUEST_FORM_LABELS.備註}</Label>
                 <Input
-                  placeholder={t('addRequestDialog.請款備註_選填')}
+                  placeholder={ADD_REQUEST_DIALOG_LABELS.請款備註_選填}
                   value={batchNote}
                   onChange={e => setBatchNote(e.target.value)}
                 />
@@ -1368,12 +1376,12 @@ export function AddRequestDialog({
                   </div>
                   <div>
                     <label className="text-sm font-medium text-morandi-primary">
-                      {t('addRequestForm.備註')}
+                      {ADD_REQUEST_FORM_LABELS.備註}
                     </label>
                     <Input
                       value={formData.notes}
                       onChange={e => setFormData(prev => ({ ...prev, notes: e.target.value }))}
-                      placeholder={t('addRequestDialog.輸入備註_可選')}
+                      placeholder={ADD_REQUEST_DIALOG_LABELS.輸入備註_可選}
                       className="mt-1"
                     />
                   </div>
@@ -1398,7 +1406,7 @@ export function AddRequestDialog({
             {/* 左側：總金額 */}
             <div className="flex items-center gap-2">
               <span className="text-sm text-morandi-secondary">
-                {t('addReceiptDialog.total6550')}
+                {ADD_RECEIPT_DIALOG_LABELS.TOTAL_6550}
               </span>
               <span className="text-lg font-semibold text-morandi-gold whitespace-nowrap">
                 NT${' '}
@@ -1465,10 +1473,10 @@ export function AddRequestDialog({
                 >
                   <Plus size={16} />
                   {isSubmitting
-                    ? t('addRequestForm.處理中')
+                    ? ADD_REQUEST_FORM_LABELS.處理中
                     : activeTab === 'batch'
-                      ? t('addRequestExtra.batchCreateLabel')
-                      : t('addRequestDialog.新增請款單')}
+                      ? ADD_REQUEST_EXTRA_LABELS.BATCH_CREATE_LABEL
+                      : ADD_REQUEST_DIALOG_LABELS.新增請款單}
                 </Button>
               )}
             </div>

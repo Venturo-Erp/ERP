@@ -36,8 +36,6 @@ export interface TransportationRate {
   created_by: string | null
   updated_at: string | null
   updated_by: string | null
-  deleted_at: string | null
-  deleted_by: string | null
 }
 
 const transportationRateEntity = createEntityHook<TransportationRate>(

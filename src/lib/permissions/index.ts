@@ -1,10 +1,10 @@
-// 新權限系統
+// 權限系統 (2026-05-01 重構：role_capabilities + has_capability RPC)
 export * from './features'
 export * from './hooks'
 export * from './module-tabs'
-export * from './useTabPermissions'
 export * from './capabilities'
 export { useCapabilities } from './useCapabilities'
+export { useMyCapabilities, hasCapabilitySync, invalidateCapabilityCache } from './useMyCapabilities'
 
 export interface PermissionConfig {
   id: string

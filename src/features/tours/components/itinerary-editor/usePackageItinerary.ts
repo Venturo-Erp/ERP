@@ -291,10 +291,7 @@ export function usePackageItinerary({
 
   // 已關聯的行程表（透過 itinerary_id 查找）
   const linkedItineraries = useMemo(() => {
-    const filtered = itineraries.filter(i => {
-      if (i._deleted) return false
-      return ctx.itinerary_id && i.id === ctx.itinerary_id
-    })
+    const filtered = itineraries.filter(i => ctx.itinerary_id && i.id === ctx.itinerary_id)
     return filtered
   }, [itineraries, ctx.itinerary_id])
 

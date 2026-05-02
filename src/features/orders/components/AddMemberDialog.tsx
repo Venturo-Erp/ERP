@@ -14,7 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { PassportUploadZone } from './PassportUploadZone'
 import type { ProcessedFile } from '../types/order-member.types'
 import type { PendingConfirmation } from '../hooks/usePassportUpload'
-import { useTranslations } from 'next-intl'
+import { COMP_ORDERS_LABELS } from '../constants/labels'
 
 interface AddMemberDialogProps {
   isOpen: boolean
@@ -65,20 +65,18 @@ export function AddMemberDialog({
   onConfirmAllUpdates,
   onRejectAllUpdates,
 }: AddMemberDialogProps) {
-  const t = useTranslations('orders')
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent nested level={2} className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>{t('common.新增成員')}</DialogTitle>
+          <DialogTitle>{COMP_ORDERS_LABELS.新增成員}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6">
           {/* 手動新增 */}
           <div className="flex items-center justify-between gap-4">
             <h4 className="text-sm font-medium text-morandi-primary">
-              {t('common.手動新增空白成員')}
+              {COMP_ORDERS_LABELS.手動新增空白成員}
             </h4>
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-2">
@@ -93,7 +91,7 @@ export function AddMemberDialog({
                       onCountChange(val === '' ? '' : parseInt(val, 10))
                     }}
                     className="pr-6 text-right [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [appearance:textfield]"
-                    placeholder={t('common.人數')}
+                    placeholder={COMP_ORDERS_LABELS.人數}
                   />
                   <div className="absolute right-1 top-1/2 -translate-y-1/2 flex flex-col">
                     <button
@@ -120,7 +118,7 @@ export function AddMemberDialog({
                 </div>
                 <Button onClick={onConfirm} disabled={!memberCount || memberCount < 1} size="sm">
                   <Plus size={16} className="mr-1" />
-                  {t('common.新增')}
+                  {COMP_ORDERS_LABELS.新增}
                 </Button>
               </div>
             </div>

@@ -8,7 +8,7 @@ import { useState, useCallback, useMemo, useEffect } from 'react'
 import { useOrdersSlim } from '@/data'
 import type { PaymentFormData, PaymentItem } from '../types'
 import { RECEIPT_TYPES } from '../types'
-import { useTranslations } from 'next-intl'
+import { PAYMENT_FORM_LABELS } from '../../constants/labels'
 
 interface TourSlim {
   id: string
@@ -17,8 +17,6 @@ interface TourSlim {
 }
 
 export function usePaymentForm() {
-  const t = useTranslations('finance')
-
   const { items: orders } = useOrdersSlim()
 
   // 只載入正式團（從 API 層過濾，省流量）
@@ -38,8 +36,7 @@ export function usePaymentForm() {
         // 正式團 = status 非 proposal / template
         .in('status', ['upcoming', 'ongoing', 'returned', 'closed'])
         .or('archived.is.null,archived.eq.false')
-        .or('is_deleted.is.null,is_deleted.eq.false')
-        .is('deleted_at', null)
+        .eq('is_active', true)
         .order('departure_date', { ascending: false })
         .limit(50)
 
@@ -133,34 +130,34 @@ export function usePaymentForm() {
     // 團體收款需要 tour_id 和 order_id
     // 公司收款不需要（允許 NULL）
     if (formData.tour_id && !formData.order_id) {
-      errors.push(t('paymentForm.selectOrder'))
+      errors.push(PAYMENT_FORM_LABELS.SELECT_ORDER)
     }
 
     if (paymentItems.length === 0) {
-      errors.push(t('paymentForm.atLeastOneItem'))
+      errors.push(PAYMENT_FORM_LABELS.AT_LEAST_ONE_ITEM)
     }
 
     if (totalAmount <= 0) {
-      errors.push(t('paymentForm.totalMustGtZero'))
+      errors.push(PAYMENT_FORM_LABELS.TOTAL_MUST_GT_ZERO)
     }
 
     // 驗證每個收款項目
     paymentItems.forEach((item, index) => {
       if (!item.amount || item.amount <= 0) {
-        errors.push(`收款項目 ${index + 1}: 金額必須大於 0`)
+        errors.push(PAYMENT_FORM_LABELS.ITEM_AMOUNT_GT_ZERO(index + 1))
       }
 
       if (!item.transaction_date) {
-        errors.push(`收款項目 ${index + 1}: 請選擇收款日期`)
+        errors.push(PAYMENT_FORM_LABELS.ITEM_SELECT_DATE(index + 1))
       }
 
       // LinkPay 專屬驗證
       if (item.receipt_type === RECEIPT_TYPES.LINK_PAY) {
         if (!item.email) {
-          errors.push(`收款項目 ${index + 1}: LinkPay 需要 Email`)
+          errors.push(PAYMENT_FORM_LABELS.ITEM_LINKPAY_EMAIL(index + 1))
         }
         if (!item.pay_dateline) {
-          errors.push(`收款項目 ${index + 1}: LinkPay 需要付款截止日`)
+          errors.push(PAYMENT_FORM_LABELS.ITEM_LINKPAY_DEADLINE(index + 1))
         }
       }
 

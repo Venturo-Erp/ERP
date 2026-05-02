@@ -58,13 +58,10 @@ export async function checkTourDependencies(tourId: string): Promise<TourDepende
  */
 export async function deleteTourConfigurationData(tourId: string): Promise<void> {
   const results = await Promise.all([
-    supabase.from('designer_drafts').delete().eq('tour_id', tourId),
-    supabase.from('members').delete().eq('tour_id', tourId),
-    supabase.from('tour_addons').delete().eq('tour_id', tourId),
     supabase.from('tour_custom_cost_fields').delete().eq('tour_id', tourId),
     supabase.from('tour_departure_data').delete().eq('tour_id', tourId),
     supabase.from('tour_documents').delete().eq('tour_id', tourId),
-    supabase.from('tour_itinerary_days').delete().eq('tour_id', tourId),
+    // tour_itinerary_days 已合併進 tour_itinerary_items（merge migration 20260502120000）
     supabase.from('tour_meal_settings').delete().eq('tour_id', tourId),
     supabase.from('tour_member_fields').delete().eq('tour_id', tourId),
     supabase.from('tour_role_assignments').delete().eq('tour_id', tourId),

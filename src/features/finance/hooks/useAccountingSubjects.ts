@@ -1,7 +1,8 @@
 'use client'
 
-import { useMemo } from 'react'
-import { useAccountingSubjects as useAccountingSubjectsEntity } from '@/data'
+import { useEffect, useMemo, useState } from 'react'
+import { useAuthStore } from '@/stores/auth-store'
+import { logger } from '@/lib/utils/logger'
 
 interface AccountingSubject {
   id: string
@@ -12,18 +13,41 @@ interface AccountingSubject {
 
 /**
  * 取得會計科目清單（用於下拉選擇）
- * 底層使用 SWR entity hook，享有快取和去重
+ *
+ * 資料源：chart_of_accounts（透過 /api/finance/accounting-subjects endpoint，
+ *        endpoint 內部 query chart_of_accounts、回傳時 mapping account_type → type）
  */
 export function useAccountingSubjects(
   filterType?: 'expense' | 'cost' | 'asset' | 'liability' | 'revenue'
 ) {
-  const { items, loading } = useAccountingSubjectsEntity()
+  const workspaceId = useAuthStore(s => s.user?.workspace_id)
+  const [items, setItems] = useState<AccountingSubject[]>([])
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    if (!workspaceId) return
+    let cancelled = false
+    setLoading(true)
+    fetch(`/api/finance/accounting-subjects?workspace_id=${workspaceId}`)
+      .then(res => (res.ok ? res.json() : Promise.reject(res.statusText)))
+      .then((data: AccountingSubject[]) => {
+        if (!cancelled) setItems(Array.isArray(data) ? data : [])
+      })
+      .catch(err => {
+        if (!cancelled) logger.error('[useAccountingSubjects] load failed', err)
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [workspaceId])
 
   // 根據 filterType 過濾
   const subjects: AccountingSubject[] = useMemo(() => {
-    const all = (items || []) as AccountingSubject[]
-    if (!filterType) return all
-    return all.filter(s => s.type === filterType)
+    if (!filterType) return items
+    return items.filter(s => s.type === filterType)
   }, [items, filterType])
 
   // 轉換為 Combobox 選項格式

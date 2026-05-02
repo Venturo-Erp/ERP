@@ -82,11 +82,13 @@ export async function POST(req: NextRequest) {
       const currentTime = new Date().toISOString()
 
       // ============================================
-      // 步驟 3: 驗證訂單存在性
+      // 步驟 3: 驗證訂單存在性（同時取出 workspace_id 作為後續 update 的 filter）
+      // ⚠️ 公開 webhook、無 user session、用 order_no（含 timestamp、近似 secret）查
+      // 後續 update 會用此處取得的 workspace_id 限制範圍、避免跨租戶寫入
       // ============================================
       const { data: linkpayLog, error: findError } = await supabase
         .from('linkpay_logs')
-        .select('id, linkpay_order_number, price, status')
+        .select('id, linkpay_order_number, price, status, workspace_id')
         .eq('linkpay_order_number', order_no)
         .single()
 
@@ -96,6 +98,12 @@ export async function POST(req: NextRequest) {
           error: findError,
         })
         return { status: 404, body: { ok: false, error: 'LinkPay 記錄不存在' } }
+      }
+
+      const lpWorkspaceId = linkpayLog.workspace_id
+      if (!lpWorkspaceId) {
+        logger.error('[LinkPay Webhook] LinkPay 記錄缺少 workspace_id', { order_no })
+        return { status: 500, body: { ok: false, error: 'LinkPay 記錄缺少 workspace 識別' } }
       }
 
       // ============================================
@@ -132,6 +140,7 @@ export async function POST(req: NextRequest) {
           status: linkpayStatus,
           updated_at: currentTime,
         })
+        .eq('workspace_id', lpWorkspaceId)
         .eq('linkpay_order_number', order_no)
 
       if (logError) {
@@ -162,6 +171,7 @@ export async function POST(req: NextRequest) {
             receipt_date: currentTime,
             updated_at: currentTime,
           })
+          .eq('workspace_id', lpWorkspaceId)
           .eq('receipt_number', receiptNumber)
 
         if (receiptError) {
@@ -181,6 +191,7 @@ export async function POST(req: NextRequest) {
             receipt_date: currentTime,
             updated_at: currentTime,
           })
+          .eq('workspace_id', lpWorkspaceId)
           .eq('receipt_number', receiptNumber)
 
         logger.log('[LinkPay Webhook] 付款失敗', {

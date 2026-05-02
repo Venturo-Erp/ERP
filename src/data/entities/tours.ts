@@ -55,10 +55,10 @@ export function useToursForCalendar(dateRange: DateRange | null): ListResult<Tou
   const user = useAuthStore(state => state.user)
   const isAuthenticated = useAuthStore(state => state.isAuthenticated)
   const hasHydrated = useAuthStore(state => state._hasHydrated)
-  const isAdmin = useAuthStore(state => state.isAdmin)
 
   const isReady = hasHydrated && isAuthenticated && !!user?.id
-  const userRole = isAdmin ? ('admin' as UserRole) : ('staff' as UserRole)
+  // userRole 已不再用於權限決策、僅供 SWR cache scoping 使用 (2026-05-01)
+  const userRole = 'staff' as UserRole
   const workspaceId = user?.workspace_id
 
   // SWR key 包含日期範圍

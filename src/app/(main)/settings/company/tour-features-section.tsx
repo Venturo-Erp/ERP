@@ -35,7 +35,7 @@ export function TourControllerSection({ workspaceId }: { workspaceId: string }) 
         toast.success('團控功能已停用')
       }
     } catch (error) {
-      console.error('儲存團控設定失敗:', error)
+      logger.error('儲存團控設定失敗:', error)
       toast.error('儲存失敗')
     } finally {
       setSaving(false)

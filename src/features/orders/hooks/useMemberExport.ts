@@ -3,21 +3,21 @@
 import { useState } from 'react'
 import { alert } from '@/lib/ui/alert-dialog'
 import type { OrderMember } from '@/features/orders/types/order-member.types'
-import { useTranslations } from 'next-intl'
+import { EXPORT_DIALOG_LABELS } from '../constants/labels'
 
 type ExportColumns = Record<string, boolean>
 
 export const EXPORT_COLUMN_LABELS: Record<string, string> = {
-  identity: t('exportDialog.colIdentity'),
-  chinese_name: t('exportDialog.colChineseName'),
-  passport_name: t('exportDialog.colPassportPinyin'),
-  birth_date: t('exportDialog.colBirthdate'),
-  gender: t('exportDialog.colGender'),
-  id_number: t('exportDialog.colIdNumber'),
-  passport_number: t('exportDialog.colPassportNumber'),
-  passport_expiry: t('exportDialog.colPassportExpiry'),
+  identity: EXPORT_DIALOG_LABELS.COL_IDENTITY,
+  chinese_name: EXPORT_DIALOG_LABELS.COL_CHINESE_NAME,
+  passport_name: EXPORT_DIALOG_LABELS.COL_PASSPORT_PINYIN,
+  birth_date: EXPORT_DIALOG_LABELS.COL_BIRTHDATE,
+  gender: EXPORT_DIALOG_LABELS.COL_GENDER,
+  id_number: EXPORT_DIALOG_LABELS.COL_ID_NUMBER,
+  passport_number: EXPORT_DIALOG_LABELS.COL_PASSPORT_NUMBER,
+  passport_expiry: EXPORT_DIALOG_LABELS.COL_PASSPORT_EXPIRY,
   special_meal: '飲食禁忌',
-  remarks: t('exportDialog.colRemarks'),
+  remarks: EXPORT_DIALOG_LABELS.COL_REMARKS,
   // 金額相關欄位放最後
   total_payable: '應付金額',
   deposit_amount: '訂金',
@@ -42,8 +42,6 @@ const DEFAULT_EXPORT_COLUMNS: ExportColumns = {
 }
 
 export function useMemberExport(members: OrderMember[]) {
-  const t = useTranslations('orders')
-
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false)
   const [exportColumns, setExportColumns] = useState<ExportColumns>(DEFAULT_EXPORT_COLUMNS)
 
@@ -103,9 +101,9 @@ export function useMemberExport(members: OrderMember[]) {
                     if (col === 'gender') {
                       value =
                         member.gender === 'M'
-                          ? t('exportDialog.genderMale')
+                          ? EXPORT_DIALOG_LABELS.GENDER_MALE
                           : member.gender === 'F'
-                            ? t('exportDialog.genderFemale')
+                            ? EXPORT_DIALOG_LABELS.GENDER_FEMALE
                             : '-'
                     } else if (col === 'balance') {
                       value = (
@@ -175,9 +173,9 @@ export function useMemberExport(members: OrderMember[]) {
         if (col === 'gender') {
           row[label] =
             member.gender === 'M'
-              ? t('exportDialog.genderMale')
+              ? EXPORT_DIALOG_LABELS.GENDER_MALE
               : member.gender === 'F'
-                ? t('exportDialog.genderFemale')
+                ? EXPORT_DIALOG_LABELS.GENDER_FEMALE
                 : ''
         } else if (col === 'balance') {
           row[label] = (member.total_payable || 0) - (member.deposit_amount || 0)

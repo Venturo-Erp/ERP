@@ -3,13 +3,9 @@
 import React, { useMemo, useState, useEffect } from 'react'
 import { Combobox } from '@/components/ui/combobox'
 import { useEmployeesSlim } from '@/data'
-import type { EmployeeFull } from '@/stores/types'
-import type { SyncableEntity } from '@/types'
 import type { NewTourData } from '../../types'
 import { Loader2 } from 'lucide-react'
 import { logger } from '@/lib/utils/logger'
-
-type EmployeeWithSync = EmployeeFull & Partial<SyncableEntity>
 
 interface SelectorField {
   id: string
@@ -46,12 +42,9 @@ export function TourSettings({ newTour, setNewTour }: TourSettingsProps) {
     load()
   }, [])
 
-  // 所有在職員工
+  // 所有在職員工（離職員工 status 會切到非 'active'，無需另外擋）
   const activeEmployees = useMemo(() => {
-    return employees.filter(emp => {
-      const empWithSync = emp as unknown as EmployeeWithSync
-      return !empWithSync._deleted && emp.status === 'active' && emp.employee_type !== 'bot'
-    })
+    return employees.filter(emp => emp.status === 'active' && emp.employee_type !== 'bot')
   }, [employees])
 
   // 根據欄位映射的職務過濾員工

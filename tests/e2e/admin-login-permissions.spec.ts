@@ -1,49 +1,30 @@
 /**
- * Admin 登入權限守門測試（P001 Phase A 配套）
+ * Admin 登入 + 權限守門測試
  *
- * 背景：
- *   2026-04-22 拔掉前端 isAdmin 短路（auth-store:249、permissions/hooks.ts:284/293、
- *   usePermissions.ts 的 9 個 bool）、改走 user.permissions 比對。
- *   同時跑 backfill migration 20260422150000、admin role 在 role_tab_permissions
- *   預填所有 MODULES × tabs row。
- *
- * 這個 test 守「admin 登入後取得完整 permissions」、防止：
- *   (a) backfill 沒跑或被回退 → admin permissions 空陣列 → 拔短路後整站白屏
- *   (b) validate-login 邏輯退化 → 沒從 role_tab_permissions 讀
- *   (c) 新增 MODULES.tabs 但沒補 backfill → admin 漏某些 key
+ * 2026-05-01 重寫：
+ *   - 舊版測 validate-login 回傳的 isAdmin / permissions（已從 API 移除）
+ *   - 新版改測 role_capabilities 表本身：admin role 應該有 platform.is_admin
+ *     + 全部 MODULES × tabs 的 read/write capability codes。
+ *   - validate-login 端只剩 success / employee 驗證、權限決策不再經由它。
  */
 
 import { test, expect } from './fixtures/auth.fixture'
 
-// 必須的 module key（MODULES 裡定義的 root code）
-const REQUIRED_MODULE_KEYS = [
-  'calendar',
-  'workspace',
-  'todos',
-  'tours',
-  'orders',
-  'finance',
-  'accounting',
-  'visas',
-  'design',
-  'office',
-  'hr',
-  'database',
-  'settings',
-]
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://wzvwmawpkapcmkfmkvav.supabase.co'
+const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || ''
 
-// 必須的 module:tab key（抽樣代表性 tab、命中 /finance/payments、/tours、/hr 等 UI 大鎖涉及的路由）
-const REQUIRED_TAB_KEYS = [
-  'tours:overview',
-  'tours:orders',
-  'tours:itinerary',
-  'finance:payments',
-  'finance:requests',
-  'hr:employees',
-  'hr:roles',
-  'database:customers',
-  'settings:personal',
-  'settings:company',
+const REQUIRED_CAPABILITY_CODES = [
+  'platform.is_admin',
+  'tours.overview.read',
+  'tours.orders.read',
+  'tours.itinerary.read',
+  'finance.payments.read',
+  'finance.requests.read',
+  'hr.employees.read',
+  'hr.roles.read',
+  'hr.roles.write',
+  'database.customers.read',
+  'settings.company.read',
 ]
 
 async function loginAsAdmin() {
@@ -54,53 +35,55 @@ async function loginAsAdmin() {
   })
   return res.json() as Promise<{
     success: boolean
-    data?: {
-      isAdmin?: boolean
-      permissions?: string[]
-      employee?: { employee_number?: string }
-    }
+    data?: { employee?: { employee_number?: string } }
   }>
 }
 
-test.describe('Admin 登入權限守門（P001 Phase A）', () => {
-  test('TESTUX admin 登入 isAdmin=true 且 permissions 非空', async () => {
+test.describe('Admin 登入 + 權限守門', () => {
+  test('TESTUX admin 登入成功', async () => {
     const body = await loginAsAdmin()
     expect(body.success).toBe(true)
-    expect(body.data?.isAdmin).toBe(true)
-    expect(Array.isArray(body.data?.permissions)).toBe(true)
-    expect(
-      body.data?.permissions?.length ?? 0,
-      `admin permissions 不該是空陣列。如果是空、代表：
-      (a) backfill migration 20260422150000 沒跑或被 revert
-      (b) validate-login 沒從 role_tab_permissions 讀
-      (c) admin role 不是 is_admin=true`
-    ).toBeGreaterThan(40)
+    expect(body.data?.employee?.employee_number).toBe('E001')
   })
 
-  test('admin permissions 包含所有 MODULES root key', async () => {
-    const body = await loginAsAdmin()
-    const perms = new Set(body.data?.permissions ?? [])
+  test('admin role 在 role_capabilities 有完整資格', async () => {
+    test.skip(!SERVICE_KEY, '未設 SUPABASE_SERVICE_ROLE_KEY、跳過 DB 直查')
 
-    for (const key of REQUIRED_MODULE_KEYS) {
-      // root module key 可能以原名（無 tab 的模組）或 `${module}:${tab}`（有 tab 的模組）出現
-      const hasRoot = perms.has(key)
-      const hasAnyTab = [...perms].some(p => p.startsWith(`${key}:`))
+    // 找 TESTUX workspace 的 admin role
+    const wsRes = await fetch(`${SUPABASE_URL}/rest/v1/workspaces?code=eq.TESTUX&select=id`, {
+      headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}` },
+    })
+    const wsList = (await wsRes.json()) as { id: string }[]
+    expect(wsList.length).toBeGreaterThan(0)
+    const workspaceId = wsList[0].id
 
+    const roleRes = await fetch(
+      `${SUPABASE_URL}/rest/v1/workspace_roles?workspace_id=eq.${workspaceId}&is_admin=eq.true&select=id`,
+      { headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}` } }
+    )
+    const roleList = (await roleRes.json()) as { id: string }[]
+    expect(roleList.length).toBeGreaterThan(0)
+    const adminRoleId = roleList[0].id
+
+    const capRes = await fetch(
+      `${SUPABASE_URL}/rest/v1/role_capabilities?role_id=eq.${adminRoleId}&enabled=eq.true&select=capability_code`,
+      { headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}` } }
+    )
+    const caps = (await capRes.json()) as { capability_code: string }[]
+    const codes = new Set(caps.map(c => c.capability_code))
+
+    // 必須有 platform.is_admin + 抽樣的關鍵 capabilities
+    for (const code of REQUIRED_CAPABILITY_CODES) {
       expect(
-        hasRoot || hasAnyTab,
-        `admin 應該有 '${key}' 的權限（root 或任一 tab）。如果沒有、代表該 module 沒被 backfill。`
+        codes.has(code),
+        `admin role 缺 capability "${code}"。檢查：
+        (a) seed migration 20260501110000 跑了嗎？
+        (b) backfill migration 20260501100000 跑了嗎？
+        (c) 該 capability 是否定義在 module-tabs.ts？`
       ).toBe(true)
     }
-  })
 
-  test('admin permissions 包含關鍵 module:tab key', async () => {
-    const body = await loginAsAdmin()
-    const perms = new Set(body.data?.permissions ?? [])
-
-    for (const key of REQUIRED_TAB_KEYS) {
-      expect(perms.has(key), `admin 應該有 '${key}'、但沒看到。backfill 可能遺漏此 tab。`).toBe(
-        true
-      )
-    }
+    // admin 應該至少有 ~140 個 capability（read+write × 各 module/tab）
+    expect(codes.size).toBeGreaterThan(40)
   })
 })

@@ -21,6 +21,12 @@ import { useAuthStore } from '@/stores'
 import { usePaymentMethodsCached } from '@/data/hooks'
 import { logger } from '@/lib/utils/logger'
 import { PaymentMethod } from '@/stores/types'
+import {
+  ADD_RECEIPT_DIALOG_LABELS,
+  BATCH_RECEIPT_DIALOG_LABELS,
+  BATCH_RECEIPT_FORM_LABELS,
+  BATCH_RECEIPT_TOAST_LABELS,
+} from '../../constants/labels'
 
 // 擴展 OrderAllocation 加入備註
 interface OrderAllocationWithNote {
@@ -39,7 +45,6 @@ import { formatMoney } from '@/lib/utils/format-currency'
 import { cn } from '@/lib/utils'
 import { alert } from '@/lib/ui/alert-dialog'
 import { CurrencyCell } from '@/components/table-cells'
-import { useTranslations } from 'next-intl'
 
 interface BatchReceiptDialogProps {
   open: boolean
@@ -50,8 +55,6 @@ interface BatchReceiptDialogProps {
 // 不再使用 hardcoded fallback — 新租戶會透過 trigger 自動建立預設值
 
 export function BatchReceiptDialog({ open, onOpenChange }: BatchReceiptDialogProps) {
-  const t = useTranslations('finance')
-
   const { items: orders } = useOrdersSlim()
   const { items: tours } = useToursSlim()
   const { user } = useAuthStore()
@@ -262,27 +265,30 @@ export function BatchReceiptDialog({ open, onOpenChange }: BatchReceiptDialogPro
     const validAllocations = orderAllocations.filter(a => a.order_id && a.allocated_amount > 0)
 
     if (validAllocations.length === 0) {
-      void alert(t('batchReceiptDialog.請至少選擇一個訂單並輸入金額'), 'warning')
+      void alert(BATCH_RECEIPT_DIALOG_LABELS.請至少選擇一個訂單並輸入金額, 'warning')
       return
     }
 
     if (totalAmount === 0) {
-      void alert(t('batchReceiptDialog.收款金額不能為_0'), 'warning')
+      void alert(BATCH_RECEIPT_DIALOG_LABELS.收款金額不能為_0, 'warning')
       return
     }
 
     if (unallocatedAmount !== 0) {
       void alert(
-        `還有 NT$ ${Math.abs(unallocatedAmount)} ${unallocatedAmount > 0
-            ? t('batchReceiptForm.未分配')
-            : t('batchReceiptDialog.超出')}，請確認分配金額`,
+        BATCH_RECEIPT_FORM_LABELS.還有NT金額未分配(
+          Math.abs(unallocatedAmount),
+          unallocatedAmount > 0
+            ? BATCH_RECEIPT_FORM_LABELS.未分配
+            : BATCH_RECEIPT_DIALOG_LABELS.超出
+        ),
         'warning'
       )
       return
     }
 
     if (!user?.workspace_id) {
-      void alert(t('addReceiptDialog.無法取得_workspace_ID'), 'error')
+      void alert(ADD_RECEIPT_DIALOG_LABELS.無法取得_workspace_ID, 'error')
       return
     }
 
@@ -365,19 +371,19 @@ export function BatchReceiptDialog({ open, onOpenChange }: BatchReceiptDialogPro
           pay_dateline: null,
           handler_name: null,
           fees: null,
-          deleted_at: null,
+          is_active: true,
         })
       }
 
       // 刷新資料
       await invalidateReceipts()
 
-      await alert(`成功建立 ${validAllocations.length} 筆收款單`, 'success')
+      await alert(BATCH_RECEIPT_TOAST_LABELS.SUCCESS(validAllocations.length), 'success')
       onOpenChange(false)
       resetForm()
     } catch (error) {
       logger.error('批量收款建立失敗:', error)
-      void alert(t('batchReceiptDialog.建立失敗_請稍後再試'), 'error')
+      void alert(BATCH_RECEIPT_DIALOG_LABELS.建立失敗_請稍後再試, 'error')
     } finally {
       setIsSubmitting(false)
     }
@@ -389,7 +395,7 @@ export function BatchReceiptDialog({ open, onOpenChange }: BatchReceiptDialogPro
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <DollarSign className="h-5 w-5 text-morandi-gold" />
-            {t('batchReceiptForm.label6021')}
+            {BATCH_RECEIPT_FORM_LABELS.LABEL_6021}
           </DialogTitle>
         </DialogHeader>
 
@@ -397,11 +403,11 @@ export function BatchReceiptDialog({ open, onOpenChange }: BatchReceiptDialogPro
           {/* 基本資訊 */}
           <div className="grid grid-cols-3 gap-4">
             <div>
-              <Label>{t('batchReceiptForm.收款日期')}</Label>
+              <Label>{BATCH_RECEIPT_FORM_LABELS.收款日期}</Label>
               <DatePicker value={receiptDate} onChange={date => setReceiptDate(date)} />
             </div>
             <div>
-              <Label>{t('batchReceiptForm.收款方式')}</Label>
+              <Label>{BATCH_RECEIPT_FORM_LABELS.收款方式}</Label>
               <Select
                 value={paymentMethod}
                 onValueChange={value => setPaymentMethod(value as PaymentMethod)}
@@ -419,7 +425,7 @@ export function BatchReceiptDialog({ open, onOpenChange }: BatchReceiptDialogPro
               </Select>
             </div>
             <div>
-              <Label>{t('batchReceiptForm.總金額')}</Label>
+              <Label>{BATCH_RECEIPT_FORM_LABELS.總金額}</Label>
               <Input
                 type="number"
                 value={totalAmount || ''}
@@ -454,7 +460,7 @@ export function BatchReceiptDialog({ open, onOpenChange }: BatchReceiptDialogPro
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <Label className="text-base font-semibold">
-                {t('batchReceiptForm.訂單分配')}
+                {BATCH_RECEIPT_FORM_LABELS.訂單分配}
               </Label>
               <div className="flex gap-2">
                 <Button
@@ -465,11 +471,11 @@ export function BatchReceiptDialog({ open, onOpenChange }: BatchReceiptDialogPro
                     orderAllocations.filter(a => a.order_id).length === 0 || totalAmount === 0
                   }
                 >
-                  {t('batchReceiptForm.label2869')}
+                  {BATCH_RECEIPT_FORM_LABELS.LABEL_2869}
                 </Button>
                 <Button size="sm" variant="outline" onClick={addOrderAllocation}>
                   <Plus className="h-4 w-4 mr-1" />
-                  {t('batchReceiptForm.add5419')}
+                  {BATCH_RECEIPT_FORM_LABELS.ADD_5419}
                 </Button>
               </div>
             </div>
@@ -479,16 +485,16 @@ export function BatchReceiptDialog({ open, onOpenChange }: BatchReceiptDialogPro
                 <thead>
                   <tr className="text-xs text-morandi-primary font-medium bg-morandi-container/40">
                     <th className="text-left py-2.5 px-3 border-b border-r border-border">
-                      {t('batchReceiptForm.訂單')}
+                      {BATCH_RECEIPT_FORM_LABELS.訂單}
                     </th>
                     <th className="text-left py-2.5 px-3 border-b border-r border-border w-40">
-                      {t('batchReceiptForm.團名')}
+                      {BATCH_RECEIPT_FORM_LABELS.團名}
                     </th>
                     <th className="text-right py-2.5 px-3 border-b border-r border-border w-32">
-                      {t('batchReceiptForm.分配金額')}
+                      {BATCH_RECEIPT_FORM_LABELS.分配金額}
                     </th>
                     <th className="text-left py-2.5 px-3 border-b border-r border-border w-48">
-                      {t('batchReceiptForm.備註')}
+                      {BATCH_RECEIPT_FORM_LABELS.備註}
                     </th>
                     <th className="text-center py-2.5 px-3 border-b border-border w-14"></th>
                   </tr>
@@ -500,7 +506,7 @@ export function BatchReceiptDialog({ open, onOpenChange }: BatchReceiptDialogPro
                         colSpan={5}
                         className="text-center py-6 text-morandi-secondary text-sm bg-card"
                       >
-                        {t('batchReceiptForm.add8367')}
+                        {BATCH_RECEIPT_FORM_LABELS.ADD_8367}
                       </td>
                     </tr>
                   ) : (
@@ -514,11 +520,11 @@ export function BatchReceiptDialog({ open, onOpenChange }: BatchReceiptDialogPro
                               )
                               .map(order => ({
                                 value: order.id,
-                                label: `${order.code} - ${order.contact_person || t('addReceiptDialog.無聯絡人')} (${order.tour_name})`,
+                                label: `${order.code} - ${order.contact_person || ADD_RECEIPT_DIALOG_LABELS.無聯絡人} (${order.tour_name})`,
                               }))}
                             value={allocation.order_id}
                             onChange={value => selectOrder(index, value)}
-                            placeholder={t('batchReceiptDialog.搜尋訂單')}
+                            placeholder={BATCH_RECEIPT_DIALOG_LABELS.搜尋訂單}
                           />
                         </td>
                         <td className="py-2 px-3 border-b border-r border-border text-sm text-morandi-secondary">
@@ -548,7 +554,7 @@ export function BatchReceiptDialog({ open, onOpenChange }: BatchReceiptDialogPro
                           <span
                             onClick={() => removeOrderAllocation(index)}
                             className="text-morandi-secondary cursor-pointer hover:text-morandi-red text-sm"
-                            title={t('addReceiptDialog.刪除')}
+                            title={ADD_RECEIPT_DIALOG_LABELS.刪除}
                           >
                             ✕
                           </span>
@@ -559,7 +565,9 @@ export function BatchReceiptDialog({ open, onOpenChange }: BatchReceiptDialogPro
                   {/* 總計行 */}
                   <tr className="bg-morandi-container/20 font-medium">
                     <td className="py-2.5 px-3 border-r border-border text-sm text-morandi-primary">
-                      {`共 ${orderAllocations.filter(a => a.order_id).length} 筆，總金額`.slice(0, -3)}
+                      {BATCH_RECEIPT_FORM_LABELS.共N筆總金額(
+                        orderAllocations.filter(a => a.order_id).length
+                      ).slice(0, -3)}
                     </td>
                     <td className="py-2.5 px-3 border-r border-border"></td>
                     <td className="py-2.5 px-3 border-r border-border text-right">
@@ -576,8 +584,8 @@ export function BatchReceiptDialog({ open, onOpenChange }: BatchReceiptDialogPro
             {totalAmount > 0 && (
               <UnallocatedAmountWarning
                 amount={unallocatedAmount}
-                underMessage={t('batchReceiptForm.還有金額未分配')}
-                overMessage={t('batchReceiptDialog.分配金額超過總金額')}
+                underMessage={BATCH_RECEIPT_FORM_LABELS.還有金額未分配}
+                overMessage={BATCH_RECEIPT_DIALOG_LABELS.分配金額超過總金額}
                 labelSuffix="未分配"
               />
             )}
@@ -588,7 +596,9 @@ export function BatchReceiptDialog({ open, onOpenChange }: BatchReceiptDialogPro
         <div className="flex items-center gap-4 pt-4 border-t border-border">
           <div className="flex items-center text-sm">
             <span className="text-morandi-secondary">
-              {`共 ${orderAllocations.filter(a => a.order_id).length} 筆，總金額`}
+              {BATCH_RECEIPT_FORM_LABELS.共N筆總金額(
+                orderAllocations.filter(a => a.order_id).length
+              )}
             </span>
             <span className="inline-block min-w-[100px] text-right font-semibold text-morandi-gold ml-2">
               NT$ {formatMoney(totalAmount)}
@@ -598,7 +608,7 @@ export function BatchReceiptDialog({ open, onOpenChange }: BatchReceiptDialogPro
           <div className="flex space-x-2">
             <Button variant="outline" className="gap-1" onClick={() => onOpenChange(false)}>
               <X size={16} />
-              {t('batchReceiptForm.cancel')}
+              {BATCH_RECEIPT_FORM_LABELS.CANCEL}
             </Button>
             <Button
               onClick={handleSave}
@@ -611,7 +621,7 @@ export function BatchReceiptDialog({ open, onOpenChange }: BatchReceiptDialogPro
               }
             >
               <Check size={16} />
-              {t('batchReceiptForm.label7330')}
+              {BATCH_RECEIPT_FORM_LABELS.LABEL_7330}
             </Button>
           </div>
         </div>

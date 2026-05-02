@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { getSupabaseAdminClient } from '@/lib/supabase/admin'
 import { getServerAuth } from '@/lib/auth/server-auth'
+import { logger } from '@/lib/utils/logger'
 
 /**
  * PUT /api/line/knowledge/[id]
@@ -45,13 +46,13 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       .single()
 
     if (error) {
-      console.error('knowledge_base 更新失敗:', error.message)
+      logger.error('knowledge_base 更新失敗:', error.message)
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
     return NextResponse.json(data)
   } catch (error) {
-    console.error('API PUT /api/line/knowledge/[id] 錯誤:', error)
+    logger.error('API PUT /api/line/knowledge/[id] 錯誤:', error)
     return NextResponse.json({ error: '系統錯誤' }, { status: 500 })
   }
 }
@@ -87,13 +88,13 @@ export async function DELETE(
       .eq('workspace_id', workspaceId)
 
     if (error) {
-      console.error('knowledge_base 刪除失敗:', error.message)
+      logger.error('knowledge_base 刪除失敗:', error.message)
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('API DELETE /api/line/knowledge/[id] 錯誤:', error)
+    logger.error('API DELETE /api/line/knowledge/[id] 錯誤:', error)
     return NextResponse.json({ error: '系統錯誤' }, { status: 500 })
   }
 }

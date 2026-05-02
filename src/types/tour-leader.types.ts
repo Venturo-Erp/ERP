@@ -3,7 +3,7 @@
  * 用於記錄外部合作領隊的資訊（不需要登入系統）
  */
 
-import type { SyncableEntity } from './base.types'
+import type { BaseEntity } from './base.types'
 
 // ============================================
 // 領隊狀態
@@ -15,7 +15,7 @@ export type TourLeaderStatus = 'active' | 'inactive'
 // 領隊基本資料
 // ============================================
 
-export interface TourLeader extends SyncableEntity {
+export interface TourLeader extends BaseEntity {
   code?: string | null // 領隊編號（如 TL001）
 
   // 基本資料
@@ -71,8 +71,5 @@ export interface TourLeaderFormData {
 // CRUD 型別
 // ============================================
 
-export type CreateTourLeaderData = Omit<
-  TourLeader,
-  'id' | 'created_at' | 'updated_at' | '_needs_sync' | '_synced_at'
->
+export type CreateTourLeaderData = Omit<TourLeader, 'id' | 'created_at' | 'updated_at'>
 export type UpdateTourLeaderData = Partial<CreateTourLeaderData>

@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import type { CustomCostField } from '../types/order-member.types'
-import { useTranslations } from 'next-intl'
+import { COMP_ORDERS_LABELS } from '../constants/labels'
 
 interface CustomCostFieldsSectionProps {
   fields: CustomCostField[]
@@ -23,8 +23,6 @@ export function CustomCostFieldsSection({
   onAddField,
   onRemoveField,
 }: CustomCostFieldsSectionProps) {
-  const t = useTranslations('orders')
-
   const [showAddDialog, setShowAddDialog] = useState(false)
   const [newFieldName, setNewFieldName] = useState('')
 
@@ -41,7 +39,7 @@ export function CustomCostFieldsSection({
       <div className="flex items-center gap-2">
         <Coins size={16} className="text-morandi-gold" />
         <span className="text-sm font-medium text-morandi-primary">
-          {t('common.自訂費用欄位')} ({fields.length})
+          {COMP_ORDERS_LABELS.自訂費用欄位} ({fields.length})
         </span>
         <Button
           variant="ghost"
@@ -50,7 +48,7 @@ export function CustomCostFieldsSection({
           className="ml-auto"
         >
           <Plus size={14} className="mr-1" />
-          {t('common.add3322')}
+          {COMP_ORDERS_LABELS.ADD_3322}
         </Button>
       </div>
 
@@ -79,12 +77,12 @@ export function CustomCostFieldsSection({
       <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
         <DialogContent level={2} className="max-w-md">
           <DialogHeader>
-            <DialogTitle>{t('common.add7841')}</DialogTitle>
+            <DialogTitle>{COMP_ORDERS_LABELS.ADD_7841}</DialogTitle>
           </DialogHeader>
 
           <div className="space-y-4 py-4">
             <Input
-              placeholder={t('common.輸入欄位名稱_例如_簽證費_小費')}
+              placeholder={COMP_ORDERS_LABELS.輸入欄位名稱_例如_簽證費_小費}
               value={newFieldName}
               onChange={e => setNewFieldName(e.target.value)}
               onKeyDown={e => {
@@ -95,10 +93,10 @@ export function CustomCostFieldsSection({
 
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowAddDialog(false)}>
-                {t('common.取消')}
+                {COMP_ORDERS_LABELS.取消}
               </Button>
               <Button onClick={handleAdd} disabled={!newFieldName.trim()}>
-                {t('common.新增')}
+                {COMP_ORDERS_LABELS.新增}
               </Button>
             </div>
           </div>

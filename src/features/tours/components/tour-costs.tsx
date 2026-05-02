@@ -187,11 +187,11 @@ export const TourCosts = React.memo(function TourCosts({
     const tourOrderIds = new Set(tourOrders.map(o => o.id))
 
     return (
-      paymentRequests as unknown as (PaymentRequestWithItems & { deleted_at?: string | null })[]
+      paymentRequests as unknown as (PaymentRequestWithItems & { is_active?: boolean | null })[]
     )
       .filter(request => {
         // 排除已刪除的請款單
-        if (request.deleted_at) return false
+        if (request.is_active === false) return false
 
         // 如果有 orderFilter，只顯示該訂單的請款
         if (orderFilter) {

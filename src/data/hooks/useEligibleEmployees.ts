@@ -42,16 +42,16 @@ export function useEligibleEmployees(moduleCode: string, tabCode: string) {
   const { data, error, isLoading, mutate } = useSWR<EligibleEmployee[]>(cacheKey, async () => {
     if (!workspaceId) return []
 
-    // Step 1: 找有該權限的 role_ids
-    const { data: perms, error: permsErr } = await supabase
-      .from('role_tab_permissions')
+    // Step 1: 找有該 capability_code 的 role_ids（新系統 2026-05-01）
+    const code = `${moduleCode}.${tabCode}.write`
+    const { data: caps, error: capsErr } = await supabase
+      .from('role_capabilities')
       .select('role_id')
-      .eq('module_code', moduleCode)
-      .eq('tab_code', tabCode)
-      .eq('can_write', true)
+      .eq('capability_code', code)
+      .eq('enabled', true)
 
-    if (permsErr) throw permsErr
-    const roleIds = Array.from(new Set((perms ?? []).map(p => p.role_id).filter(Boolean)))
+    if (capsErr) throw capsErr
+    const roleIds = Array.from(new Set((caps ?? []).map(p => p.role_id).filter(Boolean)))
     if (roleIds.length === 0) return []
 
     // Step 2: 找該 workspace 內、role_id 在清單中、在職且非 bot 的員工

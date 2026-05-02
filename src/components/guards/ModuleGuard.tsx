@@ -4,7 +4,7 @@
  * 模組權限守衛
  * 兩道 gate：
  *   1. workspace_features — workspace 等級「有沒有買這個功能」
- *   2. role_tab_permissions（HR）— 個人職務「能不能看這個模組」
+ *   2. role_capabilities（HR）— 個人職務「能不能看這個模組」
  *
  * HR 是權限 SSOT。除 PLATFORM_CAPABILITY_ROUTES（平台管理資格專屬）外、所有路由統一吃此處。
  */
@@ -13,11 +13,10 @@ import { useEffect, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import {
   useWorkspaceFeatures,
-  useTabPermissions,
   isPlatformCapabilityRoute,
   getModuleFromRoute,
 } from '@/lib/permissions'
-import { useAuthStore } from '@/stores'
+import { useMyCapabilities } from '@/lib/permissions/useMyCapabilities'
 import { ModuleLoading } from '@/components/module-loading'
 
 interface ModuleGuardProps {
@@ -34,13 +33,13 @@ const ALWAYS_ALLOWED_PREFIXES = ['/dashboard/']
 export function ModuleGuard({ children }: ModuleGuardProps) {
   const pathname = usePathname()
   const router = useRouter()
-  const isAdmin = useAuthStore(state => state.isAdmin)
+  const { has, canReadAnyInModule, loading: capLoading } = useMyCapabilities()
+  const isAdmin = has('platform.is_admin')
   const { isRouteAvailable, loading: featuresLoading, features } = useWorkspaceFeatures()
-  const { canReadAny, loading: permLoading } = useTabPermissions()
   const [checked, setChecked] = useState(false)
 
   useEffect(() => {
-    if (featuresLoading || permLoading) return
+    if (featuresLoading || capLoading) return
 
     // 公開路由
     if (PUBLIC_ROUTES.some(r => pathname.startsWith(r))) {
@@ -76,7 +75,7 @@ export function ModuleGuard({ children }: ModuleGuardProps) {
     // HR 職務權限：模組層 canReadAny（HR 沒給該模組任一 tab 權限就擋）
     // 細粒度 tab gate 由 page.tsx 自己用 canRead(module, tab) 守
     const moduleCode = getModuleFromRoute(pathname)
-    if (moduleCode && !canReadAny(moduleCode)) {
+    if (moduleCode && !canReadAnyInModule(moduleCode)) {
       router.replace('/unauthorized')
       return
     }
@@ -85,15 +84,15 @@ export function ModuleGuard({ children }: ModuleGuardProps) {
   }, [
     pathname,
     featuresLoading,
-    permLoading,
+    capLoading,
     isRouteAvailable,
     router,
     features.length,
-    canReadAny,
+    canReadAnyInModule,
     isAdmin,
   ])
 
-  if (featuresLoading || permLoading || !checked) {
+  if (featuresLoading || capLoading || !checked) {
     return <ModuleLoading fullscreen />
   }
 

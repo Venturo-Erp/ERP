@@ -169,8 +169,8 @@ export function useVisaCreate(
           order_number: targetOrder.order_number || '',
           tour_id: selectedTour.id,
           code: selectedTour.code,
-          created_by: user.id,
-          note: '',
+          created_by: user.id || undefined,
+          notes: '',
         })
       }
 

@@ -17,7 +17,7 @@ import { invalidateOrders } from '@/data'
 import { ValidationError } from '@/core/errors/app-errors'
 import { Order, PaymentStatus } from '@/types/order.types'
 import { BaseEntity } from '@/core/types/common'
-import { useTranslations } from 'next-intl'
+import { ORDER_SERVICE_LABELS } from '../constants/labels'
 
 class OrderService extends BaseService<Order & BaseEntity> {
   protected resourceName = 'orders'
@@ -50,11 +50,11 @@ class OrderService extends BaseService<Order & BaseEntity> {
 
   protected validate(data: Partial<Order>): void {
     if (data.tour_id && !data.tour_id.trim()) {
-      throw new ValidationError('tour_id', t('orderService.mustAssociateTour'))
+      throw new ValidationError('tour_id', ORDER_SERVICE_LABELS.MUST_ASSOCIATE_TOUR)
     }
 
     if (data.total_amount !== undefined && data.total_amount < 0) {
-      throw new ValidationError('total_amount', t('orderService.amountNotNegative'))
+      throw new ValidationError('total_amount', ORDER_SERVICE_LABELS.AMOUNT_NOT_NEGATIVE)
     }
   }
 

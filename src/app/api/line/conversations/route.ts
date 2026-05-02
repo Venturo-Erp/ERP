@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { getSupabaseAdminClient } from '@/lib/supabase/admin'
 import { getServerAuth } from '@/lib/auth/server-auth'
+import { logger } from '@/lib/utils/logger'
 
 /**
  * GET /api/line/conversations
@@ -31,7 +32,7 @@ export async function GET(request: NextRequest) {
       .limit(100)
 
     if (error) {
-      console.warn('line_conversations 查詢失敗:', error.message)
+      logger.warn('line_conversations 查詢失敗:', error.message)
       return NextResponse.json([])
     }
 
@@ -54,7 +55,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(conversations)
   } catch (error) {
-    console.error('API /api/line/conversations 錯誤:', error)
+    logger.error('API /api/line/conversations 錯誤:', error)
     return NextResponse.json([])
   }
 }
@@ -99,7 +100,7 @@ export async function PATCH(request: NextRequest) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('API PATCH /api/line/conversations 錯誤:', error)
+    logger.error('API PATCH /api/line/conversations 錯誤:', error)
     return NextResponse.json({ error: '系統錯誤' }, { status: 500 })
   }
 }

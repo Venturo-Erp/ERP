@@ -135,7 +135,7 @@ export default function PublicTourPage({ params }: { params: Promise<{ code: str
         `
         )
         .eq('code', code)
-        .eq('is_deleted', false)
+        .eq('is_active', true)
         .single()
 
       if (error || !tourData) {

@@ -366,11 +366,6 @@ export interface Itinerary {
   archived_at?: string | null
   archived?: boolean // 是否已封存
   archive_reason?: string | null // 封存原因：no_deal、cancelled、test_error
-
-  // 離線同步支援
-  _deleted?: boolean
-  _needs_sync?: boolean
-  _synced_at?: string
 }
 
 // 價格方案（如 4人包團、6人包團、8人包團）
@@ -449,7 +444,6 @@ export interface Tour extends BaseEntity {
   // 團服務類型與團控
   tour_service_type?: TourServiceType | null // 團服務類型
   controller_id?: string | null // 團控人員 ID（負責開團的人）
-  department_id?: string | null // 部門 ID
 
   // 報到功能欄位
   enable_checkin?: boolean | null // 是否開啟報到功能
@@ -483,11 +477,6 @@ export interface Tour extends BaseEntity {
   return_flight?: FlightInfo | FlightInfo[] | null
 
   // 版本鎖定欄位已移除 - 公司規範：一團一份，不需版本鎖定
-
-  // 同步欄位
-  _deleted?: boolean | null // 軟刪除標記
-  _needs_sync?: boolean | null // 需要同步
-  _synced_at?: string | null // 最後同步時間
 }
 
 // ============================================

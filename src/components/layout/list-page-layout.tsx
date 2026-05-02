@@ -22,7 +22,7 @@ export interface TabItem {
 /**
  * ListPageLayout 屬性
  */
-interface ListPageLayoutProps<T extends Record<string, any>> {
+interface ListPageLayoutProps<T extends object> {
   // ========== 頁面配置 ==========
   /** 頁面標題 */
   title: string
@@ -141,7 +141,7 @@ interface ListPageLayoutProps<T extends Record<string, any>> {
  * />
  * ```
  */
-export function ListPageLayout<T extends Record<string, any>>({
+export function ListPageLayout<T extends object>({
   title,
   icon,
   breadcrumb,
@@ -185,10 +185,16 @@ export function ListPageLayout<T extends Record<string, any>>({
   const activeStatusTab = externalActiveTab ?? internalActiveTab
 
   // ========== 數據過濾 ==========
-  const filteredData = useDataFiltering(data, activeStatusTab, searchQuery, {
-    statusField,
-    searchFields,
-  })
+  // T extends object 比 Record<string, unknown> 寬鬆、cast 給 useDataFiltering 的 Record 約束
+  const filteredData = useDataFiltering(
+    data as unknown as Record<string, unknown>[],
+    activeStatusTab,
+    searchQuery,
+    {
+      statusField: statusField as string | undefined,
+      searchFields: searchFields as string[],
+    }
+  ) as unknown as T[]
 
   // ========== 處理 Tab 切換 ==========
   const handleTabChange = (tab: string) => {

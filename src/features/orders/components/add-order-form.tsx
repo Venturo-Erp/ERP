@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Combobox } from '@/components/ui/combobox'
 import { useToursListSlim } from '@/hooks/useListSlim'
 import { useEligibleEmployees } from '@/data/hooks/useEligibleEmployees'
-import { useTranslations } from 'next-intl'
+import { COMP_ORDERS_LABELS } from '../constants/labels'
 
 export interface OrderFormData {
   tour_id: string
@@ -30,8 +30,6 @@ interface AddOrderFormProps {
 }
 
 export function AddOrderForm({ tourId, onSubmit, onCancel, value, onChange }: AddOrderFormProps) {
-  const t = useTranslations('orders')
-
   const { items: tours } = useToursListSlim()
 
   // 下拉資格：查「職務有 tours.as_sales / tours.as_assistant can_write=true」的員工
@@ -70,7 +68,7 @@ export function AddOrderForm({ tourId, onSubmit, onCancel, value, onChange }: Ad
       {!tourId && (
         <div>
           <label className="text-sm font-medium text-morandi-primary">
-            {t('common.select448')}
+            {COMP_ORDERS_LABELS.SELECT_448}
           </label>
           <Combobox
             options={tours.map(tour => ({
@@ -80,8 +78,8 @@ export function AddOrderForm({ tourId, onSubmit, onCancel, value, onChange }: Ad
             }))}
             value={formData.tour_id || ''}
             onChange={value => updateFormData?.({ ...formData, tour_id: value })}
-            placeholder={t('common.搜尋或選擇旅遊團')}
-            emptyMessage={t('common.找不到旅遊團')}
+            placeholder={COMP_ORDERS_LABELS.搜尋或選擇旅遊團}
+            emptyMessage={COMP_ORDERS_LABELS.找不到旅遊團}
             className="mt-1"
             disablePortal={true}
           />
@@ -91,12 +89,12 @@ export function AddOrderForm({ tourId, onSubmit, onCancel, value, onChange }: Ad
       {/* 聯絡人 */}
       <div>
         <label className="text-sm font-medium text-morandi-primary">
-          {t('common.label7009')}
+          {COMP_ORDERS_LABELS.LABEL_7009}
         </label>
         <Input
           value={formData.contact_person || ''}
           onChange={e => updateFormData?.({ ...formData, contact_person: e.target.value })}
-          placeholder={t('common.輸入聯絡人姓名')}
+          placeholder={COMP_ORDERS_LABELS.輸入聯絡人姓名}
           className="mt-1"
           required={!isEmbedded}
         />
@@ -106,7 +104,7 @@ export function AddOrderForm({ tourId, onSubmit, onCancel, value, onChange }: Ad
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="text-sm font-medium text-morandi-primary">
-            {t('common.label8362')}
+            {COMP_ORDERS_LABELS.LABEL_8362}
             {/* 如果有填聯絡人，業務為必填 */}
             {formData.contact_person?.trim() && <span className="text-morandi-red ml-1">*</span>}
           </label>
@@ -117,8 +115,8 @@ export function AddOrderForm({ tourId, onSubmit, onCancel, value, onChange }: Ad
             }))}
             value={formData.sales_person || ''}
             onChange={value => updateFormData?.({ ...formData, sales_person: value })}
-            placeholder={t('common.選擇業務人員')}
-            emptyMessage={t('common.找不到業務人員')}
+            placeholder={COMP_ORDERS_LABELS.選擇業務人員}
+            emptyMessage={COMP_ORDERS_LABELS.找不到業務人員}
             showSearchIcon={true}
             showClearButton={true}
             className="mt-1"
@@ -127,7 +125,7 @@ export function AddOrderForm({ tourId, onSubmit, onCancel, value, onChange }: Ad
         </div>
         <div>
           <label className="text-sm font-medium text-morandi-primary">
-            {t('common.label7412')}
+            {COMP_ORDERS_LABELS.LABEL_7412}
           </label>
           <Combobox
             options={assistants.map(emp => ({
@@ -136,8 +134,8 @@ export function AddOrderForm({ tourId, onSubmit, onCancel, value, onChange }: Ad
             }))}
             value={formData.assistant || ''}
             onChange={value => updateFormData?.({ ...formData, assistant: value })}
-            placeholder={t('common.選擇助理')}
-            emptyMessage={t('common.找不到助理')}
+            placeholder={COMP_ORDERS_LABELS.選擇助理}
+            emptyMessage={COMP_ORDERS_LABELS.找不到助理}
             showSearchIcon={true}
             showClearButton={true}
             className="mt-1"
@@ -150,7 +148,7 @@ export function AddOrderForm({ tourId, onSubmit, onCancel, value, onChange }: Ad
       {!isEmbedded && (
         <div className="flex justify-end space-x-2">
           <Button type="button" variant="outline" onClick={onCancel}>
-            {t('common.取消')}
+            {COMP_ORDERS_LABELS.取消}
           </Button>
           <Button
             type="submit"

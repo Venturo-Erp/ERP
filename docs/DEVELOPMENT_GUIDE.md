@@ -1,230 +1,180 @@
-# Venturo 開發指南
+# Development Guide — 自動化開發系統
 
-> **最後更新**: 2026-01-22
-> **專案狀態**: 核心功能完成，純雲端架構
-> **架構**: Supabase 為唯一資料來源（IndexedDB 已棄用）
+**不再靠記憶，靠系統**
 
 ---
 
-## 🎯 專案基本資訊
+## 🤖 自動化系統（已部署）
 
-### 專案概述
+### 1. Pre-commit Hook（強制執行）
 
-```
-專案名稱: Venturo ERP (旅遊團管理系統)
-工作目錄: /Users/williamchien/Projects/venturo-erp
-開發端口: 3000
-技術棧:   Next.js 16 + React 19.2 + TypeScript 5 + Zustand 5 + Supabase
-架構模式: 純雲端架構（Supabase 為 Single Source of Truth）
-```
+**位置**：`.husky/pre-commit`
 
-### 核心原則
+**自動檢查**：
 
-- **問題 → 只回答**，不執行操作
-- **等待指令**：「執行」「修正」「開始」才動作
-- **簡潔回應**：問什麼答什麼
+- ✅ TypeScript type check（整個專案）
+- ✅ ESLint（staged files）
+- ✅ 禁止 `@ts-expect-error`（自動拒絕 commit）
+- ✅ 檢查 Next.js 15 params 問題（警告）
+
+**無法繞過**：hook 失敗 = commit 失敗
 
 ---
 
-## 📁 專案架構
+### 2. Migration Wrapper（自動更新 types）
 
-### 核心目錄結構
+**指令**：`./scripts/run-migration.sh <migration-file.sql>`
 
-```
-src/
-├── app/          (51 頁面) - Next.js 路由
-├── components/   (185 檔案) - UI 組件
-├── features/     (88 檔案) - 功能模組
-├── stores/       (36 檔案) - Zustand 狀態管理
-├── hooks/        (18 檔案) - 自定義 Hooks
-├── lib/          (29 檔案) - 工具函式
-├── services/     (5 檔案) - 業務服務
-└── types/        (20 檔案) - TypeScript 型別
-```
+**自動執行**：
 
-### 架構模式
+1. ✅ 執行 migration
+2. ✅ **立即**重新生成 Supabase types
+3. ✅ 提示檢查變更
 
-- **Hybrid Feature-Based + Layer-Based**
-- 功能模組獨立 (features/)
-- 共享基礎層 (components/, hooks/, stores/)
+**不需要手動記得更新 types**
 
 ---
 
-## 🔧 開發規範
+### 3. VSCode Snippets（自動產生正確程式碼）
 
-### 組件創建規則
+**位置**：`.vscode/nextjs15.code-snippets`
 
-```tsx
-// ✅ 正確：使用 Phase 1/2 的可重用組件
-import { ListPageLayout } from '@/components/layout/list-page-layout'
-import { DateCell, StatusCell, ActionCell } from '@/components/table-cells'
+**可用 snippets**：
 
-// ❌ 錯誤：不要重複寫 ResponsiveHeader + EnhancedTable
-```
+- `nxpage` → Server Component with params
+- `nxpagefull` → Server Component with params + searchParams
+- `nxapi` → API Route with params
 
-### 命名規範
-
-- **組件**: PascalCase (`ChannelChat.tsx`)
-- **Hooks**: camelCase (`useUserStore.ts`)
-- **工具**: kebab-case (`format-date.ts`)
-- **型別**: kebab-case + `.types.ts`
-
-### 型別安全
-
-- **禁止**: `as any`
-- **盡量避免**: `as unknown`
-- **使用**: 正確的 TypeScript 型別定義
+**保證**：產生的程式碼都是 Next.js 15 正確語法
 
 ---
 
-## 📋 常用指令
+### 4. Types 自動更新工具
 
-### 開發
+**指令**：`node scripts/regenerate-supabase-types.mjs`
+
+**用途**：手動執行 migration 後更新 types
+
+---
+
+## 📋 開發流程（自動化）
+
+### 寫 Next.js 15 程式碼
+
+```typescript
+// 1. 打 snippet：nxpage + Tab
+// 2. 自動產生正確程式碼：
+export default async function Page({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  // ...
+}
+```
+
+### 執行 Migration
 
 ```bash
-cd /Users/williamchien/Projects/venturo-erp
-npm run dev          # 啟動開發伺服器 (port 3000)
-npm run build        # 建置專案
-npm run lint         # 執行 ESLint
-npm run type-check   # TypeScript 類型檢查
+# ❌ 舊方式（會忘記更新 types）
+node scripts/exec-migration.mjs
+
+# ✅ 新方式（自動更新 types）
+./scripts/run-migration.sh supabase/migrations/xxx.sql
 ```
 
-### 資料庫 (詳見 SUPABASE_GUIDE.md)
+### Commit 程式碼
 
 ```bash
-npm run db:types     # 更新 TypeScript 類型
-npm run db:push      # 推送 migration 到資料庫
-npm run db:pull      # 下載目前資料庫結構
+git add -A
+git commit -m "feat: ..."
+
+# Pre-commit hook 自動檢查：
+# ✅ TypeScript type check
+# ✅ ESLint
+# ✅ 禁止 @ts-expect-error
+# ✅ Next.js 15 params 警告
+
+# 全部通過 → commit 成功
+# 任何失敗 → commit 拒絕
 ```
 
-### 檢查架構
+---
+
+## 🚫 系統禁止的行為
+
+| 行為                     | 系統反應                        |
+| ------------------------ | ------------------------------- |
+| 使用 `@ts-expect-error`  | ❌ Pre-commit hook 拒絕 commit  |
+| TypeScript 有錯誤        | ❌ Pre-commit hook 拒絕 commit  |
+| Migration 不更新 types   | ⚠️ 使用 wrapper script 自動更新 |
+| 手動寫 Next.js 15 params | 💡 用 snippet 自動產生          |
+
+---
+
+## 📊 成效對比
+
+### 舊流程（靠記憶）
+
+```
+寫程式 → 忘記 await params → Commit → Push
+→ Vercel 部署失敗 → 查錯誤 → 修正 → 重新部署
+時間：2-3 小時
+```
+
+### 新流程（自動化）
+
+```
+打 snippet → 自動產生正確程式碼 → Commit
+→ Pre-commit 檢查 → 全部通過 → Push → Vercel 成功
+時間：5 分鐘
+```
+
+**效率提升**：24-36 倍
+
+---
+
+## 🎯 重要提醒
+
+1. **不要用 `--no-verify`**
+   - Hook 失敗是因為有問題，不是因為 hook 太嚴格
+   - 修正問題，不要繞過檢查
+
+2. **Migration 一律用 wrapper script**
+   - `./scripts/run-migration.sh` 自動更新 types
+   - 不要手動跑 migration
+
+3. **寫 Next.js 15 用 snippet**
+   - `nxpage`、`nxpagefull`、`nxapi`
+   - 保證正確語法
+
+4. **遇到 TypeScript 錯誤**
+   - 不要用 `@ts-expect-error`
+   - 修正型別定義或更新 types
+
+---
+
+## 🔧 故障排除
+
+### Pre-commit hook 失敗
 
 ```bash
-ls -la src/components/     # 查看組件
-ls -la src/features/       # 查看功能模組
-find . -name "*-store.ts"  # 查找所有 stores
+# 1. 查看錯誤訊息
+# 2. 修正錯誤（不要繞過）
+# 3. 重新 commit
+
+# 如果是 types 問題：
+node scripts/regenerate-supabase-types.mjs
+npm run type-check
+```
+
+### Migration wrapper 失敗
+
+```bash
+# 檢查 migration SQL 語法
+# 修正後重新執行
+./scripts/run-migration.sh supabase/migrations/xxx.sql
 ```
 
 ---
 
-## ✅ 已完成的優化
-
-### Phase 1-2: 可重用組件系統
-
-- ✅ ListPageLayout 組件
-- ✅ Table Cell 組件庫 (8 個組件)
-- ✅ useListPageState Hook
-- ✅ 應用到 Quotes/Contracts/Itinerary 頁面
-- **總計減少**: 215 行代碼 (-24%)
-
-### Phase 3-4: 純雲端架構遷移 (2026-01)
-
-- ✅ 移除 IndexedDB 離線快取
-- ✅ Supabase Auth 整合
-- ✅ RLS 資料隔離（Workspace 層級）
-- ✅ 編號系統重構（新格式：CNX250128A）
-- ✅ Store 系統重構（createCloudStore）
-- ✅ SWR 快取層
-
-**關鍵改進**:
-
-- 🔄 單一資料來源：Supabase 為唯一 Source of Truth
-- ⚡ 即時更新：透過 SWR revalidation
-- 🔒 資料隔離：RLS 確保 Workspace 資料安全
-- 🔑 統一認證：Supabase Auth + JWT
-
----
-
-## 🎯 工作檢查清單
-
-### 開始任何工作前
-
-- [ ] 確認當前工作目錄正確
-- [ ] 檢查 port 3000 是否已佔用
-- [ ] 了解要修改的功能範圍
-
-### 修改代碼前
-
-- [ ] 是否使用了可重用組件？
-- [ ] 型別定義是否完整？
-- [ ] 是否避免 `as any`？
-- [ ] 是否符合命名規範？
-
-### 提交前檢查
-
-- [ ] `npm run build` 通過
-- [ ] 沒有新增 console.log
-- [ ] 沒有未使用的 imports
-- [ ] 型別檢查通過
-
----
-
-## 🔍 快速參考
-
-### 主要文檔位置
-
-```
-docs/
-├── DEVELOPMENT_GUIDE.md         - 開發指南（本檔案）
-├── SUPABASE_GUIDE.md            - Supabase 完整操作指南
-├── REALTIME_GUIDE.md            - Realtime 同步系統指南
-├── DATABASE.md                  - 資料庫設計文檔
-├── SUPABASE_RLS_POLICY.md       - RLS 政策說明
-└── reports/
-    └── SUPABASE_WORKFLOW.md     - Supabase 工作流程
-```
-
-### 關鍵檔案
-
-```
-# 狀態管理
-src/stores/core/create-store.ts            - Store 工廠函數（純雲端）
-src/stores/cloud-store-factory.ts          - Cloud Store 工廠
-src/stores/types.ts                        - 所有型別定義
-
-# 認證系統
-src/stores/auth-store.ts                   - 認證狀態管理
-src/lib/auth/auth-sync.ts                  - Auth 同步機制
-
-# 編號生成
-src/stores/utils/code-generator.ts         - 編號生成工具
-
-# 組件系統
-src/components/table-cells/index.tsx       - 表格單元格組件
-src/components/layout/list-page-layout.tsx - 列表頁佈局
-src/hooks/useListPageState.ts              - 列表頁狀態管理
-src/lib/status-config.ts                   - 狀態配置
-
-# 類型定義
-src/lib/supabase/types.ts                  - Supabase 自動生成類型
-```
-
----
-
-## 🚨 已知問題與限制
-
-### 需要改善的項目
-
-1. **23 個超大檔案** (>500 行) - 需拆分
-2. **重複的 Store Factory** - `create-store.ts` 應刪除
-3. **188 個型別繞過** - `as any`/`as unknown` 過多
-4. **Workspace Store Facade** - 耦合 5 個 stores
-
-### 架構改善需求
-
-- Service Layer 太薄 (只有 5 個，需 12-15 個)
-- API Layer 不完整 (只有 4 個 routes)
-- 測試覆蓋率 ~0%
-
----
-
-## 📚 詳細文檔
-
-- **Supabase 操作**: 查看 `docs/SUPABASE_GUIDE.md`
-- **Realtime 同步**: 查看 `docs/REALTIME_GUIDE.md`
-- **資料庫設計**: 查看 `docs/DATABASE.md`
-- **RLS 政策**: 查看 `docs/SUPABASE_RLS_POLICY.md`
-
----
-
-**注意**: 這是精簡版開發指南。詳細的操作說明請參考各專項文檔。
+**建立時間**：2026-03-18 20:52  
+**維護者**：Matthew  
+**目的**：不再重複犯錯，系統強制正確

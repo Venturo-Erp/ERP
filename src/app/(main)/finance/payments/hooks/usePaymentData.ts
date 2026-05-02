@@ -19,11 +19,9 @@ import {
 import { recalculateReceiptStats } from '@/features/finance/payments/services/receipt-core.service'
 import type { ReceiptItem } from '@/stores'
 import { ReceiptType } from '@/types/receipt.types'
-import { useTranslations } from 'next-intl'
+import { PAYMENT_DATA_LABELS } from '../../constants/labels'
 
 export function usePaymentData() {
-  const t = useTranslations('finance')
-
   const { items: orders, loading: ordersLoading } = useOrdersSlim()
   const { items: receipts, loading: receiptsLoading } = useReceipts()
   const { items: linkpayLogs } = useLinkPayLogs()
@@ -60,13 +58,13 @@ export function usePaymentData() {
       const data = await response.json()
 
       if (data.success) {
-        void alert(t('paymentData.linkpaySuccess'), 'success')
+        void alert(PAYMENT_DATA_LABELS.LINKPAY_SUCCESS, 'success')
       } else {
-        void alert(`LinkPay 生成失敗: ${data.message}`, 'error')
+        void alert(PAYMENT_DATA_LABELS.LINKPAY_FAILED(data.message), 'error')
       }
     } catch (error) {
       logger.error('LinkPay API 錯誤:', error)
-      void alert(t('paymentData.linkpayError'), 'error')
+      void alert(PAYMENT_DATA_LABELS.LINKPAY_ERROR, 'error')
     }
   }
 
@@ -77,7 +75,7 @@ export function usePaymentData() {
     const { selectedOrderId, paymentItems } = data
 
     if (!selectedOrderId || paymentItems.length === 0 || !user?.id) {
-      throw new Error(t('paymentData.fillCompleteInfo'))
+      throw new Error(PAYMENT_DATA_LABELS.FILL_COMPLETE_INFO)
     }
 
     const selectedOrder = orders.find(order => order.id === selectedOrderId)
@@ -86,7 +84,7 @@ export function usePaymentData() {
     const tour = selectedOrder?.tour_id ? getTour(selectedOrder.tour_id) : undefined
     const tourCode = tour?.code || ''
     if (!tourCode) {
-      throw new Error(t('paymentData.cannotGetTourCode'))
+      throw new Error(PAYMENT_DATA_LABELS.CANNOT_GET_TOUR_CODE)
     }
 
     // 為每個收款項目建立收款單
@@ -133,7 +131,7 @@ export function usePaymentData() {
         link: null, // LinkPay 連結（建立後由 API 填入）
         linkpay_order_number: null, // LinkPay 訂單號
         notes: item.notes || null,
-        deleted_at: null,
+        is_active: true,
         created_by: user.id,
         updated_by: user.id,
       })
@@ -154,7 +152,7 @@ export function usePaymentData() {
   // 確認收款（更新實收金額和狀態）
   const handleConfirmReceipt = async (receiptId: string, actualAmount: number) => {
     if (!user?.id) {
-      throw new Error(t('paymentData.pleaseLogin'))
+      throw new Error(PAYMENT_DATA_LABELS.PLEASE_LOGIN)
     }
 
     const receipt = receipts.find(r => r.id === receiptId)
@@ -175,7 +173,7 @@ export function usePaymentData() {
   // 更新收款單（編輯模式使用）
   const handleUpdateReceipt = async (receiptId: string, data: Partial<(typeof receipts)[0]>) => {
     if (!user?.id) {
-      throw new Error(t('paymentData.pleaseLogin'))
+      throw new Error(PAYMENT_DATA_LABELS.PLEASE_LOGIN)
     }
 
     await updateReceipt(receiptId, {
@@ -190,13 +188,13 @@ export function usePaymentData() {
   // 刪除收款單
   const handleDeleteReceipt = async (receiptId: string) => {
     if (!user?.id) {
-      throw new Error(t('paymentData.pleaseLogin'))
+      throw new Error(PAYMENT_DATA_LABELS.PLEASE_LOGIN)
     }
 
     // 檢查收款單是否已確認
     const receipt = receipts.find(r => r.id === receiptId)
     if (receipt?.status === 'confirmed') {
-      throw new Error(t('paymentData.confirmedCannotDelete'))
+      throw new Error(PAYMENT_DATA_LABELS.CONFIRMED_CANNOT_DELETE)
     }
 
     await deleteReceipt(receiptId)

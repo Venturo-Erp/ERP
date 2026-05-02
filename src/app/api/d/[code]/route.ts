@@ -18,6 +18,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ code
   const { code } = await params
 
   // 1. 先查團號對應的 tour UUID
+  // ⚠️ 公開 endpoint、設計上不篩 workspace_id（無 auth context）
+  // tour code 全域可猜（已在檔案頂註解標註風險）
   const { data: tour } = await supabase.from('tours').select('id').eq('code', code).single()
 
   if (!tour) {
@@ -25,6 +27,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ code
   }
 
   // 2. 查詢 tour_documents 表（用 UUID）
+  // ⚠️ tour_id 是 UUID（不可猜）、間接受保護；公開短網址設計
   const { data, error } = await supabase
     .from('tour_documents')
     .select('file_path')

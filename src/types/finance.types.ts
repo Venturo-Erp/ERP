@@ -64,8 +64,7 @@ export interface PaymentRequest {
   created_by?: string | null // 請款人 ID
   created_by_name?: string | null // 請款人姓名（快照）
   workspace_id?: string
-  is_deleted?: boolean | null // 軟刪除 flag
-  deleted_at?: string | null // 軟刪除時間（ISO 8601）
+  is_active?: boolean | null // 軟刪除：false = 已刪除（VENTURO_STANDARDS §7）
   created_at: string
   updated_at: string
 }
@@ -100,7 +99,7 @@ export interface PaymentRequestItem {
   subtotal: number
   notes?: string // 項目備註
   sort_order: number // 排序
-  accounting_subject_id?: string | null // 會計科目 ID（關聯 accounting_subjects）
+  accounting_subject_id?: string | null // 會計科目 ID（關聯 chart_of_accounts）
   accounting_subject_name?: string | null // 會計科目名稱（顯示用）
   payment_method_id?: string | null // 付款方式 ID（關聯 payment_methods.id）
   custom_request_date?: string | null // 項目獨立請款日期（對應 DB payment_request_items.custom_request_date）

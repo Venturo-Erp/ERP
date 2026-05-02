@@ -2,7 +2,7 @@
 // 瘦身版列表 hooks：只 select 列表頁需要的欄位，減少 payload
 
 import { createCloudHook } from './createCloudHook'
-import type { Tour, Order, Quote, Itinerary, Member } from '@/stores/types'
+import type { Tour, Order, Quote, Itinerary } from '@/stores/types'
 
 // ============================================
 // Orders 列表瘦身版
@@ -85,16 +85,4 @@ const useItinerariesListSlim = createCloudHook<Itinerary>('itineraries', {
   orderBy: { column: 'created_at', ascending: false },
 })
 
-// ============================================
-// Members 列表瘦身版（用於計算人數）
-// ============================================
-
-const MEMBERS_COUNT_FIELDS = ['id', 'order_id'].join(',')
-
-/**
- * 瘦身版 Members hook - 只抓計算人數需要的欄位
- * payload 從 select('*') 的 ~25 欄位縮減到 2 欄位（-92%）
- */
-const useMembersCountSlim = createCloudHook<Member>('members', {
-  select: MEMBERS_COUNT_FIELDS,
-})
+// Members count slim hook 已移除（members 表已 DROP 2026-05-02、改用 order_members；該 hook 也未被引用）

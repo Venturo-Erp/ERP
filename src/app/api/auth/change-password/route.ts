@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
     // 直接用 auth.data.employeeId 查，不需要 employee_number
     const { data: employee, error: empError } = await supabaseAdmin
       .from('employees')
-      .select('id, employee_number, supabase_user_id, workspace_id')
+      .select('id, employee_number, user_id, workspace_id')
       .eq('id', auth.data.employeeId)
       .single()
 
@@ -48,9 +48,9 @@ export async function POST(request: NextRequest) {
     // 優先從 auth.users 取得真實 email，fallback 用舊邏輯拼假 email
     let authEmail: string | undefined
 
-    if (employee.supabase_user_id) {
+    if (employee.user_id) {
       const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(
-        employee.supabase_user_id
+        employee.user_id
       )
       authEmail = authUser?.user?.email ?? undefined
     }
@@ -71,12 +71,12 @@ export async function POST(request: NextRequest) {
     }
 
     // 3. 更新 Supabase Auth 密碼
-    if (!employee.supabase_user_id) {
+    if (!employee.user_id) {
       return errorResponse('此帳號尚未綁定登入系統', 400, ErrorCode.VALIDATION_ERROR)
     }
 
     const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
-      employee.supabase_user_id,
+      employee.user_id,
       { password: new_password }
     )
 

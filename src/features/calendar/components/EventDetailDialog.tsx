@@ -7,6 +7,7 @@ import { FullCalendarEvent } from '../types'
 import { ConfirmDialog } from '@/components/dialog/confirm-dialog'
 import { useConfirmDialog } from '@/hooks/useConfirmDialog'
 import { useAuthStore } from '@/stores/auth-store'
+import { useMyCapabilities } from '@/lib/permissions/useMyCapabilities'
 import { formatDateChineseWithWeekday } from '@/lib/utils/format-date'
 import { CALENDAR_LABELS } from '../constants/labels'
 
@@ -27,6 +28,8 @@ export function EventDetailDialog({
 }: EventDetailDialogProps) {
   const { confirm, confirmDialogProps } = useConfirmDialog()
   const { user } = useAuthStore()
+  const { has } = useMyCapabilities()
+  const isAdmin = has('platform.is_admin')
 
   if (!event) return null
 
@@ -45,7 +48,6 @@ export function EventDetailDialog({
     // 公司事項：只有建立者或系統主管可以
     if (event.extendedProps?.type === 'company') {
       const isCreator = event.extendedProps?.created_by === user?.id
-      const isAdmin = useAuthStore.getState().isAdmin
       return isCreator || isAdmin
     }
 

@@ -26,6 +26,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing lineUserId' }, { status: 400 })
     }
 
+    // 🔒 防跨租戶：所有分支都必須帶 workspaceId
+    if (!workspaceId) {
+      return NextResponse.json({ error: 'Missing workspaceId' }, { status: 400 })
+    }
+
     // 綁定到現有客戶
     if (customerId) {
       const { data, error } = await supabaseAdmin
@@ -34,6 +39,7 @@ export async function POST(request: NextRequest) {
           line_user_id: lineUserId,
           line_linked_at: new Date().toISOString(),
         })
+        .eq('workspace_id', workspaceId)
         .eq('id', customerId)
         .select('id, code, name, phone, email')
         .single()

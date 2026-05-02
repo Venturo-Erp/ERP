@@ -3,6 +3,7 @@ import { createServiceClient } from '@/lib/supabase/api-client'
 import { getServerAuth } from '@/lib/auth/server-auth'
 import { getBasicFeatures } from '@/lib/permissions'
 import { MODULES } from '@/lib/permissions/module-tabs'
+import { logger } from '@/lib/utils/logger'
 
 /**
  * GET /api/workspaces
@@ -38,6 +39,8 @@ export async function GET() {
   }
 
   // 取得所有擁有管理員資格的職務 id
+  // 平台 admin 工具設計：跨租戶查所有 admin role IDs、跟下方所有員工比對
+  // 上方已驗證 caller workspace 有 'tenants' 功能權限
   const { data: adminRoles } = await supabase
     .from('workspace_roles')
     .select('id')
@@ -168,40 +171,29 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: roleError.message }, { status: 500 })
   }
 
-  // 4. 設定系統主管角色全開權限（所有模組、所有分頁）
-  const permissionsToInsert: {
-    role_id: string
-    module_code: string
-    tab_code: string | null
-    can_read: boolean
-    can_write: boolean
-  }[] = []
+  // 4. 設定系統主管角色全開權限（所有模組、所有分頁、+ platform.is_admin）
+  const capabilityCodes = new Set<string>()
+  capabilityCodes.add('platform.is_admin')
 
   MODULES.forEach(module => {
     if (module.tabs.length === 0) {
-      // 無分頁模組
-      permissionsToInsert.push({
-        role_id: adminRole.id,
-        module_code: module.code,
-        tab_code: null,
-        can_read: true,
-        can_write: true,
-      })
+      capabilityCodes.add(`${module.code}.read`)
+      capabilityCodes.add(`${module.code}.write`)
     } else {
-      // 有分頁模組：每個分頁都開
       module.tabs.forEach(tab => {
-        permissionsToInsert.push({
-          role_id: adminRole.id,
-          module_code: module.code,
-          tab_code: tab.code,
-          can_read: true,
-          can_write: true,
-        })
+        capabilityCodes.add(`${module.code}.${tab.code}.read`)
+        capabilityCodes.add(`${module.code}.${tab.code}.write`)
       })
     }
   })
 
-  await supabase.from('role_tab_permissions').insert(permissionsToInsert)
+  const capabilityRows = Array.from(capabilityCodes).map(code => ({
+    role_id: adminRole.id,
+    capability_code: code,
+    enabled: true,
+  }))
+
+  await supabase.from('role_capabilities').insert(capabilityRows)
 
   // 5. 建立其他預設角色（可選）
   const defaultRoles = [
@@ -234,7 +226,7 @@ export async function POST(request: NextRequest) {
     if (empError) {
       // 員工建失敗不回滾（workspace 已建成），但 log 出來
 
-      console.error('建立系統主管員工失敗:', empError)
+      logger.error('建立系統主管員工失敗:', empError)
     }
   }
 

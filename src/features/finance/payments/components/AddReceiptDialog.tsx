@@ -29,8 +29,8 @@ import { Input } from '@/components/ui/input'
 import type { Receipt } from '@/stores'
 import { useAuthStore } from '@/stores'
 import { useCapabilities, CAPABILITIES } from '@/lib/permissions'
+import { ADD_RECEIPT_DIALOG_LABELS, ADD_RECEIPT_TOAST_LABELS } from '../../constants/labels'
 import { usePaymentMethodsCached } from '@/data/hooks'
-import { useTranslations } from 'next-intl'
 
 interface AddReceiptDialogProps {
   open: boolean
@@ -58,8 +58,6 @@ export function AddReceiptDialog({
   onUpdate,
   onDelete,
 }: AddReceiptDialogProps) {
-  const t = useTranslations('finance')
-
   const { toast } = useToast()
   const {
     tours,
@@ -107,23 +105,23 @@ export function AddReceiptDialog({
   const receiptColumns: InlineEditColumn<PaymentItem>[] = [
     {
       key: 'method',
-      label: t('addReceiptDialog.label5187'),
+      label: ADD_RECEIPT_DIALOG_LABELS.LABEL_5187,
       width: '110px',
       render: () => null,
     },
     {
       key: 'date',
-      label: t('addReceiptDialog.label1182'),
+      label: ADD_RECEIPT_DIALOG_LABELS.LABEL_1182,
       width: '150px',
       render: () => null,
     },
     {
       key: 'detail',
-      label: t('addReceiptDialog.label6465'),
+      label: ADD_RECEIPT_DIALOG_LABELS.LABEL_6465,
       width: '180px',
       render: () => null,
     },
-    { key: 'remarks', label: t('addReceiptDialog.remarks'), render: () => null },
+    { key: 'remarks', label: ADD_RECEIPT_DIALOG_LABELS.REMARKS, render: () => null },
     { key: 'amount', label: '收款金額', width: '120px', align: 'right', render: () => null },
     { key: 'actual', label: '實收金額', width: '120px', align: 'right', render: () => null },
   ]
@@ -252,7 +250,7 @@ export function AddReceiptDialog({
     const errors = validateForm()
     if (errors.length > 0) {
       toast({
-        title: t('addReceiptDialog.表單驗證失敗'),
+        title: ADD_RECEIPT_DIALOG_LABELS.表單驗證失敗,
         description: errors[0],
         variant: 'destructive',
       })
@@ -268,7 +266,7 @@ export function AddReceiptDialog({
       const user = authStore.user
 
       if (!user?.workspace_id) {
-        throw new Error(t('addReceiptDialog.無法取得_workspace_ID'))
+        throw new Error(ADD_RECEIPT_DIALOG_LABELS.無法取得_workspace_ID)
       }
 
       // 編輯模式：更新收款單
@@ -297,8 +295,11 @@ export function AddReceiptDialog({
         })
 
         toast({
-          title: t('addReceiptDialog.收款單更新成功'),
-          description: `已更新收款單 ${editingReceipt.receipt_number}（${result.itemCount} 個項目）`,
+          title: ADD_RECEIPT_DIALOG_LABELS.收款單更新成功,
+          description: ADD_RECEIPT_TOAST_LABELS.UPDATED(
+            editingReceipt.receipt_number,
+            result.itemCount
+          ),
         })
         resetForm()
         onOpenChange(false)
@@ -335,16 +336,22 @@ export function AddReceiptDialog({
       if (result.linkPayResults.length > 0) {
         setLinkPayResults(result.linkPayResults)
         toast({
-          title: t('addReceiptDialog.收款單建立成功'),
-          description: `已新增 ${result.itemCount} 項收款，其中 ${result.linkPayResults.length} 項 LinkPay 已產生連結`,
+          title: ADD_RECEIPT_DIALOG_LABELS.收款單建立成功,
+          description: ADD_RECEIPT_TOAST_LABELS.CREATED_WITH_LINKPAY(
+            result.itemCount,
+            result.linkPayResults.length
+          ),
         })
         resetForm()
         onSuccess?.()
         // 不關閉對話框，讓使用者複製連結
       } else {
         toast({
-          title: t('addReceiptToast.createSuccess'),
-          description: `已新增 ${result.itemCount} 項收款，總金額 NT$ ${formatMoney(result.totalAmount)}`,
+          title: ADD_RECEIPT_TOAST_LABELS.CREATE_SUCCESS,
+          description: ADD_RECEIPT_TOAST_LABELS.CREATED(
+            result.itemCount,
+            formatMoney(result.totalAmount)
+          ),
         })
         resetForm()
         onOpenChange(false)
@@ -361,7 +368,7 @@ export function AddReceiptDialog({
       )
 
       // 解析錯誤訊息
-      let errorMessage = t('addReceiptDialog.發生未知錯誤_請檢查必填欄位是否完整')
+      let errorMessage = ADD_RECEIPT_DIALOG_LABELS.發生未知錯誤_請檢查必填欄位是否完整
       if (error instanceof Error) {
         errorMessage = error.message
       } else if (typeof error === 'object' && error !== null) {
@@ -373,14 +380,14 @@ export function AddReceiptDialog({
         } else if (err.details) {
           errorMessage = err.details
         } else if (err.code) {
-          errorMessage = `錯誤代碼: ${err.code}`
+          errorMessage = ADD_RECEIPT_TOAST_LABELS.ERROR_CODE(err.code)
         } else if (Object.keys(error).length > 0) {
           errorMessage = JSON.stringify(error)
         }
       }
 
       toast({
-        title: t('addReceiptDialog.建立失敗'),
+        title: ADD_RECEIPT_DIALOG_LABELS.建立失敗,
         description: errorMessage,
         variant: 'destructive',
       })
@@ -409,8 +416,8 @@ export function AddReceiptDialog({
       })
 
     const confirmed = await confirm(
-      `確定要刪除收款單 ${editingReceipt.receipt_number} 嗎？此操作無法復原。`,
-      { type: 'warning', title: t('addReceiptDialog.刪除收款單') }
+      ADD_RECEIPT_TOAST_LABELS.DELETE_CONFIRM(editingReceipt.receipt_number),
+      { type: 'warning', title: ADD_RECEIPT_DIALOG_LABELS.刪除收款單 }
     )
 
     if (!confirmed) return
@@ -419,8 +426,8 @@ export function AddReceiptDialog({
     try {
       await deleteFunc(editingReceipt.id)
       toast({
-        title: t('addReceiptDialog.刪除成功'),
-        description: `收款單 ${editingReceipt.receipt_number} 已刪除`,
+        title: ADD_RECEIPT_DIALOG_LABELS.刪除成功,
+        description: ADD_RECEIPT_TOAST_LABELS.DELETED(editingReceipt.receipt_number),
       })
       resetForm()
       onOpenChange(false)
@@ -428,8 +435,8 @@ export function AddReceiptDialog({
     } catch (error) {
       logger.error('[AddReceiptDialog] Delete receipt failed:', error)
       toast({
-        title: t('addReceiptDialog.刪除失敗'),
-        description: t('addReceiptDialog.請稍後再試'),
+        title: ADD_RECEIPT_DIALOG_LABELS.刪除失敗,
+        description: ADD_RECEIPT_DIALOG_LABELS.請稍後再試,
         variant: 'destructive',
       })
     } finally {
@@ -473,8 +480,8 @@ export function AddReceiptDialog({
                           order_id: '',
                         }))
                       }}
-                      placeholder={t('addReceiptDialog.請選擇團體')}
-                      emptyMessage={t('addReceiptDialog.找不到團體')}
+                      placeholder={ADD_RECEIPT_DIALOG_LABELS.請選擇團體}
+                      emptyMessage={ADD_RECEIPT_DIALOG_LABELS.找不到團體}
                       className="w-[350px]"
                       maxHeight="300px"
                     />
@@ -484,7 +491,7 @@ export function AddReceiptDialog({
                     <Combobox
                       options={filteredOrders.map(order => ({
                         value: order.id,
-                        label: `${order.order_number} - ${order.contact_person || t('addReceiptDialog.無聯絡人')}`,
+                        label: `${order.order_number} - ${order.contact_person || ADD_RECEIPT_DIALOG_LABELS.無聯絡人}`,
                       }))}
                       value={formData.order_id}
                       onChange={value => setFormData(prev => ({ ...prev, order_id: value }))}
@@ -492,8 +499,8 @@ export function AddReceiptDialog({
                         !formData.tour_id
                           ? '選擇團體後選擇訂單'
                           : filteredOrders.length === 0
-                            ? t('addReceiptDialog.此團體沒有訂單')
-                            : t('addReceiptDialog.請選擇訂單')
+                            ? ADD_RECEIPT_DIALOG_LABELS.此團體沒有訂單
+                            : ADD_RECEIPT_DIALOG_LABELS.請選擇訂單
                       }
                       disabled={!formData.tour_id || filteredOrders.length === 0}
                       className="w-[300px]"
@@ -508,10 +515,10 @@ export function AddReceiptDialog({
             <div className="text-right">
               <DialogTitle className="flex items-center justify-end gap-2">
                 {isEditMode
-                  ? t('addReceiptDialog.編輯收款單')
-                  : t('addReceiptDialog.新增收款單')}
+                  ? ADD_RECEIPT_DIALOG_LABELS.編輯收款單
+                  : ADD_RECEIPT_DIALOG_LABELS.新增收款單}
                 {isConfirmed && (
-                  <StatusBadge tone="success" label={t('addReceiptDialog.confirm469')} />
+                  <StatusBadge tone="success" label={ADD_RECEIPT_DIALOG_LABELS.CONFIRM_469} />
                 )}
               </DialogTitle>
             </div>
@@ -530,11 +537,11 @@ export function AddReceiptDialog({
               <>
                 <div className="flex-1 flex flex-col overflow-hidden pt-4 border-t border-morandi-container/30">
                   <InlineEditTable<PaymentItem>
-                    title={t('addReceiptDialog.label4595')}
+                    title={ADD_RECEIPT_DIALOG_LABELS.LABEL_4595}
                     rows={paymentItems}
                     columns={receiptColumns}
                     onAdd={isConfirmed ? undefined : addPaymentItem}
-                    addLabel={t('addReceiptDialog.add2089')}
+                    addLabel={ADD_RECEIPT_DIALOG_LABELS.ADD_2089}
                     readonly={isConfirmed}
                     className="flex-1 overflow-auto"
                     rowRender={(item, index) => (
@@ -571,7 +578,7 @@ export function AddReceiptDialog({
                   <div className="space-y-3 pt-4 border-t border-morandi-gold/30 bg-morandi-gold/5 -mx-6 px-6 py-4">
                     <h3 className="text-sm font-medium text-morandi-gold flex items-center gap-2">
                       <ExternalLink size={16} />
-                      {t('addReceiptDialog.linkpayLinksGenerated')}
+                      {ADD_RECEIPT_DIALOG_LABELS.LINKPAY_LINKS_GENERATED}
                     </h3>
                     <div className="space-y-2">
                       {linkPayResults.map(result => (
@@ -600,12 +607,12 @@ export function AddReceiptDialog({
                             {copiedLink === result.receiptNumber ? (
                               <>
                                 <Check size={14} />
-                                {t('addReceiptDialog.copying1937')}
+                                {ADD_RECEIPT_DIALOG_LABELS.COPYING_1937}
                               </>
                             ) : (
                               <>
                                 <Copy size={14} />
-                                {t('addReceiptDialog.copy')}
+                                {ADD_RECEIPT_DIALOG_LABELS.COPY}
                               </>
                             )}
                           </Button>
@@ -616,7 +623,7 @@ export function AddReceiptDialog({
                             className="gap-1 text-morandi-secondary hover:bg-morandi-container/50"
                           >
                             <ExternalLink size={14} />
-                            {t('addReceiptDialog.label1670')}
+                            {ADD_RECEIPT_DIALOG_LABELS.LABEL_1670}
                           </Button>
                         </div>
                       ))}
@@ -631,11 +638,11 @@ export function AddReceiptDialog({
           <TabsContent value="company" className="flex-1 flex flex-col overflow-hidden">
             <div className="flex-1 flex flex-col overflow-hidden pt-4 border-t border-morandi-container/30">
               <InlineEditTable<PaymentItem>
-                title={t('addReceiptDialog.label4595')}
+                title={ADD_RECEIPT_DIALOG_LABELS.LABEL_4595}
                 rows={paymentItems}
                 columns={receiptColumns}
                 onAdd={isConfirmed ? undefined : addPaymentItem}
-                addLabel={t('addReceiptDialog.add2089')}
+                addLabel={ADD_RECEIPT_DIALOG_LABELS.ADD_2089}
                 readonly={isConfirmed}
                 className="flex-1 overflow-auto"
                 rowRender={(item, index) => (
@@ -663,7 +670,7 @@ export function AddReceiptDialog({
           {/* 左側：總金額 */}
           <div className="flex items-center gap-2">
             <span className="text-sm text-morandi-secondary">
-              {t('addReceiptDialog.total6550')}
+              {ADD_RECEIPT_DIALOG_LABELS.TOTAL_6550}
             </span>
             <span className="text-lg font-semibold text-morandi-gold whitespace-nowrap">
               NT$ {formatMoney(totalAmount)}
@@ -681,7 +688,7 @@ export function AddReceiptDialog({
                 className="gap-2 text-morandi-red border-morandi-red hover:bg-morandi-red hover:text-white"
               >
                 <Trash2 size={16} />
-                {isDeleting ? t('addReceiptDialog.刪除中') : t('addReceiptDialog.刪除')}
+                {isDeleting ? ADD_RECEIPT_DIALOG_LABELS.刪除中 : ADD_RECEIPT_DIALOG_LABELS.刪除}
               </Button>
             )}
 
@@ -700,11 +707,11 @@ export function AddReceiptDialog({
                 <Save size={16} />
                 {isSubmitting
                   ? isEditMode
-                    ? t('addReceiptDialog.更新中')
-                    : t('addReceiptDialog.建立中')
+                    ? ADD_RECEIPT_DIALOG_LABELS.更新中
+                    : ADD_RECEIPT_DIALOG_LABELS.建立中
                   : isEditMode
-                    ? t('addReceiptDialog.更新收款單')
-                    : t('addReceiptDialog.新增收款單')}
+                    ? ADD_RECEIPT_DIALOG_LABELS.更新收款單
+                    : ADD_RECEIPT_DIALOG_LABELS.新增收款單}
               </Button>
             )}
 

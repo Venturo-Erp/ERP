@@ -1,40 +1,33 @@
 'use client'
 
-import { useTabPermissions } from './useTabPermissions'
-import { CAPABILITIES, type Capability } from './capabilities'
+import { useMyCapabilities } from './useMyCapabilities'
+import type { Capability } from './capabilities'
 
 /**
- * 使用統一的權限常數檢查
+ * (Deprecated wrapper, 2026-05-01)
  *
- * 用法：
- * const { can } = useCapabilities()
- * if (!can(CAPABILITIES.HR_MANAGE_ROLES)) return <Forbidden />
+ * 介面保留以免大規模改 callsite、內部 100% 走新系統。
+ * 新 caller 請直接用 useMyCapabilities()。
  */
 export function useCapabilities() {
-  const { canRead, canWrite, loading } = useTabPermissions()
+  const { has, loading, canReadAnyInModule, canWriteAnyInModule } = useMyCapabilities()
 
-  const can = (capability: Capability): boolean => {
-    const tab = capability.tab ?? undefined
-    if (capability.action === 'write') {
-      return canWrite(capability.module, tab)
-    }
-    return canRead(capability.module, tab)
-  }
+  const can = (capability: Capability): boolean => has(capability)
 
-  const hasAny = (caps: Capability[]): boolean => {
-    return caps.some(cap => can(cap))
-  }
-
-  const hasAll = (caps: Capability[]): boolean => {
-    return caps.every(cap => can(cap))
-  }
+  const hasAny = (caps: Capability[]): boolean => caps.some(c => has(c))
+  const hasAll = (caps: Capability[]): boolean => caps.every(c => has(c))
 
   return {
     can,
     hasAny,
     hasAll,
     loading,
-    canRead,
-    canWrite,
+    // 舊 API 還回傳 canRead/canWrite、為相容舊 caller
+    canRead: (moduleCode: string, tabCode?: string) =>
+      has(tabCode ? `${moduleCode}.${tabCode}.read` : `${moduleCode}.read`),
+    canWrite: (moduleCode: string, tabCode?: string) =>
+      has(tabCode ? `${moduleCode}.${tabCode}.write` : `${moduleCode}.write`),
+    canReadAny: canReadAnyInModule,
+    canWriteAny: canWriteAnyInModule,
   }
 }

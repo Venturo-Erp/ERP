@@ -29,18 +29,21 @@ export async function GET(request: NextRequest) {
     }
 
     const supabase = getSupabaseAdminClient()
+    const workspaceId = auth.data.workspaceId
 
-    // 查詢 customers 表
+    // 查詢 customers 表（限定當前 workspace）
     const { count: customerCount } = await supabase
       .from('customers')
       .select('id', { count: 'exact', head: true })
+      .eq('workspace_id', workspaceId)
       .not('passport_image_url', 'is', null)
       .is('passport_name_print', null)
 
-    // 查詢 order_members 表
+    // 查詢 order_members 表（限定當前 workspace）
     const { count: memberCount } = await supabase
       .from('order_members')
       .select('id', { count: 'exact', head: true })
+      .eq('workspace_id', workspaceId)
       .not('passport_image_url', 'is', null)
       .is('passport_name_print', null)
 
@@ -74,16 +77,18 @@ export async function POST(request: NextRequest) {
     const { table, limit } = validation.data
 
     const supabase = getSupabaseAdminClient()
+    const workspaceId = auth.data.workspaceId
     const results = {
       customers: { processed: 0, updated: 0, failed: 0, errors: [] as string[] },
       order_members: { processed: 0, updated: 0, failed: 0, errors: [] as string[] },
     }
 
-    // 處理 customers 表
+    // 處理 customers 表（限定當前 workspace）
     if (table === 'all' || table === 'customers') {
       const { data: customers } = await supabase
         .from('customers')
         .select('id, passport_image_url, passport_name')
+        .eq('workspace_id', workspaceId)
         .not('passport_image_url', 'is', null)
         .is('passport_name_print', null)
         .limit(limit)
@@ -98,6 +103,7 @@ export async function POST(request: NextRequest) {
               const { error } = await supabase
                 .from('customers')
                 .update({ passport_name_print: passportNamePrint })
+                .eq('workspace_id', workspaceId)
                 .eq('id', customer.id)
 
               if (error) {
@@ -113,6 +119,7 @@ export async function POST(request: NextRequest) {
                 const { error } = await supabase
                   .from('customers')
                   .update({ passport_name_print: fallbackPrint })
+                  .eq('workspace_id', workspaceId)
                   .eq('id', customer.id)
 
                 if (!error) {
@@ -134,11 +141,12 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 處理 order_members 表
+    // 處理 order_members 表（限定當前 workspace）
     if (table === 'all' || table === 'order_members') {
       const { data: members } = await supabase
         .from('order_members')
         .select('id, passport_image_url, passport_name')
+        .eq('workspace_id', workspaceId)
         .not('passport_image_url', 'is', null)
         .is('passport_name_print', null)
         .limit(limit)
@@ -153,6 +161,7 @@ export async function POST(request: NextRequest) {
               const { error } = await supabase
                 .from('order_members')
                 .update({ passport_name_print: passportNamePrint })
+                .eq('workspace_id', workspaceId)
                 .eq('id', member.id)
 
               if (error) {
@@ -168,6 +177,7 @@ export async function POST(request: NextRequest) {
                 const { error } = await supabase
                   .from('order_members')
                   .update({ passport_name_print: fallbackPrint })
+                  .eq('workspace_id', workspaceId)
                   .eq('id', member.id)
 
                 if (!error) {

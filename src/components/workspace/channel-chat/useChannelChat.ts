@@ -5,7 +5,7 @@ import {
   useWorkspaceWidgets,
   useChatStore,
 } from '@/stores/workspace'
-import { useAuthStore } from '@/stores'
+import { useMyCapabilities } from '@/lib/permissions/useMyCapabilities'
 import { useMessageOperations, useFileUpload, useScrollToBottom } from '../chat'
 import {
   useDialogStates,
@@ -47,7 +47,7 @@ export function useChannelChat() {
     deleteChannel,
   } = useWorkspaceChannels()
 
-  const { isAdmin } = useAuthStore() // Get isAdmin flag
+  const isAdmin = useMyCapabilities().has('platform.is_admin')
 
   const { channelMessages, messagesLoading, loadMessages } = useWorkspaceChat()
   const { subscribeToMessages, unsubscribeFromMessages } = useChatStore()

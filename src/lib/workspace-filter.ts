@@ -37,7 +37,6 @@ export function setCurrentWorkspaceFilter(workspaceId: string | null): void {
  * ⚠️ 注意：workspace_permissions 表格不存在，已移除
  */
 const WORKSPACE_ENABLED_TABLES = [
-  'body_measurements',
   'bulletins',
   // 'calendar_events',  // ⚠️ 暫時停用：會導致行事曆資料消失
   'channel_groups',
@@ -48,7 +47,6 @@ const WORKSPACE_ENABLED_TABLES = [
   'disbursement_orders',
   'employees',
   'esims',
-  // fitness_goals removed
   'itineraries',
   'linkpay_logs',
   'messages',
@@ -57,7 +55,6 @@ const WORKSPACE_ENABLED_TABLES = [
   'payments',
   'personal_canvases',
   'personal_records',
-  'progress_photos',
   'quotes',
   'receipts',
   'rich_documents',

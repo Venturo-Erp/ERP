@@ -11,10 +11,7 @@ export const TABLES = {
   TOURS: 'tours',
   ITINERARIES: 'itineraries',
   ORDERS: 'orders',
-  MEMBERS: 'members',
-  TOUR_ADDONS: 'tour_addons',
   CUSTOMERS: 'customers',
-  PAYMENTS: 'payments',
   PAYMENT_REQUESTS: 'payment_requests',
   PAYMENT_REQUEST_ITEMS: 'payment_request_items',
   DISBURSEMENT_ORDERS: 'disbursement_orders',
@@ -34,10 +31,6 @@ export const TABLES = {
   REGIONS: 'regions',
   CITIES: 'cities',
   CALENDAR_EVENTS: 'calendar_events',
-  ACCOUNTS: 'accounts',
-  CATEGORIES: 'categories',
-  TRANSACTIONS: 'transactions',
-  WORKSPACE_ITEMS: 'workspace_items',
   // Workspace 相關
   WORKSPACES: 'workspaces',
   CHANNELS: 'channels',
@@ -54,7 +47,6 @@ export const TABLES = {
   VENDOR_COSTS: 'vendor_costs',
   TOUR_LEADERS: 'tour_leaders',
   // 會計系統
-  ACCOUNTING_SUBJECTS: 'accounting_subjects',
   JOURNAL_VOUCHERS: 'journal_vouchers',
   JOURNAL_LINES: 'journal_lines',
   // Workspace 模組

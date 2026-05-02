@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/api-client'
 import { getServerAuth } from '@/lib/auth/server-auth'
-import { getSupabaseAdminClient } from '@/lib/supabase/admin'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { logger } from '@/lib/utils/logger'
 
@@ -27,26 +26,11 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
   if (workspaceId !== auth.data.workspaceId) {
     // 跨租戶讀：要租戶管理權限
-    const adminClient = getSupabaseAdminClient()
-    const { data: employee } = await adminClient
-      .from('employees')
-      .select('role_id, job_info')
-      .eq('id', auth.data.employeeId)
-      .single()
-    const effectiveRoleId =
-      employee?.role_id ||
-      ((employee?.job_info as Record<string, unknown> | null)?.role_id as string | undefined)
-    let canManageTenants = false
-    if (effectiveRoleId) {
-      const { data: rolePerm } = await adminClient
-        .from('role_tab_permissions')
-        .select('can_write')
-        .eq('role_id', effectiveRoleId)
-        .eq('module_code', 'settings')
-        .eq('tab_code', 'tenants')
-        .single()
-      canManageTenants = rolePerm?.can_write ?? false
-    }
+    const { hasCapabilityByCode } = await import('@/app/api/lib/check-capability')
+    const canManageTenants = await hasCapabilityByCode(
+      auth.data.employeeId,
+      'settings.tenants.write'
+    )
     if (!canManageTenants) {
       return NextResponse.json({ error: '不能讀取其他公司的租戶詳情' }, { status: 403 })
     }
@@ -145,30 +129,12 @@ export async function DELETE(
   }
 
   // 必須有租戶管理權限
-  const adminClient = getSupabaseAdminClient()
-  const { data: employee } = await adminClient
-    .from('employees')
-    .select('role_id, job_info')
-    .eq('id', auth.data.employeeId)
-    .single()
-
-  const effectiveRoleId =
-    employee?.role_id ||
-    ((employee?.job_info as Record<string, unknown> | null)?.role_id as string | undefined)
-
-  if (!effectiveRoleId) {
-    return NextResponse.json({ error: '需租戶管理權限' }, { status: 403 })
-  }
-
-  const { data: rolePerm } = await adminClient
-    .from('role_tab_permissions')
-    .select('can_write')
-    .eq('role_id', effectiveRoleId)
-    .eq('module_code', 'settings')
-    .eq('tab_code', 'tenants')
-    .single()
-
-  if (!rolePerm?.can_write) {
+  const { hasCapabilityByCode } = await import('@/app/api/lib/check-capability')
+  const canManageTenants = await hasCapabilityByCode(
+    auth.data.employeeId,
+    'settings.tenants.write'
+  )
+  if (!canManageTenants) {
     return NextResponse.json({ error: '需租戶管理權限' }, { status: 403 })
   }
 
@@ -181,6 +147,8 @@ export async function DELETE(
   if (workspaceId === auth.data.workspaceId) {
     return NextResponse.json({ error: '不能刪除自己登入的租戶' }, { status: 403 })
   }
+
+  const adminClient = (await import('@/lib/supabase/admin')).getSupabaseAdminClient()
 
   // 找目標租戶
   const { data: targetWs } = await adminClient

@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { useWorkspaceStore } from '@/stores'
 import { useAuthStore } from '@/stores/auth-store'
+import { useMyCapabilities } from '@/lib/permissions/useMyCapabilities'
 import { useEmployeesSlim } from '@/data'
 import { COMP_WORKSPACE_LABELS } from '../constants/labels'
 
@@ -44,7 +45,9 @@ export function CreateChannelDialog({
   onClose,
   onCreate,
 }: CreateChannelDialogProps) {
-  const { user, isAdmin } = useAuthStore()
+  const { user } = useAuthStore()
+  const { has } = useMyCapabilities()
+  const isAdmin = has('platform.is_admin')
   const { items: employees } = useEmployeesSlim()
   const { workspaces, loadWorkspaces } = useWorkspaceStore()
 

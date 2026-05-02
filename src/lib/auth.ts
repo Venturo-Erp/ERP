@@ -1,4 +1,5 @@
 import bcrypt from 'bcryptjs'
+import { logger } from '@/lib/utils/logger'
 
 // Token Blacklist key in localStorage
 // TODO: Phase 2 — 改為 server-side blacklist（Supabase table 或 Redis）
@@ -27,7 +28,7 @@ function addTokenToBlacklist(token: string): void {
     blacklist.add(token)
     localStorage.setItem(TOKEN_BLACKLIST_KEY, JSON.stringify([...blacklist]))
   } catch (err) {
-    console.warn('Failed to add token to blacklist:', err)
+    logger.warn('Failed to add token to blacklist:', err)
   }
 }
 

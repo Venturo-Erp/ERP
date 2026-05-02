@@ -1,56 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createApiClient, createServiceClient } from '@/lib/supabase/api-client'
-import { getServerAuth } from '@/lib/auth/server-auth'
-import { getSupabaseAdminClient } from '@/lib/supabase/admin'
+import { getApiContext } from '@/lib/auth/get-api-context'
 
-// P003-A（2026-04-22）：零認證漏洞守門。
-// 只有有「租戶管理」權限（role_tab_permissions.settings.tenants.can_write）的人才能動任何 workspace 的 features。
+// P003-A（2026-04-22 立 / 2026-05-01 改用新 capability 系統 / F2 改走 getApiContext）
+// 只有有 settings.tenants.write 的人才能動任何 workspace 的 features。
 // 同 pattern 於 src/app/api/tenants/create/route.ts。
 async function requireTenantAdmin(): Promise<
   { ok: true; workspaceId: string } | { ok: false; response: NextResponse }
 > {
-  const auth = await getServerAuth()
-  if (!auth.success) {
+  const ctx = await getApiContext({ capabilityCode: 'settings.tenants.write' })
+  if (!ctx.ok) {
     return {
       ok: false,
-      response: NextResponse.json({ error: '請先登入' }, { status: 401 }),
+      response: NextResponse.json(
+        { error: ctx.status === 401 ? '請先登入' : '無權限操作' },
+        { status: ctx.status },
+      ),
     }
   }
-
-  const adminClient = getSupabaseAdminClient()
-  const { data: employee } = await adminClient
-    .from('employees')
-    .select('role_id, job_info')
-    .eq('id', auth.data.employeeId)
-    .single()
-
-  const effectiveRoleId =
-    employee?.role_id ||
-    ((employee?.job_info as Record<string, unknown> | null)?.role_id as string | undefined)
-
-  if (!effectiveRoleId) {
-    return {
-      ok: false,
-      response: NextResponse.json({ error: '無權限操作' }, { status: 403 }),
-    }
-  }
-
-  const { data: rolePermission } = await adminClient
-    .from('role_tab_permissions')
-    .select('can_write')
-    .eq('role_id', effectiveRoleId)
-    .eq('module_code', 'settings')
-    .eq('tab_code', 'tenants')
-    .single()
-
-  if (!rolePermission?.can_write) {
-    return {
-      ok: false,
-      response: NextResponse.json({ error: '無權限操作' }, { status: 403 }),
-    }
-  }
-
-  return { ok: true, workspaceId: auth.data.workspaceId }
+  return { ok: true, workspaceId: ctx.workspace_id }
 }
 
 /**

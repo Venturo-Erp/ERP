@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
       .insert({
         ...employeeData,
         workspace_id: currentUser.workspace_id,
-        supabase_user_id: authUser.user.id,
+        user_id: authUser.user.id,
         must_change_password: true,
       })
       .select('id, employee_number')

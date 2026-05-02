@@ -7,7 +7,10 @@
  *
  * 清理紀錄 (2026-02-14)：
  * - 移除 19 個零引用的 createStore export
- * - 保留仍有引用的 store：useTourStore, useOrderStore, useQuoteStore, useEmployeeStore, useMemberStore
+ * - 保留仍有引用的 store：useTourStore, useOrderStore, useQuoteStore, useEmployeeStore
+ *
+ * 清理紀錄 (2026-05-02)：
+ * - 移除 useMemberStore（members 表已 DROP、改用 order_members）
  * - 保留特殊 store：useAuthStore, useUserStore, useThemeStore, useHomeSettingsStore,
  *   useCalendarStore, useAccountingStore, useWorkspaceStore
  *
@@ -21,7 +24,7 @@
 import { createStore } from './core/create-store'
 
 // 從 @/types 匯入（使用 types/ 目錄下的標準定義）
-import type { Tour, Order, Member, Customer, Employee } from '@/types'
+import type { Tour, Order, Customer, Employee } from '@/types'
 
 // 從本地 types 匯入
 import type {
@@ -69,16 +72,6 @@ export const useOrderStore = createStore<Order>({
 export const useQuoteStore = createStore<Quote>({
   tableName: 'quotes',
   codePrefix: 'Q',
-  workspaceScoped: true,
-})
-
-/**
- * 團員 Store
- * 無獨立編號，依附於訂單
- * 🔒 啟用 Workspace 隔離
- */
-export const useMemberStore = createStore<Member>({
-  tableName: 'members',
   workspaceScoped: true,
 })
 

@@ -144,19 +144,7 @@ export {
   invalidateDisbursementOrders,
 } from './disbursement-orders'
 
-// Accounting Subjects
-export {
-  
-  useAccountingSubjects,
-  
-  
-  
-  
-  
-  
-  
-  
-} from './accounting-subjects'
+// Accounting Subjects — 已移除（accounting_subjects 表已整併至 chart_of_accounts）
 
 // Workspace Modules
 
@@ -257,16 +245,6 @@ export {
   invalidateCountries,
 } from './countries'
 
-
-export {
-  useDepartments,
-  
-  createDepartment,
-  updateDepartment,
-  deleteDepartment,
-  invalidateDepartments,
-} from './departments'
-export type { Department } from './departments'
 
 // Regions
 export {
@@ -494,13 +472,5 @@ export {
   invalidateTourItineraryItems,
 } from './tour-itinerary-items'
 
-// Tour Itinerary Days（day-level metadata，補足 tour_itinerary_items 缺的每日資料）
-export {
-  
-  useTourItineraryDays,
-  
-  createTourItineraryDay,
-  
-  deleteTourItineraryDay,
-  
-} from './tour-itinerary-days'
+// Tour Itinerary Days — 已合併進 tour_itinerary_items（category='day_meta' anchor row）
+// 見 migration 20260502120000_merge_tour_itinerary_days_into_items.sql

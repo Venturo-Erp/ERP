@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { Tour, Itinerary, DailyItineraryDay } from '@/stores/types'
-import type { Json } from '@/types/database.types'
+import type { Json } from '@/lib/supabase/types'
 import { useCountries } from '@/data'
 import { useAirports } from '@/features/tours/hooks/useAirports'
 import { supabase } from '@/lib/supabase/client'

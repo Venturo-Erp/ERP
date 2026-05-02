@@ -1,6 +1,7 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 import { logger } from '@/lib/utils/logger'
+import { getServerAuth } from '@/lib/auth/server-auth'
 
 // Lazy initialization to avoid build-time errors
 let supabase: SupabaseClient
@@ -27,6 +28,12 @@ function getSupabase() {
  */
 export async function POST(request: NextRequest) {
   try {
+    // 🔒 必須登入、且 body 內的 workspace_id 必須等於使用者所屬 workspace、防跨租戶建傳票
+    const auth = await getServerAuth()
+    if (!auth.success) {
+      return NextResponse.json({ error: '請先登入' }, { status: 401 })
+    }
+
     const body = await request.json()
     const { source_type, source_id, workspace_id } = body
 
@@ -34,6 +41,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: '缺少必要參數：source_type, source_id, workspace_id' },
         { status: 400 }
+      )
+    }
+
+    if (workspace_id !== auth.data.workspaceId) {
+      return NextResponse.json(
+        { error: '無權對其他 workspace 建立傳票' },
+        { status: 403 }
       )
     }
 
@@ -79,7 +93,7 @@ async function generateVoucherNo(workspaceId: string, date: string): Promise<str
 async function createVoucherFromReceipt(workspaceId: string, receiptId: string) {
   const db = getSupabase()
 
-  // 1. 查詢收款單（含收款方式的科目設定）
+  // 1. 查詢收款單（含收款方式的科目設定、限定 workspace）
   const { data: receipt, error: recError } = await db
     .from('receipts')
     .select(
@@ -92,6 +106,7 @@ async function createVoucherFromReceipt(workspaceId: string, receiptId: string) 
       )
     `
     )
+    .eq('workspace_id', workspaceId)
     .eq('id', receiptId)
     .single()
 
@@ -160,7 +175,7 @@ async function createVoucherFromReceipt(workspaceId: string, receiptId: string) 
   const { error: linesError } = await db.from('journal_lines').insert(lines)
 
   if (linesError) {
-    await db.from('journal_vouchers').delete().eq('id', voucher.id)
+    await db.from('journal_vouchers').delete().eq('workspace_id', workspaceId).eq('id', voucher.id)
     throw new Error(`建立傳票分錄失敗：${linesError.message}`)
   }
 
@@ -174,10 +189,11 @@ async function createVoucherFromReceipt(workspaceId: string, receiptId: string) 
 async function createVoucherFromPaymentRequest(workspaceId: string, paymentRequestId: string) {
   const db = getSupabase()
 
-  // 1. 查詢請款單
+  // 1. 查詢請款單（限定 workspace）
   const { data: request, error: reqError } = await db
     .from('payment_requests')
     .select('*, items:payment_request_items(*)')
+    .eq('workspace_id', workspaceId)
     .eq('id', paymentRequestId)
     .single()
 
@@ -298,14 +314,14 @@ async function createVoucherFromPaymentRequest(workspaceId: string, paymentReque
   }
 
   if (lines.length === 0) {
-    await db.from('journal_vouchers').delete().eq('id', voucher.id)
+    await db.from('journal_vouchers').delete().eq('workspace_id', workspaceId).eq('id', voucher.id)
     throw new Error('沒有有效的分錄，無法產生傳票')
   }
 
   const { error: linesError } = await db.from('journal_lines').insert(lines)
 
   if (linesError) {
-    await db.from('journal_vouchers').delete().eq('id', voucher.id)
+    await db.from('journal_vouchers').delete().eq('workspace_id', workspaceId).eq('id', voucher.id)
     throw new Error(`建立傳票分錄失敗：${linesError.message}`)
   }
 

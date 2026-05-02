@@ -23,7 +23,8 @@ import type { ProcessedFile } from '../types/order-member.types'
 import { usePassportFiles } from './passport/usePassportFiles'
 import { usePassportOcr } from './passport/usePassportOcr'
 import { usePassportValidation } from './passport/usePassportValidation'
-import { useTranslations } from 'next-intl'
+import { COMP_ORDERS_LABELS, PASSPORT_CONFLICT_LABELS } from '../constants/labels'
+import { PASSPORT_UPLOAD_LABELS } from '../constants/labels'
 import {
   syncPassportToCustomer,
   findActiveOrderConflicts,
@@ -126,7 +127,7 @@ export function usePassportUpload({
     if (fileModule.processedFiles.length === 0) return
     if (isUploading) return
     if (!orderId) {
-      void alert(t('common.需要訂單_ID_才能批次上傳'), 'error')
+      void alert(COMP_ORDERS_LABELS.需要訂單_ID_才能批次上傳, 'error')
       return
     }
 
@@ -188,10 +189,10 @@ export function usePassportUpload({
             if (createResult.matchedCustomer) matchedCustomerCount++
             if (createResult.newCustomer) newCustomerCount++
           } else {
-            failedItems.push(`${item.fileName} (建立失敗)`)
+            failedItems.push(PASSPORT_UPLOAD_LABELS.CREATE_FAILED(item.fileName))
           }
         } else {
-          failedItems.push(`${item.fileName} (辨識失敗)`)
+          failedItems.push(PASSPORT_UPLOAD_LABELS.RECOGNIZE_FAILED(item.fileName))
         }
       }
 
@@ -234,9 +235,9 @@ export function usePassportUpload({
               | null,
             birth_date: item.customer.birth_date || null,
             gender:
-              item.customer.sex === t('common.男')
+              item.customer.sex === COMP_ORDERS_LABELS.男
                 ? 'M'
-                : item.customer.sex === t('common.女')
+                : item.customer.sex === COMP_ORDERS_LABELS.女
                   ? 'F'
                   : null,
             national_id: item.customer.national_id || null,
@@ -245,7 +246,7 @@ export function usePassportUpload({
           // 回寫客戶
           const writebackOk = await syncPassportToCustomer(custId, pData)
           if (!writebackOk) {
-            logger.warn(t('passportConflict.writebackFail'), { customerId: custId })
+            logger.warn(PASSPORT_CONFLICT_LABELS.writeback_fail, { customerId: custId })
           }
 
           processedCustomerIds.add(custId)
@@ -277,15 +278,15 @@ export function usePassportUpload({
       }
 
       // 顯示結果
-      let message = `成功辨識 ${result.successful}/${result.total} 張護照`
+      let message = PASSPORT_UPLOAD_LABELS.SUCCESS_SUMMARY(result.successful, result.total)
       if (successCount > 0) {
-        message += `\n成功建立 ${successCount} 位成員`
+        message += PASSPORT_UPLOAD_LABELS.CREATED_MEMBERS(successCount)
       }
       if (matchedCustomerCount > 0) {
-        message += `\n已比對 ${matchedCustomerCount} 位現有顧客`
+        message += PASSPORT_UPLOAD_LABELS.MATCHED_CUSTOMERS(matchedCustomerCount)
       }
       if (newCustomerCount > 0) {
-        message += `\n已新增 ${newCustomerCount} 位顧客資料`
+        message += PASSPORT_UPLOAD_LABELS.NEW_CUSTOMERS(newCustomerCount)
       }
       if (newPendingConfirmations.length > 0) {
         message += `\n\n⚠️ 發現 ${newPendingConfirmations.length} 筆重複資料，請確認是否更新照片`
@@ -321,10 +322,10 @@ export function usePassportUpload({
         }
       }
     } catch (error) {
-      logger.error(t('common.批次上傳失敗'), error)
+      logger.error(COMP_ORDERS_LABELS.批次上傳失敗, error)
       void alert(
-        t('common.批次上傳失敗_2') +
-          (error instanceof Error ? error.message : t('common.未知錯誤')),
+        COMP_ORDERS_LABELS.批次上傳失敗_2 +
+          (error instanceof Error ? error.message : COMP_ORDERS_LABELS.未知錯誤),
         'error'
       )
     } finally {

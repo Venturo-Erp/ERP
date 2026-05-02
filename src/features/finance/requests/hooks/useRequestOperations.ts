@@ -5,13 +5,11 @@ import { RequestFormData, BatchRequestFormData, RequestItem } from '../types'
 import { generateCompanyPaymentRequestCode } from '@/stores/utils/code-generator'
 import { EXPENSE_TYPE_CONFIG, CompanyExpenseType } from '@/stores/types/finance.types'
 import { recalculateExpenseStats } from '@/features/finance/payments/services/expense-core.service'
+import { REQUEST_OPERATIONS_LABELS } from '../../constants/labels'
 import { logger } from '@/lib/utils/logger'
 import { supabase } from '@/lib/supabase/client'
-import { useTranslations } from 'next-intl'
 
 export function useRequestOperations() {
-  const t = useTranslations('finance')
-
   const { payment_requests, createPaymentRequest, addPaymentItems, deletePaymentRequest } =
     usePayments()
   const workspaceId = useWorkspaceId()
@@ -65,7 +63,7 @@ export function useRequestOperations() {
       codeOverride?: string // 外部預先產好 code（用於 group by 日期拆多張時避免重複編號）
     ) => {
       if (!items || items.length === 0) return null
-      if (!workspaceId) throw new Error(t('requestOperations.cannotGetWorkspace'))
+      if (!workspaceId) throw new Error(REQUEST_OPERATIONS_LABELS.CANNOT_GET_WORKSPACE)
 
       // 根據請款類別決定編號和類型
       const isCompanyRequest = formData.request_category === 'company'
@@ -73,7 +71,7 @@ export function useRequestOperations() {
       if (isCompanyRequest) {
         // 公司請款
         if (!formData.expense_type) {
-          throw new Error(t('requestOperations.companyExpenseTypeRequired'))
+          throw new Error(REQUEST_OPERATIONS_LABELS.COMPANY_EXPENSE_TYPE_REQUIRED)
         }
 
         const expenseType = formData.expense_type as CompanyExpenseType
@@ -142,7 +140,7 @@ export function useRequestOperations() {
           amount: 0,
           status: 'pending',
           notes: formData.notes,
-          request_type: t('requestOperations.supplierExpense'),
+          request_type: REQUEST_OPERATIONS_LABELS.SUPPLIER_EXPENSE,
           request_category: 'tour',
           created_by: formData.created_by || undefined,
           created_by_name: createdByName || undefined,
@@ -200,7 +198,7 @@ export function useRequestOperations() {
       tours: Array<{ id: string; code: string; name: string }>
     ) => {
       if (tourIds.length === 0 || items.length === 0) return []
-      if (!workspaceId) throw new Error(t('requestOperations.cannotGetWorkspace'))
+      if (!workspaceId) throw new Error(REQUEST_OPERATIONS_LABELS.CANNOT_GET_WORKSPACE)
 
       const createdRequests = []
 
@@ -222,7 +220,7 @@ export function useRequestOperations() {
           amount: 0,
           status: 'pending',
           notes: formData.notes,
-          request_type: t('requestOperations.supplierExpense'), // Default value for now
+          request_type: REQUEST_OPERATIONS_LABELS.SUPPLIER_EXPENSE, // Default value for now
           payment_method_id: formData.payment_method_id || null,
         })
 

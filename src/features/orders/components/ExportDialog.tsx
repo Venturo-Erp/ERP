@@ -9,7 +9,8 @@ import { Printer, X, FileSpreadsheet } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import type { OrderMember, ExportColumnsConfig } from '../types/order-member.types'
-import { useTranslations } from 'next-intl'
+import { ORDERS_LABELS } from './constants/labels'
+import { EXPORT_DIALOG_LABELS } from '../constants/labels'
 
 interface ExportDialogProps {
   isOpen: boolean
@@ -23,20 +24,20 @@ interface ExportDialogProps {
 
 // 欄位標籤對照
 const COLUMN_LABELS: Record<keyof ExportColumnsConfig, string> = {
-  identity: t('exportDialog.colIdentity'),
-  chinese_name: t('exportDialog.colChineseName'),
-  passport_name: t('exportDialog.colPassportName'),
-  birth_date: t('exportDialog.colBirthday'),
-  gender: t('exportDialog.colGender'),
-  id_number: t('exportDialog.colIdNumber'),
-  passport_number: t('exportDialog.colPassportNumber'),
-  passport_expiry: t('exportDialog.colPassportExpiry'),
-  special_meal: t('exportDialog.colSpecialMeal'),
-  remarks: t('exportDialog.colRemarks'),
+  identity: EXPORT_DIALOG_LABELS.COL_IDENTITY,
+  chinese_name: EXPORT_DIALOG_LABELS.COL_CHINESE_NAME,
+  passport_name: EXPORT_DIALOG_LABELS.COL_PASSPORT_NAME,
+  birth_date: EXPORT_DIALOG_LABELS.COL_BIRTHDAY,
+  gender: EXPORT_DIALOG_LABELS.COL_GENDER,
+  id_number: EXPORT_DIALOG_LABELS.COL_ID_NUMBER,
+  passport_number: EXPORT_DIALOG_LABELS.COL_PASSPORT_NUMBER,
+  passport_expiry: EXPORT_DIALOG_LABELS.COL_PASSPORT_EXPIRY,
+  special_meal: EXPORT_DIALOG_LABELS.COL_SPECIAL_MEAL,
+  remarks: EXPORT_DIALOG_LABELS.COL_REMARKS,
   // 金額相關欄位放最後
-  total_payable: t('exportDialog.colTotalPayable'),
-  deposit_amount: t('exportDialog.colDepositAmount'),
-  balance: t('exportDialog.colBalance'),
+  total_payable: EXPORT_DIALOG_LABELS.COL_TOTAL_PAYABLE,
+  deposit_amount: EXPORT_DIALOG_LABELS.COL_DEPOSIT_AMOUNT,
+  balance: EXPORT_DIALOG_LABELS.COL_BALANCE,
 }
 
 function ExportDialog({
@@ -48,8 +49,6 @@ function ExportDialog({
   onClose,
   onColumnsChange,
 }: ExportDialogProps) {
-  const t = useTranslations('orders')
-
   // 切換單一欄位
   const toggleColumn = (key: keyof ExportColumnsConfig) => {
     onColumnsChange({
@@ -99,9 +98,9 @@ function ExportDialog({
             case 'gender':
               value =
                 member.gender === 'M'
-                  ? t('exportDialog.genderMale')
+                  ? EXPORT_DIALOG_LABELS.GENDER_MALE
                   : member.gender === 'F'
-                    ? t('exportDialog.genderFemale')
+                    ? EXPORT_DIALOG_LABELS.GENDER_FEMALE
                     : ''
               break
             case 'id_number':
@@ -147,7 +146,7 @@ function ExportDialog({
       <!DOCTYPE html>
       <html>
         <head>
-          <title>{t('orders.label1942')}</title>
+          <title>{ORDERS_LABELS.LABEL_1942}</title>
           <style>
             body { font-family: Arial, sans-serif; padding: 20px; }
             table { border-collapse: collapse; width: 100%; font-size: 12px; }
@@ -161,9 +160,9 @@ function ExportDialog({
           </style>
         </head>
         <body>
-          <h1>{t('orders.label1942')}</h1>
+          <h1>{ORDERS_LABELS.LABEL_1942}</h1>
           <div class="info">
-            ${t('exportDialog.departureDate')}${departureDate || t('exportDialog.notSet')} | ${t('exportDialog.totalCount')}${members.length}${t('exportDialog.peopleUnit')}
+            ${EXPORT_DIALOG_LABELS.departure_date}${departureDate || EXPORT_DIALOG_LABELS.not_set} | ${EXPORT_DIALOG_LABELS.total_count}${members.length}${EXPORT_DIALOG_LABELS.people_unit}
           </div>
           <table>
             <thead>
@@ -213,9 +212,9 @@ function ExportDialog({
           case 'gender':
             row[label] =
               member.gender === 'M'
-                ? t('exportDialog.genderMale')
+                ? EXPORT_DIALOG_LABELS.GENDER_MALE
                 : member.gender === 'F'
-                  ? t('exportDialog.genderFemale')
+                  ? EXPORT_DIALOG_LABELS.GENDER_FEMALE
                   : ''
             break
           case 'balance':
@@ -264,17 +263,17 @@ function ExportDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Printer size={18} />
-            {t('orders.export8916')}
+            {ORDERS_LABELS.EXPORT_8916}
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-morandi-secondary">{t('orders.select6160')}</span>
+            <span className="text-sm text-morandi-secondary">{ORDERS_LABELS.SELECT_6160}</span>
             <Button variant="ghost" size="sm" onClick={toggleAll}>
               {Object.values(columns).every(v => v)
-                ? t('exportDialog.deselectAll')
-                : t('exportDialog.selectAll')}
+                ? EXPORT_DIALOG_LABELS.deselect_all
+                : EXPORT_DIALOG_LABELS.select_all}
             </Button>
           </div>
 
@@ -298,7 +297,7 @@ function ExportDialog({
           <div className="flex justify-end gap-2 pt-4 border-t border-border">
             <Button variant="outline" onClick={onClose}>
               <X size={16} className="mr-1" />
-              {t('orders.cancel')}
+              {ORDERS_LABELS.CANCEL}
             </Button>
             <Button variant="outline" onClick={handleExportExcel}>
               <FileSpreadsheet size={16} className="mr-1" />
@@ -306,7 +305,7 @@ function ExportDialog({
             </Button>
             <Button onClick={handlePrint}>
               <Printer size={16} className="mr-1" />
-              {t('orders.print')}
+              {ORDERS_LABELS.PRINT}
             </Button>
           </div>
         </div>

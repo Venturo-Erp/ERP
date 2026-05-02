@@ -19,8 +19,10 @@ export type Employee = Database['public']['Tables']['employees']['Row']
 export type { Tour } from './tour.types'
 export type Order = Database['public']['Tables']['orders']['Row']
 export type Customer = Database['public']['Tables']['customers']['Row']
-export type Member = Database['public']['Tables']['members']['Row']
-export type Payment = Database['public']['Tables']['payments']['Row']
+// Member 來自手寫 interface（@/types/tour.types）— members 表已 DROP (2026-05-02)、改用 order_members
+export type { Member } from './tour.types'
+// Payment 走手寫 interface（@/types/base.types）— payments 表已 DROP (2026-05-02)
+export type { Payment } from './base.types'
 export type Todo = Database['public']['Tables']['todos']['Row']
 export type Visa = Database['public']['Tables']['visas']['Row']
 export type Supplier = Database['public']['Tables']['suppliers']['Row']
@@ -81,7 +83,7 @@ export interface Message {
   attachments?: Attachment[]
   created_at: ISODateTime
   updated_at?: ISODateTime
-  deleted_at?: ISODateTime
+  is_active?: boolean
 }
 
 export interface Attachment {

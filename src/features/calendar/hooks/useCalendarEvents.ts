@@ -4,6 +4,7 @@ import { formatDate, toTaipeiDateString, toTaipeiTimeString } from '@/lib/utils/
 
 import { useMemo, useEffect, useRef, useState, useCallback } from 'react'
 import { useCalendarStore, useAuthStore, useWorkspaceStore } from '@/stores'
+import { useMyCapabilities } from '@/lib/permissions/useMyCapabilities'
 import {
   useToursForCalendar,
   useCustomersSlim,
@@ -74,7 +75,8 @@ export function useCalendarEvents() {
 
   // Workspace 篩選狀態（只有系統主管能用）
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string | null>(null)
-  const { isAdmin } = useAuthStore.getState()
+  const { has: hasCapability } = useMyCapabilities()
+  const isAdmin = hasCapability('platform.is_admin')
 
   // 初始化時從 localStorage 讀取篩選狀態
   const workspaceInitRef = useRef(false)

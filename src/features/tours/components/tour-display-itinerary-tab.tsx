@@ -15,13 +15,7 @@ import { PrintItineraryForm } from '@/features/itinerary/components/PrintItinera
 import { PrintItineraryPreview } from '@/features/itinerary/components/PrintItineraryPreview'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import {
-  useItineraries,
-  updateTour,
-  useCountries,
-  useTourItineraryDays,
-  useTourItineraryItems,
-} from '@/data'
+import { useItineraries, updateTour, useCountries, useTourItineraryItems } from '@/data'
 import type {
   FlightInfo,
   Feature,
@@ -133,7 +127,7 @@ function buildDefaultFromTour(tour: Tour, countryName = ''): TourFormData {
 /**
  * 從 DB itinerary 資料轉換為 TourFormData
  *
- * @param overrideDailyItinerary 若新表（tour_itinerary_days + tour_itinerary_items）有資料，
+ * @param overrideDailyItinerary 若核心表（tour_itinerary_items 含 day_meta + 內容 row）有資料，
  *   從 primary 路徑帶入；否則為 undefined，fallback 讀 JSONB `daily_itinerary`
  */
 function itineraryToFormData(
@@ -203,8 +197,8 @@ function itineraryToFormData(
     notices: itinerary.notices as TourFormData['notices'],
     cancellationPolicy: itinerary.cancellation_policy as TourFormData['cancellationPolicy'],
     itinerarySubtitle: (itinerary.itinerary_subtitle as string) || '',
-    // Primary：新表（tour_itinerary_days + tour_itinerary_items）組出來的版本
-    // Fallback：JSONB `daily_itinerary`（若新表對這個 tour 沒 rows）
+    // Primary：核心表（tour_itinerary_items 含 day_meta + 內容 row）組出來的版本
+    // Fallback：JSONB `daily_itinerary`（若核心表對這個 tour 沒 rows）
     dailyItinerary: overrideDailyItinerary ?? (itinerary.daily_itinerary as DailyItinerary[]) ?? [],
     price: itinerary.price as string | null,
     priceNote: itinerary.price_note as string | null,
@@ -214,9 +208,12 @@ function itineraryToFormData(
 export function TourDisplayItineraryTab({ tour }: TourDisplayItineraryTabProps) {
   const { items: itineraries } = useItineraries()
   const { items: countries } = useCountries()
-  // Phase 5a: 展示資料讀新表（tour_itinerary_days + tour_itinerary_items）
-  const { items: allItineraryDays } = useTourItineraryDays()
+  // 展示資料讀核心表（tour_itinerary_items；day_meta anchor row 帶 day-level metadata）
   const { items: allItineraryItems } = useTourItineraryItems()
+  const allItineraryDays = useMemo(
+    () => allItineraryItems.filter(i => i.category === 'day_meta'),
+    [allItineraryItems]
+  )
 
   // 解析 country_id → 國家名稱（與 useTourEdit 相同邏輯，避免依賴已廢棄的 tour.location）
   const countryName = useMemo(() => {
@@ -262,9 +259,9 @@ export function TourDisplayItineraryTab({ tour }: TourDisplayItineraryTabProps) 
     const sortedDays = [...dayRows].sort((a, b) => (a.day_number || 0) - (b.day_number || 0))
 
     return sortedDays.map(dayRow => {
-      const dn = dayRow.day_number
+      const dn = dayRow.day_number ?? 0
       const dayItems = itemRows
-        .filter(i => i.day_number === dn)
+        .filter(i => i.day_number === dn && i.category !== 'day_meta')
         .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
 
       // Activities：category='activities'
@@ -288,9 +285,9 @@ export function TourDisplayItineraryTab({ tour }: TourDisplayItineraryTabProps) 
         return mealByType(sub)?.title || mealByType(sub)?.resource_name || ''
       }
 
-      const breakfast = resolveMeal(dayRow.breakfast_preset, 'breakfast')
-      const lunch = resolveMeal(dayRow.lunch_preset, 'lunch')
-      const dinner = resolveMeal(dayRow.dinner_preset, 'dinner')
+      const breakfast = resolveMeal(dayRow.breakfast_preset ?? null, 'breakfast')
+      const lunch = resolveMeal(dayRow.lunch_preset ?? null, 'lunch')
+      const dinner = resolveMeal(dayRow.dinner_preset ?? null, 'dinner')
 
       // meal_ids（給下游 syncToCore 用，這裡保留但展示不直接使用）
       const mealIds = {
@@ -314,24 +311,25 @@ export function TourDisplayItineraryTab({ tour }: TourDisplayItineraryTabProps) 
       } = {
         dayLabel: `Day ${dn}`,
         date: dayDate,
-        title: dayRow.title || '',
-        highlight: '', // 新表沒這欄位 → 空字串
-        description: dayRow.note || '',
+        title: dayRow.day_title || '',
+        highlight: '', // 核心表沒這欄位 → 空字串
+        description: dayRow.day_note || '',
         activities,
-        recommendations: [], // 新表沒這欄位 → 空陣列
+        recommendations: [], // 核心表沒這欄位 → 空陣列
         meals: { breakfast, lunch, dinner },
         accommodation,
         isSameAccommodation: dayRow.is_same_accommodation || false,
-        images: [], // 新表沒這欄位 → 空陣列
+        images: [], // 核心表沒這欄位 → 空陣列
         accommodation_id: accommodationId,
         meal_ids: mealIds,
       }
       // route 不在 DailyItinerary interface 裡，但 JSONB 原格式有、下游有讀
-      ;(daily as unknown as { route?: string }).route = dayRow.route || ''
+      ;(daily as unknown as { route?: string }).route = dayRow.day_route || ''
 
       return daily
     })
   }, [allItineraryDays, allItineraryItems, tour.id, tour.departure_date])
+  // allItineraryDays 是從 allItineraryItems 派生的、deps 留兩者並列以保 effect 重算精準
 
   const [mode, setMode] = useState<EditorMode>('web')
   const [viewMode, setViewMode] = useState<'desktop' | 'mobile'>('desktop')

@@ -146,10 +146,11 @@ export async function POST(req: NextRequest) {
 
     const supabase = getSupabaseAdminClient()
 
-    // 取得收款單資料
+    // 取得收款單資料（限定當前 workspace 防跨租戶）
     const { data: receipt, error: receiptError } = await supabase
       .from('receipts')
       .select('*, tours(*)')
+      .eq('workspace_id', auth.data.workspaceId)
       .eq('receipt_number', receipt_number)
       .single()
 
@@ -246,6 +247,7 @@ export async function POST(req: NextRequest) {
           status: linkpayStatus,
           updated_at: new Date().toISOString(),
         })
+        .eq('workspace_id', receipt.workspace_id)
         .eq('linkpay_order_number', orderNo)
 
       if (ret_code === '00') {
@@ -257,6 +259,7 @@ export async function POST(req: NextRequest) {
             linkpay_order_number: orderNo,
             updated_at: new Date().toISOString(),
           })
+          .eq('workspace_id', receipt.workspace_id)
           .eq('receipt_number', receipt_number)
 
         return successResponse({
@@ -283,6 +286,7 @@ export async function POST(req: NextRequest) {
           link: apiError instanceof Error ? apiError.message : '呼叫失敗',
           updated_at: new Date().toISOString(),
         })
+        .eq('workspace_id', receipt.workspace_id)
         .eq('linkpay_order_number', orderNo)
 
       return ApiError.externalApi('呼叫台新 API 失敗，請稍候再嘗試。')

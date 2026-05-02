@@ -73,13 +73,12 @@ export async function getServerAuth(): Promise<AuthResult> {
     const adminClient = getSupabaseAdminClient()
 
     // 統一 ID 架構：
-    // - Pattern A (標準): employee.id = auth.uid()
-    // - Pattern B (舊制): supabase_user_id = auth.uid()
-    // 一次查詢同時檢查兩種情況
+    // - 標準: employees.user_id = auth.uid()
+    // - 兼容: employees.id = auth.uid()（Pattern A 舊資料）
     const { data: employees } = await adminClient
       .from('employees')
-      .select('id, workspace_id, supabase_user_id')
-      .or(`id.eq.${user.id},supabase_user_id.eq.${user.id}`)
+      .select('id, workspace_id, user_id')
+      .or(`user_id.eq.${user.id},id.eq.${user.id}`)
       .limit(1)
 
     const employee = employees?.[0]

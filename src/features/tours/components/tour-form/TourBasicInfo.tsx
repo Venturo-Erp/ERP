@@ -11,8 +11,7 @@ import {
 } from '@/components/ui/select'
 import { SimpleDateInput } from '@/components/ui/simple-date-input'
 import { CountryAirportSelector } from '@/components/selectors/CountryAirportSelector'
-import { useWorkspaceFeatures } from '@/lib/permissions'
-import { useDepartments, useEmployeesSlim } from '@/data'
+import { useEmployeesSlim } from '@/data'
 import { useAuthStore } from '@/stores/auth-store'
 import { supabase } from '@/lib/supabase/client'
 import { logger } from '@/lib/utils/logger'
@@ -28,9 +27,6 @@ interface TourBasicInfoProps {
 export function TourBasicInfo({ newTour, setNewTour }: TourBasicInfoProps) {
   const isProposalOrTemplate =
     newTour.status === TOUR_STATUS.PROPOSAL || newTour.status === TOUR_STATUS.TEMPLATE
-  const { isFeatureEnabled, loading: featuresLoading } = useWorkspaceFeatures()
-  const hasDepartments = isFeatureEnabled('departments')
-  const { items: departments = [] } = useDepartments()
   const { items: employees = [] } = useEmployeesSlim()
 
   // 所有團類型定義
@@ -91,19 +87,6 @@ export function TourBasicInfo({ newTour, setNewTour }: TourBasicInfoProps) {
       cityCode: airportCode,
       cityName: cityName,
     }))
-  }
-
-  if (featuresLoading) {
-    return (
-      <div className="space-y-4">
-        {[1, 2, 3].map(i => (
-          <div key={i} className="space-y-2">
-            <div className="h-4 w-20 bg-morandi-container/50 rounded animate-pulse" />
-            <div className="h-10 w-full bg-morandi-container/30 rounded animate-pulse" />
-          </div>
-        ))}
-      </div>
-    )
   }
 
   // 團類型下拉 JSX（兩處可能用到）
@@ -175,36 +158,6 @@ export function TourBasicInfo({ newTour, setNewTour }: TourBasicInfoProps) {
       )}
 
       {/* 團控已移到 TourSettings（動態選人欄位），不再寫死 */}
-
-      {/* 部門選擇（僅有 departments 功能的租戶顯示） */}
-      {hasDepartments && departments.length > 0 && (
-        <div>
-          <label className="text-sm font-medium text-morandi-primary">部門</label>
-          <Select
-            value={newTour.department_id || '_none_'}
-            onValueChange={value =>
-              setNewTour(prev => ({
-                ...prev,
-                department_id: value === '_none_' ? undefined : value,
-              }))
-            }
-          >
-            <SelectTrigger className="mt-1">
-              <SelectValue placeholder="選擇部門..." />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="_none_">不指定</SelectItem>
-              {departments
-                .filter(d => d.is_active)
-                .map(d => (
-                  <SelectItem key={d.id} value={d.id}>
-                    {d.code} - {d.name}
-                  </SelectItem>
-                ))}
-            </SelectContent>
-          </Select>
-        </div>
-      )}
 
       {/* 國家/機場選擇 - 使用共用組件 */}
       <CountryAirportSelector

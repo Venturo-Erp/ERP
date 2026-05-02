@@ -33,11 +33,10 @@ function getCurrentUserContext(): { workspaceId: string | null; userRole: UserRo
     if (authData) {
       const parsed = JSON.parse(authData)
       const user = parsed?.state?.user
-      const isAdmin = parsed?.state?.isAdmin
-      const userRole = isAdmin ? 'admin' : 'staff'
+      // userRole 已不再用於權限決策、僅供 cache scoping (2026-05-01)
       return {
         workspaceId: user?.workspace_id || null,
-        userRole: userRole as UserRole,
+        userRole: 'staff' as UserRole,
       }
     }
   } catch {
@@ -94,7 +93,6 @@ const WORKSPACE_SCOPED_TABLES = [
   'visas',
   'todos',
   'calendar_events',
-  'tour_addons',
 
   // === 溝通頻道 === ✅ 2026-01-12: 補齊
   'channels',

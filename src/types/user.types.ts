@@ -84,7 +84,6 @@ export interface EmployeeFull {
   personal_info: PersonalInfo
   job_info: JobInfo
   salary_info: SalaryInfo
-  permissions: string[] // 登入時算出、不是 DB 欄位
   roles?: UserRole[]
   attendance: EmployeeAttendance
   contracts: EmployeeContract[]
@@ -94,6 +93,7 @@ export interface EmployeeFull {
   employee_type?: 'human' | 'bot'
   avatar?: string
   avatar_url?: string | null
+  role_id?: string | null
   workspace_id?: string
   workspace_code?: string
   workspace_name?: string

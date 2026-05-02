@@ -29,6 +29,7 @@ export async function GET(request: NextRequest) {
     const { data, error } = await supabase
       .from('quote_confirmation_logs')
       .select('id, quote_id, action, note, created_by, created_at, metadata')
+      .eq('workspace_id', auth.data.workspaceId)
       .eq('quote_id', quoteId)
       .order('created_at', { ascending: false })
       .limit(500)

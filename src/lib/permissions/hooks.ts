@@ -1,10 +1,9 @@
 'use client'
 
-import { useState, useEffect, useMemo, useCallback } from 'react'
-import { useAuthStore } from '@/stores'
+import { useMemo, useCallback } from 'react'
+import { useLayoutContext, invalidateLayoutContext } from '@/lib/auth/useLayoutContext'
 import { getFeaturesByRoute } from './features'
 import { getModuleByCode } from './module-tabs'
-import { logger } from '@/lib/utils/logger'
 
 interface WorkspaceFeature {
   feature_code: string
@@ -19,6 +18,11 @@ interface RolePermission {
 
 /**
  * 取得當前租戶的功能權限
+ *
+ * F2 (2026-05-01)：內部改走 useLayoutContext()、不再獨立打
+ *   /api/permissions/features 與 /api/workspaces/[id]
+ *   外部介面（features / loading / isFeatureEnabled / isTabEnabled / isRouteAvailable
+ *   / enabledFeatures）不變、所有 caller 自動受惠。
  */
 // 付費功能代碼（需要付費大開關開啟才能用）
 const PREMIUM_FEATURE_CODES = [
@@ -31,115 +35,32 @@ const PREMIUM_FEATURE_CODES = [
   'supplier_portal',
   'esims',
   'accounting',
-  'departments',
   'tenants',
 ]
-
-// 模組級快取：登入後第一次 fetch，整個 session 共用
-const featureCache = {
-  workspaceId: null as string | null,
-  features: [] as WorkspaceFeature[],
-  premiumEnabled: false,
-  loaded: false,
-  loading: false,
-  promise: null as Promise<void> | null,
-}
 
 /**
  * 強制清快取、下次 useWorkspaceFeatures 會重 fetch
  * 用途：寫入 workspace_features 後呼叫、讓其他頁面立即看到最新狀態
  */
 export function invalidateFeatureCache() {
-  featureCache.loaded = false
-  featureCache.loading = false
-  featureCache.promise = null
+  // 走 layout-context 全域 invalidate；features 跟 capabilities 共用同一份 cache、一次清乾淨
+  void invalidateLayoutContext()
 }
 
 export function useWorkspaceFeatures() {
-  const { user } = useAuthStore()
-  const [features, setFeatures] = useState<WorkspaceFeature[]>(
-    featureCache.workspaceId === user?.workspace_id ? featureCache.features : []
+  const { payload, featuresSet, loading } = useLayoutContext()
+
+  // features list（保留 row shape 給既有 caller 用）
+  const features = useMemo<WorkspaceFeature[]>(
+    () => payload.features.map(code => ({ feature_code: code, enabled: true })),
+    [payload.features]
   )
-  const [premiumEnabled, setPremiumEnabled] = useState(
-    featureCache.workspaceId === user?.workspace_id ? featureCache.premiumEnabled : false
-  )
-  const [loading, setLoading] = useState(
-    !(featureCache.workspaceId === user?.workspace_id && featureCache.loaded)
-  )
-
-  useEffect(() => {
-    if (!user?.workspace_id) {
-      setFeatures([])
-      setPremiumEnabled(false)
-      setLoading(false)
-      return
-    }
-
-    // 快取命中：同一個 workspace 已載入過，直接用
-    if (featureCache.workspaceId === user.workspace_id && featureCache.loaded) {
-      setFeatures(featureCache.features)
-      setPremiumEnabled(featureCache.premiumEnabled)
-      setLoading(false)
-      return
-    }
-
-    // workspace 換了，清除快取
-    if (featureCache.workspaceId !== user.workspace_id) {
-      featureCache.workspaceId = user.workspace_id
-      featureCache.loaded = false
-      featureCache.loading = false
-      featureCache.promise = null
-    }
-
-    // 如果已經在載入中（其他 component 觸發的），等它完成
-    if (featureCache.loading && featureCache.promise) {
-      featureCache.promise.then(() => {
-        setFeatures(featureCache.features)
-        setPremiumEnabled(featureCache.premiumEnabled)
-        setLoading(false)
-      })
-      return
-    }
-
-    // 第一次載入
-    featureCache.loading = true
-    setLoading(true)
-
-    const fetchFeatures = async () => {
-      try {
-        // 自己 workspace 走 RLS 路徑；跨租戶查才需要帶 workspace_id 參數（需租戶管理權限）
-        const [res, wsRes] = await Promise.all([
-          fetch(`/api/permissions/features`),
-          fetch(`/api/workspaces/${user.workspace_id}`),
-        ])
-
-        if (res.ok) {
-          const data = await res.json()
-          featureCache.features = data
-          setFeatures(data)
-        }
-
-        if (wsRes.ok) {
-          const ws = await wsRes.json()
-          featureCache.premiumEnabled = ws.premium_enabled ?? false
-          setPremiumEnabled(featureCache.premiumEnabled)
-        }
-      } catch (err) {
-        logger.error('Failed to fetch workspace features:', err)
-      }
-      featureCache.loaded = true
-      featureCache.loading = false
-      setLoading(false)
-    }
-
-    featureCache.promise = fetchFeatures()
-  }, [user?.workspace_id])
+  const premiumEnabled = payload.premium_enabled
 
   // 檢查功能是否啟用（付費功能需要付費大開關 + 功能小開關都開啟）
   const isFeatureEnabled = useCallback(
     (featureCode: string): boolean => {
-      const feature = features.find(f => f.feature_code === featureCode)
-      const featureOn = feature?.enabled ?? false
+      const featureOn = featuresSet.has(featureCode)
 
       // 付費功能需要付費大開關也開啟
       if (PREMIUM_FEATURE_CODES.includes(featureCode)) {
@@ -148,7 +69,7 @@ export function useWorkspaceFeatures() {
 
       return featureOn
     },
-    [features, premiumEnabled]
+    [featuresSet, premiumEnabled]
   )
 
   // 檢查路由是否可用（根據功能權限）
@@ -174,20 +95,17 @@ export function useWorkspaceFeatures() {
   const isTabEnabled = useCallback(
     (moduleCode: string, tabCode: string, category?: 'basic' | 'premium'): boolean => {
       const key = `${moduleCode}.${tabCode}`
-      const feature = features.find(f => f.feature_code === key)
+      const featureOn = featuresSet.has(key)
       if (category === 'premium') {
-        return premiumEnabled && feature?.enabled === true
+        return premiumEnabled && featureOn
       }
-      return feature?.enabled === true
+      return featureOn
     },
-    [features, premiumEnabled]
+    [featuresSet, premiumEnabled]
   )
 
-  // 已啟用的功能代碼列表
-  const enabledFeatures = useMemo(
-    () => features.filter(f => f.enabled).map(f => f.feature_code),
-    [features]
-  )
+  // 已啟用的功能代碼列表（直接從 layout context 拿、避免再次過濾）
+  const enabledFeatures = useMemo(() => payload.features, [payload.features])
 
   return {
     features,

@@ -9,7 +9,7 @@ import { Eye } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { OrderMember } from '../../types/order-member.types'
 import type { ColumnVisibility } from '../OrderMembersExpandable'
-import { useTranslations } from 'next-intl'
+import { COMP_ORDERS_LABELS } from '../../constants/labels'
 
 interface MemberBasicInfoProps {
   member: OrderMember
@@ -40,8 +40,6 @@ export function MemberBasicInfo({
   onNameSearch,
   onIdNumberSearch,
 }: MemberBasicInfoProps) {
-  const t = useTranslations('orders')
-
   const [isComposing, setIsComposing] = useState(false)
 
   // 預設欄位顯示設定（訂金/尾款/應付金額 預設關閉）
@@ -179,13 +177,13 @@ export function MemberBasicInfo({
                 )}
                 title={
                   member.customer_verification_status === 'unverified'
-                    ? t('common.待驗證_請點擊編輯按鈕')
+                    ? COMP_ORDERS_LABELS.待驗證_請點擊編輯按鈕
                     : ''
                 }
               >
                 {member.chinese_name || '-'}
               </span>
-              {member.identity === t('common.領隊_2') && (
+              {member.identity === COMP_ORDERS_LABELS.領隊_2 && (
                 <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-morandi-gold/20 text-morandi-gold text-xs rounded-full font-medium border border-morandi-gold/30">
                   👑 領隊
                 </span>
@@ -197,7 +195,7 @@ export function MemberBasicInfo({
               type="button"
               onClick={() => onPreview(member)}
               className="p-0.5 text-morandi-gold hover:text-morandi-gold/80 transition-colors flex-shrink-0"
-              title={t('common.查看護照照片')}
+              title={COMP_ORDERS_LABELS.查看護照照片}
             >
               <Eye size={12} />
             </button>
@@ -225,22 +223,22 @@ export function MemberBasicInfo({
           {isEditMode ? (
             <input
               type="checkbox"
-              checked={member.identity === t('common.領隊_2')}
+              checked={member.identity === COMP_ORDERS_LABELS.領隊_2}
               onChange={e =>
                 onUpdateField(
                   member.id,
                   'identity',
-                  e.target.checked ? t('common.領隊_2') : t('common.大人')
+                  e.target.checked ? COMP_ORDERS_LABELS.領隊_2 : COMP_ORDERS_LABELS.大人
                 )
               }
               data-member={member.id}
               data-field="identity"
               className="w-4 h-4 cursor-pointer accent-morandi-primary"
-              title={t('common.勾選設為領隊')}
+              title={COMP_ORDERS_LABELS.勾選設為領隊}
             />
           ) : (
             <span className="text-xs text-morandi-primary">
-              {member.identity === t('common.領隊_2') ? t('common.領隊') : '-'}
+              {member.identity === COMP_ORDERS_LABELS.領隊_2 ? COMP_ORDERS_LABELS.領隊 : '-'}
             </span>
           )}
         </td>
@@ -327,15 +325,15 @@ export function MemberBasicInfo({
               className="bg-transparent text-xs text-center border-none outline-none shadow-none cursor-pointer"
             >
               <option value="">-</option>
-              <option value="M">{t('common.男')}</option>
-              <option value="F">{t('common.女')}</option>
+              <option value="M">{COMP_ORDERS_LABELS.男}</option>
+              <option value="F">{COMP_ORDERS_LABELS.女}</option>
             </select>
           ) : (
             <span className="text-morandi-primary">
               {member.gender === 'M'
-                ? t('common.男')
+                ? COMP_ORDERS_LABELS.男
                 : member.gender === 'F'
-                  ? t('common.女')
+                  ? COMP_ORDERS_LABELS.女
                   : '-'}
             </span>
           )}

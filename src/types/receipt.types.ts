@@ -50,7 +50,7 @@ export interface Receipt {
 
   notes: string | null | undefined
 
-  // 會計科目（選填）
+  // 會計科目 ID（選填、關聯 chart_of_accounts）
   accounting_subject_id: string | null | undefined
 
   // 批量收款關聯（同一筆進帳的多張收款）
@@ -61,7 +61,7 @@ export interface Receipt {
   created_by: string | null | undefined
   updated_at: string
   updated_by: string | null | undefined
-  deleted_at: string | null | undefined
+  is_active: boolean
 }
 
 // ============================================
@@ -324,7 +324,7 @@ export interface DbReceiptItem {
   updated_at: string | null | undefined
   created_by: string | null | undefined
   updated_by: string | null | undefined
-  deleted_at: string | null | undefined
+  is_active: boolean
 }
 
 // 建立收款項目用

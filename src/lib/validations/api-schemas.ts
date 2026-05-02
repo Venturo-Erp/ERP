@@ -70,7 +70,7 @@ export const customerConfirmQuoteSchema = z.object({
 
 export const syncEmployeeSchema = z.object({
   employee_id: z.string().min(1, '缺少員工 ID'),
-  supabase_user_id: z.string().min(1, '缺少 Supabase User ID'),
+  user_id: z.string().min(1, '缺少 User ID'),
   workspace_id: z.string().optional(),
   access_token: z.string().optional(),
 })
@@ -192,13 +192,14 @@ export const fetchImageSchema = z.object({
 // ==========================================
 
 export const ticketStatusPostSchema = z.object({
-  workspace_id: z.string().optional(),
+  workspace_id: z.string().uuid('workspace_id 需為 UUID'),
   channel_id: z.string().optional(),
   notify_sales: z.boolean().default(true),
   days: z.number().int().positive().default(14),
 })
 
 export const ticketStatusPatchSchema = z.object({
+  workspace_id: z.string().uuid('workspace_id 需為 UUID'),
   member_ids: z.array(z.string()).optional(),
   order_id: z.string().optional(),
   flight_self_arranged: z.boolean(),

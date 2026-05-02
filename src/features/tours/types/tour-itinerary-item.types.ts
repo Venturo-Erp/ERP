@@ -14,10 +14,16 @@ export const ITINERARY_ITEM_CATEGORIES = {
   ACTIVITIES: 'activities',
   OTHERS: 'others',
   GUIDE: 'guide',
+  // day_meta = day-level metadata anchor row（每個 (tour_id, day_number) 唯一一筆）
+  // 承載原 tour_itinerary_days 表的 day_title / day_route / day_note / day_blocks /
+  // is_same_accommodation / 三餐 preset
+  DAY_META: 'day_meta',
 } as const
 
 type ItineraryItemCategory =
   (typeof ITINERARY_ITEM_CATEGORIES)[keyof typeof ITINERARY_ITEM_CATEGORIES]
+
+type MealPreset = 'hotel' | 'self' | 'airline' | null
 
 // === Sub-category 常量 ===
 export const MEAL_SUB_CATEGORIES = {
@@ -145,6 +151,17 @@ export interface TourItineraryItem {
 
   // 負責方標示（Local 報價後鎖定）
   handled_by: 'self' | 'local' | null
+
+  // Day-level metadata（僅 category='day_meta' 的 anchor row 會用、其他 row 為 null/false）
+  // 取代原 tour_itinerary_days 表（已合併、見 migration 20260502120000）
+  day_title: string | null
+  day_route: string | null
+  day_note: string | null
+  day_blocks: unknown[] | Record<string, unknown> | null
+  is_same_accommodation: boolean
+  breakfast_preset: MealPreset
+  lunch_preset: MealPreset
+  dinner_preset: MealPreset
 
   // 元資料
   created_at: string

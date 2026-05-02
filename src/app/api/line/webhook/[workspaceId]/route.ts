@@ -214,18 +214,47 @@ async function handleEmployeeBinding(
   const profile = profileRes.ok ? await profileRes.json() : null
 
   // 更新或建立 line_users 紀錄
-  await supabase.from('line_users').upsert(
-    {
-      user_id: lineUserId,
-      workspace_id: workspaceId,
-      employee_id: employee.id,
-      display_name: profile?.displayName || null,
-      picture_url: profile?.pictureUrl || null,
-      followed_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    },
-    { onConflict: 'user_id' }
-  )
+  // line_users.user_id 是全域 UNIQUE、`onConflict: 'user_id'` 會踩到別 workspace 的 row
+  // → 改成「先查 + 限定 workspace_id」、避免覆蓋其他租戶資料
+  const profilePayload = {
+    user_id: lineUserId,
+    workspace_id: workspaceId,
+    employee_id: employee.id,
+    display_name: profile?.displayName || null,
+    picture_url: profile?.pictureUrl || null,
+    followed_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  }
+
+  // 注意：line_users.user_id 全域 UNIQUE、跨租戶查是設計、為了避免覆蓋其他租戶綁定
+  // 下方 line 237 會檢查 workspace_id 是否吻合、不吻合則拒絕
+  const { data: existingLineUser } = await supabase
+    .from('line_users')
+    .select('id, workspace_id')
+    .eq('user_id', lineUserId)
+    .maybeSingle()
+
+  if (existingLineUser) {
+    // 已存在：限定原 workspace 才能更新（避免跨租戶覆寫）
+    if (existingLineUser.workspace_id && existingLineUser.workspace_id !== workspaceId) {
+      logger.warn(
+        `[LINE] line_users user_id=${lineUserId} 已綁在 workspace ${existingLineUser.workspace_id}、忽略 ${workspaceId} 的綁定請求`
+      )
+      await reply(
+        config,
+        event.replyToken!,
+        `❌ 此 LINE 帳號已綁定其他租戶、請先解除原綁定`
+      )
+      return
+    }
+    await supabase
+      .from('line_users')
+      .update(profilePayload)
+      .eq('workspace_id', workspaceId)
+      .eq('user_id', lineUserId)
+  } else {
+    await supabase.from('line_users').insert(profilePayload)
+  }
 
   const name = employee.display_name || employee.chinese_name || employee.employee_number
   await reply(

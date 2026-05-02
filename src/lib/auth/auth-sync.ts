@@ -2,7 +2,7 @@
  * Auth 同步抽象層
  *
  * 確保前端 Auth Store 和 Supabase Auth 保持同步
- * 解決 RLS 需要 supabase_user_id 的問題
+ * 解決 RLS 需要 user_id 的問題
  */
 
 import { supabase } from '@/lib/supabase/client'
@@ -23,12 +23,12 @@ let syncState: SyncState = {
 let syncPromise: Promise<boolean> | null = null
 
 /**
- * 同步員工的 supabase_user_id
+ * 同步員工的 user_id
  * 使用 API 繞過 RLS 限制
  */
 async function syncEmployeeToSupabase(
   employeeId: string,
-  supabaseUserId: string,
+  userId: string,
   workspaceId: string,
   accessToken?: string
 ): Promise<boolean> {
@@ -38,14 +38,14 @@ async function syncEmployeeToSupabase(
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         employee_id: employeeId,
-        supabase_user_id: supabaseUserId,
+        user_id: userId,
         workspace_id: workspaceId,
         access_token: accessToken,
       }),
     })
 
     if (response.ok) {
-      logger.log('✅ Auth 同步成功:', supabaseUserId)
+      logger.log('✅ Auth 同步成功:', userId)
       syncState = {
         isSynced: true,
         lastSyncAt: new Date().toISOString(),
@@ -135,7 +135,7 @@ export async function ensureAuthSync(options?: SyncOptions): Promise<boolean> {
         return false
       }
 
-      const supabaseUserId = session.user.id
+      const userId = session.user.id
 
       // 2. 取得員工資訊（優先使用傳入的 options，否則從 localStorage）
       let employeeId = options?.employeeId
@@ -155,10 +155,10 @@ export async function ensureAuthSync(options?: SyncOptions): Promise<boolean> {
         return false
       }
 
-      // 3. 檢查資料庫中是否已經有正確的 supabase_user_id
+      // 3. 檢查資料庫中是否已經有正確的 user_id
       const { data: employee, error: checkError } = await supabase
         .from('employees')
-        .select('id, supabase_user_id, workspace_id')
+        .select('id, user_id, workspace_id')
         .eq('id', employeeId)
         .maybeSingle()
 
@@ -166,14 +166,14 @@ export async function ensureAuthSync(options?: SyncOptions): Promise<boolean> {
       if (checkError) {
         return await syncEmployeeToSupabase(
           employeeId,
-          supabaseUserId,
+          userId,
           workspaceId,
           session.access_token
         )
       }
 
-      // 4. 如果 supabase_user_id 已經正確，不需要同步
-      if (employee?.supabase_user_id === supabaseUserId) {
+      // 4. 如果 user_id 已經正確，不需要同步
+      if (employee?.user_id === userId) {
         syncState = {
           isSynced: true,
           lastSyncAt: new Date().toISOString(),
@@ -186,7 +186,7 @@ export async function ensureAuthSync(options?: SyncOptions): Promise<boolean> {
       logger.log('🔄 執行 Auth 同步...')
       return await syncEmployeeToSupabase(
         employeeId,
-        supabaseUserId,
+        userId,
         workspaceId,
         session.access_token
       )

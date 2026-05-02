@@ -1,11 +1,11 @@
 import { captureException } from '@/lib/error-tracking'
 /**
- * 同步員工的 supabase_user_id 和 workspace 到 metadata
+ * 同步員工的 user_id 和 workspace 到 metadata
  * 使用 Admin Client 繞過 RLS 限制
  *
  * 這個 API 解決登入時的雞生蛋問題：
- * - 更新 employees.supabase_user_id 需要 RLS 檢查 workspace
- * - 但 RLS 需要 supabase_user_id 才能找到 workspace
+ * - 更新 employees.user_id 需要 RLS 檢查 workspace
+ * - 但 RLS 需要 user_id 才能找到 workspace
  * - 所以用 admin client 繞過 RLS
  */
 
@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
   try {
     const validation = await validateBody(request, syncEmployeeSchema)
     if (!validation.success) return validation.error
-    const { employee_id, supabase_user_id, workspace_id, access_token } = validation.data
+    const { employee_id, user_id, workspace_id, access_token } = validation.data
 
     // 驗證請求者身份
     // 方法1: 使用 access_token 驗證（登入後 session cookie 可能還沒設好）
@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
         data: { user },
         error,
       } = await supabaseAdmin.auth.getUser(access_token)
-      if (error || !user || user.id !== supabase_user_id) {
+      if (error || !user || user.id !== user_id) {
         logger.error('Token 驗證失敗:', error?.message || 'user mismatch')
         return errorResponse('Unauthorized: invalid token', 401, ErrorCode.UNAUTHORIZED)
       }
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
         data: { user },
       } = await supabase.auth.getUser()
 
-      if (!user || user.id !== supabase_user_id) {
+      if (!user || user.id !== user_id) {
         return errorResponse('Unauthorized: user mismatch', 401, ErrorCode.UNAUTHORIZED)
       }
     }
@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
     //      拒絕已綁定其他 auth user 的員工被覆蓋。
     const { data: targetEmp, error: empLookupErr } = await supabaseAdmin
       .from('employees')
-      .select('id, workspace_id, supabase_user_id')
+      .select('id, workspace_id, user_id')
       .eq('id', employee_id)
       .single()
 
@@ -76,32 +76,32 @@ export async function POST(request: NextRequest) {
       return errorResponse('workspace 不符', 403, ErrorCode.FORBIDDEN)
     }
 
-    if (targetEmp.supabase_user_id && targetEmp.supabase_user_id !== supabase_user_id) {
+    if (targetEmp.user_id && targetEmp.user_id !== user_id) {
       logger.error('目標員工已綁定其他帳號、拒絕覆蓋', {
         employee_id,
-        existing: targetEmp.supabase_user_id,
-        attempted: supabase_user_id,
+        existing: targetEmp.user_id,
+        attempted: user_id,
       })
       return errorResponse('此員工已綁定其他帳號', 403, ErrorCode.FORBIDDEN)
     }
 
-    // 1. 更新 employees.supabase_user_id（繞過 RLS）
+    // 1. 更新 employees.user_id（繞過 RLS）
     const { error: updateError } = await supabaseAdmin
       .from('employees')
-      .update({ supabase_user_id })
+      .update({ user_id })
       .eq('id', employee_id)
 
     if (updateError) {
-      logger.error('更新 supabase_user_id 失敗:', updateError)
+      logger.error('更新 user_id 失敗:', updateError)
       return errorResponse(updateError.message, 400, ErrorCode.DATABASE_ERROR)
     }
 
-    logger.log('已更新 employees.supabase_user_id:', supabase_user_id)
+    logger.log('已更新 employees.user_id:', user_id)
 
     // 2. 更新 auth.users 的 metadata（使用 admin）
     // 用員工的真實 workspace_id（SSOT、不信 body 傳的）
     const { error: metadataError } = await supabaseAdmin.auth.admin.updateUserById(
-      supabase_user_id,
+      user_id,
       {
         user_metadata: {
           workspace_id: targetEmp.workspace_id,
@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
 
     if (metadataError) {
       logger.warn('更新 user_metadata 失敗:', metadataError)
-      // 不回傳錯誤，因為 supabase_user_id 已經設好了
+      // 不回傳錯誤，因為 user_id 已經設好了
     } else {
       logger.log('已更新 user_metadata:', {
         workspace_id: targetEmp.workspace_id,

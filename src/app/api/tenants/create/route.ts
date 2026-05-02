@@ -84,9 +84,11 @@ export async function POST(request: NextRequest) {
 
     let isWorkspaceAdmin = false
     if (effectiveRoleId) {
+      // 限定當前使用者所屬 workspace、防 role_id 偽造跨租戶
       const { data: role } = await supabaseAdmin
         .from('workspace_roles')
         .select('is_admin')
+        .eq('workspace_id', currentEmployee.workspace_id)
         .eq('id', effectiveRoleId)
         .single()
       isWorkspaceAdmin = role?.is_admin === true
@@ -172,7 +174,9 @@ export async function POST(request: NextRequest) {
           .eq('workspace_id', createdWorkspaceId)
         const wsRoleIds = (wsRoles ?? []).map(r => r.id)
         if (wsRoleIds.length > 0) {
-          await supabaseAdmin.from('role_tab_permissions').delete().in('role_id', wsRoleIds)
+          // role_capabilities 沒有自己的 workspace_id 欄位（透過 role_id 關聯到 workspace_roles）
+          // 上一步 wsRoleIds 已限定 createdWorkspaceId、跨租戶安全
+          await supabaseAdmin.from('role_capabilities').delete().in('role_id', wsRoleIds)
         }
         await supabaseAdmin.from('workspace_roles').delete().eq('workspace_id', createdWorkspaceId)
         await supabaseAdmin
@@ -269,15 +273,15 @@ export async function POST(request: NextRequest) {
 
     createdAuthUserId = authUser.user.id
 
-    // 4. 更新 employee 的 supabase_user_id（登入綁定、失敗必 rollback）
+    // 4. 更新 employee 的 user_id（登入綁定、失敗必 rollback）
     const { error: linkError } = await supabaseAdmin
       .from('employees')
-      .update({ supabase_user_id: authUser.user.id })
+      .update({ user_id: authUser.user.id })
       .eq('id', employee.id)
 
     if (linkError) {
       logger.error('Failed to link auth user to employee:', linkError)
-      await rollback('supabase_user_id link failed')
+      await rollback('user_id link failed')
       return errorResponse('綁定登入帳號失敗、請稍後重試', 500, ErrorCode.OPERATION_FAILED)
     }
 
@@ -334,48 +338,49 @@ export async function POST(request: NextRequest) {
       return errorResponse('找不到權限模板、請聯絡工程團隊', 500, ErrorCode.OPERATION_FAILED)
     }
 
-    const { data: cornerPerms, error: cornerPermsError } = await supabaseAdmin
-      .from('role_tab_permissions')
-      .select('role_id, module_code, tab_code, can_read, can_write')
+    // role_capabilities 沒有 workspace_id 欄位（透過 role_id 關聯）
+    // role_id 已限定為 cornerRoles（屬於 CORNER_WORKSPACE_ID）、不會跨租戶
+    const { data: cornerCaps, error: cornerCapsError } = await supabaseAdmin
+      .from('role_capabilities')
+      .select('role_id, capability_code, enabled')
       .in(
         'role_id',
         cornerRoles.map(r => r.id)
       )
+      .eq('enabled', true)
 
-    if (cornerPermsError) {
-      logger.error('Failed to read corner permissions:', cornerPermsError)
-      await rollback('read corner permissions failed')
+    if (cornerCapsError) {
+      logger.error('Failed to read corner capabilities:', cornerCapsError)
+      await rollback('read corner capabilities failed')
       return errorResponse('讀取權限模板失敗', 500, ErrorCode.OPERATION_FAILED)
     }
 
     const cornerRoleNameById = new Map(cornerRoles.map(r => [r.id, r.name]))
     const newRoleIdByName = new Map(createdRoles.map(r => [r.name, r.id]))
 
-    const templatePerms = (cornerPerms ?? [])
+    const templateCaps = (cornerCaps ?? [])
       .map(cp => {
         const roleName = cornerRoleNameById.get(cp.role_id)
         const newRoleId = roleName ? newRoleIdByName.get(roleName) : undefined
         if (!newRoleId) return null
         return {
           role_id: newRoleId,
-          module_code: cp.module_code,
-          tab_code: cp.tab_code,
-          can_read: cp.can_read,
-          can_write: cp.can_write,
+          capability_code: cp.capability_code,
+          enabled: true,
         }
       })
       .filter((p): p is NonNullable<typeof p> => p !== null)
 
-    if (templatePerms.length > 0) {
-      const { error: permError } = await supabaseAdmin
-        .from('role_tab_permissions')
-        .insert(templatePerms)
-      if (permError) {
-        logger.error('Failed to seed template permissions:', permError)
-        await rollback('seed permissions failed')
+    if (templateCaps.length > 0) {
+      const { error: capError } = await supabaseAdmin
+        .from('role_capabilities')
+        .insert(templateCaps)
+      if (capError) {
+        logger.error('Failed to seed template capabilities:', capError)
+        await rollback('seed capabilities failed')
         return errorResponse('複製權限模板失敗', 500, ErrorCode.OPERATION_FAILED)
       }
-      logger.log(`Template permissions seeded from Corner: ${templatePerms.length} rows`)
+      logger.log(`Template capabilities seeded from Corner: ${templateCaps.length} rows`)
     }
 
     // 7. 建立預設 workspace_features（功能開關、失敗必 rollback）

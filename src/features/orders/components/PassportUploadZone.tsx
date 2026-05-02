@@ -15,7 +15,7 @@ import { Upload, X, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import type { ProcessedFile } from '../types/order-member.types'
 import { ImageEditor, type ImageEditorSettings } from '@/components/ui/image-editor'
-import { useTranslations } from 'next-intl'
+import { COMP_ORDERS_LABELS } from '../constants/labels'
 
 interface PassportUploadZoneProps {
   processedFiles: ProcessedFile[]
@@ -45,8 +45,6 @@ export function PassportUploadZone({
   onBatchUpload,
   onUpdateFilePreview,
 }: PassportUploadZoneProps) {
-  const t = useTranslations('orders')
-
   // 圖片編輯狀態
   const [enhancingIndex, setEnhancingIndex] = useState<number | null>(null)
   const [showEditor, setShowEditor] = useState(false)
@@ -106,10 +104,10 @@ export function PassportUploadZone({
       )}
       <div className="space-y-3">
         <h4 className="text-sm font-medium text-morandi-primary">
-          {t('common.護照批次辨識OCR')}
+          {COMP_ORDERS_LABELS.護照批次辨識OCR}
         </h4>
-        <p className="text-xs text-morandi-muted">{t('common.上傳護照照片系統自動辨識')}</p>
-        <p className="text-xs text-morandi-gold">{t('common.圖片模糊增強提示')}</p>
+        <p className="text-xs text-morandi-muted">{COMP_ORDERS_LABELS.上傳護照照片系統自動辨識}</p>
+        <p className="text-xs text-morandi-gold">{COMP_ORDERS_LABELS.圖片模糊增強提示}</p>
 
         {/* 拖放區域 */}
         <label
@@ -133,10 +131,10 @@ export function PassportUploadZone({
           <Upload size={24} className="text-morandi-muted mb-2" />
           <span className="text-sm text-morandi-muted">
             {isProcessing
-              ? t('common.處理中')
-              : t('common.拖放或點擊選擇護照照片_PDF')}
+              ? COMP_ORDERS_LABELS.處理中
+              : COMP_ORDERS_LABELS.拖放或點擊選擇護照照片_PDF}
           </span>
-          <span className="text-xs text-morandi-muted mt-1">{t('common.支援格式提示')}</span>
+          <span className="text-xs text-morandi-muted mt-1">{COMP_ORDERS_LABELS.支援格式提示}</span>
         </label>
 
         {/* 已選擇的檔案預覽 */}
@@ -144,7 +142,7 @@ export function PassportUploadZone({
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-sm text-morandi-secondary">
-                {t('common.已選擇檔案').replace('{count}', processedFiles.length.toString())}
+                {COMP_ORDERS_LABELS.已選擇檔案.replace('{count}', processedFiles.length.toString())}
               </span>
               <Button
                 variant="ghost"
@@ -152,7 +150,7 @@ export function PassportUploadZone({
                 onClick={() => processedFiles.forEach((_, i) => onRemoveFile(i))}
                 className="text-morandi-muted hover:text-status-danger"
               >
-                {t('common.清空全部')}
+                {COMP_ORDERS_LABELS.清空全部}
               </Button>
             </div>
 
@@ -165,12 +163,12 @@ export function PassportUploadZone({
               {isUploading ? (
                 <>
                   <span className="animate-spin mr-2">⏳</span>
-                  {t('common.辨識中')}
+                  {COMP_ORDERS_LABELS.辨識中}
                 </>
               ) : (
                 <>
                   <Upload size={16} className="mr-2" />
-                  {t('common.開始辨識並建立成員').replace(
+                  {COMP_ORDERS_LABELS.開始辨識並建立成員.replace(
                     '{count}',
                     processedFiles.length.toString()
                   )}
@@ -188,8 +186,8 @@ export function PassportUploadZone({
                     onClick={() => !pf.isPdf && handleOpenEditor(index)}
                     title={
                       pf.isPdf
-                        ? t('common.pdf不支援增強')
-                        : t('common.點擊進行圖片增強')
+                        ? COMP_ORDERS_LABELS.PDF_不支援增強
+                        : COMP_ORDERS_LABELS.點擊進行圖片增強
                     }
                   />
                   {/* 刪除按鈕 */}
@@ -210,14 +208,14 @@ export function PassportUploadZone({
                         handleOpenEditor(index)
                       }}
                       className="absolute -top-1 -left-1 w-5 h-5 bg-morandi-gold text-white rounded-full flex items-center justify-center shadow-sm hover:bg-morandi-gold-hover transition-colors"
-                      title={t('common.圖片增強_銳利化')}
+                      title={COMP_ORDERS_LABELS.圖片增強_銳利化}
                     >
                       <Sparkles size={10} />
                     </button>
                   )}
                   {pf.isPdf && (
                     <span className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-[8px] text-center py-0.5">
-                      {t('common.pdf標籤')}
+                      {COMP_ORDERS_LABELS.PDF標籤}
                     </span>
                   )}
                 </div>

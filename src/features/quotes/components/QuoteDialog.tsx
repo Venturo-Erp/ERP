@@ -83,13 +83,11 @@ const QuoteDialog: React.FC<QuoteDialogProps> = ({
             <Combobox
               options={[
                 { value: '', label: QUOTE_DIALOG_LABELS.獨立報價單_無旅遊團 },
-                ...tours
-                  .filter(t => !t._deleted)
-                  .map(tour => ({
-                    value: tour.id,
-                    label: `${tour.code} - ${tour.name}`,
-                    data: tour,
-                  })),
+                ...tours.map(tour => ({
+                  value: tour.id,
+                  label: `${tour.code} - ${tour.name}`,
+                  data: tour,
+                })),
               ]}
               value={formData.tour_id || ''}
               onChange={value => {

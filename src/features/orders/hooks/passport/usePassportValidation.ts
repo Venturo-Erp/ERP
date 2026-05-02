@@ -14,7 +14,7 @@ import { fetchAllCustomers } from '@/features/orders/services/order_member.servi
 import { createCustomer, invalidateCustomers } from '@/data'
 import { logger } from '@/lib/utils/logger'
 import { syncPassportImageToMembers } from '@/lib/utils/sync-passport-image'
-import { useTranslations } from 'next-intl'
+import { COMP_ORDERS_LABELS } from '../../constants/labels'
 
 interface CustomerData {
   name?: string
@@ -94,7 +94,7 @@ export function usePassportValidation(): UsePassportValidationReturn {
           })
 
         if (uploadError) {
-          logger.error(t('common.上傳護照照片失敗'), uploadError, {
+          logger.error(COMP_ORDERS_LABELS.上傳護照照片失敗, uploadError, {
             fileName,
             workspaceId,
             orderId,
@@ -107,7 +107,7 @@ export function usePassportValidation(): UsePassportValidationReturn {
         logger.info(`護照照片上傳成功: ${fileName}`)
         return fileName
       } catch (error) {
-        logger.error(t('common.上傳護照照片異常'), error)
+        logger.error(COMP_ORDERS_LABELS.上傳護照照片異常, error)
         return null
       }
     },
@@ -152,12 +152,12 @@ export function usePassportValidation(): UsePassportValidationReturn {
           birth_date: birthDate,
           id_number: idNumber,
           gender:
-            customerData.sex === t('common.男')
+            customerData.sex === COMP_ORDERS_LABELS.男
               ? 'M'
-              : customerData.sex === t('common.女')
+              : customerData.sex === COMP_ORDERS_LABELS.女
                 ? 'F'
                 : null,
-          identity: t('common.大人'),
+          identity: COMP_ORDERS_LABELS.大人,
           member_type: 'adult',
           passport_image_url: passportImageUrl,
         }
@@ -234,9 +234,9 @@ export function usePassportValidation(): UsePassportValidationReturn {
               national_id: idNumber || null,
               birth_date: birthDate || null,
               gender:
-                customerData.sex === t('common.男')
+                customerData.sex === COMP_ORDERS_LABELS.男
                   ? 'M'
-                  : customerData.sex === t('common.女')
+                  : customerData.sex === COMP_ORDERS_LABELS.女
                     ? 'F'
                     : null,
               phone: '',
@@ -265,10 +265,10 @@ export function usePassportValidation(): UsePassportValidationReturn {
           newCustomer,
         }
       } catch (error) {
-        logger.error(t('common.建立成員失敗'), error)
+        logger.error(COMP_ORDERS_LABELS.建立成員失敗, error)
         return {
           success: false,
-          error: error instanceof Error ? error.message : t('common.未知錯誤'),
+          error: error instanceof Error ? error.message : COMP_ORDERS_LABELS.未知錯誤,
         }
       }
     },
@@ -330,9 +330,9 @@ export function usePassportValidation(): UsePassportValidationReturn {
           birth_date: birthDate,
           id_number: idNumber,
           gender:
-            customerData.sex === t('common.男')
+            customerData.sex === COMP_ORDERS_LABELS.男
               ? 'M'
-              : customerData.sex === t('common.女')
+              : customerData.sex === COMP_ORDERS_LABELS.女
                 ? 'F'
                 : null,
           passport_image_url: passportImageUrl,
@@ -360,10 +360,10 @@ export function usePassportValidation(): UsePassportValidationReturn {
           memberId,
         }
       } catch (error) {
-        logger.error(t('common.更新成員失敗'), error)
+        logger.error(COMP_ORDERS_LABELS.更新成員失敗, error)
         return {
           success: false,
-          error: error instanceof Error ? error.message : t('common.未知錯誤'),
+          error: error instanceof Error ? error.message : COMP_ORDERS_LABELS.未知錯誤,
         }
       }
     },

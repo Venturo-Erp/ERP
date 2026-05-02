@@ -39,14 +39,7 @@ import { logger } from '@/lib/utils/logger'
 import { toast } from 'sonner'
 import { useAuthStore } from '@/stores'
 import { useCapabilities, CAPABILITIES } from '@/lib/permissions'
-import {
-  useItineraries,
-  createItinerary,
-  updateItinerary,
-  useTourItineraryDays,
-  createTourItineraryDay,
-  deleteTourItineraryDay,
-} from '@/data'
+import { useItineraries, createItinerary, updateItinerary } from '@/data'
 import { updateTour } from '@/data/entities/tours'
 import { useTourDisplay } from '@/features/tours/utils/tour-display'
 import { useFlightSearch } from '@/hooks'
@@ -58,6 +51,7 @@ import {
 import type { DailyItinerary } from '@/components/editor/tour-form/types'
 import type { Tour } from '@/stores/types'
 import type { FlightInfo } from '@/types/flight.types'
+import type { Database, Json } from '@/lib/supabase/types'
 import { COMP_TOURS_LABELS, TOUR_ITINERARY_TAB_LABELS } from '../constants/labels'
 import { getPreviewDailyData as computePreviewData } from '@/features/tours/components/itinerary-editor/format-itinerary'
 import { ResourcePanel } from '@/components/resource-panel/ResourcePanel'
@@ -83,10 +77,11 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
   const { items: itineraries, refresh } = useItineraries()
   const { syncToCore } = useSyncItineraryToCore()
   const { items: coreItems, refresh: refreshCoreItems } = useTourItineraryItemsByTour(tour.id)
-  const { items: allItineraryDays } = useTourItineraryDays()
+  // Day-level metadata 來自 tour_itinerary_items 的 category='day_meta' anchor row
+  // （tour_itinerary_days 表已合併進 items、見 migration 20260502120000）
   const tourItineraryDays = useMemo(
-    () => allItineraryDays.filter(d => d.tour_id === tour.id),
-    [allItineraryDays, tour.id]
+    () => coreItems.filter(i => i.category === 'day_meta'),
+    [coreItems]
   )
 
   // 權限：是否可以編輯資料庫（能管理景點資料庫）
@@ -343,7 +338,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
               }
             }
 
-            // 新表優先：若 tour_itinerary_days 有 rows，day-level metadata 從新表讀
+            // 核心表優先：若 items 有 day_meta rows，day-level metadata 從新表讀
             const daysByNumber: Record<number, (typeof tourItineraryDays)[number]> = {}
             for (const d of tourItineraryDays) {
               if (d.day_number) daysByNumber[d.day_number] = d
@@ -394,13 +389,13 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                 routeText = ''
               }
 
-              // 新表優先：如果該 tour 有 tour_itinerary_days row，override day-level 欄位
-              const route = hasNewTableRows ? (dayRow?.route ?? '') : routeText
+              // 核心表優先：如果該 tour 有 day_meta row，override day-level 欄位
+              const route = hasNewTableRows ? (dayRow?.day_route ?? '') : routeText
               const note = hasNewTableRows
-                ? dayRow?.note || undefined
+                ? dayRow?.day_note || undefined
                 : day.description || undefined
               const blocks = hasNewTableRows
-                ? ((dayRow?.blocks as DailyScheduleItem['blocks']) ?? undefined)
+                ? ((dayRow?.day_blocks as DailyScheduleItem['blocks']) ?? undefined)
                 : undefined
               const sameAsPrevious = hasNewTableRows
                 ? (dayRow?.is_same_accommodation ?? false)
@@ -465,7 +460,6 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
     tour.return_date,
     itineraries.length,
     coreItems.length,
-    tourItineraryDays.length,
   ])
 
   // Update day schedule (with ID clearing for accommodation/meals)
@@ -885,78 +879,100 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
         }
       }
 
-      // Dual-write: 同步 day-level metadata 到 tour_itinerary_days（Phase 2 過渡策略）
-      // delete-then-insert：先清掉這個 tour 的舊 rows，再依 dailySchedule 重建
-      if (savedItineraryId) {
-        try {
-          for (const d of tourItineraryDays) {
-            await deleteTourItineraryDay(d.id)
-          }
-          for (const day of dailySchedule) {
-            await createTourItineraryDay({
-              tour_id: tour.id,
-              itinerary_id: savedItineraryId,
-              day_number: day.day,
-              title: day.route || null,
-              route: day.route || null,
-              note: day.note || null,
-              blocks: (day.blocks as unknown[]) || null,
-              is_same_accommodation: day.sameAsPrevious || false,
-              breakfast_preset: day.hotelBreakfast ? 'hotel' : null,
-              lunch_preset: day.lunchSelf ? 'self' : day.lunchAirline ? 'airline' : null,
-              dinner_preset: day.dinnerSelf ? 'self' : day.dinnerAirline ? 'airline' : null,
-            })
-          }
-        } catch (err) {
-          logger.error('tour_itinerary_days dual-write 失敗', err)
-          toast.error('每日行程表同步失敗（主存檔已完成）')
-        }
-      }
-
       // SSOT：航班只存於 itineraries.outbound_flight / return_flight，不再 dual-write 到 tours
       // Background sync: 只寫核心表（報價單/需求單直接讀核心表，不需要同步）
       if (savedItineraryId) {
+        const syncedItineraryId = savedItineraryId
         syncToCore({
-          itinerary_id: savedItineraryId,
+          itinerary_id: syncedItineraryId,
           tour_id: tour.id,
           daily_itinerary: fullDailyItinerary as DailyItinerary[],
         })
-          .then(result => {
+          .then(async result => {
             if (result && 'success' in result && !result.success) {
               logger.error('syncToCore failed:', result.message)
               toast.error(`核心表同步失敗：${result.message}`)
-            } else {
-              refreshCoreItems()
+              return
+            }
 
-              // 顯示取消摘要（如果有）
-              if (
-                result &&
-                'cancellations' in result &&
-                result.cancellations &&
-                result.cancellations.length > 0
-              ) {
-                const cancelList = result.cancellations
-                  .map((c: Record<string, unknown>) =>
-                    (c.items as Record<string, unknown>[])
-                      .map(
-                        (i: Record<string, unknown>) =>
-                          `${(i.service_date as string) || ''} ${i.title as string}`
-                      )
-                      .join('、')
-                  )
-                  .join('\n')
-
-                toast.warning(
-                  `📋 行程變更摘要\n\n已產生 ${result.cancellations.length} 個取消通知：\n${cancelList}\n\n請前往需求單頁面發送取消通知給供應商`,
-                  {
-                    duration: 10000,
-                    style: {
-                      whiteSpace: 'pre-line',
-                      maxWidth: '600px',
-                    },
-                  }
-                )
+            // 寫 day-level metadata 到 items 的 day_meta anchor row
+            // （syncToCore 會 delete-by-itinerary_id 整批清空、所以必須在它跑完後才寫）
+            try {
+              const workspaceId = currentUser?.workspace_id
+              if (!workspaceId) {
+                throw new Error('No workspace_id')
               }
+              const sb = createSupabaseBrowserClient()
+              // 1. 清掉舊的 day_meta rows（按 tour_id，避免 syncToCore 刷掉後殘留 stale）
+              await sb
+                .from('tour_itinerary_items')
+                .delete()
+                .eq('tour_id', tour.id)
+                .eq('category', 'day_meta')
+
+              // 2. 重新寫一輪
+              type DayMetaInsert =
+                Database['public']['Tables']['tour_itinerary_items']['Insert']
+              const dayMetaRows: DayMetaInsert[] = dailySchedule.map(day => ({
+                tour_id: tour.id,
+                itinerary_id: syncedItineraryId,
+                workspace_id: workspaceId,
+                day_number: day.day,
+                sort_order: -1,
+                category: 'day_meta',
+                title: day.route || null,
+                day_title: day.route || null,
+                day_route: day.route || null,
+                day_note: day.note || null,
+                day_blocks: (day.blocks as Json) ?? null,
+                is_same_accommodation: day.sameAsPrevious || false,
+                breakfast_preset: day.hotelBreakfast ? 'hotel' : null,
+                lunch_preset: day.lunchSelf ? 'self' : day.lunchAirline ? 'airline' : null,
+                dinner_preset: day.dinnerSelf ? 'self' : day.dinnerAirline ? 'airline' : null,
+                created_by: currentUser?.id || undefined,
+                updated_by: currentUser?.id || undefined,
+              }))
+              if (dayMetaRows.length > 0) {
+                const { error: insertError } = await sb
+                  .from('tour_itinerary_items')
+                  .insert(dayMetaRows)
+                if (insertError) throw insertError
+              }
+            } catch (err) {
+              logger.error('day_meta sync failed', err)
+              toast.error('每日行程表同步失敗（主存檔已完成）')
+            }
+
+            refreshCoreItems()
+
+            // 顯示取消摘要（如果有）
+            if (
+              result &&
+              'cancellations' in result &&
+              result.cancellations &&
+              result.cancellations.length > 0
+            ) {
+              const cancelList = result.cancellations
+                .map((c: Record<string, unknown>) =>
+                  (c.items as Record<string, unknown>[])
+                    .map(
+                      (i: Record<string, unknown>) =>
+                        `${(i.service_date as string) || ''} ${i.title as string}`
+                    )
+                    .join('、')
+                )
+                .join('\n')
+
+              toast.warning(
+                `📋 行程變更摘要\n\n已產生 ${result.cancellations.length} 個取消通知：\n${cancelList}\n\n請前往需求單頁面發送取消通知給供應商`,
+                {
+                  duration: 10000,
+                  style: {
+                    whiteSpace: 'pre-line',
+                    maxWidth: '600px',
+                  },
+                }
+              )
             }
           })
           .catch(err => {
@@ -1391,33 +1407,395 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                   {/* Flights row (hidden for domestic) */}
                   {!isDomestic && (
                     <div className="flex flex-col gap-3 mb-3">
-                      <ItineraryFlightEditor
-                        label={TOUR_ITINERARY_TAB_LABELS.去程}
-                        flights={outboundFlights}
-                        onChange={setOutboundFlights}
-                        searchNumber={outboundFlightNumber}
-                        onSearchNumberChange={setOutboundFlightNumber}
-                        flightDate={outboundFlightDate}
-                        onFlightDateChange={setOutboundFlightDate}
-                        segments={outboundSegments}
-                        onSearch={handleSearchOutboundFlight}
-                        onSelectSegment={handleSelectOutboundSegment}
-                        onClearSegments={clearOutboundSegments}
-                      />
+                      {/* Outbound flights */}
+                      <div className="flex-1">
+                        <div className="flex items-center gap-1.5 text-xs mb-1.5">
+                          <Plane size={12} className="text-morandi-gold" />
+                          <span className="text-muted-foreground font-medium">
+                            {TOUR_ITINERARY_TAB_LABELS.去程}
+                          </span>
+                        </div>
+                        <div className="border border-border rounded-xl overflow-hidden">
+                          <div className="flex items-center gap-1.5 text-xs bg-morandi-gold-header px-2 py-1.5">
+                            <span className="w-16">{TOUR_ITINERARY_TAB_LABELS.LABEL_5176}</span>
+                            <span className="w-20">{TOUR_ITINERARY_TAB_LABELS.LABEL_3349}</span>
+                            <span className="w-14">{TOUR_ITINERARY_TAB_LABELS.LABEL_7681}</span>
+                            <span className="w-16">{TOUR_ITINERARY_TAB_LABELS.TIME}</span>
+                            <span className="w-4"></span>
+                            <span className="w-14">{TOUR_ITINERARY_TAB_LABELS.抵達}</span>
+                            <span className="w-16">{TOUR_ITINERARY_TAB_LABELS.TIME}</span>
+                            <span className="flex-1"></span>
+                          </div>
+                          {outboundFlights.map((flight, index) => (
+                            <div
+                              key={index}
+                              className={`flex items-center gap-1.5 text-sm px-2 py-1 hover:bg-muted/10 group ${index < outboundFlights.length - 1 ? 'border-b border-border' : ''}`}
+                            >
+                              <Input
+                                value={flight.airline || ''}
+                                placeholder="長榮"
+                                onChange={e =>
+                                  setOutboundFlights(prev =>
+                                    prev.map((f, i) =>
+                                      i === index ? { ...f, airline: e.target.value } : f
+                                    )
+                                  )
+                                }
+                                className="h-7 text-sm w-16 px-1 border-0 border-b border-border/30 rounded-none bg-transparent focus-visible:bg-card focus-visible:border focus-visible:rounded"
+                              />
+                              <Input
+                                value={flight.flightNumber || ''}
+                                placeholder="BR123"
+                                onChange={e =>
+                                  setOutboundFlights(prev =>
+                                    prev.map((f, i) =>
+                                      i === index
+                                        ? { ...f, flightNumber: e.target.value.toUpperCase() }
+                                        : f
+                                    )
+                                  )
+                                }
+                                className="h-7 text-sm w-20 px-1 border-0 border-b border-border/30 rounded-none bg-transparent focus-visible:bg-card focus-visible:border focus-visible:rounded"
+                              />
+                              <Input
+                                value={flight.departureAirport || ''}
+                                placeholder="TPE"
+                                onChange={e =>
+                                  setOutboundFlights(prev =>
+                                    prev.map((f, i) =>
+                                      i === index
+                                        ? { ...f, departureAirport: e.target.value.toUpperCase() }
+                                        : f
+                                    )
+                                  )
+                                }
+                                className="h-7 text-sm w-14 px-1 border-0 border-b border-border/30 rounded-none bg-transparent focus-visible:bg-card focus-visible:border focus-visible:rounded"
+                              />
+                              <Input
+                                value={flight.departureTime || ''}
+                                placeholder="08:00"
+                                onChange={e =>
+                                  setOutboundFlights(prev =>
+                                    prev.map((f, i) =>
+                                      i === index ? { ...f, departureTime: e.target.value } : f
+                                    )
+                                  )
+                                }
+                                className="h-7 text-sm w-16 px-1 border-0 border-b border-border/30 rounded-none bg-transparent focus-visible:bg-card focus-visible:border focus-visible:rounded"
+                              />
+                              <span className="text-muted-foreground w-4 text-center text-xs">
+                                →
+                              </span>
+                              <Input
+                                value={flight.arrivalAirport || ''}
+                                placeholder="NRT"
+                                onChange={e =>
+                                  setOutboundFlights(prev =>
+                                    prev.map((f, i) =>
+                                      i === index
+                                        ? { ...f, arrivalAirport: e.target.value.toUpperCase() }
+                                        : f
+                                    )
+                                  )
+                                }
+                                className="h-7 text-sm w-14 px-1 border-0 border-b border-border/30 rounded-none bg-transparent focus-visible:bg-card focus-visible:border focus-visible:rounded"
+                              />
+                              <Input
+                                value={flight.arrivalTime || ''}
+                                placeholder="12:00"
+                                onChange={e =>
+                                  setOutboundFlights(prev =>
+                                    prev.map((f, i) =>
+                                      i === index ? { ...f, arrivalTime: e.target.value } : f
+                                    )
+                                  )
+                                }
+                                className="h-7 text-sm w-16 px-1 border-0 border-b border-border/30 rounded-none bg-transparent focus-visible:bg-card focus-visible:border focus-visible:rounded"
+                              />
+                              {index === 0 ? (
+                                <div className="flex-1 flex items-center justify-end gap-1">
+                                  <Input
+                                    value={outboundFlightNumber}
+                                    onChange={e =>
+                                      setOutboundFlightNumber(e.target.value.toUpperCase())
+                                    }
+                                    placeholder="航班號搜尋"
+                                    className="h-7 text-xs w-28 px-1"
+                                    onKeyDown={e => {
+                                      if (e.key === 'Enter' && outboundFlightNumber) {
+                                        handleSearchOutboundFlight()
+                                      }
+                                    }}
+                                  />
+                                  <DatePicker
+                                    value={outboundFlightDate}
+                                    onChange={date => setOutboundFlightDate(date || '')}
+                                    placeholder={TOUR_ITINERARY_TAB_LABELS.日期_表頭}
+                                    className="h-7 text-xs w-24"
+                                  />
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() =>
+                                      setOutboundFlights(prev => [
+                                        ...prev,
+                                        {
+                                          airline: '',
+                                          flightNumber: '',
+                                          departureAirport: '',
+                                          departureTime: '',
+                                          arrivalAirport: '',
+                                          arrivalTime: '',
+                                        },
+                                      ])
+                                    }
+                                    className="h-7 w-7 p-0"
+                                    title={TOUR_ITINERARY_TAB_LABELS.ADD_9636}
+                                  >
+                                    <Plus size={12} />
+                                  </Button>
+                                </div>
+                              ) : (
+                                <div className="flex-1 flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      setOutboundFlights(prev => prev.filter((_, i) => i !== index))
+                                    }
+                                    className="text-destructive/60 hover:text-destructive p-0.5"
+                                  >
+                                    <Trash2 size={14} />
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                          {outboundSegments.length > 0 && (
+                            <div className="space-y-1 px-2 py-1.5 bg-morandi-gold/5">
+                              <p className="text-xs text-muted-foreground">
+                                {TOUR_ITINERARY_TAB_LABELS.此航班有多個航段_請選擇}
+                              </p>
+                              {outboundSegments.map((seg, i) => (
+                                <button
+                                  key={i}
+                                  type="button"
+                                  onClick={() => handleSelectOutboundSegment(seg)}
+                                  className="w-full text-left p-1 rounded hover:bg-morandi-gold/10 transition-colors text-xs"
+                                >
+                                  {seg.departureAirport} → {seg.arrivalAirport}
+                                  <span className="text-muted-foreground ml-1">
+                                    {seg.departureTime} - {seg.arrivalTime}
+                                  </span>
+                                </button>
+                              ))}
+                              <button
+                                type="button"
+                                onClick={clearOutboundSegments}
+                                className="text-xs text-muted-foreground hover:text-foreground"
+                              >
+                                {COMP_TOURS_LABELS.取消}
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
 
-                      <ItineraryFlightEditor
-                        label={TOUR_ITINERARY_TAB_LABELS.回程}
-                        flights={returnFlights}
-                        onChange={setReturnFlights}
-                        searchNumber={returnFlightNumber}
-                        onSearchNumberChange={setReturnFlightNumber}
-                        flightDate={returnFlightDate}
-                        onFlightDateChange={setReturnFlightDate}
-                        segments={returnSegments}
-                        onSearch={handleSearchReturnFlight}
-                        onSelectSegment={handleSelectReturnSegment}
-                        onClearSegments={clearReturnSegments}
-                      />
+                      {/* Return flights */}
+                      <div className="flex-1">
+                        <div className="flex items-center gap-1.5 text-xs mb-1.5">
+                          <Plane size={12} className="text-morandi-gold" />
+                          <span className="text-muted-foreground font-medium">
+                            {TOUR_ITINERARY_TAB_LABELS.回程}
+                          </span>
+                        </div>
+                        <div className="border border-border rounded-xl overflow-hidden">
+                          <div className="flex items-center gap-1.5 text-xs bg-morandi-gold-header px-2 py-1.5">
+                            <span className="w-16">{TOUR_ITINERARY_TAB_LABELS.LABEL_5176}</span>
+                            <span className="w-20">{TOUR_ITINERARY_TAB_LABELS.LABEL_3349}</span>
+                            <span className="w-14">{TOUR_ITINERARY_TAB_LABELS.LABEL_7681}</span>
+                            <span className="w-16">{TOUR_ITINERARY_TAB_LABELS.TIME}</span>
+                            <span className="w-4"></span>
+                            <span className="w-14">{TOUR_ITINERARY_TAB_LABELS.抵達}</span>
+                            <span className="w-16">{TOUR_ITINERARY_TAB_LABELS.TIME}</span>
+                            <span className="flex-1"></span>
+                          </div>
+                          {returnFlights.map((flight, index) => (
+                            <div
+                              key={index}
+                              className={`flex items-center gap-1.5 text-sm px-2 py-1 hover:bg-muted/10 group ${index < returnFlights.length - 1 ? 'border-b border-border' : ''}`}
+                            >
+                              <Input
+                                value={flight.airline || ''}
+                                placeholder="長榮"
+                                onChange={e =>
+                                  setReturnFlights(prev =>
+                                    prev.map((f, i) =>
+                                      i === index ? { ...f, airline: e.target.value } : f
+                                    )
+                                  )
+                                }
+                                className="h-7 text-sm w-16 px-1 border-0 border-b border-border/30 rounded-none bg-transparent focus-visible:bg-card focus-visible:border focus-visible:rounded"
+                              />
+                              <Input
+                                value={flight.flightNumber || ''}
+                                placeholder="BR124"
+                                onChange={e =>
+                                  setReturnFlights(prev =>
+                                    prev.map((f, i) =>
+                                      i === index
+                                        ? { ...f, flightNumber: e.target.value.toUpperCase() }
+                                        : f
+                                    )
+                                  )
+                                }
+                                className="h-7 text-sm w-20 px-1 border-0 border-b border-border/30 rounded-none bg-transparent focus-visible:bg-card focus-visible:border focus-visible:rounded"
+                              />
+                              <Input
+                                value={flight.departureAirport || ''}
+                                placeholder="NRT"
+                                onChange={e =>
+                                  setReturnFlights(prev =>
+                                    prev.map((f, i) =>
+                                      i === index
+                                        ? { ...f, departureAirport: e.target.value.toUpperCase() }
+                                        : f
+                                    )
+                                  )
+                                }
+                                className="h-7 text-sm w-14 px-1 border-0 border-b border-border/30 rounded-none bg-transparent focus-visible:bg-card focus-visible:border focus-visible:rounded"
+                              />
+                              <Input
+                                value={flight.departureTime || ''}
+                                placeholder="14:00"
+                                onChange={e =>
+                                  setReturnFlights(prev =>
+                                    prev.map((f, i) =>
+                                      i === index ? { ...f, departureTime: e.target.value } : f
+                                    )
+                                  )
+                                }
+                                className="h-7 text-sm w-16 px-1 border-0 border-b border-border/30 rounded-none bg-transparent focus-visible:bg-card focus-visible:border focus-visible:rounded"
+                              />
+                              <span className="text-muted-foreground w-4 text-center text-xs">
+                                →
+                              </span>
+                              <Input
+                                value={flight.arrivalAirport || ''}
+                                placeholder="TPE"
+                                onChange={e =>
+                                  setReturnFlights(prev =>
+                                    prev.map((f, i) =>
+                                      i === index
+                                        ? { ...f, arrivalAirport: e.target.value.toUpperCase() }
+                                        : f
+                                    )
+                                  )
+                                }
+                                className="h-7 text-sm w-14 px-1 border-0 border-b border-border/30 rounded-none bg-transparent focus-visible:bg-card focus-visible:border focus-visible:rounded"
+                              />
+                              <Input
+                                value={flight.arrivalTime || ''}
+                                placeholder="17:00"
+                                onChange={e =>
+                                  setReturnFlights(prev =>
+                                    prev.map((f, i) =>
+                                      i === index ? { ...f, arrivalTime: e.target.value } : f
+                                    )
+                                  )
+                                }
+                                className="h-7 text-sm w-16 px-1 border-0 border-b border-border/30 rounded-none bg-transparent focus-visible:bg-card focus-visible:border focus-visible:rounded"
+                              />
+                              {index === 0 ? (
+                                <div className="flex-1 flex items-center justify-end gap-1">
+                                  <Input
+                                    value={returnFlightNumber}
+                                    onChange={e =>
+                                      setReturnFlightNumber(e.target.value.toUpperCase())
+                                    }
+                                    placeholder="航班號搜尋"
+                                    className="h-7 text-xs w-28 px-1"
+                                    onKeyDown={e => {
+                                      if (e.key === 'Enter' && returnFlightNumber) {
+                                        handleSearchReturnFlight()
+                                      }
+                                    }}
+                                  />
+                                  <DatePicker
+                                    value={returnFlightDate}
+                                    onChange={date => setReturnFlightDate(date || '')}
+                                    placeholder={TOUR_ITINERARY_TAB_LABELS.日期_表頭}
+                                    className="h-7 text-xs w-24"
+                                  />
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() =>
+                                      setReturnFlights(prev => [
+                                        ...prev,
+                                        {
+                                          airline: '',
+                                          flightNumber: '',
+                                          departureAirport: '',
+                                          departureTime: '',
+                                          arrivalAirport: '',
+                                          arrivalTime: '',
+                                        },
+                                      ])
+                                    }
+                                    className="h-7 w-7 p-0"
+                                    title={TOUR_ITINERARY_TAB_LABELS.ADD_9636}
+                                  >
+                                    <Plus size={12} />
+                                  </Button>
+                                </div>
+                              ) : (
+                                <div className="flex-1 flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      setReturnFlights(prev => prev.filter((_, i) => i !== index))
+                                    }
+                                    className="text-destructive/60 hover:text-destructive p-0.5"
+                                  >
+                                    <Trash2 size={14} />
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                          {returnSegments.length > 0 && (
+                            <div className="space-y-1 px-2 py-1.5 bg-morandi-gold/5">
+                              <p className="text-xs text-muted-foreground">
+                                {TOUR_ITINERARY_TAB_LABELS.此航班有多個航段_請選擇}
+                              </p>
+                              {returnSegments.map((seg, i) => (
+                                <button
+                                  key={i}
+                                  type="button"
+                                  onClick={() => handleSelectReturnSegment(seg)}
+                                  className="w-full text-left p-1 rounded hover:bg-morandi-gold/10 transition-colors text-xs"
+                                >
+                                  {seg.departureAirport} → {seg.arrivalAirport}
+                                  <span className="text-muted-foreground ml-1">
+                                    {seg.departureTime} - {seg.arrivalTime}
+                                  </span>
+                                </button>
+                              ))}
+                              <button
+                                type="button"
+                                onClick={clearReturnSegments}
+                                className="text-xs text-muted-foreground hover:text-foreground"
+                              >
+                                {COMP_TOURS_LABELS.取消}
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   {/* 行程小標題 */}
                   <div className="flex items-center gap-1.5 text-xs mb-1.5 mt-1">

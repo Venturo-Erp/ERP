@@ -47,13 +47,13 @@ async function recalculateOrderPayment(orderId: string): Promise<void> {
 
   const orderTotalAmount = orderData?.total_amount || 0
 
-  // 計算該訂單所有已確認收款的實收總金額（過濾 deleted_at）
+  // 計算該訂單所有已確認收款的實收總金額（只取未軟刪的）
   const { data: confirmedReceipts, error: receiptsError } = await supabase
     .from('receipts')
     .select('actual_amount')
     .eq('order_id', orderId)
     .eq('status', 'confirmed')
-    .is('deleted_at', null)
+    .eq('is_active', true)
 
   if (receiptsError) {
     logger.error('查詢已確認收款失敗:', receiptsError)
@@ -115,7 +115,7 @@ async function recalculateTourFinancials(tourId: string): Promise<void> {
     .from('receipts')
     .select('actual_amount')
     .eq('status', 'confirmed')
-    .is('deleted_at', null)
+    .eq('is_active', true)
 
   if (orderIds.length > 0) {
     receiptsQuery = receiptsQuery.or(`order_id.in.(${orderIds.join(',')}),tour_id.eq.${tourId}`)

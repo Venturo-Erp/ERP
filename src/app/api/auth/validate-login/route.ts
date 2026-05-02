@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     const { data: employee, error: empError } = await supabase
       .from('employees')
       .select(
-        'id, employee_number, display_name, english_name, avatar_url, status, supabase_user_id, workspace_id, role_id, job_info, created_at, updated_at, login_failed_count, login_locked_until, is_bot, must_change_password'
+        'id, employee_number, display_name, english_name, avatar_url, status, user_id, workspace_id, role_id, job_info, created_at, updated_at, login_failed_count, login_locked_until, is_bot, must_change_password'
       )
       .eq('workspace_id', workspace.id)
       .ilike('employee_number', username)
@@ -73,17 +73,17 @@ export async function POST(request: NextRequest) {
     }
 
     // 4. 從 auth.users 取得這位員工的登入 email（單一來源、不再 fallback）
-    if (!employee.supabase_user_id) {
-      logger.warn(`Employee ${employee.employee_number}@${code} 缺少 supabase_user_id、無法登入`)
+    if (!employee.user_id) {
+      logger.warn(`Employee ${employee.employee_number}@${code} 缺少 user_id、無法登入`)
       return ApiError.unauthorized('帳號設定不完整、請聯絡系統主管')
     }
 
-    const { data: authUser } = await supabase.auth.admin.getUserById(employee.supabase_user_id)
+    const { data: authUser } = await supabase.auth.admin.getUserById(employee.user_id)
     const authEmail = authUser?.user?.email
 
     if (!authEmail) {
       logger.error(
-        `Auth user ${employee.supabase_user_id} (employee ${employee.employee_number}) 無 email、登入卡住`
+        `Auth user ${employee.user_id} (employee ${employee.employee_number}) 無 email、登入卡住`
       )
       return ApiError.unauthorized('帳號認證資料異常、請聯絡系統主管')
     }
@@ -128,43 +128,8 @@ export async function POST(request: NextRequest) {
     // 6. 回傳員工資料 + auth email（SELECT 已不含 password_hash）
     const employeeData = employee
 
-    // 7. 從職務系統取得權限（統一用 role_tab_permissions）
-    let rolePermissions: string[] = []
-    let isAdmin = false
-    const roleId = (employee as Record<string, unknown>).role_id as string | undefined
-
-    if (roleId) {
-      // 查職務是否擁有管理員資格
-      const { data: role } = await supabase
-        .from('workspace_roles')
-        .select('is_admin')
-        .eq('id', roleId)
-        .single()
-
-      isAdmin = role?.is_admin || false
-
-      // 權限決策統一從 role_tab_permissions 拿資格清單
-      const { data: tabPerms } = await supabase
-        .from('role_tab_permissions')
-        .select('module_code, tab_code, can_read, can_write')
-        .eq('role_id', roleId)
-
-      const permSet = new Set<string>()
-
-      tabPerms
-        ?.filter(p => p.can_read)
-        .forEach(p => {
-          if (p.tab_code) {
-            permSet.add(`${p.module_code}:${p.tab_code}`)
-          } else {
-            permSet.add(p.module_code)
-          }
-        })
-
-      rolePermissions = Array.from(permSet)
-    }
-
-    // 8. 回傳資料（Session 由 client-side supabase.auth.signInWithPassword 建立）
+    // 7. 權限不再由 validate-login 計算 (2026-05-01)。
+    //    前端用 useMyCapabilities() 直接 query role_capabilities、SSOT 在 DB。
     const mustChangePassword =
       (employee as Record<string, unknown>).must_change_password === true
 
@@ -179,8 +144,6 @@ export async function POST(request: NextRequest) {
           type: workspace.type,
         },
         authEmail,
-        permissions: rolePermissions,
-        isAdmin,
         mustChangePassword,
       },
     })

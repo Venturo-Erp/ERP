@@ -11,10 +11,7 @@ type NullableKeys<T> = {
   [K in keyof T]: null extends T[K] ? K : never
 }[keyof T]
 
-type CreateInput<T> = Omit<
-  T,
-  'id' | 'created_at' | 'updated_at' | '_needs_sync' | '_synced_at' | '_deleted' | 'code'
->
+type CreateInput<T> = Omit<T, 'id' | 'created_at' | 'updated_at' | 'code'>
 
 /** Makes nullable fields optional — matches Supabase Insert semantics */
 export type EntityCreateData<T> = Partial<Pick<CreateInput<T>, NullableKeys<CreateInput<T>>>> &

@@ -11,7 +11,7 @@ import type { Employee } from '@/stores/types'
 const employeeEntity = createEntityHook<Employee>('employees', {
   list: {
     select:
-      'id,employee_number,display_name,chinese_name,english_name,email,avatar_url,birth_date,id_number,employee_type,status,is_bot,roles,monthly_salary,supabase_user_id,user_id,must_change_password,last_login_at,workspace_id,created_at,updated_at,updated_by',
+      'id,employee_number,display_name,chinese_name,english_name,email,avatar_url,birth_date,id_number,employee_type,status,is_bot,roles,monthly_salary,user_id,must_change_password,last_login_at,workspace_id,created_at,updated_at,updated_by',
     orderBy: { column: 'employee_number', ascending: true },
   },
   slim: {

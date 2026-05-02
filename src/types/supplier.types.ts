@@ -6,13 +6,13 @@
  * - CostTemplate：成本模板（報價用）
  */
 
-import type { BaseEntity, SyncableEntity } from './base.types'
+import type { BaseEntity } from './base.types'
 
 // ============================================
 // 供應商基本資料（財務用）
 // ============================================
 
-export interface Supplier extends SyncableEntity {
+export interface Supplier extends BaseEntity {
   name: string
   english_name?: string | null // 英文名稱（標準欄位）
   code?: string | null // 供應商代碼（會計用）
@@ -79,7 +79,7 @@ export interface SupplierServiceArea extends BaseEntity {
 // 成本模板（報價用）
 // ============================================
 
-export interface CostTemplate extends SyncableEntity {
+export interface CostTemplate extends BaseEntity {
   // 關聯
   supplier_id: string
   city_id: string

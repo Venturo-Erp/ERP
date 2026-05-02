@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { getSupabaseAdminClient } from '@/lib/supabase/admin'
 import { getServerAuth } from '@/lib/auth/server-auth'
+import { logger } from '@/lib/utils/logger'
 
 /**
  * GET /api/line/messages/[conversationId]
@@ -37,20 +38,22 @@ export async function GET(
       .limit(1)
 
     if (conversationError || !conversationData || conversationData.length === 0) {
-      console.warn('對話不存在或無權限訪問:', conversationError?.message)
+      logger.warn('對話不存在或無權限訪問:', conversationError?.message)
       return NextResponse.json({ error: '對話不存在' }, { status: 404 })
     }
 
     // 取得該對話的所有消息，按時間順序排列
+    // 雖然上方已驗證 conversation 屬於 workspace、仍補 workspace_id 雙保險
     const { data, error } = await supabase
       .from('line_messages')
       .select('*')
+      .eq('workspace_id', workspaceId)
       .eq('conversation_id', conversationId)
       .order('created_at', { ascending: true })
       .limit(500)
 
     if (error) {
-      console.warn('line_messages 查詢失敗:', error.message)
+      logger.warn('line_messages 查詢失敗:', error.message)
       return NextResponse.json([])
     }
 
@@ -74,7 +77,7 @@ export async function GET(
 
     return NextResponse.json(messages)
   } catch (error) {
-    console.error('API /api/line/messages/[conversationId] 錯誤:', error)
+    logger.error('API /api/line/messages/[conversationId] 錯誤:', error)
     return NextResponse.json([])
   }
 }
@@ -111,7 +114,7 @@ export async function PATCH(
       .eq('workspace_id', workspaceId)
 
     if (error) {
-      console.warn('標記已讀失敗:', error.message)
+      logger.warn('標記已讀失敗:', error.message)
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
@@ -123,12 +126,12 @@ export async function PATCH(
       .eq('workspace_id', workspaceId)
 
     if (updateConvError) {
-      console.warn('重置未讀數失敗:', updateConvError.message)
+      logger.warn('重置未讀數失敗:', updateConvError.message)
     }
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('API PATCH /api/line/messages/[conversationId] 錯誤:', error)
+    logger.error('API PATCH /api/line/messages/[conversationId] 錯誤:', error)
     return NextResponse.json({ error: '系統錯誤' }, { status: 500 })
   }
 }

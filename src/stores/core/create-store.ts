@@ -56,6 +56,10 @@ function generateUUID(): string {
 /**
  * 取得當前使用者的 workspace_id 和 role
  * 從 localStorage 讀取 auth-store 的值，避免循環依賴
+ *
+ * 2026-05-01：isAdmin flag 已從 auth-store 移除、userRole 一律回 'staff'。
+ * 真正的「是不是 admin」改由前端 useMyCapabilities().has('platform.is_admin') 判斷。
+ * 這個函式只服務 stores/core 內部 cache scoping、不涉及權限決策。
  */
 function getCurrentUserContext(): { workspaceId: string | null; userRole: UserRole | null } {
   if (typeof window === 'undefined') return { workspaceId: null, userRole: null }
@@ -64,12 +68,9 @@ function getCurrentUserContext(): { workspaceId: string | null; userRole: UserRo
     if (authData) {
       const parsed = JSON.parse(authData)
       const user = parsed?.state?.user
-      const isAdmin = parsed?.state?.isAdmin
-      // 新系統：使用 permissions 判斷系統主管
-      const userRole = isAdmin ? ('admin' as UserRole) : ('staff' as UserRole)
       return {
         workspaceId: user?.workspace_id || null,
-        userRole,
+        userRole: 'staff' as UserRole,
       }
     }
   } catch {

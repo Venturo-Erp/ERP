@@ -21,10 +21,12 @@ interface DayItinerary {
 
 /**
  * 用 attraction_id 從景點庫補上描述
+ * @param workspaceId 限定景點所在 workspace、防跨租戶撈資料
  */
 async function enrichDailyItinerary(
   supabase: SupabaseClient,
-  dailyItinerary: DayItinerary[] | null
+  dailyItinerary: DayItinerary[] | null,
+  workspaceId: string
 ): Promise<DayItinerary[] | null> {
   if (!dailyItinerary || !Array.isArray(dailyItinerary)) return dailyItinerary
 
@@ -42,10 +44,11 @@ async function enrichDailyItinerary(
 
   if (attractionIds.size === 0) return dailyItinerary
 
-  // 批次查詢景點
+  // 批次查詢景點（限定 workspace、attractions 是租戶自己的景點庫）
   const { data: attractions } = await supabase
     .from('attractions')
     .select('id, description, images')
+    .eq('workspace_id', workspaceId)
     .in('id', Array.from(attractionIds))
 
   if (!attractions) return dailyItinerary
@@ -81,6 +84,7 @@ async function enrichDailyItinerary(
 
 /**
  * 用飯店名稱從 hotels 表補上介紹和圖片（SSOT）
+ * 註：hotels 是全域共用 ref 表（無 workspace_id 欄位）、不需 workspace 篩
  */
 async function enrichHotels(
   supabase: SupabaseClient,
@@ -131,10 +135,13 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       return ApiError.missingField('id')
     }
 
-    // 🔒 安全修復 2026-02-19：檢查認證狀態
-    // 未登入用戶只能存取已發布的行程（供客戶公開瀏覽）
+    // 🔒 D3 P0 修復：必須登入、所有查詢限定當前 workspace
+    // 短碼 8 hex 可枚舉、admin client 全程繞 RLS、未登入查詢視為跨租戶資料外洩
     const auth = await getServerAuth()
-    const isAuthenticated = auth.success
+    if (!auth.success) {
+      return ApiError.unauthorized()
+    }
+    const workspaceId = auth.data.workspaceId
 
     // 判斷查詢類型：
     // 1. 完整 UUID（36 字元，含連字號）
@@ -150,31 +157,34 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     const selectFields = '*, tour:tours(quotes(tier_pricings,quote_type))'
 
     if (isUUID) {
-      // 用完整 UUID 查詢
+      // 用完整 UUID 查詢（限定當前 workspace）
       const result = await supabaseAdmin
         .from('itineraries')
         .select(selectFields)
+        .eq('workspace_id', workspaceId)
         .eq('id', id)
         .single()
       itinerary = result.data
       error = result.error
     } else if (isShortId) {
-      // 用短碼查詢（ID 前 8 碼，需要用 like 查詢）
+      // 用短碼查詢（ID 前 8 碼，需要用 like 查詢、限定當前 workspace）
       // 將短碼轉換成 UUID 前綴格式：xxxxxxxx-
       const uuidPrefix = `${id.substring(0, 8)}`
       const result = await supabaseAdmin
         .from('itineraries')
         .select(selectFields)
+        .eq('workspace_id', workspaceId)
         .ilike('id', `${uuidPrefix}%`)
         .limit(1)
         .single()
       itinerary = result.data
       error = result.error
     } else {
-      // 用 tour_code 查詢
+      // 用 tour_code 查詢（限定當前 workspace）
       const result = await supabaseAdmin
         .from('itineraries')
         .select(selectFields)
+        .eq('workspace_id', workspaceId)
         .eq('tour_code', id)
         .single()
       itinerary = result.data
@@ -225,6 +235,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         supabaseAdmin,
         itinerary.hotels as Array<{ name?: string; description?: string; images?: string[] }>
       ),
+      // ↑ hotels 為全域 ref 表、無 workspace_id 欄位
       showFeatures: itinerary.show_features,
       showLeaderMeeting: itinerary.show_leader_meeting,
       showHotels: itinerary.show_hotels,
@@ -252,7 +263,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       itinerarySubtitle: itinerary.itinerary_subtitle,
       dailyItinerary: await enrichDailyItinerary(
         supabaseAdmin,
-        itinerary.daily_itinerary as DayItinerary[]
+        itinerary.daily_itinerary as DayItinerary[],
+        workspaceId
       ),
       versionRecords: itinerary.version_records,
       createdAt: itinerary.created_at,

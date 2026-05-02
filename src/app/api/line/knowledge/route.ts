@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { getSupabaseAdminClient } from '@/lib/supabase/admin'
 import { getServerAuth } from '@/lib/auth/server-auth'
+import { logger } from '@/lib/utils/logger'
 
 /**
  * GET /api/line/knowledge
@@ -37,7 +38,7 @@ export async function GET(request: NextRequest) {
     const { data, error } = await query
 
     if (error) {
-      console.error('knowledge_base 查詢失敗:', error.message)
+      logger.error('knowledge_base 查詢失敗:', error.message)
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
@@ -55,7 +56,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(results)
   } catch (error) {
-    console.error('API /api/line/knowledge 錯誤:', error)
+    logger.error('API /api/line/knowledge 錯誤:', error)
     return NextResponse.json({ error: '系統錯誤' }, { status: 500 })
   }
 }
@@ -95,13 +96,13 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('knowledge_base 新增失敗:', error.message)
+      logger.error('knowledge_base 新增失敗:', error.message)
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
     return NextResponse.json(data)
   } catch (error) {
-    console.error('API POST /api/line/knowledge 錯誤:', error)
+    logger.error('API POST /api/line/knowledge 錯誤:', error)
     return NextResponse.json({ error: '系統錯誤' }, { status: 500 })
   }
 }

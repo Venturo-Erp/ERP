@@ -156,29 +156,11 @@ export function useTourOperations(params: UseTourOperationsParams) {
             return
           }
           const departure_date = new Date(newTour.departure_date)
-          let generatedCode = await tourService.generateTourCode(
+          code = await tourService.generateTourCode(
             cityCode,
             departure_date,
             newTour.isSpecial
           )
-
-          // 部門代號前綴（如 JY-CNX250501A）
-          if (newTour.department_id) {
-            try {
-              const { supabase } = await import('@/lib/supabase/client')
-              const { data: dept } = await supabase
-                .from('departments')
-                .select('code')
-                .eq('id', newTour.department_id)
-                .single()
-              if (dept?.code) {
-                generatedCode = `${dept.code}-${generatedCode}`
-              }
-            } catch {
-              // 查不到部門就不加前綴
-            }
-          }
-          code = generatedCode
         }
 
         // 🔧 核心表架構：直接使用前端傳來的 countryId，不查詢
@@ -212,7 +194,6 @@ export function useTourOperations(params: UseTourOperationsParams) {
           controller_id: isProposalOrTemplate ? undefined : newTour.controller_id || undefined,
           // SSOT：航班屬於旅遊團「行程編輯」分頁，開團時不寫入 outbound_flight / return_flight
           workspace_id: workspaceId,
-          department_id: newTour.department_id || undefined,
           tour_service_type: newTour.tour_service_type || 'tour_group',
         }
 

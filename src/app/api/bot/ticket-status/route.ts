@@ -172,21 +172,23 @@ export async function GET(request: NextRequest) {
     const daysAhead = parseInt(searchParams.get('days') || '14', 10)
     const workspaceId = searchParams.get('workspace_id')
 
+    // 🔒 強制必填 workspace_id、避免整表跨租戶掃描
+    if (!workspaceId) {
+      return ApiError.validation('workspace_id 必填')
+    }
+
     const today = new Date()
     const futureDate = addDays(today, daysAhead)
 
     // 查詢未來 N 天出發的團
-    let toursQuery = supabase
+    const toursQuery = supabase
       .from('tours')
       .select('id, code, name, departure_date')
+      .eq('workspace_id', workspaceId)
       .gte('departure_date', format(today, 'yyyy-MM-dd'))
       .lte('departure_date', format(futureDate, 'yyyy-MM-dd'))
       .neq('status', '取消')
       .order('departure_date', { ascending: true })
-
-    if (workspaceId) {
-      toursQuery = toursQuery.eq('workspace_id', workspaceId)
-    }
 
     const { data: tours, error: toursError } = await toursQuery
 
@@ -209,6 +211,7 @@ export async function GET(request: NextRequest) {
     const { data: orders, error: ordersError } = await supabase
       .from('orders')
       .select('id, code, tour_id, contact_person, sales_person, assistant')
+      .eq('workspace_id', workspaceId)
       .in('tour_id', tourIds)
       .neq('status', 'cancelled')
 
@@ -232,6 +235,7 @@ export async function GET(request: NextRequest) {
       .select(
         'id, order_id, chinese_name, pnr, ticket_number, ticketing_deadline, flight_self_arranged'
       )
+      .eq('workspace_id', workspaceId)
       .in('order_id', orderIds)
 
     if (membersError) {
@@ -384,12 +388,15 @@ export async function POST(request: NextRequest) {
 
     // 發送到指定頻道
     if (channel_id) {
-      // 先查詢頻道的 workspace_id
-      const { data: channelData } = await supabase
+      // 先查詢頻道的 workspace_id（若有指定 workspace_id 則驗證頻道屬於該 workspace）
+      let channelQuery = supabase
         .from('channels')
         .select('workspace_id')
         .eq('id', channel_id)
-        .single()
+      if (workspace_id) {
+        channelQuery = channelQuery.eq('workspace_id', workspace_id)
+      }
+      const { data: channelData } = await channelQuery.single()
 
       const channelWorkspaceId = channelData?.workspace_id
 
@@ -700,9 +707,12 @@ export async function PATCH(request: NextRequest) {
     const supabase = getSupabaseAdminClient()
     const validation = await validateBody(request, ticketStatusPatchSchema)
     if (!validation.success) return validation.error
-    const { member_ids, order_id, flight_self_arranged } = validation.data
+    const { workspace_id, member_ids, order_id, flight_self_arranged } = validation.data
 
-    let query = supabase.from('order_members').update({ flight_self_arranged })
+    let query = supabase
+      .from('order_members')
+      .update({ flight_self_arranged })
+      .eq('workspace_id', workspace_id)
 
     if (member_ids && member_ids.length > 0) {
       query = query.in('id', member_ids)

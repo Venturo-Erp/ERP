@@ -15,8 +15,8 @@ import { updateOrder } from '@/data'
 import type { Order } from '@/stores/types'
 import { X } from 'lucide-react'
 import { logger } from '@/lib/utils/logger'
+import { COMP_ORDERS_LABELS } from '../constants/labels'
 import { useEligibleEmployees } from '@/data/hooks/useEligibleEmployees'
-import { useTranslations } from 'next-intl'
 
 interface OrderEditDialogProps {
   open: boolean
@@ -26,8 +26,6 @@ interface OrderEditDialogProps {
 }
 
 export function OrderEditDialog({ open, onOpenChange, order, level = 2 }: OrderEditDialogProps) {
-  const t = useTranslations('orders')
-
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState({
     contact_person: '',
@@ -63,8 +61,8 @@ export function OrderEditDialog({ open, onOpenChange, order, level = 2 }: OrderE
       })
       onOpenChange(false)
     } catch (error) {
-      logger.error(t('common.ordereditdialog更新訂單失敗'), error)
-      alert(error instanceof Error ? error.message : t('common.更新訂單失敗_請稍後再試'))
+      logger.error(COMP_ORDERS_LABELS.OrderEditDialog_更新訂單失敗, error)
+      alert(error instanceof Error ? error.message : COMP_ORDERS_LABELS.更新訂單失敗_請稍後再試)
     } finally {
       setIsSubmitting(false)
     }
@@ -88,12 +86,12 @@ export function OrderEditDialog({ open, onOpenChange, order, level = 2 }: OrderE
           {/* 聯絡人 */}
           <div>
             <label className="text-sm font-medium text-morandi-primary">
-              {t('common.label7009')}
+              {COMP_ORDERS_LABELS.LABEL_7009}
             </label>
             <Input
               value={formData.contact_person}
               onChange={e => setFormData(prev => ({ ...prev, contact_person: e.target.value }))}
-              placeholder={t('common.輸入聯絡人姓名')}
+              placeholder={COMP_ORDERS_LABELS.輸入聯絡人姓名}
               className="mt-1"
               required
             />
@@ -103,7 +101,7 @@ export function OrderEditDialog({ open, onOpenChange, order, level = 2 }: OrderE
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="text-sm font-medium text-morandi-primary">
-                {t('common.label8362')}
+                {COMP_ORDERS_LABELS.LABEL_8362}
                 {formData.contact_person?.trim() && (
                   <span className="text-morandi-red ml-1">*</span>
                 )}
@@ -115,8 +113,8 @@ export function OrderEditDialog({ open, onOpenChange, order, level = 2 }: OrderE
                 }))}
                 value={formData.sales_person}
                 onChange={value => setFormData(prev => ({ ...prev, sales_person: value }))}
-                placeholder={t('common.選擇業務人員')}
-                emptyMessage={t('common.找不到業務人員')}
+                placeholder={COMP_ORDERS_LABELS.選擇業務人員}
+                emptyMessage={COMP_ORDERS_LABELS.找不到業務人員}
                 showSearchIcon={true}
                 showClearButton={true}
                 className="mt-1"
@@ -125,7 +123,7 @@ export function OrderEditDialog({ open, onOpenChange, order, level = 2 }: OrderE
             </div>
             <div>
               <label className="text-sm font-medium text-morandi-primary">
-                {t('common.label7412')}
+                {COMP_ORDERS_LABELS.LABEL_7412}
               </label>
               <Combobox
                 options={assistants.map(emp => ({
@@ -134,8 +132,8 @@ export function OrderEditDialog({ open, onOpenChange, order, level = 2 }: OrderE
                 }))}
                 value={formData.assistant}
                 onChange={value => setFormData(prev => ({ ...prev, assistant: value }))}
-                placeholder={t('common.選擇助理')}
-                emptyMessage={t('common.找不到助理')}
+                placeholder={COMP_ORDERS_LABELS.選擇助理}
+                emptyMessage={COMP_ORDERS_LABELS.找不到助理}
                 showSearchIcon={true}
                 showClearButton={true}
                 className="mt-1"
@@ -154,14 +152,14 @@ export function OrderEditDialog({ open, onOpenChange, order, level = 2 }: OrderE
               className="gap-2"
             >
               <X size={16} />
-              {t('common.取消')}
+              {COMP_ORDERS_LABELS.取消}
             </Button>
             <Button
               type="submit"
               disabled={!formData.contact_person || isSubmitting}
               className="bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors"
             >
-              {isSubmitting ? t('common.儲存中') : t('common.儲存')}
+              {isSubmitting ? COMP_ORDERS_LABELS.儲存中 : COMP_ORDERS_LABELS.儲存}
             </Button>
           </div>
         </form>

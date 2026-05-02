@@ -61,6 +61,7 @@ export async function GET(_request: Request, { params }: RouteParams) {
       return ApiError.database(error.message)
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- 凍結模組（channels）、解凍重做時改具體型別
     const members = (data || []).map((member: Record<string, any>) => ({
       id: member.id as string,
       workspaceId: member.workspace_id as string,

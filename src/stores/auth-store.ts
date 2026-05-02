@@ -16,15 +16,14 @@ interface WorkspaceInfo {
 
 /**
  * 從 EmployeeRow + workspace 資訊 構建全站用 EmployeeFull
- * 權限決策統一從 role_tab_permissions 拿資格清單
+ * 權限不再儲存在 user 上、由 useMyCapabilities() 直接 query role_capabilities (2026-05-01)
  */
 function buildUserFromEmployee(
   employeeData: EmployeeRow,
   workspaceInfo: WorkspaceInfo,
-  options?: { mustChangePassword?: boolean; rolePermissions?: string[] }
+  options?: { mustChangePassword?: boolean }
 ): EmployeeFull {
-  const userRoles = (employeeData.roles || []) as UserRole[]
-  const mergedPermissions = options?.rolePermissions || []
+  const userRoles = ((employeeData as Record<string, unknown>).roles || []) as UserRole[]
 
   return {
     id: employeeData.id,
@@ -35,7 +34,7 @@ function buildUserFromEmployee(
     personal_info: (employeeData.personal_info ?? {}) as unknown as EmployeeFull['personal_info'],
     job_info: (employeeData.job_info ?? {}) as unknown as EmployeeFull['job_info'],
     salary_info: (employeeData.salary_info ?? {}) as unknown as EmployeeFull['salary_info'],
-    permissions: mergedPermissions,
+    role_id: (employeeData as Record<string, unknown>).role_id as string | null | undefined,
     roles: userRoles as EmployeeFull['roles'],
     attendance: (employeeData.attendance ?? {
       leave_records: [],
@@ -57,12 +56,11 @@ function buildUserFromEmployee(
 interface AuthState {
   user: EmployeeFull | null
   isAuthenticated: boolean
-  isAdmin: boolean // Added isAdmin flag
   sidebarCollapsed: boolean
   _hasHydrated: boolean
 
   // Methods
-  setUser: (user: EmployeeFull | null, isAdmin?: boolean) => void
+  setUser: (user: EmployeeFull | null) => void
   logout: () => void
   validateLogin: (
     username: string,
@@ -80,14 +78,11 @@ export const useAuthStore = create<AuthState>()(
     (set, get) => ({
       user: null,
       isAuthenticated: false,
-      isAdmin: false, // Initial state
       sidebarCollapsed: true,
       _hasHydrated: false,
 
-      setUser: (user, adminFlag?: boolean) => {
-        const isAuthenticated = !!user
-        const isAdmin = adminFlag ?? get().isAdmin ?? false
-        set({ user, isAuthenticated, isAdmin })
+      setUser: (user) => {
+        set({ user, isAuthenticated: !!user })
       },
 
       logout: async () => {
@@ -113,7 +108,6 @@ export const useAuthStore = create<AuthState>()(
         set({
           user: null,
           isAuthenticated: false,
-          isAdmin: false,
         })
       },
 
@@ -141,13 +135,11 @@ export const useAuthStore = create<AuthState>()(
             return { success: false, message: errMsg || '帳號或密碼錯誤' }
           }
 
-          const { employee, workspace, authEmail, permissions, isAdmin, mustChangePassword } =
+          const { employee, workspace, authEmail, mustChangePassword } =
             validateResult.data as {
               employee: EmployeeRow
               workspace: { id: string; code: string; name: string | null; type: string | null }
               authEmail: string
-              permissions: string[]
-              isAdmin: boolean
               mustChangePassword: boolean
             }
 
@@ -162,7 +154,7 @@ export const useAuthStore = create<AuthState>()(
             return { success: false, message: '帳號或密碼錯誤' }
           }
 
-          // 3. 確保 Auth 同步（處理 RLS 所需的 supabase_user_id）
+          // 3. 確保 Auth 同步（處理 RLS 所需的 user_id）
           await ensureAuthSync({
             employeeId: employee.id,
             workspaceId: employee.workspace_id ?? undefined,
@@ -175,12 +167,11 @@ export const useAuthStore = create<AuthState>()(
               code: workspace.code,
               name: workspace.name ?? undefined,
               type: (workspace.type as EmployeeFull['workspace_type']) ?? undefined,
-            },
-            { rolePermissions: permissions }
+            }
           )
 
-          get().setUser(user, isAdmin)
-          logger.log(`✅ 登入成功: ${employee.display_name} (admin: ${isAdmin})`)
+          get().setUser(user)
+          logger.log(`✅ 登入成功: ${employee.display_name}`)
           return { success: true, mustChangePassword: mustChangePassword === true }
         } catch (error) {
           logger.error('💥 Login validation error:', error)
@@ -196,7 +187,7 @@ export const useAuthStore = create<AuthState>()(
           const { supabase } = await import('@/lib/supabase/client')
 
           // 使用 maybeSingle() 而不是 single()，避免 RLS 返回 0 筆時拋錯
-          // 這可能發生在 supabase_user_id 還沒同步時
+          // 這可能發生在 user_id 還沒同步時
           const { data, error } = await supabase
             .from('employees')
             .select(
@@ -219,15 +210,13 @@ export const useAuthStore = create<AuthState>()(
           }
 
           // 保留現有 workspace 資訊（workspace 本身極少變、登入時已寫入）
-          // 保留現有權限（從登入時的 JWT 取得、refreshUserData 不重算）
           const updatedUser = buildUserFromEmployee(
             employeeData,
             {
               code: currentUser.workspace_code,
               name: currentUser.workspace_name,
               type: currentUser.workspace_type,
-            },
-            { rolePermissions: currentUser.permissions }
+            }
           )
           get().setUser(updatedUser)
         } catch (error) {
@@ -245,7 +234,6 @@ export const useAuthStore = create<AuthState>()(
       partialize: state => ({
         user: state.user,
         isAuthenticated: state.isAuthenticated,
-        isAdmin: state.isAdmin, // Persist isAdmin
         sidebarCollapsed: state.sidebarCollapsed,
       }),
       onRehydrateStorage: () => state => {

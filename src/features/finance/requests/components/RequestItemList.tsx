@@ -18,8 +18,8 @@ import {
   getDefaultSubjectByCategory,
 } from '../../hooks/useAccountingSubjects'
 import { CurrencyCell } from '@/components/table-cells'
+import { REQUEST_DETAIL_DIALOG_LABELS, REQUEST_ITEM_LIST_LABELS } from '../../constants/labels'
 import { InlineEditTable, type InlineEditColumn } from '@/components/ui/inline-edit-table'
-import { useTranslations } from 'next-intl'
 
 interface SupplierOption {
   id: string
@@ -211,8 +211,6 @@ export function EditableRequestItemList({
   onTransfer,
   hideDateColumn = false,
 }: EditableRequestItemListProps) {
-  const t = useTranslations('finance')
-
   const total_amount = items.reduce((sum, item) => sum + item.unit_price * item.quantity, 0)
 
   // 會計科目選項
@@ -223,7 +221,7 @@ export function EditableRequestItemList({
     .filter(s => s.type === 'supplier')
     .map(s => ({
       value: s.id,
-      label: s.name || t('requestDetailDialog.未命名'),
+      label: s.name || REQUEST_DETAIL_DIALOG_LABELS.未命名,
     }))
 
   // 無 focus 樣式的 input class（使用 globals.css 的 input-no-focus）
@@ -270,7 +268,7 @@ export function EditableRequestItemList({
     },
     {
       key: 'category',
-      label: t('requestItemList.label2946'),
+      label: REQUEST_ITEM_LIST_LABELS.LABEL_2946,
       width: '104px',
       render: ({ row, onUpdate }) => (
         <Select
@@ -302,7 +300,7 @@ export function EditableRequestItemList({
     },
     {
       key: 'supplier',
-      label: t('requestItemList.label561'),
+      label: REQUEST_ITEM_LIST_LABELS.LABEL_561,
       render: ({ row, onUpdate }) => (
         <Combobox
           options={supplierOptions}
@@ -317,7 +315,7 @@ export function EditableRequestItemList({
               selected_id: value,
             })
           }}
-          placeholder={t('requestItemList.選擇供應商')}
+          placeholder={REQUEST_ITEM_LIST_LABELS.選擇供應商}
           className="input-no-focus [&_input]:h-9 [&_input]:px-1 [&_input]:bg-transparent"
           onCreate={onCreateSupplier}
           showSearchIcon={false}
@@ -327,7 +325,7 @@ export function EditableRequestItemList({
     },
     {
       key: 'description',
-      label: t('requestItemList.label6008'),
+      label: REQUEST_ITEM_LIST_LABELS.LABEL_6008,
       render: ({ row, onUpdate }) => (
         <div className="flex items-center gap-1">
           <DeferredInput
@@ -381,7 +379,7 @@ export function EditableRequestItemList({
     },
     {
       key: 'unit_price',
-      label: t('requestItemList.label9413'),
+      label: REQUEST_ITEM_LIST_LABELS.LABEL_9413,
       width: '96px',
       align: 'right',
       render: ({ row, onUpdate }) => (
@@ -396,7 +394,7 @@ export function EditableRequestItemList({
     },
     {
       key: 'quantity',
-      label: t('requestItemList.quantity'),
+      label: REQUEST_ITEM_LIST_LABELS.QUANTITY,
       width: '64px',
       align: 'center',
       render: ({ row, onUpdate }) => (
@@ -411,7 +409,7 @@ export function EditableRequestItemList({
     },
     {
       key: 'subtotal',
-      label: t('requestItemList.label832'),
+      label: REQUEST_ITEM_LIST_LABELS.LABEL_832,
       width: '112px',
       align: 'right',
       render: ({ row }) => (
@@ -425,7 +423,7 @@ export function EditableRequestItemList({
 
   return (
     <InlineEditTable<RequestItem>
-      title={t('requestItemList.label475')}
+      title={REQUEST_ITEM_LIST_LABELS.LABEL_475}
       rows={items}
       columns={visibleColumns}
       onUpdate={(index, patch) => updateItem(items[index].id, patch)}
@@ -433,7 +431,7 @@ export function EditableRequestItemList({
       onRemove={disabled ? undefined : index => removeItem(items[index].id)}
       canRemove={() => items.length > 1}
       readonly={disabled}
-      addLabel={t('requestItemList.新增項目')}
+      addLabel={REQUEST_ITEM_LIST_LABELS.新增項目}
       headerExtra={
         disabled && onTransfer ? (
           <Button

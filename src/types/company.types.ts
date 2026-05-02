@@ -39,25 +39,31 @@ export interface Company {
   notes: string | null
 
   // 系統欄位
+  is_active: boolean
   created_at: string
   updated_at: string
   created_by: string | null
+  updated_by: string | null
 }
 
 export interface CompanyContact {
   id: string
-  company_id: string
+  workspace_id: string
+  company_id: string | null
 
   // 聯絡人資訊
   name: string
+  english_name: string | null
   title: string | null // 職稱
   department: string | null // 部門
   phone: string | null
   mobile: string | null
   email: string | null
+  line_id: string | null
 
   // 主要聯絡人標記
   is_primary: boolean
+  is_active: boolean
 
   // 備註
   notes: string | null
@@ -65,10 +71,15 @@ export interface CompanyContact {
   // 系統欄位
   created_at: string
   updated_at: string
+  created_by: string | null
+  updated_by: string | null
 }
 
 // 建立/更新資料的輸入型別
-export type CreateCompanyData = Omit<Company, 'id' | 'created_at' | 'updated_at' | 'created_by'> & {
+export type CreateCompanyData = Omit<
+  Company,
+  'id' | 'created_at' | 'updated_at' | 'created_by' | 'updated_by' | 'is_active'
+> & {
   payment_terms?: number
   payment_method?: 'transfer' | 'cash' | 'check' | 'credit_card'
   credit_limit?: number
@@ -77,7 +88,10 @@ export type CreateCompanyData = Omit<Company, 'id' | 'created_at' | 'updated_at'
 
 export type UpdateCompanyData = Partial<CreateCompanyData>
 
-export type CreateCompanyContactData = Omit<CompanyContact, 'id' | 'created_at' | 'updated_at'> & {
+export type CreateCompanyContactData = Omit<
+  CompanyContact,
+  'id' | 'created_at' | 'updated_at' | 'created_by' | 'updated_by' | 'is_active'
+> & {
   is_primary?: boolean
 }
 

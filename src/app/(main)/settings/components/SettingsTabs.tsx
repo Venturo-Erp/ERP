@@ -1,7 +1,7 @@
 'use client'
 
 import { usePathname, useRouter } from 'next/navigation'
-import { useAuthStore } from '@/stores/auth-store'
+import { useMyCapabilities } from '@/lib/permissions/useMyCapabilities'
 
 interface TabConfig {
   value: string
@@ -18,7 +18,8 @@ const ALL_TABS: TabConfig[] = [
 export function SettingsTabs() {
   const pathname = usePathname()
   const router = useRouter()
-  const { isAdmin } = useAuthStore()
+  const { has } = useMyCapabilities()
+  const isAdmin = has('platform.is_admin')
 
   // 依權限過濾 — 沒有管理員資格看不到公司設定
   const tabs = ALL_TABS.filter(tab => !tab.adminOnly || isAdmin)

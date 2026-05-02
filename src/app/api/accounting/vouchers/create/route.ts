@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
     const { data: empRow } = await supabase
       .from('employees')
       .select('id')
-      .or(`id.eq.${session.user.id},supabase_user_id.eq.${session.user.id}`)
+      .or(`user_id.eq.${session.user.id},id.eq.${session.user.id}`)
       .limit(1)
       .maybeSingle()
     const employeeId = empRow?.id ?? null

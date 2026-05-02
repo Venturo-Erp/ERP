@@ -11,7 +11,7 @@ import { useCallback } from 'react'
 import { supabase } from '@/lib/supabase/client'
 import { logger } from '@/lib/utils/logger'
 import type { ProcessedFile } from '../../types/order-member.types'
-import { useTranslations } from 'next-intl'
+import { COMP_ORDERS_LABELS } from '../../constants/labels'
 
 interface OcrCustomerData {
   name?: string
@@ -84,7 +84,7 @@ export function usePassportOcr(): UsePassportOcrReturn {
       try {
         errorText = await response.text()
       } catch (e) {
-        errorText = t('common.無法讀取回應內容')
+        errorText = COMP_ORDERS_LABELS.無法讀取回應內容
       }
       const statusCode = response.status
       const statusMessage = response.statusText
@@ -92,7 +92,7 @@ export function usePassportOcr(): UsePassportOcrReturn {
         `OCR API 回應錯誤: status=${statusCode}, statusText=${statusMessage}, body=${errorText.slice(0, 500)}`
       )
       throw new Error(
-        `OCR 辨識失敗 (${statusCode}): ${errorText.slice(0, 100) || statusMessage || t('common.未知錯誤')}`
+        `OCR 辨識失敗 (${statusCode}): ${errorText.slice(0, 100) || statusMessage || COMP_ORDERS_LABELS.未知錯誤}`
       )
     }
 
@@ -105,7 +105,7 @@ export function usePassportOcr(): UsePassportOcrReturn {
 
     // 如果 API 返回錯誤
     if (!json.success) {
-      throw new Error(json.error || t('common.ocr辨識失敗'))
+      throw new Error(json.error || COMP_ORDERS_LABELS.OCR_辨識失敗)
     }
 
     // 向後相容：如果直接返回資料格式
@@ -146,7 +146,7 @@ export function usePassportOcr(): UsePassportOcrReturn {
         return {
           isDuplicate: false,
           needsConfirmation: true,
-          reason: t('common.護照號碼重複'),
+          reason: COMP_ORDERS_LABELS.護照號碼重複,
           matchType: 'passport_match',
           matchedMember: matched,
           confirmMessage: `${displayName} 已存在（護照號碼相同）。是否更新護照照片和資料？`,
@@ -160,7 +160,7 @@ export function usePassportOcr(): UsePassportOcrReturn {
         return {
           isDuplicate: false,
           needsConfirmation: true,
-          reason: t('common.身分證號重複'),
+          reason: COMP_ORDERS_LABELS.身分證號重複,
           matchType: 'exact',
           matchedMember: matched,
           confirmMessage: `${displayName} 已存在（身分證號相同）。是否更新護照照片？（新照片可能更清楚）`,
@@ -176,7 +176,7 @@ export function usePassportOcr(): UsePassportOcrReturn {
         return {
           isDuplicate: false,
           needsConfirmation: true,
-          reason: t('common.姓名_生日重複'),
+          reason: COMP_ORDERS_LABELS.姓名_生日重複,
           matchType: 'name_birthday_match',
           matchedMember: matched,
           confirmMessage: `${displayName} 已存在（姓名+生日相同）。護照號碼不同，是否換了新護照？要更新嗎？`,
@@ -193,7 +193,7 @@ export function usePassportOcr(): UsePassportOcrReturn {
           return {
             isDuplicate: false,
             needsConfirmation: true,
-            reason: t('common.發現同名成員_無生日資料'),
+            reason: COMP_ORDERS_LABELS.發現同名成員_無生日資料,
             matchType: 'name_only',
             matchedMember: nameOnlyMatch,
             confirmMessage: `${displayName} 已存在（同名，無生日資料）。是否為同一人？要更新嗎？`,

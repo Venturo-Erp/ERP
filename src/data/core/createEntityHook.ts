@@ -75,7 +75,12 @@ const WORKSPACE_SCOPED_TABLES = [
   'visas',
   'todos',
   'calendar_events',
-  'tour_addons',
+  // === 企業客戶（B2B）===
+  'companies',
+  'company_contacts',
+  'company_announcements',
+  // === 金流串接 log ===
+  'linkpay_logs',
   // === 溝通頻道 ===
   'channels',
   'messages',
@@ -132,11 +137,10 @@ function getCurrentUserContext(): {
     if (authData) {
       const parsed = JSON.parse(authData)
       const user = parsed?.state?.user
-      const isAdmin = parsed?.state?.isAdmin
-      const userRole = isAdmin ? 'admin' : 'staff'
+      // userRole 不再用於權限決策、僅供 SWR cache scoping (2026-05-01)
       return {
         workspaceId: user?.workspace_id || null,
-        userRole: userRole as UserRole,
+        userRole: 'staff' as UserRole,
         userId: user?.id || null,
       }
     }
@@ -209,13 +213,12 @@ export function createEntityHook<T extends BaseEntity>(
     const isAuthenticated = useAuthStore(state => state.isAuthenticated)
     const hasHydrated = useAuthStore(state => state._hasHydrated)
 
-    const isAdmin = useAuthStore(state => state.isAdmin)
-
     return {
       isReady: hasHydrated && isAuthenticated && !!user?.id,
       hasHydrated,
       workspaceId: user?.workspace_id || null,
-      userRole: isAdmin ? ('admin' as UserRole) : ('staff' as UserRole),
+      // userRole 已不再用於權限決策、僅供 SWR cache scoping (2026-05-01)
+      userRole: 'staff' as UserRole,
     }
   }
 
