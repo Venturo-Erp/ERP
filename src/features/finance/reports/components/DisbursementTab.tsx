@@ -149,11 +149,13 @@ export function DisbursementTab({ dateRange }: DisbursementTabProps) {
       render: value => <DateCell date={value as string} />,
     },
     {
-      key: 'payment_request_ids',
+      key: 'request_count',
       label: '請款單數',
       width: '100',
-      render: value => (
-        <span className="text-sm">{Array.isArray(value) ? value.length : 0} 筆</span>
+      render: (_value, row) => (
+        <span className="text-sm">
+          {paymentRequests.filter(pr => pr.disbursement_order_id === row.id).length} 筆
+        </span>
       ),
     },
     {

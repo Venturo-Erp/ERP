@@ -64,12 +64,10 @@ export function DisbursementDetailDialog({
       .then(({ data }) => setPaymentMethods(data || []))
   }, [open, order, user?.workspace_id])
 
-  // 取得此出納單包含的請款單
+  // 取得此出納單包含的請款單（FK 反查）
   const includedRequests = useMemo(() => {
-    if (!order?.payment_request_ids) return []
-    return order.payment_request_ids
-      .map(id => payment_requests.find(r => r.id === id))
-      .filter(Boolean) as PaymentRequest[]
+    if (!order?.id) return []
+    return payment_requests.filter(r => r.disbursement_order_id === order.id) as PaymentRequest[]
   }, [order, payment_requests])
 
   // 分類：團體請款 vs 公司請款
@@ -117,8 +115,8 @@ export function DisbursementDetailDialog({
         confirmed_at: new Date().toISOString(),
       })
 
-      // 更新所有請款單狀態為 billed
-      const requestIds = order.payment_request_ids || []
+      // 更新所有請款單狀態為 billed（從 FK 反查）
+      const requestIds = includedRequests.map(r => r.id)
       const tour_ids_to_recalculate = new Set<string>()
       for (const requestId of requestIds) {
         await updatePaymentRequestApi(requestId, {
@@ -219,7 +217,7 @@ export function DisbursementDetailDialog({
                 </div>
                 <InfoItem
                   label={DISBURSEMENT_LABELS.請款單數}
-                  value={`${order.payment_request_ids?.length || 0} ${DISBURSEMENT_LABELS.筆}`}
+                  value={`${includedRequests.length} ${DISBURSEMENT_LABELS.筆}`}
                 />
                 <div>
                   <p className="text-xs text-morandi-muted mb-1">

@@ -73,11 +73,22 @@ export function useCreateDisbursement({
   const [statusFilter, setStatusFilter] = useState('all')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // 編輯模式：初始化表單值
+  // 編輯模式：初始化表單值（從 FK 反查綁定的請款單 IDs）
   useEffect(() => {
     if (editingOrder) {
       setDisbursementDate(editingOrder.disbursement_date || formatDate(getNextThursday()))
-      setSelectedRequestIds(editingOrder.payment_request_ids || [])
+      ;(async () => {
+        const { data, error } = await supabase
+          .from('payment_requests')
+          .select('id')
+          .eq('disbursement_order_id', editingOrder.id)
+        if (error) {
+          logger.error('讀取出納單綁定請款失敗:', error)
+          setSelectedRequestIds([])
+          return
+        }
+        setSelectedRequestIds((data || []).map(r => r.id))
+      })()
     }
   }, [editingOrder])
 
@@ -182,7 +193,6 @@ export function useCreateDisbursement({
             code: orderNumber,
             order_number: orderNumber,
             disbursement_date: disbursementDate,
-            payment_request_ids: selectedRequestIds,
             amount: selectedAmount,
             status: 'pending',
             workspace_id: user?.workspace_id || null,
@@ -220,10 +230,13 @@ export function useCreateDisbursement({
 
       if (!data) throw new Error('建立出納單失敗（未預期）')
 
-      // 更新請款單狀態為 confirmed（已加入出納單，尚未出帳）
+      // 把選中的請款單綁到此出納單（FK 標籤式）+ 改 status=confirmed
       const tour_ids_to_recalculate = new Set<string>()
       for (const id of selectedRequestIds) {
-        await supabase.from('payment_requests').update({ status: 'confirmed' }).eq('id', id)
+        await supabase
+          .from('payment_requests')
+          .update({ disbursement_order_id: data.id, status: 'confirmed' })
+          .eq('id', id)
         const req = pendingRequests.find(r => r.id === id)
         if (req?.tour_id) {
           tour_ids_to_recalculate.add(req.tour_id)
@@ -264,17 +277,23 @@ export function useCreateDisbursement({
 
     setIsSubmitting(true)
     try {
-      const oldIds = new Set(editingOrder.payment_request_ids || [])
+      // 從 FK 反查現有綁定、跟 selectedRequestIds 算 diff
+      const { data: currentLinks, error: linkErr } = await supabase
+        .from('payment_requests')
+        .select('id')
+        .eq('disbursement_order_id', editingOrder.id)
+      if (linkErr) throw linkErr
+      const existingIds = (currentLinks || []).map(r => r.id)
+      const oldIds = new Set(existingIds)
       const newIds = new Set(selectedRequestIds)
 
       // 找出新增和移除的請款單
       const addedIds = selectedRequestIds.filter(id => !oldIds.has(id))
-      const removedIds = (editingOrder.payment_request_ids || []).filter(id => !newIds.has(id))
+      const removedIds = existingIds.filter(id => !newIds.has(id))
 
       // 如果出帳日期改變，重新生成出納單號
       const dateChanged = editingOrder.disbursement_date !== disbursementDate
       let updatedFields: Record<string, unknown> = {
-        payment_request_ids: selectedRequestIds,
         amount: selectedAmount,
         disbursement_date: disbursementDate,
       }
@@ -284,23 +303,29 @@ export function useCreateDisbursement({
         updatedFields = { ...updatedFields, order_number: newOrderNumber, code: newOrderNumber }
       }
 
-      // 更新出納單
+      // 更新出納單金額/日期/編號（不寫 array、FK 端負責綁定）
       await updateDisbursementOrderApi(editingOrder.id, updatedFields)
 
       const tour_ids_to_recalculate = new Set<string>()
 
-      // 新增的請款單：狀態改為 confirmed（加入出納單，尚未出帳）
+      // 新增的請款單：綁到此出納單 + status=confirmed
       for (const id of addedIds) {
-        await supabase.from('payment_requests').update({ status: 'confirmed' }).eq('id', id)
+        await supabase
+          .from('payment_requests')
+          .update({ disbursement_order_id: editingOrder.id, status: 'confirmed' })
+          .eq('id', id)
         const req = pendingRequests.find(r => r.id === id)
         if (req?.tour_id) {
           tour_ids_to_recalculate.add(req.tour_id)
         }
       }
 
-      // 移除的請款單：狀態改回 pending（從出納單移除，回到待處理）
+      // 移除的請款單：解除綁定（FK = null）+ status=pending
       for (const id of removedIds) {
-        await supabase.from('payment_requests').update({ status: 'pending' }).eq('id', id)
+        await supabase
+          .from('payment_requests')
+          .update({ disbursement_order_id: null, status: 'pending' })
+          .eq('id', id)
         const req = pendingRequests.find(r => r.id === id)
         if (req?.tour_id) {
           tour_ids_to_recalculate.add(req.tour_id)

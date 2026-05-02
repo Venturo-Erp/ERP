@@ -9,7 +9,17 @@ type DisbursementOrderInsert = Database['public']['Tables']['disbursement_orders
 type DisbursementOrderUpdate = Database['public']['Tables']['disbursement_orders']['Update']
 
 const DO_COLS =
-  'id, order_number, status, payment_request_ids, amount, payment_method, bank_account, confirmed_by, confirmed_at, notes, workspace_id, created_at, created_by, updated_at, disbursement_date, pdf_url, code'
+  'id, order_number, status, amount, payment_method, bank_account, confirmed_by, confirmed_at, notes, workspace_id, created_at, created_by, updated_at, disbursement_date, pdf_url, code'
+
+// 透過 FK 取得出納單關聯的 request IDs（取代之前的 payment_request_ids array）
+async function fetchRequestIdsByOrder(orderId: string): Promise<string[]> {
+  const { data, error } = await supabase
+    .from('payment_requests')
+    .select('id')
+    .eq('disbursement_order_id', orderId)
+  if (error) throw new Error(error.message)
+  return (data || []).map(r => r.id)
+}
 import { ValidationError } from '@/core/errors/app-errors'
 import { logger } from '@/lib/utils/logger'
 import { PAYMENTS_LABELS } from '../constants/labels'
@@ -65,10 +75,6 @@ class DisbursementOrderService extends BaseService<DisbursementOrder> {
   }
 
   protected validate(data: Partial<DisbursementOrder>): void {
-    if (data.payment_request_ids && data.payment_request_ids.length === 0) {
-      throw new ValidationError('payment_request_ids', PAYMENTS_LABELS.出納單必須包含至少一個請款單)
-    }
-
     if (data.amount !== undefined && data.amount < 0) {
       throw new ValidationError('amount', PAYMENTS_LABELS.總金額不能為負數)
     }
@@ -149,7 +155,6 @@ class DisbursementOrderService extends BaseService<DisbursementOrder> {
     const orderData = {
       order_number: orderNumber,
       disbursement_date: disbursementDate,
-      payment_request_ids: [...paymentRequestIds],
       amount: totalAmount,
       status: 'pending' as const,
       notes: note,
@@ -162,9 +167,9 @@ class DisbursementOrderService extends BaseService<DisbursementOrder> {
 
     const order = await this.create(orderData)
 
-    // 更新請款單狀態為 billed（已加入出納單）
+    // 把選中的請款單綁到此出納單（FK 標籤式）+ 改 status=billed
     for (const requestId of paymentRequestIds) {
-      await this.updatePaymentRequestStatus(requestId, 'billed')
+      await this.linkRequestToOrder(requestId, order.id, 'billed')
     }
 
     return order
@@ -195,7 +200,7 @@ class DisbursementOrderService extends BaseService<DisbursementOrder> {
     })
 
     // 更新所有關聯請款單狀態為 confirmed（含 rollback）
-    const requestIds = order.payment_request_ids || []
+    const requestIds = await fetchRequestIdsByOrder(orderId)
     const updatedRequestIds: string[] = []
 
     try {
@@ -242,8 +247,8 @@ class DisbursementOrderService extends BaseService<DisbursementOrder> {
       throw new Error(PAYMENTS_LABELS.只能修改待處理的出納單)
     }
 
-    // 從 Supabase 取得請款單並計算總金額
-    const existingIds = order.payment_request_ids || []
+    // 用 FK 算新的綁定總額（既有 + 新加入）
+    const existingIds = await fetchRequestIdsByOrder(orderId)
     const newRequestIds = [...existingIds, ...requestIds]
 
     const { data: requests, error } = await supabase
@@ -254,16 +259,15 @@ class DisbursementOrderService extends BaseService<DisbursementOrder> {
 
     const newTotalAmount = (requests || []).reduce((sum, r) => sum + (Number(r.amount) || 0), 0)
 
-    // 更新出納單
+    // 更新出納單金額（不寫 array、FK 端負責綁定）
     await this.update(orderId, {
-      payment_request_ids: newRequestIds,
       amount: newTotalAmount,
       updated_at: this.now(),
     })
 
-    // 更新請款單狀態為 billed（已加入出納單）
+    // 把新加入的 request 綁到此出納單 + status=billed
     for (const requestId of requestIds) {
-      await this.updatePaymentRequestStatus(requestId, 'billed')
+      await this.linkRequestToOrder(requestId, orderId, 'billed')
     }
   }
 
@@ -280,11 +284,10 @@ class DisbursementOrderService extends BaseService<DisbursementOrder> {
       throw new Error(PAYMENTS_LABELS.只能修改待處理的出納單)
     }
 
-    // 計算新的總金額
-    const existingIds = order.payment_request_ids || []
+    // 計算新的總金額：用 FK 重新查、扣掉要移除的那筆
+    const existingIds = await fetchRequestIdsByOrder(orderId)
     const newRequestIds = existingIds.filter(id => id !== requestId)
 
-    // 從 Supabase 取得請款單並計算總金額
     let newTotalAmount = 0
     if (newRequestIds.length > 0) {
       const { data: requests, error } = await supabase
@@ -295,15 +298,14 @@ class DisbursementOrderService extends BaseService<DisbursementOrder> {
       newTotalAmount = (requests || []).reduce((sum, r) => sum + (Number(r.amount) || 0), 0)
     }
 
-    // 更新出納單
+    // 更新出納單金額
     await this.update(orderId, {
-      payment_request_ids: newRequestIds,
       amount: newTotalAmount,
       updated_at: this.now(),
     })
 
-    // 將請款單狀態改回 confirmed
-    await this.updatePaymentRequestStatus(requestId, 'confirmed')
+    // 解除綁定（FK 設 null）+ 狀態改回 confirmed
+    await this.linkRequestToOrder(requestId, null, 'confirmed')
   }
 
   /**
@@ -334,6 +336,27 @@ class DisbursementOrderService extends BaseService<DisbursementOrder> {
     const { error } = await supabase
       .from('payment_requests')
       .update({
+        status,
+        updated_at: this.now(),
+      })
+      .eq('id', requestId)
+    if (error) throw new Error(error.message)
+    await invalidatePaymentRequests()
+  }
+
+  /**
+   * 綁定 / 解除綁定請款單到出納單（FK 標籤式）+ 同步 status
+   * orderId=null → 解除綁定
+   */
+  private async linkRequestToOrder(
+    requestId: string,
+    orderId: string | null,
+    status: PaymentRequest['status']
+  ): Promise<void> {
+    const { error } = await supabase
+      .from('payment_requests')
+      .update({
+        disbursement_order_id: orderId,
         status,
         updated_at: this.now(),
       })

@@ -34,9 +34,9 @@ export function DisbursementPrintDialog({
   const [paymentRequests, setPaymentRequests] = useState<PaymentRequest[]>([])
   const [paymentRequestItems, setPaymentRequestItems] = useState<PaymentRequestItem[]>([])
 
-  // 直接從 Supabase 取得關聯的請款單和項目
+  // 直接從 Supabase 取得關聯的請款單和項目（FK 反查、不再讀 array）
   useEffect(() => {
-    if (!open || !order?.payment_request_ids?.length) {
+    if (!open || !order?.id) {
       setPaymentRequests([])
       setPaymentRequestItems([])
       return
@@ -45,21 +45,21 @@ export function DisbursementPrintDialog({
     const fetchData = async () => {
       setLoading(true)
       try {
-        const requestIds = order.payment_request_ids || []
-        if (requestIds.length === 0) {
-          setPaymentRequests([])
-          setPaymentRequestItems([])
-          return
-        }
-
-        // 取得請款單
+        // 取得綁定到此出納單的請款單
         const { data: requests } = await supabase
           .from('payment_requests')
           .select(
             'id, code, request_number, request_type, request_category, amount, total_amount, status, tour_id, tour_code, tour_name, supplier_name, expense_type, notes, workspace_id, created_at, created_by_name'
           )
-          .in('id', requestIds)
+          .eq('disbursement_order_id', order.id)
           .limit(500)
+
+        const requestIds = (requests || []).map(r => r.id)
+        if (requestIds.length === 0) {
+          setPaymentRequests([])
+          setPaymentRequestItems([])
+          return
+        }
 
         // 取得請款項目
         const { data: items } = await supabase

@@ -60,38 +60,22 @@ export function DisbursementPage() {
   const [isPrintDialogOpen, setIsPrintDialogOpen] = useState(false)
   const [printOrder, setPrintOrder] = useState<DisbursementOrder | null>(null)
 
-  // 取得待出帳的請款單（狀態為 pending，且尚未加入任何出納單）
+  // 取得待出帳的請款單（狀態為 pending、且尚未綁到任何出納單）
+  // FK 標籤式：直接看 disbursement_order_id 是不是 NULL
   const pendingRequests = useMemo(() => {
-    // 收集所有已在出納單中的請款單 ID
-    const usedRequestIds = new Set<string>()
-    disbursement_orders.forEach(order => {
-      order.payment_request_ids?.forEach(id => usedRequestIds.add(id))
-    })
+    return payment_requests.filter(r => r.status === 'pending' && !r.disbursement_order_id)
+  }, [payment_requests])
 
-    // 只顯示「請款中」且「尚未加入出納單」的請款單
-    return payment_requests.filter(r => r.status === 'pending' && !usedRequestIds.has(r.id))
-  }, [payment_requests, disbursement_orders])
-
-  // 編輯模式用的請款單列表：pending + 目前編輯中出納單包含的 billed 請款單
+  // 編輯模式用的請款單列表：當前出納單綁定的 + pending 且未綁
   const editableRequests = useMemo(() => {
     if (!editingOrder) return pendingRequests
 
-    const editingIds = new Set(editingOrder.payment_request_ids || [])
-
-    // 收集其他出納單中的請款單 ID（排除當前編輯的）
-    const usedByOthers = new Set<string>()
-    disbursement_orders.forEach(order => {
-      if (order.id === editingOrder.id) return
-      order.payment_request_ids?.forEach(id => usedByOthers.add(id))
-    })
-
-    // 可選的請款單：
-    // 1. 屬於當前出納單的（billed 狀態，顯示為已勾選）
-    // 2. pending 且不在其他出納單中的
     return payment_requests.filter(
-      r => editingIds.has(r.id) || (r.status === 'pending' && !usedByOthers.has(r.id))
+      r =>
+        r.disbursement_order_id === editingOrder.id ||
+        (r.status === 'pending' && !r.disbursement_order_id)
     )
-  }, [editingOrder, pendingRequests, payment_requests, disbursement_orders])
+  }, [editingOrder, pendingRequests, payment_requests])
 
   // 表格欄位
   const columns = useMemo(
@@ -121,14 +105,18 @@ export function DisbursementPage() {
         ),
       },
       {
-        key: 'payment_request_ids' as const,
+        key: 'request_count' as const,
         label: DISBURSEMENT_LABELS.請款單數,
         width: '80px',
-        render: (value: unknown) => (
-          <div className="text-center">
-            {Array.isArray(value) ? value.length : 0} {DISBURSEMENT_LABELS.筆}
-          </div>
-        ),
+        render: (_value: unknown, row: unknown) => {
+          const orderId = (row as DisbursementOrder).id
+          return (
+            <div className="text-center">
+              {payment_requests.filter(r => r.disbursement_order_id === orderId).length}{' '}
+              {DISBURSEMENT_LABELS.筆}
+            </div>
+          )
+        },
       },
       {
         key: 'amount' as const,
@@ -199,15 +187,12 @@ export function DisbursementPage() {
           confirmed_at: new Date().toISOString(),
         })
 
-        // 更新所有請款單狀態為 billed
-        const requestIds = order.payment_request_ids || []
+        // 更新所有請款單狀態為 billed（從 FK 反查）
+        const linkedRequests = payment_requests.filter(r => r.disbursement_order_id === order.id)
         const tour_ids_to_recalculate = new Set<string>()
-        for (const requestId of requestIds) {
-          await updatePaymentRequestApi(requestId, {
-            status: 'billed',
-          })
-          const req = payment_requests.find(r => r.id === requestId)
-          if (req?.tour_id) {
+        for (const req of linkedRequests) {
+          await updatePaymentRequestApi(req.id, { status: 'billed' })
+          if (req.tour_id) {
             tour_ids_to_recalculate.add(req.tour_id)
           }
         }

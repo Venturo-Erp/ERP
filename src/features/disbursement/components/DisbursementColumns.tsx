@@ -179,9 +179,11 @@ export function useCurrentOrderColumns({ currentOrder, onRemove }: UseCurrentOrd
 interface UseHistoryColumnsProps {
   onPrintPDF: (order: DisbursementOrder) => void
   getEmployeeName?: (id: string) => string
+  /** 用於計算每張出納單綁多少請款單（FK 反查、SaaS 化標籤式綁定） */
+  payment_requests: PaymentRequest[]
 }
 
-export function useHistoryColumns({ onPrintPDF, getEmployeeName }: UseHistoryColumnsProps) {
+export function useHistoryColumns({ onPrintPDF, getEmployeeName, payment_requests }: UseHistoryColumnsProps) {
   return useMemo<TableColumn[]>(
     () => [
       {
@@ -205,11 +207,11 @@ export function useHistoryColumns({ onPrintPDF, getEmployeeName }: UseHistoryCol
         render: (value: unknown) => <CurrencyCell amount={value as number} />,
       },
       {
-        key: 'payment_request_ids',
+        key: 'request_count',
         label: DISBURSEMENT_LABELS.請款單數,
-        render: (value: unknown) => (
+        render: (_value: unknown, row: unknown) => (
           <div className="text-center">
-            {(value as string[]).length}
+            {payment_requests.filter(r => r.disbursement_order_id === (row as HistoryTableRow).id).length}
             {DISBURSEMENT_LABELS.筆}
           </div>
         ),

@@ -2010,7 +2010,6 @@ export type Database = {
           notes: string | null
           order_number: string | null
           payment_method: string | null
-          payment_request_ids: string[] | null
           pdf_url: string | null
           refund_id: string | null
           status: string
@@ -2034,7 +2033,6 @@ export type Database = {
           notes?: string | null
           order_number?: string | null
           payment_method?: string | null
-          payment_request_ids?: string[] | null
           pdf_url?: string | null
           refund_id?: string | null
           status?: string
@@ -2058,7 +2056,6 @@ export type Database = {
           notes?: string | null
           order_number?: string | null
           payment_method?: string | null
-          payment_request_ids?: string[] | null
           pdf_url?: string | null
           refund_id?: string | null
           status?: string
@@ -4161,6 +4158,7 @@ export type Database = {
           created_at: string | null
           created_by: string | null
           created_by_name: string | null
+          disbursement_order_id: string | null
           expense_type: string | null
           id: string
           is_special_billing: boolean | null
@@ -4198,6 +4196,7 @@ export type Database = {
           created_at?: string | null
           created_by?: string | null
           created_by_name?: string | null
+          disbursement_order_id?: string | null
           expense_type?: string | null
           id?: string
           is_special_billing?: boolean | null
@@ -4235,6 +4234,7 @@ export type Database = {
           created_at?: string | null
           created_by?: string | null
           created_by_name?: string | null
+          disbursement_order_id?: string | null
           expense_type?: string | null
           id?: string
           is_special_billing?: boolean | null
@@ -4280,6 +4280,13 @@ export type Database = {
             columns: ['approved_by']
             isOneToOne: false
             referencedRelation: 'employees'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'payment_requests_disbursement_order_id_fkey'
+            columns: ['disbursement_order_id']
+            isOneToOne: false
+            referencedRelation: 'disbursement_orders'
             referencedColumns: ['id']
           },
           {
@@ -5261,13 +5268,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: 'orders_invoice_summary'
             referencedColumns: ['order_id']
-          },
-          {
-            foreignKeyName: 'receipts_payment_method_id_fkey'
-            columns: ['payment_method_id']
-            isOneToOne: false
-            referencedRelation: 'payment_methods'
-            referencedColumns: ['id']
           },
           {
             foreignKeyName: 'receipts_tour_id_fkey'

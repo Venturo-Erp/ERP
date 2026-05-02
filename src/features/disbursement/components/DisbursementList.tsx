@@ -22,7 +22,7 @@ import { PaymentRequestItem } from '@/stores/types'
 import { usePendingColumns, useCurrentOrderColumns, useHistoryColumns } from './DisbursementColumns'
 import { cn } from '@/lib/utils'
 import { DateCell, CurrencyCell } from '@/components/table-cells'
-import { useEmployeeDictionary } from '@/data'
+import { useEmployeeDictionary, usePaymentRequests } from '@/data'
 import { DISBURSEMENT_LABELS } from './constants/labels'
 
 interface PendingListProps {
@@ -125,7 +125,7 @@ function CurrentOrderList({
           </h3>
           <p className="text-sm text-morandi-secondary">
             {DISBURSEMENT_LABELS.DISBURSEMENT_DATE_PREFIX}
-            {currentOrder.disbursement_date} • {(currentOrder.payment_request_ids || []).length}{' '}
+            {currentOrder.disbursement_date} • {requests.filter(r => r.disbursement_order_id === currentOrder.id).length}{' '}
             {DISBURSEMENT_LABELS.PAYMENT_REQUESTS_SUFFIX}
           </p>
         </div>
@@ -196,12 +196,13 @@ interface HistoryListProps {
 
 function HistoryList({ data, searchTerm, onPrintPDF }: HistoryListProps) {
   const { get: getEmployee } = useEmployeeDictionary()
+  const { items: payment_requests } = usePaymentRequests()
   const getEmployeeName = (id: string) => {
     if (!id) return '-'
     const emp = getEmployee(id)
     return emp?.chinese_name || emp?.display_name || '-'
   }
-  const columns = useHistoryColumns({ onPrintPDF, getEmployeeName })
+  const columns = useHistoryColumns({ onPrintPDF, getEmployeeName, payment_requests })
 
   return (
     <EnhancedTable

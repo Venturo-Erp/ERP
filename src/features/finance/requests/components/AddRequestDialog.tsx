@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo, useCallback, useRef } from 'react'
-import { Plus, X, AlertCircle, Trash2, Save, Layers } from 'lucide-react'
+import { Plus, X, AlertCircle, Trash2, Save, Layers, Undo2 } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
@@ -593,6 +593,46 @@ export function AddRequestDialog({
     } catch (error) {
       logger.error('刪除請款單失敗:', error)
       await alert(REQUEST_DETAIL_DIALOG_LABELS.刪除請款單失敗, 'error')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // === Edit mode: 解除確認（confirmed → pending、可重編） ===
+  const handleUnconfirm = async () => {
+    if (!currentRequest || isSubmitting) return
+
+    // 已被列入出納單 → 擋下、要先撤出納單才能反悔（資料一致性）
+    const linked = (currentRequest as unknown as { disbursement_order_id?: string | null })
+      .disbursement_order_id
+    if (linked) {
+      await alert(
+        '這張請款單已被列入某張出納單。請先把它從那張出納單拿出來、再來解除確認。',
+        'warning'
+      )
+      return
+    }
+
+    const confirmed = await confirm(
+      `確定要解除確認請款單 ${currentRequest.code}？解除後可重新編輯金額/供應商等欄位、再重新確認。`,
+      { title: '解除確認', type: 'warning' }
+    )
+    if (!confirmed) return
+
+    setIsSubmitting(true)
+    try {
+      const { error } = await supabase
+        .from('payment_requests')
+        .update({ status: 'pending' })
+        .eq('id', currentRequest.id)
+      if (error) throw error
+
+      await invalidatePaymentRequests()
+      await alert(`請款單 ${currentRequest.code} 已解除確認、可重新編輯`, 'success')
+      onOpenChange(false)
+    } catch (error) {
+      logger.error('解除確認失敗:', error)
+      await alert('解除確認失敗、請稍後再試', 'error')
     } finally {
       setIsSubmitting(false)
     }
@@ -1440,6 +1480,17 @@ export function AddRequestDialog({
                       {isSubmitting ? '儲存中...' : '儲存'}
                     </Button>
                   </>
+                ) : currentRequest?.status === 'confirmed' ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleUnconfirm}
+                    disabled={isSubmitting}
+                    className="gap-2 text-morandi-secondary border-morandi-secondary hover:bg-morandi-container/30"
+                  >
+                    <Undo2 size={16} />
+                    {isSubmitting ? '處理中...' : '解除確認'}
+                  </Button>
                 ) : null
               ) : (
                 <Button

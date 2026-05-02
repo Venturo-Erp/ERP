@@ -61,6 +61,7 @@ export interface PaymentRequest {
   paid_at?: string | null
   paid_by?: string | null
   payment_method_id?: string | null // 付款方式 ID（關聯 payment_methods 表）
+  disbursement_order_id?: string | null // 所屬出納單 FK（1-to-N、SaaS 化標籤式綁定）
   created_by?: string | null // 請款人 ID
   created_by_name?: string | null // 請款人姓名（快照）
   workspace_id?: string
@@ -120,7 +121,6 @@ export interface DisbursementOrder {
   id: string
   order_number: string | null // CD-2024001
   disbursement_date: string | null // 出帳日期 (預設本週四)
-  payment_request_ids: string[] | null // 關聯的請款單ID陣列
   amount: number // 總金額 (自動加總)
   status: string | null // pending, confirmed, paid, cancelled
   notes?: string | null // 出納備註
