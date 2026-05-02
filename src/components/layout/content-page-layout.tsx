@@ -42,10 +42,8 @@ interface ContentPageLayoutProps {
   searchPlaceholder?: string
 
   // ========== Header 結構化按鈕（SSOT） ==========
-  /** 第一/唯一按鈕（header-outline 樣式） */
+  /** 主操作按鈕（header-outline 樣式） */
   primaryAction?: HeaderActionConfig
-  /** 第二按鈕（header-filled 樣式、視覺上排在 primary 右邊） */
-  secondaryAction?: HeaderActionConfig
 
   // ========== 返回按鈕 ==========
   /** 是否顯示返回按鈕 */
@@ -126,7 +124,6 @@ export function ContentPageLayout({
   onSearchChange,
   searchPlaceholder,
   primaryAction,
-  secondaryAction,
   showBackButton,
   onBack,
   headerActions,
@@ -161,7 +158,6 @@ export function ContentPageLayout({
         activeTab={activeTab}
         onTabChange={onTabChange}
         primaryAction={primaryAction}
-        secondaryAction={secondaryAction}
         showBackButton={showBackButton}
         onBack={onBack}
         actions={headerActions}

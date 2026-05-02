@@ -196,7 +196,7 @@ export default function CalendarPage() {
             <CalendarSettingsDialog />
           </div>
         }
-        secondaryAction={{
+        primaryAction={{
           label: CALENDAR_LABELS.ADD_EVENT,
           icon: Plus,
           onClick: () => {

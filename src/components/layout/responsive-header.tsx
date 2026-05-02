@@ -20,11 +20,11 @@ import { COMP_LAYOUT_LABELS } from './constants/labels'
 /**
  * Header 結構化按鈕設定
  *
- * SSOT 規則：頁面右上角的按鈕一律走這個結構、不准在 layout 裡塞 raw <Button>。
- * 樣式由 ResponsiveHeader 統一決定、頁面端只給意圖（label / icon / onClick）。
+ * SSOT 規則：頁面右上角主操作走這個結構、樣式由 ResponsiveHeader 統一畫成 header-outline
+ * （漸層 + shadow，配方來源 dashboard 「小工具設定」）。頁面端只給意圖（label / icon / onClick）。
  *
- * - primaryAction（第一/唯一按鈕）→ header-outline 樣式（漸層 + shadow）
- * - secondaryAction（第二按鈕）→ header-filled 樣式（實底金）、視覺上排在 primary 右邊
+ * 同頁有第二顆輔助按鈕（匯入 / 群組 / 設定 等）時、走 actions / headerActions escape hatch、
+ * 視覺上仍套 <Button variant="header-outline">、保持全站按鈕視覺一致。
  */
 export interface HeaderActionConfig {
   label: string
@@ -59,10 +59,8 @@ interface ResponsiveHeaderProps {
   }[]
   activeTab?: string
   onTabChange?: (value: string) => void
-  /** 第一/唯一按鈕（header-outline 樣式） */
+  /** 主操作按鈕（header-outline 樣式） */
   primaryAction?: HeaderActionConfig
-  /** 第二按鈕（header-filled 樣式、排在 primary 右邊） */
-  secondaryAction?: HeaderActionConfig
   children?: React.ReactNode
   /** Escape hatch：給「不是按鈕」的元件用（date input / filter / select）。不准放 Button。 */
   actions?: React.ReactNode
@@ -325,7 +323,7 @@ export const ResponsiveHeader = memo(function ResponsiveHeader(props: Responsive
           </div>
         )}
 
-        {/* Header 按鈕：primary（第一/唯一）+ secondary（第二）— 結構化、由 ResponsiveHeader 統一畫 */}
+        {/* Header 主操作按鈕：結構化、由 ResponsiveHeader 統一畫成 header-outline */}
         {props.primaryAction && (
           <Button
             variant="header-outline"
@@ -336,17 +334,6 @@ export const ResponsiveHeader = memo(function ResponsiveHeader(props: Responsive
           >
             {props.primaryAction.icon && <props.primaryAction.icon />}
             {props.primaryAction.label}
-          </Button>
-        )}
-        {props.secondaryAction && (
-          <Button
-            variant="header-filled"
-            size="sm"
-            onClick={props.secondaryAction.onClick}
-            disabled={props.secondaryAction.disabled}
-          >
-            {props.secondaryAction.icon && <props.secondaryAction.icon />}
-            {props.secondaryAction.label}
           </Button>
         )}
 

@@ -234,12 +234,18 @@ export const SuppliersPage: React.FC = () => {
       searchTerm={searchQuery}
       onSearchChange={setSearchQuery}
       searchPlaceholder={LABELS.searchPlaceholder}
+      headerActions={
+        // 主操作（新增供應商）走 primaryAction、輔助（匯入）走 escape hatch、樣式套 header-outline 維持視覺一致
+        <Button
+          variant="header-outline"
+          size="sm"
+          onClick={() => setIsImportDialogOpen(true)}
+        >
+          <FileSpreadsheet size={16} />
+          <span className="hidden sm:inline">{SUPPLIER_IMPORT_LABELS.btn_select_file}</span>
+        </Button>
+      }
       primaryAction={{
-        label: SUPPLIER_IMPORT_LABELS.btn_select_file,
-        icon: FileSpreadsheet,
-        onClick: () => setIsImportDialogOpen(true),
-      }}
-      secondaryAction={{
         label: LABELS.addSupplier,
         icon: Plus,
         onClick: handleOpenAddDialog,

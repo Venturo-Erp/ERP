@@ -69,10 +69,8 @@ interface ListPageLayoutProps<T extends object> {
   onStatusTabChange?: (tab: string) => void
 
   // ========== Header 結構化按鈕（SSOT） ==========
-  /** 第一/唯一按鈕（header-outline 樣式） */
+  /** 主操作按鈕（header-outline 樣式） */
   primaryAction?: HeaderActionConfig
-  /** 第二按鈕（header-filled 樣式、視覺上排在 primary 右邊） */
-  secondaryAction?: HeaderActionConfig
 
   // ========== 自訂擴展 ==========
   /** Header 右側 escape hatch：給「不是按鈕」的元件用（date input / filter / select）。不准放 Button。 */
@@ -158,7 +156,6 @@ export function ListPageLayout<T extends object>({
   activeStatusTab: externalActiveTab,
   onStatusTabChange,
   primaryAction,
-  secondaryAction,
   headerActions,
   actionsWidth,
   beforeTable,
@@ -216,7 +213,6 @@ export function ListPageLayout<T extends object>({
         activeTab={activeStatusTab}
         onTabChange={handleTabChange}
         primaryAction={primaryAction}
-        secondaryAction={secondaryAction}
         actions={headerActions}
         badge={badge}
       >

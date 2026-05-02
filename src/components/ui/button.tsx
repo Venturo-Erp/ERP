@@ -33,16 +33,11 @@ const buttonVariants = cva(
           'text-morandi-red border border-morandi-red/30 hover:bg-morandi-red/10',
         'morandi-destructive-ghost':
           'text-morandi-red hover:text-morandi-red hover:bg-morandi-red/10',
-        // Header 主/唯一按鈕：頁面右上角第一顆按鈕統一用這個（漸層 + shadow + rounded-xl）
+        // Header 按鈕統一樣式：頁面右上角所有按鈕都用這個（漸層 + shadow + rounded-xl）
         // 配方來源：dashboard 「小工具設定」按鈕
-        // SSOT 規則：只能由 ResponsiveHeader 的 primaryAction 路徑觸發、頁面端不直接呼叫
+        // SSOT 規則：主操作走 ResponsiveHeader 的 primaryAction、輔助按鈕走 headerActions escape hatch、視覺一致
         'header-outline':
           'bg-gradient-to-br from-card to-morandi-container/30 border border-morandi-gold/30 text-morandi-primary hover:from-morandi-gold/10 hover:to-morandi-gold/20 hover:border-morandi-gold/50 shadow-md hover:shadow-lg rounded-xl transition-all',
-        // Header 第二按鈕：頁面右上角同時有兩顆按鈕時、第二顆用這個（實底金 + rounded-lg）
-        // 配方來源：calendar 「新增事項」按鈕
-        // SSOT 規則：只能由 ResponsiveHeader 的 secondaryAction 路徑觸發、頁面端不直接呼叫
-        'header-filled':
-          'bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 rounded-lg font-medium transition-all',
       },
       size: {
         default: 'h-10 px-4 py-2',

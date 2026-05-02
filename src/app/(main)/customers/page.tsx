@@ -332,23 +332,27 @@ export default function CustomersPage() {
       onSearchChange={setSearchQuery}
       searchPlaceholder="搜尋姓名 / 電話 / 公司名"
       headerActions={
-        // 客戶群組是 navigation 不算「主操作」、留 escape hatch；匯入/新增走結構化
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => router.push('/customer-groups')}
-          className="gap-2"
-        >
-          <Users size={16} />
-          <span className="hidden sm:inline">{L.btn_groups}</span>
-        </Button>
+        // 主操作走 primaryAction、其他兩顆輔助按鈕（群組 / 匯入）走 escape hatch、樣式套 header-outline 維持視覺一致
+        <div className="flex items-center gap-2">
+          <Button
+            variant="header-outline"
+            size="sm"
+            onClick={() => router.push('/customer-groups')}
+          >
+            <Users size={16} />
+            <span className="hidden sm:inline">{L.btn_groups}</span>
+          </Button>
+          <Button
+            variant="header-outline"
+            size="sm"
+            onClick={() => setIsImportDialogOpen(true)}
+          >
+            <FileSpreadsheet size={16} />
+            <span className="hidden sm:inline">{CUSTOMER_IMPORT_LABELS.btn_select_file}</span>
+          </Button>
+        </div>
       }
       primaryAction={{
-        label: CUSTOMER_IMPORT_LABELS.btn_select_file,
-        icon: FileSpreadsheet,
-        onClick: () => setIsImportDialogOpen(true),
-      }}
-      secondaryAction={{
         label: L.btn_add_customer,
         icon: Plus,
         onClick: () => setIsAddDialogOpen(true),
