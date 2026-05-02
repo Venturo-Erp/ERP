@@ -79,6 +79,7 @@ import {
   Sparkles,
   LayoutTemplate,
   Bot,
+  LogOut,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/stores/auth-store'
@@ -339,8 +340,13 @@ const personalToolItems: MenuItem[] = []
 
 export function Sidebar() {
   const pathname = usePathname()
-  const { user } = useAuthStore()
+  const { user, logout } = useAuthStore()
   const { isFeatureEnabled, enabledFeatures } = useWorkspaceFeatures()
+
+  const handleLogout = async () => {
+    await logout()
+    window.location.href = '/login'
+  }
   const { canReadAnyInModule } = useMyCapabilities()
   const [mounted, setMounted] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false) // 點擊固定展開
@@ -574,6 +580,32 @@ export function Sidebar() {
           })}
         </ul>
       </nav>
+
+      {/* 底部使用者區：名字 + 登出（William 2026-05-02 拍板） */}
+      {user && (
+        <div className="shrink-0 border-t border-border">
+          <div className="h-14 flex items-center">
+            <div className="w-16 flex justify-center shrink-0">
+              <User size={22} weight="duotone" className="text-morandi-secondary" />
+            </div>
+            {showExpanded && (
+              <>
+                <div className="flex-1 text-sm text-morandi-primary whitespace-nowrap overflow-hidden">
+                  {user.display_name || user.chinese_name || user.english_name || '使用者'}
+                </div>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  title="登出"
+                  className="px-3 py-2 text-morandi-secondary hover:text-morandi-red transition-colors"
+                >
+                  <LogOut size={16} />
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
