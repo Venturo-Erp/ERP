@@ -8,6 +8,68 @@ export const TODO_STATUS_LABELS = {
   cancelled: '取消',
 }
 
+// 優先度（5 級對應 1-5 數值）
+export const TODO_PRIORITY_LABELS: Record<1 | 2 | 3 | 4 | 5, string> = {
+  5: '緊急',
+  4: '高',
+  3: '中',
+  2: '低',
+  1: '很低',
+}
+
+// Dialog header / sidebar / quick actions 文字（中央化、避免散落）
+export const TODO_DIALOG_LABELS = {
+  inListPrefix: '在列表',
+  inListSuffix: '中',
+  description: '描述',
+  quickActions: '業務快捷操作',
+  relatedERP: '關聯 ERP 資料',
+  coverImage: '點擊設定封面圖片',
+  erpPlaceholderHint: 'ERP 即時資料整合 — 開發中',
+  tour: '旅遊團',
+  customerOrder: '客戶訂單',
+  totalQuote: '報價總額',
+  customerPaid: '客戶已付',
+  supplierPayable: '待付供應商',
+  estimatedProfit: '預估毛利',
+  notLinked: '未關聯',
+  notAssigned: '未指派',
+  notSet: '未設定',
+  status: '狀態',
+  priority: '優先度',
+  deadline: '到期日',
+  assignee: '負責人',
+  related: '關聯',
+  businessActions: '業務動作',
+  actions: '動作',
+  copy: '複製',
+  delete: '刪除',
+  share: '共享',
+  label: '標籤',
+  createInvoice: '建立請款單',
+  confirmReceipt: '確認收款',
+  bookTicket: '訂票作業',
+  preTrip: '行前說明',
+  comingSoon: '敬請期待',
+  noSubtasks: '尚無子任務',
+  subtasksProgress: '進度',
+  addSubtask: '新增子任務...',
+  quickAddSubtasks: '快速新增業務子任務',
+}
+
+// 子任務常用預設項目（旅行社業務常見任務）
+// 順序：一站式作業先（開團/建單/請款/收款）→ 操作面（訂房/航班/簽證）→ 收尾（行前）
+export const PRESET_BUSINESS_SUBTASKS = [
+  '開團',
+  '建立訂單',
+  '請款作業',
+  '收款確認',
+  '訂房確認',
+  '確認航班',
+  '簽證辦理',
+  '行前說明',
+] as const
+
 // 通用標籤
 export const COMMON_LABELS = {
   shared: '共享',
