@@ -1,0 +1,91 @@
+/accounting/period-closing                                   | auth=0 | cap=0 | admin=0 | ws_filter=12 | 
+/accounting/vouchers/auto-create                             | auth=2 | cap=0 | admin=2 | ws_filter=17 | 
+/accounting/vouchers/create                                  | auth=0 | cap=0 | admin=0 | ws_filter=7 | 
+/ai-settings                                                 | auth=3 | cap=0 | admin=3 | ws_filter=3 | 
+/ai-workflow/execute                                         | auth=0 | cap=0 | admin=0 | ws_filter=0 | 
+/ai/edit-image                                               | auth=2 | cap=0 | admin=0 | ws_filter=0 | 
+/ai/generate-itinerary-copy                                  | auth=2 | cap=0 | admin=0 | ws_filter=0 | 
+/ai/suggest-attraction                                       | auth=2 | cap=0 | admin=0 | ws_filter=0 | 
+/airports                                                    | auth=2 | cap=0 | admin=2 | ws_filter=0 | 
+/amadeus-totp/current                                        | auth=2 | cap=0 | admin=2 | ws_filter=0 | 
+/amadeus-totp                                                | auth=2 | cap=0 | admin=2 | ws_filter=0 | 
+/amadeus-totp/setup                                          | auth=2 | cap=0 | admin=2 | ws_filter=0 | 
+/auth/change-password                                        | auth=2 | cap=0 | admin=2 | ws_filter=1 | 
+/auth/layout-context                                         | auth=0 | cap=0 | admin=0 | ws_filter=2 | 
+/auth/logout                                                 | auth=0 | cap=0 | admin=0 | ws_filter=0 | public
+/auth/reset-employee-password                                | auth=2 | cap=0 | admin=2 | ws_filter=5 | 
+/auth/sync-employee                                          | auth=0 | cap=0 | admin=2 | ws_filter=11 | public
+/auth/validate-login                                         | auth=0 | cap=0 | admin=2 | ws_filter=2 | public
+/bank-accounts                                               | auth=0 | cap=0 | admin=0 | ws_filter=2 | 
+/bot-notification                                            | auth=0 | cap=0 | admin=2 | ws_filter=7 | 
+/bot/ticket-status                                           | auth=0 | cap=0 | admin=4 | ws_filter=18 | 
+/contracts/[id]/pdf                                          | auth=0 | cap=0 | admin=0 | ws_filter=0 | 
+/contracts/create                                            | auth=0 | cap=0 | admin=0 | ws_filter=1 | 
+/contracts/list                                              | auth=0 | cap=0 | admin=0 | ws_filter=0 | 
+/contracts/members                                           | auth=0 | cap=0 | admin=0 | ws_filter=0 | 
+/contracts/paper-sign                                        | auth=0 | cap=0 | admin=0 | ws_filter=0 | 
+/contracts/sign                                              | auth=0 | cap=0 | admin=2 | ws_filter=0 | public
+/cron/process-tasks                                          | auth=0 | cap=0 | admin=0 | ws_filter=0 | public
+/cron/ticket-status                                          | auth=0 | cap=0 | admin=2 | ws_filter=0 | public
+/customers/by-line                                           | auth=0 | cap=0 | admin=2 | ws_filter=2 | public
+/customers/match                                             | auth=0 | cap=0 | admin=2 | ws_filter=1 | public
+/d/[code]                                                    | auth=0 | cap=0 | admin=3 | ws_filter=1 | public
+/employees/by-ref/[ref]                                      | auth=2 | cap=0 | admin=3 | ws_filter=5 | 
+/employees/create                                            | auth=2 | cap=0 | admin=2 | ws_filter=6 | 
+/fetch-image                                                 | auth=2 | cap=0 | admin=0 | ws_filter=0 | 
+/finance/accounting-subjects                                 | auth=0 | cap=0 | admin=0 | ws_filter=1 | 
+/finance/expense-categories                                  | auth=0 | cap=0 | admin=0 | ws_filter=5 | 
+/finance/payment-methods                                     | auth=0 | cap=0 | admin=0 | ws_filter=4 | 
+/gemini/generate-image                                       | auth=2 | cap=0 | admin=0 | ws_filter=0 | 
+/health/db                                                   | auth=0 | cap=0 | admin=2 | ws_filter=0 | public
+/health/detailed                                             | auth=0 | cap=0 | admin=2 | ws_filter=0 | public
+/health                                                      | auth=0 | cap=0 | admin=2 | ws_filter=0 | public
+/itineraries/[id]                                            | auth=2 | cap=0 | admin=2 | ws_filter=7 | public
+/itineraries/by-tour/[tourId]                                | auth=2 | cap=0 | admin=3 | ws_filter=2 | public
+/itineraries/generate                                        | auth=2 | cap=0 | admin=2 | ws_filter=11 | public
+/job-roles/selector-fields/[fieldId]                         | auth=0 | cap=0 | admin=0 | ws_filter=2 | 
+/job-roles/selector-fields                                   | auth=0 | cap=0 | admin=0 | ws_filter=3 | 
+/line/connections                                            | auth=3 | cap=0 | admin=3 | ws_filter=3 | 
+/line/conversations                                          | auth=3 | cap=0 | admin=3 | ws_filter=4 | 
+/line/groups                                                 | auth=0 | cap=0 | admin=0 | ws_filter=1 | 
+/line/knowledge/[id]                                         | auth=3 | cap=0 | admin=3 | ws_filter=4 | 
+/line/knowledge                                              | auth=3 | cap=0 | admin=3 | ws_filter=4 | 
+/line/messages/[conversationId]                              | auth=3 | cap=0 | admin=3 | ws_filter=7 | 
+/line/push                                                   | auth=0 | cap=0 | admin=0 | ws_filter=0 | 
+/line/send-insurance                                         | auth=0 | cap=0 | admin=2 | ws_filter=1 | 
+/line/send-requirement                                       | auth=0 | cap=0 | admin=0 | ws_filter=0 | 
+/line/send-transport-quote                                   | auth=0 | cap=0 | admin=0 | ws_filter=0 | 
+/line/send-transport                                         | auth=0 | cap=0 | admin=0 | ws_filter=0 | 
+/line/setup                                                  | auth=3 | cap=0 | admin=3 | ws_filter=11 | 
+/line/test-ai                                                | auth=0 | cap=0 | admin=0 | ws_filter=0 | 
+/line/webhook/[workspaceId]                                  | auth=0 | cap=0 | admin=4 | ws_filter=14 | public
+/line/webhook                                                | auth=0 | cap=0 | admin=9 | ws_filter=8 | public
+/linkpay                                                     | auth=2 | cap=0 | admin=2 | ws_filter=5 | 
+/linkpay/webhook                                             | auth=0 | cap=0 | admin=2 | ws_filter=8 | public
+/log-error                                                   | auth=2 | cap=0 | admin=0 | ws_filter=0 | 
+/meta/setup                                                  | auth=4 | cap=0 | admin=4 | ws_filter=9 | 
+/meta/webhook                                                | auth=0 | cap=0 | admin=2 | ws_filter=0 | public
+/ocr/passport/batch-reprocess                                | auth=3 | cap=0 | admin=4 | ws_filter=10 | 
+/ocr/passport                                                | auth=2 | cap=0 | admin=0 | ws_filter=0 | 
+/orders/create-from-booking                                  | auth=0 | cap=0 | admin=0 | ws_filter=3 | 
+/permissions/features                                        | auth=3 | cap=1 | admin=3 | ws_filter=9 | 
+/quotes/confirmation/customer                                | auth=0 | cap=0 | admin=3 | ws_filter=0 | public
+/quotes/confirmation/logs                                    | auth=2 | cap=0 | admin=2 | ws_filter=1 | 
+/quotes/confirmation/revoke                                  | auth=2 | cap=0 | admin=2 | ws_filter=0 | 
+/quotes/confirmation/send                                    | auth=2 | cap=0 | admin=2 | ws_filter=0 | 
+/quotes/confirmation/staff                                   | auth=2 | cap=0 | admin=2 | ws_filter=0 | 
+/roles/[roleId]                                              | auth=0 | cap=0 | admin=0 | ws_filter=0 | 
+/roles/[roleId]/tab-permissions                              | auth=0 | cap=10 | admin=0 | ws_filter=0 | 
+/roles                                                       | auth=0 | cap=0 | admin=0 | ws_filter=5 | 
+/settings/env                                                | auth=2 | cap=0 | admin=2 | ws_filter=0 | 
+/storage/upload                                              | auth=3 | cap=0 | admin=3 | ws_filter=5 | 
+/suppliers                                                   | auth=3 | cap=0 | admin=3 | ws_filter=2 | 
+/tasks/create                                                | auth=0 | cap=0 | admin=0 | ws_filter=1 | 
+/tenants/create                                              | auth=2 | cap=2 | admin=2 | ws_filter=19 | 
+/todo-columns                                                | auth=0 | cap=0 | admin=0 | ws_filter=3 | 
+/tours/by-code/[code]                                        | auth=0 | cap=0 | admin=2 | ws_filter=1 | 
+/transport/[id]/confirm                                      | auth=0 | cap=0 | admin=0 | ws_filter=0 | 
+/transport/send-booking                                      | auth=0 | cap=0 | admin=2 | ws_filter=0 | 
+/users/[userId]/role                                         | auth=2 | cap=0 | admin=0 | ws_filter=0 | 
+/workspaces/[id]                                             | auth=4 | cap=4 | admin=6 | ws_filter=8 | 
+/workspaces                                                  | auth=2 | cap=8 | admin=3 | ws_filter=9 | 
