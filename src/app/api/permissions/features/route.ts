@@ -4,12 +4,12 @@ import { getSupabaseAdminClient } from '@/lib/supabase/admin'
 import { getApiContext } from '@/lib/auth/get-api-context'
 
 // P003-A（2026-04-22 立 / 2026-05-01 改用新 capability 系統 / F2 改走 getApiContext）
-// 只有有 settings.tenants.write 的人才能動任何 workspace 的 features。
+// 只有有 platform.tenants.write 的人才能動任何 workspace 的 features。
 // 同 pattern 於 src/app/api/tenants/create/route.ts。
 async function requireTenantAdmin(): Promise<
   { ok: true; workspaceId: string } | { ok: false; response: NextResponse }
 > {
-  const ctx = await getApiContext({ capabilityCode: 'settings.tenants.write' })
+  const ctx = await getApiContext({ capabilityCode: 'platform.tenants.write' })
   if (!ctx.ok) {
     return {
       ok: false,

@@ -6,7 +6,7 @@
  * 三道 check 為單一 helper、避免 caller 各自重複寫。
  *
  * 用法：
- *   const ctx = await getApiContext('settings.tenants.write')
+ *   const ctx = await getApiContext('platform.tenants.write')
  *   if (!ctx.ok) return NextResponse.json({ error: ctx.error }, { status: ctx.status })
  *   const { workspace_id, employee_id, capabilities } = ctx
  */

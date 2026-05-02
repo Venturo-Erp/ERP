@@ -29,7 +29,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     const { hasCapabilityByCode } = await import('@/app/api/lib/check-capability')
     const canManageTenants = await hasCapabilityByCode(
       auth.data.employeeId,
-      'settings.tenants.write'
+      'platform.tenants.write'
     )
     if (!canManageTenants) {
       return NextResponse.json({ error: '不能讀取其他公司的租戶詳情' }, { status: 403 })
@@ -132,7 +132,7 @@ export async function DELETE(
   const { hasCapabilityByCode } = await import('@/app/api/lib/check-capability')
   const canManageTenants = await hasCapabilityByCode(
     auth.data.employeeId,
-    'settings.tenants.write'
+    'platform.tenants.write'
   )
   if (!canManageTenants) {
     return NextResponse.json({ error: '需租戶管理權限' }, { status: 403 })
