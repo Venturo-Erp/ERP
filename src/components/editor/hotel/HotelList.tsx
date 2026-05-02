@@ -3,11 +3,11 @@
 import React from 'react'
 import { Loader2 } from 'lucide-react'
 import { HotelCard } from './HotelCard'
-import type { LuxuryHotel } from '../HotelSelector'
+import type { HotelItem } from '../HotelSelector'
 import { COMP_EDITOR_LABELS } from '../constants/labels'
 
 interface HotelListProps {
-  hotels: LuxuryHotel[]
+  hotels: HotelItem[]
   loading: boolean
   selectedIds: Set<string>
   selectedCountryId: string

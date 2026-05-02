@@ -6,7 +6,7 @@
 
 1. **登入 Supabase Dashboard**
    - 前往：https://app.supabase.com
-   - 選擇專案：`pfqvdacxowpgfamuvnsn`
+   - 選擇專案：`wzvwmawpkapcmkfmkvav`
 
 2. **打開 SQL Editor**
    - 左側選單點選 "SQL Editor"

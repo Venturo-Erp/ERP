@@ -16,7 +16,7 @@ import { useHotelSelector } from './hooks/useHotelSelector'
 import { COMP_EDITOR_LABELS } from './constants/labels'
 
 // 飯店型別
-export interface LuxuryHotel {
+export interface HotelItem {
   id: string
   name: string
   name_en: string | null
@@ -44,7 +44,7 @@ interface HotelSelectorProps {
   onClose: () => void
   tourCountryName?: string
   tourCountryId?: string // 可直接用 country_id，優先於 tourCountryName
-  onSelect: (hotels: LuxuryHotel[]) => void
+  onSelect: (hotels: HotelItem[]) => void
 }
 
 export function HotelSelector({

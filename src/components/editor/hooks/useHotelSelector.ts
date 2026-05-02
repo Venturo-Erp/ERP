@@ -3,7 +3,7 @@
 import { useState, useMemo, useRef, useEffect } from 'react'
 import { supabase } from '@/lib/supabase/client'
 import { logger } from '@/lib/utils/logger'
-import type { LuxuryHotel } from '../HotelSelector'
+import type { HotelItem } from '../HotelSelector'
 
 // Supabase 查詢結果的型別（包含 join 的 regions 和 cities）
 interface HotelQueryResult {
@@ -74,7 +74,7 @@ export function useHotelSelector({
   const [selectedCityId, setSelectedCityId] = useState<string>('')
   const [selectedBrand, setSelectedBrand] = useState<string>('')
   const [searchQuery, setSearchQuery] = useState('')
-  const [hotels, setHotels] = useState<LuxuryHotel[]>([])
+  const [hotels, setHotels] = useState<HotelItem[]>([])
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(false)
   const [countries, setCountries] = useState<{ id: string; name: string }[]>([])
@@ -276,7 +276,7 @@ export function useHotelSelector({
 
         // 透過 unknown 中轉處理 Supabase 的複雜型別
         const formatted = ((data || []) as unknown as HotelQueryResult[]).map(
-          (item): LuxuryHotel => ({
+          (item): HotelItem => ({
             id: item.id,
             name: item.name,
             name_en: item.name_en,
@@ -342,11 +342,11 @@ export function useHotelSelector({
     setManualHotelName('')
   }
 
-  const handleManualAdd = (onSelect: (hotels: LuxuryHotel[]) => void, onClose: () => void) => {
+  const handleManualAdd = (onSelect: (hotels: HotelItem[]) => void, onClose: () => void) => {
     if (!manualHotelName.trim()) return
 
     // 創建一個臨時的飯店物件
-    const manualHotel: LuxuryHotel = {
+    const manualHotel: HotelItem = {
       id: `manual_${Date.now()}`,
       name: manualHotelName.trim(),
       name_en: null,

@@ -13,7 +13,7 @@
 ### 方式 1：使用 Supabase Dashboard（推薦）
 
 1. 登入 Supabase Dashboard: https://app.supabase.com
-2. 選擇你的專案：pfqvdacxowpgfamuvnsn
+2. 選擇你的專案：wzvwmawpkapcmkfmkvav
 3. 進入左側選單的 **SQL Editor**
 4. 點擊 **New Query**
 5. 複製 `20251026040000_create_user_data_tables.sql` 的完整內容並貼上
@@ -23,7 +23,7 @@
 
 ```bash
 # 確保 Supabase CLI 已連接到遠端專案
-supabase link --project-ref pfqvdacxowpgfamuvnsn
+supabase link --project-ref wzvwmawpkapcmkfmkvav
 
 # 應用 migration
 supabase db push

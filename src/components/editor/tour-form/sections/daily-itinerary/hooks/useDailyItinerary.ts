@@ -3,7 +3,7 @@
 import { useState, useRef, useMemo } from 'react'
 import { TourFormData } from '../../../types'
 import { AttractionWithCity, MealSelectorState } from '../types'
-import { LuxuryHotel } from '@/components/editor/HotelSelector'
+import { HotelItem } from '@/components/editor/HotelSelector'
 import { Restaurant, MichelinRestaurant } from '@/components/editor/RestaurantSelector'
 import { supabase } from '@/lib/supabase/client'
 import { createImageLibraryItem } from '@/data/entities/image-library'
@@ -143,7 +143,7 @@ export function useDailyItinerary({
   }
 
   // 處理飯店選擇
-  const handleSelectHotels = (hotels: LuxuryHotel[]) => {
+  const handleSelectHotels = (hotels: HotelItem[]) => {
     if (currentDayIndex === -1 || hotels.length === 0) return
 
     const hotel = hotels[0]

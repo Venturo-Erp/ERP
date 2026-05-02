@@ -18,7 +18,7 @@ if (!SUPABASE_ACCESS_TOKEN) {
   console.error('❌ 請設定 SUPABASE_ACCESS_TOKEN')
   process.exit(1)
 }
-const PROJECT_REF = 'pfqvdacxowpgfamuvnsn'
+const PROJECT_REF = 'wzvwmawpkapcmkfmkvav'
 const MIGRATIONS_DIR = path.join(__dirname, '../supabase/migrations')
 
 /**

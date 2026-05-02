@@ -98,8 +98,8 @@
   --input-border-hover: #a08a68;
   --input-border-focus: #c4a572;
   --input-bg: #ffffff;
-  --input-disabled-bg: #f0ede8;
-  --input-readonly-bg: #f8f6f4;
+  --input-disabled-bg: #ddd6c8;
+  --input-readonly-bg: #f5f1e8;
   --input-text: #2a2522;
   --input-placeholder: #a89e92;
 

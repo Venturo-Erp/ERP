@@ -16,7 +16,7 @@ interface LocationData {
   name: string
 }
 
-// Supabase 查詢結果型別（一般餐廳）
+// Supabase 查詢結果型別（合併後的 restaurants、含米其林欄位）
 interface RestaurantQueryResult {
   id: string
   name: string
@@ -29,6 +29,7 @@ interface RestaurantQueryResult {
   meal_type: string[] | null
   description: string | null
   specialties: string[] | null
+  signature_dishes: string[] | null
   price_range: string | null
   avg_price_lunch: number | null
   avg_price_dinner: number | null
@@ -45,35 +46,10 @@ interface RestaurantQueryResult {
   address: string | null
   phone: string | null
   google_maps_url: string | null
-  regions: { name: string } | null
-  cities: { name: string } | null
-}
-
-// Supabase 查詢結果型別（米其林餐廳）
-interface MichelinQueryResult {
-  id: string
-  name: string
-  name_en: string | null
-  country_id: string
-  city_id: string
   michelin_stars: number | null
   bib_gourmand: boolean | null
   green_star: boolean | null
-  cuisine_type: string[] | null
-  description: string | null
-  signature_dishes: string[] | null
-  price_range: string | null
-  avg_price_lunch: number | null
-  avg_price_dinner: number | null
-  max_group_size: number | null
-  group_menu_available: boolean | null
-  images: string[] | null
-  is_active: boolean | null
-  latitude: number | null
-  longitude: number | null
-  address: string | null
-  phone: string | null
-  google_maps_url: string | null
+  regions: { name: string } | null
   cities: { name: string } | null
 }
 
@@ -241,158 +217,83 @@ export function useRestaurantSelector({
 
       setLoading(true)
       try {
+        // SSOT 後：restaurants 表已含 michelin 欄位、單一 query 抓全部
+        let restaurantQuery = supabase
+          .from('restaurants')
+          .select(
+            `
+            id, name, name_en, country_id, region_id, city_id,
+            cuisine_type, category, meal_type, description,
+            specialties, signature_dishes,
+            price_range, avg_price_lunch, avg_price_dinner,
+            group_friendly, max_group_size, group_menu_available,
+            private_room, images, rating, is_active, is_featured,
+            latitude, longitude, address, phone, google_maps_url,
+            michelin_stars, bib_gourmand, green_star,
+            regions(name),
+            cities!inner(name)
+          `
+          )
+          .eq('is_active', true)
+          .eq('country_id', selectedCountryId)
+          .order('michelin_stars', { ascending: false, nullsFirst: false })
+          .order('is_featured', { ascending: false })
+          .order('display_order')
+
+        if (selectedRegionId) restaurantQuery = restaurantQuery.eq('region_id', selectedRegionId)
+        if (selectedCityId) restaurantQuery = restaurantQuery.eq('city_id', selectedCityId)
+        if (selectedCategory) restaurantQuery = restaurantQuery.eq('category', selectedCategory)
+
+        const { data: restaurantData } = await restaurantQuery
+
         const results: CombinedRestaurant[] = []
-
-        // 1. 載入一般餐廳
-        if (!showMichelinOnly) {
-          let restaurantQuery = supabase
-            .from('restaurants')
-            .select(
-              `
-              id, name, name_en, country_id, region_id, city_id,
-              cuisine_type, category, meal_type, description,
-              specialties, price_range, avg_price_lunch, avg_price_dinner,
-              group_friendly, max_group_size, group_menu_available,
-              private_room, images, rating, is_active, is_featured,
-              latitude, longitude, address, phone, google_maps_url,
-              regions(name),
-              cities!inner(name)
-            `
-            )
-            .eq('is_active', true)
-            .eq('country_id', selectedCountryId)
-            .order('is_featured', { ascending: false })
-            .order('display_order')
-
-          // 區域篩選
-          if (selectedRegionId) {
-            restaurantQuery = restaurantQuery.eq('region_id', selectedRegionId)
-          }
-
-          // 城市篩選
-          if (selectedCityId) {
-            restaurantQuery = restaurantQuery.eq('city_id', selectedCityId)
-          }
-
-          // 分類篩選
-          if (selectedCategory) {
-            restaurantQuery = restaurantQuery.eq('category', selectedCategory)
-          }
-
-          const { data: restaurantData } = await restaurantQuery
-
-          if (restaurantData) {
-            // 透過 unknown 中轉處理 Supabase 的複雜型別
-            ;(restaurantData as unknown as RestaurantQueryResult[]).forEach(item => {
-              results.push({
-                id: item.id,
-                name: item.name,
-                name_en: item.name_en,
-                country_id: item.country_id,
-                region_id: item.region_id || null,
-                city_id: item.city_id,
-                cuisine_type: item.cuisine_type,
-                category: item.category,
-                meal_type: item.meal_type,
-                description: item.description,
-                specialties: item.specialties,
-                price_range: item.price_range,
-                avg_price_lunch: item.avg_price_lunch,
-                avg_price_dinner: item.avg_price_dinner,
-                group_friendly: item.group_friendly ?? true,
-                max_group_size: item.max_group_size,
-                group_menu_available: item.group_menu_available ?? false,
-                private_room: item.private_room ?? false,
-                images: item.images,
-                rating: item.rating,
-                is_active: item.is_active ?? true,
-                is_featured: item.is_featured ?? false,
-                // GPS 資訊
-                latitude: item.latitude,
-                longitude: item.longitude,
-                address: item.address,
-                phone: item.phone,
-                google_maps_url: item.google_maps_url,
-                source: 'restaurant' as const,
-                region_name: item.regions?.name || '',
-                city_name: item.cities?.name || '',
-              })
+        if (restaurantData) {
+          ;(restaurantData as unknown as RestaurantQueryResult[]).forEach(item => {
+            const isMichelin = (item.michelin_stars ?? 0) > 0 || item.bib_gourmand === true
+            results.push({
+              id: item.id,
+              name: item.name,
+              name_en: item.name_en,
+              country_id: item.country_id,
+              region_id: item.region_id || null,
+              city_id: item.city_id,
+              cuisine_type: item.cuisine_type,
+              category: item.category,
+              meal_type: item.meal_type,
+              description: item.description,
+              specialties: item.specialties,
+              signature_dishes: item.signature_dishes,
+              price_range: item.price_range,
+              avg_price_lunch: item.avg_price_lunch,
+              avg_price_dinner: item.avg_price_dinner,
+              group_friendly: item.group_friendly ?? true,
+              max_group_size: item.max_group_size,
+              group_menu_available: item.group_menu_available ?? false,
+              private_room: item.private_room ?? false,
+              images: item.images,
+              rating: item.rating,
+              is_active: item.is_active ?? true,
+              is_featured: item.is_featured ?? false,
+              latitude: item.latitude,
+              longitude: item.longitude,
+              address: item.address,
+              phone: item.phone,
+              google_maps_url: item.google_maps_url,
+              // 米其林欄位（一般餐廳為 null/false）
+              michelin_stars: item.michelin_stars,
+              bib_gourmand: item.bib_gourmand,
+              green_star: item.green_star,
+              // source 由 michelin 欄位 derive、向下相容 RestaurantCard / 排序邏輯
+              source: isMichelin ? 'michelin' : 'restaurant',
+              region_name: item.regions?.name || '',
+              city_name: item.cities?.name || '',
             })
-          }
+          })
         }
 
-        // 2. 載入米其林餐廳
-        if (includeMichelin) {
-          let michelinQuery = supabase
-            .from('michelin_restaurants')
-            .select(
-              `
-              id, name, name_en, country_id, city_id,
-              michelin_stars, bib_gourmand, green_star,
-              cuisine_type, description, signature_dishes,
-              price_range, avg_price_lunch, avg_price_dinner,
-              max_group_size, group_menu_available,
-              images, is_active,
-              latitude, longitude, address, phone, google_maps_url,
-              cities!inner(name)
-            `
-            )
-            .eq('is_active', true)
-            .eq('country_id', selectedCountryId)
-            .order('michelin_stars', { ascending: false })
-
-          // 城市篩選
-          if (selectedCityId) {
-            michelinQuery = michelinQuery.eq('city_id', selectedCityId)
-          }
-
-          const { data: michelinData } = await michelinQuery
-
-          if (michelinData) {
-            // 透過 unknown 中轉處理 Supabase 的複雜型別
-            ;(michelinData as unknown as MichelinQueryResult[]).forEach(item => {
-              results.push({
-                id: item.id,
-                name: item.name,
-                name_en: item.name_en,
-                country_id: item.country_id,
-                city_id: item.city_id,
-                michelin_stars: item.michelin_stars,
-                bib_gourmand: item.bib_gourmand,
-                green_star: item.green_star,
-                cuisine_type: item.cuisine_type,
-                description: item.description,
-                signature_dishes: item.signature_dishes,
-                price_range: item.price_range,
-                avg_price_lunch: item.avg_price_lunch,
-                avg_price_dinner: item.avg_price_dinner,
-                group_friendly: true,
-                max_group_size: item.max_group_size,
-                group_menu_available: item.group_menu_available ?? false,
-                private_room: false,
-                images: item.images,
-                is_active: item.is_active ?? true,
-                // GPS 資訊
-                latitude: item.latitude,
-                longitude: item.longitude,
-                address: item.address,
-                phone: item.phone,
-                google_maps_url: item.google_maps_url,
-                source: 'michelin' as const,
-                city_name: item.cities?.name || '',
-              })
-            })
-          }
-        }
-
-        // 排序：米其林優先，然後是精選
-        results.sort((a, b) => {
-          if (a.source === 'michelin' && b.source !== 'michelin') return -1
-          if (a.source !== 'michelin' && b.source === 'michelin') return 1
-          return 0
-        })
-
-        setRestaurants(results)
+        // 若 includeMichelin=false 由 caller 控制過濾（行程編輯器選餐廳時可關閉米其林）
+        const filtered = includeMichelin ? results : results.filter(r => r.source !== 'michelin')
+        setRestaurants(filtered)
       } catch (error) {
         logger.error('Error loading restaurants:', error)
       } finally {

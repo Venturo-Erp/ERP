@@ -70,7 +70,6 @@ export function tableToModule(tableName: string): string | null {
     t === 'attractions' ||
     t === 'hotels' ||
     t === 'restaurants' ||
-    t === 'michelin_restaurants' ||
     t === 'suppliers' ||
     t === 'supplier_categories' ||
     t === 'countries' ||

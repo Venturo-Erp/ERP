@@ -144,6 +144,7 @@ export type TodoTaskType =
 export interface Todo {
   id: string
   title: string
+  description?: string // 任務描述（卡片正面預覽 + Dialog 完整編輯）
   priority: 1 | 2 | 3 | 4 | 5 // 星級緊急度
   deadline?: string
   status: 'pending' | 'in_progress' | 'completed' | 'cancelled'

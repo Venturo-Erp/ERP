@@ -2,11 +2,11 @@
 
 import React from 'react'
 import { ImageIcon, Crown, Star } from 'lucide-react'
-import type { LuxuryHotel } from '../HotelSelector'
+import type { HotelItem } from '../HotelSelector'
 import { COMP_EDITOR_LABELS } from '../constants/labels'
 
 interface HotelCardProps {
-  hotel: LuxuryHotel
+  hotel: HotelItem
   isSelected: boolean
   onToggle: (id: string) => void
 }
@@ -33,7 +33,7 @@ const getHotelClassLabel = (hotelClass: string | null) => {
   }
 }
 
-const getHotelImage = (hotel: LuxuryHotel) => {
+const getHotelImage = (hotel: HotelItem) => {
   return hotel.images && hotel.images.length > 0 ? hotel.images[0] : null
 }
 
