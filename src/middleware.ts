@@ -31,7 +31,6 @@ const EXACT_PUBLIC_PATHS = new Set<string>([
   '/api/quotes/confirmation/customer',
   // === LINE LIFF customer 登入前查詢 ===
   '/api/customers/by-line',
-  '/api/customers/link-line',
   '/api/customers/match',
 ])
 
