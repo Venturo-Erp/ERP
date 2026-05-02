@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createServiceClient } from '@/lib/supabase/api-client'
+import { getSupabaseAdminClient } from '@/lib/supabase/admin'
 
 /**
  * GET /api/d/[code]
@@ -14,7 +14,7 @@ import { createServiceClient } from '@/lib/supabase/api-client'
  * TODO: Add rate limiting (e.g. IP-based, 10 req/min) to prevent enumeration attacks.
  */
 export async function GET(request: Request, { params }: { params: Promise<{ code: string }> }) {
-  const supabase = createServiceClient()
+  const supabase = getSupabaseAdminClient()
   const { code } = await params
 
   // 1. 先查團號對應的 tour UUID

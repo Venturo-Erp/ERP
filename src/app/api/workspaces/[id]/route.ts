@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServiceClient } from '@/lib/supabase/api-client'
+import { getSupabaseAdminClient } from '@/lib/supabase/admin'
 import { getServerAuth } from '@/lib/auth/server-auth'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { logger } from '@/lib/utils/logger'
@@ -36,7 +36,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     }
   }
 
-  const supabase = createServiceClient()
+  const supabase = getSupabaseAdminClient()
 
   const { data, error } = await supabase
     .from('workspaces')
@@ -185,7 +185,7 @@ export async function DELETE(
   })
 
   // 真刪（service_role 繞 RLS）
-  const serviceSupabase = createServiceClient()
+  const serviceSupabase = getSupabaseAdminClient()
   const { error } = await serviceSupabase.from('workspaces').delete().eq('id', workspaceId)
 
   if (error) {

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createApiClient, createServiceClient } from '@/lib/supabase/api-client'
+import { createApiClient } from '@/lib/supabase/api-client'
+import { getSupabaseAdminClient } from '@/lib/supabase/admin'
 import { getApiContext } from '@/lib/auth/get-api-context'
 
 // P003-A（2026-04-22 立 / 2026-05-01 改用新 capability 系統 / F2 改走 getApiContext）
@@ -35,7 +36,7 @@ export async function GET(request: NextRequest) {
     const gate = await requireTenantAdmin()
     if (!gate.ok) return gate.response
 
-    const serviceSupabase = createServiceClient()
+    const serviceSupabase = getSupabaseAdminClient()
     const { data, error } = await serviceSupabase
       .from('workspace_features')
       .select('feature_code, enabled')
@@ -77,7 +78,7 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: '缺少必要欄位' }, { status: 400 })
   }
 
-  const serviceSupabase = createServiceClient()
+  const serviceSupabase = getSupabaseAdminClient()
 
   // 1. 更新付費大開關
   if (typeof premium_enabled === 'boolean') {
