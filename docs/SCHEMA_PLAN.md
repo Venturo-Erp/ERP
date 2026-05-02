@@ -253,7 +253,7 @@
 
 | 表 | 行數 | 用途 |
 |----|------|------|
-| `quote_confirmation_logs` | 0 | 報價確認操作 log（待用） |
+| `quote_confirmation_logs` | 0 | 報價確認操作 log（待用）。**例外**：append-only log、無 `updated_at`（憲法 §2）|
 
 ### 紅線（葡萄串）
 
@@ -446,7 +446,7 @@
 | `line_users` | 2 | LINE 用戶 |
 | `line_groups` | 5 | LINE 群組 |
 | `line_conversations` | 0 | LINE 對話 |
-| `line_messages` | 0 | LINE 訊息（待用） |
+| `line_messages` | 0 | LINE 訊息（待用）。**例外**：append-only log、無 `updated_at`（憲法 §2）|
 
 ### 客服
 

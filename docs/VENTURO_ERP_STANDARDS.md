@@ -76,6 +76,8 @@ updated_by   uuid REFERENCES employees(id) ON DELETE SET NULL
 
 非業務表（如 `ref_*` 對照表、`cron_*` 系統表）可豁免 `workspace_id` 跟 `created_by`、但要在 `SCHEMA_PLAN.md` 註明「**為什麼例外**」。
 
+**Append-only log 表**（純記事件、寫入後不再 UPDATE、如 `line_messages` / `quote_confirmation_logs`）可豁免 `updated_at` 欄位跟對應 trigger。理由：log 表只新增不更新、`updated_at` 永遠等於 `created_at`、徒增一個欄位 + 一個 trigger 而沒用途。例外條目同樣要在 `SCHEMA_PLAN.md` 註明。
+
 ### 多租戶表編號 UNIQUE 規則
 
 > 起源：2026-04-21、御風租戶撞角落租戶 `DO260423-001`、13 張表全踩同個反模式。
