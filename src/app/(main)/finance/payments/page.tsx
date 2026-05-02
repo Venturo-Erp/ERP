@@ -18,7 +18,6 @@ import { ModuleLoading } from '@/components/module-loading'
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
-import { cn } from '@/lib/utils'
 import { FinanceLabels, PAYMENT_METHOD_MAP } from '../constants/labels'
 import { ListPageLayout } from '@/components/layout/list-page-layout'
 import { Button } from '@/components/ui/button'
@@ -96,8 +95,8 @@ export default function PaymentsPage() {
   const visibleTabs = useMemo<ReceiptTabConfig[]>(() => {
     const tabs: ReceiptTabConfig[] = []
     if (canTour || canCompany) tabs.push({ value: 'all', label: '全部' })
-    if (canTour) tabs.push({ value: 'tour', label: '🧳 團體收款' })
-    if (canCompany) tabs.push({ value: 'company', label: '🏢 公司收款' })
+    if (canTour) tabs.push({ value: 'tour', label: '團體收款' })
+    if (canCompany) tabs.push({ value: 'company', label: '公司收款' })
     return tabs
   }, [canTour, canCompany])
 
@@ -268,32 +267,11 @@ export default function PaymentsPage() {
         onRowClick={handleRowClick}
         defaultSort={{ key: 'receipt_date', direction: 'desc' }}
         initialPageSize={15}
-        headerActions={
-          <Button variant="soft-gold" onClick={() => setIsDialogOpen(true)}>
-            <Plus size={16} />
-            {FinanceLabels.addPayment}
-          </Button>
-        }
-        beforeTable={
-          visibleTabs.length > 1 ? (
-            <div className="flex items-center gap-1 border-b border-border mb-4">
-              {visibleTabs.map(tab => (
-                <button
-                  key={tab.value}
-                  onClick={() => setActiveTab(tab.value)}
-                  className={cn(
-                    'px-4 py-2 text-sm font-medium transition-colors border-b-2',
-                    activeTab === tab.value
-                      ? 'text-morandi-gold border-morandi-gold'
-                      : 'text-morandi-secondary border-transparent hover:text-morandi-primary hover:border-morandi-container'
-                  )}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
-          ) : null
-        }
+        onAdd={() => setIsDialogOpen(true)}
+        addLabel={FinanceLabels.addPayment}
+        statusTabs={visibleTabs.length > 1 ? visibleTabs : undefined}
+        activeStatusTab={activeTab}
+        onStatusTabChange={tab => setActiveTab(tab as ReceiptTabValue)}
       />
 
       {/* 新增/編輯收款對話框 */}

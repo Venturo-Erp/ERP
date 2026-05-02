@@ -182,8 +182,9 @@ export function ContentPageLayout({
         {headerChildren}
       </ResponsiveHeader>
 
-      {/* 內容區域 — 預設 flex col 讓子元件可用 flex-1 填滿高度 */}
-      <div className={contentClassName || 'flex-1 overflow-auto flex flex-col min-h-0'}>
+      {/* 內容區域 — 預設 flex col 讓子元件可用 flex-1 填滿高度
+          padding p-4：給卡片 box-shadow 留空間、避免被 overflow-auto 截掉 */}
+      <div className={contentClassName || 'flex-1 overflow-auto flex flex-col min-h-0 p-4'}>
         {children}
       </div>
     </div>
