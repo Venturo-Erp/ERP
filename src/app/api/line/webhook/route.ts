@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createHmac, timingSafeEqual, createHash } from 'crypto'
 import { logger } from '@/lib/utils/logger'
-import { handleAICustomerService } from '@/lib/line/ai-customer-service'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { withWebhookIdempotency } from '@/lib/webhook/idempotency'
 import { fetchWithTimeout } from '@/lib/external/fetch-with-timeout'
+
+// AI 客服已撤（2026-05-02、William 拍板「完全移除後重新撰寫」）
+// 所有訊息回覆固定 fallback、由人工客服承接。
+const AI_FALLBACK_REPLY = '感謝您的訊息！我們已收到，將盡快回覆您。'
 
 /** LINE Webhook event type (minimal) */
 interface LineEvent {
@@ -611,7 +614,7 @@ async function replyText(replyToken: string, text: string) {
   })
 }
 
-/** 處理 AI 客服訊息 */
+/** 處理客戶訊息：AI 客服撤掉後、回覆 fallback、留對話記錄給人工查 */
 async function handleAIMessage(event: LineEvent) {
   try {
     const userId = event.source?.userId
@@ -619,29 +622,18 @@ async function handleAIMessage(event: LineEvent) {
 
     if (!userId || !userMessage) return
 
-    // 1. 先檢查景點選擇
-
-    // 2. 取得用戶資訊
     const profile = await getUserProfile(userId)
 
-    // 3. 呼叫 AI 客服
-    const aiResponse = await handleAICustomerService(
-      'line',
-      userId,
-      profile?.displayName || null,
-      userMessage
-    )
-
-    // 4. 儲存對話到資料庫
+    // 仍儲存對話（給人工客服查歷史）
     await saveConversationToDb(
       'line',
       userId,
       userMessage,
-      aiResponse,
+      AI_FALLBACK_REPLY,
       profile?.displayName || null
     )
 
-    // 5. 回覆用戶
+    // 回覆 fallback
     await fetchWithTimeout('https://api.line.me/v2/bot/message/reply', {
       method: 'POST',
       headers: {
@@ -650,15 +642,13 @@ async function handleAIMessage(event: LineEvent) {
       },
       body: JSON.stringify({
         replyToken: event.replyToken,
-        messages: [{ type: 'text', text: aiResponse }],
+        messages: [{ type: 'text', text: AI_FALLBACK_REPLY }],
       }),
     })
 
-    logger.info(
-      `[LINE AI] User: ${userId} | Message: ${userMessage} | Response: ${aiResponse.substring(0, 50)}...`
-    )
+    logger.info(`[LINE] User: ${userId} | Message: ${userMessage} | Replied with fallback`)
   } catch (err) {
-    logger.error('[LINE AI] Handle message error:', err)
+    logger.error('[LINE] Handle message error:', err)
   }
 }
 

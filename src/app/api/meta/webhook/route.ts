@@ -2,7 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createHmac, timingSafeEqual, createHash } from 'crypto'
 import { getSupabaseAdminClient } from '@/lib/supabase/admin'
 import { logger } from '@/lib/utils/logger'
-import { handleAICustomerService } from '@/lib/line/ai-customer-service'
+// AI 客服已撤（2026-05-02、William 拍板「完全移除後重新撰寫」）
+// 所有訊息回覆固定 fallback、由人工客服承接。
+const AI_FALLBACK_REPLY = '感謝您的訊息！我們已收到，將盡快回覆您。'
 import { withWebhookIdempotency } from '@/lib/webhook/idempotency'
 
 // Message ID 去重（防止 Meta 重送 webhook 導致重複回覆）
@@ -343,19 +345,7 @@ async function handleIncomingMessage(
     return
   }
 
-  try {
-    // 呼叫 AI 客服（跟 LINE 共用同一套邏輯）
-    // platform: 'messenger' for Facebook, 'instagram' for Instagram DM
-    const aiResponse = await handleAICustomerService(
-      actualPlatform,
-      senderId,
-      null, // Meta 不像 LINE 可以直接拿 displayName
-      messageText
-    )
-
-    await sendReply(senderId, aiResponse, pageAccessToken)
-  } catch (error) {
-    logger.error('[Meta] AI response error:', error)
-    await sendReply(senderId, '感謝您的訊息！我們已收到，將盡快回覆您。', pageAccessToken)
-  }
+  // AI 客服已撤、回覆 fallback、由人工客服承接
+  void actualPlatform
+  await sendReply(senderId, AI_FALLBACK_REPLY, pageAccessToken)
 }
