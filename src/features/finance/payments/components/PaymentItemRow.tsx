@@ -277,10 +277,7 @@ export function PaymentItemRow({
               onChange={e => {
                 onUpdate(item.id, { receipt_account: e.target.value })
               }}
-              placeholder={
-                // 從 DB 讀取的 placeholder，沒有就用預設
-                currentMethod?.placeholder || ''
-              }
+              placeholder="付款資訊"
               disabled={readonly}
               className="input-no-focus w-full bg-transparent text-sm"
             />
@@ -388,12 +385,12 @@ export function PaymentItemRow({
             />
           </td>
           <td className="py-2 px-3 border-b border-border/50 text-center" colSpan={2}>
-            <Button
+            <Button variant="soft-gold"
               type="button"
               onClick={handleGenerateLink}
               disabled={isGenerating || !item.email || !item.amount || !item.pay_dateline}
               size="sm"
-              className="bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors gap-1"
+ className="gap-1"
             >
               {isGenerating ? (
                 <>
@@ -440,24 +437,6 @@ export function PaymentItemRow({
             >
               {PAYMENT_ITEM_ROW_LABELS.LABEL_1670}
             </button>
-          </td>
-        </tr>
-      )}
-
-      {/* 現金額外欄位 */}
-      {currentCode === 'CASH' && !readonly && (
-        <tr className="bg-card">
-          <td className="py-2 px-3 border-b border-border/50 text-xs text-morandi-primary font-medium">
-            經手人
-          </td>
-          <td className="py-2 px-3 border-b border-border/50" colSpan={5}>
-            <input
-              type="text"
-              value={item.handler_name || ''}
-              onChange={e => onUpdate(item.id, { handler_name: e.target.value })}
-              placeholder="經手人姓名"
-              className="input-no-focus w-full bg-transparent text-sm"
-            />
           </td>
         </tr>
       )}
@@ -575,17 +554,6 @@ export function PaymentItemRow({
         </tr>
       )}
 
-      {/* 方式說明（從 DB 帶出） */}
-      {currentMethod?.description && !readonly && (
-        <tr className="bg-morandi-container/10">
-          <td
-            className="py-1.5 px-3 border-b border-border/50 text-xs text-morandi-muted"
-            colSpan={6}
-          >
-            {currentMethod.description}
-          </td>
-        </tr>
-      )}
     </>
   )
 }

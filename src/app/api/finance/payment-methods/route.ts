@@ -101,7 +101,12 @@ export async function PUT(request: NextRequest) {
 
 /**
  * DELETE /api/finance/payment-methods
- * 刪除收款/付款方式（軟刪除，設為 is_active = false）
+ * 真刪除（hard delete）。停用走 PUT is_active=false、不再用此端點軟刪。
+ *
+ * FK 行為：
+ *   - receipts.payment_method_id ON DELETE RESTRICT → 已被收款用過會被擋
+ *   - payment_request_items.payment_method_id ON DELETE SET NULL
+ * 受 RESTRICT 擋下時回 409 + 中文訊息、引導 user 改用「停用」
  */
 export async function DELETE(request: NextRequest) {
   const supabase = await createApiClient()
@@ -112,21 +117,16 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ error: 'id is required' }, { status: 400 })
   }
 
-  // 檢查是否為系統預設方式
-  const { data: method } = await supabase
-    .from('payment_methods')
-    .select('is_system')
-    .eq('id', id)
-    .single()
-
-  if (method?.is_system) {
-    return NextResponse.json({ error: '系統預設方式不可刪除，只能停用' }, { status: 403 })
-  }
-
-  // RLS 會確保只能刪除自己租戶的資料
-  const { error } = await supabase.from('payment_methods').update({ is_active: false }).eq('id', id)
+  const { error } = await supabase.from('payment_methods').delete().eq('id', id)
 
   if (error) {
+    // 23503 = foreign_key_violation（已被 receipts 引用）
+    if (error.code === '23503') {
+      return NextResponse.json(
+        { error: '此方式已被歷史收款紀錄使用、無法刪除。請改用「停用」隱藏。' },
+        { status: 409 }
+      )
+    }
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 

@@ -1,3 +1,0 @@
-{
-  "message": "Failed to run sql query: ERROR:  42703: column \"tour_id\" does not exist\nLINE 1: SELECT * FROM tour_room_assignments ORDER BY tour_id\n                                                     ^\nHINT:  Perhaps you meant to reference the column \"tour_room_assignments.room_id\".\n"
-}

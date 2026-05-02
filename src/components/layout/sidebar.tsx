@@ -474,16 +474,18 @@ export function Sidebar() {
           data-tutorial={`nav-${item.href.replace(/^\//, '').split('/')[0]}`}
         >
           {/* 父項目：flex layout、icon 在固定 w-16 wrapper、不隨 sidebar 寬度晃動
-              border-l-[3px] 永遠保留、active 只換顏色、避免被選中時 menu 整體位移 */}
+              active border 用 absolute、不佔 3px 寬、避免 icon 偏離水平中心 */}
           <div
             className={cn(
-              'w-full flex items-center h-11 text-sm text-morandi-secondary cursor-pointer',
-              'border-l-[3px] border-l-transparent',
+              'relative w-full flex items-center h-11 text-sm text-morandi-secondary cursor-pointer',
               'hover:bg-morandi-gold/5 hover:text-morandi-gold',
-              active && 'bg-morandi-gold/10 text-morandi-gold border-l-morandi-gold'
+              active && 'bg-morandi-gold/10 text-morandi-gold'
             )}
             onClick={() => toggleSubmenu(item.href)}
           >
+            {active && (
+              <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-morandi-gold" />
+            )}
             <div className="w-16 flex justify-center shrink-0">
               <item.icon size={22} weight="duotone" />
             </div>
@@ -524,12 +526,14 @@ export function Sidebar() {
           prefetch={false}
           onClick={closeSidebar}
           className={cn(
-            'w-full flex items-center h-11 text-sm text-morandi-secondary',
-            'border-l-[3px] border-l-transparent',
+            'relative w-full flex items-center h-11 text-sm text-morandi-secondary',
             'hover:bg-morandi-gold/5 hover:text-morandi-gold',
-            active && 'bg-morandi-gold/10 text-morandi-gold border-l-morandi-gold'
+            active && 'bg-morandi-gold/10 text-morandi-gold'
           )}
         >
+          {active && (
+            <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-morandi-gold" />
+          )}
           <div className={cn('w-16 flex justify-center shrink-0', isChild && 'pl-4')}>
             <item.icon size={isChild ? 16 : 22} weight="duotone" />
           </div>

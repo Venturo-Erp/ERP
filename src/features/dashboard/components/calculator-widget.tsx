@@ -287,10 +287,10 @@ export function CalculatorWidget() {
             >
               +
             </Button>
-            <Button
+            <Button variant="soft-gold"
               size="sm"
               onClick={() => handleButtonClick('=')}
-              className="h-8 text-xs font-bold bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors transition-all rounded-xl"
+ className="h-8 text-xs font-bold transition-all rounded-xl"
             >
               =
             </Button>

@@ -103,7 +103,9 @@ export function useLayoutContext(): UseLayoutContextResult {
     payload,
     capabilitiesSet,
     featuresSet,
-    loading: shouldFetch && isLoading,
+    // hydrate 中也算 loading：reload/複製分頁時 zustand 還沒從 localStorage 載入、
+    // 此時 capabilities=[] 不代表沒權限、ModuleGuard 不能誤判 redirect /unauthorized
+    loading: !_hasHydrated || (shouldFetch && isLoading),
     refresh: async () => {
       await globalMutate(SWR_KEY)
     },

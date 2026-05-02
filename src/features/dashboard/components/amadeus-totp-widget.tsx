@@ -236,34 +236,40 @@ export function AmadeusTotpWidget() {
           {/* 底部 */}
           <div className="flex gap-3 flex-shrink-0">
             {view === 'setup' && (
-              <Button
+              <Button variant="soft-gold"
                 size="sm"
-                variant="outline"
-                className="flex-1 rounded-xl"
-                onClick={() => fileInputRef.current?.click()}
                 disabled={uploading}
+                onClick={() => fileInputRef.current?.click()}
+                className={cn(
+                  'flex-1 rounded-xl transition-all duration-200 font-semibold',
+ ''
+                )}
               >
                 <Upload className="w-4 h-4 mr-1" />
                 {uploading ? '解析中…' : '上傳 QR code'}
               </Button>
             )}
             {(view === 'idle' || view === 'expired') && (
-              <Button
+              <Button variant="soft-gold"
                 size="sm"
-                variant="outline"
-                className="flex-1 rounded-xl text-morandi-muted hover:text-status-danger"
                 onClick={handleReset}
+                className={cn(
+                  'flex-1 rounded-xl transition-all duration-200 font-semibold',
+ ''
+                )}
               >
                 <RefreshCw className="w-4 h-4 mr-1" />
                 重新設定
               </Button>
             )}
             {view === 'active' && (
-              <Button
+              <Button variant="soft-gold"
                 size="sm"
-                variant="outline"
-                className="flex-1 rounded-xl"
                 onClick={handleCopy}
+                className={cn(
+                  'flex-1 rounded-xl transition-all duration-200 font-semibold',
+ ''
+                )}
               >
                 <Check className="w-4 h-4 mr-1" />
                 複製驗證碼

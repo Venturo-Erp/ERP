@@ -85,9 +85,6 @@ export const DASHBOARD_LABELS = {
   PASSENGERS_SUFFIX: ')',
   CHILD: '兒童',
 
-  // notes-widget
-  NOTES_AUTO_SAVE_HINT: '自動儲存 • 雙擊分頁名稱可重新命名',
-
   // currency-widget
   EXCHANGE_RATE_LABEL: '匯率 (1 ',
   EXCHANGE_RATE_SUFFIX: ' = ? TWD)',

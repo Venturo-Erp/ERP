@@ -24,7 +24,13 @@ const TableRow = ({ children, className }: { children: React.ReactNode; classNam
     {children}
   </tr>
 )
-const TableHead = ({ children, className }: { children: React.ReactNode; className?: string }) => (
+const TableHead = ({
+  children,
+  className,
+}: {
+  children?: React.ReactNode
+  className?: string
+}) => (
   <th
     className={`px-4 py-3 text-left text-xs font-medium text-morandi-secondary uppercase tracking-wider ${className || ''}`}
   >
@@ -65,7 +71,24 @@ import {
   Tag,
   TrendingUp,
   Award,
+  GripVertical,
 } from 'lucide-react'
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  KeyboardSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core'
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  useSortable,
+  arrayMove,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import { useAuthStore } from '@/stores/auth-store'
 import { alert, confirm } from '@/lib/ui/alert-dialog'
 import { logger } from '@/lib/utils/logger'
@@ -117,6 +140,100 @@ interface ExpenseCategory {
   credit_account_id: string | null
   debit_account?: { id: string; code: string; name: string } | null
   credit_account?: { id: string; code: string; name: string } | null
+}
+
+// 拖曳排序的 payment_method row
+// 不用刻的 TableRow（要傳 ref/style 給 useSortable）、直接 <tr>
+function SortableMethodRow({
+  method,
+  onEdit,
+  onToggle,
+  onDelete,
+}: {
+  method: PaymentMethod
+  onEdit: () => void
+  onToggle: () => void
+  onDelete: () => void
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: method.id,
+  })
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : !method.is_active ? 0.5 : 1,
+  }
+  return (
+    <tr
+      ref={setNodeRef}
+      style={style}
+      className="group border-b border-border/50 hover:bg-morandi-container/20 transition-colors"
+    >
+      {/* 拖曳把手（hover 時顯示） */}
+      <td className="w-[40px] px-2 py-3 text-center">
+        <button
+          {...attributes}
+          {...listeners}
+          className="cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity p-1 inline-flex"
+          aria-label="拖曳排序"
+        >
+          <GripVertical className="h-4 w-4 text-morandi-secondary" />
+        </button>
+      </td>
+      {/* 名稱 */}
+      <td className="px-4 py-3 text-sm font-medium">
+        {method.name}
+        {method.is_system && (
+          <Badge variant="outline" className="ml-2 text-[10px] px-1.5 py-0">
+            系統
+          </Badge>
+        )}
+      </td>
+      {/* 說明 */}
+      <td className="px-4 py-3 text-sm text-morandi-muted">{method.description || '-'}</td>
+      {/* 付款提示 */}
+      <td className="px-4 py-3 text-sm text-morandi-muted">{method.placeholder || '-'}</td>
+      {/* 借方科目 */}
+      <td className="px-4 py-3 text-sm text-morandi-muted">
+        {method.debit_account
+          ? `${method.debit_account.code} ${method.debit_account.name}`
+          : '-'}
+      </td>
+      {/* 貸方科目 */}
+      <td className="px-4 py-3 text-sm text-morandi-muted">
+        {method.credit_account
+          ? `${method.credit_account.code} ${method.credit_account.name}`
+          : '-'}
+      </td>
+      {/* 狀態 */}
+      <td className="px-4 py-3 text-sm w-[80px]">
+        <div className="flex items-center gap-2">
+          <Switch checked={method.is_active} onCheckedChange={onToggle} />
+          <span
+            className={`text-xs ${method.is_active ? 'text-morandi-primary' : 'text-morandi-muted'}`}
+          >
+            {method.is_active ? '啟用' : '停用'}
+          </span>
+        </div>
+      </td>
+      {/* 操作 */}
+      <td className="px-4 py-3 text-sm w-[80px] text-right">
+        <div className="flex justify-end gap-1">
+          <Button variant="ghost" size="icon" onClick={onEdit}>
+            <Pencil className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onDelete}
+            className="text-status-danger hover:text-status-danger/80"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      </td>
+    </tr>
+  )
 }
 
 export default function FinanceSettingsPage() {
@@ -187,6 +304,48 @@ export default function FinanceSettingsPage() {
   // 付款方式
   const paymentMethodsList = paymentMethods.filter(m => m.type === 'payment')
 
+  // ===== 拖曳排序 =====
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor)
+  )
+
+  const handleMethodDragEnd = async (event: DragEndEvent, type: 'receipt' | 'payment') => {
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+
+    const list = type === 'receipt' ? receiptMethods : paymentMethodsList
+    const oldIndex = list.findIndex(m => m.id === active.id)
+    const newIndex = list.findIndex(m => m.id === over.id)
+    if (oldIndex === -1 || newIndex === -1) return
+
+    const reordered = arrayMove(list, oldIndex, newIndex)
+
+    // Optimistic update：local state 先換順序、UI 立即反映
+    const reorderedIds = new Set(reordered.map(m => m.id))
+    setPaymentMethods(prev => {
+      const others = prev.filter(m => !reorderedIds.has(m.id))
+      return [...others, ...reordered.map((m, idx) => ({ ...m, sort_order: idx + 1 }))]
+    })
+
+    // Batch PUT sort_order
+    try {
+      await Promise.all(
+        reordered.map((m, idx) =>
+          fetch('/api/finance/payment-methods', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: m.id, sort_order: idx + 1 }),
+          })
+        )
+      )
+    } catch (error) {
+      logger.error('排序更新失敗:', error)
+      await alert('排序更新失敗', 'error')
+      await loadData() // 失敗 → reload 還原
+    }
+  }
+
   // 儲存付款方式
   const handleSaveMethod = async (method: Partial<PaymentMethod>) => {
     try {
@@ -234,9 +393,9 @@ export default function FinanceSettingsPage() {
     }
   }
 
-  // 刪除付款方式
+  // 刪除付款方式（hard delete、被歷史紀錄引用時回 409）
   const handleDeleteMethod = async (method: PaymentMethod) => {
-    const confirmed = await confirm(`確定要刪除「${method.name}」嗎？`, {
+    const confirmed = await confirm(`確定要刪除「${method.name}」嗎？此動作無法復原。`, {
       title: '刪除付款方式',
       type: 'warning',
     })
@@ -246,7 +405,11 @@ export default function FinanceSettingsPage() {
       const res = await fetch(`/api/finance/payment-methods?id=${method.id}`, {
         method: 'DELETE',
       })
-      if (!res.ok) throw new Error('刪除失敗')
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}))
+        await alert(body.error || '刪除失敗', 'error')
+        return
+      }
       await loadData()
       await alert('刪除成功', 'success')
     } catch (error) {
@@ -441,93 +604,54 @@ export default function FinanceSettingsPage() {
         {/* 收款方式 */}
         {activeSection === 'receipt' && (
           <div className="space-y-4">
-            <Card className="rounded-lg overflow-hidden">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[60px]">排序</TableHead>
-                    <TableHead>名稱</TableHead>
-                    <TableHead>說明</TableHead>
-                    <TableHead>借方科目</TableHead>
-                    <TableHead>貸方科目</TableHead>
-                    <TableHead className="w-[80px]">狀態</TableHead>
-                    <TableHead className="w-[80px] text-right">操作</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {receiptMethods.length === 0 ? (
+            <Card className="border border-border rounded-xl overflow-hidden bg-card shadow-sm">
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={e => handleMethodDragEnd(e, 'receipt')}
+              >
+                <Table>
+                  <TableHeader>
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center py-8 text-morandi-muted">
-                        尚未設定收款方式
-                      </TableCell>
+                      <TableHead className="w-[40px]"></TableHead>
+                      <TableHead>名稱</TableHead>
+                      <TableHead>說明</TableHead>
+                      <TableHead>付款提示</TableHead>
+                      <TableHead>借方科目</TableHead>
+                      <TableHead>貸方科目</TableHead>
+                      <TableHead className="w-[80px]">狀態</TableHead>
+                      <TableHead className="w-[80px] text-right">操作</TableHead>
                     </TableRow>
-                  ) : (
-                    receiptMethods.map(method => (
-                      <TableRow key={method.id} className={!method.is_active ? 'opacity-50' : ''}>
-                        <TableCell className="text-morandi-muted">{method.sort_order}</TableCell>
-                        <TableCell className="font-medium">
-                          {method.name}
-                          {method.is_system && (
-                            <Badge variant="outline" className="ml-2 text-[10px] px-1.5 py-0">
-                              系統
-                            </Badge>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-morandi-muted text-sm">
-                          {method.description || '-'}
-                        </TableCell>
-                        <TableCell className="text-morandi-muted text-sm">
-                          {method.debit_account
-                            ? `${method.debit_account.code} ${method.debit_account.name}`
-                            : '-'}
-                        </TableCell>
-                        <TableCell className="text-morandi-muted text-sm">
-                          {method.credit_account
-                            ? `${method.credit_account.code} ${method.credit_account.name}`
-                            : '-'}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Switch
-                              checked={method.is_active}
-                              onCheckedChange={() => handleToggleMethodActive(method)}
-                            />
-                            <span
-                              className={`text-xs ${method.is_active ? 'text-morandi-primary' : 'text-morandi-muted'}`}
-                            >
-                              {method.is_active ? '啟用' : '停用'}
-                            </span>
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-1">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => {
-                                setEditingMethod(method)
-                                setIsMethodDialogOpen(true)
-                              }}
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                            {!method.is_system && (
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => handleDeleteMethod(method)}
-                                className="text-status-danger hover:text-status-danger/80"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            )}
-                          </div>
+                  </TableHeader>
+                  <TableBody>
+                    {receiptMethods.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={8} className="text-center py-8 text-morandi-muted">
+                          尚未設定收款方式
                         </TableCell>
                       </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
+                    ) : (
+                      <SortableContext
+                        items={receiptMethods.map(m => m.id)}
+                        strategy={verticalListSortingStrategy}
+                      >
+                        {receiptMethods.map(method => (
+                          <SortableMethodRow
+                            key={method.id}
+                            method={method}
+                            onEdit={() => {
+                              setEditingMethod(method)
+                              setIsMethodDialogOpen(true)
+                            }}
+                            onToggle={() => handleToggleMethodActive(method)}
+                            onDelete={() => handleDeleteMethod(method)}
+                          />
+                        ))}
+                      </SortableContext>
+                    )}
+                  </TableBody>
+                </Table>
+              </DndContext>
             </Card>
           </div>
         )}
@@ -535,93 +659,54 @@ export default function FinanceSettingsPage() {
         {/* 付款方式 */}
         {activeSection === 'payment' && (
           <div className="space-y-4">
-            <Card className="rounded-lg overflow-hidden">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[60px]">排序</TableHead>
-                    <TableHead>名稱</TableHead>
-                    <TableHead>說明</TableHead>
-                    <TableHead>借方科目</TableHead>
-                    <TableHead>貸方科目</TableHead>
-                    <TableHead className="w-[80px]">狀態</TableHead>
-                    <TableHead className="w-[80px] text-right">操作</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {paymentMethodsList.length === 0 ? (
+            <Card className="border border-border rounded-xl overflow-hidden bg-card shadow-sm">
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={e => handleMethodDragEnd(e, 'payment')}
+              >
+                <Table>
+                  <TableHeader>
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center py-8 text-morandi-muted">
-                        尚未設定付款方式
-                      </TableCell>
+                      <TableHead className="w-[40px]"></TableHead>
+                      <TableHead>名稱</TableHead>
+                      <TableHead>說明</TableHead>
+                      <TableHead>付款提示</TableHead>
+                      <TableHead>借方科目</TableHead>
+                      <TableHead>貸方科目</TableHead>
+                      <TableHead className="w-[80px]">狀態</TableHead>
+                      <TableHead className="w-[80px] text-right">操作</TableHead>
                     </TableRow>
-                  ) : (
-                    paymentMethodsList.map(method => (
-                      <TableRow key={method.id} className={!method.is_active ? 'opacity-50' : ''}>
-                        <TableCell className="text-morandi-muted">{method.sort_order}</TableCell>
-                        <TableCell className="font-medium">
-                          {method.name}
-                          {method.is_system && (
-                            <Badge variant="outline" className="ml-2 text-[10px] px-1.5 py-0">
-                              系統
-                            </Badge>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-morandi-muted text-sm">
-                          {method.description || '-'}
-                        </TableCell>
-                        <TableCell className="text-morandi-muted text-sm">
-                          {method.debit_account
-                            ? `${method.debit_account.code} ${method.debit_account.name}`
-                            : '-'}
-                        </TableCell>
-                        <TableCell className="text-morandi-muted text-sm">
-                          {method.credit_account
-                            ? `${method.credit_account.code} ${method.credit_account.name}`
-                            : '-'}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Switch
-                              checked={method.is_active}
-                              onCheckedChange={() => handleToggleMethodActive(method)}
-                            />
-                            <span
-                              className={`text-xs ${method.is_active ? 'text-morandi-primary' : 'text-morandi-muted'}`}
-                            >
-                              {method.is_active ? '啟用' : '停用'}
-                            </span>
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-1">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => {
-                                setEditingMethod(method)
-                                setIsMethodDialogOpen(true)
-                              }}
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                            {!method.is_system && (
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => handleDeleteMethod(method)}
-                                className="text-status-danger hover:text-status-danger/80"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            )}
-                          </div>
+                  </TableHeader>
+                  <TableBody>
+                    {paymentMethodsList.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={8} className="text-center py-8 text-morandi-muted">
+                          尚未設定付款方式
                         </TableCell>
                       </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
+                    ) : (
+                      <SortableContext
+                        items={paymentMethodsList.map(m => m.id)}
+                        strategy={verticalListSortingStrategy}
+                      >
+                        {paymentMethodsList.map(method => (
+                          <SortableMethodRow
+                            key={method.id}
+                            method={method}
+                            onEdit={() => {
+                              setEditingMethod(method)
+                              setIsMethodDialogOpen(true)
+                            }}
+                            onToggle={() => handleToggleMethodActive(method)}
+                            onDelete={() => handleDeleteMethod(method)}
+                          />
+                        ))}
+                      </SortableContext>
+                    )}
+                  </TableBody>
+                </Table>
+              </DndContext>
             </Card>
           </div>
         )}
@@ -629,7 +714,7 @@ export default function FinanceSettingsPage() {
         {/* 請款類別 */}
         {activeSection === 'category' && (
           <div className="space-y-4">
-            <Card className="rounded-lg overflow-hidden">
+            <Card className="border border-border rounded-xl overflow-hidden bg-card shadow-sm">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -710,7 +795,7 @@ export default function FinanceSettingsPage() {
         {/* 公司支出項目 */}
         {activeSection === 'company_expense' && (
           <div className="space-y-4">
-            <Card className="rounded-lg overflow-hidden">
+            <Card className="border border-border rounded-xl overflow-hidden bg-card shadow-sm">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -793,7 +878,7 @@ export default function FinanceSettingsPage() {
         {/* 公司收入項目 */}
         {activeSection === 'company_income' && (
           <div className="space-y-4">
-            <Card className="rounded-lg overflow-hidden">
+            <Card className="border border-border rounded-xl overflow-hidden bg-card shadow-sm">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -876,7 +961,7 @@ export default function FinanceSettingsPage() {
         {/* 銀行帳戶 */}
         {activeSection === 'bank' && (
           <div className="space-y-4">
-            <Card className="rounded-lg overflow-hidden">
+            <Card className="border border-border rounded-xl overflow-hidden bg-card shadow-sm">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -941,7 +1026,7 @@ export default function FinanceSettingsPage() {
         {/* 獎金設定 */}
         {activeSection === 'bonus' && (
           <div className="space-y-4">
-            <Card className="rounded-lg overflow-hidden p-8">
+            <Card className="border border-border rounded-xl overflow-hidden bg-card shadow-sm p-8">
               <div className="text-center text-morandi-muted py-8">
                 <Award className="h-12 w-12 mx-auto mb-3 opacity-40" />
                 <p className="text-lg font-medium">獎金設定</p>
