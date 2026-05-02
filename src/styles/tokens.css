@@ -93,15 +93,15 @@
   --card-foreground: var(--morandi-primary);
   --border-muted: var(--morandi-container);
 
-  /* 表單元素專用變數 */
-  --input-border: #d4c4b0;
-  --input-border-hover: #c4a572;
+  /* 表單元素專用變數 — 2026-05-02 加深邊框 + 加深字色，UX 反映看不清楚 */
+  --input-border: #b8a385;
+  --input-border-hover: #a08a68;
   --input-border-focus: #c4a572;
   --input-bg: #ffffff;
   --input-disabled-bg: #f0ede8;
   --input-readonly-bg: #f8f6f4;
-  --input-text: #3a3633;
-  --input-placeholder: #b8b2aa;
+  --input-text: #2a2522;
+  --input-placeholder: #a89e92;
 
   /* Shadcn 標準變數（按鈕等組件使用） */
   --primary: #c9aa7c;
@@ -113,7 +113,7 @@
   --muted: #e8e5e0;
   --muted-foreground: #8b8680;
   --ring: #c9aa7c;
-  --input: #d4c4b0;
+  --input: #b8a385;
 }
 
 /* ─────────────────────────────────────────────
