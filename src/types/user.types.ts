@@ -100,7 +100,6 @@ export interface EmployeeFull {
   workspace_type?: 'travel_agency'
   selected_workspace_id?: string
   pinyin?: string | null
-  preferred_features?: string[]
   password_hash?: string
   last_password_change?: string
   must_change_password?: boolean

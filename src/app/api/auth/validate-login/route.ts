@@ -133,7 +133,9 @@ export async function POST(request: NextRequest) {
     const mustChangePassword =
       (employee as Record<string, unknown>).must_change_password === true
 
-    return NextResponse.json({
+    // 寫 cookie 標「當前 workspace」、給 get-layout-context 篩用（user 多 workspace 時）
+    // 不然 user_id 對到多筆 employee（漫途平台主管 + 租戶員工）會抓錯筆、sidebar 全 hide
+    const response = NextResponse.json({
       success: true,
       data: {
         employee: employeeData,
@@ -147,6 +149,13 @@ export async function POST(request: NextRequest) {
         mustChangePassword,
       },
     })
+    response.cookies.set('venturo-workspace-id', workspace.id, {
+      httpOnly: false, // client 需要讀取（debug）、不放敏感資料
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 60 * 60 * 24 * 7, // 7 天
+    })
+    return response
   } catch (error) {
     logger.error('Validate login error:', error)
     captureException(error, { module: 'auth.validate-login' })

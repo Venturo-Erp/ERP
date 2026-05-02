@@ -401,12 +401,8 @@ export function Sidebar() {
     return pathname.startsWith(href)
   }
 
-  // 權限過濾：HR role_tab_permissions 為 SSOT、不再讀 user.permissions array
-  const preferredFeatures = useMemo(
-    () => user?.preferred_features || [],
-    [user?.preferred_features]
-  )
-
+  // 權限過濾：純靠 capability + workspace_features
+  // （個人偏好 menu 過濾已於 2026-05-02 砍除、William 拍板「以前砍掉的、要清乾淨」）
   const visibleMenuItems = useMemo(() => {
     const workspaceCode = user?.workspace_code
 
@@ -429,14 +425,6 @@ export function Sidebar() {
           ) {
             return null
           }
-          // 個人偏好 menu 過濾：含 '*' 視為「全部顯示」（不再做偏好過濾、退回 capability check）
-          if (
-            preferredFeatures.length > 0 &&
-            !preferredFeatures.includes('*') &&
-            item.requiredPermission
-          ) {
-            if (!preferredFeatures.includes(item.requiredPermission)) return null
-          }
           if (item.children) {
             const visibleChildren = filterMenuByPermissions(item.children)
             if (visibleChildren.length > 0) {
@@ -454,7 +442,6 @@ export function Sidebar() {
   }, [
     user?.id,
     user?.workspace_code,
-    preferredFeatures,
     canReadAnyInModule,
     isFeatureEnabled,
     enabledFeatures,

@@ -15,6 +15,7 @@
  */
 
 import { cache } from 'react'
+import { cookies } from 'next/headers'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { getSupabaseAdminClient } from '@/lib/supabase/admin'
 import type { User } from '@supabase/supabase-js'
@@ -66,13 +67,24 @@ export const getLayoutContext = cache(async (): Promise<LayoutContext> => {
 
   const admin = getSupabaseAdminClient()
 
+  // 讀 cookie 標的「當前 workspace」（validate-login 登入時寫的）
+  // user 在多 workspace 都有 employee（如 William 在 Corner 跟 VENTURO 各一筆）、要靠 cookie 區分
+  const cookieStore = await cookies()
+  const currentWorkspaceId = cookieStore.get('venturo-workspace-id')?.value
+
   // Round-trip 2: employee（用 user_id 對 auth.uid() 篩、E1 後 user_id 已對齊）
   // 兼容 Pattern A 舊資料：employee.id = auth.uid()
-  const { data: employees } = await admin
+  let employeeQuery = admin
     .from('employees')
     .select('id, employee_number, display_name, english_name, role_id, workspace_id, status')
     .or(`user_id.eq.${user.id},id.eq.${user.id}`)
-    .limit(1)
+
+  // 有 cookie 的 workspace_id 就嚴格篩、避免抓到別的 workspace 的 employee
+  if (currentWorkspaceId) {
+    employeeQuery = employeeQuery.eq('workspace_id', currentWorkspaceId)
+  }
+
+  const { data: employees } = await employeeQuery.limit(1)
 
   const employee = employees?.[0]
 
