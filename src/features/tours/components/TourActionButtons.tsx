@@ -12,7 +12,7 @@
  */
 
 import { useCallback } from 'react'
-import { Archive, ArchiveRestore, Trash2, Edit, Share2, Copy, Send } from 'lucide-react'
+import { Archive, ArchiveRestore, Trash2, Edit, Copy, Send } from 'lucide-react'
 import { Tour, EmployeeFull } from '@/stores/types'
 import { TOUR_STATUS } from '@/lib/constants/status-maps'
 
@@ -70,18 +70,7 @@ export function useTourActionButtons(params: UseTourActionButtonsParams) {
         }
       }
 
-      const handleCopyLink = async (e: React.MouseEvent) => {
-        e.stopPropagation()
-        const employeeCode = params.user?.employee_number || params.user?.id
-        const refParam = employeeCode ? `?ref=${employeeCode}` : ''
-        const link = `${window.location.origin}/public/itinerary/${tour.id}${refParam}`
-        try {
-          await navigator.clipboard.writeText(link)
-          toast.success('已複製行程連結')
-        } catch {
-          toast.error('複製失敗')
-        }
-      }
+      // 「複製公開行程連結」功能 2026-05-02 已隨 /public/itinerary 砍除（William 拍板、之後重寫）
 
       const ArchiveButton = (
         <Button
@@ -171,15 +160,6 @@ export function useTourActionButtons(params: UseTourActionButtonsParams) {
                 className="h-7 px-2 text-xs text-morandi-gold hover:text-morandi-gold hover:bg-morandi-gold/10"
               >
                 報名
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleCopyLink}
-                className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground gap-1"
-              >
-                <Share2 size={12} />
-                分享
               </Button>
             </>
           )}
