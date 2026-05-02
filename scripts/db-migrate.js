@@ -70,35 +70,32 @@ async function executeSQL(sql, description = 'SQL') {
 
 /**
  * 檢查 migration 記錄表是否存在
+ * SSOT: supabase_migrations.schema_migrations (Supabase CLI 標準)
  */
 async function ensureMigrationTable() {
-  const sql = `
-    CREATE TABLE IF NOT EXISTS public._migrations (
-      id serial PRIMARY KEY,
-      name text NOT NULL UNIQUE,
-      executed_at timestamp with time zone DEFAULT now()
-    );
-  `
-
+  // supabase_migrations.schema_migrations 由 Supabase 平台自動建立、無需手動 CREATE。
+  // 這裡只驗證可讀取。
+  const sql = `SELECT 1 FROM supabase_migrations.schema_migrations LIMIT 1;`
   try {
-    await executeSQL(sql, '建立 migration 記錄表')
+    await executeSQL(sql, '驗證 schema_migrations 可讀')
     return true
   } catch (error) {
-    console.error('無法建立 migration 表:', error.message)
+    console.error('無法存取 supabase_migrations.schema_migrations:', error.message)
     return false
   }
 }
 
 /**
- * 取得已執行的 migrations
+ * 取得已執行的 migrations（回傳 filename 清單，例如 20260101000000_xxx.sql）
+ * 從 schema_migrations.version + name 還原 filename
  */
 async function getExecutedMigrations() {
-  const sql = `SELECT name FROM public._migrations ORDER BY executed_at;`
+  const sql = `SELECT version, name FROM supabase_migrations.schema_migrations ORDER BY version;`
 
   try {
     const result = await executeSQL(sql, '查詢已執行的 migrations')
     const data = JSON.parse(result.data)
-    return data.map(row => row.name)
+    return data.map(row => `${row.version}_${row.name}.sql`)
   } catch (error) {
     console.warn('⚠️ 無法查詢 migrations，可能是第一次執行')
     return []
@@ -107,9 +104,16 @@ async function getExecutedMigrations() {
 
 /**
  * 記錄已執行的 migration
+ * filename 格式：YYYYMMDDHHMMSS_description.sql
  */
 async function recordMigration(name) {
-  const sql = `INSERT INTO public._migrations (name) VALUES ('${name}');`
+  const m = name.match(/^(\d{14})_(.+)\.sql$/)
+  if (!m) {
+    throw new Error(`Migration filename 格式錯誤（需 YYYYMMDDHHMMSS_xxx.sql）: ${name}`)
+  }
+  const version = m[1]
+  const baseName = m[2].replace(/'/g, "''")
+  const sql = `INSERT INTO supabase_migrations.schema_migrations (version, name, statements) VALUES ('${version}', '${baseName}', ARRAY[]::text[]) ON CONFLICT (version) DO NOTHING;`
   await executeSQL(sql, `記錄 migration: ${name}`)
 }
 

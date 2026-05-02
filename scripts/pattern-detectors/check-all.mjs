@@ -129,9 +129,10 @@ async function detectP016() {
 }
 
 async function detectP017() {
-  // P017: _migrations / rate_limits / ref_cities RLS 必須開
+  // P017: rate_limits / ref_cities RLS 必須開
+  // (原本還列 _migrations、已於 20260502240000 廢除、由 supabase_migrations.schema_migrations 取代)
   const result = await runSql(
-    `SELECT c.relname, c.relrowsecurity AS rls FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public' AND c.relname IN ('_migrations','rate_limits','ref_cities') AND c.relrowsecurity=false`
+    `SELECT c.relname, c.relrowsecurity AS rls FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public' AND c.relname IN ('rate_limits','ref_cities') AND c.relrowsecurity=false`
   )
   if (result.length === 0) return ok('P017', '系統表 RLS 全開')
   return fail('P017', `${result.length} 張系統表 RLS 沒開`, result)

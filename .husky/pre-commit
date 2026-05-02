@@ -36,4 +36,15 @@ if [ -n "$CONSOLE_LOGS" ]; then
   echo "💡 Consider using proper logging or remove debug logs"
 fi
 
+# 5. ERP 整理憲法守門（VENTURO_ERP_STANDARDS.md Section 10）
+echo "🛡️  Running ERP standards check..."
+if [ -x scripts/check-standards.sh ]; then
+  scripts/check-standards.sh --strict
+  if [ $? -ne 0 ]; then
+    echo "❌ ERP standards violations found"
+    echo "💡 See docs/VENTURO_ERP_STANDARDS.md Section 10"
+    exit 1
+  fi
+fi
+
 echo "✅ All checks passed!"

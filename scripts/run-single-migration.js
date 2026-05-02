@@ -79,11 +79,17 @@ async function main() {
   try {
     await executeSQL(sql, migrationFile)
 
-    // 記錄到 _migrations 表
+    // 記錄到 supabase_migrations.schema_migrations（SSOT）
+    const m = migrationFile.match(/^(\d{14})_(.+)\.sql$/)
+    if (!m) {
+      throw new Error(`Migration filename 格式錯誤（需 YYYYMMDDHHMMSS_xxx.sql）: ${migrationFile}`)
+    }
+    const version = m[1]
+    const baseName = m[2].replace(/'/g, "''")
     const recordSql = `
-      INSERT INTO _migrations (name, executed_at)
-      VALUES ('${migrationFile}', NOW())
-      ON CONFLICT (name) DO NOTHING;
+      INSERT INTO supabase_migrations.schema_migrations (version, name, statements)
+      VALUES ('${version}', '${baseName}', ARRAY[]::text[])
+      ON CONFLICT (version) DO NOTHING;
     `
     await executeSQL(recordSql, '記錄 migration')
 

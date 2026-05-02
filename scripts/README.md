@@ -17,7 +17,7 @@ npm run db:migrate
 - ✅ 自動檢查 `supabase/migrations/` 目錄
 - ✅ 找出未執行的 migration 檔案
 - ✅ 按順序執行它們
-- ✅ 記錄已執行的 migrations 到 `_migrations` 表格
+- ✅ 記錄已執行的 migrations 到 `supabase_migrations.schema_migrations` 表格
 
 ### 2. 檢查資料庫狀態
 
@@ -49,24 +49,25 @@ node verify-final-status.js
 
 ### Migration 記錄表
 
-所有執行過的 migrations 都記錄在 `public._migrations` 表格：
+所有執行過的 migrations 都記錄在 `supabase_migrations.schema_migrations` 表格（Supabase CLI 標準、SSOT）：
 
 ```sql
-CREATE TABLE public._migrations (
-  id serial PRIMARY KEY,
-  name text NOT NULL UNIQUE,
-  executed_at timestamp with time zone DEFAULT now()
-);
+-- 由 Supabase 平台自動建立、欄位
+-- version    text PRIMARY KEY  -- 14 位 timestamp（YYYYMMDDHHMMSS）
+-- name       text              -- description（不含 timestamp 前綴與 .sql 後綴）
+-- statements text[]            -- 已執行的 SQL statements
 ```
+
+> 舊的 `public._migrations` 已於 `20260502240000_drop_legacy_migrations_table.sql` 廢除（兩套 SSOT 違反 VENTURO_ERP_STANDARDS Section 10 #15）。
 
 ### 執行流程
 
 ```
 1. 讀取 supabase/migrations/*.sql
-2. 查詢 _migrations 表格
+2. 查詢 schema_migrations 表格
 3. 找出未執行的檔案
 4. 依序執行 SQL
-5. 記錄到 _migrations
+5. 記錄到 schema_migrations
 ```
 
 ## 🎯 使用情境
@@ -108,7 +109,7 @@ node verify-final-status.js
 
 ## ⚠️ 注意事項
 
-1. **不要手動修改 `_migrations` 表格**
+1. **不要手動修改 `supabase_migrations.schema_migrations` 表格**
    - 這會導致 migration 狀態不一致
 
 2. **Migration 檔案命名規則**
@@ -179,7 +180,7 @@ const req = https.request({
 }, (res) => {
   res.on('data', d => console.log(d.toString()));
 });
-req.write(JSON.stringify({query: 'SELECT * FROM _migrations ORDER BY executed_at;'}));
+req.write(JSON.stringify({query: 'SELECT version, name FROM supabase_migrations.schema_migrations ORDER BY version;'}));
 req.end();
 "
 ```
@@ -191,9 +192,12 @@ req.end();
 1. 前往 [Supabase Dashboard](https://supabase.com/dashboard/project/pfqvdacxowpgfamuvnsn/sql/new)
 2. 複製 migration 檔案的 SQL
 3. 執行
-4. 記錄到 `_migrations`：
+4. 記錄到 `supabase_migrations.schema_migrations`：
    ```sql
-   INSERT INTO public._migrations (name) VALUES ('檔案名稱.sql');
+   -- 從檔名拆出 version + name
+   INSERT INTO supabase_migrations.schema_migrations (version, name, statements)
+   VALUES ('20260101000000', 'my_migration_description', ARRAY[]::text[])
+   ON CONFLICT (version) DO NOTHING;
    ```
 
 ## ✅ 最佳實踐

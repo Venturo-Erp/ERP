@@ -1,8 +1,29 @@
 # Venturo 系統架構規範
 
+> ⚠️ **DEPRECATED 2026-05-02**：本文件部分跟憲法 `VENTURO_ERP_STANDARDS.md` 衝突、以憲法為準。
+>
+> **過期 / 衝突部分**：
+> - **權限控制規範（§4）** 用舊概念 `FEATURE_PERMISSIONS` / `ROLE_CONFIG` / `hasPermissionForRoute` / `super_admin` / 「擁有平台管理資格的人」、跟憲法 §6 衝突。
+>   - 憲法權限 SSOT：`role_capabilities` + `workspace_features` + `has_capability` RPC + `useMyCapabilities().has(code)` + `hasCapabilityByCode()` 後端
+>   - capability code 命名：`{module}.{action}` / `{module}.{tab}.{action}` / `platform.is_admin`
+>   - 不准 `useAuthStore.isAdmin` / `role_tab_permissions` / 應用層重做權限查詢
+> - **核心原則 §1 SSOT** 跟憲法 §0 重疊、以憲法為準
+>
+> **仍有效的獨有細節**：
+> - **§2 五層架構**（UI → Hook → Store → API、層級職責表）— 憲法沒涵蓋、繼續適用
+> - **§3 資料隔離**（workspaceScoped Store 配置、跟憲法 §5 RLS 互補）— 仍適用
+> - **§5 Store 開發規範**（`createStore` 工廠、命名、`StoreConfig`）— 仍適用
+> - **§6 數據系統規範**（SWR + Realtime + `createEntityHook`、SWR key 命名 `entity:{table}:{type}`、快取策略 STATIC/DYNAMIC/REALTIME）— 重要實作細節、繼續適用
+> - **§7 路由與導航**（`router.push` vs `window.location`）— 仍適用
+> - **§8 錯誤處理 / 靜默降級** — 仍適用
+> - **架構核心哲學「團為中心」 + 獨立視角 vs 從屬視角** — 業務理解、仍適用
+> - **資料流邊界**（ERP ↔ Online）— 仍適用
+>
+> **計畫**：本檔不再更新、§6 數據系統規範未來考慮拆成獨立 `DATA_SYSTEM.md`。權限部分**禁止**繼續按本檔做。
+
 **版本**: 1.0.0
 **日期**: 2025-12-09
-**目的**: 確保系統開發與修復遵循統一標準，支援規模化擴展
+**狀態**: ⚠️ deprecated（部分有效、見上方 header）
 
 ---
 

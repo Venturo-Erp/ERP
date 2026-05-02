@@ -227,7 +227,6 @@ const KNOWN_GLOBAL = new Set([
   'cities',
   'attractions',
   'restaurants',
-  '_migrations',
   'employees',
 ])
 

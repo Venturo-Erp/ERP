@@ -1,5 +1,20 @@
 # Venturo 資料庫設計規範
 
+> ⚠️ **DEPRECATED 2026-05-02**：本文件部分過期、跟憲法 `VENTURO_ERP_STANDARDS.md` 衝突的部分以憲法為準。
+>
+> **過期 / 衝突部分**：
+> - **§3 RLS** 用舊函式名 `get_current_user_workspace()` / `is_super_admin()`、憲法 §5 改用 `has_capability_for_workspace(workspace_id, code)` 三條 policy 模板、以憲法為準。
+> - **§5 命名** 跟憲法 Section 1 重疊、以 `FIELD_NAMING_STANDARDS.md` 為命名 SSOT。
+> - **§6 修復歷史**（2026-01-12 修復記錄）只是過期報告、不再維護。
+>
+> **仍有效的細節**：
+> - **§1 / §2 業務流程地圖**（提案 → 旅遊團生命週期、資料關聯圖）— 跟 `BUSINESS_MAP.md` / `SCHEMA_PLAN.md` 同方向、可作為背景閱讀
+> - **§4 表格分類**（業務 / 共用 / 會員三類 + 範例清單）— 憲法沒涵蓋這個分類視角
+> - **§8 審計欄位 FK 慣例**（`created_by` / `updated_by` 指 `employees(id)`、`user_id` / `sender_id` 等指 `auth.users`）— 仍是 ERP 實際慣例、`CLAUDE.md` 紅線引用
+> - **§9 多租戶表編號 UNIQUE 規範**（tenant-scoped UNIQUE）— **已整合進憲法 Section 2**、未來改本檔不必同步
+>
+> **計畫**：本檔不再更新、§4 / §8 細節未來合併進憲法或保留為附錄參考。
+
 > 版本：2.0
 > 建立日期：2026-01-12
 > 適用範圍：venturo-erp 與 venturo-online 共用資料庫

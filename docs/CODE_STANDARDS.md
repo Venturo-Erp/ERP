@@ -1,8 +1,25 @@
 # 📋 Venturo 代碼規範 - 嚴格執行版
 
+> ⚠️ **DEPRECATED 2026-05-02**：本文件部分跟憲法 `VENTURO_ERP_STANDARDS.md` 重疊、衝突部分以憲法為準。
+>
+> **跟憲法重疊（以憲法為準）**：
+> - **規則 #1 禁 `any`** → 憲法 §11 已規範
+> - **規則 #6 禁 `console.log`** → 憲法 §10.19 已規範
+> - **`as any` 遺留清單**（2025-12-25 快照、43 處）— 是歷史紀錄、不再維護
+>
+> **仍有效的獨有細節**：
+> - **規則 #2 單檔行數限制**（300 / 200 / 150 行）— 憲法沒涵蓋、繼續適用
+> - **規則 #3-5 組件職責 / 嵌套深度 / 參數數量** — 細節規範、繼續適用
+> - **日期處理規範**（`parseLocalDate` / `toTaipeiDateString`、避免 UTC 午夜陷阱）— 重要實作細節、繼續適用
+> - **Stale Closure 防範**（SWR functional update / `useCallback` 依賴）— 重要實作細節、繼續適用
+> - **Next.js RSC 邊界**（`'use client'` 規則）— 重要實作細節、繼續適用
+> - **檔案 / 變數命名**（PascalCase / camelCase / kebab-case 規則）— 仍適用
+>
+> **計畫**：本檔不再更新、實作細節未來考慮合併進憲法或拆成 `IMPLEMENTATION_PATTERNS.md`。
+
 **版本**: 2.0.0
 **日期**: 2025-12-10
-**強制執行**: ✅ 必須
+**狀態**: ⚠️ deprecated（部分有效、見上方 header）
 
 ---
 

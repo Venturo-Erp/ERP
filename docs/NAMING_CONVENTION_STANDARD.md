@@ -1,8 +1,14 @@
 # VENTURO 命名規範標準
 
+> ⚠️ **DEPRECATED 2026-05-02**：本文件已過期、跟憲法 `VENTURO_ERP_STANDARDS.md` Section 1 + `FIELD_NAMING_STANDARDS.md` 重疊、且提及已不再使用的 IndexedDB。命名 SSOT 改以 `FIELD_NAMING_STANDARDS.md` 為準。
+>
+> **仍有效的核心結論**：snake_case + 表名複數 + 不混 camelCase。這幾條已收進憲法 Section 1、不必再從本檔讀。
+>
+> **計畫**：本檔不再更新、未來合併進憲法後刪除。
+
 > 版本：2.0
 > 生效日期：2025-01-15
-> 狀態：正式規範
+> 狀態：⚠️ deprecated
 
 ---
 
