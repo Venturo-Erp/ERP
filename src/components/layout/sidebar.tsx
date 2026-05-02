@@ -467,27 +467,22 @@ export function Sidebar() {
           key={`${item.href}-${item.label}`}
           data-tutorial={`nav-${item.href.replace(/^\//, '').split('/')[0]}`}
         >
-          {/* 父項目 */}
+          {/* 父項目：flex layout、icon 在固定 w-16 wrapper、不隨 sidebar 寬度晃動 */}
           <div
             className={cn(
-              'w-full relative h-11 text-sm text-morandi-secondary transition-all duration-200 cursor-pointer',
+              'w-full flex items-center h-11 text-sm text-morandi-secondary cursor-pointer',
               'hover:bg-morandi-gold/5 hover:text-morandi-gold',
               active && 'bg-morandi-gold/10 text-morandi-gold border-l-3 border-morandi-gold'
             )}
             onClick={() => toggleSubmenu(item.href)}
           >
-            <item.icon
-              size={22}
-              weight="duotone"
-              className={cn(
-                'absolute top-1/2 -translate-y-1/2',
-                showExpanded ? 'left-4' : 'left-1/2 -translate-x-1/2'
-              )}
-            />
+            <div className="w-16 flex justify-center shrink-0">
+              <item.icon size={22} weight="duotone" />
+            </div>
             {showExpanded && (
               <>
-                <span className="ml-12 block text-left leading-11">{item.label}</span>
-                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                <span className="flex-1 text-left">{item.label}</span>
+                <div className="px-3">
                   {isSubmenuExpanded ? (
                     <ChevronDown size={14} className="text-morandi-gold" />
                   ) : (
@@ -508,7 +503,7 @@ export function Sidebar() {
       )
     }
 
-    // 沒有子項目的菜單項
+    // 沒有子項目的菜單項：flex layout、icon 固定不晃
     return (
       <li
         key={`${item.href}-${item.label}`}
@@ -519,25 +514,15 @@ export function Sidebar() {
           prefetch={false}
           onClick={closeSidebar}
           className={cn(
-            'w-full relative block h-11 text-sm text-morandi-secondary transition-all duration-200',
+            'w-full flex items-center h-11 text-sm text-morandi-secondary',
             'hover:bg-morandi-gold/5 hover:text-morandi-gold',
-            active && 'bg-morandi-gold/10 text-morandi-gold border-l-3 border-morandi-gold',
-            isChild && 'pl-4'
+            active && 'bg-morandi-gold/10 text-morandi-gold border-l-3 border-morandi-gold'
           )}
         >
-          <item.icon
-            size={isChild ? 16 : 22}
-            weight="duotone"
-            className={cn(
-              'absolute top-1/2 -translate-y-1/2',
-              showExpanded ? (isChild ? 'left-8' : 'left-4') : 'left-1/2 -translate-x-1/2'
-            )}
-          />
-          {showExpanded && (
-            <span className={cn('block text-left leading-11', isChild ? 'ml-14' : 'ml-12')}>
-              {item.label}
-            </span>
-          )}
+          <div className={cn('w-16 flex justify-center shrink-0', isChild && 'pl-4')}>
+            <item.icon size={isChild ? 16 : 22} weight="duotone" />
+          </div>
+          {showExpanded && <span className="flex-1 text-left">{item.label}</span>}
         </Link>
       </li>
     )
@@ -553,19 +538,16 @@ export function Sidebar() {
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      {/* Logo區域 */}
-      <div className="shrink-0 border-b border-border mx-3">
-        <div className="h-18 flex items-center relative">
-          <div
-            className={cn(
-              'absolute top-1/2 -translate-y-1/2 w-10 h-10 rounded-lg bg-morandi-gold flex items-center justify-center shadow-sm flex-shrink-0 opacity-90',
-              showExpanded ? 'left-3' : 'left-1/2 -translate-x-1/2'
-            )}
-          >
-            <span className="text-white font-semibold text-lg">V</span>
+      {/* Logo區域：flex layout、Logo 永遠在 w-10 + 邊距固定位置、不隨 sidebar 寬度晃動 */}
+      <div className="shrink-0 border-b border-border">
+        <div className="h-18 flex items-center">
+          <div className="w-16 flex justify-center shrink-0">
+            <div className="w-10 h-10 rounded-lg bg-morandi-gold flex items-center justify-center shadow-sm opacity-90">
+              <span className="text-white font-semibold text-lg">V</span>
+            </div>
           </div>
           {showExpanded && (
-            <div className="ml-[58px] text-xl font-bold text-morandi-primary">
+            <div className="text-xl font-bold text-morandi-primary">
               {user?.workspace_code || 'V'}
             </div>
           )}
