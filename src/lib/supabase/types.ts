@@ -198,108 +198,6 @@ export type Database = {
           },
         ]
       }
-      advance_items: {
-        Row: {
-          advance_list_id: string
-          advance_person: string
-          amount: number
-          created_at: string | null
-          description: string | null
-          id: string
-          name: string
-          payment_request_id: string | null
-          processed_at: string | null
-          processed_by: string | null
-          status: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          advance_list_id: string
-          advance_person: string
-          amount?: number
-          created_at?: string | null
-          description?: string | null
-          id?: string
-          name: string
-          payment_request_id?: string | null
-          processed_at?: string | null
-          processed_by?: string | null
-          status?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          advance_list_id?: string
-          advance_person?: string
-          amount?: number
-          created_at?: string | null
-          description?: string | null
-          id?: string
-          name?: string
-          payment_request_id?: string | null
-          processed_at?: string | null
-          processed_by?: string | null
-          status?: string | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "advance_items_advance_list_id_fkey"
-            columns: ["advance_list_id"]
-            isOneToOne: false
-            referencedRelation: "advance_lists"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "advance_items_processed_by_fkey"
-            columns: ["processed_by"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      advance_lists: {
-        Row: {
-          channel_id: string
-          created_at: string | null
-          created_by: string | null
-          created_by_legacy_author: string | null
-          id: string
-          updated_at: string | null
-        }
-        Insert: {
-          channel_id: string
-          created_at?: string | null
-          created_by?: string | null
-          created_by_legacy_author?: string | null
-          id?: string
-          updated_at?: string | null
-        }
-        Update: {
-          channel_id?: string
-          created_at?: string | null
-          created_by?: string | null
-          created_by_legacy_author?: string | null
-          id?: string
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "advance_lists_channel_id_fkey"
-            columns: ["channel_id"]
-            isOneToOne: false
-            referencedRelation: "channels"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "advance_lists_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       ai_conversations: {
         Row: {
           created_at: string | null
@@ -996,209 +894,6 @@ export type Database = {
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      channel_groups: {
-        Row: {
-          created_at: string | null
-          id: string
-          is_collapsed: boolean | null
-          is_system: boolean | null
-          name: string
-          order: number | null
-          system_type: string | null
-          updated_at: string | null
-          workspace_id: string
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string
-          is_collapsed?: boolean | null
-          is_system?: boolean | null
-          name: string
-          order?: number | null
-          system_type?: string | null
-          updated_at?: string | null
-          workspace_id: string
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          is_collapsed?: boolean | null
-          is_system?: boolean | null
-          name?: string
-          order?: number | null
-          system_type?: string | null
-          updated_at?: string | null
-          workspace_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "channel_groups_workspace_id_fkey"
-            columns: ["workspace_id"]
-            isOneToOne: false
-            referencedRelation: "workspaces"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      channel_members: {
-        Row: {
-          channel_id: string
-          created_at: string | null
-          employee_id: string
-          id: string
-          role: string
-          status: string
-          updated_at: string | null
-          workspace_id: string
-        }
-        Insert: {
-          channel_id: string
-          created_at?: string | null
-          employee_id: string
-          id?: string
-          role?: string
-          status?: string
-          updated_at?: string | null
-          workspace_id: string
-        }
-        Update: {
-          channel_id?: string
-          created_at?: string | null
-          employee_id?: string
-          id?: string
-          role?: string
-          status?: string
-          updated_at?: string | null
-          workspace_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "channel_members_channel_id_fkey"
-            columns: ["channel_id"]
-            isOneToOne: false
-            referencedRelation: "channels"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "channel_members_employee_id_fkey"
-            columns: ["employee_id"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "channel_members_workspace_id_fkey"
-            columns: ["workspace_id"]
-            isOneToOne: false
-            referencedRelation: "workspaces"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      channels: {
-        Row: {
-          archived_at: string | null
-          channel_type: string
-          created_at: string | null
-          created_by: string | null
-          description: string | null
-          dm_target_id: string | null
-          group_id: string | null
-          id: string
-          is_announcement: boolean
-          is_archived: boolean | null
-          is_company_wide: boolean | null
-          is_favorite: boolean | null
-          is_pinned: boolean | null
-          name: string
-          order: number | null
-          scope: string | null
-          tour_id: string | null
-          type: string | null
-          updated_at: string | null
-          updated_by: string | null
-          visibility: Database["public"]["Enums"]["channel_visibility"] | null
-          workspace_id: string
-        }
-        Insert: {
-          archived_at?: string | null
-          channel_type?: string
-          created_at?: string | null
-          created_by?: string | null
-          description?: string | null
-          dm_target_id?: string | null
-          group_id?: string | null
-          id?: string
-          is_announcement?: boolean
-          is_archived?: boolean | null
-          is_company_wide?: boolean | null
-          is_favorite?: boolean | null
-          is_pinned?: boolean | null
-          name: string
-          order?: number | null
-          scope?: string | null
-          tour_id?: string | null
-          type?: string | null
-          updated_at?: string | null
-          updated_by?: string | null
-          visibility?: Database["public"]["Enums"]["channel_visibility"] | null
-          workspace_id: string
-        }
-        Update: {
-          archived_at?: string | null
-          channel_type?: string
-          created_at?: string | null
-          created_by?: string | null
-          description?: string | null
-          dm_target_id?: string | null
-          group_id?: string | null
-          id?: string
-          is_announcement?: boolean
-          is_archived?: boolean | null
-          is_company_wide?: boolean | null
-          is_favorite?: boolean | null
-          is_pinned?: boolean | null
-          name?: string
-          order?: number | null
-          scope?: string | null
-          tour_id?: string | null
-          type?: string | null
-          updated_at?: string | null
-          updated_by?: string | null
-          visibility?: Database["public"]["Enums"]["channel_visibility"] | null
-          workspace_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "channels_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "channels_dm_target_id_fkey"
-            columns: ["dm_target_id"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "channels_group_id_fkey"
-            columns: ["group_id"]
-            isOneToOne: false
-            referencedRelation: "channel_groups"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "channels_tour_id_fkey"
-            columns: ["tour_id"]
-            isOneToOne: false
-            referencedRelation: "tours"
             referencedColumns: ["id"]
           },
         ]
@@ -2425,7 +2120,6 @@ export type Database = {
           password_hash: string | null
           personal_info: Json | null
           pinyin: string | null
-          preferred_features: Json | null
           role_id: string | null
           salary_info: Json | null
           status: string | null
@@ -2466,7 +2160,6 @@ export type Database = {
           password_hash?: string | null
           personal_info?: Json | null
           pinyin?: string | null
-          preferred_features?: Json | null
           role_id?: string | null
           salary_info?: Json | null
           status?: string | null
@@ -2507,7 +2200,6 @@ export type Database = {
           password_hash?: string | null
           personal_info?: Json | null
           pinyin?: string | null
-          preferred_features?: Json | null
           role_id?: string | null
           salary_info?: Json | null
           status?: string | null
@@ -2682,13 +2374,6 @@ export type Database = {
           workspace_id?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "flight_status_subscriptions_notify_channel_id_fkey"
-            columns: ["notify_channel_id"]
-            isOneToOne: false
-            referencedRelation: "channels"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "flight_status_subscriptions_workspace_id_fkey"
             columns: ["workspace_id"]
@@ -3803,354 +3488,6 @@ export type Database = {
           },
         ]
       }
-      messages: {
-        Row: {
-          _deleted: boolean | null
-          attachments: Json | null
-          author: Json | null
-          channel_id: string
-          content: string
-          created_at: string | null
-          created_by: string | null
-          created_by_legacy_author: string | null
-          edited_at: string | null
-          id: string
-          is_pinned: boolean | null
-          last_reply_at: string | null
-          metadata: Json | null
-          parent_message_id: string | null
-          reactions: Json | null
-          reply_count: number | null
-          updated_at: string | null
-          updated_by: string | null
-          workspace_id: string | null
-        }
-        Insert: {
-          _deleted?: boolean | null
-          attachments?: Json | null
-          author?: Json | null
-          channel_id: string
-          content: string
-          created_at?: string | null
-          created_by?: string | null
-          created_by_legacy_author?: string | null
-          edited_at?: string | null
-          id?: string
-          is_pinned?: boolean | null
-          last_reply_at?: string | null
-          metadata?: Json | null
-          parent_message_id?: string | null
-          reactions?: Json | null
-          reply_count?: number | null
-          updated_at?: string | null
-          updated_by?: string | null
-          workspace_id?: string | null
-        }
-        Update: {
-          _deleted?: boolean | null
-          attachments?: Json | null
-          author?: Json | null
-          channel_id?: string
-          content?: string
-          created_at?: string | null
-          created_by?: string | null
-          created_by_legacy_author?: string | null
-          edited_at?: string | null
-          id?: string
-          is_pinned?: boolean | null
-          last_reply_at?: string | null
-          metadata?: Json | null
-          parent_message_id?: string | null
-          reactions?: Json | null
-          reply_count?: number | null
-          updated_at?: string | null
-          updated_by?: string | null
-          workspace_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "messages_author_id_fkey"
-            columns: ["created_by_legacy_author"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "messages_channel_id_fkey"
-            columns: ["channel_id"]
-            isOneToOne: false
-            referencedRelation: "channels"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "messages_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "messages_parent_message_id_fkey"
-            columns: ["parent_message_id"]
-            isOneToOne: false
-            referencedRelation: "messages"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "messages_updated_by_fkey"
-            columns: ["updated_by"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "messages_workspace_id_fkey"
-            columns: ["workspace_id"]
-            isOneToOne: false
-            referencedRelation: "workspaces"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      michelin_restaurants: {
-        Row: {
-          address: string | null
-          address_en: string | null
-          avg_price_dinner: number | null
-          avg_price_lunch: number | null
-          awards: string[] | null
-          best_season: string[] | null
-          bib_gourmand: boolean | null
-          booking_contact: string | null
-          booking_email: string | null
-          booking_notes: string | null
-          chef_name: string | null
-          chef_profile: string | null
-          city_id: string
-          commission_rate: number | null
-          country_code: string | null
-          country_id: string
-          created_at: string | null
-          created_by: string | null
-          cuisine_type: string[] | null
-          currency: string | null
-          description: string | null
-          description_en: string | null
-          dining_restrictions: Json | null
-          dining_style: string | null
-          display_order: number | null
-          dress_code: string | null
-          email: string | null
-          english_name: string | null
-          facilities: Json | null
-          google_maps_url: string | null
-          green_star: boolean | null
-          group_menu_available: boolean | null
-          id: string
-          images: string[] | null
-          is_active: boolean | null
-          latitude: number | null
-          longitude: number | null
-          max_group_size: number | null
-          menu_images: string[] | null
-          michelin_guide_year: number | null
-          michelin_plate: boolean | null
-          michelin_stars: number | null
-          min_group_size: number | null
-          name: string
-          name_local: string | null
-          notes: string | null
-          opening_hours: Json | null
-          phone: string | null
-          price_range: string | null
-          ratings: Json | null
-          recommended_for: string[] | null
-          region_id: string | null
-          reservation_required: boolean | null
-          reservation_url: string | null
-          signature_dishes: string[] | null
-          specialties: string[] | null
-          updated_at: string | null
-          updated_by: string | null
-          website: string | null
-          workspace_id: string
-        }
-        Insert: {
-          address?: string | null
-          address_en?: string | null
-          avg_price_dinner?: number | null
-          avg_price_lunch?: number | null
-          awards?: string[] | null
-          best_season?: string[] | null
-          bib_gourmand?: boolean | null
-          booking_contact?: string | null
-          booking_email?: string | null
-          booking_notes?: string | null
-          chef_name?: string | null
-          chef_profile?: string | null
-          city_id: string
-          commission_rate?: number | null
-          country_code?: string | null
-          country_id: string
-          created_at?: string | null
-          created_by?: string | null
-          cuisine_type?: string[] | null
-          currency?: string | null
-          description?: string | null
-          description_en?: string | null
-          dining_restrictions?: Json | null
-          dining_style?: string | null
-          display_order?: number | null
-          dress_code?: string | null
-          email?: string | null
-          english_name?: string | null
-          facilities?: Json | null
-          google_maps_url?: string | null
-          green_star?: boolean | null
-          group_menu_available?: boolean | null
-          id?: string
-          images?: string[] | null
-          is_active?: boolean | null
-          latitude?: number | null
-          longitude?: number | null
-          max_group_size?: number | null
-          menu_images?: string[] | null
-          michelin_guide_year?: number | null
-          michelin_plate?: boolean | null
-          michelin_stars?: number | null
-          min_group_size?: number | null
-          name: string
-          name_local?: string | null
-          notes?: string | null
-          opening_hours?: Json | null
-          phone?: string | null
-          price_range?: string | null
-          ratings?: Json | null
-          recommended_for?: string[] | null
-          region_id?: string | null
-          reservation_required?: boolean | null
-          reservation_url?: string | null
-          signature_dishes?: string[] | null
-          specialties?: string[] | null
-          updated_at?: string | null
-          updated_by?: string | null
-          website?: string | null
-          workspace_id: string
-        }
-        Update: {
-          address?: string | null
-          address_en?: string | null
-          avg_price_dinner?: number | null
-          avg_price_lunch?: number | null
-          awards?: string[] | null
-          best_season?: string[] | null
-          bib_gourmand?: boolean | null
-          booking_contact?: string | null
-          booking_email?: string | null
-          booking_notes?: string | null
-          chef_name?: string | null
-          chef_profile?: string | null
-          city_id?: string
-          commission_rate?: number | null
-          country_code?: string | null
-          country_id?: string
-          created_at?: string | null
-          created_by?: string | null
-          cuisine_type?: string[] | null
-          currency?: string | null
-          description?: string | null
-          description_en?: string | null
-          dining_restrictions?: Json | null
-          dining_style?: string | null
-          display_order?: number | null
-          dress_code?: string | null
-          email?: string | null
-          english_name?: string | null
-          facilities?: Json | null
-          google_maps_url?: string | null
-          green_star?: boolean | null
-          group_menu_available?: boolean | null
-          id?: string
-          images?: string[] | null
-          is_active?: boolean | null
-          latitude?: number | null
-          longitude?: number | null
-          max_group_size?: number | null
-          menu_images?: string[] | null
-          michelin_guide_year?: number | null
-          michelin_plate?: boolean | null
-          michelin_stars?: number | null
-          min_group_size?: number | null
-          name?: string
-          name_local?: string | null
-          notes?: string | null
-          opening_hours?: Json | null
-          phone?: string | null
-          price_range?: string | null
-          ratings?: Json | null
-          recommended_for?: string[] | null
-          region_id?: string | null
-          reservation_required?: boolean | null
-          reservation_url?: string | null
-          signature_dishes?: string[] | null
-          specialties?: string[] | null
-          updated_at?: string | null
-          updated_by?: string | null
-          website?: string | null
-          workspace_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "michelin_restaurants_city_id_fkey"
-            columns: ["city_id"]
-            isOneToOne: false
-            referencedRelation: "cities"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "michelin_restaurants_country_code_fkey"
-            columns: ["country_code"]
-            isOneToOne: false
-            referencedRelation: "ref_countries"
-            referencedColumns: ["code"]
-          },
-          {
-            foreignKeyName: "michelin_restaurants_country_id_fkey"
-            columns: ["country_id"]
-            isOneToOne: false
-            referencedRelation: "countries"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "michelin_restaurants_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "michelin_restaurants_region_id_fkey"
-            columns: ["region_id"]
-            isOneToOne: false
-            referencedRelation: "regions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "michelin_restaurants_updated_by_fkey"
-            columns: ["updated_by"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "michelin_restaurants_workspace_id_fkey"
-            columns: ["workspace_id"]
-            isOneToOne: false
-            referencedRelation: "workspaces"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       notes: {
         Row: {
           content: string
@@ -4382,7 +3719,7 @@ export type Database = {
           id?: string
           id_number?: string | null
           identity?: string | null
-          member_type: string
+          member_type?: string
           misc_cost?: number | null
           order_id: string
           passport_expiry?: string | null
@@ -4510,6 +3847,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           customer_id: string | null
+          departure_date: string | null
           id: string
           identity_options: Json | null
           is_active: boolean | null
@@ -4538,6 +3876,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           customer_id?: string | null
+          departure_date?: string | null
           id?: string
           identity_options?: Json | null
           is_active?: boolean | null
@@ -4566,6 +3905,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           customer_id?: string | null
+          departure_date?: string | null
           id?: string
           identity_options?: Json | null
           is_active?: boolean | null
@@ -5797,148 +5137,94 @@ export type Database = {
       }
       receipts: {
         Row: {
-          account_info: string | null
-          account_last_digits: string | null
           accounting_subject_id: string | null
           actual_amount: number | null
-          amount: number
-          auth_code: string | null
-          bank_name: string | null
           batch_id: string | null
-          card_last_four: string | null
-          check_bank: string | null
-          check_date: string | null
-          check_number: string | null
           confirmed_at: string | null
           confirmed_by: string | null
           created_at: string | null
           created_by: string | null
           customer_id: string | null
           customer_name: string | null
-          email: string | null
           fees: number | null
-          handler_name: string | null
           id: string
           is_active: boolean
-          link: string | null
-          linkpay_order_number: string | null
           notes: string | null
           order_id: string | null
           order_number: string | null
-          pay_dateline: string | null
           payment_date: string
           payment_method: string
           payment_method_id: string
-          payment_name: string | null
           receipt_account: string | null
           receipt_amount: number
           receipt_date: string | null
           receipt_number: string
           receipt_type: number
           status: string
-          sync_status: string | null
-          total_amount: number | null
           tour_id: string | null
           tour_name: string | null
-          transaction_id: string | null
           updated_at: string | null
           updated_by: string | null
           workspace_id: string
         }
         Insert: {
-          account_info?: string | null
-          account_last_digits?: string | null
           accounting_subject_id?: string | null
           actual_amount?: number | null
-          amount: number
-          auth_code?: string | null
-          bank_name?: string | null
           batch_id?: string | null
-          card_last_four?: string | null
-          check_bank?: string | null
-          check_date?: string | null
-          check_number?: string | null
           confirmed_at?: string | null
           confirmed_by?: string | null
           created_at?: string | null
           created_by?: string | null
           customer_id?: string | null
           customer_name?: string | null
-          email?: string | null
           fees?: number | null
-          handler_name?: string | null
           id?: string
           is_active?: boolean
-          link?: string | null
-          linkpay_order_number?: string | null
           notes?: string | null
           order_id?: string | null
           order_number?: string | null
-          pay_dateline?: string | null
           payment_date: string
           payment_method: string
           payment_method_id: string
-          payment_name?: string | null
           receipt_account?: string | null
           receipt_amount: number
           receipt_date?: string | null
           receipt_number: string
           receipt_type?: number
           status?: string
-          sync_status?: string | null
-          total_amount?: number | null
           tour_id?: string | null
           tour_name?: string | null
-          transaction_id?: string | null
           updated_at?: string | null
           updated_by?: string | null
           workspace_id: string
         }
         Update: {
-          account_info?: string | null
-          account_last_digits?: string | null
           accounting_subject_id?: string | null
           actual_amount?: number | null
-          amount?: number
-          auth_code?: string | null
-          bank_name?: string | null
           batch_id?: string | null
-          card_last_four?: string | null
-          check_bank?: string | null
-          check_date?: string | null
-          check_number?: string | null
           confirmed_at?: string | null
           confirmed_by?: string | null
           created_at?: string | null
           created_by?: string | null
           customer_id?: string | null
           customer_name?: string | null
-          email?: string | null
           fees?: number | null
-          handler_name?: string | null
           id?: string
           is_active?: boolean
-          link?: string | null
-          linkpay_order_number?: string | null
           notes?: string | null
           order_id?: string | null
           order_number?: string | null
-          pay_dateline?: string | null
           payment_date?: string
           payment_method?: string
           payment_method_id?: string
-          payment_name?: string | null
           receipt_account?: string | null
           receipt_amount?: number
           receipt_date?: string | null
           receipt_number?: string
           receipt_type?: number
           status?: string
-          sync_status?: string | null
-          total_amount?: number | null
           tour_id?: string | null
           tour_name?: string | null
-          transaction_id?: string | null
           updated_at?: string | null
           updated_by?: string | null
           workspace_id?: string
@@ -6515,11 +5801,16 @@ export type Database = {
           address_en: string | null
           avg_price_dinner: number | null
           avg_price_lunch: number | null
+          awards: string[] | null
+          best_season: string[] | null
+          bib_gourmand: boolean | null
           booking_contact: string | null
           booking_email: string | null
           booking_notes: string | null
           booking_phone: string | null
           category: string | null
+          chef_name: string | null
+          chef_profile: string | null
           city_id: string | null
           commission_rate: number | null
           country_code: string | null
@@ -6532,11 +5823,15 @@ export type Database = {
           description: string | null
           description_en: string | null
           dietary_options: string[] | null
+          dining_restrictions: Json | null
+          dining_style: string | null
           display_order: number | null
+          dress_code: string | null
           english_name: string | null
           facilities: Json | null
           fax: string | null
           google_maps_url: string | null
+          green_star: boolean | null
           group_friendly: boolean | null
           group_menu_available: boolean | null
           group_menu_options: Json | null
@@ -6552,6 +5847,9 @@ export type Database = {
           max_group_size: number | null
           meal_type: string[] | null
           menu_images: string[] | null
+          michelin_guide_year: number | null
+          michelin_plate: boolean | null
+          michelin_stars: number | null
           min_group_size: number | null
           name: string
           name_local: string | null
@@ -6562,10 +5860,13 @@ export type Database = {
           private_room: boolean | null
           private_room_capacity: number | null
           rating: number | null
+          ratings: Json | null
+          recommended_for: string[] | null
           region_id: string | null
           reservation_required: boolean | null
           reservation_url: string | null
           review_count: number | null
+          signature_dishes: string[] | null
           specialties: string[] | null
           updated_at: string | null
           updated_by: string | null
@@ -6576,11 +5877,16 @@ export type Database = {
           address_en?: string | null
           avg_price_dinner?: number | null
           avg_price_lunch?: number | null
+          awards?: string[] | null
+          best_season?: string[] | null
+          bib_gourmand?: boolean | null
           booking_contact?: string | null
           booking_email?: string | null
           booking_notes?: string | null
           booking_phone?: string | null
           category?: string | null
+          chef_name?: string | null
+          chef_profile?: string | null
           city_id?: string | null
           commission_rate?: number | null
           country_code?: string | null
@@ -6593,11 +5899,15 @@ export type Database = {
           description?: string | null
           description_en?: string | null
           dietary_options?: string[] | null
+          dining_restrictions?: Json | null
+          dining_style?: string | null
           display_order?: number | null
+          dress_code?: string | null
           english_name?: string | null
           facilities?: Json | null
           fax?: string | null
           google_maps_url?: string | null
+          green_star?: boolean | null
           group_friendly?: boolean | null
           group_menu_available?: boolean | null
           group_menu_options?: Json | null
@@ -6613,6 +5923,9 @@ export type Database = {
           max_group_size?: number | null
           meal_type?: string[] | null
           menu_images?: string[] | null
+          michelin_guide_year?: number | null
+          michelin_plate?: boolean | null
+          michelin_stars?: number | null
           min_group_size?: number | null
           name: string
           name_local?: string | null
@@ -6623,10 +5936,13 @@ export type Database = {
           private_room?: boolean | null
           private_room_capacity?: number | null
           rating?: number | null
+          ratings?: Json | null
+          recommended_for?: string[] | null
           region_id?: string | null
           reservation_required?: boolean | null
           reservation_url?: string | null
           review_count?: number | null
+          signature_dishes?: string[] | null
           specialties?: string[] | null
           updated_at?: string | null
           updated_by?: string | null
@@ -6637,11 +5953,16 @@ export type Database = {
           address_en?: string | null
           avg_price_dinner?: number | null
           avg_price_lunch?: number | null
+          awards?: string[] | null
+          best_season?: string[] | null
+          bib_gourmand?: boolean | null
           booking_contact?: string | null
           booking_email?: string | null
           booking_notes?: string | null
           booking_phone?: string | null
           category?: string | null
+          chef_name?: string | null
+          chef_profile?: string | null
           city_id?: string | null
           commission_rate?: number | null
           country_code?: string | null
@@ -6654,11 +5975,15 @@ export type Database = {
           description?: string | null
           description_en?: string | null
           dietary_options?: string[] | null
+          dining_restrictions?: Json | null
+          dining_style?: string | null
           display_order?: number | null
+          dress_code?: string | null
           english_name?: string | null
           facilities?: Json | null
           fax?: string | null
           google_maps_url?: string | null
+          green_star?: boolean | null
           group_friendly?: boolean | null
           group_menu_available?: boolean | null
           group_menu_options?: Json | null
@@ -6674,6 +5999,9 @@ export type Database = {
           max_group_size?: number | null
           meal_type?: string[] | null
           menu_images?: string[] | null
+          michelin_guide_year?: number | null
+          michelin_plate?: boolean | null
+          michelin_stars?: number | null
           min_group_size?: number | null
           name?: string
           name_local?: string | null
@@ -6684,10 +6012,13 @@ export type Database = {
           private_room?: boolean | null
           private_room_capacity?: number | null
           rating?: number | null
+          ratings?: Json | null
+          recommended_for?: string[] | null
           region_id?: string | null
           reservation_required?: boolean | null
           reservation_url?: string | null
           review_count?: number | null
+          signature_dishes?: string[] | null
           specialties?: string[] | null
           updated_at?: string | null
           updated_by?: string | null
@@ -6860,54 +6191,6 @@ export type Database = {
             columns: ["role_id"]
             isOneToOne: false
             referencedRelation: "workspace_roles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      shared_order_lists: {
-        Row: {
-          author_id: string
-          channel_id: string
-          created_at: string | null
-          created_by: string
-          id: string
-          order_ids: Json
-          updated_at: string | null
-          updated_by: string | null
-        }
-        Insert: {
-          author_id?: string
-          channel_id: string
-          created_at?: string | null
-          created_by: string
-          id?: string
-          order_ids?: Json
-          updated_at?: string | null
-          updated_by?: string | null
-        }
-        Update: {
-          author_id?: string
-          channel_id?: string
-          created_at?: string | null
-          created_by?: string
-          id?: string
-          order_ids?: Json
-          updated_at?: string | null
-          updated_by?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "shared_order_lists_channel_id_fkey"
-            columns: ["channel_id"]
-            isOneToOne: false
-            referencedRelation: "channels"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "shared_order_lists_updated_by_fkey"
-            columns: ["updated_by"]
-            isOneToOne: false
-            referencedRelation: "employees"
             referencedColumns: ["id"]
           },
         ]
@@ -7205,6 +6488,7 @@ export type Database = {
           created_at: string | null
           created_by: string | null
           deadline: string | null
+          description: string | null
           enabled_quick_actions: string[] | null
           id: string
           is_public: boolean | null
@@ -7229,6 +6513,7 @@ export type Database = {
           created_at?: string | null
           created_by?: string | null
           deadline?: string | null
+          description?: string | null
           enabled_quick_actions?: string[] | null
           id?: string
           is_public?: boolean | null
@@ -7253,6 +6538,7 @@ export type Database = {
           created_at?: string | null
           created_by?: string | null
           deadline?: string | null
+          description?: string | null
           enabled_quick_actions?: string[] | null
           id?: string
           is_public?: boolean | null
@@ -9100,47 +8386,6 @@ export type Database = {
           },
         ]
       }
-      workspace_modules: {
-        Row: {
-          created_at: string | null
-          enabled_at: string | null
-          expires_at: string | null
-          id: string
-          is_enabled: boolean | null
-          module_name: string
-          updated_at: string | null
-          workspace_id: string
-        }
-        Insert: {
-          created_at?: string | null
-          enabled_at?: string | null
-          expires_at?: string | null
-          id?: string
-          is_enabled?: boolean | null
-          module_name: string
-          updated_at?: string | null
-          workspace_id: string
-        }
-        Update: {
-          created_at?: string | null
-          enabled_at?: string | null
-          expires_at?: string | null
-          id?: string
-          is_enabled?: boolean | null
-          module_name?: string
-          updated_at?: string | null
-          workspace_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "workspace_modules_workspace_id_fkey"
-            columns: ["workspace_id"]
-            isOneToOne: false
-            referencedRelation: "workspaces"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       workspace_roles: {
         Row: {
           created_at: string | null
@@ -9236,6 +8481,7 @@ export type Database = {
           created_at: string | null
           created_by: string | null
           custom_domain: string | null
+          default_billing_day_of_week: number | null
           default_password: string | null
           description: string | null
           email: string | null
@@ -9275,6 +8521,7 @@ export type Database = {
           created_at?: string | null
           created_by?: string | null
           custom_domain?: string | null
+          default_billing_day_of_week?: number | null
           default_password?: string | null
           description?: string | null
           email?: string | null
@@ -9314,6 +8561,7 @@ export type Database = {
           created_at?: string | null
           created_by?: string | null
           custom_domain?: string | null
+          default_billing_day_of_week?: number | null
           default_password?: string | null
           description?: string | null
           email?: string | null
@@ -9544,43 +8792,6 @@ export type Database = {
       get_or_create_direct_conversation: {
         Args: { other_user_id: string }
         Returns: string
-      }
-      get_or_create_dm_channel: {
-        Args: {
-          p_user_1_id: string
-          p_user_2_id: string
-          p_workspace_id: string
-        }
-        Returns: {
-          archived_at: string | null
-          channel_type: string
-          created_at: string | null
-          created_by: string | null
-          description: string | null
-          dm_target_id: string | null
-          group_id: string | null
-          id: string
-          is_announcement: boolean
-          is_archived: boolean | null
-          is_company_wide: boolean | null
-          is_favorite: boolean | null
-          is_pinned: boolean | null
-          name: string
-          order: number | null
-          scope: string | null
-          tour_id: string | null
-          type: string | null
-          updated_at: string | null
-          updated_by: string | null
-          visibility: Database["public"]["Enums"]["channel_visibility"] | null
-          workspace_id: string
-        }[]
-        SetofOptions: {
-          from: "*"
-          to: "channels"
-          isOneToOne: false
-          isSetofReturn: true
-        }
       }
       get_order_invoiceable_amount: {
         Args: { p_order_id: string }

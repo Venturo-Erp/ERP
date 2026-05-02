@@ -458,20 +458,7 @@ export async function POST(request: NextRequest) {
 
     // ========== 以下為 soft 步驟：失敗不 rollback（影響小、可事後補） ==========
 
-    // 8. 建立公告頻道（不再建立 Supabase Auth 用戶，ERP 用員工編號+密碼登入）
-    try {
-      await supabaseAdmin.from('channels').insert({
-        workspace_id: workspace.id,
-        name: '公告',
-        description: '公司公告頻道',
-        type: 'PUBLIC',
-        is_announcement: true,
-        created_by: auth.data.employeeId,
-      })
-      logger.log('Announcement channel created')
-    } catch (channelError) {
-      logger.warn('Failed to create announcement channel:', channelError)
-    }
+    // 8. channel_chat_system 已於 cleanup 砍除、新租戶不再建公告頻道
 
     // 9. 從 CORNER 複製基礎資料（國家、城市/機場）給新租戶
     try {

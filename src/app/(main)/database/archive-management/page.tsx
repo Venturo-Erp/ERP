@@ -71,12 +71,7 @@ export default function ArchiveManagementPage() {
 
       if (error) throw error
 
-      // 同步解封頻道
-      await supabase
-        .from('channels')
-        .update({ is_archived: false, archived_at: null })
-        .eq('tour_id', tour.id)
-
+      // channel_chat_system 已於 cleanup 砍除、不再同步頻道
       toast.success(ARCHIVE_LABELS.TOAST_TOUR_RESTORED(tour.code))
       loadArchivedData()
     } catch (error) {
@@ -101,12 +96,9 @@ export default function ArchiveManagementPage() {
     if (!confirmed) return
 
     try {
-      // 清理關聯資料
+      // 清理關聯資料（channels 已於 cleanup 砍除）
       await supabase.from('tour_itinerary_items').delete().eq('tour_id', tour.id)
-      await Promise.all([
-        supabase.from('calendar_events').delete().eq('related_tour_id', tour.id),
-        supabase.from('channels').delete().eq('tour_id', tour.id),
-      ])
+      await supabase.from('calendar_events').delete().eq('related_tour_id', tour.id)
       await unlinkTourQuotes(tour.id)
       await unlinkTourItineraries(tour.id)
       await deleteTourEmptyOrders(tour.id)

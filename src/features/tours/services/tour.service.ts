@@ -138,30 +138,11 @@ class TourService extends BaseService<Tour & BaseEntity> {
   }
 
   /**
-   * 封存旅遊團相關頻道
-   * 當旅遊團結案或取消時，自動封存其相關頻道
+   * @deprecated channel_chat_system 已於 cleanup 砍掉（migration 20260503040000）
+   * 保留空 method 避免 caller break、之後一併清。
    */
-  private async archiveTourChannel(tourId: string): Promise<void> {
-    try {
-      const now = new Date().toISOString()
-      const { error } = await supabase
-        .from('channels')
-        .update({
-          is_archived: true,
-          archived_at: now,
-          updated_at: now,
-        })
-        .eq('tour_id', tourId)
-
-      if (error) {
-        logger.warn(`封存旅遊團 ${tourId} 頻道失敗:`, error)
-      } else {
-        logger.log(`旅遊團 ${tourId} 頻道已封存`)
-      }
-    } catch (error) {
-      // 封存頻道失敗不應阻止狀態更新
-      logger.warn('封存頻道時發生錯誤:', error)
-    }
+  private async archiveTourChannel(_tourId: string): Promise<void> {
+    return
   }
 
   // 更新團體狀態

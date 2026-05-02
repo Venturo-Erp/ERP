@@ -338,12 +338,9 @@ export function useTourOperations(params: UseTourOperationsParams) {
           return { success: false, error: errorMsg }
         }
 
-        // 清理關聯資料
+        // 清理關聯資料（channels 已於 cleanup 砍除）
         await supabase.from('tour_itinerary_items').delete().eq('tour_id', tour.id)
-        await Promise.all([
-          supabase.from('calendar_events').delete().eq('related_tour_id', tour.id),
-          supabase.from('channels').delete().eq('tour_id', tour.id),
-        ])
+        await supabase.from('calendar_events').delete().eq('related_tour_id', tour.id)
 
         // 斷開報價單和行程表連結
         await unlinkTourQuotes(tour.id)
@@ -392,16 +389,7 @@ export function useTourOperations(params: UseTourOperationsParams) {
           archive_reason: tour.archived ? null : reason,
         } as Partial<Tour>)
 
-        // 同步頻道封存狀態
-        const isArchiving = !tour.archived
-        await supabase
-          .from('channels')
-          .update({
-            is_archived: isArchiving,
-            archived_at: isArchiving ? new Date().toISOString() : null,
-          })
-          .eq('tour_id', tour.id)
-
+        // channel_chat_system 已於 cleanup 砍除、不再同步頻道封存
         logger.info(tour.archived ? '已解除封存旅遊團' : `已封存旅遊團，原因：${reason}`)
       } catch (err) {
         logger.error('封存/解封旅遊團失敗:', err)

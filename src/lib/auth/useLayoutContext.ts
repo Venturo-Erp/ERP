@@ -42,6 +42,8 @@ export interface LayoutContextPayload {
     type: string | null
     is_active: boolean | null
     premium_enabled: boolean | null
+    /** 預設出帳日期（0=週日 ... 4=週四 ... 6=週六）— 請款 dialog 用此判斷「特殊出帳」 */
+    default_billing_day_of_week: number | null
   } | null
   role_id: string | null
   workspace_id: string | null

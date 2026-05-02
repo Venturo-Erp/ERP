@@ -32,7 +32,13 @@ export interface LayoutContext {
   > | null
   workspace: Pick<
     WorkspaceRow,
-    'id' | 'code' | 'name' | 'type' | 'is_active' | 'premium_enabled'
+    | 'id'
+    | 'code'
+    | 'name'
+    | 'type'
+    | 'is_active'
+    | 'premium_enabled'
+    | 'default_billing_day_of_week'
   > | null
   workspace_id: string | null
   role_id: string | null
@@ -96,7 +102,7 @@ export const getLayoutContext = cache(async (): Promise<LayoutContext> => {
   const [wsRes, featuresRes, capsRes] = await Promise.all([
     admin
       .from('workspaces')
-      .select('id, code, name, type, is_active, premium_enabled')
+      .select('id, code, name, type, is_active, premium_enabled, default_billing_day_of_week')
       .eq('id', employee.workspace_id)
       .maybeSingle(),
     admin

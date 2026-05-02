@@ -276,6 +276,52 @@ export function EmployeeForm({
   // 取得選中職務的名稱
   const selectedRole = roles.find(r => r.id === formData.role_id)
 
+  const bottomButtons = (
+    <>
+      {mode !== 'self' && (
+        <Button type="button" variant="outline" onClick={onCancel}>
+          取消
+        </Button>
+      )}
+      {mode === 'self' && (
+        <Button
+          type="button"
+          variant="outline"
+          className="border-morandi-gold text-morandi-gold hover:bg-morandi-gold hover:text-white"
+          onClick={() => {
+            if (onPasswordChange) onPasswordChange()
+          }}
+          data-tutorial="btn-change-password"
+        >
+          <Lock className="w-4 h-4 mr-2" />
+          修改密碼
+        </Button>
+      )}
+      <Button
+        type="submit"
+        disabled={
+          submitting ||
+          !formData.chinese_name ||
+          !formData.email ||
+          (!isEditMode && !formData.role_id && mode === 'hr')
+        }
+        className="bg-morandi-gold hover:bg-morandi-gold/90 text-white"
+      >
+        {submitting ? (
+          <>
+            <Loader2 className="w-4 h-4 animate-spin mr-2" />
+            {isEditMode ? '儲存中...' : '建立中...'}
+          </>
+        ) : (
+          <>
+            <Save className="w-4 h-4 mr-2" />
+            {isEditMode ? '儲存變更' : '建立員工'}
+          </>
+        )}
+      </Button>
+    </>
+  )
+
   return (
     <form onSubmit={handleSubmit} className="h-full">
       {/* Character Card 風格 */}
@@ -690,52 +736,19 @@ export function EmployeeForm({
                 </div>
               </div>
             )}
+
+            {mode === 'self' && (
+              <div className="pt-6 flex justify-end gap-3">
+                {bottomButtons}
+              </div>
+            )}
           </div>
 
-          {/* 底部按鈕 */}
-          <div className="px-6 py-4 flex justify-end gap-3 flex-shrink-0">
-            {mode !== 'self' && (
-              <Button type="button" variant="outline" onClick={onCancel}>
-                取消
-              </Button>
-            )}
-            {mode === 'self' && (
-              <Button
-                type="button"
-                variant="outline"
-                className="border-morandi-gold text-morandi-gold hover:bg-morandi-gold hover:text-white"
-                onClick={() => {
-                  if (onPasswordChange) onPasswordChange()
-                }}
-                data-tutorial="btn-change-password"
-              >
-                <Lock className="w-4 h-4 mr-2" />
-                修改密碼
-              </Button>
-            )}
-            <Button
-              type="submit"
-              disabled={
-                submitting ||
-                !formData.chinese_name ||
-                !formData.email ||
-                (!isEditMode && !formData.role_id && mode === 'hr')
-              }
-              className="bg-morandi-gold hover:bg-morandi-gold/90 text-white"
-            >
-              {submitting ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                  {isEditMode ? '儲存中...' : '建立中...'}
-                </>
-              ) : (
-                <>
-                  <Save className="w-4 h-4 mr-2" />
-                  {isEditMode ? '儲存變更' : '建立員工'}
-                </>
-              )}
-            </Button>
-          </div>
+          {mode !== 'self' && (
+            <div className="px-6 py-4 flex justify-end gap-3 flex-shrink-0">
+              {bottomButtons}
+            </div>
+          )}
         </div>
       </div>
     </form>

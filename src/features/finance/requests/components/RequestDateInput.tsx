@@ -1,12 +1,13 @@
 'use client'
 
 import { getTodayString } from '@/lib/utils/format-date'
-
 import { useEffect } from 'react'
-import { Input } from '@/components/ui/input'
 import { DatePicker } from '@/components/ui/date-picker'
 import { cn } from '@/lib/utils'
+import { useLayoutContext } from '@/lib/auth/useLayoutContext'
 import { PAYMENT_ITEM_ROW_LABELS, REQUEST_DATE_INPUT_LABELS } from '../../constants/labels'
+
+const WEEKDAY_NAMES = ['週日', '週一', '週二', '週三', '週四', '週五', '週六']
 
 interface RequestDateInputProps {
   value: string
@@ -19,27 +20,37 @@ export function RequestDateInput({
   onChange,
   label = REQUEST_DATE_INPUT_LABELS.請款日期,
 }: RequestDateInputProps) {
-  // 預設帶入今天（原本預設下週四是 Corner 專屬、其他租戶不適用）
-  // 未來 workspace 設定上線後、可改為依 workspace.default_request_date_rule 設定
+  // SSOT：workspace.default_billing_day_of_week（admin 在 /settings/company 設定）
+  // 沒設值（NULL）fallback 4=週四（Corner 既有規則 / migration 預設）
+  const { payload } = useLayoutContext()
+  const defaultBillingDay = payload.workspace?.default_billing_day_of_week ?? 4
+
+  // 預設帶入今天
   useEffect(() => {
     if (!value) {
-      onChange(getTodayString(), false)
+      const today = getTodayString()
+      const isToday = new Date(today + 'T00:00:00').getDay() === defaultBillingDay
+      onChange(today, !isToday)
     }
-  }, [])
+  }, [defaultBillingDay])
 
   const handleDateChange = (selectedDate: string) => {
-    const isThursday = selectedDate ? new Date(selectedDate + 'T00:00:00').getDay() === 4 : false
-    onChange(selectedDate, !isThursday)
+    const isDefaultDay = selectedDate
+      ? new Date(selectedDate + 'T00:00:00').getDay() === defaultBillingDay
+      : false
+    onChange(selectedDate, !isDefaultDay)
   }
 
-  const isSpecialBilling = value && new Date(value + 'T00:00:00').getDay() !== 4
+  const isSpecialBilling =
+    !!value && new Date(value + 'T00:00:00').getDay() !== defaultBillingDay
 
   // 跟 Combobox 同高、不放 label 跟提示文字（避免 header flex row 高度不齊）
-  // special billing 用底色提示、滑鼠 hover 看 wrap 的 title 完整文字
+  // special billing 用底色提示、滑鼠 hover 看 title 完整文字
+  const defaultDayName = WEEKDAY_NAMES[defaultBillingDay] || '週四'
   const tooltip = value
     ? isSpecialBilling
-      ? '特殊出帳：非週四請款'
-      : REQUEST_DATE_INPUT_LABELS.一般請款_週四出帳
+      ? `特殊出帳：非${defaultDayName}請款`
+      : `正常出帳：${defaultDayName}請款`
     : undefined
 
   return (

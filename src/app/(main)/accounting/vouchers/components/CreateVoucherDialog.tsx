@@ -100,7 +100,7 @@ export function CreateVoucherDialog({ open, onOpenChange, onSuccess }: CreateVou
         // 載入收款單（排除已有傳票的）
         const { data } = await supabase
           .from('receipts')
-          .select('id, receipt_number, notes, amount, receipt_date')
+          .select('id, receipt_number, notes, receipt_amount, receipt_date')
           .eq('workspace_id', user.workspace_id)
           .order('receipt_date', { ascending: false })
           .limit(50)
@@ -110,7 +110,7 @@ export function CreateVoucherDialog({ open, onOpenChange, onSuccess }: CreateVou
             id: r.id,
             code: r.receipt_number || r.id.slice(0, 8),
             description: r.notes || '收款單',
-            amount: r.amount || 0,
+            amount: r.receipt_amount || 0,
             date: r.receipt_date || '',
           }))
         )

@@ -157,26 +157,7 @@ export function TourClosingDialog({ open, onOpenChange, tour, onSuccess }: TourC
         updated_at: now,
       })
 
-      // 4. 封存旅遊團頻道
-      try {
-        const { error: channelError } = await supabase
-          .from('channels')
-          .update({
-            is_archived: true,
-            archived_at: now,
-            updated_at: now,
-          })
-          .eq('tour_id', tour.id)
-
-        if (channelError) {
-          logger.warn('封存旅遊團頻道失敗:', channelError)
-        } else {
-          logger.log(`旅遊團 ${tour.code} 頻道已封存`)
-        }
-      } catch (error) {
-        // 封存頻道失敗不應阻止結案流程
-        logger.warn('封存頻道時發生錯誤:', error)
-      }
+      // 4. channel_chat_system 已於 cleanup 砍除、不再封存頻道
 
       toast.success(TOUR_CLOSING_LABELS.CLOSING_SUCCESS)
       onOpenChange(false)

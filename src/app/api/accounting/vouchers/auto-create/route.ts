@@ -129,8 +129,8 @@ async function createVoucherFromReceipt(workspaceId: string, receiptId: string) 
       voucher_date: voucherDate,
       memo: `收款單 ${receipt.receipt_number || ''} - ${receipt.notes || ''}`.trim(),
       status: 'posted',
-      total_debit: receipt.amount || 0,
-      total_credit: receipt.amount || 0,
+      total_debit: receipt.receipt_amount || 0,
+      total_credit: receipt.receipt_amount || 0,
       source_type: 'receipt',
       source_id: receiptId,
     })
@@ -148,7 +148,7 @@ async function createVoucherFromReceipt(workspaceId: string, receiptId: string) 
       line_no: 1,
       account_id: debitAccount.id,
       description: `收款 - ${receipt.notes || ''}`,
-      debit_amount: receipt.amount || 0,
+      debit_amount: receipt.receipt_amount || 0,
       credit_amount: 0,
     },
     {
@@ -157,7 +157,7 @@ async function createVoucherFromReceipt(workspaceId: string, receiptId: string) 
       account_id: creditAccount.id,
       description: `收款 - ${receipt.notes || ''}`,
       debit_amount: 0,
-      credit_amount: receipt.amount || 0,
+      credit_amount: receipt.receipt_amount || 0,
     },
   ]
 

@@ -59,6 +59,8 @@ interface CompanyFormData {
   personal_seal_url: string
   invoice_seal_image_url: string
   contract_seal_image_url: string
+  /** 預設出帳日期（0=週日 ... 4=週四 ... 6=週六）— 取代 RequestDateInput hardcoded 4 */
+  default_billing_day_of_week: number
 }
 
 const INITIAL_FORM: CompanyFormData = {
@@ -81,6 +83,7 @@ const INITIAL_FORM: CompanyFormData = {
   personal_seal_url: '',
   invoice_seal_image_url: '',
   contract_seal_image_url: '',
+  default_billing_day_of_week: 4, // 預設週四
 }
 
 function ImageUploadField({
@@ -223,7 +226,7 @@ export default function CompanySettingsPage() {
       const { data, error } = await supabase
         .from('workspaces')
         .select(
-          'name, description, logo_url, legal_name, subtitle, address, phone, fax, email, website, tax_id, bank_name, bank_branch, bank_account, bank_account_name, company_seal_url, personal_seal_url, invoice_seal_image_url, contract_seal_image_url'
+          'name, description, logo_url, legal_name, subtitle, address, phone, fax, email, website, tax_id, bank_name, bank_branch, bank_account, bank_account_name, company_seal_url, personal_seal_url, invoice_seal_image_url, contract_seal_image_url, default_billing_day_of_week'
         )
         .eq('id', workspaceId)
         .single()
@@ -251,6 +254,7 @@ export default function CompanySettingsPage() {
           personal_seal_url: (d.personal_seal_url as string) ?? '',
           invoice_seal_image_url: (d.invoice_seal_image_url as string) ?? '',
           contract_seal_image_url: (d.contract_seal_image_url as string) ?? '',
+          default_billing_day_of_week: typeof d.default_billing_day_of_week === 'number' ? d.default_billing_day_of_week : 4,
         })
       }
     } catch (error) {
@@ -305,7 +309,7 @@ export default function CompanySettingsPage() {
     }
   }
 
-  const updateField = (field: keyof CompanyFormData, value: string) => {
+  const updateField = <K extends keyof CompanyFormData>(field: K, value: CompanyFormData[K]) => {
     setForm(prev => ({ ...prev, [field]: value }))
   }
 
@@ -505,17 +509,40 @@ export default function CompanySettingsPage() {
             <Briefcase className="h-6 w-6 text-morandi-gold" />
             <h2 className="text-xl font-semibold">{COMPANY_LABELS.BUSINESS_INFO}</h2>
           </div>
-          <div id="field-tax_id" className="scroll-mt-24">
-            <Label className="text-sm font-medium text-morandi-primary">
-              {COMPANY_LABELS.TAX_ID}
-            </Label>
-            <Input
-              value={form.tax_id}
-              onChange={e => updateField('tax_id', e.target.value)}
-              placeholder={COMPANY_LABELS.TAX_ID_PLACEHOLDER}
-              className="mt-1.5 max-w-xs"
-              maxLength={8}
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div id="field-tax_id" className="scroll-mt-24">
+              <Label className="text-sm font-medium text-morandi-primary">
+                {COMPANY_LABELS.TAX_ID}
+              </Label>
+              <Input
+                value={form.tax_id}
+                onChange={e => updateField('tax_id', e.target.value)}
+                placeholder={COMPANY_LABELS.TAX_ID_PLACEHOLDER}
+                className="mt-1.5"
+                maxLength={8}
+              />
+            </div>
+            <div id="field-default_billing_day_of_week" className="scroll-mt-24">
+              <Label className="text-sm font-medium text-morandi-primary">
+                預設出帳日期
+              </Label>
+              <select
+                value={form.default_billing_day_of_week}
+                onChange={e => updateField('default_billing_day_of_week', Number(e.target.value))}
+                className="mt-1.5 w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
+              >
+                <option value={0}>週日</option>
+                <option value={1}>週一</option>
+                <option value={2}>週二</option>
+                <option value={3}>週三</option>
+                <option value={4}>週四</option>
+                <option value={5}>週五</option>
+                <option value={6}>週六</option>
+              </select>
+              <p className="text-xs text-morandi-muted mt-1">
+                請款 dialog 在此日期提交視為「正常出帳」、其他日期視為「特殊出帳」
+              </p>
+            </div>
           </div>
         </Card>
 
