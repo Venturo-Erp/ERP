@@ -4,7 +4,7 @@ import { useAuthStore } from '@/stores/auth-store'
 import { useMyCapabilities } from '@/lib/permissions/useMyCapabilities'
 import { ContentPageLayout } from '@/components/layout/content-page-layout'
 import { Button } from '@/components/ui/button'
-import { User, LogOut, Lock } from 'lucide-react'
+import { Lock } from 'lucide-react'
 import { useSettingsState } from './hooks/useSettingsState'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { useEffect } from 'react'
@@ -23,7 +23,7 @@ export const dynamic = 'force-dynamic'
 export const fetchCache = 'force-no-store'
 
 export default function SettingsPage() {
-  const { user, logout } = useAuthStore()
+  const { user } = useAuthStore()
   const searchParams = useSearchParams()
   const router = useRouter()
 
@@ -49,10 +49,7 @@ export default function SettingsPage() {
   const { canReadAnyInModule } = useMyCapabilities()
   const hasSettingsAccess = canReadAnyInModule('settings')
 
-  const handleLogout = async () => {
-    await logout()
-    window.location.href = '/login'
-  }
+  // 「使用者名字 + 登出」已於 2026-05-02 移到 sidebar 底部、這裡不再重複
 
   return (
     <ContentPageLayout
@@ -60,24 +57,6 @@ export default function SettingsPage() {
       headerActions={
         <div className="flex items-center gap-4">
           {hasSettingsAccess && <SettingsTabs />}
-
-          {user && (
-            <div className="flex items-center gap-2 px-3 py-2 bg-morandi-container rounded-lg">
-              <User className="h-4 w-4 text-morandi-secondary" />
-              <span className="text-sm font-medium text-morandi-primary">
-                {user.display_name || user.chinese_name || user.english_name || '使用者'}
-              </span>
-            </div>
-          )}
-
-          <Button
-            variant="outline"
-            onClick={handleLogout}
-            className="flex items-center gap-2 text-morandi-red border-morandi-red/50 hover:bg-morandi-red/10 hover:text-morandi-red"
-          >
-            <LogOut className="h-4 w-4" />
-            登出
-          </Button>
         </div>
       }
     >
