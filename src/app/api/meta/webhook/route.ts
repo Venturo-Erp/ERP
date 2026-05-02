@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createHmac, timingSafeEqual, createHash } from 'crypto'
-import { createClient } from '@supabase/supabase-js'
+import { getSupabaseAdminClient } from '@/lib/supabase/admin'
 import { logger } from '@/lib/utils/logger'
 import { handleAICustomerService } from '@/lib/line/ai-customer-service'
 import { withWebhookIdempotency } from '@/lib/webhook/idempotency'
@@ -26,12 +26,7 @@ const HANDOVER_MESSAGE = '好的，我已將您的需求整理好，馬上請專
 // 每位用戶最多 AI 對話輪數
 const MAX_AI_ROUNDS = 8
 
-function getSupabase() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-    process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-  )
-}
+const getSupabase = getSupabaseAdminClient
 
 interface MetaConfig {
   verify_token: string | null

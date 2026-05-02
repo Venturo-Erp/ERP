@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js'
+import { getSupabaseAdminClient } from '@/lib/supabase/admin'
 import { COMPANY_NAME, COMPANY_NAME_EN } from '@/lib/tenant'
 import { notFound } from 'next/navigation'
 
@@ -11,10 +11,7 @@ type Member = {
 }
 
 async function getTourMembers(code: string) {
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
+  const supabase = getSupabaseAdminClient()
 
   // 1. 查團（含 workspace 公司名稱）
   const { data: tour } = await supabase

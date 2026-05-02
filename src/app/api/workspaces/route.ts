@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServiceClient } from '@/lib/supabase/api-client'
+import { getSupabaseAdminClient } from '@/lib/supabase/admin'
 import { getServerAuth } from '@/lib/auth/server-auth'
 import { getBasicFeatures } from '@/lib/permissions'
 import { MODULES } from '@/lib/permissions/module-tabs'
@@ -16,7 +16,7 @@ export async function GET() {
   }
 
   // 檢查用戶是否有 tenants 功能權限
-  const supabase = createServiceClient()
+  const supabase = getSupabaseAdminClient()
   const { data: feature } = await supabase
     .from('workspace_features')
     .select('enabled')
@@ -110,7 +110,7 @@ export async function GET() {
  * 4. 設定系統主管角色全開權限 (role_tab_permissions)
  */
 export async function POST(request: NextRequest) {
-  const supabase = createServiceClient()
+  const supabase = getSupabaseAdminClient()
   const body = await request.json()
   const {
     name,

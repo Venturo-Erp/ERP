@@ -7,15 +7,12 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { getSupabaseAdminClient } from '@/lib/supabase/admin'
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ code: string }> }) {
   const { code } = await params
 
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
+  const supabase = getSupabaseAdminClient()
 
   // 只查詢公開欄位（不包含 workspace_id, leader_id, sales_id）
   const { data, error } = await supabase

@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js'
+import { getSupabaseAdminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 import ExcelJS from 'exceljs'
 import { logger } from '@/lib/utils/logger'
@@ -21,10 +21,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: '缺少必要參數' }, { status: 400 })
     }
 
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
     const lineToken = process.env.LINE_CHANNEL_ACCESS_TOKEN!
-    const supabase = createClient(supabaseUrl, supabaseKey)
+    const supabase = getSupabaseAdminClient()
 
     let targetGroup: { group_id: string; group_name: string | null }
 

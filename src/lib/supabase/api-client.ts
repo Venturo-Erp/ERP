@@ -1,4 +1,3 @@
-import { createClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 
@@ -7,12 +6,13 @@ import { createServerClient } from '@supabase/ssr'
  *
  * 使用方式：
  * const supabase = await createApiClient()
- * const { data } = await supabase.from('tours').select('id, code, name, location, departure_date, return_date, status, current_participants, max_participants, workspace_id, archived, contract_archived_date, tour_type, outbound_flight, return_flight, is_active, confirmed_requirements, locked_itinerary_id, itinerary_id, quote_id, locked_quote_id, tour_leader_id, controller_id, country_id, price, selling_price_per_person, total_cost, total_revenue, profit, contract_status, description, days_count, created_at, created_by, updated_at, updated_by')
+ * const { data } = await supabase.from('tours').select('id, code, name, ...')
  * // 不需要加 .eq('workspace_id', ...) ！
  * // RLS 會自動過濾
  *
  * 如果需要繞過 RLS（例如平台管理操作）：
- * const supabase = createServiceClient()
+ * import { getSupabaseAdminClient } from '@/lib/supabase/admin'
+ * const supabase = getSupabaseAdminClient()
  */
 
 /**
@@ -43,15 +43,6 @@ export async function createApiClient() {
       },
     }
   )
-}
-
-/**
- * Service Role Client（繞過 RLS）
- * - 只在特殊情況使用（如：建立租戶、平台管理操作）
- * - 必須手動處理 workspace_id
- */
-export function createServiceClient() {
-  return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
 }
 
 /**

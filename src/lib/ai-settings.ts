@@ -4,12 +4,9 @@
  * 系統主管可在後台修改，不需要改 code
  */
 
-import { createClient } from '@supabase/supabase-js'
+import { getSupabaseAdminClient } from '@/lib/supabase/admin'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-)
+const supabase = getSupabaseAdminClient()
 
 // 快取（避免每次 API 呼叫都查 DB）
 const cache = new Map<string, { value: string; expiry: number }>()
