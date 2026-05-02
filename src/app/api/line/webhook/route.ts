@@ -1,9 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createHmac, timingSafeEqual, createHash } from 'crypto'
 import { logger } from '@/lib/utils/logger'
+import { getSupabaseAdminClient } from '@/lib/supabase/admin'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { withWebhookIdempotency } from '@/lib/webhook/idempotency'
 import { fetchWithTimeout } from '@/lib/external/fetch-with-timeout'
+
+/** 取得 LINE Bot 對應的 workspace_id（取第一筆 config、目前 1 個 LINE Bot 對 1 workspace）*/
+async function getLineWorkspaceId(): Promise<string | null> {
+  const supabase = getSupabaseAdminClient()
+  const { data, error } = await supabase
+    .from('workspace_line_config')
+    .select('workspace_id')
+    .limit(1)
+    .maybeSingle()
+
+  if (error) {
+    logger.error('[LINE] Failed to get workspace config:', error)
+    return null
+  }
+  return data?.workspace_id ?? null
+}
 
 // AI 客服已撤（2026-05-02、William 拍板「完全移除後重新撰寫」）
 // 所有訊息回覆固定 fallback、由人工客服承接。
@@ -63,80 +80,35 @@ async function saveUserToDb(
     statusMessage: string | null
   } | null
 ) {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-  if (!supabaseUrl || !supabaseKey) return
-
-  // 先查詢 LINE Bot 屬於哪個 workspace（必需）
-  let workspaceId: string | null = null
-
-  try {
-    const configRes = await fetch(
-      `${supabaseUrl}/rest/v1/workspace_line_config?select=workspace_id&limit=1`,
-      {
-        headers: {
-          apikey: supabaseKey,
-          Authorization: `Bearer ${supabaseKey}`,
-        },
-      }
-    )
-
-    if (configRes.ok) {
-      const configs = await configRes.json()
-      if (configs && configs.length > 0) {
-        workspaceId = configs[0].workspace_id
-      }
-    }
-  } catch (error) {
-    logger.error('[LINE] Failed to get workspace config:', error)
-  }
-
+  const workspaceId = await getLineWorkspaceId()
   if (!workspaceId) {
     logger.error('[LINE] No workspace config found, cannot save user')
     return
   }
 
-  await fetch(`${supabaseUrl}/rest/v1/line_users`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      apikey: supabaseKey,
-      Authorization: `Bearer ${supabaseKey}`,
-      Prefer: 'resolution=merge-duplicates',
-    },
-    body: JSON.stringify({
-      workspace_id: workspaceId,
-      user_id: userId,
-      display_name: profile?.displayName,
-      picture_url: profile?.pictureUrl,
-      status_message: profile?.statusMessage,
-      followed_at: new Date().toISOString(),
-      unfollowed_at: null, // 重新追蹤時清除
-      updated_at: new Date().toISOString(),
-    }),
+  const supabase = getSupabaseAdminClient()
+  await supabase.from('line_users').upsert({
+    workspace_id: workspaceId,
+    user_id: userId,
+    display_name: profile?.displayName,
+    picture_url: profile?.pictureUrl,
+    status_message: profile?.statusMessage,
+    followed_at: new Date().toISOString(),
+    unfollowed_at: null,
+    updated_at: new Date().toISOString(),
   })
 }
 
 /** 標記用戶取消追蹤 */
 async function markUserUnfollowed(userId: string) {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-  if (!supabaseUrl || !supabaseKey) return
-
-  await fetch(`${supabaseUrl}/rest/v1/line_users?user_id=eq.${userId}`, {
-    method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-      apikey: supabaseKey,
-      Authorization: `Bearer ${supabaseKey}`,
-    },
-    body: JSON.stringify({
+  const supabase = getSupabaseAdminClient()
+  await supabase
+    .from('line_users')
+    .update({
       unfollowed_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
-    }),
-  })
+    })
+    .eq('user_id', userId)
 }
 
 /** 處理 follow/unfollow 事件 */
@@ -188,56 +160,19 @@ async function saveGroupToDb(
   groupName: string | null,
   memberCount: number | null
 ) {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseKey =
-    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-  if (!supabaseUrl || !supabaseKey) return
-
-  // 先查詢 LINE Bot 屬於哪個 workspace（必需）
-  let workspaceId: string | null = null
-
-  try {
-    const configRes = await fetch(
-      `${supabaseUrl}/rest/v1/workspace_line_config?select=workspace_id&limit=1`,
-      {
-        headers: {
-          apikey: supabaseKey,
-          Authorization: `Bearer ${supabaseKey}`,
-        },
-      }
-    )
-
-    if (configRes.ok) {
-      const configs = await configRes.json()
-      if (configs && configs.length > 0) {
-        workspaceId = configs[0].workspace_id
-      }
-    }
-  } catch (error) {
-    logger.error('[LINE] Failed to get workspace config:', error)
-  }
-
+  const workspaceId = await getLineWorkspaceId()
   if (!workspaceId) {
     logger.error('[LINE] No workspace config found, cannot save group')
     return
   }
 
-  await fetch(`${supabaseUrl}/rest/v1/line_groups`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      apikey: supabaseKey,
-      Authorization: `Bearer ${supabaseKey}`,
-      Prefer: 'resolution=merge-duplicates',
-    },
-    body: JSON.stringify({
-      workspace_id: workspaceId,
-      group_id: groupId,
-      group_name: groupName,
-      member_count: memberCount,
-      updated_at: new Date().toISOString(),
-    }),
+  const supabase = getSupabaseAdminClient()
+  await supabase.from('line_groups').upsert({
+    workspace_id: workspaceId,
+    group_id: groupId,
+    group_name: groupName,
+    member_count: memberCount,
+    updated_at: new Date().toISOString(),
   })
 }
 
@@ -263,26 +198,17 @@ async function processCustomerBinding(event: LineEvent) {
   if (!bindMatch || !userId) return false
 
   const customerCode = bindMatch[1].toUpperCase()
-
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseKey =
-    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  if (!supabaseUrl || !supabaseKey) return false
+  const supabase = getSupabaseAdminClient()
 
   try {
     // 查找客戶
-    const findRes = await fetch(
-      `${supabaseUrl}/rest/v1/customers?code=eq.${customerCode}&select=id,name,phone`,
-      {
-        headers: {
-          apikey: supabaseKey,
-          Authorization: `Bearer ${supabaseKey}`,
-        },
-      }
-    )
-    const customers = await findRes.json()
+    const { data: customer } = await supabase
+      .from('customers')
+      .select('id, name, phone')
+      .eq('code', customerCode)
+      .maybeSingle()
 
-    if (!customers || customers.length === 0) {
+    if (!customer) {
       await fetchWithTimeout('https://api.line.me/v2/bot/message/reply', {
         method: 'POST',
         headers: {
@@ -297,21 +223,14 @@ async function processCustomerBinding(event: LineEvent) {
       return true
     }
 
-    const customer = customers[0]
-
     // 更新客戶的 LINE User ID
-    await fetch(`${supabaseUrl}/rest/v1/customers?id=eq.${customer.id}`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        apikey: supabaseKey,
-        Authorization: `Bearer ${supabaseKey}`,
-      },
-      body: JSON.stringify({
+    await supabase
+      .from('customers')
+      .update({
         line_user_id: userId,
         line_linked_at: new Date().toISOString(),
-      }),
-    })
+      })
+      .eq('id', customer.id)
 
     const custName = customer.name || customerCode
 
@@ -353,27 +272,17 @@ async function processEmployeeBinding(event: LineEvent) {
   if (bindMatch[1].toUpperCase().startsWith('C')) return false
 
   const employeeCode = bindMatch[1].toUpperCase()
-
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseKey =
-    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  if (!supabaseUrl || !supabaseKey) return false
+  const supabase = getSupabaseAdminClient()
 
   try {
-    // 查找員工（欄位名是 employee_number）
-    const findRes = await fetch(
-      `${supabaseUrl}/rest/v1/employees?employee_number=eq.${employeeCode}&select=id,display_name,chinese_name,english_name`,
-      {
-        headers: {
-          apikey: supabaseKey,
-          Authorization: `Bearer ${supabaseKey}`,
-        },
-      }
-    )
-    const employees = await findRes.json()
+    // 查找員工
+    const { data: employee } = await supabase
+      .from('employees')
+      .select('id, display_name, chinese_name, english_name')
+      .eq('employee_number', employeeCode)
+      .maybeSingle()
 
-    if (!employees || employees.length === 0) {
-      // 員工不存在，回覆錯誤
+    if (!employee) {
       await fetchWithTimeout('https://api.line.me/v2/bot/message/reply', {
         method: 'POST',
         headers: {
@@ -388,18 +297,8 @@ async function processEmployeeBinding(event: LineEvent) {
       return true
     }
 
-    const employee = employees[0]
-
     // 更新員工的 LINE User ID
-    await fetch(`${supabaseUrl}/rest/v1/employees?id=eq.${employee.id}`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        apikey: supabaseKey,
-        Authorization: `Bearer ${supabaseKey}`,
-      },
-      body: JSON.stringify({ line_user_id: userId }),
-    })
+    await supabase.from('employees').update({ line_user_id: userId }).eq('id', employee.id)
 
     const empName =
       employee.chinese_name || employee.display_name || employee.english_name || employeeCode
@@ -458,70 +357,21 @@ async function saveConversationToDb(
   aiResponse: string,
   userDisplayName: string | null
 ) {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-  if (!supabaseUrl || !supabaseKey) return
-
-  // 先查詢 LINE Bot 屬於哪個 workspace（必需）
-  let workspaceId: string | null = null
-
-  try {
-    const configRes = await fetch(
-      `${supabaseUrl}/rest/v1/workspace_line_config?select=workspace_id&limit=1`,
-      {
-        headers: {
-          apikey: supabaseKey,
-          Authorization: `Bearer ${supabaseKey}`,
-        },
-      }
-    )
-
-    if (configRes.ok) {
-      const configs = await configRes.json()
-      if (configs && configs.length > 0) {
-        workspaceId = configs[0].workspace_id
-      }
-    }
-  } catch (error) {
-    logger.error('[LINE] Failed to get workspace config:', error)
-  }
-
+  const workspaceId = await getLineWorkspaceId()
   if (!workspaceId) {
     logger.error('[LINE] No workspace config found, cannot save conversation')
     return
   }
 
   try {
-    // 只儲存現有的欄位
-    const conversationData: {
-      platform: string
-      platform_user_id: string
-      user_display_name: string | null
-      user_message: string
-      ai_response: string
-      created_at: string
-    } = {
-      platform: platform,
+    const supabase = getSupabaseAdminClient()
+    await supabase.from('customer_service_conversations').insert({
+      platform,
       platform_user_id: platformUserId,
       user_display_name: userDisplayName,
       user_message: userMessage,
       ai_response: aiResponse,
       created_at: new Date().toISOString(),
-    }
-
-    // 可以添加一些 AI 分析的欄位（如果有的話）
-    // 例如：intent, sentiment 等
-
-    await fetch(`${supabaseUrl}/rest/v1/customer_service_conversations`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        apikey: supabaseKey,
-        Authorization: `Bearer ${supabaseKey}`,
-        Prefer: 'return=minimal',
-      },
-      body: JSON.stringify(conversationData),
     })
 
     logger.info(`[LINE] Conversation saved: ${platformUserId} - ${userMessage.substring(0, 30)}...`)
@@ -545,18 +395,17 @@ async function processClockIn(event: LineEvent): Promise<boolean> {
   else if (clockOutKeywords.includes(text)) action = 'clock_out'
   if (!action) return false
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-  if (!supabaseUrl || !supabaseKey) return false
-
   try {
+    const supabase = getSupabaseAdminClient()
     // 查找已綁定的員工
-    const lineUserRes = await fetch(
-      `${supabaseUrl}/rest/v1/line_users?select=employee_id,workspace_id&user_id=eq.${userId}&employee_id=not.is.null`,
-      { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` } }
-    )
-    const lineUsers = await lineUserRes.json()
-    if (!lineUsers?.length || !lineUsers[0].employee_id) {
+    const { data: lineUser } = await supabase
+      .from('line_users')
+      .select('employee_id, workspace_id')
+      .eq('user_id', userId)
+      .not('employee_id', 'is', null)
+      .maybeSingle()
+
+    if (!lineUser?.employee_id) {
       await replyText(
         event.replyToken!,
         '❌ 你尚未綁定員工帳號，請先傳送員工編號進行綁定（例如：E001）'
@@ -564,7 +413,7 @@ async function processClockIn(event: LineEvent): Promise<boolean> {
       return true
     }
 
-    const { employee_id, workspace_id } = lineUsers[0]
+    const { employee_id, workspace_id } = lineUser
 
     // 呼叫打卡 API（以 internal secret 驗證身份）
     const baseUrl =
@@ -573,7 +422,7 @@ async function processClockIn(event: LineEvent): Promise<boolean> {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-internal-secret': supabaseKey,
+        'x-internal-secret': process.env.SUPABASE_SERVICE_ROLE_KEY!,
       },
       body: JSON.stringify({
         employee_id,
