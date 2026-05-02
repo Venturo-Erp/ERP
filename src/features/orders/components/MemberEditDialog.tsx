@@ -275,14 +275,14 @@ export function MemberEditDialog({
               <X size={16} />
               {COMP_ORDERS_LABELS.取消}
             </Button>
-            <Button
+            <Button variant="soft-gold"
               onClick={onSave}
               disabled={isSaving}
               size="lg"
               className={
                 editMode === 'verify'
                   ? 'bg-status-success hover:bg-morandi-green text-white px-8 font-medium'
-                  : 'bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors px-8 font-medium'
+ : 'px-8 font-medium'
               }
             >
               {isSaving

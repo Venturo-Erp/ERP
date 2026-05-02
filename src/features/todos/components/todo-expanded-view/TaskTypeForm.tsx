@@ -320,10 +320,10 @@ function AccommodationForm({ todo, onUpdate, onClose }: FormProps) {
         </div>
       )}
 
-      <Button
+      <Button variant="soft-gold"
         onClick={handleSubmit}
         disabled={isSubmitting}
-        className="w-full bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors"
+ className="w-full"
       >
         {isSubmitting ? '提交中...' : '提交並完成任務'}
       </Button>
@@ -765,12 +765,12 @@ function TicketForm({ todo, onUpdate, onClose }: FormProps) {
 
       {/* 操作按鈕 */}
       <div className="flex gap-2 pt-2">
-        <Button
+        <Button variant="soft-gold"
           onClick={() => {
             onUpdate({ status: 'completed', completed: true })
             onClose()
           }}
-          className="flex-1 bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors"
+ className="flex-1"
         >
           標記完成
         </Button>
@@ -797,12 +797,12 @@ function GeneralForm({ todo, onUpdate, onClose }: FormProps) {
   return (
     <div className="space-y-3">
       <p className="text-sm text-morandi-secondary">一般任務（無專屬表單）</p>
-      <Button
+      <Button variant="soft-gold"
         onClick={() => {
           onUpdate({ status: 'completed', completed: true })
           onClose()
         }}
-        className="w-full bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors"
+ className="w-full"
       >
         標記完成
       </Button>

@@ -195,10 +195,10 @@ export function BatchPickupDialog({
                   <X size={16} />
                   {L.btn_cancel}
                 </Button>
-                <Button
+                <Button variant="soft-gold"
                   onClick={handleStartOCR}
                   disabled={files.length === 0 || isProcessing}
-                  className="bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors"
+ 
                 >
                   {isProcessing ? (
                     <>

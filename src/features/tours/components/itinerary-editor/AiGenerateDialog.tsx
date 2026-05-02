@@ -142,10 +142,10 @@ export function AiGenerateDialog({
             <X size={14} />
             {AI_GENERATE_DIALOG_LABELS.CANCEL}
           </Button>
-          <Button
+          <Button variant="soft-gold"
             onClick={onGenerate}
             disabled={isGenerating}
-            className="gap-1 bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors"
+ className="gap-1"
           >
             {isGenerating ? (
               <>

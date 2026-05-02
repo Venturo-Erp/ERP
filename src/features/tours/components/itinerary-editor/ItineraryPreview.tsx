@@ -64,10 +64,10 @@ function ItineraryPreview({
                 <Edit2 size={12} />
                 {BROCHURE_PREVIEW_DIALOG_LABELS.編輯}
               </Button>
-              <Button
+              <Button variant="soft-gold"
                 size="sm"
                 onClick={onPrint}
-                className="h-7 text-[11px] gap-1 bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors"
+ className="h-7 text-[11px] gap-1"
               >
                 <Printer size={12} />
                 {PRINTABLE_QUICK_QUOTE_LABELS.列印}
@@ -256,10 +256,10 @@ export function ItineraryPreviewContent({
             <Edit2 size={12} />
             {BROCHURE_PREVIEW_DIALOG_LABELS.編輯}
           </Button>
-          <Button
+          <Button variant="soft-gold"
             size="sm"
             onClick={onPrint}
-            className="h-7 text-[11px] gap-1 bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors"
+ className="h-7 text-[11px] gap-1"
           >
             <Printer size={12} />
             {PRINTABLE_QUICK_QUOTE_LABELS.列印}

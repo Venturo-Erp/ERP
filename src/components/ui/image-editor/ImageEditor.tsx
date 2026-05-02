@@ -557,21 +557,21 @@ export function ImageEditor({
             {tCommon('cancel')}
           </Button>
           {onCropAndSave ? (
-            <Button
+            <Button variant="soft-gold"
               type="button"
               onClick={handleCropAndSave}
               disabled={isProcessing}
-              className="bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors gap-1.5"
+ className="gap-1.5"
             >
               {isProcessing ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
               {t('save')}
             </Button>
           ) : (
-            <Button
+            <Button variant="soft-gold"
               type="button"
               onClick={handleSave}
               disabled={isProcessing}
-              className="bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors gap-1.5"
+ className="gap-1.5"
             >
               <Check size={14} />
               {t('save')}

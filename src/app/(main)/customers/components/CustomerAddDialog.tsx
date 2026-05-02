@@ -221,10 +221,10 @@ export function CustomerAddDialog({
             </FormField>
           </div>
 
-          <Button
+          <Button variant="soft-gold"
             onClick={handleAddManually}
             disabled={!newCustomer.name.trim() || !newCustomer.phone.trim()}
-            className="w-full bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors gap-2"
+ className="w-full gap-2"
           >
             <Plus size={16} />
             {L.btn_add_manual}
@@ -271,10 +271,10 @@ export function CustomerAddDialog({
 
           {/* 辨識按鈕 - 固定在檔案列表上方 */}
           {passportUpload.files.length > 0 && (
-            <Button
+            <Button variant="soft-gold"
               onClick={passportUpload.processFiles}
               disabled={passportUpload.isUploading}
-              className="w-full bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors gap-2"
+ className="w-full gap-2"
             >
               <Upload size={16} />
               {passportUpload.isUploading

@@ -272,10 +272,10 @@ export function CreateTenantDialog({
               <Button variant="outline" onClick={() => handleOpenChange(false)} className="flex-1">
                 {LABELS.BTN_CANCEL}
               </Button>
-              <Button
+              <Button variant="soft-gold"
                 onClick={() => setStep(2)}
                 disabled={!isStep1Valid}
-                className="flex-1 bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors"
+ className="flex-1"
               >
                 {LABELS.BTN_NEXT}
               </Button>
@@ -343,10 +343,10 @@ export function CreateTenantDialog({
               <Button variant="outline" onClick={() => setStep(1)} className="flex-1">
                 {LABELS.BTN_PREV}
               </Button>
-              <Button
+              <Button variant="soft-gold"
                 onClick={handleCreate}
                 disabled={!isStep2Valid || creating}
-                className="flex-1 bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors"
+ className="flex-1"
               >
                 {creating ? LABELS.BTN_CREATING : LABELS.BTN_CREATE}
               </Button>
@@ -386,9 +386,9 @@ export function CreateTenantDialog({
               <Button variant="outline" onClick={handleClose} className="flex-1">
                 {LABELS.BTN_CLOSE}
               </Button>
-              <Button
+              <Button variant="soft-gold"
                 onClick={handleCopyLoginInfo}
-                className="flex-1 bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors gap-2"
+ className="flex-1 gap-2"
               >
                 {copied ? <Check size={16} /> : <Copy size={16} />}
                 {LABELS.COPY_ALL}

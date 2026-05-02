@@ -381,9 +381,9 @@ export function TourPrintDialog({ isOpen, tour, members, onClose }: TourPrintDia
                 <FileSpreadsheet size={16} className="mr-1" />
                 {TOUR_PRINT_DIALOG_LABELS.Excel}
               </Button>
-              <Button
+              <Button variant="soft-gold"
                 onClick={handlePrintMembers}
-                className="bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors"
+ 
               >
                 <Printer size={16} className="mr-1" />
                 {TOUR_PRINT_DIALOG_LABELS.列印}
@@ -429,10 +429,10 @@ export function TourPrintDialog({ isOpen, tour, members, onClose }: TourPrintDia
                 <X size={16} className="mr-1" />
                 {TOUR_PRINT_DIALOG_LABELS.取消}
               </Button>
-              <Button
+              <Button variant="soft-gold"
                 onClick={handlePrintFlightConfirmation}
                 disabled={selectedCount === 0}
-                className="bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors"
+ 
               >
                 <Printer size={16} className="mr-1" />
                 列印 ({selectedCount} 人)
@@ -465,10 +465,10 @@ export function TourPrintDialog({ isOpen, tour, members, onClose }: TourPrintDia
                 <X size={16} className="mr-1" />
                 {TOUR_PRINT_DIALOG_LABELS.取消}
               </Button>
-              <Button
+              <Button variant="soft-gold"
                 onClick={handlePrintHotelConfirmation}
                 disabled={selectedCount === 0}
-                className="bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors"
+ 
               >
                 <Printer size={16} className="mr-1" />
                 列印 ({selectedCount} 人)

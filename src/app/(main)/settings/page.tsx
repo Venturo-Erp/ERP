@@ -54,6 +54,7 @@ export default function SettingsPage() {
   return (
     <ContentPageLayout
       title="設定"
+      contentClassName="flex-1 overflow-visible min-h-0 flex flex-col"
       headerActions={
         <div className="flex items-center gap-4">
           {hasSettingsAccess && <SettingsTabs />}

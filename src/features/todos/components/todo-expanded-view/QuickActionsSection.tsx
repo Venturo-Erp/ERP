@@ -241,10 +241,10 @@ export function QuickActionContent({
                 onChange={e => setShareData(prev => ({ ...prev, message: e.target.value }))}
               />
             </div>
-            <Button
+            <Button variant="soft-gold"
               onClick={handleShareTodo}
               disabled={isSharing || !shareData.targetUserId}
-              className="w-full bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors shadow-md h-9 text-xs gap-1.5"
+ className="w-full shadow-md h-9 text-xs gap-1.5"
             >
               <UserPlus size={14} />
               {isSharing ? SHARE_LABELS.sharing : SHARE_LABELS.shareTask}

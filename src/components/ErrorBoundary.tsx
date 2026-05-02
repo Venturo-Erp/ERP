@@ -98,9 +98,9 @@ function ErrorDisplay({ error, errorInfo, onRetry }: ErrorDisplayProps) {
           )}
 
           {/* Retry Button */}
-          <Button
+          <Button variant="soft-gold"
             onClick={onRetry || (() => window.location.reload())}
-            className="w-full bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors gap-2"
+ className="w-full gap-2"
           >
             <RefreshCw size={16} />
             {COMPONENT_LABELS.LOADING_8807}

@@ -508,10 +508,10 @@ export default function HRSettingsPage() {
                         className="font-mono text-xs mt-1.5"
                       />
                     </div>
-                    <Button
+                    <Button variant="soft-gold"
                       onClick={handleLineSetup}
                       disabled={lineSaving || !lineToken || !lineSecret}
-                      className="w-full bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors"
+ className="w-full"
                     >
                       {lineSaving ? '設定中...' : '完成設定'}
                     </Button>

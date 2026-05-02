@@ -1130,10 +1130,10 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
               <Edit2 className="w-4 h-4 mr-1" />
               {TOUR_ITINERARY_TAB_LABELS.編輯}
             </Button>
-            <Button
+            <Button variant="soft-gold"
               size="sm"
               onClick={handlePrint}
-              className="bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors"
+ 
             >
               <Printer className="w-4 h-4 mr-1" />
               {TOUR_ITINERARY_TAB_LABELS.列印}
@@ -1383,11 +1383,11 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                         <Eye size={12} />
                         {TOUR_ITINERARY_TAB_LABELS.預覽}
                       </Button>
-                      <Button
+                      <Button variant="soft-gold"
                         size="sm"
                         onClick={handleSave}
                         disabled={saving || !title.trim()}
-                        className="h-8 px-3 text-xs bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors gap-1"
+ className="h-8 px-3 text-xs gap-1"
                       >
                         {saving ? (
                           <Loader2 className="w-3 h-3 animate-spin" />

@@ -293,9 +293,9 @@ export function CompanyDetailDialog({
                 {COMPANY_LABELS.DETAIL_CLOSE}
               </Button>
               {onUpdate && (
-                <Button
+                <Button variant="soft-gold"
                   onClick={() => setIsEditDialogOpen(true)}
-                  className="gap-2 bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors"
+ className="gap-2"
                 >
                   <Edit2 size={16} />
                   {COMPANY_LABELS.DETAIL_EDIT}

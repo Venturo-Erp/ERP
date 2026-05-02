@@ -104,10 +104,10 @@ export function ArchiveReasonDialog({
             <X size={16} />
             {TOUR_ARCHIVE.cancel}
           </Button>
-          <Button
+          <Button variant="soft-gold"
             onClick={handleConfirm}
             disabled={!selectedReason}
-            className="bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors gap-2"
+ className="gap-2"
           >
             <Check size={16} />
             {TOUR_ARCHIVE.confirm}

@@ -401,10 +401,10 @@ export function QuickReceipt({ onSubmit, defaultTourId, defaultOrderId }: QuickR
       )}
 
       {/* 提交按鈕 */}
-      <Button
+      <Button variant="soft-gold"
         onClick={handleSave}
         disabled={!selectedOrderId || !paymentItem.amount || paymentItem.amount === 0}
-        className="w-full bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors"
+ className="w-full"
       >
         <ReceiptIcon size={16} className="mr-2" />
         {BUTTON_LABELS.create}

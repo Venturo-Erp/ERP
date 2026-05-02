@@ -221,11 +221,11 @@ export function PackageItineraryDialog({
                           {PACKAGE_ITINERARY_DIALOG_LABELS.LABEL_6621}
                         </Button>
                       )}
-                      <Button
+                      <Button variant="soft-gold"
                         size="sm"
                         onClick={hook.handleSubmit}
                         disabled={hook.isCreating || !hook.formData.title.trim()}
-                        className="h-7 px-2 text-[11px] bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors gap-1"
+ className="h-7 px-2 text-[11px] gap-1"
                       >
                         {hook.isCreating ? (
                           <Loader2 className="w-3 h-3 animate-spin" />

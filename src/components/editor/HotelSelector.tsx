@@ -164,10 +164,10 @@ export function HotelSelector({
           <Button variant="outline" onClick={handleCancel} className="rounded-xl">
             {COMP_EDITOR_LABELS.取消}
           </Button>
-          <Button
+          <Button variant="soft-gold"
             onClick={handleConfirm}
             disabled={selectedIds.size === 0}
-            className="bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors rounded-xl min-w-[120px]"
+ className="rounded-xl min-w-[120px]"
           >
             新增飯店 ({selectedIds.size})
           </Button>

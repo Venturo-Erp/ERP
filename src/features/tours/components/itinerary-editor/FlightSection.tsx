@@ -147,12 +147,12 @@ export function FlightSection({
               placeholder={TOUR_REQUEST_FORM_DIALOG_LABELS.日期}
               className="h-8 text-xs w-32"
             />
-            <Button
+            <Button variant="soft-gold"
               type="button"
               size="sm"
               onClick={onSearchOutbound}
               disabled={searchingOutbound}
-              className="h-8 px-2 bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors"
+ className="h-8 px-2"
             >
               {searchingOutbound ? (
                 <Loader2 size={14} className="animate-spin" />
@@ -242,12 +242,12 @@ export function FlightSection({
               placeholder={TOUR_REQUEST_FORM_DIALOG_LABELS.日期}
               className="h-8 text-xs w-32"
             />
-            <Button
+            <Button variant="soft-gold"
               type="button"
               size="sm"
               onClick={onSearchReturn}
               disabled={searchingReturn}
-              className="h-8 px-2 bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors"
+ className="h-8 px-2"
             >
               {searchingReturn ? (
                 <Loader2 size={14} className="animate-spin" />

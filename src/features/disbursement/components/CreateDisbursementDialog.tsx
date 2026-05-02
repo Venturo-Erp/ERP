@@ -129,10 +129,10 @@ export function CreateDisbursementDialog({
             <X size={16} />
             {DISBURSEMENT_LABELS.取消}
           </Button>
-          <Button
+          <Button variant="soft-gold"
             onClick={handleSubmit}
             disabled={(!isEditMode && selectedRequestIds.length === 0) || isSubmitting}
-            className="bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors"
+ 
           >
             {submitLabel}
           </Button>

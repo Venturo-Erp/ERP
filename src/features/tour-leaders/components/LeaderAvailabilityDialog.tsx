@@ -269,9 +269,9 @@ export const LeaderAvailabilityDialog: React.FC<LeaderAvailabilityDialogProps> =
                   <X size={16} />
                   {TOUR_LEADERS_LABELS.CANCEL}
                 </Button>
-                <Button
+                <Button variant="soft-gold"
                   onClick={handleSubmit}
-                  className="bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors gap-2"
+ className="gap-2"
                 >
                   <Save size={16} />
                   {editingId ? TOUR_LEADERS_LABELS.SAVE : TOUR_LEADERS_LABELS.ADD}

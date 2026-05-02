@@ -271,10 +271,10 @@ export function ImagePositionEditor({ image, onSave, onClose }: ImagePositionEdi
           <X size={16} />
           {COMP_EDITOR_LABELS.取消}
         </Button>
-        <Button
+        <Button variant="soft-gold"
           type="button"
           onClick={() => onSave(position)}
-          className="bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors"
+ 
         >
           <Check size={16} className="mr-1" />
           {COMP_EDITOR_LABELS.LABEL_4550}

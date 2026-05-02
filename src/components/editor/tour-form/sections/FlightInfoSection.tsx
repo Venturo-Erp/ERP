@@ -212,12 +212,12 @@ export function FlightInfoSection({
             </div>
             <div className="h-6 w-px bg-morandi-container hidden sm:block"></div>
             <div className="flex items-center gap-2">
-              <Button
+              <Button variant="soft-gold"
                 type="button"
                 size="sm"
                 onClick={handleGenerateDailyItinerary}
                 disabled={!onGenerateDailyItinerary}
-                className="bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors text-xs gap-1"
+ className="text-xs gap-1"
               >
                 <CalendarPlus size={14} />
                 自動產生 {tripDays} 天行程

@@ -393,10 +393,10 @@ export function CustomerDialog({
                 <X size={14} />
                 {L.btn_cancel}
               </Button>
-              <Button
+              <Button variant="soft-gold"
                 onClick={handleSave}
                 disabled={saving || !isDirty}
-                className="gap-1.5 bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors"
+ className="gap-1.5"
               >
                 <Save size={14} />
                 {saving ? L.btn_saving : L.btn_confirm}
@@ -408,9 +408,9 @@ export function CustomerDialog({
                 <X size={14} />
                 {L.btn_close}
               </Button>
-              <Button
+              <Button variant="soft-gold"
                 onClick={() => onModeChange?.('edit')}
-                className="gap-1.5 bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors"
+ className="gap-1.5"
               >
                 <Edit size={14} />
                 {L.btn_edit}

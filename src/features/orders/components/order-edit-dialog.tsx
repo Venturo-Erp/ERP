@@ -154,10 +154,10 @@ export function OrderEditDialog({ open, onOpenChange, order, level = 2 }: OrderE
               <X size={16} />
               {COMP_ORDERS_LABELS.取消}
             </Button>
-            <Button
+            <Button variant="soft-gold"
               type="submit"
               disabled={!formData.contact_person || isSubmitting}
-              className="bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors"
+ 
             >
               {isSubmitting ? COMP_ORDERS_LABELS.儲存中 : COMP_ORDERS_LABELS.儲存}
             </Button>

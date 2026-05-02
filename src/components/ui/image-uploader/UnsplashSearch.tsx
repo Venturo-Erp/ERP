@@ -114,10 +114,10 @@ export function UnsplashSearch({ onSelect, className }: UnsplashSearchProps) {
             className="pl-9 h-9"
           />
         </div>
-        <Button
+        <Button variant="soft-gold"
           onClick={searchImages}
           disabled={!query.trim() || loading}
-          className="h-9 px-4 bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors"
+ className="h-9 px-4"
         >
           {loading ? <Loader2 size={16} className="animate-spin" /> : '搜尋'}
         </Button>

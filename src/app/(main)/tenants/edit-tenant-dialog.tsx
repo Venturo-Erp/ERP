@@ -104,10 +104,10 @@ export function EditTenantDialog({
             <Button variant="outline" onClick={() => onOpenChange(false)}>
               {LABELS.BTN_CANCEL}
             </Button>
-            <Button
+            <Button variant="soft-gold"
               onClick={handleSave}
               disabled={saving || !name.trim()}
-              className="bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors"
+ 
             >
               {saving ? (
                 <>

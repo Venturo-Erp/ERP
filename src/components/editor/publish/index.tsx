@@ -120,11 +120,11 @@ export function PublishButton({
     <>
       <div className="flex items-center gap-2">
         {/* 1. 存檔按鈕 */}
-        <Button
+        <Button variant="soft-gold"
           onClick={saveItinerary}
           disabled={saving}
           size="sm"
-          className="bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors h-8 px-3"
+ className="h-8 px-3"
         >
           <Save size={14} className="mr-1.5" />
           {saving ? COMP_EDITOR_LABELS.儲存中 : COMP_EDITOR_LABELS.存檔}

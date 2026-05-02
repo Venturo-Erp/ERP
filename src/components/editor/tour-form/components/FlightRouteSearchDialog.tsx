@@ -192,11 +192,11 @@ export function FlightRouteSearchDialog({
                 />
               </div>
               <div className="flex items-end">
-                <Button
+                <Button variant="soft-gold"
                   type="button"
                   onClick={handleSearch}
                   disabled={loading || !origin}
-                  className="w-full h-9 bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors gap-1"
+ className="w-full h-9 gap-1"
                 >
                   {loading ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}
                   查詢

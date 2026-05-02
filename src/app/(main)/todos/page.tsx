@@ -597,9 +597,9 @@ export default function TodosPage() {
                                     className="h-8 text-sm mb-2"
                                   />
                                   <div className="flex gap-2">
-                                    <Button
+                                    <Button variant="soft-gold"
                                       size="sm"
-                                      className="h-7 text-xs bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors"
+ className="h-7 text-xs"
                                       onClick={() => handleQuickAdd(column.id)}
                                       disabled={!quickAddValue.trim() || isSubmitting}
                                     >
@@ -679,9 +679,9 @@ export default function TodosPage() {
                             className="h-8 text-sm mb-2"
                           />
                           <div className="flex gap-2">
-                            <Button
+                            <Button variant="soft-gold"
                               size="sm"
-                              className="h-7 text-xs bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors"
+ className="h-7 text-xs"
                               onClick={handleAddColumn}
                               disabled={!newColumnName.trim()}
                             >
@@ -850,9 +850,9 @@ function AddTodoForm({
       </div>
 
       <div className="flex gap-2 pt-4">
-        <Button
+        <Button variant="soft-gold"
           type="submit"
-          className="flex-1 bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors gap-2"
+ className="flex-1 gap-2"
         >
           <Plus size={16} />
           {LABELS.LABEL_1974}

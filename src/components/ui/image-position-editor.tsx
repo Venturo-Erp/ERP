@@ -299,10 +299,10 @@ export function ImagePositionEditor({
                 <Button type="button" variant="outline" onClick={onClose}>
                   {UI_LABELS.CANCEL}
                 </Button>
-                <Button
+                <Button variant="soft-gold"
                   type="button"
                   onClick={handleConfirm}
-                  className="bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors"
+ 
                 >
                   {UI_LABELS.LABEL_4550}
                 </Button>

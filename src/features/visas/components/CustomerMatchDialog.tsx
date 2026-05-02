@@ -167,9 +167,9 @@ export function CustomerMatchDialog({
 
         <DialogFooter>
           {(currentPerson?.matchedCustomers.length ?? 0) === 0 && (
-            <Button
+            <Button variant="soft-gold"
               onClick={onAddNew}
-              className="bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors gap-2"
+ className="gap-2"
             >
               <Plus size={16} />
               {CL.btn_add_to_crm}
@@ -426,9 +426,9 @@ export function AddCustomerFormDialog({
             <X size={16} />
             {FL.btn_cancel}
           </Button>
-          <Button
+          <Button variant="soft-gold"
             onClick={onSave}
-            className="bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors gap-2"
+ className="gap-2"
           >
             <Save size={16} />
             {FL.btn_save}

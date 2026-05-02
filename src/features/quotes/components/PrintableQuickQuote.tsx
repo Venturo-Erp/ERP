@@ -403,9 +403,9 @@ export const PrintableQuickQuote: React.FC<PrintableQuickQuoteProps> = ({
             <X className="h-4 w-4" />
             {DIALOGS_CONTAINER_LABELS.關閉}
           </Button>
-          <Button
+          <Button variant="soft-gold"
             onClick={handlePrint}
-            className="gap-2 bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors"
+ className="gap-2"
           >
             <Printer className="h-4 w-4" />
             {PRINTABLE_QUICK_QUOTE_LABELS.列印}

@@ -191,10 +191,10 @@ export function TourFormShell({
             <X size={16} />
             {TOUR_FORM.cancel}
           </Button>
-          <Button
+          <Button variant="soft-gold"
             onClick={onSubmit}
             disabled={isSubmitDisabled()}
-            className="bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors"
+ 
           >
             {getSubmitLabel()}
           </Button>

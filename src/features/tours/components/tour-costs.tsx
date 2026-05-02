@@ -313,10 +313,10 @@ export const TourCosts = React.memo(function TourCosts({
               />
             </div>
           </div>
-          <Button
+          <Button variant="soft-gold"
             onClick={() => setIsAddDialogOpen(true)}
             size="sm"
-            className="bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors"
+ 
           >
             <Plus size={14} className="mr-1" />
             {COMP_TOURS_LABELS.新增支出}
@@ -406,9 +406,9 @@ export const TourCosts = React.memo(function TourCosts({
                 <X size={16} />
                 {COMP_TOURS_LABELS.取消}
               </Button>
-              <Button
+              <Button variant="soft-gold"
                 onClick={handleAddCost}
-                className="bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors"
+ 
               >
                 {COMP_TOURS_LABELS.新增}
               </Button>

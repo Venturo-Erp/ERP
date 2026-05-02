@@ -541,11 +541,11 @@ export default function RolesPage() {
                   )}
                 </div>
                 {selectedRole && !selectedRole.is_admin && (
-                  <Button
+                  <Button variant="soft-gold"
                     onClick={handleSavePermissions}
                     disabled={saving}
                     size="sm"
-                    className="h-8 bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors"
+ className="h-8"
                   >
                     {saving ? (
                       <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
@@ -631,10 +631,10 @@ export default function RolesPage() {
               <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
                 取消
               </Button>
-              <Button
+              <Button variant="soft-gold"
                 onClick={handleCreateRole}
                 disabled={saving || !editingRole.name}
-                className="bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors"
+ 
               >
                 {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                 建立

@@ -210,10 +210,10 @@ const QuoteDialog: React.FC<QuoteDialogProps> = ({
               <X size={16} />
               {QUOTE_DIALOG_LABELS.CANCEL}
             </Button>
-            <Button
+            <Button variant="soft-gold"
               type="submit"
               disabled={!formData.name.trim() || !formData.group_size || formData.group_size < 1}
-              className="bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors gap-2"
+ className="gap-2"
             >
               <Plus size={16} />
               {QUOTE_DIALOG_LABELS.ADD} <span className="ml-1 text-xs opacity-70">(Enter)</span>

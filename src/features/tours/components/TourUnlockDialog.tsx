@@ -173,10 +173,10 @@ function TourUnlockDialog({ tour, open, onOpenChange, onUnlocked }: TourUnlockDi
             <X size={16} />
             {TOUR_UNLOCK.cancel}
           </Button>
-          <Button
+          <Button variant="soft-gold"
             onClick={handleUnlock}
             disabled={submitting || !password}
-            className="bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors gap-1"
+ className="gap-1"
           >
             <Check size={16} className={submitting ? 'hidden' : ''} />
             <Loader2 className={submitting ? 'h-4 w-4 animate-spin' : 'hidden'} />

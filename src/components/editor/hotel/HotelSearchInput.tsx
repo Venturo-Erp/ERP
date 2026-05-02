@@ -190,11 +190,11 @@ export function HotelSearchInput({
             }}
             autoFocus
           />
-          <Button
+          <Button variant="soft-gold"
             type="button"
             onClick={onManualAdd}
             disabled={!manualHotelName.trim()}
-            className="bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors rounded-lg h-10 px-4 gap-1.5"
+ className="rounded-lg h-10 px-4 gap-1.5"
           >
             <Plus size={16} />
             {COMP_EDITOR_LABELS.新增}

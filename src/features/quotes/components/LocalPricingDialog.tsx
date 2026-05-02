@@ -231,9 +231,9 @@ export const LocalPricingDialog: React.FC<LocalPricingDialogProps> = ({
             <X className="w-4 h-4 mr-2" />
             {LOCAL_PRICING_DIALOG_LABELS.取消}
           </Button>
-          <Button
+          <Button variant="soft-gold"
             onClick={handleConfirmClick}
-            className="bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors"
+ 
             disabled={tiers.some(
               t => !t.participants || t.participants <= 0 || !t.unitPrice || t.unitPrice <= 0
             )}

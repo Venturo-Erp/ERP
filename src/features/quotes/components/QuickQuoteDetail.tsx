@@ -160,10 +160,10 @@ export const QuickQuoteDetail: React.FC<QuickQuoteDetailProps> = ({
             <X size={16} />
             {QUICK_QUOTE_DETAIL_LABELS.CANCEL}
           </Button>
-          <Button
+          <Button variant="soft-gold"
             onClick={() => handleSave(true)}
             disabled={isSaving}
-            className="bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors gap-2"
+ className="gap-2"
           >
             <Save className="h-4 w-4" />
             {isSaving ? QUICK_QUOTE_DETAIL_LABELS.儲存中 : QUICK_QUOTE_DETAIL_LABELS.儲存}

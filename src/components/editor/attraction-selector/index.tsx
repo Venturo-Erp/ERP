@@ -277,9 +277,9 @@ export function AttractionSelector({
             {ATTRACTION_SELECTOR_LABELS.CANCEL}
           </Button>
           {selectedIds.size > 0 && (
-            <Button
+            <Button variant="soft-gold"
               onClick={handleConfirm}
-              className="rounded-xl bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors"
+ className="rounded-xl"
             >
               加入 {selectedIds.size} 個景點
             </Button>

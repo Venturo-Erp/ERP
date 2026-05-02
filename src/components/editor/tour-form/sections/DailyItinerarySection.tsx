@@ -287,11 +287,11 @@ export function DailyItinerarySection({
             >
               {COMP_EDITOR_LABELS.LABEL_1066}
             </Button>
-            <Button
+            <Button variant="soft-gold"
               type="button"
               onClick={handleSaveToLibrary}
               disabled={isSavingToLibrary}
-              className="bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors"
+ 
             >
               {isSavingToLibrary ? (
                 <>

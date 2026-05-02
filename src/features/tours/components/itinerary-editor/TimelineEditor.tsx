@@ -110,11 +110,11 @@ export function TimelineEditor({
             {dateLabel && <span className="text-sm text-morandi-secondary">{dateLabel}</span>}
           </div>
           <div className="flex gap-1.5">
-            <Button
+            <Button variant="soft-gold"
               type="button"
               size="sm"
               onClick={() => setIsAttractionSelectorOpen(true)}
-              className="h-7 px-2 text-xs gap-1 bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors"
+ className="h-7 px-2 text-xs gap-1"
             >
               <MapPin size={12} />
               {ITINERARY_DIALOG_LABELS.從景點庫選擇}

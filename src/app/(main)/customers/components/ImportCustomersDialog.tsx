@@ -548,11 +548,11 @@ export function ImportCustomersDialog({ open, onOpenChange }: ImportCustomersDia
               {L.btn_cancel}
             </Button>
             {step === 'preview' && (
-              <Button
+              <Button variant="soft-gold"
                 size="sm"
                 onClick={handleImport}
                 disabled={is_importing || valid_count === 0}
-                className="bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors gap-2"
+ className="gap-2"
               >
                 <Upload size={16} />
                 {is_importing ? L.btn_importing : `${L.btn_import}（${valid_count} 筆）`}
