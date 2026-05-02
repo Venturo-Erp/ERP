@@ -80,7 +80,7 @@ export function NotesSection({ todo, onUpdate }: NotesSectionProps) {
     <div className="bg-card border border-border rounded-xl p-4 shadow-sm flex-1 flex flex-col min-h-0">
       <h4 className="text-sm font-semibold text-morandi-primary mb-3 flex items-center gap-1.5">
         <MessageSquare size={14} className="text-morandi-gold" />
-        {COMMON_LABELS.notes}
+        {COMMON_LABELS.activityLog}
       </h4>
       <div className="space-y-2 mb-3 max-h-[250px] overflow-y-auto">
         {(todo.notes || []).map((note, index) => (

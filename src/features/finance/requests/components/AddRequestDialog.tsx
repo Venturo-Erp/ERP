@@ -29,7 +29,9 @@ import { CostTransferDialog } from './CostTransferDialog'
 import { useRequestForm } from '../hooks/useRequestForm'
 import { useRequestOperations } from '../hooks/useRequestOperations'
 import { usePayments } from '@/features/payments/hooks/usePayments'
-import { RequestItem, categoryOptions, statusLabels, statusColors } from '../types'
+import { RequestItem, categoryOptions, statusLabels } from '../types'
+import { StatusBadge, type StatusTone } from '@/components/ui/status-badge'
+import { PAYMENT_REQUEST_STATUS_TONES } from '@/features/disbursement/constants'
 import { PaymentRequest, PaymentItemCategory, CompanyExpenseType } from '@/stores/types'
 import { paymentRequestService } from '@/features/payments/services/payment-request.service'
 import { usePaymentMethodsCached } from '@/data/hooks'
@@ -1010,7 +1012,7 @@ export function AddRequestDialog({
                   )}
                 </TabsList>
 
-                {/* 團體請款：團號 + 訂單選擇器 */}
+                {/* 團體請款：團號 + 訂單 + 請款日期 同一行（跟收款 dialog 對齊） */}
                 {activeTab === 'tour' && (
                   <>
                     <div className="relative z-[10020]">
@@ -1042,6 +1044,18 @@ export function AddRequestDialog({
                         maxHeight="300px"
                       />
                     </div>
+                    <div className="relative z-[10018] w-[200px]">
+                      <RequestDateInput
+                        value={formData.request_date}
+                        onChange={(date, isSpecialBilling) =>
+                          setFormData(prev => ({
+                            ...prev,
+                            request_date: date,
+                            is_special_billing: isSpecialBilling,
+                          }))
+                        }
+                      />
+                    </div>
                   </>
                 )}
               </div>
@@ -1052,25 +1066,12 @@ export function AddRequestDialog({
                   {isEditMode ? (
                     <>
                       請款單 {currentRequest?.code}
-                      <Badge
-                        className={
-                          statusColors[
-                            (currentRequest?.status || 'pending') as
-                              | 'pending'
-                              | 'confirmed'
-                              | 'billed'
-                          ]
-                        }
-                      >
-                        {
-                          statusLabels[
-                            (currentRequest?.status || 'pending') as
-                              | 'pending'
-                              | 'confirmed'
-                              | 'billed'
-                          ]
-                        }
-                      </Badge>
+                      {(() => {
+                        const status = (currentRequest?.status || 'pending') as keyof typeof PAYMENT_REQUEST_STATUS_TONES
+                        const tone = (PAYMENT_REQUEST_STATUS_TONES[status] || 'pending') as StatusTone
+                        const label = statusLabels[status as 'pending' | 'confirmed' | 'billed'] || ''
+                        return <StatusBadge tone={tone} label={label} />
+                      })()}
                     </>
                   ) : (
                     ADD_REQUEST_FORM_LABELS.新增請款單
@@ -1110,19 +1111,7 @@ export function AddRequestDialog({
               value="tour"
               className="flex-1 overflow-y-auto pt-4 border-t border-morandi-container/30 space-y-6"
             >
-              {/* 請款日期（header 級、和列表顯示的一致） */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <RequestDateInput
-                  value={formData.request_date}
-                  onChange={(date, isSpecialBilling) =>
-                    setFormData(prev => ({
-                      ...prev,
-                      request_date: date,
-                      is_special_billing: isSpecialBilling,
-                    }))
-                  }
-                />
-              </div>
+              {/* 請款日期已移到 DialogHeader 的團+訂單同一行（跟收款 UI 對齊） */}
 
               <EditableRequestItemList
                 items={isEditMode ? localItems : requestItems}

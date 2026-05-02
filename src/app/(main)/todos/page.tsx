@@ -29,7 +29,7 @@ import {
   Plus,
   GripVertical,
   Calendar,
-  User,
+  MapPin,
   MoreHorizontal,
   Trash2,
   Pencil,
@@ -77,6 +77,8 @@ export default function TodosPage() {
   const searchParams = useSearchParams()
   const [expandedTodo, setExpandedTodo] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
+  const [priorityFilter, setPriorityFilter] = useState<number | 'all'>('all')
+  const [memberFilter, setMemberFilter] = useState<string>('all')
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [quickAddColumn, setQuickAddColumn] = useState<string | null>(null)
   const [quickAddValue, setQuickAddValue] = useState('')
@@ -139,9 +141,11 @@ export default function TodosPage() {
         if (!isCreator && !isAssignee && !inVisibility) return false
       }
       if (searchTerm && !todo.title.toLowerCase().includes(searchTerm.toLowerCase())) return false
+      if (priorityFilter !== 'all' && todo.priority !== priorityFilter) return false
+      if (memberFilter !== 'all' && todo.assignee !== memberFilter) return false
       return true
     })
-  }, [todos, searchTerm, user?.id])
+  }, [todos, searchTerm, priorityFilter, memberFilter, user?.id])
 
   // 按 column_id 分組
   const todosByColumn = useMemo(() => {
@@ -463,6 +467,59 @@ export default function TodosPage() {
       searchTerm={searchTerm}
       onSearchChange={setSearchTerm}
       searchPlaceholder={LABELS.SEARCH_PLACEHOLDER}
+      badge={
+        <span className="text-xs font-normal text-morandi-secondary bg-morandi-container/60 px-2 py-0.5 rounded-full">
+          {visibleTodos.length} / {todos?.length || 0}
+        </span>
+      }
+      headerActions={
+        <div className="flex items-center gap-2">
+          <Select
+            value={String(priorityFilter)}
+            onValueChange={v =>
+              setPriorityFilter(v === 'all' ? 'all' : (Number(v) as 1 | 2 | 3 | 4 | 5))
+            }
+          >
+            <SelectTrigger className="h-9 w-[120px] text-xs">
+              <SelectValue placeholder="優先度" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">全部優先度</SelectItem>
+              <SelectItem value="5">★★★★★ 緊急</SelectItem>
+              <SelectItem value="4">★★★★ 高</SelectItem>
+              <SelectItem value="3">★★★ 中</SelectItem>
+              <SelectItem value="2">★★ 低</SelectItem>
+              <SelectItem value="1">★ 很低</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={memberFilter} onValueChange={setMemberFilter}>
+            <SelectTrigger className="h-9 w-[120px] text-xs">
+              <SelectValue placeholder="負責人" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">全部負責人</SelectItem>
+              {employees?.map(emp => (
+                <SelectItem key={emp.id} value={emp.id}>
+                  {emp.display_name || emp.chinese_name || emp.english_name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {(priorityFilter !== 'all' || memberFilter !== 'all') && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-9 text-xs text-morandi-secondary"
+              onClick={() => {
+                setPriorityFilter('all')
+                setMemberFilter('all')
+              }}
+            >
+              清除篩選
+            </Button>
+          )}
+        </div>
+      }
       primaryAction={{
         label: LABELS.ADD_TASK,
         icon: Plus,
@@ -882,30 +939,50 @@ interface TodoCardMemoProps {
 }
 
 /**
- * 依優先級取 RGB（對應星級顏色），用於半透明 radial gradient 卡片背景
+ * 5 級 priority 中文 label
  */
-function getPriorityRgb(priority: number): string {
+const PRIORITY_LABELS: Record<number, string> = {
+  1: '很低',
+  2: '低',
+  3: '中',
+  4: '高',
+  5: '緊急',
+}
+
+/**
+ * 卡片頂端 priority bar 顏色（5 級）
+ */
+function getPriorityBarClass(priority: number): string {
   switch (priority) {
     case 5:
-      return '190, 100, 100' // morandi-red
+      return 'bg-morandi-red'
     case 4:
-      return '251, 146, 60' // orange-400
+      return 'bg-orange-400'
     case 3:
-      return '201, 170, 124' // morandi-gold
+      return 'bg-morandi-gold'
     case 2:
-      return '56, 189, 248' // sky-400
+      return 'bg-sky-400'
     default:
-      return '139, 134, 128' // morandi-muted
+      return 'bg-morandi-muted'
   }
 }
 
 /**
- * Uiverse radial-gradient 半透明效果：中心淡、邊緣聚集
- * 刻意用低透明度讓文字仍清楚可讀
+ * 卡片內 priority 文字 badge 樣式（5 級）
  */
-function getPriorityCardBackground(priority: number): string {
-  const rgb = getPriorityRgb(priority)
-  return `radial-gradient(circle, rgba(${rgb},0.04) 0%, rgba(${rgb},0.12) 80%, rgba(${rgb},0.22) 100%), #ffffff`
+function getPriorityBadgeClass(priority: number): string {
+  switch (priority) {
+    case 5:
+      return 'bg-morandi-red/10 text-morandi-red border border-morandi-red/20'
+    case 4:
+      return 'bg-orange-50 text-orange-600 border border-orange-100'
+    case 3:
+      return 'bg-morandi-gold/10 text-morandi-gold border border-morandi-gold/20'
+    case 2:
+      return 'bg-sky-50 text-sky-600 border border-sky-100'
+    default:
+      return 'bg-morandi-muted/10 text-morandi-muted border border-morandi-muted/20'
+  }
 }
 
 function getDeadlineBadge(deadline?: string) {
@@ -934,7 +1011,6 @@ const TodoCardMemo = React.memo(
     onChangePriority,
   }: TodoCardMemoProps) {
     const deadlineInfo = getDeadlineBadge(todo.deadline)
-    const [hoverPriority, setHoverPriority] = useState<number | null>(null)
     const subTasksDone = todo.sub_tasks?.filter(s => s.done).length || 0
     const subTasksTotal = todo.sub_tasks?.length || 0
     const unreadNotes = (todo.notes || []).filter(
@@ -949,17 +1025,20 @@ const TodoCardMemo = React.memo(
             {...provided.draggableProps}
             {...provided.dragHandleProps}
             onClick={() => onClick(todo.id)}
-            style={{
-              ...provided.draggableProps.style,
-              background: getPriorityCardBackground(todo.priority || 1),
-            }}
             className={cn(
-              'group rounded-lg border border-border/20 cursor-pointer',
-              snapshot.isDragging && 'shadow-xl rotate-[1deg]',
+              'group relative bg-card rounded-lg border border-border cursor-pointer transition-all hover:shadow-md hover:border-morandi-gold/30',
+              snapshot.isDragging && 'shadow-xl ring-2 ring-morandi-gold rotate-[1deg]',
               todo.status === 'completed' && 'opacity-60'
             )}
           >
-            <div className="p-3 relative">
+            {/* 頂端 5 色 priority bar（demo 風格） */}
+            <div
+              className={cn(
+                'absolute top-0 left-0 right-0 h-1 rounded-t-lg',
+                getPriorityBarClass(todo.priority || 1)
+              )}
+            />
+            <div className="p-3 pt-3.5 relative">
               {/* Hover actions */}
               <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button
@@ -1002,18 +1081,43 @@ const TodoCardMemo = React.memo(
                 )}
               </div>
 
-              {todo.related_items && todo.related_items.length > 0 && (
-                <div className="flex flex-wrap gap-1 mt-2">
-                  {todo.related_items.map((item, i) => (
-                    <span
-                      key={i}
-                      className="text-[10px] bg-morandi-gold/15 text-morandi-primary px-1.5 py-0.5 rounded"
-                    >
-                      {item.title}
-                    </span>
-                  ))}
-                </div>
+              {todo.description && (
+                <p className="text-xs text-morandi-secondary mt-1.5 line-clamp-2 leading-relaxed">
+                  {todo.description}
+                </p>
               )}
+
+              {/* Tags row：priority 文字 badge + 關聯 +N（demo 風格） */}
+              <div className="flex items-center gap-1.5 mt-2.5 flex-wrap">
+                <span
+                  className={cn(
+                    'text-[10px] font-medium px-1.5 py-0.5 rounded',
+                    getPriorityBadgeClass(todo.priority || 1)
+                  )}
+                >
+                  {PRIORITY_LABELS[todo.priority || 1]}
+                </span>
+
+                {todo.related_items && todo.related_items.length > 0 && (
+                  <>
+                    <span className="text-[10px] inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-morandi-gold/20 bg-morandi-gold/5 text-morandi-primary max-w-[150px]">
+                      <MapPin size={10} className="text-morandi-gold flex-shrink-0" />
+                      <span className="truncate">{todo.related_items[0].title}</span>
+                    </span>
+                    {todo.related_items.length > 1 && (
+                      <span
+                        className="text-[10px] bg-morandi-container/50 text-morandi-secondary px-1.5 py-0.5 rounded flex-shrink-0"
+                        title={todo.related_items
+                          .slice(1)
+                          .map(i => i.title)
+                          .join('、')}
+                      >
+                        +{todo.related_items.length - 1}
+                      </span>
+                    )}
+                  </>
+                )}
+              </div>
 
               {subTasksTotal > 0 && (
                 <div className="flex items-center gap-2 mt-2">
@@ -1029,49 +1133,28 @@ const TodoCardMemo = React.memo(
                 </div>
               )}
 
+              {/* Footer：avatar 左、截止日右（demo 風格） */}
               <div className="flex items-center justify-between mt-2.5">
-                <div className="flex items-center gap-2">
-                  {/* 星級：hover 預覽、click 切換 */}
-                  <div className="flex items-center" onMouseLeave={() => setHoverPriority(null)}>
-                    {[1, 2, 3, 4, 5].map(level => {
-                      const active = level <= (hoverPriority ?? todo.priority ?? 1)
-                      return (
-                        <button
-                          key={level}
-                          type="button"
-                          onClick={e => {
-                            e.stopPropagation()
-                            onChangePriority(todo, level)
-                          }}
-                          onMouseEnter={() => setHoverPriority(level)}
-                          title={`優先級 ${level}`}
-                          className={cn(
-                            'text-[12px] leading-none px-[1px] transition-colors',
-                            active ? 'text-morandi-gold' : 'text-morandi-muted/30',
-                            'hover:scale-110'
-                          )}
-                        >
-                          ★
-                        </button>
-                      )
-                    })}
+                {assigneeName ? (
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-5 h-5 rounded-full bg-morandi-gold/20 flex items-center justify-center text-[10px] font-medium text-morandi-gold">
+                      {assigneeName.slice(0, 1)}
+                    </div>
+                    <span className="text-[11px] text-morandi-secondary">{assigneeName}</span>
                   </div>
-                  {deadlineInfo && (
-                    <span
-                      className={cn(
-                        'text-[10px] px-1.5 py-0.5 rounded flex items-center gap-0.5',
-                        deadlineInfo.color
-                      )}
-                    >
-                      <Calendar size={10} />
-                      {deadlineInfo.text}
-                    </span>
-                  )}
-                </div>
-                {assigneeName && (
-                  <span className="text-[10px] text-morandi-secondary flex items-center gap-0.5">
-                    <User size={10} />
-                    {assigneeName}
+                ) : (
+                  <div />
+                )}
+
+                {deadlineInfo && (
+                  <span
+                    className={cn(
+                      'flex items-center gap-1 text-[11px]',
+                      deadlineInfo.color
+                    )}
+                  >
+                    <Calendar size={10} />
+                    {deadlineInfo.text}
                   </span>
                 )}
               </div>
@@ -1086,6 +1169,7 @@ const TodoCardMemo = React.memo(
     return (
       prev.todo.id === next.todo.id &&
       prev.todo.title === next.todo.title &&
+      prev.todo.description === next.todo.description &&
       prev.todo.status === next.todo.status &&
       prev.todo.priority === next.todo.priority &&
       prev.todo.deadline === next.todo.deadline &&

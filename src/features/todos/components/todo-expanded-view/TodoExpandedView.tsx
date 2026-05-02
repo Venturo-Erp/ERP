@@ -4,6 +4,7 @@ import { formatDate } from '@/lib/utils/format-date'
 
 import React from 'react'
 import { Button } from '@/components/ui/button'
+import { Textarea } from '@/components/ui/textarea'
 import { InputIME } from '@/components/ui/input-ime'
 import { StarRating } from '@/components/ui/star-rating'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
@@ -13,7 +14,7 @@ import { TodoExpandedViewProps } from './types'
 import { useTodoExpandedView } from './useTodoExpandedView'
 import { NotesSection } from './NotesSection'
 import { AssignmentSection } from './AssignmentSection'
-import { QuickActionsSection, QuickActionContent } from './QuickActionsSection'
+import { QuickActionsButtons, QuickActionInstanceCard } from './QuickActionsSection'
 import { TaskTypeForm } from './TaskTypeForm'
 import { useAuthStore } from '@/stores/auth-store'
 import {
@@ -24,7 +25,7 @@ import {
 } from '@/features/todos/constants/labels'
 
 export function TodoExpandedView({ todo, onUpdate, onClose }: TodoExpandedViewProps) {
-  const { activeTab, setActiveTab } = useTodoExpandedView()
+  const { instances, addInstance, removeInstance } = useTodoExpandedView()
   const { user } = useAuthStore()
 
   if (!todo) {
@@ -95,6 +96,28 @@ export function TodoExpandedView({ todo, onUpdate, onClose }: TodoExpandedViewPr
               </div>
             </div>
 
+            {/* 描述 */}
+            <div className="mb-4 bg-card border border-border rounded-xl p-4 shadow-sm">
+              <label className="text-xs font-medium text-morandi-secondary mb-2 block">
+                {COMMON_LABELS.description}
+              </label>
+              {canEdit ? (
+                <Textarea
+                  value={todo.description || ''}
+                  onChange={e => onUpdate({ description: e.target.value || undefined })}
+                  placeholder="新增描述..."
+                  rows={3}
+                  className="text-sm resize-none border-morandi-container/40 focus-visible:ring-morandi-gold focus-visible:border-morandi-gold"
+                />
+              ) : (
+                <div className="text-sm text-morandi-primary whitespace-pre-wrap min-h-[40px] leading-relaxed">
+                  {todo.description || (
+                    <span className="text-morandi-muted">未填寫</span>
+                  )}
+                </div>
+              )}
+            </div>
+
             {/* 基本資訊 */}
             <AssignmentSection
               todo={todo}
@@ -155,18 +178,31 @@ export function TodoExpandedView({ todo, onUpdate, onClose }: TodoExpandedViewPr
                   </div>
                 </div>
               )
-            ) : /* 沒有 task_type：顯示快速操作分頁 */
+            ) : /* 沒有 task_type：快速建立堆疊（點按鈕往下方追加、可同時對照） */
             canEdit ? (
               <>
-                <QuickActionsSection activeTab={activeTab} onTabChange={setActiveTab} />
-                <div className="flex-1 bg-card border border-border rounded-xl p-4 overflow-y-auto shadow-sm">
-                  <QuickActionContent
-                    activeTab={activeTab}
-                    todo={todo}
-                    onUpdate={onUpdate}
-                    onClose={onClose}
-                  />
-                </div>
+                <QuickActionsButtons onAdd={addInstance} />
+                {instances.length === 0 ? (
+                  <div className="flex-1 bg-card/40 border border-dashed border-border/60 rounded-xl p-4 flex items-center justify-center">
+                    <p className="text-sm text-morandi-muted text-center px-4">
+                      點上方按鈕新增收款 / 請款 / 共享
+                      <br />
+                      可累加多張、同時對照
+                    </p>
+                  </div>
+                ) : (
+                  <div className="flex-1 overflow-y-auto space-y-3 pr-1">
+                    {instances.map(instance => (
+                      <QuickActionInstanceCard
+                        key={instance.id}
+                        instance={instance}
+                        todo={todo}
+                        onUpdate={onUpdate}
+                        onRemove={() => removeInstance(instance.id)}
+                      />
+                    ))}
+                  </div>
+                )}
               </>
             ) : (
               <div className="flex-1 flex items-center justify-center">

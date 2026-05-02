@@ -6,12 +6,11 @@ export interface TodoExpandedViewProps {
   onClose: () => void
 }
 
-export type QuickActionTab = 'receipt' | 'invoice' | 'share'
+export type QuickActionType = 'receipt' | 'invoice' | 'share'
 
-export interface QuickActionTabConfig {
-  key: QuickActionTab
-  label: string
-  icon: React.ComponentType<{ size?: number; className?: string }>
+export interface QuickActionInstance {
+  id: string
+  type: QuickActionType
 }
 
 export interface NotesSectionProps {
@@ -25,14 +24,13 @@ export interface AssignmentSectionProps {
   readOnly?: boolean
 }
 
-export interface QuickActionsSectionProps {
-  activeTab: QuickActionTab
-  onTabChange: (tab: QuickActionTab) => void
+export interface QuickActionsButtonsProps {
+  onAdd: (type: QuickActionType) => void
 }
 
-export interface QuickActionContentProps {
-  activeTab: QuickActionTab
+export interface QuickActionInstanceCardProps {
+  instance: QuickActionInstance
   todo: Todo
-  onUpdate?: (updates: Partial<Todo>) => void
-  onClose?: () => void
+  onUpdate: (updates: Partial<Todo>) => void
+  onRemove: () => void
 }

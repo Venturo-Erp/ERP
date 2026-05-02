@@ -89,29 +89,41 @@ export default function RequestsPage() {
     if (canTour || canCompany || canSalary) {
       tabs.push({ value: 'all', label: '全部' })
     }
-    if (canTour) tabs.push({ value: 'tour', label: '🧳 團體請款' })
-    if (canCompany) tabs.push({ value: 'company', label: '🏢 公司請款' })
-    if (canSalary) tabs.push({ value: 'salary', label: '💰 薪資' })
+    if (canTour) tabs.push({ value: 'tour', label: '團體請款' })
+    if (canCompany) tabs.push({ value: 'company', label: '公司請款' })
+    if (canSalary) tabs.push({ value: 'salary', label: '薪資' })
     return tabs
   }, [canTour, canCompany, canSalary])
 
   const { tableColumns, filteredAndSortedRequests, handleSort } = useRequestTable(payment_requests)
 
-  // Tab filter
+  // Tab filter + 排序：status (pending → confirmed → billed) 為主、同狀態內 |日期 - today| asc
   const filteredByTab = useMemo(() => {
+    let list: typeof filteredAndSortedRequests
     if (activeTab === 'all') {
-      // 「全部」= 自己有資格看的合集
-      return filteredAndSortedRequests.filter(r => {
+      list = filteredAndSortedRequests.filter(r => {
         if (canTour && isTour(r)) return true
         if (canCompany && isCompany(r)) return true
         if (canSalary && isSalary(r)) return true
         return false
       })
-    }
-    if (activeTab === 'tour') return filteredAndSortedRequests.filter(isTour)
-    if (activeTab === 'company') return filteredAndSortedRequests.filter(isCompany)
-    if (activeTab === 'salary') return filteredAndSortedRequests.filter(isSalary)
-    return filteredAndSortedRequests
+    } else if (activeTab === 'tour') list = filteredAndSortedRequests.filter(isTour)
+    else if (activeTab === 'company') list = filteredAndSortedRequests.filter(isCompany)
+    else if (activeTab === 'salary') list = filteredAndSortedRequests.filter(isSalary)
+    else list = filteredAndSortedRequests
+
+    const today = Date.now()
+    const statusOrder: Record<string, number> = { pending: 0, confirmed: 1, billed: 2 }
+    return [...list].sort((a, b) => {
+      // 1. status 順序：待處理 > 已確認 > 已出帳
+      const sa = statusOrder[a.status || 'pending'] ?? 99
+      const sb = statusOrder[b.status || 'pending'] ?? 99
+      if (sa !== sb) return sa - sb
+      // 2. 同狀態內、|日期 - today| asc（越靠近今天越前）
+      const da = a.request_date ? Math.abs(new Date(a.request_date).getTime() - today) : Infinity
+      const db = b.request_date ? Math.abs(new Date(b.request_date).getTime() - today) : Infinity
+      return da - db
+    })
   }, [filteredAndSortedRequests, activeTab, canTour, canCompany, canSalary])
 
   // 點擊行打開詳細對話框
@@ -146,26 +158,9 @@ export default function RequestsPage() {
           icon: Plus,
           onClick: () => setIsAddDialogOpen(true),
         }}
-        beforeTable={
-          visibleTabs.length > 1 ? (
-            <div className="flex items-center gap-1 border-b border-border mb-4">
-              {visibleTabs.map(tab => (
-                <button
-                  key={tab.value}
-                  onClick={() => setActiveTab(tab.value)}
-                  className={cn(
-                    'px-4 py-2 text-sm font-medium transition-colors border-b-2',
-                    activeTab === tab.value
-                      ? 'text-morandi-gold border-morandi-gold'
-                      : 'text-morandi-secondary border-transparent hover:text-morandi-primary hover:border-morandi-container'
-                  )}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
-          ) : null
-        }
+        statusTabs={visibleTabs.length > 1 ? visibleTabs : undefined}
+        activeStatusTab={activeTab}
+        onStatusTabChange={tab => setActiveTab(tab as TabValue)}
       />
 
       <AddRequestDialog

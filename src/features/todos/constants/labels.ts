@@ -14,6 +14,8 @@ export const COMMON_LABELS = {
   priority: '優先級',
   deadline: '截止日期',
   notes: '備註',
+  activityLog: '活動紀錄',
+  description: '描述',
   relatedItems: '關聯項目',
   readOnlyMode: '唯讀模式',
   unknownEmployee: '未知員工',

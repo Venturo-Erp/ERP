@@ -34,25 +34,22 @@ export function RequestDateInput({
 
   const isSpecialBilling = value && new Date(value + 'T00:00:00').getDay() !== 4
 
+  // 跟 Combobox 同高、不放 label 跟提示文字（避免 header flex row 高度不齊）
+  // special billing 用底色提示、滑鼠 hover 看 wrap 的 title 完整文字
+  const tooltip = value
+    ? isSpecialBilling
+      ? '特殊出帳：非週四請款'
+      : REQUEST_DATE_INPUT_LABELS.一般請款_週四出帳
+    : undefined
+
   return (
-    <div>
-      <label className="text-sm font-medium text-morandi-primary">{label}</label>
+    <div title={tooltip}>
       <DatePicker
         value={value}
         onChange={date => handleDateChange(date)}
-        className={cn('mt-1', isSpecialBilling && 'bg-morandi-gold/10 border-morandi-gold/20')}
-        placeholder={PAYMENT_ITEM_ROW_LABELS.選擇日期}
+        className={cn(isSpecialBilling && 'bg-morandi-gold/10 border-morandi-gold/30')}
+        placeholder={label || PAYMENT_ITEM_ROW_LABELS.選擇日期}
       />
-      {value && (
-        <p
-          className={cn(
-            'text-xs mt-1',
-            isSpecialBilling ? 'text-morandi-gold' : 'text-morandi-secondary'
-          )}
-        >
-          {isSpecialBilling ? '特殊出帳：非週四請款' : REQUEST_DATE_INPUT_LABELS.一般請款_週四出帳}
-        </p>
-      )}
     </div>
   )
 }

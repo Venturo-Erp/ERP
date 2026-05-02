@@ -1,7 +1,6 @@
 'use client'
 
-import { logger } from '@/lib/utils/logger'
-import React, { useEffect, lazy, Suspense } from 'react'
+import React, { useState, lazy, Suspense } from 'react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import {
@@ -14,47 +13,54 @@ import {
 import { cn } from '@/lib/utils'
 import { useEmployeesSlim } from '@/data'
 import { useAuthStore } from '@/stores/auth-store'
-import { Receipt, FileText, Plane, UserPlus } from 'lucide-react'
-import { QuickActionsSectionProps, QuickActionContentProps, QuickActionTabConfig } from './types'
+import { Receipt, FileText, UserPlus, ChevronDown, ChevronUp, X } from 'lucide-react'
+import type {
+  QuickActionsButtonsProps,
+  QuickActionInstanceCardProps,
+  QuickActionType,
+} from './types'
+import type { Todo } from '@/stores/types'
 import { alert } from '@/lib/ui/alert-dialog'
 import {
   QUICK_ACTION_LABELS,
   LOADING_LABELS,
   SHARE_LABELS,
 } from '@/features/todos/constants/labels'
-// 使用懶加載避免打包問題
+
 const QuickReceipt = lazy(() =>
   import('../quick-actions/quick-receipt').then(m => ({ default: m.QuickReceipt }))
 )
 const QuickDisbursement = lazy(() =>
   import('../quick-actions/quick-disbursement').then(m => ({ default: m.QuickDisbursement }))
 )
-// PNR 快速動作已移除（2026-04-22、跟 PNR 進階系統一起砍）
-const quickActionTabs: QuickActionTabConfig[] = [
-  { key: 'receipt' as const, label: QUICK_ACTION_LABELS.receipt, icon: Receipt },
-  { key: 'invoice' as const, label: QUICK_ACTION_LABELS.invoice, icon: FileText },
-  { key: 'share' as const, label: QUICK_ACTION_LABELS.share, icon: UserPlus },
-]
 
-export function QuickActionsSection({ activeTab, onTabChange }: QuickActionsSectionProps) {
+const TYPE_META: Record<QuickActionType, { label: string; icon: typeof Receipt }> = {
+  receipt: { label: QUICK_ACTION_LABELS.receipt, icon: Receipt },
+  invoice: { label: QUICK_ACTION_LABELS.invoice, icon: FileText },
+  share: { label: QUICK_ACTION_LABELS.share, icon: UserPlus },
+}
+
+/**
+ * 上方三顆按鈕、點下去 onAdd(type) 往下方堆疊一張卡。
+ */
+export function QuickActionsButtons({ onAdd }: QuickActionsButtonsProps) {
   return (
-    <div className="mb-4 bg-card border border-border rounded-xl p-2 shadow-sm">
+    <div className="mb-3 bg-card border border-border rounded-xl p-2 shadow-sm">
       <div className="flex gap-2">
-        {quickActionTabs.map(tab => {
-          const Icon = tab.icon
+        {(Object.keys(TYPE_META) as QuickActionType[]).map(type => {
+          const meta = TYPE_META[type]
+          const Icon = meta.icon
           return (
             <button
-              key={tab.key}
-              onClick={() => onTabChange(tab.key)}
+              key={type}
+              onClick={() => onAdd(type)}
               className={cn(
                 'flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium transition-all flex-1 rounded-lg',
-                activeTab === tab.key
-                  ? 'bg-morandi-container/30 text-morandi-primary'
-                  : 'bg-transparent text-morandi-secondary hover:text-morandi-primary hover:bg-morandi-container/10'
+                'bg-transparent text-morandi-secondary hover:text-morandi-primary hover:bg-morandi-container/20'
               )}
             >
               <Icon size={16} />
-              {tab.label}
+              {meta.label}
             </button>
           )
         })}
@@ -63,26 +69,83 @@ export function QuickActionsSection({ activeTab, onTabChange }: QuickActionsSect
   )
 }
 
-export function QuickActionContent({
-  activeTab,
+/**
+ * 單張快速建立卡（可摺疊、可移除、提交後不關 dialog）。
+ */
+export function QuickActionInstanceCard({
+  instance,
   todo,
   onUpdate,
-  onClose,
-}: QuickActionContentProps) {
+  onRemove,
+}: QuickActionInstanceCardProps) {
+  const [collapsed, setCollapsed] = useState(false)
+  const meta = TYPE_META[instance.type]
+  const Icon = meta.icon
+
+  const LoadingFallback = (
+    <div className="flex items-center justify-center py-8">
+      <div className="text-sm text-morandi-secondary">{LOADING_LABELS.loading}</div>
+    </div>
+  )
+
+  return (
+    <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
+      <div className="flex items-center justify-between px-3 py-2 bg-morandi-container/20 border-b border-border">
+        <button
+          onClick={() => setCollapsed(c => !c)}
+          className="flex items-center gap-2 text-sm font-medium text-morandi-primary flex-1 text-left"
+        >
+          <Icon size={14} className="text-morandi-gold" />
+          <span>{meta.label}</span>
+          {collapsed ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
+        </button>
+        <button
+          onClick={onRemove}
+          className="p-1 rounded hover:bg-morandi-red/10 text-morandi-secondary hover:text-morandi-red"
+          title="移除"
+        >
+          <X size={14} />
+        </button>
+      </div>
+      {!collapsed && (
+        <div className="p-3">
+          {instance.type === 'receipt' && (
+            <Suspense fallback={LoadingFallback}>
+              <QuickReceipt onSubmit={() => undefined} />
+            </Suspense>
+          )}
+          {instance.type === 'invoice' && (
+            <Suspense fallback={LoadingFallback}>
+              <QuickDisbursement onSubmit={() => undefined} />
+            </Suspense>
+          )}
+          {instance.type === 'share' && <ShareForm todo={todo} onUpdate={onUpdate} />}
+        </div>
+      )}
+    </div>
+  )
+}
+
+/**
+ * 共享表單（從原本 QuickActionContent 抽出來、行為不變）。
+ */
+function ShareForm({
+  todo,
+  onUpdate,
+}: {
+  todo: Todo
+  onUpdate: (updates: Partial<Todo>) => void
+}) {
   const { items: employees } = useEmployeesSlim()
   const { user: currentUser } = useAuthStore()
-  const [shareData, setShareData] = React.useState({
+  const [shareData, setShareData] = useState({
     targetUserId: '',
     permission: 'view' as 'view' | 'edit',
     message: '',
   })
-  const [isSharing, setIsSharing] = React.useState(false)
+  const [isSharing, setIsSharing] = useState(false)
 
-  // 收款功能的資料載入狀態
-  const [isLoadingReceipt, setIsLoadingReceipt] = React.useState(false)
-
-  // 共享待辦的處理函數
-  const handleShareTodo = React.useCallback(async () => {
+  const handleShare = async () => {
     if (!shareData.targetUserId) {
       void alert(SHARE_LABELS.selectMemberWarning, 'warning')
       return
@@ -90,170 +153,95 @@ export function QuickActionContent({
 
     setIsSharing(true)
     try {
-      // 更新 assignee 和 visibility
       const currentVisibility = todo.visibility || []
       const newVisibility = currentVisibility.includes(shareData.targetUserId)
         ? currentVisibility
         : [...currentVisibility, shareData.targetUserId]
 
-      if (onUpdate) {
-        await onUpdate({
-          assignee: shareData.permission === 'edit' ? shareData.targetUserId : todo.assignee,
-          visibility: newVisibility,
-        })
-      }
+      await onUpdate({
+        assignee: shareData.permission === 'edit' ? shareData.targetUserId : todo.assignee,
+        visibility: newVisibility,
+      })
 
-      // 重置表單
       setShareData({ targetUserId: '', permission: 'view', message: '' })
       await alert(SHARE_LABELS.shareSuccess, 'success')
-      onClose?.()
-    } catch (error) {
+    } catch {
       void alert(SHARE_LABELS.shareFailed, 'error')
     } finally {
       setIsSharing(false)
     }
-  }, [shareData, todo, onUpdate])
+  }
 
-  // 只在收款分頁時載入團體和訂單資料
-  useEffect(() => {
-    const loadReceiptData = async () => {
-      if (activeTab === 'receipt') {
-        setIsLoadingReceipt(true)
-        try {
-          const { invalidateTours, invalidateOrders } = await import('@/data')
-
-          // SWR 快取失效，確保資料已載入
-          await Promise.all([invalidateTours(), invalidateOrders()])
-        } catch (error) {
-          logger.error('載入收款資料失敗:', error)
-        } finally {
-          setIsLoadingReceipt(false)
-        }
-      }
-    }
-
-    loadReceiptData()
-  }, [activeTab])
-
-  // 過濾掉自己
   const otherEmployees = employees.filter(emp => emp.id !== currentUser?.id)
 
-  // 加載中的元件
-  const LoadingFallback = (
-    <div className="flex items-center justify-center h-full">
-      <div className="text-sm text-morandi-secondary">{LOADING_LABELS.loading}</div>
+  return (
+    <div className="space-y-3">
+      <div>
+        <label className="block text-xs font-medium text-morandi-primary mb-1">
+          {SHARE_LABELS.shareTo}
+        </label>
+        <Select
+          value={shareData.targetUserId}
+          onValueChange={v => setShareData(p => ({ ...p, targetUserId: v }))}
+        >
+          <SelectTrigger className="shadow-sm h-9 text-xs">
+            <SelectValue placeholder={SHARE_LABELS.selectMember} />
+          </SelectTrigger>
+          <SelectContent>
+            {otherEmployees.length > 0 ? (
+              otherEmployees.map(emp => (
+                <SelectItem key={emp.id} value={emp.id}>
+                  {emp.display_name || emp.english_name}
+                </SelectItem>
+              ))
+            ) : (
+              <SelectItem value="none" disabled>
+                {SHARE_LABELS.noOtherEmployees}
+              </SelectItem>
+            )}
+          </SelectContent>
+        </Select>
+      </div>
+      <div>
+        <label className="block text-xs font-medium text-morandi-primary mb-1">
+          {SHARE_LABELS.permission}
+        </label>
+        <Select
+          value={shareData.permission}
+          onValueChange={(v: 'view' | 'edit') =>
+            setShareData(p => ({ ...p, permission: v }))
+          }
+        >
+          <SelectTrigger className="shadow-sm h-9 text-xs">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="view">{SHARE_LABELS.viewOnly}</SelectItem>
+            <SelectItem value="edit">{SHARE_LABELS.canEdit}</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <div>
+        <label className="block text-xs font-medium text-morandi-primary mb-1">
+          {SHARE_LABELS.messageOptional}
+        </label>
+        <Textarea
+          placeholder={SHARE_LABELS.messageToMember}
+          rows={2}
+          className="shadow-sm text-xs"
+          value={shareData.message}
+          onChange={e => setShareData(p => ({ ...p, message: e.target.value }))}
+        />
+      </div>
+      <Button
+        variant="soft-gold"
+        onClick={handleShare}
+        disabled={isSharing || !shareData.targetUserId}
+        className="w-full shadow-md h-9 text-xs gap-1.5"
+      >
+        <UserPlus size={14} />
+        {isSharing ? SHARE_LABELS.sharing : SHARE_LABELS.shareTask}
+      </Button>
     </div>
   )
-
-  switch (activeTab) {
-    case 'receipt':
-      if (isLoadingReceipt) {
-        return (
-          <div className="flex items-center justify-center h-full">
-            <div className="text-sm text-morandi-secondary">
-              {LOADING_LABELS.loadingReceiptData}
-            </div>
-          </div>
-        )
-      }
-      return (
-        <Suspense fallback={LoadingFallback}>
-          <QuickReceipt onSubmit={onClose} />
-        </Suspense>
-      )
-
-    case 'invoice':
-      return (
-        <Suspense fallback={LoadingFallback}>
-          <QuickDisbursement onSubmit={onClose} />
-        </Suspense>
-      )
-
-    case 'share':
-      return (
-        <div className="space-y-4">
-          <div className="flex items-center gap-2 pb-3 border-b border-morandi-container/20">
-            <div className="p-1.5 bg-morandi-gold/10 rounded-lg">
-              <UserPlus size={16} className="text-morandi-gold" />
-            </div>
-            <div>
-              <h5 className="text-sm font-semibold text-morandi-primary">
-                {SHARE_LABELS.shareTask}
-              </h5>
-              <p className="text-xs text-morandi-secondary">{SHARE_LABELS.shareDescription}</p>
-            </div>
-          </div>
-          <div className="space-y-3">
-            <div>
-              <label className="block text-xs font-medium text-morandi-primary mb-1">
-                {SHARE_LABELS.shareTo}
-              </label>
-              <Select
-                value={shareData.targetUserId}
-                onValueChange={value => setShareData(prev => ({ ...prev, targetUserId: value }))}
-              >
-                <SelectTrigger className="shadow-sm h-9 text-xs">
-                  <SelectValue placeholder={SHARE_LABELS.selectMember} />
-                </SelectTrigger>
-                <SelectContent>
-                  {otherEmployees.length > 0 ? (
-                    otherEmployees.map(emp => (
-                      <SelectItem key={emp.id} value={emp.id}>
-                        {emp.display_name || emp.english_name}
-                      </SelectItem>
-                    ))
-                  ) : (
-                    <SelectItem value="none" disabled>
-                      {SHARE_LABELS.noOtherEmployees}
-                    </SelectItem>
-                  )}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-morandi-primary mb-1">
-                {SHARE_LABELS.permission}
-              </label>
-              <Select
-                value={shareData.permission}
-                onValueChange={(value: 'view' | 'edit') =>
-                  setShareData(prev => ({ ...prev, permission: value }))
-                }
-              >
-                <SelectTrigger className="shadow-sm h-9 text-xs">
-                  <SelectValue placeholder={SHARE_LABELS.selectPermission} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="view">{SHARE_LABELS.viewOnly}</SelectItem>
-                  <SelectItem value="edit">{SHARE_LABELS.canEdit}</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-morandi-primary mb-1">
-                {SHARE_LABELS.messageOptional}
-              </label>
-              <Textarea
-                placeholder={SHARE_LABELS.messageToMember}
-                rows={2}
-                className="shadow-sm text-xs"
-                value={shareData.message}
-                onChange={e => setShareData(prev => ({ ...prev, message: e.target.value }))}
-              />
-            </div>
-            <Button variant="soft-gold"
-              onClick={handleShareTodo}
-              disabled={isSharing || !shareData.targetUserId}
- className="w-full shadow-md h-9 text-xs gap-1.5"
-            >
-              <UserPlus size={14} />
-              {isSharing ? SHARE_LABELS.sharing : SHARE_LABELS.shareTask}
-            </Button>
-          </div>
-        </div>
-      )
-
-    default:
-      return null
-  }
 }
