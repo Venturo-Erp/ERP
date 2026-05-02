@@ -56,22 +56,30 @@ return (
 
 | # | 列表頁 | 篩選欄位 | 狀態 |
 |---|---|---|---|
-| 1 | `/customers` 顧客 | 中文(name) / 電話(phone) / 公司名(company) | ⏸️ 待改 |
-| 2 | `/orders` 訂單 | 團號(code) / 團名(name) / 日期(departure_date) | ⏸️ 待改 |
-| 3 | `/tours` 旅行團 | ❓ 待你拍板 | ⏸️ |
-| 4 | `/finance` 財務 overview | ❓ | ⏸️ |
-| 5 | `/finance/treasury` 出納 | ❓ | ⏸️ |
-| 6 | `/finance/payments` 收款 | ❓ | ⏸️ |
-| 7 | `/finance/requests` 請款 | ❓ | ⏸️ |
-| 8 | `/database/attractions` 景點 | ❓ | ⏸️ |
-| 9 | `/database/suppliers` 供應商 | ❓ | ⏸️ |
-| 10 | `/database/tour-leaders` 領隊 | ❓ | ⏸️ |
-| 11 | `/hr/employees` 員工 | ❓ | ⏸️ |
-| 12 | `/visas` 簽證 | ❓ | ⏸️ |
-| 13 | `/todos` 待辦 | （量小、可能不用）| ⏸️ |
-| 14 | `/tenants` 租戶（VENTURO 平台用）| code / name | ⏸️ |
+| 1 | `/customers` 顧客 | 姓名(name) / 電話(phone) / 公司名(company) | ✅ 完成（2026-05-02） |
+| 2 | `/orders` 訂單 | 團號(code) / 團名(tour_name)、出團日(departure_date) 排序 | ✅ 完成（2026-05-02） |
+| 3 | `/tours` 旅行團 | 團名(name) / 團號(code) / 地點(location) / 描述(description) | ✅ **本來就 server-side**（useToursPaginated）|
+| 4 | `/finance/payments` 收款 | 收款單號 / 團名 / 收款日期 / **帳號後五碼**（核對對帳單用）| ⏸️ 待改 |
+| 5 | `/finance/requests` 請款 | 請款單號 / 團名 / 請款日期 / 帳號後五碼 | ⏸️ 待改 |
+| 6 | `/finance/treasury` 出納 | 出納單號 / 廠商名（出帳時間排序）| ⏸️ 待改 |
+| 7 | `/database/attractions` 景點 | 景點名 / 城市 | ⏸️（agent 推測、待 William 確認）|
+| 8 | `/database/suppliers` 供應商 | 供應商名 / 聯絡人 | ⏸️（同上）|
+| 9 | `/database/tour-leaders` 領隊 | 姓名 / 員工編號 | ⏸️（同上）|
+| 10 | `/hr/employees` 員工 | 姓名 / 員工編號 / 電話 | ⏸️（同上）|
+| 11 | `/visas` 簽證 | 護照號 / 客戶姓名 / 團號 | ⏸️（同上）|
+| 12 | `/todos` 待辦 | （量小、可能不用） | ⏸️ |
+| 13 | `/tenants` 租戶（VENTURO 平台用）| code / name | ⏸️ |
 
-> 等 William 拍板剩餘 11 個列表頁的篩選欄位、再批次改。
+### 帳號後五碼 — 技術註記
+
+「帳號後五碼」搜尋是會計核對銀行對帳單時的常見需求（例：對帳單顯示款項從 `*****12345` 進來、要找 ERP 對應的收款單）。
+
+**實作選項**：
+- (a) `receipts` 表加 `bank_account_last5` 衍生欄位、trigger 從 `bank_accounts` 同步
+- (b) 用 SQL view + cast、search 對 view 操作
+- (c) 用 RPC 寫 custom search
+
+待 William 確認方案後實作。
 
 ---
 
