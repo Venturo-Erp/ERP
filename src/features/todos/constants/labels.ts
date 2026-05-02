@@ -55,6 +55,9 @@ export const TODO_DIALOG_LABELS = {
   subtasksProgress: '進度',
   addSubtask: '新增子任務...',
   quickAddSubtasks: '快速新增業務子任務',
+  tags: '標籤',
+  addTagPlaceholder: '輸入後按 Enter 新增...',
+  noTags: '尚無標籤',
 }
 
 // 子任務常用預設項目（旅行社業務常見任務）

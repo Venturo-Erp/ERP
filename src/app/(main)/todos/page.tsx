@@ -239,6 +239,7 @@ export default function TodosPage() {
           completed: status === 'completed',
           column_id: columnId,
           creator: currentUser.id,
+          assignee: currentUser.id, // 建立者預設為負責人
           visibility: [currentUser.id],
           related_items: [],
           sub_tasks: [],
@@ -367,7 +368,7 @@ export default function TodosPage() {
           completed: false,
           column_id: firstCol?.id,
           creator: currentUser.id,
-          assignee: formData.assignee || undefined,
+          assignee: formData.assignee || currentUser.id, // 沒填指派人就預設為建立者
           visibility: visibilityList,
           related_items: [],
           sub_tasks: [],
@@ -1026,19 +1027,13 @@ const TodoCardMemo = React.memo(
             {...provided.dragHandleProps}
             onClick={() => onClick(todo.id)}
             className={cn(
-              'group relative bg-card rounded-lg border border-border cursor-pointer transition-all hover:shadow-md hover:border-morandi-gold/30',
-              snapshot.isDragging && 'shadow-xl ring-2 ring-morandi-gold rotate-[1deg]',
+              'group relative cursor-pointer transition-all rounded-md',
+              'hover:bg-morandi-container/30',
+              snapshot.isDragging && 'bg-card shadow-xl ring-2 ring-morandi-gold rotate-[1deg]',
               todo.status === 'completed' && 'opacity-60'
             )}
           >
-            {/* 頂端 5 色 priority bar（demo 風格） */}
-            <div
-              className={cn(
-                'absolute top-0 left-0 right-0 h-1 rounded-t-lg',
-                getPriorityBarClass(todo.priority || 1)
-              )}
-            />
-            <div className="p-3 pt-3.5 relative">
+            <div className="p-2.5 relative">
               {/* Hover actions */}
               <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button

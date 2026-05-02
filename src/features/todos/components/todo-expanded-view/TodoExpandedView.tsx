@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input'
 import { InputIME } from '@/components/ui/input-ime'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
+import { Combobox, type ComboboxOption } from '@/components/ui/combobox'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
@@ -32,13 +33,14 @@ import {
   ImagePlus,
   Plus,
   Eye,
+  X,
 } from 'lucide-react'
 import { TodoExpandedViewProps } from './types'
 import { useTodoExpandedView } from './useTodoExpandedView'
 import { NotesSection } from './NotesSection'
 import { QuickActionInstanceCard } from './QuickActionsSection'
 import { useAuthStore } from '@/stores/auth-store'
-import { useEmployeesSlim } from '@/data'
+import { useEmployeesSlim, useToursSlim, useOrdersSlim } from '@/data'
 import { cn } from '@/lib/utils'
 import {
   TODO_STATUS_LABELS,
@@ -104,8 +106,11 @@ export function TodoExpandedView({ todo, onUpdate, onClose }: TodoExpandedViewPr
   const { instances, addInstance, removeInstance } = useTodoExpandedView()
   const { user } = useAuthStore()
   const { items: employees } = useEmployeesSlim()
+  const { items: tours } = useToursSlim()
+  const { items: orders } = useOrdersSlim()
   const [activeTab, setActiveTab] = useState('details')
   const [newSubtaskTitle, setNewSubtaskTitle] = useState('')
+  const [newTagInput, setNewTagInput] = useState('')
 
   useEffect(() => {
     if (todo) setActiveTab('details')
@@ -149,8 +154,15 @@ export function TodoExpandedView({ todo, onUpdate, onClose }: TodoExpandedViewPr
     setNewSubtaskTitle('')
   }
 
+  // 子任務 chip 對應到業務動作 instance（部分 chip 會同時觸發完整表單）
+  const SUBTASK_TO_INSTANCE: Record<string, 'receipt' | 'invoice'> = {
+    請款作業: 'invoice',
+    收款確認: 'receipt',
+  }
+
   const addPresetSubtask = (title: string) => {
     if (!canEdit) return
+    // 1. 加進子任務 list
     onUpdate({
       sub_tasks: [
         ...subTasks,
@@ -158,6 +170,76 @@ export function TodoExpandedView({ todo, onUpdate, onClose }: TodoExpandedViewPr
           id: `st-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
           title,
           done: false,
+        },
+      ],
+    })
+    // 2. 對應業務動作則同時開啟下方完整表單、自動切到詳情 tab 讓使用者看到
+    const instanceType = SUBTASK_TO_INSTANCE[title]
+    if (instanceType) {
+      addInstance(instanceType)
+      setActiveTab('details')
+    }
+  }
+
+  // 旅遊團 Combobox 選項
+  const tourOptions: ComboboxOption[] = (tours || []).map(t => ({
+    value: t.id,
+    label: t.code ? `${t.code}｜${t.name}` : t.name,
+  }))
+
+  // 訂單 Combobox 選項（依選中的旅遊團篩選）
+  const orderOptions: ComboboxOption[] = (orders || [])
+    .filter(o => !tourRelated || o.tour_id === tourRelated.id)
+    .map(o => ({
+      value: o.id,
+      label: o.order_number || o.id,
+    }))
+
+  const handleSelectTour = (tourId: string) => {
+    if (!canEdit) return
+    const others = (todo.related_items || []).filter(r => r.type !== 'group')
+    if (!tourId) {
+      onUpdate({ related_items: others })
+      return
+    }
+    const tour = tours.find(t => t.id === tourId)
+    if (!tour) return
+    onUpdate({
+      related_items: [
+        ...others,
+        { type: 'group', id: tour.id, title: tour.code ? `${tour.code}｜${tour.name}` : tour.name },
+      ],
+      tour_id: tour.id, // 同步寫入 todo.tour_id
+    })
+  }
+
+  // 標籤
+  const tags = todo.tags || []
+  const addTag = (raw: string) => {
+    const t = raw.trim()
+    if (!t || tags.includes(t)) return
+    onUpdate({ tags: [...tags, t] })
+  }
+  const removeTag = (t: string) => {
+    onUpdate({ tags: tags.filter(x => x !== t) })
+  }
+
+  const handleSelectOrder = (orderId: string) => {
+    if (!canEdit) return
+    const others = (todo.related_items || []).filter(r => r.type !== 'order')
+    if (!orderId) {
+      onUpdate({ related_items: others })
+      return
+    }
+    const order = orders.find(o => o.id === orderId)
+    if (!order) return
+    onUpdate({
+      related_items: [
+        ...others,
+        {
+          type: 'order',
+          id: order.id,
+          title: order.order_number || order.id,
         },
       ],
     })
@@ -270,21 +352,31 @@ export function TodoExpandedView({ todo, onUpdate, onClose }: TodoExpandedViewPr
                     <h4 className="text-sm font-medium text-morandi-primary">關聯 ERP 資料</h4>
                   </div>
                   <div className="bg-card rounded-lg border border-border p-4 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-morandi-secondary">旅遊團</span>
-                      <span className="text-sm text-morandi-primary">
-                        {tourRelated?.title || (
-                          <span className="text-morandi-muted">未關聯</span>
-                        )}
-                      </span>
+                    <div className="space-y-1">
+                      <label className="text-xs text-morandi-secondary">{TODO_DIALOG_LABELS.tour}</label>
+                      <Combobox
+                        value={tourRelated?.id || ''}
+                        onChange={handleSelectTour}
+                        options={tourOptions}
+                        placeholder="選擇旅遊團..."
+                        emptyMessage="找不到旅遊團"
+                        showClearButton
+                        disabled={!canEdit}
+                        disablePortal
+                      />
                     </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-morandi-secondary">客戶訂單</span>
-                      <span className="text-sm text-morandi-primary">
-                        {orderRelated?.title || (
-                          <span className="text-morandi-muted">未關聯</span>
-                        )}
-                      </span>
+                    <div className="space-y-1">
+                      <label className="text-xs text-morandi-secondary">{TODO_DIALOG_LABELS.customerOrder}</label>
+                      <Combobox
+                        value={orderRelated?.id || ''}
+                        onChange={handleSelectOrder}
+                        options={orderOptions}
+                        placeholder={tourRelated ? '選擇訂單...' : '請先選擇旅遊團'}
+                        emptyMessage={tourRelated ? '此團無訂單' : '請先選擇旅遊團'}
+                        showClearButton
+                        disabled={!canEdit || !tourRelated}
+                        disablePortal
+                      />
                     </div>
 
                     <div className="border-t border-morandi-container/40 pt-3 space-y-2">
@@ -532,6 +624,55 @@ export function TodoExpandedView({ todo, onUpdate, onClose }: TodoExpandedViewPr
                   {firstRelated?.title || '未關聯'}
                 </span>
               </div>
+            </div>
+
+            <div>
+              <label className="text-xs font-medium text-morandi-muted mb-1.5 block">
+                {TODO_DIALOG_LABELS.tags}
+              </label>
+              {tags.length > 0 ? (
+                <div className="flex flex-wrap gap-1 mb-1.5">
+                  {tags.map(tag => (
+                    <span
+                      key={tag}
+                      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] bg-morandi-gold/10 text-morandi-gold border border-morandi-gold/20"
+                    >
+                      {tag}
+                      {canEdit && (
+                        <button
+                          onClick={() => removeTag(tag)}
+                          className="hover:bg-morandi-red/20 rounded"
+                          title="移除"
+                        >
+                          <X size={10} />
+                        </button>
+                      )}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                !canEdit && (
+                  <p className="text-xs text-morandi-muted mb-1.5">
+                    {TODO_DIALOG_LABELS.noTags}
+                  </p>
+                )
+              )}
+              {canEdit && (
+                <Input
+                  type="text"
+                  value={newTagInput}
+                  onChange={e => setNewTagInput(e.target.value)}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter' && !e.nativeEvent.isComposing && newTagInput.trim()) {
+                      e.preventDefault()
+                      addTag(newTagInput)
+                      setNewTagInput('')
+                    }
+                  }}
+                  placeholder={TODO_DIALOG_LABELS.addTagPlaceholder}
+                  className="h-7 text-xs"
+                />
+              )}
             </div>
 
             <div>
