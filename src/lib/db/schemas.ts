@@ -33,13 +33,7 @@ export const TABLES = {
   CALENDAR_EVENTS: 'calendar_events',
   // Workspace 相關
   WORKSPACES: 'workspaces',
-  CHANNELS: 'channels',
-  CHANNEL_GROUPS: 'channel_groups',
-  CHANNEL_MEMBERS: 'channel_members',
-  MESSAGES: 'messages',
   BULLETINS: 'bulletins',
-  ADVANCE_LISTS: 'advance_lists',
-  SHARED_ORDER_LISTS: 'shared_order_lists',
   RICH_DOCUMENTS: 'rich_documents',
   ATTRACTIONS: 'attractions',
   RECEIPTS: 'receipts',
