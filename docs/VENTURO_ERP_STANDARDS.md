@@ -308,7 +308,8 @@ CREATE POLICY "tenant_write" ON table_name
     - 凍結模組必須在 `SCHEMA_PLAN.md` 對應 section 列「凍結中、年月日」+ 凍結原因 + 解凍方向
     - 凍結期間只允許：純 bug fix、跟全站機械式 type-check / lint 一起改
     - 解凍流程：「重新審視 → 拆模組 → 不繼承半成品」、不准延續現有實作直接擴充
-    - 當前凍結：**頻道聊天模組**（`channels` / `channel_members` / `messages` / `/channel` UI / `channel-chat/*` hooks、2026-05-02 凍結）
+    - 當前凍結：（無）
+    - 已處理歷史：**頻道聊天模組**（`channels` / `channel_members` / `messages` / `channel_groups` / `/channel` UI / `channel-chat/*` hooks）2026-05-02 凍結、同日 William 拍板「直接完全刪除」、4 張 DB 表 + 整個 UI 模組已徹底移除（migration `20260503040000_drop_channel_chat_system.sql`）
 17. ❌ **直接 manual SQL 改 DB schema/function/policy、繞過 migration tracking**
     - 2026-05-02 發現：`is_super_admin()` 函式 migration 寫對了、但 DB 實際被改成 `RETURN false` stub、表示有人手動改 DB
     - 後果：migration replay 無法 rebuild 真實狀態、災難復原靠運氣

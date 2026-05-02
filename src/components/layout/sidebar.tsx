@@ -6,7 +6,6 @@ import {
   BookOpenText,
   CalendarDots,
   CashRegister,
-  ChatDots,
   CheckSquare as PhCheckSquare,
   Confetti,
   CurrencyCircleDollar,
@@ -103,12 +102,7 @@ const menuItems: MenuItem[] = [
     icon: CalendarDots,
     requiredPermission: 'calendar',
   },
-  {
-    href: '/channel',
-    label: COMP_LAYOUT_LABELS.頻道,
-    icon: ChatDots,
-    requiredPermission: 'workspace', // 對應 workspace_features.workspace
-  },
+  // 內部聊天頻道已於 2026-05-02 整套刪除（William 拍板）
   // 郵件系統暫時隱藏（目前使用 Google Workspace）
   // { href: '/mail', label: '郵件', icon: Mail, requiredPermission: 'workspace' },
   {

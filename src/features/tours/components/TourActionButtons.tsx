@@ -30,7 +30,6 @@ interface UseTourActionButtonsParams {
   onEditTour: (tour: Tour) => void
   setSelectedTour: (tour: Tour) => void
   setDeleteConfirm: (state: { isOpen: boolean; tour: Tour | null }) => void
-  handleCreateChannel: (tour: Tour) => Promise<void>
   onOpenQuoteDialog?: (tour: Tour) => void
   onOpenItineraryDialog?: (tour: Tour) => void
   onOpenContractDialog?: (tour: Tour) => void

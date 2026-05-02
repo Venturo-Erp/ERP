@@ -439,9 +439,6 @@ export {
 // Notes
 export * from './notes'
 
-// Channel Members
-export * from './channel-members'
-
 // Image Library
 export * from './image-library'
 
