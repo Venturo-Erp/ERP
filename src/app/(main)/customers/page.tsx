@@ -29,7 +29,7 @@ import { DateCell } from '@/components/table-cells'
 import { ContentPageLayout } from '@/components/layout/content-page-layout'
 import { Button } from '@/components/ui/button'
 import { EnhancedTable, TableColumn } from '@/components/ui/enhanced-table'
-import { useCustomers, createCustomer, updateCustomer, deleteCustomer } from '@/data'
+import { useCustomersSlim, useCustomersPaginated, createCustomer, updateCustomer, deleteCustomer } from '@/data'
 import type { Customer, CreateCustomerData } from '@/types/customer.types'
 import { confirm } from '@/lib/ui/alert-dialog'
 import { supabase } from '@/lib/supabase/client'
@@ -42,38 +42,27 @@ import { CUSTOMER_PAGE_LABELS as L, CUSTOMER_IMPORT_LABELS } from './constants/l
 
 export default function CustomersPage() {
   const router = useRouter()
-  const { items: customers } = useCustomers()
   const addCustomer = createCustomer
 
-  // 搜尋（單一輸入框，比對所有主要欄位）
+  // Server-side 分頁 + 搜尋（William 拍板：中文 / 電話 / 公司名）
+  // 規範見 docs/LIST_PAGE_PERFORMANCE.md
   const [searchQuery, setSearchQuery] = useState('')
-  const filteredCustomers = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase()
-    const result = q
-      ? customers.filter(c =>
-          [
-            c.code,
-            c.name,
-            c.passport_name,
-            c.phone,
-            c.email,
-            c.passport_number,
-            c.national_id,
-            c.city,
-            c.address,
-          ]
-            .filter(Boolean)
-            .some(v => String(v).toLowerCase().includes(q))
-        )
-      : customers
-    return [...result].sort((a, b) => {
-      const aUnverified = a.verification_status !== 'verified'
-      const bUnverified = b.verification_status !== 'verified'
-      if (aUnverified && !bUnverified) return -1
-      if (!aUnverified && bUnverified) return 1
-      return (b.code || '').localeCompare(a.code || '')
-    })
-  }, [customers, searchQuery])
+  const [page, setPage] = useState(1)
+  const PAGE_SIZE = 15
+  const { items: customers, totalCount } = useCustomersPaginated({
+    page,
+    pageSize: PAGE_SIZE,
+    search: searchQuery.trim() || undefined,
+    searchFields: ['name', 'phone', 'company'],
+    sortBy: 'created_at',
+    sortOrder: 'desc',
+  })
+
+  // CRUD 用的「已載入這頁」資料
+  const filteredCustomers = customers
+
+  // CustomerAddDialog 防重複偵測用全部 slim（欄位少、不載 passport_image_url 等大欄位）
+  const { items: customersSlim } = useCustomersSlim()
 
   // 對話框狀態
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
@@ -341,7 +330,7 @@ export default function CustomersPage() {
       showSearch={true}
       searchTerm={searchQuery}
       onSearchChange={setSearchQuery}
-      searchPlaceholder="搜尋編號 / 姓名 / 拼音 / 電話 / 護照 / 身分證..."
+      searchPlaceholder="搜尋姓名 / 電話 / 公司名"
       headerActions={
         <div className="flex items-center gap-2">
           <Button
@@ -380,6 +369,12 @@ export default function CustomersPage() {
           <EnhancedTable
             columns={tableColumns}
             data={filteredCustomers}
+            serverPagination={{
+              currentPage: page,
+              pageSize: PAGE_SIZE,
+              totalCount,
+              onPageChange: setPage,
+            }}
             onRowClick={handleRowClick}
             actions={(customer: Customer) => (
               <div className="flex items-center gap-1">
@@ -444,7 +439,7 @@ export default function CustomersPage() {
       <CustomerAddDialog
         open={isAddDialogOpen}
         onOpenChange={setIsAddDialogOpen}
-        customers={customers}
+        customers={customersSlim}
         onAddCustomer={handleAddCustomer}
         updateCustomer={
           updateCustomer as unknown as (id: string, data: Partial<Customer>) => Promise<void>

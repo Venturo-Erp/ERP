@@ -42,6 +42,7 @@ export function EnhancedTable<T extends RowData = RowData>({
   striped = false,
   hoverable = true,
   isLoading,
+  serverPagination,
 }: EnhancedTableProps<T>) {
   // Generic type erasure: EnhancedTable accepts T extends RowData but internal
   // hooks/state use RowData. These casts are safe because T extends RowData.
@@ -59,29 +60,39 @@ export function EnhancedTable<T extends RowData = RowData>({
     | undefined
   // Handle loading aliases
   const actualLoading = loading || isLoading || false
+  const tableState = useTableState<RowData>({
+    // server-side 分頁：data 已是「當前頁的 15 筆」、不能再被 useTableState 篩選 / 切片、直接全給
+    data: typedData,
+    // server-side 模式：不在 client 端再 filter（searchTerm / searchableFields）
+    searchTerm: serverPagination ? '' : externalSearchTerm,
+    searchableFields: serverPagination ? [] : (searchableFields as (keyof RowData)[]),
+    initialPageSize,
+    defaultSort,
+  })
+
   const {
     sortColumn,
     sortDirection,
     filters,
     showFilters,
     setShowFilters,
-    currentPage,
     setCurrentPage,
-    pageSize,
     setPageSize,
-    processedData,
-    paginatedData,
-    totalPages,
-    startIndex,
     handleSort,
     updateFilter,
-  } = useTableState<RowData>({
-    data: typedData,
-    searchTerm: externalSearchTerm,
-    searchableFields: searchableFields as (keyof RowData)[],
-    initialPageSize,
-    defaultSort,
-  })
+  } = tableState
+
+  // server pagination 模式：分頁狀態直接用外部、paginatedData = data 本身
+  const currentPage = serverPagination?.currentPage ?? tableState.currentPage
+  const pageSize = serverPagination?.pageSize ?? tableState.pageSize
+  const totalPages = serverPagination
+    ? Math.max(1, Math.ceil(serverPagination.totalCount / serverPagination.pageSize))
+    : tableState.totalPages
+  const startIndex = serverPagination
+    ? (serverPagination.currentPage - 1) * serverPagination.pageSize
+    : tableState.startIndex
+  const paginatedData = serverPagination ? typedData : tableState.paginatedData
+  const processedData = serverPagination ? typedData : tableState.processedData
 
   // Helper functions for selection and expandable
   const getRowId = useCallback(
@@ -251,12 +262,20 @@ export function EnhancedTable<T extends RowData = RowData>({
       </div>
 
       <TablePagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        pageSize={pageSize}
-        startIndex={startIndex}
-        totalItems={processedData.length}
-        onPageChange={setCurrentPage}
+        currentPage={serverPagination?.currentPage ?? currentPage}
+        totalPages={
+          serverPagination
+            ? Math.max(1, Math.ceil(serverPagination.totalCount / serverPagination.pageSize))
+            : totalPages
+        }
+        pageSize={serverPagination?.pageSize ?? pageSize}
+        startIndex={
+          serverPagination
+            ? (serverPagination.currentPage - 1) * serverPagination.pageSize
+            : startIndex
+        }
+        totalItems={serverPagination?.totalCount ?? processedData.length}
+        onPageChange={serverPagination?.onPageChange ?? setCurrentPage}
         onPageSizeChange={setPageSize}
       />
     </div>

@@ -54,12 +54,9 @@ export {
 
 // Customers
 export {
-  
   useCustomers,
   useCustomersSlim,
-  
-  
-  
+  useCustomersPaginated,
   createCustomer,
   updateCustomer,
   deleteCustomer,

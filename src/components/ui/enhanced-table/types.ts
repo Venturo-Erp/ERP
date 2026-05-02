@@ -64,4 +64,18 @@ export interface EnhancedTableProps<T extends RowData = RowData> {
   striped?: boolean
   hoverable?: boolean
   isLoading?: boolean
+  /**
+   * Server-side 分頁模式（controlled）
+   * 給時：data 視為「當前頁的 15 筆」、不在 component 內 slice
+   * 不給：保持原 client-side 行為（接全部 data、內部 slice）
+   *
+   * 用於降低讀取量：列表頁改用 useXxxPaginated() 後傳 server 端分頁狀態進來
+   * 規範見 docs/LIST_PAGE_PERFORMANCE.md
+   */
+  serverPagination?: {
+    currentPage: number
+    pageSize: number
+    totalCount: number
+    onPageChange: (page: number) => void
+  }
 }
