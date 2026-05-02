@@ -26,12 +26,9 @@ export {
 
 // Orders
 export {
-  
   useOrders,
   useOrdersSlim,
-  
-  
-  
+  useOrdersPaginated,
   createOrder,
   updateOrder,
   deleteOrder,

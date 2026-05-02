@@ -18,15 +18,15 @@ import type { Order } from '@/stores/types'
 const orderEntity = createEntityHook<Order>('orders', {
   list: {
     select:
-      'id,code,order_number,tour_id,tour_name,contact_person,contact_phone,contact_email,customer_id,sales_person,assistant,status,payment_status,paid_amount,remaining_amount,total_amount,member_count,adult_count,is_active,workspace_id,created_at,created_by,updated_at,updated_by',
+      'id,code,order_number,tour_id,tour_name,contact_person,contact_phone,contact_email,customer_id,sales_person,assistant,status,payment_status,paid_amount,remaining_amount,total_amount,member_count,adult_count,departure_date,is_active,workspace_id,created_at,created_by,updated_at,updated_by',
     orderBy: {
-      column: 'created_at',
+      column: 'departure_date',
       ascending: false,
     },
   },
   slim: {
     select:
-      'id,order_number,tour_id,tour_name,contact_person,contact_phone,sales_person,assistant,payment_status,paid_amount,remaining_amount,total_amount,member_count,code,created_at,customer_id',
+      'id,order_number,tour_id,tour_name,contact_person,contact_phone,sales_person,assistant,payment_status,paid_amount,remaining_amount,total_amount,member_count,code,departure_date,created_at,customer_id',
   },
   detail: {
     select: '*',
@@ -48,7 +48,7 @@ export const useOrdersSlim = orderEntity.useListSlim
 const useOrder = orderEntity.useDetail
 
 /** 分頁 Orders（server-side pagination + filter + search）*/
-const useOrdersPaginated = orderEntity.usePaginated
+export const useOrdersPaginated = orderEntity.usePaginated
 
 /** Order Dictionary（O(1) 查詢）*/
 const useOrderDictionary = orderEntity.useDictionary

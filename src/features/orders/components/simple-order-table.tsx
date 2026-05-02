@@ -30,6 +30,13 @@ interface SimpleOrderTableProps {
   onEdit?: (order: Order) => void
   onQuickVisa?: (order: Order) => void
   onAdd?: () => void
+  /** Server-side 分頁（給 /orders 頁用、tour-orders 子頁不用、傳就生效）*/
+  serverPagination?: {
+    currentPage: number
+    pageSize: number
+    totalCount: number
+    onPageChange: (page: number) => void
+  }
 }
 
 export const SimpleOrderTable = React.memo(function SimpleOrderTable({
@@ -43,6 +50,7 @@ export const SimpleOrderTable = React.memo(function SimpleOrderTable({
   onEdit,
   onQuickVisa,
   onAdd,
+  serverPagination,
 }: SimpleOrderTableProps) {
   const router = useRouter()
   const workspaceId = useAuthStore(state => state.user?.workspace_id) || ''
@@ -170,6 +178,7 @@ export const SimpleOrderTable = React.memo(function SimpleOrderTable({
       className={className}
       columns={columns}
       data={orders}
+      serverPagination={serverPagination}
       striped
       showFilters={false}
       actionsWidth="440px"

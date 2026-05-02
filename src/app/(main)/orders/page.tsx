@@ -2,68 +2,40 @@
 
 import { LABELS } from './constants/labels'
 
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState } from 'react'
 import { ContentPageLayout } from '@/components/layout/content-page-layout'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { useOrdersListSlim, useToursListSlim } from '@/hooks/useListSlim'
+import { useOrdersPaginated, createOrder } from '@/data'
+import { useToursListSlim } from '@/hooks/useListSlim'
 import { useAuthStore } from '@/stores/auth-store'
-import { ShoppingCart, AlertCircle, CheckCircle, Clock } from 'lucide-react'
+import { ShoppingCart } from 'lucide-react'
 import { OrderListView } from '@/features/orders/components/OrderListView'
 import { AddOrderForm } from '@/features/orders/components/add-order-form'
 import type { Order } from '@/stores/types'
 import { logger } from '@/lib/utils/logger'
 import { alert as showAlert } from '@/lib/ui/alert-dialog'
-import { ORDERS_PAGE_LABELS } from '@/features/orders/constants/labels'
 
 export default function OrdersPage() {
-  const { items: orders, create: addOrder } = useOrdersListSlim()
   const { items: tours } = useToursListSlim()
   const { user } = useAuthStore()
-  const [statusFilter, setStatusFilter] = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
+  const [page, setPage] = useState(1)
+  const PAGE_SIZE = 15
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
 
-  const tourDepartureDates = useMemo(() => {
-    const map = new Map<string, number>()
-    tours.forEach(t => {
-      map.set(t.id, t.departure_date ? new Date(t.departure_date).getTime() : 0)
-    })
-    return map
-  }, [tours])
-
-  const filteredOrders = orders.filter(order => {
-    const isVisaOrEsim =
-      order.tour_name?.includes(ORDERS_PAGE_LABELS.VISA_TOUR) ||
-      order.tour_name?.includes(ORDERS_PAGE_LABELS.ESIM_TOUR)
-    if (isVisaOrEsim) return false
-
-    // 改用金額算、不再依賴 payment_status enum (SSOT 簡化、收多少錢才是事實)
-    const paid = order.paid_amount ?? 0
-    const total = order.total_amount ?? 0
-    const matchesFilter =
-      statusFilter === 'all' ||
-      (statusFilter === 'unpaid' && paid <= 0) ||
-      (statusFilter === 'partial' && paid > 0 && paid < total) ||
-      (statusFilter === 'paid' && paid >= total && total > 0)
-
-    const searchLower = searchQuery.toLowerCase()
-    const matchesSearch =
-      !searchQuery ||
-      (order.order_number || '').toLowerCase().includes(searchLower) ||
-      order.code?.toLowerCase().includes(searchLower) ||
-      order.tour_name?.toLowerCase().includes(searchLower) ||
-      order.contact_person.toLowerCase().includes(searchLower) ||
-      order.sales_person?.toLowerCase().includes(searchLower) ||
-      order.assistant?.toLowerCase().includes(searchLower)
-
-    return matchesFilter && matchesSearch
+  // Server-side 分頁 + 搜尋（William 拍板：團號 / 團名 / 日期、用出團日 desc 排序）
+  // 規範見 docs/LIST_PAGE_PERFORMANCE.md
+  const { items: orders, totalCount } = useOrdersPaginated({
+    page,
+    pageSize: PAGE_SIZE,
+    search: searchQuery.trim() || undefined,
+    searchFields: ['code', 'tour_name'],
+    sortBy: 'departure_date',
+    sortOrder: 'desc',
   })
 
-  const sortedOrders = [...filteredOrders].sort((a, b) => {
-    const dateA = a.tour_id ? (tourDepartureDates.get(a.tour_id) ?? 0) : 0
-    const dateB = b.tour_id ? (tourDepartureDates.get(b.tour_id) ?? 0) : 0
-    return dateA - dateB
-  })
+  const addOrder = createOrder
+  const sortedOrders = orders
 
   const handleAddOrder = async (orderData: {
     tour_id: string
@@ -126,20 +98,23 @@ export default function OrdersPage() {
       showSearch={true}
       searchTerm={searchQuery}
       onSearchChange={setSearchQuery}
-      searchPlaceholder={LABELS.SEARCH_PLACEHOLDER}
-      tabs={[
-        { value: 'all', label: ORDERS_PAGE_LABELS.TAB_ALL, icon: ShoppingCart },
-        { value: 'unpaid', label: ORDERS_PAGE_LABELS.TAB_UNPAID, icon: AlertCircle },
-        { value: 'partial', label: ORDERS_PAGE_LABELS.TAB_PARTIAL, icon: Clock },
-        { value: 'paid', label: ORDERS_PAGE_LABELS.TAB_PAID, icon: CheckCircle },
-      ]}
-      activeTab={statusFilter}
-      onTabChange={setStatusFilter}
+      searchPlaceholder="搜尋團號 / 團名"
       onAdd={() => setIsAddDialogOpen(true)}
       addLabel={LABELS.ADD_ORDER}
       contentClassName="flex-1 overflow-auto flex flex-col"
     >
-      <OrderListView className="flex-1" orders={sortedOrders} tours={tours} showTourInfo={true} />
+      <OrderListView
+        className="flex-1"
+        orders={sortedOrders}
+        tours={tours}
+        showTourInfo={true}
+        serverPagination={{
+          currentPage: page,
+          pageSize: PAGE_SIZE,
+          totalCount,
+          onPageChange: setPage,
+        }}
+      />
 
       {/* 新增訂單對話框 */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>

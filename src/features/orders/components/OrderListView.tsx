@@ -37,6 +37,13 @@ interface OrderListViewProps {
   onReceiptSuccess?: () => void
   /** 請款成功後的額外動作（例如 toast） */
   onRequestSuccess?: () => void
+  /** Server-side 分頁（給 /orders 主頁用、tour-orders 子頁不傳）*/
+  serverPagination?: {
+    currentPage: number
+    pageSize: number
+    totalCount: number
+    onPageChange: (page: number) => void
+  }
 }
 
 export function OrderListView({
@@ -46,6 +53,7 @@ export function OrderListView({
   className,
   onReceiptSuccess,
   onRequestSuccess,
+  serverPagination,
 }: OrderListViewProps) {
   // 功能開關：租戶沒開啟簽證管理 → 不顯示「批次簽證」按鈕
   const { isFeatureEnabled } = useWorkspaceFeatures()
@@ -87,6 +95,7 @@ export function OrderListView({
         orders={orders}
         tours={tours}
         showTourInfo={showTourInfo}
+        serverPagination={serverPagination}
         onQuickReceipt={openReceipt}
         onQuickPaymentRequest={openRequest}
         onEdit={openEdit}
