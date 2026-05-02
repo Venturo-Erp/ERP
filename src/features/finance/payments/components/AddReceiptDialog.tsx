@@ -7,7 +7,8 @@
 import { logger } from '@/lib/utils/logger'
 import { getTodayString } from '@/lib/utils/format-date'
 import { useEffect, useState } from 'react'
-import { Plus, Save, X, Copy, ExternalLink, Check, Trash2, Lock } from 'lucide-react'
+import { Plus, Save, X, Copy, ExternalLink, Check, Trash2, Lock, ArrowRightLeft } from 'lucide-react'
+import { ReceiptTransferDialog } from './ReceiptTransferDialog'
 import { Skeleton } from '@/components/ui/skeleton'
 import { StatusBadge } from '@/components/ui/status-badge'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -129,6 +130,7 @@ export function AddReceiptDialog({
   // 提交狀態（防止重複點擊）
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [receiptTransferOpen, setReceiptTransferOpen] = useState(false)
 
 
   // 收款方式（SWR 快取，統一在 Dialog 層級載入）
@@ -591,7 +593,7 @@ export function AddReceiptDialog({
             </span>
           </div>
 
-          {/* 右側：刪除 + 存檔 */}
+          {/* 右側：刪除 / 收款轉移 + 存檔 */}
           <div className="flex items-center gap-2">
             {/* 刪除按鈕：編輯模式且未確認 */}
             {isEditMode && !isConfirmed && (
@@ -603,6 +605,17 @@ export function AddReceiptDialog({
               >
                 <Trash2 size={16} />
                 {isDeleting ? ADD_RECEIPT_DIALOG_LABELS.刪除中 : ADD_RECEIPT_DIALOG_LABELS.刪除}
+              </Button>
+            )}
+            {/* 收款轉移按鈕：編輯模式且已確認、跟 CostTransferDialog 鏡像 */}
+            {isEditMode && isConfirmed && editingReceipt && (
+              <Button
+                variant="outline"
+                onClick={() => setReceiptTransferOpen(true)}
+                className="gap-2"
+              >
+                <ArrowRightLeft size={16} />
+                收款轉移
               </Button>
             )}
 
@@ -673,6 +686,29 @@ export function AddReceiptDialog({
           </div>
         </div>
       </DialogContent>
+
+      {/* 收款轉移 Dialog（confirmed 時可用、跟成本轉移鏡像） */}
+      {editingReceipt && (
+        <ReceiptTransferDialog
+          open={receiptTransferOpen}
+          onOpenChange={setReceiptTransferOpen}
+          sourceReceipt={{
+            id: editingReceipt.id,
+            receipt_number: editingReceipt.receipt_number,
+            tour_id: editingReceipt.tour_id ?? null,
+            tour_code: '',
+            tour_name: editingReceipt.tour_name || '',
+            receipt_amount: editingReceipt.receipt_amount || 0,
+            payment_method_id: editingReceipt.payment_method_id,
+            payment_method: editingReceipt.payment_method,
+            receipt_type: editingReceipt.receipt_type as unknown as number,
+          }}
+          onSuccess={() => {
+            onSuccess?.()
+            onOpenChange(false)
+          }}
+        />
+      )}
     </Dialog>
   )
 }
