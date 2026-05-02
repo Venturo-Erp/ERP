@@ -8,31 +8,28 @@ import { useCallback } from 'react'
 import { useToast } from '@/components/ui/use-toast'
 import { RECEIPT_MUTATION_LABELS } from '../../constants/labels'
 import type { PaymentItem, PaymentFormData } from '../types'
-import { RECEIPT_TYPES } from '../types'
 import type { Receipt } from '@/types/receipt.types'
+import { codeToReceiptType, codeToPaymentMethod, isLinkPayCode } from '@/types/receipt.types'
 import { recalculateReceiptStats } from '../services/receipt-core.service'
 
-/** receipt_type 數字 → payment_method 字串（DB constraint 限定英文） */
-const PAYMENT_METHOD_MAP: Record<number, string> = {
-  0: 'transfer',
-  1: 'cash',
-  2: 'card',
-  3: 'check',
-  4: 'linkpay',
-}
-
-/** 將 DB 收款方式名稱轉回 receipt_type 數字（用於舊欄位向下相容） */
-function resolveReceiptType(receiptType: unknown): number {
-  // 已經是數字就直接回傳
-  if (typeof receiptType === 'number' && !isNaN(receiptType)) return receiptType
-  // DB 字串名稱 → 對應的數字
-  const name = String(receiptType).toLowerCase()
-  if (name.includes('現金') || name.includes('cash')) return 1
-  if (name.includes('匯款') || name.includes('transfer')) return 0
-  if (name.includes('信用卡') || name.includes('刷卡') || name.includes('card')) return 2
-  if (name.includes('支票') || name.includes('check')) return 3
-  if (name.includes('linkpay') || name.includes('line pay')) return 4
-  return 1 // 預設現金（比較常見）
+/** 將 PaymentItem 解析成 method.code（SSOT）：優先 payment_method_code、fallback 從 receipt_type 字串/數字推 */
+function resolveMethodCode(item: PaymentItem): string {
+  if (item.payment_method_code) return item.payment_method_code
+  // 舊資料：receipt_type 是 string 名稱（譬如「匯款-國泰」）
+  const rt: unknown = item.receipt_type
+  if (typeof rt === 'string') {
+    const n = rt.toLowerCase()
+    if (n.includes('現金') || n.includes('cash')) return 'CASH'
+    if (n.includes('信用卡') || n.includes('刷卡') || n.includes('card')) return 'CREDIT_CARD'
+    if (n.includes('支票') || n.includes('check')) return 'CHECK'
+    if (n.includes('linkpay') || n.includes('line pay') || n.includes('linepay')) return 'LINKPAY'
+    if (n.includes('匯款') || n.includes('transfer')) return 'TRANSFER'
+  }
+  // 數字 fallback
+  if (typeof rt === 'number') {
+    return ['TRANSFER', 'CASH', 'CREDIT_CARD', 'CHECK', 'LINKPAY'][rt] || 'TRANSFER'
+  }
+  return 'TRANSFER'
 }
 
 export interface LinkPayResult {
@@ -166,22 +163,16 @@ export function useReceiptMutations() {
         .eq('type', 'receipt')
         .eq('is_active', true)
 
-      const getPaymentMethodId = (receiptTypeNum: number, itemReceiptType?: unknown): string => {
+      const getPaymentMethodId = (item: PaymentItem): string => {
         if (!paymentMethodsData?.length) return ''
-        // 先嘗試用 DB 名稱直接比對
-        if (typeof itemReceiptType === 'string') {
-          const byName = paymentMethodsData.find(m => m.name === itemReceiptType)
-          if (byName) return byName.id
+        // SSOT：優先用 PaymentItem 已寫入的 method.id
+        if (item.payment_method_id) {
+          const m = paymentMethodsData.find(m => m.id === item.payment_method_id)
+          if (m) return m.id
         }
-        // 再用 code 對照
-        const codeMap: Record<number, string> = {
-          0: 'TRANSFER',
-          1: 'CASH',
-          2: 'CREDIT_CARD',
-          3: 'CHECK',
-          4: 'LINKPAY',
-        }
-        const byCode = paymentMethodsData.find(m => m.code === codeMap[receiptTypeNum])
+        // 舊資料 fallback：用 receipt_type 字串 / payment_method_code 比對
+        const code = resolveMethodCode(item)
+        const byCode = paymentMethodsData.find(m => m.code === code)
         return byCode?.id || paymentMethodsData[0]?.id || ''
       }
 
@@ -199,9 +190,11 @@ export function useReceiptMutations() {
       // 統一處理所有收款項目 — 每個品項獨立流水號
       for (let i = 0; i < paymentItems.length; i++) {
         const item = paymentItems[i]
-        const receiptTypeNum = resolveReceiptType(item.receipt_type)
-        const paymentMethod = PAYMENT_METHOD_MAP[receiptTypeNum] || 'transfer'
-        const paymentMethodId = getPaymentMethodId(receiptTypeNum, item.receipt_type)
+        // SSOT 流：先解析 method.code、再從 code 反推 receipt_type 數字 + payment_method 字串
+        const methodCode = resolveMethodCode(item)
+        const receiptTypeNum = codeToReceiptType(methodCode)
+        const paymentMethod = codeToPaymentMethod(methodCode)
+        const paymentMethodId = getPaymentMethodId(item)
 
         // 每個品項獨立編號 — 透過 DB RPC、advisory lock 防 race
         const { data: itemReceiptNumber, error: numErr } = await supabase.rpc(
@@ -273,8 +266,8 @@ export function useReceiptMutations() {
           }
         }
 
-        // 處理 LinkPay
-        if (receiptTypeNum === RECEIPT_TYPES.LINK_PAY) {
+        // 處理 LinkPay（SSOT 用 method.code 判定）
+        if (isLinkPayCode(methodCode)) {
           const linkPayResult = await handleLinkPayIntegration(
             itemReceiptNumber,
             item,
@@ -332,10 +325,11 @@ export function useReceiptMutations() {
       // 計算總金額
       const totalAmount = paymentItems.reduce((sum, item) => sum + (item.amount || 0), 0)
 
-      // 取第一個項目的收款方式
+      // 取第一個項目的收款方式（SSOT：method.code 為唯一真相）
       const firstItem = paymentItems[0]
-      const receiptTypeNum = firstItem ? resolveReceiptType(firstItem.receipt_type) : 0
-      const paymentMethod = PAYMENT_METHOD_MAP[receiptTypeNum] || 'transfer'
+      const methodCode = firstItem ? resolveMethodCode(firstItem) : 'TRANSFER'
+      const receiptTypeNum = codeToReceiptType(methodCode)
+      const paymentMethod = codeToPaymentMethod(methodCode)
 
       // 更新收款單主表
       await onUpdate(receipt.id, {

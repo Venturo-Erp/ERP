@@ -7,7 +7,7 @@ import { getTodayString } from '@/lib/utils/format-date'
 import { useState, useCallback, useMemo, useEffect } from 'react'
 import { useOrdersSlim } from '@/data'
 import type { PaymentFormData, PaymentItem } from '../types'
-import { RECEIPT_TYPES } from '../types'
+import { isLinkPayCode } from '@/types/receipt.types'
 import { PAYMENT_FORM_LABELS } from '../../constants/labels'
 
 interface TourSlim {
@@ -151,8 +151,8 @@ export function usePaymentForm() {
         errors.push(PAYMENT_FORM_LABELS.ITEM_SELECT_DATE(index + 1))
       }
 
-      // LinkPay 專屬驗證
-      if (item.receipt_type === RECEIPT_TYPES.LINK_PAY) {
+      // LinkPay 專屬驗證（SSOT 用 method.code、不再用 receipt_type 數字比對）
+      if (isLinkPayCode(item.payment_method_code)) {
         if (!item.email) {
           errors.push(PAYMENT_FORM_LABELS.ITEM_LINKPAY_EMAIL(index + 1))
         }

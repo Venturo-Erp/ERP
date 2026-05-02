@@ -11,7 +11,12 @@ export interface TableColumn<T extends RowData = RowData> {
   filterType?: 'text' | 'number' | 'date' | 'select'
   filterOptions?: Array<{ value: string; label: string }>
   render?: (value: unknown, row: T) => React.ReactNode
+  /** 最少寬度（含原本 width 向下相容、表示 column 不會比這個窄） */
   width?: string
+  /** 最少寬度別名（語意更清楚） */
+  minWidth?: string
+  /** 最多寬度（content 超過會 truncate / wrap、避免單欄無限長） */
+  maxWidth?: string
   align?: 'left' | 'center' | 'right'
   className?: string
 }

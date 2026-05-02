@@ -321,10 +321,5 @@ export const TRAVEL_INVOICE_DETAIL_LABELS = {
   CONFIRM_8486: '確認作廢',
 }
 
-export const PAYMENT_METHOD_MAP: Record<string, string> = {
-  transfer: '匯款',
-  cash: '現金',
-  card: '刷卡',
-  check: '支票',
-  linkpay: 'LinkPay',
-}
+// PAYMENT_METHOD_MAP 已砍、列表改用 receipts.payment_methods.name (join) 顯示真實方式名字
+// 歷史代碼：寫死 5 大類字串→中文翻譯、新 code 不再使用

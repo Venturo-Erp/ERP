@@ -14,7 +14,9 @@ const Table = ({ children, className }: { children: React.ReactNode; className?:
   <table className={`w-full text-sm ${className || ''}`}>{children}</table>
 )
 const TableHeader = ({ children }: { children: React.ReactNode }) => (
-  <thead className="bg-card sticky top-0 z-20 [&_tr]:bg-morandi-container/30">{children}</thead>
+  <thead className="sticky top-0 z-20 bg-card border-b border-border [&_tr]:bg-morandi-gold-header">
+    {children}
+  </thead>
 )
 const TableBody = ({ children }: { children: React.ReactNode }) => <tbody>{children}</tbody>
 const TableRow = ({ children, className }: { children: React.ReactNode; className?: string }) => (
@@ -32,7 +34,7 @@ const TableHead = ({
   className?: string
 }) => (
   <th
-    className={`px-4 py-3 text-left text-xs font-medium text-morandi-secondary uppercase tracking-wider ${className || ''}`}
+    className={`text-left py-2.5 px-4 text-xs font-medium text-morandi-primary ${className || ''}`}
   >
     {children}
   </th>
@@ -167,7 +169,7 @@ function SortableMethodRow({
     <tr
       ref={setNodeRef}
       style={style}
-      className="group border-b border-border/50 hover:bg-morandi-container/20 transition-colors"
+      className="group border-b border-border/50 last:border-b-0 hover:bg-morandi-container/20 transition-colors"
     >
       {/* 拖曳把手（hover 時顯示） */}
       <td className="w-[40px] px-2 py-3 text-center">
@@ -1162,24 +1164,13 @@ function MethodDialog({
               placeholder="例：現金、匯款、信用卡"
             />
           </div>
-          <div className="grid grid-cols-4 gap-4">
-            <div className="col-span-3 space-y-2">
-              <Label>說明</Label>
-              <Input
-                value={description}
-                onChange={e => setDescription(e.target.value)}
-                placeholder="選填"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>排序</Label>
-              <Input
-                type="number"
-                value={sortOrder}
-                onChange={e => setSortOrder(Number(e.target.value))}
-                placeholder="0"
-              />
-            </div>
+          <div className="space-y-2">
+            <Label>說明</Label>
+            <Input
+              value={description}
+              onChange={e => setDescription(e.target.value)}
+              placeholder="選填"
+            />
           </div>
           {type === 'receipt' && (
             <div className="space-y-2">

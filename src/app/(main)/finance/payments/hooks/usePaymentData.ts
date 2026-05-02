@@ -18,7 +18,7 @@ import {
 } from '@/data'
 import { recalculateReceiptStats } from '@/features/finance/payments/services/receipt-core.service'
 import type { ReceiptItem } from '@/stores'
-import { ReceiptType } from '@/types/receipt.types'
+import { ReceiptType, codeToPaymentMethod, codeToReceiptType, isLinkPayCode } from '@/types/receipt.types'
 import { PAYMENT_DATA_LABELS } from '../../constants/labels'
 
 export function usePaymentData() {
@@ -109,9 +109,11 @@ export function usePaymentData() {
         tour_name: selectedOrder?.tour_name || '',
         receipt_date: item.transaction_date,
         payment_date: item.transaction_date,
-        payment_method:
-          ['transfer', 'cash', 'card', 'check', 'linkpay'][item.receipt_type] || 'transfer',
-        receipt_type: item.receipt_type,
+        // SSOT: payment_method_id 是真相（FK to payment_methods）
+        // payment_method 字串 + receipt_type 數字皆從 method.code 反推、給 DB trigger / 歷史邏輯兼容
+        payment_method_id: item.payment_method_id || null,
+        payment_method: codeToPaymentMethod(item.payment_method_code),
+        receipt_type: codeToReceiptType(item.payment_method_code),
         receipt_amount: item.amount,
         amount: item.amount,
         actual_amount: 0, // 待會計確認
@@ -136,8 +138,8 @@ export function usePaymentData() {
         updated_by: user.id,
       })
 
-      // 如果是 LinkPay，呼叫 API 生成付款連結
-      if (item.receipt_type === ReceiptType.LINK_PAY) {
+      // 如果是 LinkPay，呼叫 API 生成付款連結（SSOT 改用 method.code）
+      if (isLinkPayCode(item.payment_method_code)) {
         await handleCreateLinkPay(receiptNumber, item)
       }
     }

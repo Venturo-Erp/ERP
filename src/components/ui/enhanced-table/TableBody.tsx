@@ -179,7 +179,10 @@ export const TableBody = React.memo(function TableBody({
                     column.align === 'right' && 'text-right',
                     column.className
                   )}
-                  style={{ width: column.width ? `${column.width}px` : undefined }}
+                  style={{
+                    minWidth: column.minWidth || (column.width ? `${column.width}px` : undefined),
+                    maxWidth: column.maxWidth,
+                  }}
                 >
                   {column.render ? (
                     column.render(row[column.key as keyof typeof row], row)

@@ -18,7 +18,7 @@ import { ModuleLoading } from '@/components/module-loading'
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
-import { FinanceLabels, PAYMENT_METHOD_MAP } from '../constants/labels'
+import { FinanceLabels } from '../constants/labels'
 import { ListPageLayout } from '@/components/layout/list-page-layout'
 import { Button } from '@/components/ui/button'
 import { TableColumn } from '@/components/ui/enhanced-table'
@@ -200,12 +200,16 @@ export default function PaymentsPage() {
       ),
     },
     {
-      key: 'payment_method',
+      key: 'payment_method_id',
       label: FinanceLabels.paymentMethod,
-      width: '80',
-      render: value => (
-        <span className="text-sm">{PAYMENT_METHOD_MAP[String(value)] || String(value || '-')}</span>
-      ),
+      width: '120',
+      // SSOT：列表 join payment_methods.name 取得真實方式名字
+      // 歷史資料 payment_method_id NULL 時 fallback 顯示 receipt_type 字串（detail 也讀這個）
+      render: (_, row) => {
+        const fromJoin = row.payment_methods?.name
+        const fromLegacy = row.receipt_type ? String(row.receipt_type) : null
+        return <span className="text-sm">{fromJoin || fromLegacy || '-'}</span>
+      },
     },
     {
       key: 'status',

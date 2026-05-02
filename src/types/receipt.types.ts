@@ -19,9 +19,14 @@ export interface Receipt {
   // 收款資訊
   receipt_date: string // ISO date
   payment_date: string // 付款日期（資料庫必填欄位）
-  payment_method: string // 付款方式（資料庫用 string: transfer/cash/card/check/linkpay）
-  payment_method_id: string | null // 付款方式 ID（關聯 payment_methods 表）
-  receipt_type: ReceiptType // 0:匯款 1:現金 2:刷卡 3:支票 4:LinkPay
+  /** @deprecated 寫死 5 大類字串、DB trigger 還用、新 code 走 payment_method_id */
+  payment_method: string
+  /** SSOT — 付款方式 ID（FK to payment_methods）、列表 / 條件比對都讀這個 */
+  payment_method_id: string | null
+  /** PostgREST join 出來的 payment_methods row（顯示真實方式名字） */
+  payment_methods?: { name: string; code: string } | null
+  /** @deprecated 數字 enum、DB auto_posting trigger 還在用 0-4、新 code 用 payment_method_id */
+  receipt_type: ReceiptType
   receipt_amount: number // 應收金額
   total_amount?: number // 所有項目金額加總
   amount: number // 金額（與 receipt_amount 同義）
@@ -95,7 +100,11 @@ export interface LinkPayLog {
 // ============================================
 
 /**
- * 收款方式
+ * 收款方式（@deprecated 用 payment_methods.code 代替）
+ *
+ * 保留原因：DB auto_posting trigger 還在 case `receipt_type = 0/1/2/3/4`、
+ * 寫入時還要塞 number 給 trigger 兼容。新 code 一律用 codeToReceiptType(code) 反推、
+ * 不要直接寫 ReceiptType.X。等 trigger 重寫成 join payment_methods.code 後再砍 enum。
  */
 export enum ReceiptType {
   BANK_TRANSFER = 0, // 匯款
@@ -121,6 +130,42 @@ export const RECEIPT_TYPE_OPTIONS = [
   { value: ReceiptType.CHECK, label: '支票' },
   { value: ReceiptType.LINK_PAY, label: 'LinkPay' },
 ] as const
+
+// =============================================================================
+// SSOT helper：payment_methods.code 為唯一真相
+// receipt_type / payment_method 字串都從 code 反推、給 DB trigger 兼容
+// 自訂方式（譬如「匯款-國泰」code = 'TRANSFER_KGI'）prefix 比對到大類
+// =============================================================================
+
+/** payment_methods.code → ReceiptType 數字（給 DB auto_posting trigger 兼容） */
+export function codeToReceiptType(code: string | null | undefined): ReceiptType {
+  if (!code) return ReceiptType.BANK_TRANSFER
+  const upper = code.toUpperCase()
+  if (upper === 'CASH' || upper.startsWith('CASH_')) return ReceiptType.CASH
+  if (upper === 'CREDIT_CARD' || upper === 'CARD' || upper.startsWith('CREDIT_') || upper.startsWith('CARD_')) return ReceiptType.CREDIT_CARD
+  if (upper === 'CHECK' || upper.startsWith('CHECK_')) return ReceiptType.CHECK
+  if (upper === 'LINKPAY' || upper === 'LINEPAY' || upper.startsWith('LINKPAY_') || upper.startsWith('LINEPAY_')) return ReceiptType.LINK_PAY
+  // 'TRANSFER' / 'TRANSFER_KGI' / 'TRANSFER_TCB' 跟其他全 fallback 到匯款
+  return ReceiptType.BANK_TRANSFER
+}
+
+/** payment_methods.code → 5 大類字串（receipts.payment_method 兼容欄位） */
+export function codeToPaymentMethod(code: string | null | undefined): string {
+  const t = codeToReceiptType(code)
+  switch (t) {
+    case ReceiptType.CASH: return 'cash'
+    case ReceiptType.CREDIT_CARD: return 'card'
+    case ReceiptType.CHECK: return 'check'
+    case ReceiptType.LINK_PAY: return 'linkpay'
+    case ReceiptType.BANK_TRANSFER:
+    default: return 'transfer'
+  }
+}
+
+/** code 是否為 LinkPay 系列（含 LINEPAY） */
+export function isLinkPayCode(code: string | null | undefined): boolean {
+  return codeToReceiptType(code) === ReceiptType.LINK_PAY
+}
 
 /** 收款單付款方式標籤（對應資料庫 payment_method 字串值） */
 export const RECEIPT_PAYMENT_METHOD_LABELS: Record<string, string> = {
@@ -254,6 +299,10 @@ export interface ReceiptItem {
   receipt_type: ReceiptType
   amount: number
   transaction_date: string
+
+  // 真正的方式關聯（PaymentItemRow handleReceiptTypeChange 寫入）
+  payment_method_id?: string | null // FK to payment_methods.id
+  payment_method_code?: string | null // method.code snapshot（向下相容）
 
   // 各收款方式的欄位
   receipt_account?: string

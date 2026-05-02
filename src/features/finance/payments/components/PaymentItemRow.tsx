@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
 import type { PaymentItem, ReceiptType } from '../types'
+import { codeToReceiptType, isLinkPayCode } from '@/types/receipt.types'
 import { BANK_ACCOUNTS } from '../types'
 import {
   ADD_RECEIPT_DIALOG_LABELS,
@@ -181,19 +182,20 @@ export function PaymentItemRow({
   const currentMethod = paymentMethods.find(m => m.name === String(item.receipt_type))
   const currentCode = item.payment_method_code || currentMethod?.code || ''
 
-  // 當收款方式變更時（使用 DB 字串值）
+  // 當收款方式變更時（method 為 SSOT、receipt_type 從 method.code 反推給 trigger 兼容）
   const handleReceiptTypeChange = (value: string) => {
-    const newType = value as unknown as ReceiptType
     const method = paymentMethods.find(m => m.name === value)
+    const code = method?.code || ''
     const updates: Partial<PaymentItem> = {
-      receipt_type: newType,
-      payment_method_code: method?.code,
+      // SSOT：method.id + method.code
       payment_method_id: method?.id,
+      payment_method_code: code,
+      // receipt_type 數字（DB auto_posting trigger 還在吃）— 從 code 反推大類
+      receipt_type: codeToReceiptType(code) as unknown as ReceiptType,
     }
 
     // 如果切換到 LinkPay 類型，自動帶入預設值
-    const code = method?.code || ''
-    if (code === 'LINKPAY' || code === 'LINEPAY') {
+    if (isLinkPayCode(code)) {
       // 預設付款截止日為 7 天後
       if (!item.pay_dateline) {
         const deadline = new Date()

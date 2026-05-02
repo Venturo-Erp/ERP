@@ -221,7 +221,7 @@ export function EnhancedTable<T extends RowData = RowData>({
       )}
     >
       <div className="overflow-auto flex-1">
-        <table className="w-full border-collapse table-fixed" style={{ tableLayout: 'fixed' }}>
+        <table className="w-full border-collapse">
           <TableHeader
             columns={typedColumns}
             sortColumn={sortColumn}
