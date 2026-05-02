@@ -429,7 +429,12 @@ export function Sidebar() {
           ) {
             return null
           }
-          if (preferredFeatures.length > 0 && item.requiredPermission) {
+          // 個人偏好 menu 過濾：含 '*' 視為「全部顯示」（不再做偏好過濾、退回 capability check）
+          if (
+            preferredFeatures.length > 0 &&
+            !preferredFeatures.includes('*') &&
+            item.requiredPermission
+          ) {
             if (!preferredFeatures.includes(item.requiredPermission)) return null
           }
           if (item.children) {
