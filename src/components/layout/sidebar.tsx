@@ -473,12 +473,14 @@ export function Sidebar() {
           key={`${item.href}-${item.label}`}
           data-tutorial={`nav-${item.href.replace(/^\//, '').split('/')[0]}`}
         >
-          {/* 父項目：flex layout、icon 在固定 w-16 wrapper、不隨 sidebar 寬度晃動 */}
+          {/* 父項目：flex layout、icon 在固定 w-16 wrapper、不隨 sidebar 寬度晃動
+              border-l-[3px] 永遠保留、active 只換顏色、避免被選中時 menu 整體位移 */}
           <div
             className={cn(
               'w-full flex items-center h-11 text-sm text-morandi-secondary cursor-pointer',
+              'border-l-[3px] border-l-transparent',
               'hover:bg-morandi-gold/5 hover:text-morandi-gold',
-              active && 'bg-morandi-gold/10 text-morandi-gold border-l-3 border-morandi-gold'
+              active && 'bg-morandi-gold/10 text-morandi-gold border-l-morandi-gold'
             )}
             onClick={() => toggleSubmenu(item.href)}
           >
@@ -523,8 +525,9 @@ export function Sidebar() {
           onClick={closeSidebar}
           className={cn(
             'w-full flex items-center h-11 text-sm text-morandi-secondary',
+            'border-l-[3px] border-l-transparent',
             'hover:bg-morandi-gold/5 hover:text-morandi-gold',
-            active && 'bg-morandi-gold/10 text-morandi-gold border-l-3 border-morandi-gold'
+            active && 'bg-morandi-gold/10 text-morandi-gold border-l-morandi-gold'
           )}
         >
           <div className={cn('w-16 flex justify-center shrink-0', isChild && 'pl-4')}>
