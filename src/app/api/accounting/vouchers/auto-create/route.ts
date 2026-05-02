@@ -1,20 +1,9 @@
-import { createClient, SupabaseClient } from '@supabase/supabase-js'
+import { getSupabaseAdminClient } from '@/lib/supabase/admin'
 import { NextRequest, NextResponse } from 'next/server'
 import { logger } from '@/lib/utils/logger'
 import { getServerAuth } from '@/lib/auth/server-auth'
 
-// Lazy initialization to avoid build-time errors
-let supabase: SupabaseClient
-
-function getSupabase() {
-  if (!supabase) {
-    supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    )
-  }
-  return supabase
-}
+const getSupabase = getSupabaseAdminClient
 
 /**
  * 自動產生傳票 API（使用使用者設定的科目，不再硬編碼）
@@ -290,14 +279,14 @@ async function createVoucherFromPaymentRequest(workspaceId: string, paymentReque
       line_no: lineNo++,
       account_id: catMapping.debit_account.id,
       description: `${request.supplier_name || ''} / ${item.description || category}`,
-      debit_amount: item.amount || 0,
+      debit_amount: item.subtotal || 0,
       credit_amount: 0,
     })
 
     // 累計貸方金額（可能多個項目用同一個貸方科目）
     if (catMapping.credit_account) {
       const creditId = catMapping.credit_account.id
-      creditAccountIds.set(creditId, (creditAccountIds.get(creditId) || 0) + (item.amount || 0))
+      creditAccountIds.set(creditId, (creditAccountIds.get(creditId) || 0) + (item.subtotal || 0))
     }
   }
 
