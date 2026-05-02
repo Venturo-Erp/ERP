@@ -27,7 +27,7 @@ const customerEntity = createEntityHook<Customer>('customers', {
 export const useCustomers = customerEntity.useList
 export const useCustomersSlim = customerEntity.useListSlim
 const useCustomer = customerEntity.useDetail
-const useCustomersPaginated = customerEntity.usePaginated
+export const useCustomersPaginated = customerEntity.usePaginated
 const useCustomerDictionary = customerEntity.useDictionary
 
 export const createCustomer = customerEntity.create

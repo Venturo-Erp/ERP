@@ -2,13 +2,6 @@
 
 import React from 'react'
 import { Button } from '@/components/ui/button'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { cn } from '@/lib/utils'
 import { ENHANCED_TABLE_LABELS } from './constants/labels'
 
@@ -19,17 +12,18 @@ interface TablePaginationProps {
   startIndex: number
   totalItems: number
   onPageChange: (page: number) => void
-  onPageSizeChange: (size: number) => void
+  /** 保留 prop 介面、但 UI 不再提供選擇器（William 2026-05-02 拍板：固定 15 筆 / 頁、用篩選找特定資料） */
+  onPageSizeChange?: (size: number) => void
 }
 
 export const TablePagination = React.memo(function TablePagination({
   currentPage,
   totalPages,
-  pageSize,
-  startIndex,
+  pageSize: _pageSize,
+  startIndex: _startIndex,
   totalItems,
   onPageChange,
-  onPageSizeChange,
+  onPageSizeChange: _onPageSizeChange,
 }: TablePaginationProps) {
   if (totalItems === 0) return null
 
@@ -37,26 +31,6 @@ export const TablePagination = React.memo(function TablePagination({
     <div className="p-3 flex flex-col sm:flex-row items-center justify-end gap-3 border-t border-border/40 bg-morandi-container/10">
       {/* 分頁控制 */}
       <div className="flex items-center gap-2">
-        {/* 每頁顯示筆數 */}
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-morandi-secondary">{ENHANCED_TABLE_LABELS.LABEL_2936}</span>
-          <Select
-            value={pageSize.toString()}
-            onValueChange={value => onPageSizeChange(Number(value))}
-          >
-            <SelectTrigger className="w-20 h-9 text-sm">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="15">15</SelectItem>
-              <SelectItem value="20">20</SelectItem>
-              <SelectItem value="50">50</SelectItem>
-              <SelectItem value="100">100</SelectItem>
-            </SelectContent>
-          </Select>
-          <span className="text-sm text-morandi-secondary">{ENHANCED_TABLE_LABELS.LABEL_2269}</span>
-        </div>
-
         {/* 分頁按鈕 — 永遠顯示以保持版型一致 */}
         <>
           <div className="w-px h-6 bg-border/60 mx-1"></div>
