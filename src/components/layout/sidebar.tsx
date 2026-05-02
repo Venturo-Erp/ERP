@@ -481,7 +481,9 @@ export function Sidebar() {
             </div>
             {showExpanded && (
               <>
-                <span className="flex-1 text-left">{item.label}</span>
+                <span className="flex-1 text-left whitespace-nowrap overflow-hidden">
+                  {item.label}
+                </span>
                 <div className="px-3">
                   {isSubmenuExpanded ? (
                     <ChevronDown size={14} className="text-morandi-gold" />
@@ -522,7 +524,11 @@ export function Sidebar() {
           <div className={cn('w-16 flex justify-center shrink-0', isChild && 'pl-4')}>
             <item.icon size={isChild ? 16 : 22} weight="duotone" />
           </div>
-          {showExpanded && <span className="flex-1 text-left">{item.label}</span>}
+          {showExpanded && (
+            <span className="flex-1 text-left whitespace-nowrap overflow-hidden">
+              {item.label}
+            </span>
+          )}
         </Link>
       </li>
     )
@@ -547,7 +553,7 @@ export function Sidebar() {
             </div>
           </div>
           {showExpanded && (
-            <div className="text-xl font-bold text-morandi-primary">
+            <div className="text-xl font-bold text-morandi-primary whitespace-nowrap overflow-hidden">
               {user?.workspace_code || 'V'}
             </div>
           )}
