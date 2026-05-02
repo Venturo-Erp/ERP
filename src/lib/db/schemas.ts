@@ -49,8 +49,6 @@ export const TABLES = {
   // 會計系統
   JOURNAL_VOUCHERS: 'journal_vouchers',
   JOURNAL_LINES: 'journal_lines',
-  // Workspace 模組
-  WORKSPACE_MODULES: 'workspace_modules',
 } as const
 
 export type TableName = (typeof TABLES)[keyof typeof TABLES]

@@ -10,26 +10,6 @@ import type { BaseEntity } from './base.types'
 import type { VoucherStatus } from './accounting.types'
 
 // ============================================
-// 模組管理
-// ============================================
-
-/**
- * 模組名稱
- */
-export type ModuleName = 'accounting' | 'inventory' | 'bi_analytics'
-
-/**
- * 工作空間模組
- */
-export interface WorkspaceModule extends BaseEntity {
-  workspace_id: string
-  module_name: ModuleName
-  is_enabled: boolean
-  enabled_at: string
-  expires_at: string | null // NULL = 永久授權
-}
-
-// ============================================
 // 會計科目 (Chart of Accounts)
 // ============================================
 
@@ -136,9 +116,6 @@ export interface GeneralLedger extends BaseEntity {
 // ============================================
 // CRUD 資料型別
 // ============================================
-
-export type CreateWorkspaceModuleData = Omit<WorkspaceModule, keyof BaseEntity>
-export type UpdateWorkspaceModuleData = Partial<CreateWorkspaceModuleData>
 
 export type CreateAccountingSubjectData = Omit<AccountingSubject, keyof BaseEntity>
 export type UpdateAccountingSubjectData = Partial<CreateAccountingSubjectData>
