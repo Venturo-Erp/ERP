@@ -74,6 +74,7 @@ import {
   TrendingUp,
   Award,
   GripVertical,
+  Copy,
 } from 'lucide-react'
 import {
   DndContext,
@@ -151,11 +152,13 @@ function SortableMethodRow({
   onEdit,
   onToggle,
   onDelete,
+  onCopy,
 }: {
   method: PaymentMethod
   onEdit: () => void
   onToggle: () => void
   onDelete: () => void
+  onCopy: () => void
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: method.id,
@@ -182,15 +185,8 @@ function SortableMethodRow({
           <GripVertical className="h-4 w-4 text-morandi-secondary" />
         </button>
       </td>
-      {/* 名稱 */}
-      <td className="px-4 py-3 text-sm font-medium">
-        {method.name}
-        {method.is_system && (
-          <Badge variant="outline" className="ml-2 text-[10px] px-1.5 py-0">
-            系統
-          </Badge>
-        )}
-      </td>
+      {/* 名稱（系統 Badge 已砍、user 不需要區分系統 / 自訂） */}
+      <td className="px-4 py-3 text-sm font-medium">{method.name}</td>
       {/* 說明 */}
       <td className="px-4 py-3 text-sm text-morandi-muted">{method.description || '-'}</td>
       {/* 付款提示 */}
@@ -207,21 +203,17 @@ function SortableMethodRow({
           ? `${method.credit_account.code} ${method.credit_account.name}`
           : '-'}
       </td>
-      {/* 狀態 */}
-      <td className="px-4 py-3 text-sm w-[80px]">
-        <div className="flex items-center gap-2">
-          <Switch checked={method.is_active} onCheckedChange={onToggle} />
-          <span
-            className={`text-xs ${method.is_active ? 'text-morandi-primary' : 'text-morandi-muted'}`}
-          >
-            {method.is_active ? '啟用' : '停用'}
-          </span>
-        </div>
+      {/* 狀態（純 Switch、不再加「啟用/停用」中文撐高） */}
+      <td className="px-4 py-3 text-sm w-[60px]">
+        <Switch checked={method.is_active} onCheckedChange={onToggle} />
       </td>
-      {/* 操作 */}
-      <td className="px-4 py-3 text-sm w-[80px] text-right">
-        <div className="flex justify-end gap-1">
-          <Button variant="ghost" size="icon" onClick={onEdit}>
+      {/* 操作（複製 / 編輯 / 刪除、寬度拉寬避免 wrap） */}
+      <td className="px-4 py-3 text-sm w-[140px] text-right">
+        <div className="flex justify-end gap-0.5">
+          <Button variant="ghost" size="icon" onClick={onCopy} title="複製為自訂方式">
+            <Copy className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="icon" onClick={onEdit} title="編輯">
             <Pencil className="h-4 w-4" />
           </Button>
           <Button
@@ -229,6 +221,7 @@ function SortableMethodRow({
             size="icon"
             onClick={onDelete}
             className="text-status-danger hover:text-status-danger/80"
+            title="刪除"
           >
             <Trash2 className="h-4 w-4" />
           </Button>
@@ -368,6 +361,36 @@ export default function FinanceSettingsPage() {
       await alert('儲存成功', 'success')
     } catch (error) {
       await alert('儲存失敗', 'error')
+    }
+  }
+
+  // 複製方式（system / 自訂都可複製、複製後變 user 自訂、可改名 / 編輯）
+  const handleCopyMethod = async (method: PaymentMethod) => {
+    try {
+      const maxSort = Math.max(0, ...paymentMethods.filter(m => m.type === method.type).map(m => m.sort_order || 0))
+      const res = await fetch('/api/finance/payment-methods', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          workspace_id: workspaceId,
+          type: method.type,
+          // code 加 _COPY 後綴避免衝突；user 編輯時可改
+          code: `${method.code}_COPY_${Date.now().toString(36).slice(-4).toUpperCase()}`,
+          name: `${method.name} - 副本`,
+          description: method.description,
+          placeholder: method.placeholder,
+          debit_account_id: method.debit_account_id,
+          credit_account_id: method.credit_account_id,
+          sort_order: maxSort + 1,
+          is_active: true,
+          is_system: false, // 副本一律 user 自訂
+        }),
+      })
+      if (!res.ok) throw new Error('複製失敗')
+      await loadData()
+      await alert('複製成功，請編輯名稱', 'success')
+    } catch (error) {
+      await alert('複製失敗', 'error')
     }
   }
 
@@ -647,6 +670,7 @@ export default function FinanceSettingsPage() {
                             }}
                             onToggle={() => handleToggleMethodActive(method)}
                             onDelete={() => handleDeleteMethod(method)}
+                            onCopy={() => handleCopyMethod(method)}
                           />
                         ))}
                       </SortableContext>
@@ -702,6 +726,7 @@ export default function FinanceSettingsPage() {
                             }}
                             onToggle={() => handleToggleMethodActive(method)}
                             onDelete={() => handleDeleteMethod(method)}
+                            onCopy={() => handleCopyMethod(method)}
                           />
                         ))}
                       </SortableContext>
