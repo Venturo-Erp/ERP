@@ -91,6 +91,14 @@ fix-types-to-snake.js
 Corner/
 backup/
 temp/
+db-export/
+
+# Backup files — 一律放 ~/Backups/、不該進 repo
+*.tar.gz
+db-backup-*.sql
+backup_*.sql
+venturo-erp-backup-*
+venturo-erp-clean-backup-*
 
 # Playwright auth state
 tests/e2e/.auth/
