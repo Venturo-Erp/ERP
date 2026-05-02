@@ -180,6 +180,13 @@ CREATE POLICY "tenant_write" ON table_name
   USING (has_capability_for_workspace(workspace_id, '{module}.write'));
 ```
 
+### 鐵律：必接 HR
+
+- ✅ RLS policy **必用 `has_capability_for_workspace`**（接 HR 角色管理）
+- ❌ **禁止**用 `is_admin = true` 之類 hardcode（不接 HR、權限調整不會生效）
+- 接哪個 capability 由表名 → MODULES 對應、見 `docs/MODULE_REGISTRY.md`
+- 加新表必跑 `npx tsx scripts/sync-capabilities.ts` 把 capability 補到 DB
+
 ### `workspaces` 表特殊
 
 - ⚠️ 不准 `FORCE ROW LEVEL SECURITY`（會擋到 service_role 登入流程、2026-04-20 痛過一次）
@@ -267,16 +274,36 @@ CREATE POLICY "tenant_write" ON table_name
 
 ### Route 結構
 
-每個 API route 必須：
+每個業務 API route 必須：
 
-1. **Auth check**：`getServerAuth()`、否則 401
-2. **Capability check**：`hasCapabilityByCode(employeeId, code)`、否則 403
-3. **Workspace filter**：所有 admin client query 必須 `.eq('workspace_id', workspace_id)`
-4. **`[id]` route 特別**：workspace_id filter **必須在 id filter 之前**（防跨租戶）
+1. **守門**：`requireCapability('{module}.{action}')`（含 auth + capability check、見 `src/lib/auth/require-capability.ts`）
+2. **Workspace filter**：所有 admin client query 必須 `.eq('workspace_id', workspaceId)`
+3. **`[id]` route 特別**：workspace_id filter **必須在 id filter 之前**（防跨租戶）
+
+### 用法
+
+```ts
+import { requireCapability } from '@/lib/auth/require-capability'
+
+export async function GET(req: NextRequest) {
+  const ctx = await requireCapability('tours.read')
+  if (!ctx.ok) return ctx.response
+  const { workspaceId, employeeId } = ctx
+  // ...業務邏輯
+}
+```
+
+### 例外（不需 requireCapability）
+
+- **公開 endpoint**：在 `middleware.ts` 的 `PUBLIC_PATHS` / `PREFIX_PUBLIC_PATHS` 註冊
+- **平台級 endpoint**：用 `platform.*` capability（如 tenants 管理）
+- **Webhook**：自有簽章驗證（LINE / Meta / 第三方）
+- **Internal API**：用 `x-internal-secret` header 驗證
 
 ### 違反 = CRITICAL（資料外洩）
 
-`[id]` route 沒先篩 workspace_id 就 query = 跨租戶資料外洩。立即修復。
+- `[id]` route 沒先篩 workspace_id 就 query = 跨租戶資料外洩、立即修復
+- 業務 endpoint 沒 `requireCapability` = 「登入就能用」、繞過 HR 角色管理
 
 ---
 
