@@ -250,153 +250,17 @@ export function QuickReceipt({ onSubmit, defaultTourId, defaultOrderId }: QuickR
         </div>
       </div>
 
-      {/* 第二排：根據收款方式顯示專屬欄位 */}
-      {paymentItem.receipt_type === ReceiptType.CASH && (
+      {/* 收款方式不再有額外專屬欄位（form 已砍）*/}
+      {paymentItem.receipt_type === ReceiptType.CREDIT_CARD && (
         <div className="pt-3 border-t">
-          <Label className="text-sm font-medium text-morandi-primary">{FORM_LABELS.handler}</Label>
+          <Label className="text-sm font-medium text-morandi-primary">{FORM_LABELS.fees}</Label>
           <Input
-            placeholder={PLACEHOLDER_LABELS.enterHandlerName}
-            value={paymentItem.handler_name || ''}
-            onChange={e => updatePaymentItem({ handler_name: e.target.value })}
+            type="number"
+            placeholder={PLACEHOLDER_LABELS.optionalWithFees}
+            value={paymentItem.fees || ''}
+            onChange={e => updatePaymentItem({ fees: Number(e.target.value) })}
             className="mt-1 border-morandi-container/30"
           />
-        </div>
-      )}
-
-      {paymentItem.receipt_type === ReceiptType.BANK_TRANSFER && (
-        <div className="grid grid-cols-2 gap-3 pt-3 border-t">
-          <div>
-            <Label className="text-sm font-medium text-morandi-primary">
-              {FORM_LABELS.depositAccount}
-            </Label>
-            <Select
-              value={paymentItem.account_info || ''}
-              onValueChange={value => updatePaymentItem({ account_info: value })}
-            >
-              <SelectTrigger className="mt-1 border-morandi-container/30">
-                <SelectValue placeholder={PLACEHOLDER_LABELS.selectAccount} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="國泰">{BANK_OPTIONS.cathay}</SelectItem>
-                <SelectItem value="合庫">{BANK_OPTIONS.hcb}</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <Label className="text-sm font-medium text-morandi-primary">{FORM_LABELS.fees}</Label>
-            <Input
-              type="number"
-              placeholder={PLACEHOLDER_LABELS.optionalWithFees}
-              value={paymentItem.fees || ''}
-              onChange={e => updatePaymentItem({ fees: Number(e.target.value) })}
-              className="mt-1 border-morandi-container/30"
-            />
-          </div>
-        </div>
-      )}
-
-      {paymentItem.receipt_type === ReceiptType.CREDIT_CARD && (
-        <div className="grid grid-cols-3 gap-3 pt-3 border-t">
-          <div>
-            <Label className="text-sm font-medium text-morandi-primary">
-              {FORM_LABELS.cardLastFour}
-            </Label>
-            <Input
-              placeholder="1234"
-              value={paymentItem.card_last_four || ''}
-              onChange={e =>
-                updatePaymentItem({ card_last_four: e.target.value.replace(/\D/g, '') })
-              }
-              className="mt-1 border-morandi-container/30"
-              maxLength={4}
-            />
-          </div>
-          <div>
-            <Label className="text-sm font-medium text-morandi-primary">
-              {FORM_LABELS.authCode}
-            </Label>
-            <Input
-              placeholder={PLACEHOLDER_LABELS.enterAuthCode}
-              value={paymentItem.auth_code || ''}
-              onChange={e => updatePaymentItem({ auth_code: e.target.value })}
-              className="mt-1 border-morandi-container/30"
-            />
-          </div>
-          <div>
-            <Label className="text-sm font-medium text-morandi-primary">{FORM_LABELS.fees}</Label>
-            <Input
-              type="number"
-              placeholder={PLACEHOLDER_LABELS.optionalWithFees}
-              value={paymentItem.fees || ''}
-              onChange={e => updatePaymentItem({ fees: Number(e.target.value) })}
-              className="mt-1 border-morandi-container/30"
-            />
-          </div>
-        </div>
-      )}
-
-      {paymentItem.receipt_type === ReceiptType.CHECK && (
-        <div className="grid grid-cols-2 gap-3 pt-3 border-t">
-          <div>
-            <Label className="text-sm font-medium text-morandi-primary">
-              {FORM_LABELS.checkNumber}
-            </Label>
-            <Input
-              placeholder={PLACEHOLDER_LABELS.enterCheckNumber}
-              value={paymentItem.check_number || ''}
-              onChange={e => updatePaymentItem({ check_number: e.target.value })}
-              className="mt-1 border-morandi-container/30"
-            />
-          </div>
-          <div>
-            <Label className="text-sm font-medium text-morandi-primary">
-              {FORM_LABELS.issueBank}
-            </Label>
-            <Input
-              placeholder={PLACEHOLDER_LABELS.enterBankName}
-              value={paymentItem.check_bank || ''}
-              onChange={e => updatePaymentItem({ check_bank: e.target.value })}
-              className="mt-1 border-morandi-container/30"
-            />
-          </div>
-        </div>
-      )}
-
-      {paymentItem.receipt_type === ReceiptType.LINK_PAY && (
-        <div className="space-y-3 pt-3 border-t">
-          <div>
-            <Label className="text-sm font-medium text-morandi-primary">{FORM_LABELS.email}</Label>
-            <Input
-              type="email"
-              placeholder="user@example.com"
-              value={paymentItem.email || ''}
-              onChange={e => updatePaymentItem({ email: e.target.value })}
-              className="mt-1 border-morandi-container/30"
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label className="text-sm font-medium text-morandi-primary">
-                {FORM_LABELS.paymentDeadline}
-              </Label>
-              <DateInput
-                value={paymentItem.pay_dateline || ''}
-                onChange={value => updatePaymentItem({ pay_dateline: value })}
-                className="mt-1"
-              />
-            </div>
-            <div>
-              <Label className="text-sm font-medium text-morandi-primary">
-                {FORM_LABELS.paymentNameForCustomer}
-              </Label>
-              <Input
-                placeholder={PLACEHOLDER_LABELS.paymentNameExample}
-                value={paymentItem.payment_name || ''}
-                onChange={e => updatePaymentItem({ payment_name: e.target.value })}
-                className="mt-1 border-morandi-container/30"
-              />
-            </div>
-          </div>
         </div>
       )}
 

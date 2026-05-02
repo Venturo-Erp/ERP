@@ -19,39 +19,23 @@ export interface Receipt {
   // 收款資訊
   receipt_date: string // ISO date
   payment_date: string // 付款日期（資料庫必填欄位）
-  /** @deprecated 寫死 5 大類字串、DB trigger 還用、新 code 走 payment_method_id */
+  /** @deprecated 寫死 4 大類字串、DB trigger 還用、新 code 走 payment_method_id */
   payment_method: string
   /** SSOT — 付款方式 ID（FK to payment_methods）、列表 / 條件比對都讀這個 */
   payment_method_id: string | null
   /** PostgREST join 出來的 payment_methods row（顯示真實方式名字） */
   payment_methods?: { name: string; code: string } | null
-  /** @deprecated 數字 enum、DB auto_posting trigger 還在用 0-4、新 code 用 payment_method_id */
+  /** @deprecated 數字 enum、DB auto_posting trigger 還在用 0-3、新 code 用 payment_method_id */
   receipt_type: ReceiptType
   receipt_amount: number // 應收金額
-  total_amount?: number // 所有項目金額加總
-  amount: number // 金額（與 receipt_amount 同義）
   actual_amount: number // 實收金額
   status: ReceiptStatus // 'pending' | 'confirmed' | 'cancelled'
 
   // 收款方式相關欄位
   receipt_account: string | null // 付款人姓名/收款帳號
-  email: string | null // Email（LinkPay 用）
-  payment_name: string | null // 付款名稱（LinkPay 客戶看到的標題）
-  pay_dateline: string | null // 付款截止日（LinkPay 用）
 
-  // 各收款方式詳細欄位
-  handler_name: string | null // 經手人（現金用）
-  account_info: string | null // 匯入帳戶（匯款用）
-  fees: number | null // 手續費（匯款用）
-  card_last_four: string | null // 卡號後四碼（刷卡用）
-  auth_code: string | null // 授權碼（刷卡用）
-  check_number: string | null // 支票號碼
-  check_bank: string | null // 開票銀行
-  check_date: string | null // 支票兌現日期
-
-  // LinkPay 欄位（直接存在收款單方便複製）
-  link: string | null // 付款連結
-  linkpay_order_number: string | null // LinkPay 訂單號
+  // 手續費（刷卡 / 匯款用、跟 fee_rate 配合計算）
+  fees: number | null
 
   notes: string | null | undefined
 
@@ -102,16 +86,18 @@ export interface LinkPayLog {
 /**
  * 收款方式（@deprecated 用 payment_methods.code 代替）
  *
- * 保留原因：DB auto_posting trigger 還在 case `receipt_type = 0/1/2/3/4`、
+ * 保留原因：DB auto_posting trigger 還在 case `receipt_type = 0/1/2/3`、
  * 寫入時還要塞 number 給 trigger 兼容。新 code 一律用 codeToReceiptType(code) 反推、
  * 不要直接寫 ReceiptType.X。等 trigger 重寫成 join payment_methods.code 後再砍 enum。
+ *
+ * LinkPay 已於 2026-05-02 砍除（form / 邏輯 / DB seed）、4 = LinkPay 不再使用、
+ * 但 enum 不刪、避免歷史資料 receipt_type=4 解析失敗。
  */
 export enum ReceiptType {
   BANK_TRANSFER = 0, // 匯款
   CASH = 1, // 現金
   CREDIT_CARD = 2, // 刷卡
   CHECK = 3, // 支票
-  LINK_PAY = 4, // LinkPay
 }
 
 export const RECEIPT_TYPE_LABELS: Record<ReceiptType, string> = {
@@ -119,7 +105,6 @@ export const RECEIPT_TYPE_LABELS: Record<ReceiptType, string> = {
   [ReceiptType.CASH]: '現金',
   [ReceiptType.CREDIT_CARD]: '刷卡',
   [ReceiptType.CHECK]: '支票',
-  [ReceiptType.LINK_PAY]: 'LinkPay',
 }
 
 /** 收款方式選項（for Select/Dropdown） */
@@ -128,7 +113,6 @@ export const RECEIPT_TYPE_OPTIONS = [
   { value: ReceiptType.CASH, label: '現金' },
   { value: ReceiptType.CREDIT_CARD, label: '刷卡' },
   { value: ReceiptType.CHECK, label: '支票' },
-  { value: ReceiptType.LINK_PAY, label: 'LinkPay' },
 ] as const
 
 // =============================================================================
@@ -144,27 +128,20 @@ export function codeToReceiptType(code: string | null | undefined): ReceiptType 
   if (upper === 'CASH' || upper.startsWith('CASH_')) return ReceiptType.CASH
   if (upper === 'CREDIT_CARD' || upper === 'CARD' || upper.startsWith('CREDIT_') || upper.startsWith('CARD_')) return ReceiptType.CREDIT_CARD
   if (upper === 'CHECK' || upper.startsWith('CHECK_')) return ReceiptType.CHECK
-  if (upper === 'LINKPAY' || upper === 'LINEPAY' || upper.startsWith('LINKPAY_') || upper.startsWith('LINEPAY_')) return ReceiptType.LINK_PAY
   // 'TRANSFER' / 'TRANSFER_KGI' / 'TRANSFER_TCB' 跟其他全 fallback 到匯款
   return ReceiptType.BANK_TRANSFER
 }
 
-/** payment_methods.code → 5 大類字串（receipts.payment_method 兼容欄位） */
+/** payment_methods.code → 4 大類字串（receipts.payment_method 兼容欄位） */
 export function codeToPaymentMethod(code: string | null | undefined): string {
   const t = codeToReceiptType(code)
   switch (t) {
     case ReceiptType.CASH: return 'cash'
     case ReceiptType.CREDIT_CARD: return 'card'
     case ReceiptType.CHECK: return 'check'
-    case ReceiptType.LINK_PAY: return 'linkpay'
     case ReceiptType.BANK_TRANSFER:
     default: return 'transfer'
   }
-}
-
-/** code 是否為 LinkPay 系列（含 LINEPAY） */
-export function isLinkPayCode(code: string | null | undefined): boolean {
-  return codeToReceiptType(code) === ReceiptType.LINK_PAY
 }
 
 /** 收款單付款方式標籤（對應資料庫 payment_method 字串值） */
@@ -266,19 +243,8 @@ export interface CreateReceiptData {
   receipt_amount: number
   actual_amount?: number
   status?: ReceiptStatus
-
-  // 收款方式相關欄位（根據 receipt_type 決定）
   receipt_account?: string
-  email?: string
-  payment_name?: string
-  pay_dateline?: string
-  handler_name?: string
-  account_info?: string
   fees?: number
-  card_last_four?: string
-  auth_code?: string
-  check_number?: string
-  check_bank?: string
   notes?: string
 }
 
@@ -304,24 +270,9 @@ export interface ReceiptItem {
   payment_method_id?: string | null // FK to payment_methods.id
   payment_method_code?: string | null // method.code snapshot（向下相容）
 
-  // 各收款方式的欄位
   receipt_account?: string
-  email?: string
-  payment_name?: string
-  pay_dateline?: string
-  handler_name?: string
-  account_info?: string
   fees?: number
-  card_last_four?: string
-  auth_code?: string
-  check_number?: string
-  check_bank?: string
   notes?: string
-
-  // LinkPay 相關（儲存後才有）
-  linkpay_order_number?: string
-  link?: string
-  linkpay_status?: LinkPayStatus
 }
 
 // ============================================
@@ -338,30 +289,18 @@ export interface DbReceiptItem {
   customer_id: string | null | undefined
 
   // 金額
-  amount: number
+  receipt_amount: number
   actual_amount: number | null | undefined
 
-  // 收款方式
+  // 收款方式（SSOT 用 payment_method_id）
+  payment_method_id: string | null | undefined
+  /** @deprecated DB trigger 還用、新 code 不寫 */
   payment_method: string
-  receipt_type: number // 0:匯款 1:現金 2:刷卡 3:支票 4:LinkPay
+  /** @deprecated DB trigger 還用、新 code 不寫 */
+  receipt_type: number
 
-  // 收款方式相關欄位
   receipt_account: string | null | undefined
-  handler_name: string | null | undefined
-  account_info: string | null | undefined
   fees: number | null | undefined
-  card_last_four: string | null | undefined
-  auth_code: string | null | undefined
-  check_number: string | null | undefined
-  check_bank: string | null | undefined
-  check_date: string | null | undefined
-
-  // LinkPay 相關
-  email: string | null | undefined
-  payment_name: string | null | undefined
-  pay_dateline: string | null | undefined
-  link: string | null | undefined
-  linkpay_order_number: string | null | undefined
 
   // 備註與狀態
   notes: string | null | undefined

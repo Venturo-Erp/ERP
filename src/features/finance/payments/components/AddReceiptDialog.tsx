@@ -18,7 +18,7 @@ import { Combobox } from '@/components/ui/combobox'
 import { useToast } from '@/components/ui/use-toast'
 import { confirm } from '@/lib/ui/alert-dialog'
 import { usePaymentForm } from '../hooks/usePaymentForm'
-import { useReceiptMutations, type LinkPayResult } from '../hooks/useReceiptMutations'
+import { useReceiptMutations } from '../hooks/useReceiptMutations'
 import { recalculateReceiptStats } from '../services/receipt-core.service'
 import { PaymentItemRow } from './PaymentItemRow'
 import { InlineEditTable, type InlineEditColumn } from '@/components/ui/inline-edit-table'
@@ -130,9 +130,6 @@ export function AddReceiptDialog({
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
 
-  // LinkPay 結果
-  const [linkPayResults, setLinkPayResults] = useState<LinkPayResult[]>([])
-  const [copiedLink, setCopiedLink] = useState<string | null>(null)
 
   // 收款方式（SWR 快取，統一在 Dialog 層級載入）
   const { methods: paymentMethods, loading: methodsLoading } = usePaymentMethodsCached('receipt')
@@ -144,8 +141,6 @@ export function AddReceiptDialog({
 
     // 重置狀態
     setIsSubmitting(false)
-    setLinkPayResults([])
-    setCopiedLink(null)
     setDialogLoading(true)
 
     const initialize = async () => {
@@ -188,16 +183,7 @@ export function AddReceiptDialog({
             notes: editingReceipt.notes || '',
             amount: editingReceipt.receipt_amount || 0,
             actual_amount: editingReceipt.actual_amount || 0,
-            email: editingReceipt.email || '',
-            payment_name: editingReceipt.payment_name || '',
-            pay_dateline: editingReceipt.pay_dateline || '',
-            handler_name: editingReceipt.handler_name || '',
-            account_info: editingReceipt.account_info || '',
             fees: editingReceipt.fees || 0,
-            card_last_four: editingReceipt.card_last_four || '',
-            auth_code: editingReceipt.auth_code || '',
-            check_number: editingReceipt.check_number || '',
-            check_bank: editingReceipt.check_bank || '',
           },
         ])
         return
@@ -332,20 +318,7 @@ export function AddReceiptDialog({
         workspaceId: user.workspace_id,
       })
 
-      // 設定 LinkPay 結果
-      if (result.linkPayResults.length > 0) {
-        setLinkPayResults(result.linkPayResults)
-        toast({
-          title: ADD_RECEIPT_DIALOG_LABELS.收款單建立成功,
-          description: ADD_RECEIPT_TOAST_LABELS.CREATED_WITH_LINKPAY(
-            result.itemCount,
-            result.linkPayResults.length
-          ),
-        })
-        resetForm()
-        onSuccess?.()
-        // 不關閉對話框，讓使用者複製連結
-      } else {
+      {
         toast({
           title: ADD_RECEIPT_TOAST_LABELS.CREATE_SUCCESS,
           description: ADD_RECEIPT_TOAST_LABELS.CREATED(
@@ -398,8 +371,6 @@ export function AddReceiptDialog({
 
   const handleCancel = () => {
     resetForm()
-    setLinkPayResults([])
-    setCopiedLink(null)
     onOpenChange(false)
   }
 
@@ -573,63 +544,6 @@ export function AddReceiptDialog({
                   />
                 </div>
 
-                {/* LinkPay 結果區域 */}
-                {linkPayResults.length > 0 && (
-                  <div className="space-y-3 pt-4 border-t border-morandi-gold/30 bg-morandi-gold/5 -mx-6 px-6 py-4">
-                    <h3 className="text-sm font-medium text-morandi-gold flex items-center gap-2">
-                      <ExternalLink size={16} />
-                      {ADD_RECEIPT_DIALOG_LABELS.LINKPAY_LINKS_GENERATED}
-                    </h3>
-                    <div className="space-y-2">
-                      {linkPayResults.map(result => (
-                        <div
-                          key={result.receiptNumber}
-                          className="flex items-center gap-3 bg-card rounded-lg px-4 py-3 border border-morandi-gold/20"
-                        >
-                          <span className="text-sm font-medium text-morandi-primary min-w-[120px]">
-                            {result.receiptNumber}
-                          </span>
-                          <Input
-                            value={result.link}
-                            readOnly
-                            className="flex-1 text-xs bg-morandi-container/30 border-0"
-                          />
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              navigator.clipboard.writeText(result.link)
-                              setCopiedLink(result.receiptNumber)
-                              setTimeout(() => setCopiedLink(null), 2000)
-                            }}
-                            className="gap-1 text-morandi-gold hover:bg-morandi-gold/10"
-                          >
-                            {copiedLink === result.receiptNumber ? (
-                              <>
-                                <Check size={14} />
-                                {ADD_RECEIPT_DIALOG_LABELS.COPYING_1937}
-                              </>
-                            ) : (
-                              <>
-                                <Copy size={14} />
-                                {ADD_RECEIPT_DIALOG_LABELS.COPY}
-                              </>
-                            )}
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => window.open(result.link, '_blank')}
-                            className="gap-1 text-morandi-secondary hover:bg-morandi-container/50"
-                          >
-                            <ExternalLink size={14} />
-                            {ADD_RECEIPT_DIALOG_LABELS.LABEL_1670}
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
               </>
             )}
           </TabsContent>
@@ -693,7 +607,7 @@ export function AddReceiptDialog({
             )}
 
             {/* 存檔按鈕 */}
-            {linkPayResults.length === 0 && canEdit && (
+            {canEdit && (
               <Button
                 onClick={handleSubmit}
                 disabled={

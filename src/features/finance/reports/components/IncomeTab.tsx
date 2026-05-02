@@ -60,12 +60,12 @@ export function IncomeTab({ dateRange }: IncomeTabProps) {
     const tourReceipts = filteredReceipts.filter(r => r.tour_id)
     const companyReceipts = filteredReceipts.filter(r => !r.tour_id)
     const totalAmount = filteredReceipts.reduce(
-      (sum, r) => sum + (r.receipt_amount || r.amount || 0),
+      (sum, r) => sum + (r.receipt_amount || 0),
       0
     )
-    const tourAmount = tourReceipts.reduce((sum, r) => sum + (r.receipt_amount || r.amount || 0), 0)
+    const tourAmount = tourReceipts.reduce((sum, r) => sum + (r.receipt_amount || 0), 0)
     const companyAmount = companyReceipts.reduce(
-      (sum, r) => sum + (r.receipt_amount || r.amount || 0),
+      (sum, r) => sum + (r.receipt_amount || 0),
       0
     )
     const byPaymentMethod = filteredReceipts.reduce(
@@ -73,7 +73,7 @@ export function IncomeTab({ dateRange }: IncomeTabProps) {
         const method = r.payment_method || 'other'
         if (!acc[method]) acc[method] = { count: 0, amount: 0 }
         acc[method].count += 1
-        acc[method].amount += r.receipt_amount || r.amount || 0
+        acc[method].amount += r.receipt_amount || 0
         return acc
       },
       {} as Record<string, { count: number; amount: number }>
@@ -118,7 +118,7 @@ export function IncomeTab({ dateRange }: IncomeTabProps) {
       label: '金額',
       width: '120',
       render: (value, row) => (
-        <CurrencyCell amount={Number(value) || Number(row.amount) || 0} variant="income" />
+        <CurrencyCell amount={Number(value) || Number(row.receipt_amount) || 0} variant="income" />
       ),
     },
     {

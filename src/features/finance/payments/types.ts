@@ -15,7 +15,6 @@ export const RECEIPT_TYPES = {
   CASH: ReceiptType.CASH,
   CREDIT_CARD: ReceiptType.CREDIT_CARD,
   CHECK: ReceiptType.CHECK,
-  LINK_PAY: ReceiptType.LINK_PAY,
 } as const
 
 export const BANK_ACCOUNTS = [
@@ -38,30 +37,10 @@ export interface PaymentItem {
   // 通用欄位
   receipt_account?: string // 付款人姓名
   notes?: string // 備註
+  fees?: number // 手續費（刷卡 / 匯款用）
 
   // 公司收款專屬
   accounting_subject_id?: string // 會計科目 ID（公司收款用）
-
-  // LinkPay 專屬
-  email?: string
-  pay_dateline?: string
-  payment_name?: string
-
-  // 現金專屬
-  handler_name?: string // 經手人
-
-  // 匯款專屬
-  account_info?: string // 匯入帳戶
-  fees?: number // 手續費
-
-  // 刷卡專屬
-  card_last_four?: string // 卡號後四碼
-  auth_code?: string // 授權碼
-
-  // 支票專屬
-  check_number?: string // 支票號碼
-  check_bank?: string // 開票銀行
-  check_date?: string // 兌現日期
 }
 
 /**

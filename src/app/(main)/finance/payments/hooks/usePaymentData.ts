@@ -14,23 +14,20 @@ import {
   updateReceipt,
   deleteReceipt,
   invalidateReceipts,
-  useLinkPayLogs,
 } from '@/data'
 import { recalculateReceiptStats } from '@/features/finance/payments/services/receipt-core.service'
 import type { ReceiptItem } from '@/stores'
-import { ReceiptType, codeToPaymentMethod, codeToReceiptType, isLinkPayCode } from '@/types/receipt.types'
+import { codeToPaymentMethod, codeToReceiptType } from '@/types/receipt.types'
 import { PAYMENT_DATA_LABELS } from '../../constants/labels'
 
 export function usePaymentData() {
   const { items: orders, loading: ordersLoading } = useOrdersSlim()
   const { items: receipts, loading: receiptsLoading } = useReceipts()
-  const { items: linkpayLogs } = useLinkPayLogs()
 
   // 合併 loading 狀態
   const loading = ordersLoading || receiptsLoading
   const { get: getTour } = useTourDictionary()
   const { user } = useAuthStore()
-  // 會計模組已停用
 
   // 過濾可用訂單（未收款或部分收款）
   const availableOrders = useMemo(() => {
@@ -38,35 +35,6 @@ export function usePaymentData() {
       order => order.payment_status === 'unpaid' || order.payment_status === 'partial'
     )
   }, [orders])
-
-  const handleCreateLinkPay = async (receiptNumber: string, item: ReceiptItem) => {
-    try {
-      const response = await fetch('/api/linkpay', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          receipt_number: receiptNumber,
-          user_name: item.receipt_account || '',
-          email: item.email || '',
-          payment_name: item.payment_name || '',
-          create_user: user?.id || '',
-          amount: item.amount,
-          end_date: item.pay_dateline || '',
-        }),
-      })
-
-      const data = await response.json()
-
-      if (data.success) {
-        void alert(PAYMENT_DATA_LABELS.LINKPAY_SUCCESS, 'success')
-      } else {
-        void alert(PAYMENT_DATA_LABELS.LINKPAY_FAILED(data.message), 'error')
-      }
-    } catch (error) {
-      logger.error('LinkPay API 錯誤:', error)
-      void alert(PAYMENT_DATA_LABELS.LINKPAY_ERROR, 'error')
-    }
-  }
 
   const handleCreateReceipt = async (data: {
     selectedOrderId: string
@@ -115,33 +83,15 @@ export function usePaymentData() {
         payment_method: codeToPaymentMethod(item.payment_method_code),
         receipt_type: codeToReceiptType(item.payment_method_code),
         receipt_amount: item.amount,
-        amount: item.amount,
         actual_amount: 0, // 待會計確認
         status: 'pending', // 待確認
         receipt_account: item.receipt_account || null,
-        email: item.email || null,
-        payment_name: item.payment_name || null,
-        pay_dateline: item.pay_dateline || null,
-        handler_name: item.handler_name || null,
-        account_info: item.account_info || null,
         fees: item.fees || null,
-        card_last_four: item.card_last_four || null,
-        auth_code: item.auth_code || null,
-        check_number: item.check_number || null,
-        check_bank: item.check_bank || null,
-        check_date: null, // 支票兌現日期
-        link: null, // LinkPay 連結（建立後由 API 填入）
-        linkpay_order_number: null, // LinkPay 訂單號
         notes: item.notes || null,
         is_active: true,
         created_by: user.id,
         updated_by: user.id,
       })
-
-      // 如果是 LinkPay，呼叫 API 生成付款連結（SSOT 改用 method.code）
-      if (isLinkPayCode(item.payment_method_code)) {
-        await handleCreateLinkPay(receiptNumber, item)
-      }
     }
 
     // 重算訂單付款狀態 + 團財務數據
@@ -214,7 +164,6 @@ export function usePaymentData() {
     receipts,
     orders,
     availableOrders,
-    linkpayLogs,
     user,
     loading,
     invalidateReceipts,

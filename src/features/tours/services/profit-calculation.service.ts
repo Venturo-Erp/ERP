@@ -20,20 +20,23 @@ import {
 } from '@/types/bonus.types'
 /** 收款資料介面（相容多種資料來源） */
 interface ReceiptData {
-  total_amount?: number
-  amount?: number | string
+  /** 應收金額（receipts.receipt_amount） */
+  receipt_amount?: number | string
+  /** 實收金額（receipts.actual_amount） */
+  actual_amount?: number | string
+  /** 已過時：收款項目（受 receipt_items 表淘汰、保留兼容） */
   payment_items?: Array<{ amount?: number }>
 }
 
 const DEFAULT_ADMIN_COST_PER_PERSON = 10
 
-/** 計算收款總額 */
+/** 計算收款總額（優先實收、其次應收） */
 function calculateReceiptTotal(receipts: ReceiptData[]): number {
   return receipts.reduce((sum, r) => {
     if (r.payment_items && r.payment_items.length > 0) {
       return sum + r.payment_items.reduce((s, item) => s + (item.amount || 0), 0)
     }
-    return sum + (r.total_amount ?? (Number(r.amount) || 0))
+    return sum + (Number(r.actual_amount) || Number(r.receipt_amount) || 0)
   }, 0)
 }
 

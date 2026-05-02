@@ -9,7 +9,7 @@ import { useToast } from '@/components/ui/use-toast'
 import { RECEIPT_MUTATION_LABELS } from '../../constants/labels'
 import type { PaymentItem, PaymentFormData } from '../types'
 import type { Receipt } from '@/types/receipt.types'
-import { codeToReceiptType, codeToPaymentMethod, isLinkPayCode } from '@/types/receipt.types'
+import { codeToReceiptType, codeToPaymentMethod } from '@/types/receipt.types'
 import { recalculateReceiptStats } from '../services/receipt-core.service'
 
 /** 將 PaymentItem 解析成 method.code（SSOT）：優先 payment_method_code、fallback 從 receipt_type 字串/數字推 */
@@ -27,14 +27,9 @@ function resolveMethodCode(item: PaymentItem): string {
   }
   // 數字 fallback
   if (typeof rt === 'number') {
-    return ['TRANSFER', 'CASH', 'CREDIT_CARD', 'CHECK', 'LINKPAY'][rt] || 'TRANSFER'
+    return ['TRANSFER', 'CASH', 'CREDIT_CARD', 'CHECK'][rt] || 'TRANSFER'
   }
   return 'TRANSFER'
-}
-
-export interface LinkPayResult {
-  receiptNumber: string
-  link: string
 }
 
 interface OrderInfo {
@@ -63,7 +58,6 @@ interface CreateReceiptWithItemsResult {
   success: boolean
   receiptId: string
   receiptNumber: string
-  linkPayResults: LinkPayResult[]
   totalAmount: number
   itemCount: number
 }
@@ -85,58 +79,6 @@ interface UpdateReceiptWithItemsResult {
 
 export function useReceiptMutations() {
   const { toast } = useToast()
-
-  /**
-   * 處理 LinkPay 整合 — 呼叫 API 產生付款連結
-   */
-  const handleLinkPayIntegration = useCallback(
-    async (
-      receiptNumber: string,
-      item: PaymentItem,
-      userId: string,
-      tourCode: string
-    ): Promise<LinkPayResult | null> => {
-      try {
-        const response = await fetch('/api/linkpay', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            receipt_number: receiptNumber,
-            user_name: item.receipt_account || '',
-            email: item.email || '',
-            payment_name: item.payment_name || tourCode,
-            create_user: userId,
-            amount: item.amount,
-            end_date: item.pay_dateline || '',
-          }),
-        })
-
-        const data: unknown = await response.json()
-
-        // 使用 type guard 確保型別安全
-        if (
-          typeof data === 'object' &&
-          data !== null &&
-          'success' in data &&
-          (data as { success: boolean }).success &&
-          'data' in data &&
-          typeof (data as { data: unknown }).data === 'object' &&
-          (data as { data: { payment_link?: string } }).data?.payment_link
-        ) {
-          const paymentLink = (data as { data: { payment_link: string } }).data.payment_link
-          return {
-            receiptNumber,
-            link: paymentLink,
-          }
-        }
-        return null
-      } catch (error) {
-        logger.error('LinkPay API 錯誤:', error)
-        return null
-      }
-    },
-    []
-  )
 
   /**
    * 建立收款單 + 多個收款項目
@@ -183,7 +125,6 @@ export function useReceiptMutations() {
       // 計算總金額
       const totalAmount = paymentItems.reduce((sum, item) => sum + (item.amount || 0), 0)
 
-      const linkPayResults: LinkPayResult[] = []
       let firstReceiptId: string | null = null
       let firstReceiptNumber: string | null = null
 
@@ -227,29 +168,15 @@ export function useReceiptMutations() {
           receipt_date: item.transaction_date || new Date().toISOString().split('T')[0],
           receipt_type: receiptTypeNum,
           receipt_amount: item.amount,
-          amount: item.amount,
-          total_amount: item.amount,
           actual_amount: 0,
           status: 'pending',
           batch_id: paymentItems.length > 1 && firstReceiptId ? firstReceiptId : null,
           receipt_account: item.receipt_account || null,
-          email: item.email || null,
-          payment_name: item.payment_name || null,
-          pay_dateline: item.pay_dateline || null,
-          handler_name: item.handler_name || null,
-          account_info: item.account_info || null,
           fees: item.fees || null,
-          card_last_four: item.card_last_four || null,
-          auth_code: item.auth_code || null,
-          check_number: item.check_number || null,
-          check_bank: item.check_bank || null,
           notes: item.notes || null,
-          check_date: null,
           created_by: userId,
           updated_by: userId,
           is_active: true,
-          link: null,
-          linkpay_order_number: null,
         })
 
         if (!createdReceipt?.id) {
@@ -263,20 +190,6 @@ export function useReceiptMutations() {
           // 多筆時，第一筆也要設 batch_id（指向自己）
           if (paymentItems.length > 1) {
             await updateReceipt(createdReceipt.id, { batch_id: firstReceiptId })
-          }
-        }
-
-        // 處理 LinkPay（SSOT 用 method.code 判定）
-        if (isLinkPayCode(methodCode)) {
-          const linkPayResult = await handleLinkPayIntegration(
-            itemReceiptNumber,
-            item,
-            userId,
-            tourCode
-          )
-          if (linkPayResult) {
-            linkPayResults.push(linkPayResult)
-            await updateReceipt(createdReceipt.id, { link: linkPayResult.link })
           }
         }
       }
@@ -306,12 +219,11 @@ export function useReceiptMutations() {
         success: true,
         receiptId: firstReceiptId || '',
         receiptNumber: firstReceiptNumber || `${prefix}01`,
-        linkPayResults,
         totalAmount,
         itemCount: paymentItems.length,
       }
     },
-    [handleLinkPayIntegration]
+    []
   )
 
   /**
@@ -336,21 +248,10 @@ export function useReceiptMutations() {
         tour_id: formData.tour_id || null,
         order_id: formData.order_id || null,
         receipt_amount: totalAmount,
-        amount: totalAmount,
-        total_amount: totalAmount,
         payment_method: paymentMethod,
         receipt_type: receiptTypeNum,
         receipt_account: firstItem?.receipt_account || null,
-        handler_name: firstItem?.handler_name || null,
-        account_info: firstItem?.account_info || null,
         fees: firstItem?.fees || null,
-        card_last_four: firstItem?.card_last_four || null,
-        auth_code: firstItem?.auth_code || null,
-        check_number: firstItem?.check_number || null,
-        check_bank: firstItem?.check_bank || null,
-        email: firstItem?.email || null,
-        payment_name: firstItem?.payment_name || null,
-        pay_dateline: firstItem?.pay_dateline || null,
         notes: firstItem?.notes || null,
       })
 
@@ -365,6 +266,5 @@ export function useReceiptMutations() {
   return {
     createReceiptWithItems,
     updateReceiptWithItems,
-    handleLinkPayIntegration,
   }
 }

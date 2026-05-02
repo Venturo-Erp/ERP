@@ -100,18 +100,29 @@ export default function PaymentsPage() {
     return tabs
   }, [canTour, canCompany])
 
-  // Tab filter
+  // Tab filter + 預設排序：待確認優先 + 日期最早優先（讓 user 看到最遠還沒處理的）
   const filteredByTab = useMemo(() => {
+    let list: typeof receipts
     if (activeTab === 'all') {
-      return receipts.filter(r => {
+      list = receipts.filter(r => {
         if (canTour && isTourReceipt(r)) return true
         if (canCompany && isCompanyReceipt(r)) return true
         return false
       })
-    }
-    if (activeTab === 'tour') return receipts.filter(isTourReceipt)
-    if (activeTab === 'company') return receipts.filter(isCompanyReceipt)
-    return receipts
+    } else if (activeTab === 'tour') list = receipts.filter(isTourReceipt)
+    else if (activeTab === 'company') list = receipts.filter(isCompanyReceipt)
+    else list = receipts
+
+    return [...list].sort((a, b) => {
+      // 1. status='pending'（待確認）排前
+      const aPending = a.status === 'pending' ? 0 : 1
+      const bPending = b.status === 'pending' ? 0 : 1
+      if (aPending !== bPending) return aPending - bPending
+      // 2. 同 status 內、receipt_date 早的在前
+      const aDate = a.receipt_date ? new Date(a.receipt_date).getTime() : 0
+      const bDate = b.receipt_date ? new Date(b.receipt_date).getTime() : 0
+      return aDate - bDate
+    })
   }, [receipts, activeTab, canTour, canCompany])
 
   // 如果有 URL 參數，自動開啟新增對話框
@@ -171,9 +182,11 @@ export default function PaymentsPage() {
       key: 'receipt_account',
       label: FinanceLabels.orderNumber,
       width: '120',
-      render: value => {
+      // 收款明細：未核准灰色、核准後黑色（跟其他資料一樣）
+      render: (value, row) => {
         const info = String(value || '-')
-        return <span className="text-sm text-morandi-secondary">{info}</span>
+        const cls = row.status === 'confirmed' ? 'text-morandi-primary' : 'text-morandi-secondary'
+        return <span className={`text-sm ${cls}`}>{info}</span>
       },
     },
     { key: 'tour_name', label: FinanceLabels.tourName, sortable: true },
@@ -182,6 +195,7 @@ export default function PaymentsPage() {
       label: FinanceLabels.receiptAmount,
       sortable: true,
       width: '130',
+      align: 'right',
       render: value => (
         <div className="whitespace-nowrap">
           <CurrencyCell amount={Number(value)} />
@@ -193,23 +207,28 @@ export default function PaymentsPage() {
       label: FinanceLabels.actualAmount,
       sortable: true,
       width: '130',
-      render: value => (
-        <div className="whitespace-nowrap">
-          <CurrencyCell amount={Number(value) || 0} />
-        </div>
-      ),
+      align: 'right',
+      // 實收金額：核准前顯示灰色短 dash、跟金額一樣 right-align
+      render: (value, row) => {
+        if (row.status !== 'confirmed') {
+          return <span className="text-morandi-muted text-sm">-</span>
+        }
+        return (
+          <div className="whitespace-nowrap">
+            <CurrencyCell amount={Number(value) || 0} />
+          </div>
+        )
+      },
     },
     {
       key: 'payment_method_id',
       label: FinanceLabels.paymentMethod,
       width: '120',
-      // SSOT：列表 join payment_methods.name 取得真實方式名字
-      // 歷史資料 payment_method_id NULL 時 fallback 顯示 receipt_type 字串（detail 也讀這個）
-      render: (_, row) => {
-        const fromJoin = row.payment_methods?.name
-        const fromLegacy = row.receipt_type ? String(row.receipt_type) : null
-        return <span className="text-sm">{fromJoin || fromLegacy || '-'}</span>
-      },
+      // SSOT：唯一真相是 payment_methods.name (FK join)
+      // 抓不到顯示「-」、不再用 5 大類中文 fallback 污染
+      render: (_, row) => (
+        <span className="text-sm">{row.payment_methods?.name || '-'}</span>
+      ),
     },
     {
       key: 'status',
@@ -269,7 +288,7 @@ export default function PaymentsPage() {
         searchFields={['receipt_number', 'tour_name']}
         searchPlaceholder={FinanceLabels.searchReceiptPlaceholder}
         onRowClick={handleRowClick}
-        defaultSort={{ key: 'receipt_date', direction: 'desc' }}
+        // 不設 defaultSort、用 filteredByTab 已經 sort 過的順序（status pending → 日期 asc）
         initialPageSize={15}
         primaryAction={{
           label: FinanceLabels.addPayment,
