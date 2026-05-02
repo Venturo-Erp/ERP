@@ -10,7 +10,6 @@ import { useAuthStore } from '@/stores/auth-store'
 import { useQuotesListSlim, useOrdersListSlim } from '@/hooks/useListSlim'
 import { useItineraries } from '@/data'
 import { useTourOperations } from '../hooks/useTourOperations'
-import { useTourChannelOperations, TourStoreActions } from './TourChannelOperations'
 import { useTourActionButtons } from './TourActionButtons'
 import { useToursPage } from '../hooks/useToursPage'
 import { useToursDialogs } from '../hooks/useToursDialogs'
@@ -214,9 +213,7 @@ export const ToursPage: React.FC = () => {
     [user?.workspace_id, addOrderDialogTour, allOrders, router]
   )
 
-  const { handleCreateChannel } = useTourChannelOperations({
-    actions: actions as unknown as TourStoreActions,
-  })
+  // 內部聊天頻道已於 2026-05-02 整套刪除（William 拍板）
 
   // 開團轉換（提案 → 正式團）
   const handleConvertTour = useCallback((tour: Tour) => {
@@ -257,7 +254,6 @@ export const ToursPage: React.FC = () => {
     setDeleteConfirm: state => state.tour && openDeleteDialog(state.tour),
     onAddOrder: setAddOrderDialogTour,
     itineraries,
-    handleCreateChannel,
     onOpenItineraryDialog: openItineraryDialog,
     onOpenContractDialog: openContractDialog,
     onCloseTour: openClosingDialog,

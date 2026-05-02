@@ -7,11 +7,11 @@ import { useParams, useRouter } from 'next/navigation'
 import { useSearchParams } from 'next/navigation'
 import { ContentPageLayout } from '@/components/layout/content-page-layout'
 import { Button } from '@/components/ui/button'
-import { MapPin, MessageSquare } from 'lucide-react'
+import { MapPin } from 'lucide-react'
 import { ModuleLoading } from '@/components/module-loading'
 import { fetchTourIdByCode } from '@/data'
 import { useTourDetails } from '@/features/tours/hooks/useTours-advanced'
-import { useWorkspaceChannels } from '@/stores/workspace-store'
+import { useAuthStore } from '@/stores/auth-store'
 import { TOUR_TABS, TourTabContent } from '@/features/tours/components/TourTabs'
 import { useVisibleModuleTabs } from '@/lib/permissions/hooks'
 import { CODE_LABELS } from './constants/labels'
@@ -26,7 +26,7 @@ export default function TourDetailPage() {
   const searchParams = useSearchParams()
   const code = params.code as string
 
-  const { channels, currentWorkspace } = useWorkspaceChannels()
+  const { user } = useAuthStore()
 
   // 用 SWR 查詢 tour_id
   const { data: tourId, isLoading: loadingTourId } = useSWR(code ? `tour-id-${code}` : null, () =>
@@ -60,10 +60,7 @@ export default function TourDetailPage() {
   // 載入團詳情
   const { tour, loading, actions } = useTourDetails(tourId || '')
 
-  // 檢查是否已有工作頻道
-  const existingChannel = channels.find(
-    (ch: { tour_id?: string | null }) => ch.tour_id === tour?.id
-  )
+  // 內部聊天頻道已於 2026-05-02 整套刪除（William 拍板）
 
   // 返回列表
   const handleBack = () => {
@@ -126,26 +123,12 @@ export default function TourDetailPage() {
       tabs={visibleTabs}
       activeTab={activeTab}
       onTabChange={setActiveTab}
-      headerActions={
-        <div className="flex items-center gap-2">
-          {existingChannel && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => router.push(`/workspace?channel=${existingChannel.id}`)}
-            >
-              <MessageSquare size={16} className="mr-1" />
-              {CODE_LABELS.LABEL_9173}
-            </Button>
-          )}
-        </div>
-      }
       contentClassName="flex-1 overflow-auto"
     >
       <TourTabContent
         tour={tour}
         activeTab={activeTab}
-        workspaceId={currentWorkspace?.id}
+        workspaceId={user?.workspace_id}
         forceShowPnr={forceShowPnr}
         onOpenRequestDialog={data => {
           setRequestData({

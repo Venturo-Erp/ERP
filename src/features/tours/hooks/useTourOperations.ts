@@ -287,23 +287,7 @@ export function useTourOperations(params: UseTourOperationsParams) {
             onQuoteLinked?.(fromQuoteId, createdTour.id)
           }
 
-          // 🔧 自動建立頻道（正式團才建立）
-          const { useAuthStore } = await import('@/stores/auth-store')
-          const user = useAuthStore.getState().user
-          if (user && createdTour.workspace_id) {
-            const { createTourChannel } = await import('../services/tour-channel.service')
-            createTourChannel(createdTour as unknown as Tour, user.id)
-              .then(result => {
-                if (result.success) {
-                  logger.log(`[useTourOperations] 已為 ${createdTour.code} 建立頻道`)
-                } else {
-                  logger.warn(`[useTourOperations] 建立頻道失敗: ${result.error}`)
-                }
-              })
-              .catch(error => {
-                logger.error('[useTourOperations] 建立頻道時發生錯誤:', error)
-              })
-          }
+          // 內部聊天頻道已於 2026-05-02 整套刪除（William 拍板）、tour 不再自動建頻道
         }
 
         resetForm()
@@ -514,29 +498,7 @@ export function useTourOperations(params: UseTourOperationsParams) {
           }
         }
 
-        // 🔧 自動建立頻道（轉正式團時）
-        const { useAuthStore } = await import('@/stores/auth-store')
-        const user = useAuthStore.getState().user
-        if (user) {
-          const { createTourChannel } = await import('../services/tour-channel.service')
-          const tourForChannel = {
-            id: tourId,
-            code,
-            name: tour.name,
-            workspace_id: workspaceId,
-          } as unknown as Tour
-          createTourChannel(tourForChannel, user.id)
-            .then(result => {
-              if (result.success) {
-                logger.log(`[useTourOperations] 轉開團已為 ${code} 建立頻道`)
-              } else {
-                logger.warn(`[useTourOperations] 轉開團建立頻道失敗: ${result.error}`)
-              }
-            })
-            .catch(error => {
-              logger.error('[useTourOperations] 轉開團建立頻道時發生錯誤:', error)
-            })
-        }
+        // 內部聊天頻道已於 2026-05-02 整套刪除（William 拍板）、轉開團不再自動建頻道
 
         // 導航到新團號
         router.push(`/tours/${code}`)

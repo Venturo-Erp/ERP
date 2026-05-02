@@ -6,7 +6,7 @@ import React, { useState, useEffect, useMemo } from 'react'
 import { ContentPageLayout } from '@/components/layout/content-page-layout'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { useOrdersListSlim, useToursListSlim } from '@/hooks/useListSlim'
-import { useWorkspaceChannels } from '@/stores/workspace-store'
+import { useAuthStore } from '@/stores/auth-store'
 import { ShoppingCart, AlertCircle, CheckCircle, Clock } from 'lucide-react'
 import { OrderListView } from '@/features/orders/components/OrderListView'
 import { AddOrderForm } from '@/features/orders/components/add-order-form'
@@ -18,14 +18,10 @@ import { ORDERS_PAGE_LABELS } from '@/features/orders/constants/labels'
 export default function OrdersPage() {
   const { items: orders, create: addOrder } = useOrdersListSlim()
   const { items: tours } = useToursListSlim()
-  const { currentWorkspace, loadWorkspaces } = useWorkspaceChannels()
+  const { user } = useAuthStore()
   const [statusFilter, setStatusFilter] = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
-
-  useEffect(() => {
-    loadWorkspaces()
-  }, [])
 
   const tourDepartureDates = useMemo(() => {
     const map = new Map<string, number>()
@@ -80,7 +76,7 @@ export default function OrdersPage() {
       void showAlert(LABELS.SELECT_TOUR, 'warning')
       return
     }
-    if (!currentWorkspace) {
+    if (!user?.workspace_id) {
       void showAlert(LABELS.WORKSPACE_ERROR, 'error')
       return
     }

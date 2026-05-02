@@ -7,7 +7,6 @@ import { useRouter } from 'next/navigation'
 import { generateTourCode } from '@/stores/utils/code-generator'
 import { getCurrentWorkspaceCode, getCurrentWorkspaceId } from '@/lib/workspace-helpers'
 import { useToursSlim } from '@/data'
-import { createChannelForTour } from '@/lib/channel-utils'
 import { useAuthStore } from '@/stores/auth-store'
 import type { ParticipantCounts, SellingPrices, CostCategory } from '../types'
 import type { Quote, Tour } from '@/stores/types'
@@ -94,19 +93,7 @@ export const useQuoteTour = ({
     if (newTour?.id) {
       await updateQuote(quote.id, { tour_id: newTour.id })
 
-      // 自動建立頻道
-      const workspaceId = getCurrentWorkspaceId()
-      const userId = useAuthStore.getState().user?.id
-      if (workspaceId && userId) {
-        await createChannelForTour({
-          tourId: newTour.id,
-          tourCode: tourCode,
-          tourName: quoteName,
-          departureDate: formatDate(departure_date),
-          workspaceId,
-          createdBy: userId,
-        })
-      }
+      // 內部聊天頻道已於 2026-05-02 整套刪除（William 拍板）、報價轉團不再自動建頻道
     }
 
     // 跳轉到旅遊團管理頁面，並高亮新建的團

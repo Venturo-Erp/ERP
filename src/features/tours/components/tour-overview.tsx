@@ -8,7 +8,6 @@ import { Tour } from '@/stores/types'
 import { useOrdersSlim, useReceipts, usePaymentRequests, useMembers } from '@/data'
 import { useTourDisplay } from '@/features/tours/utils/tour-display'
 import { formatCurrency } from '@/lib/utils/format-currency'
-import { useWorkspaceChannels } from '@/stores/workspace-store'
 import {
   Calendar,
   MapPin,
@@ -22,7 +21,6 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { COMP_TOURS_LABELS } from '../constants/labels'
-import { useTourChannelOperations, TourStoreActions } from './TourChannelOperations'
 import { logger } from '@/lib/utils/logger'
 import { getTourStatusLabel } from '@/lib/constants/status-maps'
 
@@ -49,7 +47,6 @@ export const TourOverview = React.memo(function TourOverview({
   const { items: orders } = useOrdersSlim()
   const { items: allReceipts } = useReceipts()
   const { items: allMembers } = useMembers()
-  const { channels } = useWorkspaceChannels()
   const { displayString: tourDestinationDisplay } = useTourDisplay(tour)
 
   // 訂單與團員計算
@@ -99,25 +96,7 @@ export const TourOverview = React.memo(function TourOverview({
   const confirmedProfit = confirmedIncome - totalExpense
   const estimatedProfit = estimatedIncome - totalExpense
 
-  // 檢查該團是否已有頻道
-  const existingChannel = channels.find((ch: { tour_id?: string | null }) => ch.tour_id === tour.id)
-
-  // Stub actions for channel operations
-  const noopActions: TourStoreActions = {
-    fetchAll: async () => {
-      /* noop */
-    },
-  }
-  const { handleCreateChannel } = useTourChannelOperations({ actions: noopActions })
-
-  const handleChannelClick = async () => {
-    if (existingChannel) {
-      router.push(`/workspace?channel=${existingChannel.id}`)
-    } else {
-      logger.log('🔵 [總覽快捷] 建立頻道:', tour.code)
-      await handleCreateChannel(tour)
-    }
-  }
+  // 內部聊天頻道已於 2026-05-02 整套刪除（William 拍板）
 
   // 如果有 orderFilter，取得該訂單的資料
   const order = orderFilter ? orders.find(o => o.id === orderFilter) : null
