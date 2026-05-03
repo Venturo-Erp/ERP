@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getSupabaseAdminClient } from '@/lib/supabase/admin'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 /**
  * GET /api/d/[code]
@@ -11,9 +12,12 @@ import { getSupabaseAdminClient } from '@/lib/supabase/admin'
  * Tour codes are semi-predictable (e.g. CNX250128A). Risk is mitigated by:
  * - Only exposing the latest member roster file (not arbitrary data)
  * - Short-lived signed URLs (15 min expiry)
- * TODO: Add rate limiting (e.g. IP-based, 10 req/min) to prevent enumeration attacks.
+ * - Rate limit: 10 req/min per IP（防列舉爆破）
  */
 export async function GET(request: Request, { params }: { params: Promise<{ code: string }> }) {
+  const limited = await checkRateLimit(request, 'd', 10, 60_000)
+  if (limited) return limited
+
   const supabase = getSupabaseAdminClient()
   const { code } = await params
 
