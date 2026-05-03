@@ -20,7 +20,6 @@ import { RequestDateInput } from './RequestDateInput'
 import { ExpenseTypeSelector } from './ExpenseTypeSelector'
 import { CurrencyCell } from '@/components/table-cells'
 import { InlineEditTable, type InlineEditColumn } from '@/components/ui/inline-edit-table'
-import { UnallocatedAmountWarning } from '@/features/finance/components/UnallocatedAmountWarning'
 import { useResetOnTabChange } from '@/hooks/useResetOnTabChange'
 import { formatMoney } from '@/lib/utils/format-currency'
 import { EditableRequestItemList } from './RequestItemList'
@@ -172,9 +171,6 @@ export function AddRequestDialog({
   const [batchDate, setBatchDate] = useState(getTodayString())
   const [batchCategory, setBatchCategory] = useState<PaymentItemCategory>('' as PaymentItemCategory) // 不預設類別，由用戶選擇
   const [batchSupplierId, setBatchSupplierId] = useState('')
-  const [batchDescription, setBatchDescription] = useState('')
-  const [batchTotalAmount, setBatchTotalAmount] = useState(0)
-  const [batchNote, setBatchNote] = useState('')
   const [batchPaymentMethodId, setBatchPaymentMethodId] = useState<string | undefined>(undefined)
   const [tourAllocations, setTourAllocations] = useState<TourAllocation[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -278,8 +274,6 @@ export function AddRequestDialog({
   const totalAllocatedAmount = useMemo(() => {
     return tourAllocations.reduce((sum, allocation) => sum + allocation.allocated_amount, 0)
   }, [tourAllocations])
-
-  const unallocatedAmount = batchTotalAmount - totalAllocatedAmount
 
   const batchSupplierName = useMemo(() => {
     const supplier = suppliers.find(s => s.id === batchSupplierId)
@@ -694,17 +688,7 @@ export function AddRequestDialog({
     })
   }
 
-  const distributeEvenly = () => {
-    if (tourAllocations.length === 0 || batchTotalAmount <= 0) return
-    const amountPerTour = Math.floor(batchTotalAmount / tourAllocations.length)
-    const remainder = batchTotalAmount - amountPerTour * tourAllocations.length
-    setTourAllocations(prev =>
-      prev.map((allocation, index) => ({
-        ...allocation,
-        allocated_amount: amountPerTour + (index === 0 ? remainder : 0),
-      }))
-    )
-  }
+  // 平均分配按鈕已移除（沒總金額概念了、無對照可分）
 
   // 生成批量請款編號
   const generateBatchRequestCode = (tourCode: string) => {
@@ -745,9 +729,6 @@ export function AddRequestDialog({
     setBatchDate(getTodayString())
     setBatchCategory(REQUEST_TYPE_LABELS.CAT_OTHER as PaymentItemCategory)
     setBatchSupplierId('')
-    setBatchDescription('')
-    setBatchTotalAmount(0)
-    setBatchNote('')
     setTourAllocations([
       { tour_id: '', tour_code: '', tour_name: '', allocated_amount: 0 },
       { tour_id: '', tour_code: '', tour_name: '', allocated_amount: 0 },
@@ -830,9 +811,6 @@ export function AddRequestDialog({
     setBatchDate(getTodayString())
     setBatchCategory(REQUEST_TYPE_LABELS.CAT_OTHER as PaymentItemCategory)
     setBatchSupplierId('')
-    setBatchDescription('')
-    setBatchTotalAmount(0)
-    setBatchNote('')
     setIsSubmitting(false)
     setTourAllocations([
       { tour_id: '', tour_code: '', tour_name: '', allocated_amount: 0 },
@@ -1169,7 +1147,7 @@ export function AddRequestDialog({
                   {editBatchRequests.map(br => (
                     <Button
                       key={br.id}
-                      variant="outline"
+                      variant="soft-gold"
                       size="sm"
                       onClick={() => setSelectedRequestId(br.id)}
                       className={cn(
@@ -1362,16 +1340,6 @@ export function AddRequestDialog({
                 canRemove={() => true}
                 addLabel={ADD_REQUEST_FORM_LABELS.新增旅遊團}
                 emptyMessage={ADD_REQUEST_FORM_LABELS.ADD_3774}
-                headerExtra={
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={distributeEvenly}
-                    disabled={tourAllocations.length === 0 || totalAllocatedAmount === 0}
-                  >
-                    {ADD_REQUEST_FORM_LABELS.平均分配}
-                  </Button>
-                }
                 footer={
                   <tr className="bg-morandi-container/20 font-medium">
                     <td
@@ -1429,7 +1397,7 @@ export function AddRequestDialog({
                   isEditMode
                     ? localItems.reduce((sum, i) => sum + i.unit_price * i.quantity, 0)
                     : activeTab === 'batch'
-                      ? batchTotalAmount
+                      ? totalAllocatedAmount
                       : activeTab === 'tour' && importFromRequests
                         ? selectedRequestTotal
                         : total_amount
@@ -1442,7 +1410,7 @@ export function AddRequestDialog({
                 canEdit ? (
                   <>
                     <Button
-                      variant="outline"
+                      variant="soft-gold"
                       size="sm"
                       onClick={handleDelete}
                       disabled={isSubmitting}
@@ -1468,7 +1436,7 @@ export function AddRequestDialog({
                   </>
                 ) : currentRequest?.status === 'confirmed' ? (
                   <Button
-                    variant="outline"
+                    variant="soft-gold"
                     size="sm"
                     onClick={handleUnconfirm}
                     disabled={isSubmitting}
@@ -1484,8 +1452,9 @@ export function AddRequestDialog({
                   disabled={
                     isSubmitting ||
                     (activeTab === 'batch'
-                      ? unallocatedAmount !== 0 ||
-                        tourAllocations.filter(a => a.tour_id).length === 0
+                      ? totalAllocatedAmount === 0 ||
+                        tourAllocations.filter(a => a.tour_id && a.allocated_amount > 0).length === 0 ||
+                        !batchCategory
                       : activeTab === 'company'
                         ? !formData.expense_type ||
                           !formData.request_date ||
