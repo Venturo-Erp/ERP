@@ -191,17 +191,6 @@ export default function PaymentsPage() {
       width: '90px',
       render: value => <DateCell date={String(value)} showIcon={false} />,
     },
-    {
-      key: 'receipt_account',
-      label: FinanceLabels.orderNumber,
-      width: '90px',
-      // 收款明細：未核准灰色、核准後黑色（跟其他資料一樣）
-      render: (value, row) => {
-        const info = String(value || '-')
-        const cls = row.status === 'confirmed' ? 'text-morandi-primary' : 'text-morandi-secondary'
-        return <span className={`text-sm ${cls}`}>{info}</span>
-      },
-    },
     { key: 'tour_name', label: FinanceLabels.tourName, sortable: true, width: '200px' },
     {
       key: 'receipt_amount',
