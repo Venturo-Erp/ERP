@@ -362,7 +362,7 @@ export function Sidebar() {
     await logout()
     window.location.href = '/login'
   }
-  const { canReadAnyInModule } = useMyCapabilities()
+  const { canReadAnyInModule, has } = useMyCapabilities()
   const [mounted, setMounted] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false) // 點擊固定展開
   const [isHovered, setIsHovered] = useState(false) // 滑鼠懸停暫時展開
@@ -454,6 +454,11 @@ export function Sidebar() {
             return null
           }
           if (!item.requiredPermission) return item
+          // /tenants 是 platform 路由、capability 是 platform.tenants.read（不在 'tenants' module）、
+          // 用 platform.is_admin 守、跟 ModuleGuard 對齊
+          if (item.href === '/tenants') {
+            return has('platform.is_admin') ? item : null
+          }
           // 模組層任一 capability：role_capabilities 中存在 ${module}.*.read 即顯示
           return canReadAnyInModule(item.requiredPermission) ? item : null
         })
