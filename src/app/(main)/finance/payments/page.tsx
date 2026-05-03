@@ -89,6 +89,7 @@ export default function PaymentsPage() {
 
   // 讀取 URL 參數（從快速收款按鈕傳入）
   const urlOrderId = searchParams.get('order_id')
+  const urlTourId = searchParams.get('tour_id')
 
   // UI 狀態
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -350,6 +351,7 @@ export default function PaymentsPage() {
         onOpenChange={handleAddDialogClose}
         onSuccess={invalidateReceipts}
         defaultOrderId={urlOrderId || undefined}
+        defaultTourId={urlTourId || undefined}
         editingReceipt={editingReceipt}
         onUpdate={handleUpdateReceipt}
         onDelete={handleDeleteReceipt}

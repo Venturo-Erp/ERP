@@ -198,10 +198,22 @@ export function AddReceiptDialog({
       if (defaultOrderId) {
         const { data: order } = await supabase
           .from('orders')
-          .select('tour_id')
+          .select('tour_id, code')
           .eq('id', defaultOrderId)
           .single()
-        const tourId = order?.tour_id || defaultTourId || ''
+        // 1. 優先用 order.tour_id（正常路徑）
+        // 2. tour_id 是 null 時、用 order.code（團號）反查 tours 表
+        // 3. 最後 fallback 用 defaultTourId
+        let tourId = order?.tour_id || ''
+        if (!tourId && order?.code) {
+          const { data: tour } = await supabase
+            .from('tours')
+            .select('id')
+            .eq('code', order.code)
+            .single()
+          tourId = tour?.id || ''
+        }
+        if (!tourId) tourId = defaultTourId || ''
         setFormData({
           tour_id: tourId,
           order_id: defaultOrderId,
