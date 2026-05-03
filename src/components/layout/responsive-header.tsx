@@ -104,7 +104,7 @@ export const ResponsiveHeader = memo(function ResponsiveHeader(props: Responsive
   return (
     <div
       className={cn(
-        'fixed top-0 right-0 h-[72px] bg-background z-[200] flex items-center justify-between px-6 print:hidden',
+        'fixed top-0 right-0 h-[72px] bg-transparent z-[200] flex items-center justify-between px-6 print:hidden',
         'left-0',
         sidebarCollapsed ? 'md:left-16' : 'md:left-[190px]'
       )}
@@ -284,13 +284,7 @@ export const ResponsiveHeader = memo(function ResponsiveHeader(props: Responsive
         {/* 功能區域 */}
         {props.children && <div className="flex items-center">{props.children}</div>}
 
-        {/* 操作區（日期選擇等功能） */}
-        {props.actions && <div className="flex items-center">{props.actions}</div>}
-
-        {/* 彈性空間：把 tabs 推到最右 */}
-        <div className="flex-1" />
-
-        {/* 標籤頁 - 手機模式隱藏 */}
+        {/* 標籤頁 - 手機模式隱藏（在 actions 之前、新增按鈕推到最右）*/}
         {props.tabs && props.tabs.length > 0 && (
           <div className="hidden md:flex items-center space-x-1 pointer-events-auto">
             {props.tabs.map(tab => (
@@ -322,6 +316,12 @@ export const ResponsiveHeader = memo(function ResponsiveHeader(props: Responsive
             ))}
           </div>
         )}
+
+        {/* 彈性空間：把 actions / primaryAction 推到最右 */}
+        <div className="flex-1" />
+
+        {/* 操作區（日期選擇等功能） */}
+        {props.actions && <div className="flex items-center">{props.actions}</div>}
 
         {/* Header 主操作按鈕：結構化、由 ResponsiveHeader 統一畫成 header-outline */}
         {props.primaryAction && (
