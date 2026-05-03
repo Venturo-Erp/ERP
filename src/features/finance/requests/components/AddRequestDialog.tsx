@@ -920,13 +920,22 @@ export function AddRequestDialog({
         handleCancel()
         onSuccess?.()
       } else if (activeTab === 'company') {
-        // 公司請款
-        if (!formData.expense_type) {
-          void alert(ADD_REQUEST_DIALOG_LABELS.請選擇費用類型和日期, 'warning')
+        // 公司請款：費用類型由 row 內「類別」col 提供（取第一個有值的 row）
+        const validItems = requestItems.filter(
+          item => item.category && item.unit_price > 0
+        )
+        if (validItems.length === 0) {
+          void alert('請至少新增一個請款項目（含費用類型 + 金額）', 'warning')
           return
         }
+        if (!formData.request_date) {
+          void alert('請選擇日期', 'warning')
+          return
+        }
+        // 從第一個有效 row 推 expense_type（業務上整單同 expense_type）
+        const inferredExpenseType = validItems[0].category as unknown as CompanyExpenseType
         await createRequest(
-          formData,
+          { ...formData, expense_type: inferredExpenseType },
           requestItems,
           '',
           '',
@@ -1102,51 +1111,20 @@ export function AddRequestDialog({
                   </>
                 )}
 
-                {/* 公司請款：費用類型 + 付款方式 + 日期 同一行（跟團體請款對齊） */}
+                {/* 公司請款：只留日期、付款方式 + 費用類型由 row 內 column 處理 */}
                 {activeTab === 'company' && (
-                  <>
-                    <div className="relative z-[10020] w-[260px]">
-                      <ExpenseTypeSelector
-                        value={formData.expense_type as CompanyExpenseType | ''}
-                        onChange={value => setFormData(prev => ({ ...prev, expense_type: value }))}
-                        hideLabel
-                      />
-                    </div>
-                    <div className="relative z-[10019] w-[220px]">
-                      <Select
-                        value={formData.payment_method_id || ''}
-                        onValueChange={value =>
-                          setFormData(prev => ({
-                            ...prev,
-                            payment_method_id: value || undefined,
-                          }))
-                        }
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="付款方式（選填）" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {paymentMethods.map(method => (
-                            <SelectItem key={method.id} value={method.id}>
-                              {method.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="relative z-[10018] w-[200px]">
-                      <RequestDateInput
-                        value={formData.request_date}
-                        onChange={(date, isSpecialBilling) =>
-                          setFormData(prev => ({
-                            ...prev,
-                            request_date: date,
-                            is_special_billing: isSpecialBilling,
-                          }))
-                        }
-                      />
-                    </div>
-                  </>
+                  <div className="relative z-[10018] w-[200px]">
+                    <RequestDateInput
+                      value={formData.request_date}
+                      onChange={(date, isSpecialBilling) =>
+                        setFormData(prev => ({
+                          ...prev,
+                          request_date: date,
+                          is_special_billing: isSpecialBilling,
+                        }))
+                      }
+                    />
+                  </div>
                 )}
               </div>
 
@@ -1417,7 +1395,7 @@ export function AddRequestDialog({
                 value="company"
                 className="flex-1 overflow-y-auto pt-4 border-t border-morandi-container/30 space-y-6"
               >
-                {/* 費用類型 / 付款方式 / 日期 已移到 DialogHeader 同一行（跟團體請款對齊）*/}
+                {/* 日期已移到 DialogHeader、付款方式 + 類別（=費用類型）在 row 內 */}
                 <EditableRequestItemList
                   items={requestItems}
                   suppliers={suppliers}
@@ -1427,6 +1405,7 @@ export function AddRequestDialog({
                   onCreateSupplier={handleCreateSupplier}
                   tourId={formData.tour_id || null}
                   paymentMethods={paymentMethods}
+                  expenseTypeMode
                 />
               </TabsContent>
             )}

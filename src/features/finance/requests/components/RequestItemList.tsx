@@ -13,6 +13,7 @@ import { Combobox } from '@/components/ui/combobox'
 import { DatePicker } from '@/components/ui/date-picker'
 import { UserCheck, X, ArrowRightLeft } from 'lucide-react'
 import { RequestItem, categoryOptions } from '../types'
+import { EXPENSE_TYPE_CONFIG } from '@/stores/types/finance.types'
 import {
   useAccountingSubjects,
   getDefaultSubjectByCategory,
@@ -41,6 +42,8 @@ interface EditableRequestItemListProps {
   onTransfer?: () => void
   /** 隱藏 item 級日期欄（編輯模式用、SSOT：只有 header.request_date 才是真相）*/
   hideDateColumn?: boolean
+  /** 公司請款模式：「類別」col 顯示費用類型選項（差旅 / 辦公 / 雜支等）取代供應商品項類別 */
+  expenseTypeMode?: boolean
 }
 
 /**
@@ -210,7 +213,15 @@ export function EditableRequestItemList({
   paymentMethods = [],
   onTransfer,
   hideDateColumn = false,
+  expenseTypeMode = false,
 }: EditableRequestItemListProps) {
+  // 公司請款模式：類別 col 用費用類型選項
+  const categoryColumnOptions = expenseTypeMode
+    ? Object.entries(EXPENSE_TYPE_CONFIG).map(([code, config]) => ({
+        value: code,
+        label: config.name,
+      }))
+    : categoryOptions
   const total_amount = items.reduce((sum, item) => sum + item.unit_price * item.quantity, 0)
 
   // 會計科目選項
@@ -289,7 +300,7 @@ export function EditableRequestItemList({
             <SelectValue placeholder="類別" />
           </SelectTrigger>
           <SelectContent>
-            {categoryOptions.map(option => (
+            {categoryColumnOptions.map(option => (
               <SelectItem key={option.value} value={option.value}>
                 {option.label}
               </SelectItem>
