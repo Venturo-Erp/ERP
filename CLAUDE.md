@@ -66,7 +66,32 @@ gitnexus_query({ query: "概念" })
 
 ---
 
-## DB 紅線（違反會打斷登入）
+## 紅線（違反 = 弄丟資料 / 打斷登入）
+
+### 紅線 0（最高、無例外）：絕對不准刪 William 的檔案 / 資料
+
+**檔案層**：
+- 不准刪 `src/` 下任何既有檔案，除非 William 明說「砍掉 X」
+- 不准刪 vault（`brain/wiki/`）下任何檔案
+- 不准 `rm -rf`、`git clean -f`、`git checkout .` 任何形式的批次刪除
+- 重構時用「新增 + 取代引用」、舊檔留著由 William 決定砍不砍
+
+**資料層**：
+- 不准 `DROP TABLE` 任何有資料的表（特別是：`payment_requests` / `payment_request_items` / `disbursement_orders` / `receipts` / `employees` / `customers` / `tours` / `orders` / `quotes` / 任何 HR 相關表）
+- 不准 `DELETE FROM` 既有資料、不准 `TRUNCATE`
+- 不准寫不可逆的 destructive migration（`DROP COLUMN` with data、`ALTER COLUMN type` 會 silent truncate）
+- destructive migration 寫好放 `supabase/migrations/_pending_review/`、由 William 確認再 apply
+- 唯一例外：純加法的 schema 增量（`ADD COLUMN`、`CREATE TABLE IF NOT EXISTS`、純 INSERT seed）可以直接寫並 apply
+
+**為什麼是 #0**：
+- 請款單 / 出納單 / 人資資料 = 真實營運資料、刪了沒救
+- 砍掉的檔案 = 可能是 William 半完成的工作、不知道為什麼留著就先別動
+- 相比寫錯 RLS（紅線 1）打斷登入是可救的、刪資料是無法回溯
+
+**怎麼判斷**：
+- 不確定能不能刪 → 不刪、先問 William
+- 看到孤兒檔 / 沒 reference 的 code → 報告「我看到 X 沒被引用、要不要砍」、由 William 決定
+- 看到表結構不合規格 → 寫 migration **加新欄位**、不要刪舊欄位
 
 ### 紅線 1：`workspaces` 不准 FORCE RLS
 

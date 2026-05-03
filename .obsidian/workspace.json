@@ -4,11 +4,11 @@
     "type": "split",
     "children": [
       {
-        "id": "05e400c1b989a3f3",
+        "id": "97f3fca969b50804",
         "type": "tabs",
         "children": [
           {
-            "id": "d40da2201d0a7815",
+            "id": "585a5c926c8e2ec1",
             "type": "leaf",
             "state": {
               "type": "graph",
@@ -70,7 +70,8 @@
               "title": "書籤"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "horizontal",
@@ -176,9 +177,37 @@
       "bases:建立新的 base": false
     }
   },
-  "active": "d40da2201d0a7815",
+  "active": "585a5c926c8e2ec1",
   "lastOpenFiles": [
-    "node_modules/zustand/README.md",
-    "node_modules/next/dist/docs/01-app/01-getting-started/02-project-structure.md"
+    "docs/routes/settings.md",
+    "docs/routes/calendar.md",
+    "docs/routes/todos.md",
+    "docs/routes/tenants.md",
+    "docs/routes/cis.md",
+    "docs/routes/database.md",
+    "docs/routes/payslip.md",
+    "docs/routes/hr.md",
+    "docs/routes/accounting.md",
+    "docs/routes/finance.md",
+    "docs/routes/visas.md",
+    "docs/routes/customers.md",
+    "docs/routes/orders.md",
+    "docs/routes/tours.md",
+    "docs/routes/unauthorized.md",
+    "docs/routes/dashboard.md",
+    "docs/routes/view.md",
+    "docs/routes/contract-sign.md",
+    "docs/routes/public-tour.md",
+    "docs/routes/confirm.md",
+    "docs/routes/about.md",
+    "docs/routes/landing.md",
+    "docs/routes/login.md",
+    "docs/routes",
+    "docs/CONCEPTS.md",
+    "docs/ARCHITECTURE.md",
+    "docs/SITEMAP.md",
+    "src/features/finance/payments/components/ReceiptPrintDialog.tsx",
+    "supabase/migrations/20260503260000_drop_travel_invoices_ghost_house.sql",
+    "supabase/migrations/_pending_review/20260503260000_drop_travel_invoices_ghost_house.sql"
   ]
 }

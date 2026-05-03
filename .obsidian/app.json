@@ -1,1 +1,30 @@
-{}
+{
+  "promptDelete": false,
+  "userIgnoreFilters": [
+    "node_modules/",
+    ".next/",
+    ".claude/projects/",
+    "test-results/",
+    "playwright-report/",
+    "coverage/",
+    "package.json",
+    "package-lock.json",
+    "tsconfig.tsbuildinfo",
+    "tsconfig.json",
+    ".DS_Store",
+    ".env",
+    "next-env.d.ts",
+    "next.config.ts",
+    "eslint.config.mjs",
+    "postcss.config.mjs",
+    "vitest.config.mts",
+    "vitest.setup.ts",
+    "playwright.config.ts",
+    "playwright.slow.config.ts",
+    "sentry.client.config.ts",
+    "sentry.edge.config.ts",
+    "sentry.server.config.ts",
+    "vercel.json"
+  ],
+  "showUnsupportedFiles": false
+}
