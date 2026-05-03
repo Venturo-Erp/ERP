@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, type DialogLevel } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { AlertCircle, X } from 'lucide-react'
 import { NewTourData } from '../types'
@@ -24,6 +24,8 @@ interface TourFormShellProps {
   onSubmit: () => void
   /** 是否為從提案轉開團（會顯示不同標題） */
   isFromProposal?: boolean
+  /** Dialog 巢狀層級（預設 1；嵌進其他 level=1 dialog 時要設 2）*/
+  dialogLevel?: DialogLevel
 }
 
 export function TourFormShell({
@@ -38,6 +40,7 @@ export function TourFormShell({
   formError,
   onSubmit,
   isFromProposal,
+  dialogLevel = 1,
 }: TourFormShellProps) {
   // SSOT：航班屬於旅遊團「行程編輯」分頁，開團時不再選填航班
   const isProposalOrTemplate =
@@ -101,7 +104,7 @@ export function TourFormShell({
       }}
     >
       <DialogContent
-        level={1}
+        level={dialogLevel}
         className={`${dialogWidth} w-[90vw] h-[80vh] overflow-hidden`}
         aria-describedby={undefined}
         onInteractOutside={e => {

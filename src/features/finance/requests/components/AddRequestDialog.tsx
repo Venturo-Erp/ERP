@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo, useCallback, useRef } from 'react'
 import { Plus, X, AlertCircle, Trash2, Save, Layers, Undo2 } from 'lucide-react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, type DialogLevel } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -78,6 +78,8 @@ interface AddRequestDialogProps {
   editingRequest?: PaymentRequest | null
   /** 只讀模式：隱藏編輯/刪除按鈕 */
   readOnly?: boolean
+  /** Dialog 巢狀層級（預設 1；嵌進其他 level=1 dialog 時要設 2）*/
+  level?: DialogLevel
 }
 
 // 類別對應的圖標和顏色
@@ -116,6 +118,7 @@ export function AddRequestDialog({
   defaultOrderId,
   editingRequest,
   readOnly = false,
+  level = 1,
 }: AddRequestDialogProps) {
   // === 共用 Hooks ===
   const {
@@ -1014,7 +1017,7 @@ export function AddRequestDialog({
     <>
       <Dialog open={open} onOpenChange={isEditMode ? handleOpenChange : onOpenChange}>
         <DialogContent
-          level={1}
+          level={level}
           className="max-w-[95vw] w-[95vw] h-[90vh] flex flex-col overflow-hidden"
         >
           <Tabs

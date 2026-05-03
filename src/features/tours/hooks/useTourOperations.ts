@@ -39,6 +39,8 @@ interface UseTourOperationsParams {
   workspaceId?: string
   // 🔧 保留 fromQuoteId 更新功能（可選）
   onQuoteLinked?: (quoteId: string, tourId: string) => void
+  /** 建立成功 callback：傳則抑制預設 router.push、由呼叫端決定下一步（給 todo dialog 等嵌套場景用） */
+  onCreated?: (tour: { id: string; code: string }) => void
 }
 
 export function useTourOperations(params: UseTourOperationsParams) {
@@ -83,6 +85,7 @@ export function useTourOperations(params: UseTourOperationsParams) {
     setFormError,
     workspaceId,
     onQuoteLinked,
+    onCreated,
   } = params
 
   const handleAddTour = useCallback(
@@ -293,8 +296,11 @@ export function useTourOperations(params: UseTourOperationsParams) {
         resetForm()
         closeDialog()
 
-        // 提案/模板建立後不導航（留在列表頁），正式團跳轉到詳情頁
-        if (!isProposalOrTemplate) {
+        // onCreated callback 優先（嵌套場景如 todo dialog 用、抑制預設導航）
+        if (onCreated) {
+          onCreated({ id: createdTour.id, code })
+        } else if (!isProposalOrTemplate) {
+          // 提案/模板建立後不導航（留在列表頁），正式團跳轉到詳情頁
           router.push(`/tours/${code}`)
         }
       } catch (err) {

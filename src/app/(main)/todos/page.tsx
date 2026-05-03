@@ -786,6 +786,10 @@ export default function TodosPage() {
               todo={todo}
               onUpdate={updates => updateTodo(expandedTodo, updates)}
               onClose={() => setExpandedTodo(null)}
+              onDelete={() => {
+                setExpandedTodo(null)
+                handleDeleteTodo(todo)
+              }}
             />
           )
         })()}
@@ -1028,7 +1032,7 @@ const TodoCardMemo = React.memo(
             onClick={() => onClick(todo.id)}
             className={cn(
               'group relative cursor-pointer transition-all rounded-md',
-              'hover:bg-morandi-container/30',
+              'bg-card/60 border border-border/40 hover:bg-card hover:border-morandi-gold/40 hover:shadow-sm',
               snapshot.isDragging && 'bg-card shadow-xl ring-2 ring-morandi-gold rotate-[1deg]',
               todo.status === 'completed' && 'opacity-60'
             )}

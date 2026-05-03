@@ -4,6 +4,7 @@ export interface TodoExpandedViewProps {
   todo: Todo
   onUpdate: (updates: Partial<Todo>) => void
   onClose: () => void
+  onDelete?: () => void | Promise<void>
 }
 
 export type QuickActionType = 'receipt' | 'invoice' | 'share'

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo, lazy, Suspense } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { InputIME } from '@/components/ui/input-ime'
@@ -34,13 +34,35 @@ import {
   Plus,
   Eye,
   X,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react'
 import { TodoExpandedViewProps } from './types'
 import { useTodoExpandedView } from './useTodoExpandedView'
 import { NotesSection } from './NotesSection'
 import { QuickActionInstanceCard } from './QuickActionsSection'
+import { AddReceiptDialog } from '@/features/finance/payments/components/AddReceiptDialog'
+import { AddRequestDialog } from '@/features/finance/requests/components/AddRequestDialog'
+import { PnrToolContent } from '@/features/todos/components/PnrToolDialog'
+import { TourCreateDialog } from '@/features/tours/components/TourCreateDialog'
+
+const QuickReceiptLazy = lazy(() =>
+  import('../quick-actions/quick-receipt').then(m => ({ default: m.QuickReceipt }))
+)
+const QuickDisbursementLazy = lazy(() =>
+  import('../quick-actions/quick-disbursement').then(m => ({ default: m.QuickDisbursement }))
+)
+
+const SUBTASK_INLINE_FORMS = ['請款作業', '收款確認', '確認航班']
+const hasInlineForm = (title: string) => SUBTASK_INLINE_FORMS.includes(title)
 import { useAuthStore } from '@/stores/auth-store'
-import { useEmployeesSlim, useToursSlim, useOrdersSlim } from '@/data'
+import {
+  useEmployeesSlim,
+  useToursSlim,
+  useOrdersSlim,
+  useReceipts,
+  usePaymentRequests,
+} from '@/data'
 import { cn } from '@/lib/utils'
 import {
   TODO_STATUS_LABELS,
@@ -102,15 +124,30 @@ function QuickActionButton({ icon, label, sublabel, onClick, disabled }: QuickAc
   )
 }
 
-export function TodoExpandedView({ todo, onUpdate, onClose }: TodoExpandedViewProps) {
+export function TodoExpandedView({ todo, onUpdate, onClose, onDelete }: TodoExpandedViewProps) {
   const { instances, addInstance, removeInstance } = useTodoExpandedView()
   const { user } = useAuthStore()
   const { items: employees } = useEmployeesSlim()
   const { items: tours } = useToursSlim()
   const { items: orders } = useOrdersSlim()
+  const { items: receipts } = useReceipts()
+  const { items: paymentRequests } = usePaymentRequests()
   const [activeTab, setActiveTab] = useState('details')
   const [newSubtaskTitle, setNewSubtaskTitle] = useState('')
   const [newTagInput, setNewTagInput] = useState('')
+  const [expandedSubtaskIds, setExpandedSubtaskIds] = useState<Set<string>>(new Set())
+  const [showShareForm, setShowShareForm] = useState(false)
+  const [shareTargetId, setShareTargetId] = useState('')
+  const [showTourCreateDialog, setShowTourCreateDialog] = useState(false)
+
+  const toggleExpand = (id: string) => {
+    setExpandedSubtaskIds(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
 
   useEffect(() => {
     if (todo) setActiveTab('details')
@@ -134,6 +171,23 @@ export function TodoExpandedView({ todo, onUpdate, onClose }: TodoExpandedViewPr
   const orderRelated = todo.related_items?.find(r => r.type === 'order')
   const firstRelated = todo.related_items?.[0]
 
+  // ERP 金額計算（從關聯旅遊團的真實收款/請款資料）
+  const totalReceived = useMemo(() => {
+    if (!tourRelated?.id) return 0
+    return (receipts || [])
+      .filter(r => r.tour_id === tourRelated.id && r.status === 'confirmed')
+      .reduce((sum, r) => sum + (r.actual_amount || r.receipt_amount || 0), 0)
+  }, [receipts, tourRelated])
+
+  const totalPayable = useMemo(() => {
+    if (!tourRelated?.id) return 0
+    return (paymentRequests || [])
+      .filter(r => r.tour_id === tourRelated.id && r.status !== 'paid' && r.status !== 'cancelled')
+      .reduce((sum, r) => sum + (r.total_amount || r.amount || 0), 0)
+  }, [paymentRequests, tourRelated])
+
+  const estimatedProfit = totalReceived - totalPayable
+
   const handleSubtaskToggle = (subtaskId: string) => {
     if (!canEdit) return
     onUpdate({
@@ -154,31 +208,32 @@ export function TodoExpandedView({ todo, onUpdate, onClose }: TodoExpandedViewPr
     setNewSubtaskTitle('')
   }
 
-  // 子任務 chip 對應到業務動作 instance（部分 chip 會同時觸發完整表單）
-  const SUBTASK_TO_INSTANCE: Record<string, 'receipt' | 'invoice'> = {
-    請款作業: 'invoice',
-    收款確認: 'receipt',
-  }
-
   const addPresetSubtask = (title: string) => {
     if (!canEdit) return
+    const newId = `st-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
     // 1. 加進子任務 list
     onUpdate({
-      sub_tasks: [
-        ...subTasks,
-        {
-          id: `st-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-          title,
-          done: false,
-        },
-      ],
+      sub_tasks: [...subTasks, { id: newId, title, done: false }],
     })
-    // 2. 對應業務動作則同時開啟下方完整表單、自動切到詳情 tab 讓使用者看到
-    const instanceType = SUBTASK_TO_INSTANCE[title]
-    if (instanceType) {
-      addInstance(instanceType)
-      setActiveTab('details')
+    // 2. 有對應 mini form 的 chip → 切到子任務 tab + 自動展開該 row
+    if (hasInlineForm(title)) {
+      setExpandedSubtaskIds(prev => new Set(prev).add(newId))
+      setActiveTab('subtasks')
     }
+    // 3. 開團 chip → 直接彈出 TourCreateDialog（form 太大、不適合 inline）
+    if (title === '開團') {
+      setShowTourCreateDialog(true)
+    }
+  }
+
+  /** 開團成功後、把新 tour 自動關聯回 todo.related_items */
+  const handleTourCreated = (tour: { id: string; code: string }) => {
+    const others = (todo.related_items || []).filter(r => r.type !== 'group')
+    onUpdate({
+      related_items: [...others, { type: 'group', id: tour.id, title: tour.code }],
+      tour_id: tour.id,
+    })
+    setShowTourCreateDialog(false)
   }
 
   // 旅遊團 Combobox 選項
@@ -294,23 +349,23 @@ export function TodoExpandedView({ todo, onUpdate, onClose }: TodoExpandedViewPr
               onValueChange={setActiveTab}
               className="w-full flex-1 flex flex-col overflow-hidden"
             >
-              <div className="px-6 flex-shrink-0">
-                <TabsList className="bg-card border border-border rounded-md">
+              <div className="px-6 border-b border-border flex-shrink-0 bg-card relative z-10">
+                <TabsList className="bg-transparent rounded-none p-0 h-auto justify-start gap-0">
                   <TabsTrigger
                     value="details"
-                    className="text-sm data-[state=active]:bg-morandi-gold data-[state=active]:text-white"
+                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-morandi-gold data-[state=active]:bg-transparent data-[state=active]:text-morandi-gold data-[state=active]:font-medium data-[state=active]:shadow-none px-4 py-3 text-sm text-morandi-secondary hover:text-morandi-primary -mb-px"
                   >
                     詳情
                   </TabsTrigger>
                   <TabsTrigger
                     value="subtasks"
-                    className="text-sm data-[state=active]:bg-morandi-gold data-[state=active]:text-white"
+                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-morandi-gold data-[state=active]:bg-transparent data-[state=active]:text-morandi-gold data-[state=active]:font-medium data-[state=active]:shadow-none px-4 py-3 text-sm text-morandi-secondary hover:text-morandi-primary -mb-px"
                   >
                     子任務 ({subTasksTotal})
                   </TabsTrigger>
                   <TabsTrigger
                     value="activity"
-                    className="text-sm data-[state=active]:bg-morandi-gold data-[state=active]:text-white"
+                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-morandi-gold data-[state=active]:bg-transparent data-[state=active]:text-morandi-gold data-[state=active]:font-medium data-[state=active]:shadow-none px-4 py-3 text-sm text-morandi-secondary hover:text-morandi-primary -mb-px"
                   >
                     活動
                   </TabsTrigger>
@@ -332,17 +387,20 @@ export function TodoExpandedView({ todo, onUpdate, onClose }: TodoExpandedViewPr
                   />
                 </div>
 
-                {instances.length > 0 && (
+                {/* 共享 instance 堆疊（receipt / invoice 已改用獨立 dialog） */}
+                {instances.filter(i => i.type === 'share').length > 0 && (
                   <div className="space-y-3">
-                    {instances.map(instance => (
-                      <QuickActionInstanceCard
-                        key={instance.id}
-                        instance={instance}
-                        todo={todo}
-                        onUpdate={onUpdate}
-                        onRemove={() => removeInstance(instance.id)}
-                      />
-                    ))}
+                    {instances
+                      .filter(i => i.type === 'share')
+                      .map(instance => (
+                        <QuickActionInstanceCard
+                          key={instance.id}
+                          instance={instance}
+                          todo={todo}
+                          onUpdate={onUpdate}
+                          onRemove={() => removeInstance(instance.id)}
+                        />
+                      ))}
                   </div>
                 )}
 
@@ -382,37 +440,42 @@ export function TodoExpandedView({ todo, onUpdate, onClose }: TodoExpandedViewPr
                     <div className="border-t border-morandi-container/40 pt-3 space-y-2">
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-morandi-secondary">報價總額</span>
-                        <span className="text-sm font-medium text-morandi-primary">
-                          {formatCurrency(undefined)}
-                        </span>
+                        <span className="text-sm text-morandi-muted">—（待 ERP 整合）</span>
                       </div>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-1">
-                          <span className="text-sm text-morandi-secondary">客戶已付</span>
+                          <span className="text-sm text-morandi-secondary">客戶已付（總收）</span>
                           <CheckCircle2 className="w-3.5 h-3.5 text-morandi-green" />
                         </div>
                         <span className="text-sm font-medium text-morandi-green">
-                          {formatCurrency(undefined)}
+                          {tourRelated ? formatCurrency(totalReceived) : '—'}
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-1">
-                          <span className="text-sm text-morandi-secondary">待付供應商</span>
+                          <span className="text-sm text-morandi-secondary">待付供應商（總付）</span>
                           <AlertTriangle className="w-3.5 h-3.5 text-morandi-gold" />
                         </div>
                         <span className="text-sm font-medium text-morandi-gold">
-                          {formatCurrency(undefined)}
+                          {tourRelated ? formatCurrency(totalPayable) : '—'}
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-morandi-secondary">預估毛利</span>
-                        <span className="text-sm font-medium text-morandi-primary">
-                          {formatCurrency(undefined)}
+                        <span className="text-sm text-morandi-secondary">預估毛利（簡算）</span>
+                        <span
+                          className={cn(
+                            'text-sm font-medium',
+                            estimatedProfit >= 0 ? 'text-morandi-primary' : 'text-morandi-red'
+                          )}
+                        >
+                          {tourRelated ? formatCurrency(estimatedProfit) : '—'}
                         </span>
                       </div>
                     </div>
                     <p className="text-[10px] text-morandi-muted text-center pt-1">
-                      （ERP 即時資料整合 — 開發中）
+                      {tourRelated
+                        ? '（毛利簡算 = 客戶已付 − 待付供應商；報價總額待整合）'
+                        : '（請先選擇旅遊團）'}
                     </p>
                   </div>
                 </div>
@@ -466,44 +529,90 @@ export function TodoExpandedView({ todo, onUpdate, onClose }: TodoExpandedViewPr
 
                 {subTasksTotal > 0 ? (
                   <div className="space-y-2">
-                    {subTasks.map(sub => (
-                      <div
-                        key={sub.id}
-                        className="flex items-center gap-3 p-3 bg-card rounded-lg border border-border"
-                      >
-                        <button
-                          onClick={() => handleSubtaskToggle(sub.id)}
-                          disabled={!canEdit}
-                          className={cn(
-                            'w-5 h-5 rounded border flex items-center justify-center transition-colors disabled:cursor-not-allowed',
-                            sub.done
-                              ? 'bg-morandi-green border-morandi-green text-white'
-                              : 'border-border hover:border-morandi-gold'
-                          )}
+                    {subTasks.map(sub => {
+                      const isExpanded = expandedSubtaskIds.has(sub.id)
+                      const showForm = hasInlineForm(sub.title)
+                      return (
+                        <div
+                          key={sub.id}
+                          className="bg-card rounded-lg border border-border overflow-hidden"
                         >
-                          {sub.done && <CheckCircle2 className="w-3.5 h-3.5" />}
-                        </button>
-                        <span
-                          className={cn(
-                            'text-sm flex-1',
-                            sub.done
-                              ? 'line-through text-morandi-muted'
-                              : 'text-morandi-primary'
+                          <div className="flex items-center gap-3 p-3">
+                            <button
+                              onClick={() => handleSubtaskToggle(sub.id)}
+                              disabled={!canEdit}
+                              className={cn(
+                                'w-5 h-5 rounded border flex items-center justify-center transition-colors disabled:cursor-not-allowed flex-shrink-0',
+                                sub.done
+                                  ? 'bg-morandi-green border-morandi-green text-white'
+                                  : 'border-border hover:border-morandi-gold'
+                              )}
+                            >
+                              {sub.done && <CheckCircle2 className="w-3.5 h-3.5" />}
+                            </button>
+                            <span
+                              className={cn(
+                                'text-sm flex-1',
+                                sub.done
+                                  ? 'line-through text-morandi-muted'
+                                  : 'text-morandi-primary'
+                              )}
+                            >
+                              {sub.title}
+                            </span>
+                            {showForm && (
+                              <button
+                                onClick={() => toggleExpand(sub.id)}
+                                className="text-morandi-secondary hover:text-morandi-primary p-1 rounded transition-colors"
+                                title={isExpanded ? '收合' : '展開操作'}
+                              >
+                                {isExpanded ? (
+                                  <ChevronUp className="w-4 h-4" />
+                                ) : (
+                                  <ChevronDown className="w-4 h-4" />
+                                )}
+                              </button>
+                            )}
+                          </div>
+                          {isExpanded && showForm && (
+                            <div className="border-t border-border p-3 bg-morandi-container/10">
+                              {sub.title === '請款作業' && (
+                                <Suspense
+                                  fallback={
+                                    <div className="text-xs text-morandi-muted text-center py-3">
+                                      載入請款表單中...
+                                    </div>
+                                  }
+                                >
+                                  <QuickDisbursementLazy onSubmit={() => undefined} />
+                                </Suspense>
+                              )}
+                              {sub.title === '收款確認' && (
+                                <Suspense
+                                  fallback={
+                                    <div className="text-xs text-morandi-muted text-center py-3">
+                                      載入收款表單中...
+                                    </div>
+                                  }
+                                >
+                                  <QuickReceiptLazy onSubmit={() => undefined} />
+                                </Suspense>
+                              )}
+                              {sub.title === '確認航班' && <PnrToolContent todo={todo} />}
+                            </div>
                           )}
-                        >
-                          {sub.title}
-                        </span>
-                      </div>
-                    ))}
+                        </div>
+                      )
+                    })}
                   </div>
                 ) : (
                   <p className="text-sm text-morandi-muted py-4 text-center">尚無子任務</p>
                 )}
 
                 {canEdit && (
-                  <div className="flex items-center gap-2 mt-4">
+                  <div className="relative mt-4">
                     <Input
-                      placeholder="新增子任務..."
+                      placeholder="新增子任務（按 Enter 送出）..."
                       value={newSubtaskTitle}
                       onChange={e => setNewSubtaskTitle(e.target.value)}
                       onKeyDown={e => {
@@ -512,16 +621,17 @@ export function TodoExpandedView({ todo, onUpdate, onClose }: TodoExpandedViewPr
                           handleAddSubtask()
                         }
                       }}
-                      className="text-sm bg-card border-border focus-visible:ring-morandi-gold focus-visible:border-morandi-gold"
+                      className="text-sm bg-card border-border focus-visible:ring-morandi-gold focus-visible:border-morandi-gold pr-9"
                     />
-                    <Button
-                      size="sm"
-                      variant="soft-gold"
-                      onClick={handleAddSubtask}
-                      disabled={!newSubtaskTitle.trim()}
-                    >
-                      <Plus className="w-4 h-4" />
-                    </Button>
+                    {newSubtaskTitle.trim() && (
+                      <button
+                        onClick={handleAddSubtask}
+                        className="absolute right-1.5 top-1/2 -translate-y-1/2 p-1 rounded text-morandi-gold hover:bg-morandi-gold/10 transition-colors"
+                        title="新增"
+                      >
+                        <Plus className="w-4 h-4" />
+                      </button>
+                    )}
                   </div>
                 )}
               </TabsContent>
@@ -601,32 +711,6 @@ export function TodoExpandedView({ todo, onUpdate, onClose }: TodoExpandedViewPr
             </div>
 
             <div>
-              <label className="text-xs font-medium text-morandi-muted mb-1.5 block">負責人</label>
-              <div className="flex items-center gap-2 px-2 py-1.5 rounded-md border border-border bg-card">
-                <User className="w-4 h-4 text-morandi-secondary flex-shrink-0" />
-                <span className="text-sm text-morandi-primary truncate">
-                  {assigneeName || '未指派'}
-                </span>
-              </div>
-            </div>
-
-            <div>
-              <label className="text-xs font-medium text-morandi-muted mb-1.5 block">關聯</label>
-              <div className="flex items-center gap-2 px-2 py-1.5 rounded-md border border-border bg-card">
-                {firstRelated?.type === 'group' ? (
-                  <MapPin className="w-4 h-4 text-morandi-gold flex-shrink-0" />
-                ) : firstRelated?.type === 'order' ? (
-                  <ShoppingCart className="w-4 h-4 text-morandi-gold flex-shrink-0" />
-                ) : (
-                  <Tag className="w-4 h-4 text-morandi-secondary flex-shrink-0" />
-                )}
-                <span className="text-sm text-morandi-primary truncate">
-                  {firstRelated?.title || '未關聯'}
-                </span>
-              </div>
-            </div>
-
-            <div>
               <label className="text-xs font-medium text-morandi-muted mb-1.5 block">
                 {TODO_DIALOG_LABELS.tags}
               </label>
@@ -676,71 +760,132 @@ export function TodoExpandedView({ todo, onUpdate, onClose }: TodoExpandedViewPr
             </div>
 
             <div>
-              <label className="text-xs font-medium text-morandi-muted mb-2 block">業務動作</label>
-              <div className="flex flex-col gap-1">
-                <button
-                  onClick={() => canEdit && addInstance('invoice')}
-                  disabled={!canEdit}
-                  className="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm text-status-info hover:bg-morandi-container/30 disabled:opacity-50 transition-colors text-left"
-                >
-                  <FileText className="w-3.5 h-3.5" />
-                  建立請款單
-                </button>
-                <button
-                  onClick={() => canEdit && addInstance('receipt')}
-                  disabled={!canEdit}
-                  className="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm text-morandi-green hover:bg-morandi-container/30 disabled:opacity-50 transition-colors text-left"
-                >
-                  <DollarSign className="w-3.5 h-3.5" />
-                  確認收款
-                </button>
-                <button
-                  onClick={() => alert('訂票作業敬請期待')}
-                  className="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm text-cat-purple hover:bg-morandi-container/30 transition-colors text-left"
-                >
-                  <Plane className="w-3.5 h-3.5" />
-                  訂票作業
-                </button>
-                <button
-                  onClick={() => alert('行前說明敬請期待')}
-                  className="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm text-morandi-gold hover:bg-morandi-container/30 transition-colors text-left"
-                >
-                  <FileCheck className="w-3.5 h-3.5" />
-                  行前說明
-                </button>
-              </div>
-            </div>
-
-            <div>
               <label className="text-xs font-medium text-morandi-muted mb-2 block">動作</label>
               <div className="flex flex-col gap-1">
                 <button
-                  onClick={() => canEdit && addInstance('share')}
-                  disabled={!canEdit}
-                  className="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm text-morandi-secondary hover:bg-morandi-container/30 disabled:opacity-50 transition-colors text-left"
-                >
-                  <Tag className="w-3.5 h-3.5" />
-                  共享
-                </button>
-                <button
-                  onClick={() => alert('複製敬請期待')}
+                  onClick={() => alert('存檔功能規劃中（暫時用 cancelled 狀態替代）')}
                   className="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm text-morandi-secondary hover:bg-morandi-container/30 transition-colors text-left"
                 >
-                  <Copy className="w-3.5 h-3.5" />
-                  複製
+                  <FileCheck className="w-3.5 h-3.5" />
+                  存檔
                 </button>
                 <button
-                  onClick={() => alert('刪除請從卡片 hover 操作')}
-                  className="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm text-morandi-red hover:bg-morandi-red/10 transition-colors text-left"
+                  onClick={async () => {
+                    if (!onDelete) return
+                    if (!confirm(`確定刪除「${todo.title}」？`)) return
+                    await onDelete()
+                  }}
+                  disabled={!onDelete || !canEdit}
+                  className="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm text-morandi-red hover:bg-morandi-red/10 disabled:opacity-50 transition-colors text-left"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                   刪除
                 </button>
               </div>
             </div>
+
+            {/* 共享 section — 永遠在 sidebar 最下面 */}
+            <div className="pt-3 border-t border-border">
+              <button
+                onClick={() => canEdit && setShowShareForm(s => !s)}
+                disabled={!canEdit}
+                className="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm text-morandi-gold hover:bg-morandi-container/30 disabled:opacity-50 transition-colors text-left w-full"
+              >
+                <Tag className="w-3.5 h-3.5" />
+                共享給夥伴
+                <ChevronDown
+                  className={cn(
+                    'w-3 h-3 ml-auto transition-transform',
+                    showShareForm && 'rotate-180'
+                  )}
+                />
+              </button>
+              {showShareForm && canEdit && (() => {
+                const otherEmployees = employees.filter(emp => emp.id !== currentUserId)
+                const currentVisibility = todo.visibility || []
+                const sharedWith = otherEmployees.filter(emp => currentVisibility.includes(emp.id))
+                const availableToShare = otherEmployees.filter(emp => !currentVisibility.includes(emp.id))
+
+                return (
+                  <div className="mt-2 space-y-2 px-2">
+                    {/* 已共享列表 */}
+                    {sharedWith.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {sharedWith.map(emp => (
+                          <span
+                            key={emp.id}
+                            className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] bg-morandi-green/10 text-morandi-green border border-morandi-green/20"
+                          >
+                            {emp.display_name || emp.chinese_name || emp.english_name}
+                            <button
+                              onClick={() => {
+                                onUpdate({
+                                  visibility: currentVisibility.filter(id => id !== emp.id),
+                                })
+                              }}
+                              className="hover:bg-morandi-red/20 rounded"
+                              title="移除共享"
+                            >
+                              <X size={10} />
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* 加入共享 */}
+                    {otherEmployees.length === 0 ? (
+                      <p className="text-xs text-morandi-muted">
+                        您是 workspace 唯一成員、暫無對象可共享
+                      </p>
+                    ) : availableToShare.length === 0 ? (
+                      <p className="text-xs text-morandi-muted">已共享給所有可選成員</p>
+                    ) : (
+                      <>
+                        <Select value={shareTargetId} onValueChange={setShareTargetId}>
+                          <SelectTrigger className="h-8 text-xs">
+                            <SelectValue placeholder="選擇成員..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {availableToShare.map(emp => (
+                              <SelectItem key={emp.id} value={emp.id}>
+                                {emp.display_name || emp.chinese_name || emp.english_name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Button
+                          variant="soft-gold"
+                          size="sm"
+                          className="w-full h-8 text-xs"
+                          disabled={!shareTargetId}
+                          onClick={() => {
+                            onUpdate({
+                              visibility: [...currentVisibility, shareTargetId],
+                            })
+                            setShareTargetId('')
+                          }}
+                        >
+                          加入共享
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                )
+              })()}
+            </div>
           </aside>
         </div>
       </DialogContent>
+
+      {/* 開團 Dialog（level=2 嵌套、成功後自動關聯回 todo） */}
+      <TourCreateDialog
+        open={showTourCreateDialog}
+        onOpenChange={setShowTourCreateDialog}
+        onCreated={handleTourCreated}
+        defaultTourName={todo.title}
+        level={2}
+      />
     </Dialog>
   )
 }
