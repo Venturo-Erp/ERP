@@ -46,8 +46,7 @@ export function tableToModule(tableName: string): string | null {
     t === 'vendor_costs' ||
     t === 'payment_methods' ||
     t === 'bank_accounts' ||
-    t === 'expense_categories' ||
-    t === 'travel_invoices'
+    t === 'expense_categories'
   )
     return 'finance'
 
@@ -86,6 +85,9 @@ export function tableToModule(tableName: string): string | null {
   // office 模組（文件 / 筆記）
   if (t === 'bulletins' || t === 'notes' || t === 'rich_documents' || t === 'knowledge_base')
     return 'office'
+
+  // cis 模組（漫途整合行銷 CIS 工作流）
+  if (t === 'cis_clients' || t === 'cis_visits' || t === 'cis_pricing_items') return 'cis'
 
   // 平台 / 系統表（沒對應的業務 module）
   return null
@@ -132,6 +134,7 @@ export function endpointToCapability(
     'customers',
     'attractions',
     'suppliers',
+    'cis',
   ]
 
   if (knownModules.includes(first)) {

@@ -216,8 +216,8 @@ export async function POST(request: NextRequest) {
         voucher_date: validated.period_end,
         memo: `${validated.period_type === 'month' ? '月結' : validated.period_type === 'quarter' ? '季結' : '年結'}結轉（${validated.period_start} ~ ${validated.period_end}）`,
         status: 'locked', // 結轉傳票鎖定，無法修改
-        total_debit: Math.abs(netIncome),
-        total_credit: Math.abs(netIncome),
+        total_debit: 0,
+        total_credit: 0,
         created_by: employeeId,
       })
       .select()
@@ -318,6 +318,24 @@ export async function POST(request: NextRequest) {
       // 回滾：刪除傳票
       await supabase.from('journal_vouchers').delete().eq('id', voucher.id)
       throw linesError
+    }
+
+    // 用 lines 真實合計回填傳票表頭（修正先前用 Math.abs(netIncome) 算錯的問題）
+    const headerDebit = lines.reduce((s, l) => s + Number(l.debit_amount || 0), 0)
+    const headerCredit = lines.reduce((s, l) => s + Number(l.credit_amount || 0), 0)
+
+    const { error: headerError } = await supabase
+      .from('journal_vouchers')
+      .update({
+        total_debit: headerDebit,
+        total_credit: headerCredit,
+      })
+      .eq('id', voucher.id)
+
+    if (headerError) {
+      await supabase.from('journal_lines').delete().eq('voucher_id', voucher.id)
+      await supabase.from('journal_vouchers').delete().eq('id', voucher.id)
+      throw headerError
     }
 
     // 記錄結轉歷史

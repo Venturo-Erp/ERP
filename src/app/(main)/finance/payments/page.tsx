@@ -22,7 +22,7 @@ import { FinanceLabels } from '../constants/labels'
 import { ListPageLayout } from '@/components/layout/list-page-layout'
 import { Button } from '@/components/ui/button'
 import { TableColumn } from '@/components/ui/enhanced-table'
-import { Plus, Edit2, CheckSquare, Loader2 } from 'lucide-react'
+import { Plus, Edit2, CheckSquare, Loader2, Undo2, Printer } from 'lucide-react'
 import { alert } from '@/lib/ui/alert-dialog'
 import { DateCell, StatusCell, ActionCell, CurrencyCell } from '@/components/table-cells'
 
@@ -50,6 +50,14 @@ const AddReceiptDialog = dynamic(
 )
 const BatchReceiptDialog = dynamic(
   () => import('@/features/finance/payments').then(m => m.BatchReceiptDialog),
+  { loading: () => null }
+)
+const RefundReceiptDialog = dynamic(
+  () => import('@/features/finance/payments').then(m => m.RefundReceiptDialog),
+  { loading: () => null }
+)
+const ReceiptPrintDialog = dynamic(
+  () => import('@/features/finance/payments').then(m => m.ReceiptPrintDialog),
   { loading: () => null }
 )
 
@@ -86,6 +94,10 @@ export default function PaymentsPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isBatchDialogOpen, setIsBatchDialogOpen] = useState(false)
   const [editingReceipt, setEditingReceipt] = useState<Receipt | null>(null)
+  const [refundingReceipt, setRefundingReceipt] = useState<Receipt | null>(null)
+  const [isRefundDialogOpen, setIsRefundDialogOpen] = useState(false)
+  const [printingReceipt, setPrintingReceipt] = useState<Receipt | null>(null)
+  const [isPrintDialogOpen, setIsPrintDialogOpen] = useState(false)
   const [activeTab, setActiveTab] = useState<ReceiptTabValue>('all')
 
   // 根據 capability 顯示 tab
@@ -270,6 +282,38 @@ export default function PaymentsPage() {
             <Edit2 size={14} className="mr-1" />
             {row.status === 'confirmed' ? FinanceLabels.view : FinanceLabels.edit}
           </Button>
+          {/* 退款按鈕：已確認且未退款才顯示 */}
+          {row.status === 'confirmed' && !row.refunded_at && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={e => {
+                e.stopPropagation()
+                setRefundingReceipt(row)
+                setIsRefundDialogOpen(true)
+              }}
+              className="h-7 px-2 text-xs text-morandi-red hover:text-morandi-red hover:bg-morandi-red/10"
+            >
+              <Undo2 size={14} className="mr-1" />
+              退款
+            </Button>
+          )}
+          {/* 列印收據按鈕：已確認 / 已退款都能印 */}
+          {(row.status === 'confirmed' || row.status === 'refunded') && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={e => {
+                e.stopPropagation()
+                setPrintingReceipt(row)
+                setIsPrintDialogOpen(true)
+              }}
+              className="h-7 px-2 text-xs text-morandi-secondary hover:text-morandi-primary"
+            >
+              <Printer size={14} className="mr-1" />
+              收據
+            </Button>
+          )}
         </div>
       ),
     },
@@ -313,6 +357,24 @@ export default function PaymentsPage() {
 
       {/* 批量收款對話框 */}
       <BatchReceiptDialog open={isBatchDialogOpen} onOpenChange={setIsBatchDialogOpen} />
+
+      {/* 退款對話框 */}
+      <RefundReceiptDialog
+        open={isRefundDialogOpen}
+        onOpenChange={setIsRefundDialogOpen}
+        receipt={refundingReceipt}
+        onSuccess={() => {
+          invalidateReceipts()
+          setRefundingReceipt(null)
+        }}
+      />
+
+      {/* 列印收據對話框 */}
+      <ReceiptPrintDialog
+        open={isPrintDialogOpen}
+        onOpenChange={setIsPrintDialogOpen}
+        receipt={printingReceipt}
+      />
     </>
   )
 }

@@ -115,6 +115,23 @@ export function DisbursementDetailDialog({
         confirmed_at: new Date().toISOString(),
       })
 
+      // 出納確認付款 → 自動產生會計傳票（沖應付 / 銀行支出）
+      try {
+        if (user?.workspace_id) {
+          await fetch('/api/accounting/vouchers/auto-create', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              source_type: 'disbursement_order',
+              source_id: order.id,
+              workspace_id: user.workspace_id,
+            }),
+          })
+        }
+      } catch (err) {
+        logger.error('產生出納傳票失敗:', err)
+      }
+
       // 更新所有請款單狀態為 billed（從 FK 反查）
       const requestIds = includedRequests.map(r => r.id)
       const tour_ids_to_recalculate = new Set<string>()

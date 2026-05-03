@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Eye, Plus, CheckCircle, XCircle } from 'lucide-react'
 import type { TableColumn } from '@/components/ui/enhanced-table'
-import { createBrowserClient } from '@supabase/ssr'
+import { supabase } from '@/lib/supabase/client'
 import { useAuthStore } from '@/stores/auth-store'
 import { CreateCheckDialog } from './components/CreateCheckDialog'
 import { logger } from '@/lib/utils/logger'
@@ -45,18 +45,13 @@ export default function ChecksPage() {
 
     setIsLoading(true)
     try {
-      // const supabase = createBrowserClient(
-      //   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      //   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      // )
-      // const { data, error } = await supabase
-      //   .from('checks')
-      //   .select('*')
-      //   .eq('workspace_id', user.workspace_id)
-      //   .order('due_date', { ascending: true })
-      // if (error) throw error
-      // setChecks(data || [])
-      setChecks([]) // 暫時空陣列
+      const { data, error } = await supabase
+        .from('checks')
+        .select('*')
+        .eq('workspace_id', user.workspace_id)
+        .order('due_date', { ascending: true })
+      if (error) throw error
+      setChecks((data || []) as Check[])
     } catch (error) {
       logger.error('載入票據失敗:', error)
     } finally {
@@ -155,16 +150,12 @@ export default function ChecksPage() {
     if (!confirm(`確定標記支票 ${check.check_number} 為已兌現？`)) return
 
     try {
-      // const supabase = createBrowserClient(
-      //   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      //   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      // )
-      // const { error } = await supabase
-      //   .from('checks')
-      //   .update({ status: 'cleared' })
-      //   .eq('id', check.id)
-      // if (error) throw error
-      // loadChecks()
+      const { error } = await supabase
+        .from('checks')
+        .update({ status: 'cleared' })
+        .eq('id', check.id)
+      if (error) throw error
+      loadChecks()
     } catch (error) {
       logger.error('更新票據狀態失敗:', error)
       alert('操作失敗')
@@ -175,16 +166,12 @@ export default function ChecksPage() {
     if (!confirm(`確定作廢支票 ${check.check_number}？`)) return
 
     try {
-      // const supabase = createBrowserClient(
-      //   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      //   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      // )
-      // const { error } = await supabase
-      //   .from('checks')
-      //   .update({ status: 'voided' })
-      //   .eq('id', check.id)
-      // if (error) throw error
-      // loadChecks()
+      const { error } = await supabase
+        .from('checks')
+        .update({ status: 'voided' })
+        .eq('id', check.id)
+      if (error) throw error
+      loadChecks()
     } catch (error) {
       logger.error('更新票據狀態失敗:', error)
       alert('操作失敗')

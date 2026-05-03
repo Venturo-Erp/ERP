@@ -13,6 +13,7 @@ export interface Receipt {
   order_id: string | null | undefined
   tour_id: string | null // 直接關聯團號，方便查詢
   customer_id: string | null // 付款人（客戶）ID
+  customer_name: string | null | undefined // 付款人姓名（DB 欄位、用於顯示）
   order_number: string | null | undefined
   tour_name: string | null | undefined
 
@@ -38,6 +39,13 @@ export interface Receipt {
   fees: number | null
 
   notes: string | null | undefined
+
+  // 退款相關（null = 未退款）
+  refunded_at: string | null | undefined
+  refund_amount: number | null | undefined
+  refund_voucher_id: string | null | undefined
+  refund_notes: string | null | undefined
+  refunded_by: string | null | undefined
 
   // 會計科目 ID（選填、關聯 chart_of_accounts）
   accounting_subject_id: string | null | undefined
@@ -156,24 +164,27 @@ export const RECEIPT_PAYMENT_METHOD_LABELS: Record<string, string> = {
 /**
  * 收款狀態（跟 payment_requests 一致的英文 enum、DB CHECK constraint 限定）
  */
-export type ReceiptStatus = 'pending' | 'confirmed' | 'cancelled'
+export type ReceiptStatus = 'pending' | 'confirmed' | 'cancelled' | 'refunded'
 
 export const RECEIPT_STATUS_LABELS: Record<ReceiptStatus, string> = {
   pending: '待確認',
   confirmed: '已確認',
   cancelled: '已取消',
+  refunded: '已退款',
 }
 
 export const RECEIPT_STATUS_COLORS: Record<ReceiptStatus, string> = {
   pending: 'text-morandi-gold',
   confirmed: 'text-morandi-green',
   cancelled: 'text-morandi-secondary',
+  refunded: 'text-morandi-red',
 }
 
 export const RECEIPT_STATUS_ICONS: Record<ReceiptStatus, string> = {
   pending: '🟡',
   confirmed: '✅',
   cancelled: '🚫',
+  refunded: '↩️',
 }
 
 /**

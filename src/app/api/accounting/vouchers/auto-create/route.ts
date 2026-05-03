@@ -11,8 +11,8 @@ const getSupabase = getSupabaseAdminClient
  * POST /api/accounting/vouchers/auto-create
  *
  * Body:
- * - source_type: 'payment_request' | 'receipt'
- * - source_id: string (請款單/收款單 ID)
+ * - source_type: 'payment_request' | 'receipt' | 'disbursement_order'
+ * - source_id: string (請款單/收款單/出納單 ID)
  * - workspace_id: string
  */
 export async function POST(request: NextRequest) {
@@ -40,6 +40,22 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // opt-in 守門：未啟用會計的租戶 skip、不報錯（業務鏈路照跑）
+    const { data: feat } = await getSupabase()
+      .from('workspace_features')
+      .select('enabled')
+      .eq('workspace_id', workspace_id)
+      .eq('feature_code', 'accounting')
+      .maybeSingle()
+
+    if (!feat?.enabled) {
+      return NextResponse.json({
+        success: true,
+        skipped: true,
+        reason: 'accounting_not_enabled',
+      })
+    }
+
     let voucher
 
     switch (source_type) {
@@ -48,6 +64,9 @@ export async function POST(request: NextRequest) {
         break
       case 'receipt':
         voucher = await createVoucherFromReceipt(workspace_id, source_id)
+        break
+      case 'disbursement_order':
+        voucher = await createVoucherFromDisbursement(workspace_id, source_id)
         break
       default:
         return NextResponse.json({ error: `不支援的來源類型：${source_type}` }, { status: 400 })
@@ -103,6 +122,30 @@ async function createVoucherFromReceipt(workspaceId: string, receiptId: string) 
     throw new Error(`找不到收款單：${receiptId}`)
   }
 
+  // 收款轉移類（transferred_pair_id 不為 null）不產傳票
+  // 因為會計科目沒變、只是業務歸屬調整、產正負相抵的傳票會干擾報表
+  if ((receipt as { transferred_pair_id?: string | null }).transferred_pair_id) {
+    return { skipped: true, reason: 'transferred_pair' }
+  }
+
+  // 只有已確認的收款才產生傳票（pending / cancelled 跳過）
+  if (receipt.status !== 'confirmed') {
+    throw new Error(`收款單狀態為 ${receipt.status}、只有已確認的收款才能產生傳票`)
+  }
+
+  // 已產過的傳票不重複產（idempotent）
+  const { data: existingVoucher } = await db
+    .from('journal_vouchers')
+    .select('id, voucher_no')
+    .eq('workspace_id', workspaceId)
+    .eq('source_type', 'receipt')
+    .eq('source_id', receiptId)
+    .maybeSingle()
+
+  if (existingVoucher) {
+    return existingVoucher
+  }
+
   // 2. 取得科目
   const methodRef = receipt.payment_method_ref as {
     debit_account: { id: string; code: string; name: string } | null
@@ -115,6 +158,15 @@ async function createVoucherFromReceipt(workspaceId: string, receiptId: string) 
 
   const debitAccount = methodRef.debit_account
   const creditAccount = methodRef.credit_account
+
+  // 實收金額（actual_amount）優先、fallback 到 receipt_amount
+  const amount = Number(receipt.actual_amount) > 0
+    ? Number(receipt.actual_amount)
+    : Number(receipt.receipt_amount) || 0
+
+  if (amount <= 0) {
+    throw new Error('收款金額為 0、無法產生傳票')
+  }
 
   // 3. 產生傳票編號
   const voucherDate = receipt.receipt_date || new Date().toISOString().split('T')[0]
@@ -129,8 +181,8 @@ async function createVoucherFromReceipt(workspaceId: string, receiptId: string) 
       voucher_date: voucherDate,
       memo: `收款單 ${receipt.receipt_number || ''} - ${receipt.notes || ''}`.trim(),
       status: 'posted',
-      total_debit: receipt.receipt_amount || 0,
-      total_credit: receipt.receipt_amount || 0,
+      total_debit: amount,
+      total_credit: amount,
       source_type: 'receipt',
       source_id: receiptId,
     })
@@ -148,7 +200,7 @@ async function createVoucherFromReceipt(workspaceId: string, receiptId: string) 
       line_no: 1,
       account_id: debitAccount.id,
       description: `收款 - ${receipt.notes || ''}`,
-      debit_amount: receipt.receipt_amount || 0,
+      debit_amount: amount,
       credit_amount: 0,
     },
     {
@@ -157,7 +209,7 @@ async function createVoucherFromReceipt(workspaceId: string, receiptId: string) 
       account_id: creditAccount.id,
       description: `收款 - ${receipt.notes || ''}`,
       debit_amount: 0,
-      credit_amount: receipt.receipt_amount || 0,
+      credit_amount: amount,
     },
   ]
 
@@ -188,6 +240,12 @@ async function createVoucherFromPaymentRequest(workspaceId: string, paymentReque
 
   if (reqError || !request) {
     throw new Error(`找不到請款單：${paymentRequestId}`)
+  }
+
+  // 成本轉移類（transferred_pair_id 不為 null）不產傳票
+  // 因為會計科目沒變、只是把成本掛到不同團、產正負相抵的傳票會干擾報表
+  if ((request as { transferred_pair_id?: string | null }).transferred_pair_id) {
+    return { skipped: true, reason: 'transferred_pair' }
   }
 
   // 2. 查詢所有請款類別（用於對應 category）
@@ -313,6 +371,191 @@ async function createVoucherFromPaymentRequest(workspaceId: string, paymentReque
     await db.from('journal_vouchers').delete().eq('workspace_id', workspaceId).eq('id', voucher.id)
     throw new Error(`建立傳票分錄失敗：${linesError.message}`)
   }
+
+  return voucher
+}
+
+/**
+ * 從出納單產生沖銷傳票（撥款付款）
+ * 借：應付帳款（從 PR.items 對應的 expense_categories.credit_account 反查、累加分組）
+ * 貸：銀行存款（從 disbursement_orders.bank_account_id 對應的 chart_of_accounts）
+ */
+async function createVoucherFromDisbursement(workspaceId: string, disbursementId: string) {
+  const db = getSupabase()
+
+  // 1. 查出納單 + 銀行帳戶
+  const { data: disbursement, error: disErr } = await db
+    .from('disbursement_orders')
+    .select('id, code, order_number, amount, disbursement_date, bank_account_id, accounting_voucher_id, notes')
+    .eq('workspace_id', workspaceId)
+    .eq('id', disbursementId)
+    .single()
+
+  if (disErr || !disbursement) {
+    throw new Error(`找不到出納單：${disbursementId}`)
+  }
+
+  // idempotent：已產過直接 return
+  if (disbursement.accounting_voucher_id) {
+    const { data: existing } = await db
+      .from('journal_vouchers')
+      .select('id, voucher_no')
+      .eq('id', disbursement.accounting_voucher_id)
+      .maybeSingle()
+    if (existing) return existing
+  }
+
+  if (!disbursement.bank_account_id) {
+    throw new Error('出納單未指定銀行帳戶、無法產生傳票')
+  }
+
+  // 2. 銀行帳戶 → chart_of_accounts.id（貸方銀行科目）
+  const { data: bankAcct, error: bankErr } = await db
+    .from('bank_accounts')
+    .select('id, name, account_id')
+    .eq('id', disbursement.bank_account_id)
+    .single()
+
+  if (bankErr || !bankAcct?.account_id) {
+    throw new Error('銀行帳戶未綁定會計科目、無法產生傳票')
+  }
+
+  // 3. 查關聯的請款單 + items + items 對應 expense_categories
+  const { data: linkedRequests, error: prErr } = await db
+    .from('payment_requests')
+    .select('id, code, supplier_name, items:payment_request_items(category, subtotal)')
+    .eq('workspace_id', workspaceId)
+    .eq('disbursement_order_id', disbursementId)
+
+  if (prErr) throw prErr
+  if (!linkedRequests || linkedRequests.length === 0) {
+    throw new Error('出納單沒有關聯請款單、無法產生傳票')
+  }
+
+  // 4. 查所有 expense_categories 的 credit_account（要沖的應付科目）
+  const { data: categories } = await db
+    .from('expense_categories')
+    .select(
+      `name,
+       credit_account:chart_of_accounts!credit_account_id(id, code, name)`
+    )
+    .eq('is_active', true)
+
+  const categoryMap = new Map<string, { id: string; code: string; name: string }>()
+  if (categories) {
+    for (const cat of categories) {
+      const creditRaw = cat.credit_account as unknown
+      const credit = Array.isArray(creditRaw) ? creditRaw[0] : creditRaw
+      if (credit) {
+        categoryMap.set(cat.name, credit as { id: string; code: string; name: string })
+      }
+    }
+  }
+
+  // 5. 累加每個 credit_account 的金額（沖銷分組）
+  const debitAccountAmounts = new Map<string, { name: string; amount: number }>()
+  let totalRequestAmount = 0
+  const supplierNames: string[] = []
+
+  for (const pr of linkedRequests) {
+    if (pr.supplier_name) supplierNames.push(pr.supplier_name)
+    for (const item of (pr.items || [])) {
+      const cat = (item as { category?: string; subtotal?: number }).category || '其他'
+      const subtotal = Number((item as { subtotal?: number }).subtotal) || 0
+      const creditAcct = categoryMap.get(cat)
+      if (!creditAcct) {
+        throw new Error(`請款類別「${cat}」未設定貸方科目（沖銷對象）、無法產生出納傳票`)
+      }
+      const existing = debitAccountAmounts.get(creditAcct.id)
+      debitAccountAmounts.set(creditAcct.id, {
+        name: creditAcct.name,
+        amount: (existing?.amount || 0) + subtotal,
+      })
+      totalRequestAmount += subtotal
+    }
+  }
+
+  if (debitAccountAmounts.size === 0) {
+    throw new Error('沒有有效的沖銷科目、無法產生出納傳票')
+  }
+
+  // 6. 產生傳票編號
+  const voucherDate = disbursement.disbursement_date || new Date().toISOString().split('T')[0]
+  const voucherNo = await generateVoucherNo(workspaceId, voucherDate)
+
+  // 7. 建立傳票（header total 先 0、lines 算完再 update）
+  const { data: voucher, error: voucherError } = await db
+    .from('journal_vouchers')
+    .insert({
+      workspace_id: workspaceId,
+      voucher_no: voucherNo,
+      voucher_date: voucherDate,
+      memo: `出納撥款 ${disbursement.code || disbursement.order_number || ''} - ${supplierNames.join(', ').slice(0, 80)}`,
+      status: 'posted',
+      total_debit: 0,
+      total_credit: 0,
+      source_type: 'disbursement_order',
+      source_id: disbursementId,
+    })
+    .select()
+    .single()
+
+  if (voucherError) {
+    throw new Error(`建立出納傳票失敗：${voucherError.message}`)
+  }
+
+  // 8. 借方分錄（每個應付科目一筆）
+  const lines: Array<{
+    voucher_id: string
+    line_no: number
+    account_id: string
+    description: string
+    debit_amount: number
+    credit_amount: number
+  }> = []
+  let lineNo = 1
+  let debitTotal = 0
+
+  for (const [accountId, info] of debitAccountAmounts) {
+    lines.push({
+      voucher_id: voucher.id,
+      line_no: lineNo++,
+      account_id: accountId,
+      description: `沖${info.name}`,
+      debit_amount: info.amount,
+      credit_amount: 0,
+    })
+    debitTotal += info.amount
+  }
+
+  // 9. 貸方分錄（銀行存款一筆）
+  lines.push({
+    voucher_id: voucher.id,
+    line_no: lineNo++,
+    account_id: bankAcct.account_id,
+    description: `付款 ${bankAcct.name}`,
+    debit_amount: 0,
+    credit_amount: debitTotal,
+  })
+
+  const { error: linesError } = await db.from('journal_lines').insert(lines)
+
+  if (linesError) {
+    await db.from('journal_vouchers').delete().eq('workspace_id', workspaceId).eq('id', voucher.id)
+    throw new Error(`建立出納傳票分錄失敗：${linesError.message}`)
+  }
+
+  // 10. 回填 header total
+  await db
+    .from('journal_vouchers')
+    .update({ total_debit: debitTotal, total_credit: debitTotal })
+    .eq('id', voucher.id)
+
+  // 11. 回填 disbursement_orders.accounting_voucher_id
+  await db
+    .from('disbursement_orders')
+    .update({ accounting_voucher_id: voucher.id })
+    .eq('id', disbursementId)
 
   return voucher
 }

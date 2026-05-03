@@ -21,20 +21,15 @@ interface TourDependencyCheck {
  *   - receipts（收款）
  *   - payment_requests（請款）
  *   - visas（簽證）
- *   - travel_invoices（發票）
  */
 export async function checkTourDependencies(tourId: string): Promise<TourDependencyCheck> {
-  const [receipts, payments, visas, invoices] = await Promise.all([
+  const [receipts, payments, visas] = await Promise.all([
     supabase.from('receipts').select('id', { count: 'exact', head: true }).eq('tour_id', tourId),
     supabase
       .from('payment_requests')
       .select('id', { count: 'exact', head: true })
       .eq('tour_id', tourId),
     supabase.from('visas').select('id', { count: 'exact', head: true }).eq('tour_id', tourId),
-    supabase
-      .from('travel_invoices')
-      .select('id', { count: 'exact', head: true })
-      .eq('tour_id', tourId),
   ])
 
   const blockers: string[] = []
@@ -44,7 +39,6 @@ export async function checkTourDependencies(tourId: string): Promise<TourDepende
   if (payments.count && payments.count > 0)
     blockers.push(TOUR_DEPENDENCY_LABELS.PAYMENTS_COUNT(payments.count))
   if (visas.count && visas.count > 0) blockers.push(`簽證 ${visas.count} 筆`)
-  if (invoices.count && invoices.count > 0) blockers.push(`發票 ${invoices.count} 張`)
 
   return { blockers, hasBlockers: blockers.length > 0 }
 }
@@ -53,7 +47,7 @@ export async function checkTourDependencies(tourId: string): Promise<TourDepende
  * 清除旅遊團的配置類關聯資料（UI 設定、排房/排車、確認單等）
  *
  * 注意：Wave 6 Batch 2 把這些 FK 改 RESTRICT、必須在刪 tour 前顯式清掉。
- * 業務/財務類（receipts/payment_requests/visas/travel_invoices）不在這、
+ * 業務/財務類（receipts/payment_requests/visas）不在這、
  * 有資料時 checkTourDependencies 會擋、不會走到這一步。
  */
 export async function deleteTourConfigurationData(tourId: string): Promise<void> {

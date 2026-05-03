@@ -23,7 +23,6 @@ function hasFullFeatures(workspaceCode: string | undefined | null): boolean {
  * - accounting: 會計系統
  * - itinerary_editor: 行程編輯器（其他公司只有簡易列印）
  * - esim: eSIM 網卡管理
- * - travel_invoices: 電子代轉發票
  * - ai_suggest: AI 景點資料補充
  */
 export type RestrictedFeature =
@@ -32,7 +31,6 @@ export type RestrictedFeature =
   | 'accounting'
   | 'itinerary_editor'
   | 'esim'
-  | 'travel_invoices'
   | 'ai_suggest'
 
 /**
@@ -54,7 +52,6 @@ export function isFeatureAvailable(
     'accounting',
     'itinerary_editor',
     'esim',
-    'travel_invoices',
     'ai_suggest',
   ]
 

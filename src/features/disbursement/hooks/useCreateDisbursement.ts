@@ -177,6 +177,27 @@ export function useCreateDisbursement({
 
     setIsSubmitting(true)
     try {
+      // 推斷出納單分類：依所選 PR 的特性決定 disbursement_type
+      // 優先順序：成本轉移 > 薪資 > 公司請款 > 團體請款（fallback）
+      const selectedPRs = pendingRequests.filter(pr => selectedRequestIds.includes(pr.id))
+      let disbursementType: 'payment_request' | 'payroll' | 'cost_transfer' | 'company_expense' =
+        'payment_request'
+      // transferred_pair_id 不在 PaymentRequest type 上、用 DB 查
+      const { data: pairCheck } = await supabase
+        .from('payment_requests')
+        .select('id')
+        .in('id', selectedRequestIds)
+        .not('transferred_pair_id', 'is', null)
+        .limit(1)
+      const hasCostTransfer = (pairCheck?.length ?? 0) > 0
+      if (hasCostTransfer) {
+        disbursementType = 'cost_transfer'
+      } else if (selectedPRs.length > 0 && selectedPRs.every(pr => pr.expense_type === 'SAL')) {
+        disbursementType = 'payroll'
+      } else if (selectedPRs.length > 0 && selectedPRs.every(pr => !pr.tour_id)) {
+        disbursementType = 'company_expense'
+      }
+
       // 根治 race condition：client 生號 + insert 兩步中間、別人可能插隊
       // 做法：遇 23505 重複鍵就重新生號重試、最多 5 次
       // 正常情況第 1 次就成功、有並發才會重試、重試成本低
@@ -195,6 +216,7 @@ export function useCreateDisbursement({
             disbursement_date: disbursementDate,
             amount: selectedAmount,
             status: 'pending',
+            disbursement_type: disbursementType,
             workspace_id: user?.workspace_id || null,
             created_by: user?.id || null,
           })
@@ -237,6 +259,22 @@ export function useCreateDisbursement({
           .from('payment_requests')
           .update({ disbursement_order_id: data.id, status: 'confirmed' })
           .eq('id', id)
+
+        // PR confirmed → 自動產生會計傳票（opt-in：未啟用會計或設定不全、API 會 skip / throw、catch 吞）
+        try {
+          await fetch('/api/accounting/vouchers/auto-create', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              source_type: 'payment_request',
+              source_id: id,
+              workspace_id: user?.workspace_id,
+            }),
+          })
+        } catch (err) {
+          logger.error('產生請款傳票失敗:', err)
+        }
+
         const req = pendingRequests.find(r => r.id === id)
         if (req?.tour_id) {
           tour_ids_to_recalculate.add(req.tour_id)
@@ -314,6 +352,22 @@ export function useCreateDisbursement({
           .from('payment_requests')
           .update({ disbursement_order_id: editingOrder.id, status: 'confirmed' })
           .eq('id', id)
+
+        // PR confirmed → 自動產生會計傳票
+        try {
+          await fetch('/api/accounting/vouchers/auto-create', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              source_type: 'payment_request',
+              source_id: id,
+              workspace_id: user?.workspace_id,
+            }),
+          })
+        } catch (err) {
+          logger.error('產生請款傳票失敗:', err)
+        }
+
         const req = pendingRequests.find(r => r.id === id)
         if (req?.tour_id) {
           tour_ids_to_recalculate.add(req.tour_id)

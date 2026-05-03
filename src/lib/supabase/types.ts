@@ -1113,6 +1113,111 @@ export type Database = {
           },
         ]
       }
+      clock_records: {
+        Row: {
+          clock_at: string
+          clock_date: string
+          clock_type: string
+          created_at: string
+          created_by: string | null
+          employee_id: string
+          gps_accuracy_meters: number | null
+          gps_latitude: number | null
+          gps_longitude: number | null
+          id: string
+          is_remote: boolean
+          is_within_geofence: boolean | null
+          late_minutes: number
+          missed_clock_request_id: string | null
+          note: string | null
+          source: string
+          status: string
+          updated_at: string
+          updated_by: string | null
+          workspace_id: string
+        }
+        Insert: {
+          clock_at?: string
+          clock_date?: string
+          clock_type: string
+          created_at?: string
+          created_by?: string | null
+          employee_id: string
+          gps_accuracy_meters?: number | null
+          gps_latitude?: number | null
+          gps_longitude?: number | null
+          id?: string
+          is_remote?: boolean
+          is_within_geofence?: boolean | null
+          late_minutes?: number
+          missed_clock_request_id?: string | null
+          note?: string | null
+          source?: string
+          status?: string
+          updated_at?: string
+          updated_by?: string | null
+          workspace_id: string
+        }
+        Update: {
+          clock_at?: string
+          clock_date?: string
+          clock_type?: string
+          created_at?: string
+          created_by?: string | null
+          employee_id?: string
+          gps_accuracy_meters?: number | null
+          gps_latitude?: number | null
+          gps_longitude?: number | null
+          id?: string
+          is_remote?: boolean
+          is_within_geofence?: boolean | null
+          late_minutes?: number
+          missed_clock_request_id?: string | null
+          note?: string | null
+          source?: string
+          status?: string
+          updated_at?: string
+          updated_by?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'clock_records_created_by_fkey'
+            columns: ['created_by']
+            isOneToOne: false
+            referencedRelation: 'employees'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'clock_records_employee_id_fkey'
+            columns: ['employee_id']
+            isOneToOne: false
+            referencedRelation: 'employees'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'clock_records_missed_clock_request_id_fkey'
+            columns: ['missed_clock_request_id']
+            isOneToOne: false
+            referencedRelation: 'missed_clock_requests'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'clock_records_updated_by_fkey'
+            columns: ['updated_by']
+            isOneToOne: false
+            referencedRelation: 'employees'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'clock_records_workspace_id_fkey'
+            columns: ['workspace_id']
+            isOneToOne: false
+            referencedRelation: 'workspaces'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       companies: {
         Row: {
           bank_account: string | null
@@ -1995,6 +2100,7 @@ export type Database = {
       }
       disbursement_orders: {
         Row: {
+          accounting_voucher_id: string | null
           amount: number
           bank_account_id: string | null
           code: string | null
@@ -2018,6 +2124,7 @@ export type Database = {
           workspace_id: string
         }
         Insert: {
+          accounting_voucher_id?: string | null
           amount: number
           bank_account_id?: string | null
           code?: string | null
@@ -2041,6 +2148,7 @@ export type Database = {
           workspace_id: string
         }
         Update: {
+          accounting_voucher_id?: string | null
           amount?: number
           bank_account_id?: string | null
           code?: string | null
@@ -2064,6 +2172,13 @@ export type Database = {
           workspace_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: 'disbursement_orders_accounting_voucher_id_fkey'
+            columns: ['accounting_voucher_id']
+            isOneToOne: false
+            referencedRelation: 'journal_vouchers'
+            referencedColumns: ['id']
+          },
           {
             foreignKeyName: 'disbursement_orders_bank_account_id_fkey'
             columns: ['bank_account_id']
@@ -3171,6 +3286,257 @@ export type Database = {
           },
         ]
       }
+      leave_balances: {
+        Row: {
+          created_at: string
+          employee_id: string
+          id: string
+          leave_type_id: string
+          pending_days: number
+          total_days: number
+          updated_at: string
+          used_days: number
+          workspace_id: string
+          year: number
+        }
+        Insert: {
+          created_at?: string
+          employee_id: string
+          id?: string
+          leave_type_id: string
+          pending_days?: number
+          total_days?: number
+          updated_at?: string
+          used_days?: number
+          workspace_id: string
+          year: number
+        }
+        Update: {
+          created_at?: string
+          employee_id?: string
+          id?: string
+          leave_type_id?: string
+          pending_days?: number
+          total_days?: number
+          updated_at?: string
+          used_days?: number
+          workspace_id?: string
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'leave_balances_employee_id_fkey'
+            columns: ['employee_id']
+            isOneToOne: false
+            referencedRelation: 'employees'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'leave_balances_leave_type_id_fkey'
+            columns: ['leave_type_id']
+            isOneToOne: false
+            referencedRelation: 'leave_types'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'leave_balances_workspace_id_fkey'
+            columns: ['workspace_id']
+            isOneToOne: false
+            referencedRelation: 'workspaces'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      leave_requests: {
+        Row: {
+          approved_at: string | null
+          approver_id: string | null
+          approver_note: string | null
+          attachments: Json
+          cancelled_at: string | null
+          cancelled_by: string | null
+          created_at: string
+          created_by: string | null
+          employee_id: string
+          end_at: string
+          estimated_deduction_amount: number | null
+          id: string
+          leave_type_id: string
+          reason: string
+          reject_reason: string | null
+          start_at: string
+          status: string
+          total_days: number
+          total_minutes: number
+          updated_at: string
+          updated_by: string | null
+          workspace_id: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approver_id?: string | null
+          approver_note?: string | null
+          attachments?: Json
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          employee_id: string
+          end_at: string
+          estimated_deduction_amount?: number | null
+          id?: string
+          leave_type_id: string
+          reason: string
+          reject_reason?: string | null
+          start_at: string
+          status?: string
+          total_days: number
+          total_minutes: number
+          updated_at?: string
+          updated_by?: string | null
+          workspace_id: string
+        }
+        Update: {
+          approved_at?: string | null
+          approver_id?: string | null
+          approver_note?: string | null
+          attachments?: Json
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          employee_id?: string
+          end_at?: string
+          estimated_deduction_amount?: number | null
+          id?: string
+          leave_type_id?: string
+          reason?: string
+          reject_reason?: string | null
+          start_at?: string
+          status?: string
+          total_days?: number
+          total_minutes?: number
+          updated_at?: string
+          updated_by?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'leave_requests_approver_id_fkey'
+            columns: ['approver_id']
+            isOneToOne: false
+            referencedRelation: 'employees'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'leave_requests_cancelled_by_fkey'
+            columns: ['cancelled_by']
+            isOneToOne: false
+            referencedRelation: 'employees'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'leave_requests_created_by_fkey'
+            columns: ['created_by']
+            isOneToOne: false
+            referencedRelation: 'employees'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'leave_requests_employee_id_fkey'
+            columns: ['employee_id']
+            isOneToOne: false
+            referencedRelation: 'employees'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'leave_requests_leave_type_id_fkey'
+            columns: ['leave_type_id']
+            isOneToOne: false
+            referencedRelation: 'leave_types'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'leave_requests_updated_by_fkey'
+            columns: ['updated_by']
+            isOneToOne: false
+            referencedRelation: 'employees'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'leave_requests_workspace_id_fkey'
+            columns: ['workspace_id']
+            isOneToOne: false
+            referencedRelation: 'workspaces'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      leave_types: {
+        Row: {
+          attachment_threshold_days: number | null
+          attendance_bonus_flag: string
+          code: string
+          created_at: string
+          default_days_per_year: number | null
+          id: string
+          is_active: boolean
+          legal_basis: string | null
+          name: string
+          pay_type: string
+          quota_type: string
+          requires_attachment: boolean
+          sort_order: number
+          supports_hourly: boolean
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          attachment_threshold_days?: number | null
+          attendance_bonus_flag?: string
+          code: string
+          created_at?: string
+          default_days_per_year?: number | null
+          id?: string
+          is_active?: boolean
+          legal_basis?: string | null
+          name: string
+          pay_type?: string
+          quota_type?: string
+          requires_attachment?: boolean
+          sort_order?: number
+          supports_hourly?: boolean
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          attachment_threshold_days?: number | null
+          attendance_bonus_flag?: string
+          code?: string
+          created_at?: string
+          default_days_per_year?: number | null
+          id?: string
+          is_active?: boolean
+          legal_basis?: string | null
+          name?: string
+          pay_type?: string
+          quota_type?: string
+          requires_attachment?: boolean
+          sort_order?: number
+          supports_hourly?: boolean
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'leave_types_workspace_id_fkey'
+            columns: ['workspace_id']
+            isOneToOne: false
+            referencedRelation: 'workspaces'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       line_conversations: {
         Row: {
           conversation_type: string
@@ -3476,6 +3842,96 @@ export type Database = {
             isOneToOne: false
             referencedRelation: 'receipts'
             referencedColumns: ['workspace_id', 'receipt_number']
+          },
+        ]
+      }
+      missed_clock_requests: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          clock_type: string
+          created_at: string
+          created_by: string | null
+          date: string
+          employee_id: string
+          id: string
+          reason: string
+          reject_reason: string | null
+          requested_time: string
+          status: string
+          updated_at: string
+          updated_by: string | null
+          workspace_id: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          clock_type: string
+          created_at?: string
+          created_by?: string | null
+          date: string
+          employee_id: string
+          id?: string
+          reason: string
+          reject_reason?: string | null
+          requested_time: string
+          status?: string
+          updated_at?: string
+          updated_by?: string | null
+          workspace_id: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          clock_type?: string
+          created_at?: string
+          created_by?: string | null
+          date?: string
+          employee_id?: string
+          id?: string
+          reason?: string
+          reject_reason?: string | null
+          requested_time?: string
+          status?: string
+          updated_at?: string
+          updated_by?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'missed_clock_requests_approved_by_fkey'
+            columns: ['approved_by']
+            isOneToOne: false
+            referencedRelation: 'employees'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'missed_clock_requests_created_by_fkey'
+            columns: ['created_by']
+            isOneToOne: false
+            referencedRelation: 'employees'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'missed_clock_requests_employee_id_fkey'
+            columns: ['employee_id']
+            isOneToOne: false
+            referencedRelation: 'employees'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'missed_clock_requests_updated_by_fkey'
+            columns: ['updated_by']
+            isOneToOne: false
+            referencedRelation: 'employees'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'missed_clock_requests_workspace_id_fkey'
+            columns: ['workspace_id']
+            isOneToOne: false
+            referencedRelation: 'workspaces'
+            referencedColumns: ['id']
           },
         ]
       }
@@ -3953,6 +4409,102 @@ export type Database = {
           },
         ]
       }
+      overtime_requests: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          created_by: string | null
+          date: string
+          employee_id: string
+          end_time: string
+          hours: number
+          id: string
+          overtime_type: string
+          reason: string | null
+          reject_reason: string | null
+          start_time: string
+          status: string
+          updated_at: string
+          updated_by: string | null
+          workspace_id: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          date: string
+          employee_id: string
+          end_time: string
+          hours: number
+          id?: string
+          overtime_type?: string
+          reason?: string | null
+          reject_reason?: string | null
+          start_time: string
+          status?: string
+          updated_at?: string
+          updated_by?: string | null
+          workspace_id: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          date?: string
+          employee_id?: string
+          end_time?: string
+          hours?: number
+          id?: string
+          overtime_type?: string
+          reason?: string | null
+          reject_reason?: string | null
+          start_time?: string
+          status?: string
+          updated_at?: string
+          updated_by?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'overtime_requests_approved_by_fkey'
+            columns: ['approved_by']
+            isOneToOne: false
+            referencedRelation: 'employees'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'overtime_requests_created_by_fkey'
+            columns: ['created_by']
+            isOneToOne: false
+            referencedRelation: 'employees'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'overtime_requests_employee_id_fkey'
+            columns: ['employee_id']
+            isOneToOne: false
+            referencedRelation: 'employees'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'overtime_requests_updated_by_fkey'
+            columns: ['updated_by']
+            isOneToOne: false
+            referencedRelation: 'employees'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'overtime_requests_workspace_id_fkey'
+            columns: ['workspace_id']
+            isOneToOne: false
+            referencedRelation: 'workspaces'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       payment_methods: {
         Row: {
           code: string | null
@@ -4333,6 +4885,236 @@ export type Database = {
           },
           {
             foreignKeyName: 'payment_requests_workspace_id_fkey'
+            columns: ['workspace_id']
+            isOneToOne: false
+            referencedRelation: 'workspaces'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      payroll_runs: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          finalized_at: string | null
+          finalized_by: string | null
+          id: string
+          law_version: string | null
+          note: string | null
+          period_month: number
+          period_year: number
+          status: string
+          total_deduction_amount: number
+          total_employees: number
+          total_gross_amount: number
+          total_net_amount: number
+          updated_at: string
+          updated_by: string | null
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          finalized_at?: string | null
+          finalized_by?: string | null
+          id?: string
+          law_version?: string | null
+          note?: string | null
+          period_month: number
+          period_year: number
+          status?: string
+          total_deduction_amount?: number
+          total_employees?: number
+          total_gross_amount?: number
+          total_net_amount?: number
+          updated_at?: string
+          updated_by?: string | null
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          finalized_at?: string | null
+          finalized_by?: string | null
+          id?: string
+          law_version?: string | null
+          note?: string | null
+          period_month?: number
+          period_year?: number
+          status?: string
+          total_deduction_amount?: number
+          total_employees?: number
+          total_gross_amount?: number
+          total_net_amount?: number
+          updated_at?: string
+          updated_by?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'payroll_runs_created_by_fkey'
+            columns: ['created_by']
+            isOneToOne: false
+            referencedRelation: 'employees'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'payroll_runs_finalized_by_fkey'
+            columns: ['finalized_by']
+            isOneToOne: false
+            referencedRelation: 'employees'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'payroll_runs_updated_by_fkey'
+            columns: ['updated_by']
+            isOneToOne: false
+            referencedRelation: 'employees'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'payroll_runs_workspace_id_fkey'
+            columns: ['workspace_id']
+            isOneToOne: false
+            referencedRelation: 'workspaces'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      payslips: {
+        Row: {
+          attendance_bonus: number
+          attendance_bonus_deduction: number
+          base_salary: number
+          calc_breakdown: Json
+          created_at: string
+          created_by: string | null
+          employee_id: string
+          employee_snapshot: Json
+          gross_amount: number
+          has_warnings: boolean
+          health_insurance_employee: number
+          health_insurance_employer: number
+          id: string
+          income_tax: number
+          labor_insurance_employee: number
+          labor_insurance_employer: number
+          leave_deduction: number
+          net_amount: number
+          note: string | null
+          other_allowances: number
+          other_deductions: number
+          overtime_pay: number
+          payroll_run_id: string
+          pension_employer: number
+          pension_voluntary: number
+          period_month: number
+          period_year: number
+          sent_to_employee_at: string | null
+          updated_at: string
+          updated_by: string | null
+          warnings: Json
+          workspace_id: string
+        }
+        Insert: {
+          attendance_bonus?: number
+          attendance_bonus_deduction?: number
+          base_salary?: number
+          calc_breakdown?: Json
+          created_at?: string
+          created_by?: string | null
+          employee_id: string
+          employee_snapshot?: Json
+          gross_amount?: number
+          has_warnings?: boolean
+          health_insurance_employee?: number
+          health_insurance_employer?: number
+          id?: string
+          income_tax?: number
+          labor_insurance_employee?: number
+          labor_insurance_employer?: number
+          leave_deduction?: number
+          net_amount?: number
+          note?: string | null
+          other_allowances?: number
+          other_deductions?: number
+          overtime_pay?: number
+          payroll_run_id: string
+          pension_employer?: number
+          pension_voluntary?: number
+          period_month: number
+          period_year: number
+          sent_to_employee_at?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          warnings?: Json
+          workspace_id: string
+        }
+        Update: {
+          attendance_bonus?: number
+          attendance_bonus_deduction?: number
+          base_salary?: number
+          calc_breakdown?: Json
+          created_at?: string
+          created_by?: string | null
+          employee_id?: string
+          employee_snapshot?: Json
+          gross_amount?: number
+          has_warnings?: boolean
+          health_insurance_employee?: number
+          health_insurance_employer?: number
+          id?: string
+          income_tax?: number
+          labor_insurance_employee?: number
+          labor_insurance_employer?: number
+          leave_deduction?: number
+          net_amount?: number
+          note?: string | null
+          other_allowances?: number
+          other_deductions?: number
+          overtime_pay?: number
+          payroll_run_id?: string
+          pension_employer?: number
+          pension_voluntary?: number
+          period_month?: number
+          period_year?: number
+          sent_to_employee_at?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          warnings?: Json
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'payslips_created_by_fkey'
+            columns: ['created_by']
+            isOneToOne: false
+            referencedRelation: 'employees'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'payslips_employee_id_fkey'
+            columns: ['employee_id']
+            isOneToOne: false
+            referencedRelation: 'employees'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'payslips_payroll_run_id_fkey'
+            columns: ['payroll_run_id']
+            isOneToOne: false
+            referencedRelation: 'payroll_runs'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'payslips_updated_by_fkey'
+            columns: ['updated_by']
+            isOneToOne: false
+            referencedRelation: 'employees'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'payslips_workspace_id_fkey'
             columns: ['workspace_id']
             isOneToOne: false
             referencedRelation: 'workspaces'
@@ -5161,6 +5943,11 @@ export type Database = {
           receipt_date: string | null
           receipt_number: string
           receipt_type: number
+          refund_amount: number | null
+          refund_notes: string | null
+          refund_voucher_id: string | null
+          refunded_at: string | null
+          refunded_by: string | null
           status: string
           tour_id: string | null
           tour_name: string | null
@@ -5193,6 +5980,11 @@ export type Database = {
           receipt_date?: string | null
           receipt_number: string
           receipt_type?: number
+          refund_amount?: number | null
+          refund_notes?: string | null
+          refund_voucher_id?: string | null
+          refunded_at?: string | null
+          refunded_by?: string | null
           status?: string
           tour_id?: string | null
           tour_name?: string | null
@@ -5225,6 +6017,11 @@ export type Database = {
           receipt_date?: string | null
           receipt_number?: string
           receipt_type?: number
+          refund_amount?: number | null
+          refund_notes?: string | null
+          refund_voucher_id?: string | null
+          refunded_at?: string | null
+          refunded_by?: string | null
           status?: string
           tour_id?: string | null
           tour_name?: string | null
@@ -7752,174 +8549,6 @@ export type Database = {
           },
           {
             foreignKeyName: 'transportation_rates_workspace_id_fkey'
-            columns: ['workspace_id']
-            isOneToOne: false
-            referencedRelation: 'workspaces'
-            referencedColumns: ['id']
-          },
-        ]
-      }
-      travel_invoices: {
-        Row: {
-          allowance_amount: number | null
-          allowance_date: string | null
-          allowance_items: Json | null
-          allowance_no: string | null
-          allowanced_by: string | null
-          barcode: string | null
-          buyer_email: string | null
-          buyer_info: Json
-          buyer_mobile: string | null
-          buyer_name: string
-          buyer_ubn: string | null
-          created_at: string
-          created_by: string
-          id: string
-          invoice_date: string
-          invoice_number: string | null
-          is_batch: boolean | null
-          items: Json
-          merchant_id: string | null
-          order_id: string | null
-          qrcode_l: string | null
-          qrcode_r: string | null
-          random_num: string | null
-          status: string
-          tax_type: string
-          total_amount: number
-          tour_id: string | null
-          transaction_no: string
-          updated_at: string
-          updated_by: string | null
-          void_date: string | null
-          void_reason: string | null
-          voided_by: string | null
-          workspace_id: string
-        }
-        Insert: {
-          allowance_amount?: number | null
-          allowance_date?: string | null
-          allowance_items?: Json | null
-          allowance_no?: string | null
-          allowanced_by?: string | null
-          barcode?: string | null
-          buyer_email?: string | null
-          buyer_info?: Json
-          buyer_mobile?: string | null
-          buyer_name: string
-          buyer_ubn?: string | null
-          created_at?: string
-          created_by: string
-          id?: string
-          invoice_date: string
-          invoice_number?: string | null
-          is_batch?: boolean | null
-          items?: Json
-          merchant_id?: string | null
-          order_id?: string | null
-          qrcode_l?: string | null
-          qrcode_r?: string | null
-          random_num?: string | null
-          status?: string
-          tax_type?: string
-          total_amount: number
-          tour_id?: string | null
-          transaction_no: string
-          updated_at?: string
-          updated_by?: string | null
-          void_date?: string | null
-          void_reason?: string | null
-          voided_by?: string | null
-          workspace_id: string
-        }
-        Update: {
-          allowance_amount?: number | null
-          allowance_date?: string | null
-          allowance_items?: Json | null
-          allowance_no?: string | null
-          allowanced_by?: string | null
-          barcode?: string | null
-          buyer_email?: string | null
-          buyer_info?: Json
-          buyer_mobile?: string | null
-          buyer_name?: string
-          buyer_ubn?: string | null
-          created_at?: string
-          created_by?: string
-          id?: string
-          invoice_date?: string
-          invoice_number?: string | null
-          is_batch?: boolean | null
-          items?: Json
-          merchant_id?: string | null
-          order_id?: string | null
-          qrcode_l?: string | null
-          qrcode_r?: string | null
-          random_num?: string | null
-          status?: string
-          tax_type?: string
-          total_amount?: number
-          tour_id?: string | null
-          transaction_no?: string
-          updated_at?: string
-          updated_by?: string | null
-          void_date?: string | null
-          void_reason?: string | null
-          voided_by?: string | null
-          workspace_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: 'travel_invoices_allowanced_by_fkey'
-            columns: ['allowanced_by']
-            isOneToOne: false
-            referencedRelation: 'employees'
-            referencedColumns: ['id']
-          },
-          {
-            foreignKeyName: 'travel_invoices_created_by_fkey'
-            columns: ['created_by']
-            isOneToOne: false
-            referencedRelation: 'employees'
-            referencedColumns: ['id']
-          },
-          {
-            foreignKeyName: 'travel_invoices_order_id_fkey'
-            columns: ['order_id']
-            isOneToOne: false
-            referencedRelation: 'orders'
-            referencedColumns: ['id']
-          },
-          {
-            foreignKeyName: 'travel_invoices_order_id_fkey'
-            columns: ['order_id']
-            isOneToOne: false
-            referencedRelation: 'orders_invoice_summary'
-            referencedColumns: ['order_id']
-          },
-          {
-            foreignKeyName: 'travel_invoices_tour_id_fkey'
-            columns: ['tour_id']
-            isOneToOne: false
-            referencedRelation: 'tours'
-            referencedColumns: ['id']
-          },
-          {
-            foreignKeyName: 'travel_invoices_updated_by_fkey'
-            columns: ['updated_by']
-            isOneToOne: false
-            referencedRelation: 'employees'
-            referencedColumns: ['id']
-          },
-          {
-            foreignKeyName: 'travel_invoices_voided_by_fkey'
-            columns: ['voided_by']
-            isOneToOne: false
-            referencedRelation: 'employees'
-            referencedColumns: ['id']
-          },
-          {
-            foreignKeyName: 'travel_invoices_workspace_id_fkey'
             columns: ['workspace_id']
             isOneToOne: false
             referencedRelation: 'workspaces'

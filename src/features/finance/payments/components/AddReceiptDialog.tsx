@@ -11,7 +11,7 @@ import { Plus, Save, X, Copy, ExternalLink, Check, Trash2, Lock, ArrowRightLeft 
 import { ReceiptTransferDialog } from './ReceiptTransferDialog'
 import { Skeleton } from '@/components/ui/skeleton'
 import { StatusBadge } from '@/components/ui/status-badge'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, type DialogLevel } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -47,6 +47,8 @@ interface AddReceiptDialogProps {
   onUpdate?: (receiptId: string, data: Partial<Receipt>) => Promise<void>
   /** 編輯模式：刪除回呼 */
   onDelete?: (receiptId: string) => Promise<void>
+  /** Dialog 巢狀層級（預設 1；嵌進其他 level=1 dialog 時要設 2）*/
+  level?: DialogLevel
 }
 
 export function AddReceiptDialog({
@@ -58,6 +60,7 @@ export function AddReceiptDialog({
   editingReceipt,
   onUpdate,
   onDelete,
+  level = 1,
 }: AddReceiptDialogProps) {
   const { toast } = useToast()
   const {
@@ -419,7 +422,7 @@ export function AddReceiptDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent level={1} className="max-w-[95vw] w-[95vw] h-[90vh] flex flex-col">
+      <DialogContent level={level} className="max-w-[95vw] w-[95vw] h-[90vh] flex flex-col">
         {/* 收款類型 Tab - 包住整個 header 和內容 */}
         <Tabs
           value={activeTab}
@@ -667,6 +670,24 @@ export function AddReceiptDialog({
                       editingReceipt.order_id,
                       editingReceipt.tour_id || null
                     )
+                    // confirm 之後產生會計傳票（用實收金額 actual_amount）
+                    // 沒啟用會計 / 收款方式沒綁科目時、API 會 throw、catch 吞掉、不中斷確認流程
+                    try {
+                      const wsId = useAuthStore.getState().user?.workspace_id
+                      if (wsId) {
+                        await fetch('/api/accounting/vouchers/auto-create', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({
+                            source_type: 'receipt',
+                            source_id: editingReceipt.id,
+                            workspace_id: wsId,
+                          }),
+                        })
+                      }
+                    } catch (err) {
+                      logger.error('產生收款傳票失敗:', err)
+                    }
                     toast({ title: '已確認收款' })
                     onSuccess?.()
                     onOpenChange(false)

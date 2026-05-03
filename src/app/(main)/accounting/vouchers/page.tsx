@@ -181,7 +181,28 @@ export default function VouchersPage() {
     setIsDetailDialogOpen(true)
   }
 
-  const handleReverse = (voucher: JournalVoucher) => {}
+  const handleReverse = async (voucher: JournalVoucher) => {
+    const confirmed = window.confirm(
+      `確定要反沖傳票 ${voucher.voucher_no} 嗎？\n\n會建立一張借貸對調的反沖傳票、原傳票狀態改為「已反沖」、不可復原。`
+    )
+    if (!confirmed) return
+
+    try {
+      const res = await fetch(`/api/accounting/vouchers/${voucher.id}/reverse`, {
+        method: 'POST',
+      })
+      const json = await res.json()
+      if (!res.ok) {
+        alert(`反沖失敗：${json.error || '未知錯誤'}`)
+        return
+      }
+      alert(`反沖成功、反沖傳票編號：${json.voucher_no}`)
+      loadVouchers()
+    } catch (error) {
+      logger.error('反沖傳票失敗:', error)
+      alert('反沖失敗、請稍後再試')
+    }
+  }
 
   const handleCreate = () => {
     setIsCreateDialogOpen(true)

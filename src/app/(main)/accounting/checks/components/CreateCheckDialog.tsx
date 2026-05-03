@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { createBrowserClient } from '@supabase/ssr'
+import { supabase } from '@/lib/supabase/client'
 import { useAuthStore } from '@/stores/auth-store'
 import { toast } from 'sonner'
 import { logger } from '@/lib/utils/logger'
@@ -59,11 +59,6 @@ export function CreateCheckDialog({ open, onOpenChange, onSuccess }: CreateCheck
     setIsSubmitting(true)
 
     try {
-      const supabase = createBrowserClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      )
-
       const { error } = await supabase.from('checks').insert({
         workspace_id: user.workspace_id,
         check_number: formData.check_number,
@@ -71,10 +66,8 @@ export function CreateCheckDialog({ open, onOpenChange, onSuccess }: CreateCheck
         due_date: formData.due_date,
         amount,
         payee_name: formData.payee_name,
-        payee_type: 'other',
         status: 'pending',
         memo: formData.memo || null,
-        created_by: user.id,
       })
 
       if (error) throw error

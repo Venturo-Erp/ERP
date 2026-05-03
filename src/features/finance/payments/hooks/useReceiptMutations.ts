@@ -197,23 +197,7 @@ export function useReceiptMutations() {
       // 3. 重算訂單付款狀態 + 團財務數據 + 刷新快取
       await recalculateReceiptStats(formData.order_id, tourId || null)
 
-      // 4. 自動產生傳票（只為第一筆建立，或之後改成每筆都建）
-      if (firstReceiptId) {
-        try {
-          await fetch('/api/accounting/vouchers/auto-create', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              source_type: 'receipt',
-              source_id: firstReceiptId,
-              workspace_id: workspaceId,
-            }),
-          })
-        } catch (error) {
-          logger.error('自動產生收款傳票失敗:', error)
-          // 不中斷流程，傳票可手動補建
-        }
-      }
+      // 自動傳票改在「確認收款」時產生（用實收金額 actual_amount）、不在建單時產生
 
       return {
         success: true,

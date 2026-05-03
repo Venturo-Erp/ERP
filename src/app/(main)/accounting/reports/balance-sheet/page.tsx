@@ -47,17 +47,18 @@ export default function BalanceSheetPage() {
     setIsLoading(true)
 
     try {
-      // 1. 取得資產、負債、權益科目
+      // 1. 取得資產、負債、權益科目（剔除停用）
       const { data: accounts, error: accountsError } = await supabase
         .from('chart_of_accounts')
         .select('id, code, name, account_type')
         .eq('workspace_id', user.workspace_id)
+        .eq('is_active', true)
         .in('account_type', ['asset', 'liability', 'equity'])
         .order('code', { ascending: true })
 
       if (accountsError) throw accountsError
 
-      // 2. 取得截至指定日期的所有分錄
+      // 2. 取得截至指定日期的所有分錄（剔除已反沖 / 草稿、只算 posted / locked）
       const { data: lines, error: linesError } = await supabase
         .from('journal_lines')
         .select(
@@ -67,12 +68,14 @@ export default function BalanceSheetPage() {
           credit_amount,
           voucher:journal_vouchers!inner(
             voucher_date,
-            workspace_id
+            workspace_id,
+            status
           )
         `
         )
         .eq('voucher.workspace_id', user.workspace_id)
         .lte('voucher.voucher_date', asOfDate)
+        .in('voucher.status', ['posted', 'locked'])
 
       if (linesError) throw linesError
 
@@ -130,21 +133,24 @@ export default function BalanceSheetPage() {
           credit_amount,
           voucher:journal_vouchers!inner(
             voucher_date,
-            workspace_id
+            workspace_id,
+            status
           )
         `
         )
         .eq('voucher.workspace_id', user.workspace_id)
         .gte('voucher.voucher_date', yearStart)
         .lte('voucher.voucher_date', asOfDate)
+        .in('voucher.status', ['posted', 'locked'])
 
       if (plError) throw plError
 
-      // 取得損益科目
+      // 取得損益科目（剔除停用）
       const { data: plAccounts } = await supabase
         .from('chart_of_accounts')
         .select('id, account_type')
         .eq('workspace_id', user.workspace_id)
+        .eq('is_active', true)
         .in('account_type', ['revenue', 'cost', 'expense'])
 
       const plAccountIds = new Set(plAccounts?.map(a => a.id) || [])
