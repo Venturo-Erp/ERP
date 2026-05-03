@@ -1370,21 +1370,11 @@ export function AddRequestDialog({
                 value="company"
                 className="flex-1 overflow-y-auto pt-4 border-t border-morandi-container/30 space-y-6"
               >
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* 上方三格：費用類型 / 付款方式 / 日期（William 拍板對齊團體請款） */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <ExpenseTypeSelector
                     value={formData.expense_type as CompanyExpenseType | ''}
                     onChange={value => setFormData(prev => ({ ...prev, expense_type: value }))}
-                  />
-                  <div />
-                  <RequestDateInput
-                    value={formData.request_date}
-                    onChange={(date, isSpecialBilling) =>
-                      setFormData(prev => ({
-                        ...prev,
-                        request_date: date,
-                        is_special_billing: isSpecialBilling,
-                      }))
-                    }
                   />
                   <div>
                     <label className="text-sm font-medium text-morandi-primary">付款方式</label>
@@ -1406,17 +1396,16 @@ export function AddRequestDialog({
                       </SelectContent>
                     </Select>
                   </div>
-                  <div>
-                    <label className="text-sm font-medium text-morandi-primary">
-                      {ADD_REQUEST_FORM_LABELS.備註}
-                    </label>
-                    <Input
-                      value={formData.notes}
-                      onChange={e => setFormData(prev => ({ ...prev, notes: e.target.value }))}
-                      placeholder={ADD_REQUEST_DIALOG_LABELS.輸入備註_可選}
-                      className="mt-1"
-                    />
-                  </div>
+                  <RequestDateInput
+                    value={formData.request_date}
+                    onChange={(date, isSpecialBilling) =>
+                      setFormData(prev => ({
+                        ...prev,
+                        request_date: date,
+                        is_special_billing: isSpecialBilling,
+                      }))
+                    }
+                  />
                 </div>
 
                 <EditableRequestItemList
