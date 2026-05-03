@@ -95,7 +95,7 @@ export const TableHeader = React.memo(function TableHeader({
             key={String(column.key)}
             className={cn('text-left py-2.5 px-4 text-xs relative align-middle')}
             style={{
-              minWidth: column.minWidth || (column.width ? `${column.width}px` : undefined),
+              minWidth: column.minWidth || column.width || undefined,
               maxWidth: column.maxWidth,
             }}
           >

@@ -64,7 +64,7 @@ export const TableBody = React.memo(function TableBody({
               <td
                 key={`skeleton-${rowIndex}-${colIndex}`}
                 className="py-3 px-4"
-                style={{ width: column.width ? `${column.width}px` : undefined }}
+                style={{ width: column.width || undefined }}
               >
                 <div
                   className="h-4 bg-morandi-container/50 rounded animate-pulse"
@@ -180,7 +180,7 @@ export const TableBody = React.memo(function TableBody({
                     column.className
                   )}
                   style={{
-                    minWidth: column.minWidth || (column.width ? `${column.width}px` : undefined),
+                    minWidth: column.minWidth || column.width || undefined,
                     maxWidth: column.maxWidth,
                   }}
                 >

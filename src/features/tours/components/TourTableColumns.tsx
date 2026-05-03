@@ -43,7 +43,7 @@ export function useTourTableColumns({ ordersByTourId }: UseTourTableColumnsParam
         key: 'name',
         label: TOUR_TABLE.col_name,
         sortable: true,
-        width: '180px',
+        // 完全不設 width / minWidth：搭配 table-fixed、name 欄位 auto 吃剩餘空間
         render: value => (
           <span className="text-sm text-morandi-primary">{String(value || '')}</span>
         ),
