@@ -269,7 +269,7 @@ export function CreateTenantDialog({
             </div>
 
             <div className="flex gap-2 mt-6">
-              <Button variant="outline" onClick={() => handleOpenChange(false)} className="flex-1">
+              <Button variant="soft-gold" onClick={() => handleOpenChange(false)} className="flex-1">
                 {LABELS.BTN_CANCEL}
               </Button>
               <Button variant="soft-gold"
@@ -340,7 +340,7 @@ export function CreateTenantDialog({
             </div>
 
             <div className="flex gap-2 mt-6">
-              <Button variant="outline" onClick={() => setStep(1)} className="flex-1">
+              <Button variant="soft-gold" onClick={() => setStep(1)} className="flex-1">
                 {LABELS.BTN_PREV}
               </Button>
               <Button variant="soft-gold"
@@ -383,7 +383,7 @@ export function CreateTenantDialog({
             </Card>
 
             <div className="flex gap-2 mt-4">
-              <Button variant="outline" onClick={handleClose} className="flex-1">
+              <Button variant="soft-gold" onClick={handleClose} className="flex-1">
                 {LABELS.BTN_CLOSE}
               </Button>
               <Button variant="soft-gold"

@@ -89,7 +89,6 @@ export function TourControllerSection({ workspaceId }: { workspaceId: string }) 
       <Button
         onClick={handleSave}
         disabled={saving}
-        className="bg-morandi-gold hover:bg-morandi-gold-hover"
       >
         {saving ? (
           <span className="flex items-center">
@@ -221,7 +220,7 @@ export function TourAttributesSection({ workspaceId }: { workspaceId: string }) 
             <div className="flex gap-2">
               <Button
                 type="button"
-                variant="outline"
+                variant="soft-gold"
                 size="sm"
                 onClick={selectAll}
                 disabled={selectedCategories.length === tourCategories.length}
@@ -230,7 +229,7 @@ export function TourAttributesSection({ workspaceId }: { workspaceId: string }) 
               </Button>
               <Button
                 type="button"
-                variant="outline"
+                variant="soft-gold"
                 size="sm"
                 onClick={clearAll}
                 disabled={selectedCategories.length === 0}
@@ -281,7 +280,6 @@ export function TourAttributesSection({ workspaceId }: { workspaceId: string }) 
       <Button
         onClick={handleSave}
         disabled={saving}
-        className="bg-morandi-gold hover:bg-morandi-gold-hover"
       >
         {saving ? (
           <span className="flex items-center">

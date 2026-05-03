@@ -301,7 +301,7 @@ export function TourClosingDialog({ open, onOpenChange, tour, onSuccess }: TourC
 
         <DialogFooter className="gap-2">
           <Button
-            variant="outline"
+            variant="soft-gold"
             onClick={handlePrintReport}
             disabled={isPrinting}
             className="gap-2"
@@ -309,7 +309,7 @@ export function TourClosingDialog({ open, onOpenChange, tour, onSuccess }: TourC
             {isPrinting ? <Loader2 size={16} className="animate-spin" /> : <Printer size={16} />}
             {isPrinting ? TOURS_LABELS.PRINTING : TOURS_LABELS.PRINT_REPORT}
           </Button>
-          <Button variant="outline" onClick={() => onOpenChange(false)} className="gap-2">
+          <Button variant="soft-gold" onClick={() => onOpenChange(false)} className="gap-2">
             <X size={16} />
             {TOURS_LABELS.CANCEL}
           </Button>
@@ -332,7 +332,7 @@ export function TourClosingDialog({ open, onOpenChange, tour, onSuccess }: TourC
             <DialogDescription>{TOURS_LABELS.CONFIRM_CLOSE_WARNING}</DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setShowConfirmation(false)}>
+            <Button variant="soft-gold" onClick={() => setShowConfirmation(false)}>
               {TOURS_LABELS.CANCEL}
             </Button>
             <Button variant="soft-gold"

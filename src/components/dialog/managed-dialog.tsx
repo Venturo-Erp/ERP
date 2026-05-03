@@ -340,7 +340,7 @@ export function ManagedDialog({
                     <>
                       <Button
                         type="button"
-                        variant="outline"
+                        variant="soft-gold"
                         onClick={handleCancel}
                         className="gap-2"
                       >
@@ -381,7 +381,7 @@ export function ManagedDialog({
           <p className="text-morandi-primary py-2">{confirmCloseMessage}</p>
 
           <div className="flex justify-end gap-2 pt-2">
-            <Button variant="outline" onClick={handleCancelClose} className="gap-2">
+            <Button variant="soft-gold" onClick={handleCancelClose} className="gap-2">
               <X size={16} />
               {cancelCloseLabel}
             </Button>

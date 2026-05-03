@@ -101,8 +101,9 @@ export function usePaymentData() {
     await invalidateReceipts()
   }
 
-  // 確認收款（更新實收金額和狀態）
-  const handleConfirmReceipt = async (receiptId: string, actualAmount: number) => {
+  // 確認收款（狀態改 confirmed、actual_amount 沿用建單時自動算的值、不覆蓋）
+  // 確認後自動產生會計傳票（含手續費三行分錄）
+  const handleConfirmReceipt = async (receiptId: string) => {
     if (!user?.id) {
       throw new Error(PAYMENT_DATA_LABELS.PLEASE_LOGIN)
     }
@@ -110,13 +111,30 @@ export function usePaymentData() {
     const receipt = receipts.find(r => r.id === receiptId)
 
     await updateReceipt(receiptId, {
-      actual_amount: actualAmount,
       status: 'confirmed',
       updated_by: user.id,
     })
 
     if (receipt) {
       await recalculateReceiptStats(receipt.order_id, receipt.tour_id || null)
+    }
+
+    // 產生傳票（沒啟用會計 / 沒綁科目 → API throw、catch 吞掉、不中斷確認流程）
+    try {
+      const wsId = user?.workspace_id
+      if (wsId) {
+        await fetch('/api/accounting/vouchers/auto-create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            source_type: 'receipt',
+            source_id: receiptId,
+            workspace_id: wsId,
+          }),
+        })
+      }
+    } catch (err) {
+      logger.error('產生收款傳票失敗:', err)
     }
 
     await invalidateReceipts()

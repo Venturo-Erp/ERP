@@ -346,12 +346,14 @@ export default function TodosPage() {
       assignee: string
       enabled_quick_actions: ('receipt' | 'invoice' | 'group' | 'quote' | 'assign')[]
     }) => {
+      if (isSubmitting) return
       const currentUser = useAuthStore.getState().user
       if (!currentUser?.id) {
         await alertError('請先登入')
         return
       }
 
+      setIsSubmitting(true)
       try {
         const visibilityList = [currentUser.id]
         if (formData.assignee && formData.assignee !== currentUser.id) {
@@ -379,9 +381,11 @@ export default function TodosPage() {
       } catch (error) {
         logger.error('新增失敗:', error)
         await alertError(LABELS.ADD_FAILED)
+      } finally {
+        setIsSubmitting(false)
       }
     },
-    [addTodo, columns]
+    [addTodo, columns, isSubmitting]
   )
 
   // 截止日期
@@ -468,11 +472,7 @@ export default function TodosPage() {
       searchTerm={searchTerm}
       onSearchChange={setSearchTerm}
       searchPlaceholder={LABELS.SEARCH_PLACEHOLDER}
-      badge={
-        <span className="text-xs font-normal text-morandi-secondary bg-morandi-container/60 px-2 py-0.5 rounded-full">
-          {visibleTodos.length} / {todos?.length || 0}
-        </span>
-      }
+      badge={undefined}
       headerActions={
         <div className="flex items-center gap-2">
           <Select
@@ -593,9 +593,7 @@ export default function TodosPage() {
                                       {column.name}
                                     </span>
                                   )}
-                                  <span className="text-xs text-morandi-muted bg-morandi-container/60 px-1.5 py-0.5 rounded-full flex-shrink-0">
-                                    {items.length}
-                                  </span>
+
                                 </div>
                                 <div className="flex items-center gap-0.5">
                                   <button
@@ -784,7 +782,13 @@ export default function TodosPage() {
           return (
             <TodoExpandedView
               todo={todo}
-              onUpdate={updates => updateTodo(expandedTodo, updates)}
+              onUpdate={async updates => {
+                try {
+                  await updateTodo(expandedTodo, updates)
+                } catch {
+                  // useTodos 已經處理樂觀更新回滾和錯誤日誌，這裡吞掉避免 unhandled rejection
+                }
+              }}
               onClose={() => setExpandedTodo(null)}
               onDelete={() => {
                 setExpandedTodo(null)
@@ -801,7 +805,7 @@ export default function TodosPage() {
             <DialogTitle>{LABELS.ADD_TODO}</DialogTitle>
             <DialogDescription>{LABELS.ADD_TODO_DESC}</DialogDescription>
           </DialogHeader>
-          <AddTodoForm onSubmit={handleAddTodo} onCancel={() => setIsAddDialogOpen(false)} />
+          <AddTodoForm onSubmit={handleAddTodo} onCancel={() => setIsAddDialogOpen(false)} isSubmitting={isSubmitting} />
         </DialogContent>
       </Dialog>
 
@@ -814,6 +818,7 @@ export default function TodosPage() {
 function AddTodoForm({
   onSubmit,
   onCancel,
+  isSubmitting,
 }: {
   onSubmit: (data: {
     title: string
@@ -823,6 +828,7 @@ function AddTodoForm({
     enabled_quick_actions: ('receipt' | 'invoice' | 'group' | 'quote' | 'assign')[]
   }) => void
   onCancel: () => void
+  isSubmitting?: boolean
 }) {
   const { items: users, loading: isLoadingUsers } = useEmployeesSlim()
   const [formData, setFormData] = useState({
@@ -914,12 +920,13 @@ function AddTodoForm({
       <div className="flex gap-2 pt-4">
         <Button variant="soft-gold"
           type="submit"
- className="flex-1 gap-2"
+          disabled={isSubmitting}
+          className="flex-1 gap-2"
         >
           <Plus size={16} />
           {LABELS.LABEL_1974}
         </Button>
-        <Button type="button" variant="outline" onClick={onCancel} className="gap-2">
+        <Button type="button" variant="soft-gold" onClick={onCancel} className="gap-2">
           <X size={16} />
           {LABELS.CANCEL}
         </Button>

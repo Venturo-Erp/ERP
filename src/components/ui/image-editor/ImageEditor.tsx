@@ -452,7 +452,7 @@ export function ImageEditor({
                   settings.y !== 50) && (
                   <Button
                     type="button"
-                    variant="outline"
+                    variant="soft-gold"
                     size="sm"
                     onClick={handleResetTransform}
                     className="w-full gap-1.5 text-xs"
@@ -505,7 +505,7 @@ export function ImageEditor({
               {hasAdjustments && (
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="soft-gold"
                   size="sm"
                   onClick={handleResetAdjustments}
                   className="w-full gap-1.5 text-xs"
@@ -553,7 +553,7 @@ export function ImageEditor({
 
         {/* 底部按鈕 */}
         <div className="px-6 py-4 border-t border-border flex items-center justify-end gap-3">
-          <Button type="button" variant="outline" onClick={onClose} disabled={isProcessing}>
+          <Button type="button" variant="soft-gold" onClick={onClose} disabled={isProcessing}>
             {tCommon('cancel')}
           </Button>
           {onCropAndSave ? (

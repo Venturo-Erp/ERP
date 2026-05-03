@@ -129,7 +129,7 @@ export function PriceTiersSection({ data, onChange, quoteTierPricings }: PriceTi
           {quoteTierPricings && quoteTierPricings.length > 0 && (
             <Button
               type="button"
-              variant="outline"
+              variant="soft-gold"
               size="sm"
               onClick={importFromQuote}
               className="gap-1.5 text-morandi-gold border-morandi-gold hover:bg-morandi-gold hover:text-white"
@@ -259,7 +259,7 @@ export function PriceTiersSection({ data, onChange, quoteTierPricings }: PriceTi
           {/* 新增按鈕 */}
           <Button
             type="button"
-            variant="outline"
+            variant="soft-gold"
             onClick={addPriceTier}
             className="w-full border-dashed"
           >

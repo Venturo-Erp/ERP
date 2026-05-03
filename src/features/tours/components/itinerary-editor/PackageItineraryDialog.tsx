@@ -80,7 +80,7 @@ export function PackageItineraryDialog({
                     </span>
                     {/* 預覽按鈕 */}
                     <Button
-                      variant="outline"
+                      variant="soft-gold"
                       size="sm"
                       onClick={() => hook.setViewMode('preview')}
                       className="ml-auto h-6 px-2 text-[10px] gap-1"
@@ -187,7 +187,7 @@ export function PackageItineraryDialog({
                     <div className="flex items-center gap-2">
                       {hook.showAiGenerate && (
                         <Button
-                          variant="outline"
+                          variant="soft-gold"
                           size="sm"
                           onClick={hook.openAiDialog}
                           className="h-7 px-2 text-[11px] gap-1 text-morandi-gold border-morandi-gold/50 hover:bg-morandi-gold/10"
@@ -211,7 +211,7 @@ export function PackageItineraryDialog({
                     <div className="flex gap-1.5">
                       {hook.isEditMode && (
                         <Button
-                          variant="outline"
+                          variant="soft-gold"
                           size="sm"
                           onClick={hook.handleSaveAsNewVersion}
                           disabled={hook.isCreating || !hook.formData.title.trim()}

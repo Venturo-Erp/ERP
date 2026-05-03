@@ -4,6 +4,7 @@ import React, { useMemo, useState, useEffect } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { DatePicker } from '@/components/ui/date-picker'
 import { Copy, Check, Plane } from 'lucide-react'
 import { useMembers, useToursSlim } from '@/data'
 import type { Todo } from '@/stores/types'
@@ -201,7 +202,7 @@ export function PnrToolContent({ todo }: { todo: Todo }) {
         <div className="flex items-center justify-between mb-2">
           <h4 className="text-xs font-medium text-morandi-primary">NM 旅客名字指令</h4>
           <Button
-            variant="outline"
+            variant="soft-gold"
             size="sm"
             onClick={() => copy(nmCommand, setCopiedNm)}
             disabled={!nmCommand}
@@ -222,12 +223,7 @@ export function PnrToolContent({ todo }: { todo: Todo }) {
         <div className="grid grid-cols-3 gap-2 mb-3">
           <div>
             <label className="text-xs text-morandi-secondary mb-1 block">出發日期</label>
-            <Input
-              type="date"
-              value={anDate}
-              onChange={e => setAnDate(e.target.value)}
-              className="h-8 text-xs"
-            />
+            <DatePicker value={anDate} onChange={setAnDate} className="h-8 text-xs" />
           </div>
           <div>
             <label className="text-xs text-morandi-secondary mb-1 block">出發機場</label>
@@ -253,7 +249,7 @@ export function PnrToolContent({ todo }: { todo: Todo }) {
         <div className="flex items-center justify-between mb-2">
           <span className="text-xs text-morandi-secondary">產生指令</span>
           <Button
-            variant="outline"
+            variant="soft-gold"
             size="sm"
             onClick={() => copy(anCommand, setCopiedAn)}
             disabled={!anCommand}

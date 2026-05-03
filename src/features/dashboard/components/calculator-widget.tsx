@@ -238,7 +238,7 @@ export function CalculatorWidget() {
             {['7', '8', '9', '/'].map(btn => (
               <Button
                 key={btn}
-                variant="outline"
+                variant="soft-gold"
                 size="sm"
                 onClick={() => handleButtonClick(btn)}
                 className="h-8 text-xs font-bold bg-gradient-to-br from-card to-morandi-container/30 border border-morandi-gold/30 text-morandi-primary hover:from-morandi-gold/10 hover:to-morandi-gold/20 hover:border-morandi-gold/50 shadow-sm hover:shadow-md transition-all rounded-xl"
@@ -249,7 +249,7 @@ export function CalculatorWidget() {
             {['4', '5', '6', '*'].map(btn => (
               <Button
                 key={btn}
-                variant="outline"
+                variant="soft-gold"
                 size="sm"
                 onClick={() => handleButtonClick(btn)}
                 className="h-8 text-xs font-bold bg-gradient-to-br from-card to-morandi-container/30 border border-morandi-gold/30 text-morandi-primary hover:from-morandi-gold/10 hover:to-morandi-gold/20 hover:border-morandi-gold/50 shadow-sm hover:shadow-md transition-all rounded-xl"
@@ -260,7 +260,7 @@ export function CalculatorWidget() {
             {['1', '2', '3', '-'].map(btn => (
               <Button
                 key={btn}
-                variant="outline"
+                variant="soft-gold"
                 size="sm"
                 onClick={() => handleButtonClick(btn)}
                 className="h-8 text-xs font-bold bg-gradient-to-br from-card to-morandi-container/30 border border-morandi-gold/30 text-morandi-primary hover:from-morandi-gold/10 hover:to-morandi-gold/20 hover:border-morandi-gold/50 shadow-sm hover:shadow-md transition-all rounded-xl"
@@ -271,7 +271,7 @@ export function CalculatorWidget() {
             {['0', '.', '(', ')'].map(btn => (
               <Button
                 key={btn}
-                variant="outline"
+                variant="soft-gold"
                 size="sm"
                 onClick={() => handleButtonClick(btn)}
                 className="h-8 text-xs font-bold bg-gradient-to-br from-card to-morandi-container/30 border border-morandi-gold/30 text-morandi-primary hover:from-morandi-gold/10 hover:to-morandi-gold/20 hover:border-morandi-gold/50 shadow-sm hover:shadow-md transition-all rounded-xl"
@@ -280,7 +280,7 @@ export function CalculatorWidget() {
               </Button>
             ))}
             <Button
-              variant="outline"
+              variant="soft-gold"
               size="sm"
               onClick={() => handleButtonClick('+')}
               className="h-8 text-xs font-bold bg-gradient-to-br from-card to-morandi-container/30 border border-morandi-gold/30 text-morandi-primary hover:from-morandi-gold/10 hover:to-morandi-gold/20 hover:border-morandi-gold/50 shadow-sm hover:shadow-md transition-all rounded-xl"
@@ -295,7 +295,7 @@ export function CalculatorWidget() {
               =
             </Button>
             <Button
-              variant="outline"
+              variant="soft-gold"
               size="sm"
               onClick={() => handleButtonClick('C')}
               className="h-8 text-xs font-semibold col-span-2 bg-gradient-to-br from-card to-morandi-container/30 border border-morandi-gold/30 text-morandi-primary hover:from-status-danger-bg hover:to-status-danger-bg hover:text-status-danger hover:border-status-danger shadow-sm hover:shadow-md transition-all rounded-xl"

@@ -373,11 +373,11 @@ export function TourPrintDialog({ isOpen, tour, members, onClose }: TourPrintDia
               ))}
             </div>
             <div className="flex justify-end gap-2 pt-4 border-t border-border">
-              <Button variant="outline" onClick={onClose}>
+              <Button variant="soft-gold" onClick={onClose}>
                 <X size={16} className="mr-1" />
                 {TOUR_PRINT_DIALOG_LABELS.取消}
               </Button>
-              <Button variant="outline" onClick={handleExportExcel}>
+              <Button variant="soft-gold" onClick={handleExportExcel}>
                 <FileSpreadsheet size={16} className="mr-1" />
                 {TOUR_PRINT_DIALOG_LABELS.Excel}
               </Button>
@@ -425,7 +425,7 @@ export function TourPrintDialog({ isOpen, tour, members, onClose }: TourPrintDia
               }
             />
             <div className="flex justify-end gap-2 pt-4 border-t border-border">
-              <Button variant="outline" onClick={onClose}>
+              <Button variant="soft-gold" onClick={onClose}>
                 <X size={16} className="mr-1" />
                 {TOUR_PRINT_DIALOG_LABELS.取消}
               </Button>
@@ -461,7 +461,7 @@ export function TourPrintDialog({ isOpen, tour, members, onClose }: TourPrintDia
               }
             />
             <div className="flex justify-end gap-2 pt-4 border-t border-border">
-              <Button variant="outline" onClick={onClose}>
+              <Button variant="soft-gold" onClick={onClose}>
                 <X size={16} className="mr-1" />
                 {TOUR_PRINT_DIALOG_LABELS.取消}
               </Button>

@@ -137,7 +137,7 @@ export function PublishButton({
               <Button
                 disabled={saving}
                 size="sm"
-                variant="outline"
+                variant="soft-gold"
                 className="h-8 px-3 border-morandi-container hover:bg-morandi-container/30"
               >
                 <FilePlus size={14} className="mr-1.5" />
@@ -181,7 +181,7 @@ export function PublishButton({
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
-                variant="outline"
+                variant="soft-gold"
                 size="sm"
                 className="h-8 px-3 text-xs border-morandi-container bg-card"
               >

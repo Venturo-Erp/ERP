@@ -89,7 +89,7 @@ export function OrderSelectDialog({ isOpen, orders, onClose, onSelect }: OrderSe
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={handleClose} className="gap-2">
+          <Button variant="soft-gold" onClick={handleClose} className="gap-2">
             <X size={16} />
             {COMP_ORDERS_LABELS.取消}
           </Button>

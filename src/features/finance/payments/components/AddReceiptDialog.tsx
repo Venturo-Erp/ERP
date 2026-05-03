@@ -613,7 +613,7 @@ export function AddReceiptDialog({
             {/* 刪除按鈕：編輯模式且未確認 */}
             {isEditMode && !isConfirmed && (
               <Button
-                variant="outline"
+                variant="soft-gold"
                 onClick={handleDelete}
                 disabled={isDeleting}
                 className="gap-2 text-morandi-red border-morandi-red hover:bg-morandi-red hover:text-white"
@@ -625,7 +625,7 @@ export function AddReceiptDialog({
             {/* 收款轉移按鈕：編輯模式且已確認、跟 CostTransferDialog 鏡像 */}
             {isEditMode && isConfirmed && editingReceipt && (
               <Button
-                variant="outline"
+                variant="soft-gold"
                 onClick={() => setReceiptTransferOpen(true)}
                 className="gap-2"
               >
@@ -644,7 +644,8 @@ export function AddReceiptDialog({
                   !formData.order_id ||
                   paymentItems.length === 0
                 }
-                className="bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors gap-2"
+                variant="soft-gold"
+                className="gap-2"
               >
                 <Save size={16} />
                 {isSubmitting

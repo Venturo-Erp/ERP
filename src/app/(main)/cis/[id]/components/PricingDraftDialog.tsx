@@ -127,7 +127,7 @@ export function PricingDraftDialog({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant="soft-gold" onClick={() => onOpenChange(false)}>
             {Q.btn_close}
           </Button>
           {!showEmptyPricing && totalNeeds > 0 && (
@@ -231,7 +231,7 @@ function EmptyState({
     <div className="text-center py-8 px-4 border border-dashed border-morandi-muted/30 rounded-md">
       <p className="text-sm text-morandi-secondary mb-3">{message}</p>
       {actionLabel && onAction && (
-        <Button size="sm" variant="outline" onClick={onAction}>
+        <Button size="sm" variant="soft-gold" onClick={onAction}>
           {actionLabel}
         </Button>
       )}

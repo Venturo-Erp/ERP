@@ -257,7 +257,7 @@ export function MemberEditDialog({
           <div>
             {editingMember?.customer_id && (
               <Button
-                variant="outline"
+                variant="soft-gold"
                 size="sm"
                 className="gap-1 text-morandi-blue border-morandi-blue/30 hover:bg-morandi-blue/10"
                 onClick={handleSyncFromCustomer}
@@ -271,7 +271,7 @@ export function MemberEditDialog({
 
           {/* 右邊：取消和儲存按鈕 */}
           <div className="flex gap-3">
-            <Button variant="outline" className="gap-1" onClick={onClose} disabled={isSaving}>
+            <Button variant="soft-gold" className="gap-1" onClick={onClose} disabled={isSaving}>
               <X size={16} />
               {COMP_ORDERS_LABELS.取消}
             </Button>

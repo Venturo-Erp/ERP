@@ -111,12 +111,20 @@ export function QuickActionInstanceCard({
         <div className="p-3">
           {instance.type === 'receipt' && (
             <Suspense fallback={LoadingFallback}>
-              <QuickReceipt onSubmit={() => undefined} />
+              <QuickReceipt
+                onSubmit={() => undefined}
+                defaultTourId={todo.tour_id || undefined}
+                defaultOrderId={todo.related_items?.find(r => r.type === 'order')?.id || undefined}
+              />
             </Suspense>
           )}
           {instance.type === 'invoice' && (
             <Suspense fallback={LoadingFallback}>
-              <QuickDisbursement onSubmit={() => undefined} />
+              <QuickDisbursement
+                onSubmit={() => undefined}
+                defaultTourId={todo.tour_id || undefined}
+                defaultOrderId={todo.related_items?.find(r => r.type === 'order')?.id || undefined}
+              />
             </Suspense>
           )}
           {instance.type === 'share' && <ShareForm todo={todo} onUpdate={onUpdate} />}

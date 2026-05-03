@@ -172,8 +172,13 @@ export function useTodos() {
     )
 
     try {
+      // Supabase .update() 會忽略 undefined 欄位，導致無法清除資料。
+      // 把 undefined 轉為 null，才能正確寫入資料庫。
+      const dbPayload = Object.fromEntries(
+        Object.entries(updatedTodo).map(([k, v]) => [k, v === undefined ? null : v])
+      )
       // 直接用 Supabase client 更新（不經過 entity layer，避免 invalidate）
-      const { error } = await supabase.from('todos').update(updatedTodo).eq('id', id)
+      const { error } = await supabase.from('todos').update(dbPayload).eq('id', id)
       if (error) throw error
       // 成功後不需要 revalidate，樂觀更新已經是正確的資料
     } catch (err) {

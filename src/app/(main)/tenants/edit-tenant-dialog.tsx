@@ -101,7 +101,7 @@ export function EditTenantDialog({
           </div>
 
           <div className="flex justify-end gap-2 pt-2">
-            <Button variant="outline" onClick={() => onOpenChange(false)}>
+            <Button variant="soft-gold" onClick={() => onOpenChange(false)}>
               {LABELS.BTN_CANCEL}
             </Button>
             <Button variant="soft-gold"

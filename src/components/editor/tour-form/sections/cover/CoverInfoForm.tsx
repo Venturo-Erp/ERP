@@ -148,7 +148,7 @@ export function CoverInfoForm({
             <Popover>
               <PopoverTrigger asChild>
                 <Button
-                  variant="outline"
+                  variant="soft-gold"
                   className={cn(
                     'w-full h-9 justify-start text-left font-normal',
                     !data.departureDate && 'text-muted-foreground'

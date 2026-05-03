@@ -309,7 +309,7 @@ export default function AccountsPage() {
         headerActions={
           <div className="flex gap-2">
             <Button
-              variant="outline"
+              variant="soft-gold"
               size="sm"
               onClick={() => {
                 // 展開所有
@@ -319,7 +319,7 @@ export default function AccountsPage() {
             >
               全部展開
             </Button>
-            <Button variant="outline" size="sm" onClick={() => setExpandedIds(new Set())}>
+            <Button variant="soft-gold" size="sm" onClick={() => setExpandedIds(new Set())}>
               全部折疊
             </Button>
           </div>

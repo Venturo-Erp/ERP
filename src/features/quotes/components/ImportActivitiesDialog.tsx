@@ -177,7 +177,7 @@ function ImportActivitiesDialog({
 
           {/* 按鈕 */}
           <div className="flex gap-2 pt-2">
-            <Button variant="outline" onClick={onClose} className="flex-1 gap-1">
+            <Button variant="soft-gold" onClick={onClose} className="flex-1 gap-1">
               <X size={16} />
               {IMPORT_ACTIVITIES_DIALOG_LABELS.CANCEL}
             </Button>

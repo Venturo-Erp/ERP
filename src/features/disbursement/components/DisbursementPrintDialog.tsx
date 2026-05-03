@@ -178,7 +178,7 @@ export function DisbursementPrintDialog({
               {DISBURSEMENT_LABELS.PRINT_PREVIEW} - {order.order_number}
             </DialogTitle>
             <div className="flex items-center gap-2 no-print">
-              <Button variant="outline" size="sm" onClick={handlePrint} className="gap-2">
+              <Button variant="soft-gold" size="sm" onClick={handlePrint} className="gap-2">
                 <Printer size={16} />
                 {DISBURSEMENT_LABELS.PRINT}
               </Button>

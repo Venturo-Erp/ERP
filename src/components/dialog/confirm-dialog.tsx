@@ -45,7 +45,7 @@ const TYPE_CONFIG = {
     iconColor: 'text-morandi-blue',
     titleColor: 'text-morandi-primary',
     buttonClass:
-      'bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors',
+      'bg-morandi-gold/[0.08] text-morandi-primary border border-morandi-gold/20 hover:bg-morandi-gold/[0.14] hover:border-morandi-gold/35 transition-colors',
     detailsBg: 'bg-morandi-blue/5 border-morandi-blue/20',
   },
 }
@@ -107,7 +107,7 @@ export function ConfirmDialog({
         <div className="flex justify-end gap-2 pt-2">
           <Button
             type="button"
-            variant="outline"
+            variant="soft-gold"
             onClick={handleCancel}
             disabled={loading}
             className="gap-2"

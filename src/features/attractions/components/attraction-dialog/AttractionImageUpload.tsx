@@ -207,7 +207,7 @@ export function AttractionImageUpload({
         />
         <Button
           type="button"
-          variant="outline"
+          variant="soft-gold"
           size="sm"
           onClick={() => fileInputRef.current?.click()}
           disabled={isUploading}

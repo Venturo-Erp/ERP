@@ -7,6 +7,7 @@ import { Sparkles, Loader2, X } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { TimeInput } from '@/components/ui/time-input'
 import { Label } from '@/components/ui/label'
 import { AI_THEMES, type AccommodationStatus } from './types'
 import { AI_GENERATE_DIALOG_LABELS } from './labels'
@@ -84,10 +85,9 @@ export function AiGenerateDialog({
               <Label className="text-xs text-morandi-primary">
                 {AI_GENERATE_DIALOG_LABELS.LABEL_1928}
               </Label>
-              <Input
-                type="time"
+              <TimeInput
                 value={arrivalTime}
-                onChange={e => onArrivalTimeChange(e.target.value)}
+                onChange={onArrivalTimeChange}
                 className="h-9"
               />
             </div>
@@ -95,10 +95,9 @@ export function AiGenerateDialog({
               <Label className="text-xs text-morandi-primary">
                 {AI_GENERATE_DIALOG_LABELS.LABEL_4695}
               </Label>
-              <Input
-                type="time"
+              <TimeInput
                 value={departureTime}
-                onChange={e => onDepartureTimeChange(e.target.value)}
+                onChange={onDepartureTimeChange}
                 className="h-9"
               />
             </div>
@@ -138,7 +137,7 @@ export function AiGenerateDialog({
           </p>
         </div>
         <div className="flex justify-end gap-2">
-          <Button variant="outline" onClick={onClose} className="gap-1">
+          <Button variant="soft-gold" onClick={onClose} className="gap-1">
             <X size={14} />
             {AI_GENERATE_DIALOG_LABELS.CANCEL}
           </Button>

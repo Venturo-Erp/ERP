@@ -172,7 +172,7 @@ export function VisasInfoDialog({ open, onClose }: VisasInfoDialogProps) {
           <DialogTitle>{L.title}</DialogTitle>
           <div className="flex flex-wrap items-center gap-2">
             <Button
-              variant="outline"
+              variant="soft-gold"
               onClick={handleCopySelected}
               disabled={selectedSections.size === 0}
               className="flex items-center gap-2"

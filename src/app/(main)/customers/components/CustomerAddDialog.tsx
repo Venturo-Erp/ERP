@@ -379,7 +379,7 @@ export function CustomerAddDialog({
       </div>
 
       <div className="flex justify-end pt-2 border-t">
-        <Button variant="outline" onClick={handleClose} className="gap-2">
+        <Button variant="soft-gold" onClick={handleClose} className="gap-2">
           <X size={16} />
           {L.btn_cancel}
         </Button>

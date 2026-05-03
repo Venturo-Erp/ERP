@@ -167,7 +167,7 @@ export function ConvertToTourDialog({
         </div>
 
         <div className="flex justify-end space-x-2 pt-4 border-t border-border mt-4">
-          <Button variant="outline" onClick={handleClose} disabled={submitting} className="gap-2">
+          <Button variant="soft-gold" onClick={handleClose} disabled={submitting} className="gap-2">
             <X size={16} />
             {TOUR_CONVERT.cancel}
           </Button>
@@ -179,7 +179,7 @@ export function ConvertToTourDialog({
               !returnDate ||
               (hasOrder && !newOrder.sales_person?.trim())
             }
-            className="bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors"
+            variant="soft-gold"
           >
             {submitLabel}
           </Button>

@@ -135,7 +135,7 @@ export function BirthdayListDialog({ open, onClose, initialMonth }: BirthdayList
             <span className="font-semibold text-morandi-primary">
               {getMonthLabel(currentMonth)}
             </span>
-            <Button variant="outline" size="sm" onClick={handleToday} className="h-6 px-2 text-xs">
+            <Button variant="soft-gold" size="sm" onClick={handleToday} className="h-6 px-2 text-xs">
               {CALENDAR_LABELS.THIS_MONTH}
             </Button>
           </div>

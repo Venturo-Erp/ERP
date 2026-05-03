@@ -187,7 +187,7 @@ export function BatchPickupDialog({
             {step === 'upload' ? (
               <>
                 <Button
-                  variant="outline"
+                  variant="soft-gold"
                   className="gap-1"
                   onClick={handleClose}
                   disabled={isProcessing}
@@ -212,7 +212,7 @@ export function BatchPickupDialog({
               </>
             ) : (
               <>
-                <Button variant="outline" onClick={() => setStep('upload')} disabled={isProcessing}>
+                <Button variant="soft-gold" onClick={() => setStep('upload')} disabled={isProcessing}>
                   {L.btn_back}
                 </Button>
                 <Button

@@ -161,7 +161,7 @@ export function HotelSelector({
         </div>
 
         <DialogFooter className="px-6 py-4 border-t bg-muted/50">
-          <Button variant="outline" onClick={handleCancel} className="rounded-xl">
+          <Button variant="soft-gold" onClick={handleCancel} className="rounded-xl">
             {COMP_EDITOR_LABELS.取消}
           </Button>
           <Button variant="soft-gold"

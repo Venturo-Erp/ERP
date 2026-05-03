@@ -131,7 +131,7 @@ export function CustomerMatchDialog({
         </div>
 
         <div className="flex-shrink-0 flex justify-end pt-4 border-t">
-          <Button variant="outline" className="gap-1" onClick={onClose}>
+          <Button variant="soft-gold" className="gap-1" onClick={onClose}>
             <X size={16} />
             {COMP_ORDERS_LABELS.取消}
           </Button>

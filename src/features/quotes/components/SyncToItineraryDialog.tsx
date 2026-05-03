@@ -43,7 +43,7 @@ export const SyncToItineraryDialog: React.FC<SyncToItineraryDialogProps> = ({
       maxWidth="lg"
       footer={
         <div className="flex justify-end space-x-2">
-          <Button type="button" variant="outline" onClick={onClose} className="gap-2">
+          <Button type="button" variant="soft-gold" onClick={onClose} className="gap-2">
             <X size={16} />
             {SYNC_TO_ITINERARY_DIALOG_LABELS.取消}
           </Button>

@@ -250,7 +250,7 @@ export function CustomerDialog({
                 <ImageOff size={40} className="mb-2 opacity-50" />
                 <span className="text-sm">{L.no_passport_photo}</span>
                 {isEdit && (
-                  <Button size="sm" variant="outline" className="mt-3 gap-1.5">
+                  <Button size="sm" variant="soft-gold" className="mt-3 gap-1.5">
                     <Upload size={14} />
                     {L.btn_upload_photo}
                   </Button>
@@ -383,7 +383,7 @@ export function CustomerDialog({
           {isEdit ? (
             <>
               <Button
-                variant="outline"
+                variant="soft-gold"
                 onClick={() => {
                   resetDirty()
                   onModeChange?.('view')
@@ -404,7 +404,7 @@ export function CustomerDialog({
             </>
           ) : (
             <>
-              <Button variant="outline" onClick={() => onOpenChange(false)} className="gap-1.5">
+              <Button variant="soft-gold" onClick={() => onOpenChange(false)} className="gap-1.5">
                 <X size={14} />
                 {L.btn_close}
               </Button>

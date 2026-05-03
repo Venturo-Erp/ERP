@@ -268,15 +268,12 @@ export function ContractDialog({ isOpen, onClose, tour, mode }: ContractDialogPr
 
               {/* 新增按鈕 */}
               <div className="flex-shrink-0 p-4">
-                <button
-                  onClick={handleStartNewContract}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 text-sm font-medium text-white bg-morandi-gold hover:bg-morandi-gold-hover rounded-lg transition-colors"
-                >
+                <Button onClick={handleStartNewContract} className="w-full gap-2">
                   <Plus size={16} />
                   {hasContract && membersWithoutContract.length > 0
                     ? `新增旅客 (${membersWithoutContract.length} 人未加入)`
                     : COMP_CONTRACTS_LABELS.新增}
-                </button>
+                </Button>
               </div>
             </div>
           </>
@@ -397,13 +394,10 @@ export function ContractDialog({ isOpen, onClose, tour, mode }: ContractDialogPr
 
               {/* 確認按鈕 */}
               <div className="flex-shrink-0 p-4">
-                <button
-                  onClick={handleConfirmMemberSelection}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 text-sm font-medium text-white bg-morandi-gold hover:bg-morandi-gold-hover rounded-lg transition-colors"
-                >
+                <Button onClick={handleConfirmMemberSelection} className="w-full gap-2">
                   <Check size={16} />
                   確認 ({selectedMemberIds.length} 人)
-                </button>
+                </Button>
               </div>
             </div>
           </>
@@ -617,7 +611,7 @@ export function ContractDialog({ isOpen, onClose, tour, mode }: ContractDialogPr
 
             <DialogFooter className="flex-shrink-0 border-t border-border pt-4">
               <Button
-                variant="outline"
+                variant="soft-gold"
                 onClick={handleBackToMain}
                 disabled={saving}
                 className="gap-2"
@@ -640,7 +634,7 @@ export function ContractDialog({ isOpen, onClose, tour, mode }: ContractDialogPr
               <Button
                 onClick={handlePrint}
                 disabled={saving || (!hasContract && !selectedTemplate)}
-                className="bg-morandi-gold hover:bg-morandi-gold-hover gap-2"
+                className="gap-2"
               >
                 <Printer size={16} />
                 {CONTRACT_DIALOG_LABELS.PRINT}

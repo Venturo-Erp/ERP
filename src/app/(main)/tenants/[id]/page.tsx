@@ -305,7 +305,7 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
             </div>
             <div className="flex items-end">
               <Button
-                variant="outline"
+                variant="soft-gold"
                 size="sm"
                 className="border-morandi-gold text-morandi-gold hover:bg-morandi-gold/10"
                 onClick={async () => {
@@ -511,7 +511,7 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
           </div>
           <DialogFooter>
             <Button
-              variant="outline"
+              variant="soft-gold"
               onClick={() => setTabModalModuleCode(null)}
               className="border-morandi-gold text-morandi-gold hover:bg-morandi-gold/10"
             >

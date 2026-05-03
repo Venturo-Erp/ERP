@@ -265,7 +265,7 @@ export function CisClientDialog({
 
         <DialogFooter>
           <Button
-            variant="outline"
+            variant="soft-gold"
             onClick={() => onOpenChange(false)}
             disabled={submitting}
           >

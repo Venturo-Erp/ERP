@@ -176,7 +176,7 @@ export function EventDetailDialog({
               {canEditOrDelete() && (
                 <>
                   <Button
-                    variant="outline"
+                    variant="soft-gold"
                     onClick={async () => {
                       const confirmed = await confirm({
                         type: 'danger',
@@ -196,7 +196,7 @@ export function EventDetailDialog({
                     {CALENDAR_LABELS.DELETE}
                   </Button>
                   <Button
-                    variant="outline"
+                    variant="soft-gold"
                     onClick={() => onEdit(event)}
                     className="text-morandi-gold hover:bg-morandi-gold hover:text-white"
                   >
@@ -204,7 +204,7 @@ export function EventDetailDialog({
                   </Button>
                 </>
               )}
-              <Button variant="outline" onClick={onClose} className="gap-2">
+              <Button variant="soft-gold" onClick={onClose} className="gap-2">
                 <X size={16} />
                 {CALENDAR_LABELS.CLOSE}
               </Button>

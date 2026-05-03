@@ -208,7 +208,7 @@ export const QuoteHeader: React.FC<QuoteHeaderProps> = ({
           {onImportFromItinerary && !isReadOnly && (
             <Button
               onClick={onImportFromItinerary}
-              variant="outline"
+              variant="soft-gold"
               disabled={importingFromItinerary}
               className="h-8 px-2.5 text-sm gap-1"
             >
@@ -223,7 +223,7 @@ export const QuoteHeader: React.FC<QuoteHeaderProps> = ({
           {handleCreateItinerary && (
             <Button
               onClick={handleCreateItinerary}
-              variant="outline"
+              variant="soft-gold"
               title={QUOTE_HEADER_LABELS.建立行程表}
               className="h-8 px-2.5 text-sm gap-1"
             >
@@ -308,7 +308,7 @@ export const QuoteHeader: React.FC<QuoteHeaderProps> = ({
 
           <DialogFooter>
             <Button
-              variant="outline"
+              variant="soft-gold"
               className="gap-2"
               onClick={() => setIsContactDialogOpen(false)}
             >

@@ -114,7 +114,7 @@ export function CustomerMatchDialog({
                     </div>
                     <Button
                       size="sm"
-                      variant="outline"
+                      variant="soft-gold"
                       className="text-morandi-gold border-morandi-gold/50"
                     >
                       {CL.btn_is_this}
@@ -142,7 +142,7 @@ export function CustomerMatchDialog({
                   </div>
                   <Button
                     size="sm"
-                    variant="outline"
+                    variant="soft-gold"
                     className="text-morandi-green border-morandi-green/50 gap-1"
                   >
                     <Plus size={16} />
@@ -422,7 +422,7 @@ export function AddCustomerFormDialog({
         </div>
 
         <DialogFooter className="gap-2">
-          <Button variant="outline" onClick={onBack} className="gap-2">
+          <Button variant="soft-gold" onClick={onBack} className="gap-2">
             <X size={16} />
             {FL.btn_cancel}
           </Button>

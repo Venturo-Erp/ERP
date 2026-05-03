@@ -31,6 +31,8 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
+import { DatePicker } from '@/components/ui/date-picker'
+import { TimeInput } from '@/components/ui/time-input'
 import { Label } from '@/components/ui/label'
 import {
   Select,
@@ -731,11 +733,7 @@ export function TourContractTab({ tour }: TourContractTabProps) {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label>集合時間</Label>
-                  <Input
-                    type="time"
-                    value={gatherTime}
-                    onChange={e => setGatherTime(e.target.value)}
-                  />
+                  <TimeInput value={gatherTime} onChange={setGatherTime} />
                 </div>
               </div>
             </div>
@@ -828,7 +826,7 @@ export function TourContractTab({ tour }: TourContractTabProps) {
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setCreateDialogOpen(false)}>
+            <Button variant="soft-gold" onClick={() => setCreateDialogOpen(false)}>
               取消
             </Button>
             <Button onClick={handleCreateContract} disabled={creating}>
@@ -863,7 +861,7 @@ export function TourContractTab({ tour }: TourContractTabProps) {
 
               <div className="space-y-3">
                 <Button
-                  variant="outline"
+                  variant="soft-gold"
                   className="w-full justify-start"
                   onClick={() => copyLink(currentContract)}
                 >
@@ -871,13 +869,13 @@ export function TourContractTab({ tour }: TourContractTabProps) {
                   複製簽約連結
                 </Button>
 
-                <Button variant="outline" className="w-full justify-start" disabled>
+                <Button variant="soft-gold" className="w-full justify-start" disabled>
                   <Mail className="w-4 h-4 mr-2" />
                   Email 發送（開發中）
                 </Button>
 
                 <Button
-                  variant="outline"
+                  variant="soft-gold"
                   className="w-full justify-start"
                   onClick={() =>
                     window.open(`/public/contract/sign/${currentContract.code}`, '_blank')
@@ -914,17 +912,13 @@ export function TourContractTab({ tour }: TourContractTabProps) {
 
             <div className="space-y-2">
               <Label>收到日期</Label>
-              <Input
-                type="date"
-                value={paperSignDate}
-                onChange={e => setPaperSignDate(e.target.value)}
-              />
+              <DatePicker value={paperSignDate} onChange={setPaperSignDate} />
               <p className="text-xs text-morandi-secondary">紙本合約收到的日期</p>
             </div>
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setPaperSignDialogOpen(false)}>
+            <Button variant="soft-gold" onClick={() => setPaperSignDialogOpen(false)}>
               取消
             </Button>
             <Button onClick={confirmPaperSign} disabled={paperSigning || !paperSignDate}>

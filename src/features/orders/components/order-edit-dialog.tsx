@@ -146,7 +146,7 @@ export function OrderEditDialog({ open, onOpenChange, order, level = 2 }: OrderE
           <div className="flex justify-end space-x-2 pt-2">
             <Button
               type="button"
-              variant="outline"
+              variant="soft-gold"
               onClick={() => onOpenChange(false)}
               disabled={isSubmitting}
               className="gap-2"

@@ -19,7 +19,13 @@ export async function GET(request: NextRequest) {
   let query = supabase
     .from('payment_methods')
     .select(
-      'id, name, code, type, description, placeholder, is_active, is_system, sort_order, workspace_id, created_at, updated_at'
+      `id, name, code, type, description, placeholder, is_active, is_system, sort_order,
+       workspace_id, created_at, updated_at,
+       debit_account_id, credit_account_id,
+       fee_percent, fee_fixed, fee_account_id,
+       debit_account:chart_of_accounts!debit_account_id(id, code, name),
+       credit_account:chart_of_accounts!credit_account_id(id, code, name),
+       fee_account:chart_of_accounts!fee_account_id(id, code, name)`
     )
     .order('sort_order')
 

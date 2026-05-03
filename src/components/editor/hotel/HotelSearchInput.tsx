@@ -165,7 +165,7 @@ export function HotelSearchInput({
         {/* 手動新增按鈕 */}
         <Button
           type="button"
-          variant="outline"
+          variant="soft-gold"
           onClick={onToggleManualInput}
           className={`rounded-xl h-11 gap-1.5 ${showManualInput ? 'bg-morandi-gold/10 border-morandi-gold' : ''}`}
         >

@@ -479,7 +479,7 @@ export default function PublicTourPage({ params }: { params: Promise<{ code: str
                 {companyInfo.phone && (
                   <a href={`tel:${companyInfo.phone}`} className="block">
                     <Button
-                      variant="outline"
+                      variant="soft-gold"
                       className="w-full border-public-primary text-public-primary py-4 rounded-xl font-bold hover:bg-morandi-container/50 transition-all"
                     >
                       諮詢專屬顧問

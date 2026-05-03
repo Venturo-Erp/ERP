@@ -838,7 +838,7 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
                     ? `已於 ${new Date(contract.signed_at!).toLocaleDateString('zh-TW')} 簽署完成`
                     : '簽署完成，請確認合約內容'}
                 </div>
-                <Button size="lg" variant="outline" onClick={handlePrint}>
+                <Button size="lg" variant="soft-gold" onClick={handlePrint}>
                   <Printer className="w-5 h-5 mr-2" />
                   列印合約
                 </Button>
@@ -862,7 +862,7 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
                   <FileSignature className="w-5 h-5 mr-2" />
                   我已閱讀，進行電子簽署
                 </Button>
-                <Button size="lg" variant="outline" onClick={handlePrint}>
+                <Button size="lg" variant="soft-gold" onClick={handlePrint}>
                   <Printer className="w-5 h-5 mr-2" />
                   列印合約
                 </Button>
@@ -1033,7 +1033,7 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
                 <div className="flex gap-3">
                   <Button
                     type="button"
-                    variant="outline"
+                    variant="soft-gold"
                     className="flex-1"
                     onClick={handleRetrySign}
                   >
@@ -1098,7 +1098,7 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
             >
               回到首頁
             </Button>
-            <Button size="lg" variant="outline" onClick={() => setStep('preview')}>
+            <Button size="lg" variant="soft-gold" onClick={() => setStep('preview')}>
               查看合約
             </Button>
           </div>

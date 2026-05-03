@@ -239,7 +239,7 @@ export function CheckinMemberList({
                   </Button>
                 ) : (
                   <Button
-                    variant="outline"
+                    variant="soft-gold"
                     size="sm"
                     onClick={() => handleCheckin(member.id)}
                     disabled={processingId === member.id}

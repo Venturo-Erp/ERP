@@ -40,7 +40,7 @@ export function DeleteConfirmDialog({
           </div>
         </div>
         <div className="flex justify-end gap-2 mt-4">
-          <Button variant="outline" onClick={onClose} className="gap-2">
+          <Button variant="soft-gold" onClick={onClose} className="gap-2">
             <X size={16} />
             {TOUR_DELETE.cancel}
           </Button>

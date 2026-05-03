@@ -628,7 +628,7 @@ export default function RolesPage() {
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+              <Button variant="soft-gold" onClick={() => setIsDialogOpen(false)}>
                 取消
               </Button>
               <Button variant="soft-gold"

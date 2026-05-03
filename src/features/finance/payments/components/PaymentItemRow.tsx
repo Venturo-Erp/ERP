@@ -118,13 +118,25 @@ export function PaymentItemRow({
   const handleReceiptTypeChange = (value: string) => {
     const method = paymentMethods.find(m => m.name === value)
     const code = method?.code || ''
+    const feePercent = Number((method as { fee_percent?: number } | undefined)?.fee_percent) || 0
+    const amount = Number(item.amount) || 0
+
     const updates: Partial<PaymentItem> = {
-      // SSOT：method.id + method.code
       payment_method_id: method?.id,
       payment_method_code: code,
-      // receipt_type 數字（DB auto_posting trigger 還在吃）— 從 code 反推大類
       receipt_type: codeToReceiptType(code) as unknown as ReceiptType,
     }
+
+    // 自動算手續費 + 實收（切換到刷卡就自動扣、切回現金/匯款就還原）
+    if (feePercent > 0) {
+      const fees = Math.round((amount * feePercent) / 100)
+      updates.fees = fees
+      updates.actual_amount = Math.max(0, amount - fees)
+    } else {
+      updates.fees = 0
+      updates.actual_amount = amount
+    }
+
     onUpdate(item.id, updates)
   }
 
@@ -215,12 +227,30 @@ export function PaymentItemRow({
             onChange={e => {
               const raw = e.target.value.replace(/,/g, '')
               const num = parseInt(raw, 10)
-              onUpdate(item.id, { amount: isNaN(num) ? 0 : num })
+              const amount = isNaN(num) ? 0 : num
+              const feePercent =
+                Number((currentMethod as { fee_percent?: number } | undefined)?.fee_percent) || 0
+
+              const updates: Partial<PaymentItem> = { amount }
+              if (feePercent > 0) {
+                const fees = Math.round((amount * feePercent) / 100)
+                updates.fees = fees
+                updates.actual_amount = Math.max(0, amount - fees)
+              } else {
+                updates.fees = 0
+                updates.actual_amount = amount
+              }
+              onUpdate(item.id, updates)
             }}
             placeholder="0"
             disabled={readonly}
             className="input-no-focus w-full bg-transparent text-sm text-right"
           />
+          {item.fees && item.fees > 0 ? (
+            <div className="text-[10px] text-morandi-muted mt-0.5">
+              手續費 {formatMoney(item.fees)}
+            </div>
+          ) : null}
         </td>
 
         {/* 實收金額 + 刪除 */}

@@ -54,6 +54,11 @@ export function DateInput({
 
   // 組合日期並回傳 ISO 格式
   const emitDate = (y: string, m: string, d: string) => {
+    // 全部清空時視為清除日期
+    if (!y && !m && !d) {
+      onChange('')
+      return
+    }
     if (y.length === 4 && m.length === 2 && d.length === 2) {
       const isoDate = `${y}-${m}-${d}`
 

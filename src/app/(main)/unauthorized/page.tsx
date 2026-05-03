@@ -23,7 +23,7 @@ export default function UnauthorizedPage() {
         </div>
 
         <div className="space-y-3">
-          <Button onClick={() => router.back()} variant="outline" className="w-full gap-2">
+          <Button onClick={() => router.back()} variant="soft-gold" className="w-full gap-2">
             <ArrowLeft size={16} />
             {LABELS.LABEL_3074}
           </Button>

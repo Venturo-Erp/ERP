@@ -226,7 +226,7 @@ export function FlightInfoSection({
                 <Button
                   type="button"
                   size="sm"
-                  variant="outline"
+                  variant="soft-gold"
                   onClick={onUndoItinerary}
                   className="text-xs gap-1 border-status-warning/30 text-status-warning hover:bg-status-warning-bg"
                 >

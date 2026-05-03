@@ -399,7 +399,7 @@ export const PrintableQuickQuote: React.FC<PrintableQuickQuoteProps> = ({
       >
         {/* 控制按鈕 */}
         <div className="flex justify-end gap-2 p-4 border-b">
-          <Button onClick={onClose} variant="outline" className="gap-2">
+          <Button onClick={onClose} variant="soft-gold" className="gap-2">
             <X className="h-4 w-4" />
             {DIALOGS_CONTAINER_LABELS.關閉}
           </Button>

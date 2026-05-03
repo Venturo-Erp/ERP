@@ -168,7 +168,7 @@ export function useReceiptMutations() {
           receipt_date: item.transaction_date || new Date().toISOString().split('T')[0],
           receipt_type: receiptTypeNum,
           receipt_amount: item.amount,
-          actual_amount: 0,
+          actual_amount: item.actual_amount ?? item.amount,
           status: 'pending',
           batch_id: paymentItems.length > 1 && firstReceiptId ? firstReceiptId : null,
           receipt_account: item.receipt_account || null,
@@ -218,8 +218,12 @@ export function useReceiptMutations() {
     async (params: UpdateReceiptWithItemsParams): Promise<UpdateReceiptWithItemsResult> => {
       const { receipt, formData, paymentItems, onUpdate } = params
 
-      // 計算總金額
+      // 計算總金額 + 實收金額（扣完手續費）
       const totalAmount = paymentItems.reduce((sum, item) => sum + (item.amount || 0), 0)
+      const totalActual = paymentItems.reduce(
+        (sum, item) => sum + (item.actual_amount ?? item.amount ?? 0),
+        0
+      )
 
       // 取第一個項目的收款方式（SSOT：method.code 為唯一真相）
       const firstItem = paymentItems[0]
@@ -232,6 +236,7 @@ export function useReceiptMutations() {
         tour_id: formData.tour_id || null,
         order_id: formData.order_id || null,
         receipt_amount: totalAmount,
+        actual_amount: totalActual,
         payment_method: paymentMethod,
         receipt_type: receiptTypeNum,
         receipt_account: firstItem?.receipt_account || null,

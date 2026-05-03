@@ -65,7 +65,20 @@ const EMPTY_PAYLOAD: LayoutContextPayload = {
 }
 
 async function fetcher(url: string): Promise<LayoutContextPayload> {
-  const res = await fetch(url, { credentials: 'include' })
+  let res = await fetch(url, { credentials: 'include' })
+
+  // 401 = 可能是複製分頁 / 快速 navigation 撞到 Supabase token refresh race。
+  // 等 client 端 supabase（有 navigator.locks）完成 refresh 寫回 cookies、再試一次。
+  // 兩段 retry：300ms 後一次、再不行 1000ms 後最後一次。
+  if (res.status === 401) {
+    await new Promise(r => setTimeout(r, 300))
+    res = await fetch(url, { credentials: 'include' })
+  }
+  if (res.status === 401) {
+    await new Promise(r => setTimeout(r, 1000))
+    res = await fetch(url, { credentials: 'include' })
+  }
+
   if (!res.ok) return EMPTY_PAYLOAD
   return (await res.json()) as LayoutContextPayload
 }

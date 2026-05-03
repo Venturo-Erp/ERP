@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useMemo, lazy, Suspense } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { DatePicker } from '@/components/ui/date-picker'
 import { InputIME } from '@/components/ui/input-ime'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
@@ -19,7 +20,6 @@ import {
 import {
   Calendar,
   MapPin,
-  ShoppingCart,
   FileText,
   DollarSign,
   Plane,
@@ -28,7 +28,6 @@ import {
   Tag,
   Copy,
   Trash2,
-  AlertTriangle,
   CheckCircle2,
   ImagePlus,
   Plus,
@@ -45,6 +44,7 @@ import { AddReceiptDialog } from '@/features/finance/payments/components/AddRece
 import { AddRequestDialog } from '@/features/finance/requests/components/AddRequestDialog'
 import { PnrToolContent } from '@/features/todos/components/PnrToolDialog'
 import { TourCreateDialog } from '@/features/tours/components/TourCreateDialog'
+import { InlineTourCreate } from '@/features/tours/components/InlineTourCreate'
 
 const QuickReceiptLazy = lazy(() =>
   import('../quick-actions/quick-receipt').then(m => ({ default: m.QuickReceipt }))
@@ -53,7 +53,7 @@ const QuickDisbursementLazy = lazy(() =>
   import('../quick-actions/quick-disbursement').then(m => ({ default: m.QuickDisbursement }))
 )
 
-const SUBTASK_INLINE_FORMS = ['請款作業', '收款確認', '確認航班']
+const SUBTASK_INLINE_FORMS = ['開團', '請款作業', '收款確認', '確認航班']
 const hasInlineForm = (title: string) => SUBTASK_INLINE_FORMS.includes(title)
 import { useAuthStore } from '@/stores/auth-store'
 import {
@@ -171,29 +171,33 @@ export function TodoExpandedView({ todo, onUpdate, onClose, onDelete }: TodoExpa
   const orderRelated = todo.related_items?.find(r => r.type === 'order')
   const firstRelated = todo.related_items?.[0]
 
-  // ERP 金額計算（從關聯旅遊團的真實收款/請款資料）
-  const totalReceived = useMemo(() => {
-    if (!tourRelated?.id) return 0
-    return (receipts || [])
-      .filter(r => r.tour_id === tourRelated.id && r.status === 'confirmed')
-      .reduce((sum, r) => sum + (r.actual_amount || r.receipt_amount || 0), 0)
-  }, [receipts, tourRelated])
-
-  const totalPayable = useMemo(() => {
-    if (!tourRelated?.id) return 0
-    return (paymentRequests || [])
-      .filter(r => r.tour_id === tourRelated.id && r.status !== 'paid' && r.status !== 'cancelled')
-      .reduce((sum, r) => sum + (r.total_amount || r.amount || 0), 0)
-  }, [paymentRequests, tourRelated])
-
-  const estimatedProfit = totalReceived - totalPayable
-
   const handleSubtaskToggle = (subtaskId: string) => {
     if (!canEdit) return
     onUpdate({
       sub_tasks: subTasks.map(st =>
         st.id === subtaskId ? { ...st, done: !st.done } : st
       ),
+    })
+  }
+
+  const handleSubtaskDone = (subtaskId: string) => {
+    if (!canEdit) return
+    onUpdate({
+      sub_tasks: subTasks.map(st =>
+        st.id === subtaskId ? { ...st, done: true } : st
+      ),
+    })
+    setExpandedSubtaskIds(prev => {
+      const next = new Set(prev)
+      next.delete(subtaskId)
+      return next
+    })
+  }
+
+  const handleDeleteSubtask = (subtaskId: string) => {
+    if (!canEdit) return
+    onUpdate({
+      sub_tasks: subTasks.filter(st => st.id !== subtaskId),
     })
   }
 
@@ -220,17 +224,28 @@ export function TodoExpandedView({ todo, onUpdate, onClose, onDelete }: TodoExpa
       setExpandedSubtaskIds(prev => new Set(prev).add(newId))
       setActiveTab('subtasks')
     }
-    // 3. 開團 chip → 直接彈出 TourCreateDialog（form 太大、不適合 inline）
-    if (title === '開團') {
-      setShowTourCreateDialog(true)
-    }
+    // 開團也走 inline form（已在 SUBTASK_INLINE_FORMS 中）
   }
 
-  /** 開團成功後、把新 tour 自動關聯回 todo.related_items */
-  const handleTourCreated = (tour: { id: string; code: string }) => {
-    const others = (todo.related_items || []).filter(r => r.type !== 'group')
+  /** 開團成功後、把新 tour（含訂單）自動關聯回 todo */
+  const handleTourCreated = (tour: {
+    id: string
+    code: string
+    order?: { id: string; order_number: string }
+  }) => {
+    const newRelatedItems = [
+      ...todo.related_items?.filter(r => r.type !== 'group' && r.type !== 'order') || [],
+      { type: 'group' as const, id: tour.id, title: tour.code },
+    ]
+    if (tour.order) {
+      newRelatedItems.push({
+        type: 'order' as const,
+        id: tour.order.id,
+        title: tour.order.order_number,
+      })
+    }
     onUpdate({
-      related_items: [...others, { type: 'group', id: tour.id, title: tour.code }],
+      related_items: newRelatedItems,
       tour_id: tour.id,
     })
     setShowTourCreateDialog(false)
@@ -304,10 +319,10 @@ export function TodoExpandedView({ todo, onUpdate, onClose, onDelete }: TodoExpa
     <Dialog open={!!todo} onOpenChange={open => !open && onClose()}>
       <DialogContent
         level={1}
-        className="max-w-4xl w-[90vw] max-h-[90vh] p-0 overflow-hidden flex flex-col"
+        className="max-w-7xl w-[90vw] max-h-[90vh] p-0 overflow-hidden flex flex-col gap-0"
       >
         {/* Header（永遠固定） */}
-        <DialogHeader className="px-6 pt-5 pb-3 flex-shrink-0">
+        <DialogHeader className="px-6 pt-4 pb-0 flex-shrink-0 space-y-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-sm text-morandi-secondary">
               <div className={cn('w-2 h-2 rounded-full', getStatusDot(todo.status))} />
@@ -330,10 +345,10 @@ export function TodoExpandedView({ todo, onUpdate, onClose, onDelete }: TodoExpa
                 value={todo.title}
                 onChange={value => onUpdate({ title: value })}
                 placeholder={TODO_DIALOG_LABELS.description}
-                className="text-xl font-semibold text-morandi-primary mt-2 text-left border-0 border-b border-transparent rounded-none px-0 h-auto bg-transparent shadow-none focus-visible:ring-0 focus-visible:border-morandi-gold transition-colors"
+                className="text-xl font-semibold text-morandi-primary mt-1.5 text-left border-0 border-b border-transparent rounded-none px-0 py-0 h-auto bg-transparent shadow-none focus-visible:ring-0 focus-visible:border-morandi-gold transition-colors"
               />
             ) : (
-              <h2 className="text-xl font-semibold text-morandi-primary mt-2 text-left">
+              <h2 className="text-xl font-semibold text-morandi-primary mt-1.5 text-left">
                 {todo.title}
               </h2>
             )}
@@ -374,19 +389,6 @@ export function TodoExpandedView({ todo, onUpdate, onClose, onDelete }: TodoExpa
 
               {/* 詳情 */}
               <TabsContent value="details" className="mt-0 flex-1 overflow-y-auto px-6 py-4 space-y-5">
-                <div>
-                  <h4 className="text-sm font-medium text-morandi-primary mb-2">描述</h4>
-                  <Textarea
-                    placeholder="新增描述..."
-                    value={todo.description || ''}
-                    onChange={e =>
-                      canEdit && onUpdate({ description: e.target.value || undefined })
-                    }
-                    disabled={!canEdit}
-                    className="min-h-[80px] text-sm bg-card border-border resize-none focus-visible:ring-morandi-gold focus-visible:border-morandi-gold"
-                  />
-                </div>
-
                 {/* 共享 instance 堆疊（receipt / invoice 已改用獨立 dialog） */}
                 {instances.filter(i => i.type === 'share').length > 0 && (
                   <div className="space-y-3">
@@ -404,80 +406,48 @@ export function TodoExpandedView({ todo, onUpdate, onClose, onDelete }: TodoExpa
                   </div>
                 )}
 
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <ShoppingCart className="w-4 h-4 text-morandi-gold" />
-                    <h4 className="text-sm font-medium text-morandi-primary">關聯 ERP 資料</h4>
+                <div className="flex items-end gap-3">
+                  <div className="flex-1 min-w-0">
+                    <label className="text-xs text-morandi-secondary mb-1 block">{TODO_DIALOG_LABELS.tour}</label>
+                    <Combobox
+                      value={tourRelated?.id || ''}
+                      onChange={handleSelectTour}
+                      options={tourOptions}
+                      placeholder="選擇旅遊團..."
+                      emptyMessage="找不到旅遊團"
+                      showClearButton
+                      disabled={!canEdit}
+                      disablePortal
+                      className="w-full"
+                    />
                   </div>
-                  <div className="bg-card rounded-lg border border-border p-4 space-y-3">
-                    <div className="space-y-1">
-                      <label className="text-xs text-morandi-secondary">{TODO_DIALOG_LABELS.tour}</label>
-                      <Combobox
-                        value={tourRelated?.id || ''}
-                        onChange={handleSelectTour}
-                        options={tourOptions}
-                        placeholder="選擇旅遊團..."
-                        emptyMessage="找不到旅遊團"
-                        showClearButton
-                        disabled={!canEdit}
-                        disablePortal
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-xs text-morandi-secondary">{TODO_DIALOG_LABELS.customerOrder}</label>
-                      <Combobox
-                        value={orderRelated?.id || ''}
-                        onChange={handleSelectOrder}
-                        options={orderOptions}
-                        placeholder={tourRelated ? '選擇訂單...' : '請先選擇旅遊團'}
-                        emptyMessage={tourRelated ? '此團無訂單' : '請先選擇旅遊團'}
-                        showClearButton
-                        disabled={!canEdit || !tourRelated}
-                        disablePortal
-                      />
-                    </div>
+                  <div className="flex-1 min-w-0">
+                    <label className="text-xs text-morandi-secondary mb-1 block">{TODO_DIALOG_LABELS.customerOrder}</label>
+                    <Combobox
+                      value={orderRelated?.id || ''}
+                      onChange={handleSelectOrder}
+                      options={orderOptions}
+                      placeholder={tourRelated ? '選擇訂單...' : '請先選擇旅遊團'}
+                      emptyMessage={tourRelated ? '此團無訂單' : '請先選擇旅遊團'}
+                      showClearButton
+                      disabled={!canEdit || !tourRelated}
+                      disablePortal
+                      className="w-full"
+                    />
+                  </div>
+                </div>
 
-                    <div className="border-t border-morandi-container/40 pt-3 space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-morandi-secondary">報價總額</span>
-                        <span className="text-sm text-morandi-muted">—（待 ERP 整合）</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-1">
-                          <span className="text-sm text-morandi-secondary">客戶已付（總收）</span>
-                          <CheckCircle2 className="w-3.5 h-3.5 text-morandi-green" />
-                        </div>
-                        <span className="text-sm font-medium text-morandi-green">
-                          {tourRelated ? formatCurrency(totalReceived) : '—'}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-1">
-                          <span className="text-sm text-morandi-secondary">待付供應商（總付）</span>
-                          <AlertTriangle className="w-3.5 h-3.5 text-morandi-gold" />
-                        </div>
-                        <span className="text-sm font-medium text-morandi-gold">
-                          {tourRelated ? formatCurrency(totalPayable) : '—'}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-morandi-secondary">預估毛利（簡算）</span>
-                        <span
-                          className={cn(
-                            'text-sm font-medium',
-                            estimatedProfit >= 0 ? 'text-morandi-primary' : 'text-morandi-red'
-                          )}
-                        >
-                          {tourRelated ? formatCurrency(estimatedProfit) : '—'}
-                        </span>
-                      </div>
-                    </div>
-                    <p className="text-[10px] text-morandi-muted text-center pt-1">
-                      {tourRelated
-                        ? '（毛利簡算 = 客戶已付 − 待付供應商；報價總額待整合）'
-                        : '（請先選擇旅遊團）'}
-                    </p>
-                  </div>
+                <div>
+                  <h4 className="text-sm font-medium text-morandi-primary mb-2">描述</h4>
+                  <Textarea
+                    placeholder="新增描述..."
+                    value={todo.description || ''}
+                    onChange={e =>
+                      canEdit && onUpdate({ description: e.target.value || undefined })
+                    }
+                    disabled={!canEdit}
+                    className="min-h-[80px] text-sm bg-card border-border resize-none focus-visible:ring-morandi-gold focus-visible:border-morandi-gold"
+                  />
                 </div>
 
               </TabsContent>
@@ -573,9 +543,28 @@ export function TodoExpandedView({ todo, onUpdate, onClose, onDelete }: TodoExpa
                                 )}
                               </button>
                             )}
+                            {canEdit && (
+                              <button
+                                onClick={() => handleDeleteSubtask(sub.id)}
+                                className="text-morandi-muted hover:text-morandi-red p-1 rounded transition-colors"
+                                title="刪除子任務"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            )}
                           </div>
                           {isExpanded && showForm && (
                             <div className="border-t border-border p-3 bg-morandi-container/10">
+                              {sub.title === '開團' && (
+                                <InlineTourCreate
+                                  defaultTourName={todo.title}
+                                  onCreated={tour => {
+                                    handleTourCreated(tour)
+                                    handleSubtaskDone(sub.id)
+                                  }}
+                                  onCancel={() => toggleExpand(sub.id)}
+                                />
+                              )}
                               {sub.title === '請款作業' && (
                                 <Suspense
                                   fallback={
@@ -584,7 +573,11 @@ export function TodoExpandedView({ todo, onUpdate, onClose, onDelete }: TodoExpa
                                     </div>
                                   }
                                 >
-                                  <QuickDisbursementLazy onSubmit={() => undefined} />
+                                  <QuickDisbursementLazy
+                                    onSubmit={() => handleSubtaskDone(sub.id)}
+                                    defaultTourId={todo.tour_id || undefined}
+                                    defaultOrderId={todo.related_items?.find(r => r.type === 'order')?.id || undefined}
+                                  />
                                 </Suspense>
                               )}
                               {sub.title === '收款確認' && (
@@ -595,7 +588,11 @@ export function TodoExpandedView({ todo, onUpdate, onClose, onDelete }: TodoExpa
                                     </div>
                                   }
                                 >
-                                  <QuickReceiptLazy onSubmit={() => undefined} />
+                                  <QuickReceiptLazy
+                                    onSubmit={() => handleSubtaskDone(sub.id)}
+                                    defaultTourId={todo.tour_id || undefined}
+                                    defaultOrderId={todo.related_items?.find(r => r.type === 'order')?.id || undefined}
+                                  />
                                 </Suspense>
                               )}
                               {sub.title === '確認航班' && <PnrToolContent todo={todo} />}
@@ -698,16 +695,11 @@ export function TodoExpandedView({ todo, onUpdate, onClose, onDelete }: TodoExpa
 
             <div>
               <label className="text-xs font-medium text-morandi-muted mb-1.5 block">到期日</label>
-              <div className="flex items-center gap-2 px-2 py-1.5 rounded-md border border-border bg-card">
-                <Calendar className="w-4 h-4 text-morandi-secondary flex-shrink-0" />
-                <input
-                  type="date"
-                  value={todo.deadline || ''}
-                  onChange={e => canEdit && onUpdate({ deadline: e.target.value || undefined })}
-                  disabled={!canEdit}
-                  className="text-sm bg-transparent border-0 p-0 focus:outline-none text-morandi-primary flex-1"
-                />
-              </div>
+              <DatePicker
+                value={todo.deadline || ''}
+                onChange={v => canEdit && onUpdate({ deadline: v || undefined })}
+                disabled={!canEdit}
+              />
             </div>
 
             <div>
@@ -763,11 +755,31 @@ export function TodoExpandedView({ todo, onUpdate, onClose, onDelete }: TodoExpa
               <label className="text-xs font-medium text-morandi-muted mb-2 block">動作</label>
               <div className="flex flex-col gap-1">
                 <button
-                  onClick={() => alert('存檔功能規劃中（暫時用 cancelled 狀態替代）')}
+                  onClick={() => onClose()}
                   className="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm text-morandi-secondary hover:bg-morandi-container/30 transition-colors text-left"
                 >
                   <FileCheck className="w-3.5 h-3.5" />
                   存檔
+                </button>
+                <button
+                  onClick={() => {
+                    if (!canEdit) return
+                    const isCompleted = todo.status === 'completed'
+                    onUpdate({
+                      status: isCompleted ? 'pending' : 'completed',
+                      completed: !isCompleted,
+                    })
+                  }}
+                  disabled={!canEdit}
+                  className={cn(
+                    'flex items-center gap-2 px-2 py-1.5 rounded-md text-sm transition-colors text-left',
+                    todo.status === 'completed'
+                      ? 'text-morandi-secondary hover:bg-morandi-container/30'
+                      : 'text-morandi-green hover:bg-morandi-green/10'
+                  )}
+                >
+                  <FileCheck className="w-3.5 h-3.5" />
+                  {todo.status === 'completed' ? '重新開啟' : '標記完成'}
                 </button>
                 <button
                   onClick={async () => {
@@ -801,7 +813,7 @@ export function TodoExpandedView({ todo, onUpdate, onClose, onDelete }: TodoExpa
                 />
               </button>
               {showShareForm && canEdit && (() => {
-                const otherEmployees = employees.filter(emp => emp.id !== currentUserId)
+                const otherEmployees = employees.filter(emp => emp.id !== currentUserId && !emp.is_bot)
                 const currentVisibility = todo.visibility || []
                 const sharedWith = otherEmployees.filter(emp => currentVisibility.includes(emp.id))
                 const availableToShare = otherEmployees.filter(emp => !currentVisibility.includes(emp.id))

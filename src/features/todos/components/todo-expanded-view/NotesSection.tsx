@@ -110,14 +110,15 @@ export function NotesSection({ todo, onUpdate }: NotesSectionProps) {
                       onUpdate({ notes: newNotes })
                       setEditingNoteIndex(null)
                     }}
-                    className="bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors h-7 text-xs gap-1.5"
+                    variant="soft-gold"
+                    className="h-7 text-xs gap-1.5"
                   >
                     <Save size={12} />
                     {BUTTON_LABELS.save}
                   </Button>
                   <Button
                     size="sm"
-                    variant="outline"
+                    variant="soft-gold"
                     onClick={() => setEditingNoteIndex(null)}
                     className="h-7 text-xs gap-1.5"
                   >

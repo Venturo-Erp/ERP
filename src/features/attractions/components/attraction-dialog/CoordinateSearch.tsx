@@ -154,7 +154,7 @@ export function CoordinateSearch({
           <Button
             type="button"
             size="sm"
-            variant="outline"
+            variant="soft-gold"
             onClick={handleCoordsPaste}
             disabled={!coordsPaste}
           >
@@ -176,7 +176,7 @@ export function CoordinateSearch({
           <Button
             type="button"
             size="sm"
-            variant="outline"
+            variant="soft-gold"
             onClick={handleUrlPaste}
             disabled={!googleMapsUrl}
           >
@@ -204,7 +204,7 @@ export function CoordinateSearch({
           <Button
             type="button"
             size="sm"
-            variant="outline"
+            variant="soft-gold"
             onClick={handleManualInput}
             disabled={!manualLat || !manualLng}
           >

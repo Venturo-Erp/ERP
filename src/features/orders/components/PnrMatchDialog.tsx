@@ -892,14 +892,13 @@ export function PnrMatchDialog({
         </div>
 
         <DialogFooter className="gap-2">
-          <Button variant="outline" className="gap-1" onClick={handleClose}>
+          <Button variant="soft-gold" className="gap-1" onClick={handleClose}>
             <X size={16} />
             {COMP_ORDERS_LABELS.取消}
           </Button>
           <Button
             onClick={handleSave}
             disabled={!parsedPnr || savableCount === 0 || isSaving}
-            className="bg-morandi-gold hover:bg-morandi-gold-hover"
           >
             <Save size={16} className="mr-1" />
             {isSaving

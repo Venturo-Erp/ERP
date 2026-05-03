@@ -243,15 +243,17 @@ function CustomerVerifyDialog({
                       <Pencil size={12} />
                       {t('passport.editImage')}
                     </button>
-                    <button
+                    <Button
                       type="button"
+                      variant="soft-gold"
+                      size="xs"
                       onClick={handleReOcr}
                       disabled={isRecognizing}
-                      className="flex items-center gap-1.5 px-2 py-1 text-xs bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors rounded disabled:opacity-50 transition-colors"
+                      className="px-2 py-1 text-xs gap-1.5"
                     >
                       <RefreshCw size={12} className={isRecognizing ? 'animate-spin' : ''} />
                       {isRecognizing ? t('passport.recognizing') : t('passport.reRecognize')}
-                    </button>
+                    </Button>
                   </div>
                 )}
               </div>
@@ -379,7 +381,7 @@ function CustomerVerifyDialog({
 
           {/* 底部按鈕 */}
           <div className="flex justify-end gap-2 pt-4 border-t">
-            <Button variant="outline" onClick={handleClose} className="gap-2">
+            <Button variant="soft-gold" onClick={handleClose} className="gap-2">
               <X size={16} />
               {t('common.cancel')}
             </Button>

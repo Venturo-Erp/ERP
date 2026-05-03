@@ -9,6 +9,7 @@
 import React, { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { RefreshCw, Upload, Pencil } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { ImageEditor, type ImageEditorSettings } from '@/components/ui/image-editor'
 import { supabase } from '@/lib/supabase/client'
 import { logger } from '@/lib/utils/logger'
@@ -106,15 +107,17 @@ export function PassportSection({
                 <Pencil size={12} />
                 {t('passport.editImage')}
               </button>
-              <button
+              <Button
                 type="button"
+                variant="soft-gold"
+                size="xs"
                 onClick={onRecognize}
                 disabled={isRecognizing}
-                className="flex items-center gap-1.5 px-2 py-1 text-xs bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors rounded disabled:opacity-50 transition-colors"
+                className="px-2 py-1 text-xs gap-1.5"
               >
                 <RefreshCw size={12} className={isRecognizing ? 'animate-spin' : ''} />
                 {isRecognizing ? t('passport.recognizing') : t('passport.reRecognize')}
-              </button>
+              </Button>
             </div>
           )}
         </div>

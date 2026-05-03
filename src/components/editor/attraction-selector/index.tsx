@@ -273,7 +273,7 @@ export function AttractionSelector({
         </div>
 
         <DialogFooter className="shrink-0 px-6 py-3 border-t bg-muted/50 flex items-center justify-end gap-2">
-          <Button variant="outline" onClick={handleCancel} className="rounded-xl">
+          <Button variant="soft-gold" onClick={handleCancel} className="rounded-xl">
             {ATTRACTION_SELECTOR_LABELS.CANCEL}
           </Button>
           {selectedIds.size > 0 && (

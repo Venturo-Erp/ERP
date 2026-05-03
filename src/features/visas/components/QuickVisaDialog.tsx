@@ -317,7 +317,7 @@ export function QuickVisaDialog({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={submitting}>
+          <Button variant="soft-gold" onClick={onClose} disabled={submitting}>
             取消
           </Button>
           <Button variant="soft-gold"

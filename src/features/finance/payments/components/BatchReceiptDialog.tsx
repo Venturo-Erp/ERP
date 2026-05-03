@@ -452,7 +452,7 @@ export function BatchReceiptDialog({ open, onOpenChange }: BatchReceiptDialogPro
               <div className="flex gap-2">
                 <Button
                   size="sm"
-                  variant="outline"
+                  variant="soft-gold"
                   onClick={distributeEvenly}
                   disabled={
                     orderAllocations.filter(a => a.order_id).length === 0 || totalAmount === 0
@@ -460,7 +460,7 @@ export function BatchReceiptDialog({ open, onOpenChange }: BatchReceiptDialogPro
                 >
                   {BATCH_RECEIPT_FORM_LABELS.LABEL_2869}
                 </Button>
-                <Button size="sm" variant="outline" onClick={addOrderAllocation}>
+                <Button size="sm" variant="soft-gold" onClick={addOrderAllocation}>
                   <Plus className="h-4 w-4 mr-1" />
                   {BATCH_RECEIPT_FORM_LABELS.ADD_5419}
                 </Button>
@@ -593,13 +593,13 @@ export function BatchReceiptDialog({ open, onOpenChange }: BatchReceiptDialogPro
           </div>
           <div className="flex-1" />
           <div className="flex space-x-2">
-            <Button variant="outline" className="gap-1" onClick={() => onOpenChange(false)}>
+            <Button variant="soft-gold" className="gap-1" onClick={() => onOpenChange(false)}>
               <X size={16} />
               {BATCH_RECEIPT_FORM_LABELS.CANCEL}
             </Button>
             <Button
               onClick={handleSave}
-              className="bg-morandi-gold hover:bg-morandi-gold-hover gap-1"
+              className="gap-1"
               disabled={
                 isSubmitting ||
                 unallocatedAmount !== 0 ||

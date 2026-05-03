@@ -5,6 +5,7 @@ import { ContentPageLayout } from '@/components/layout/content-page-layout'
 import { Card } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
+import { DatePicker } from '@/components/ui/date-picker'
 import { Button } from '@/components/ui/button'
 import { Search } from 'lucide-react'
 import { supabase } from '@/lib/supabase/client'
@@ -205,7 +206,7 @@ export default function BalanceSheetPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label>截止日期</Label>
-              <Input type="date" value={asOfDate} onChange={e => setAsOfDate(e.target.value)} />
+              <DatePicker value={asOfDate} onChange={setAsOfDate} />
             </div>
 
             <div className="flex items-end">

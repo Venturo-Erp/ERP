@@ -165,7 +165,7 @@ export function PexelsPicker({ onSelectImage }: PexelsPickerProps) {
         {/* 搜尋按鈕 */}
         <Button
           size="sm"
-          className="w-full mt-2 h-7 text-xs bg-morandi-gold hover:bg-morandi-gold-hover"
+          className="w-full mt-2 h-7 text-xs"
           onClick={() => handleSearch(search, 1)}
           disabled={!search.trim() || loading}
         >
@@ -248,7 +248,7 @@ export function PexelsPicker({ onSelectImage }: PexelsPickerProps) {
         {photos.length < totalResults && photos.length > 0 && (
           <div className="p-2">
             <Button
-              variant="outline"
+              variant="soft-gold"
               size="sm"
               className="w-full h-7 text-xs"
               onClick={loadMore}

@@ -156,7 +156,7 @@ export function SignaturePad({
       <div className="flex gap-2 justify-end">
         <Button
           type="button"
-          variant="outline"
+          variant="soft-gold"
           size="sm"
           onClick={clearSignature}
           disabled={!hasSignature}

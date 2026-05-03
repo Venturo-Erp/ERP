@@ -93,14 +93,30 @@ export const TableHeader = React.memo(function TableHeader({
         {columns.map((column, index) => (
           <th
             key={String(column.key)}
-            className={cn('text-left py-2.5 px-4 text-xs relative align-middle')}
+            className={cn(
+              'py-2.5 px-4 text-xs relative align-middle',
+              column.align === 'right'
+                ? 'text-right'
+                : column.align === 'center'
+                  ? 'text-center'
+                  : 'text-left'
+            )}
             style={{
               minWidth: column.minWidth || column.width || undefined,
               maxWidth: column.maxWidth,
             }}
           >
             {/* Remove absolute div - use native border instead */}
-            <div className="flex items-center gap-2">
+            <div
+              className={cn(
+                'flex items-center gap-2',
+                column.align === 'right'
+                  ? 'justify-end'
+                  : column.align === 'center'
+                    ? 'justify-center'
+                    : ''
+              )}
+            >
               {column.sortable ? (
                 <Button
                   variant="ghost"

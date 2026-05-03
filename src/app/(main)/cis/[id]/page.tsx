@@ -125,7 +125,7 @@ export default function CisClientDetailPage({ params }: PageProps) {
       <div className="flex flex-col items-center justify-center h-full gap-3 p-10 text-center">
         <Building2 size={32} className="text-morandi-muted" />
         <p className="text-sm text-morandi-secondary">找不到此客戶（或仍在載入）</p>
-        <Button onClick={() => router.push('/cis')} variant="outline" size="sm">
+        <Button onClick={() => router.push('/cis')} variant="soft-gold" size="sm">
           <ArrowLeft size={14} className="mr-1" />
           回列表
         </Button>

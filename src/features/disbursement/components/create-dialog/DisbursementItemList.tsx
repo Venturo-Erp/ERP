@@ -94,16 +94,16 @@ export function DisbursementItemList({
             value={dateFilter}
             onChange={onDateFilterChange}
             placeholder={DISBURSEMENT_LABELS.搜尋出帳日期}
-            className="w-40"
+            className="w-48"
           />
           {/* 當日按鈕 */}
-          <Button variant="outline" size="sm" onClick={onSetToday} className="whitespace-nowrap">
+          <Button variant="soft-gold" size="sm" onClick={onSetToday} className="whitespace-nowrap">
             <Calendar size={14} className="mr-1" />
             {DISBURSEMENT_LABELS.LABEL_2377}
           </Button>
           {/* 清除按鈕 */}
           <Button
-            variant="outline"
+            variant="soft-gold"
             size="sm"
             onClick={onClearFilters}
             className="whitespace-nowrap"

@@ -502,7 +502,7 @@ export default function CustomersPage() {
                   </div>
                   <div className="flex gap-2 w-full">
                     <Button
-                      variant="outline"
+                      variant="soft-gold"
                       className="flex-1"
                       onClick={() => {
                         const url = `https://line.me/R/oaMessage/${process.env.NEXT_PUBLIC_LINE_BOT_ID || '@745gftqd'}?綁定 ${lineBindingCustomer.code}`

@@ -47,7 +47,7 @@ export function BatchPickupDialog({
           </div>
         </div>
         <div className="flex justify-end gap-2">
-          <Button variant="outline" className="gap-1" onClick={onCancel}>
+          <Button variant="soft-gold" className="gap-1" onClick={onCancel}>
             <X size={16} />
             {L.btn_cancel}
           </Button>
@@ -101,7 +101,7 @@ export function BatchRejectDialog({
           </div>
         </div>
         <div className="flex justify-end gap-2">
-          <Button variant="outline" className="gap-1" onClick={onCancel}>
+          <Button variant="soft-gold" className="gap-1" onClick={onCancel}>
             <X size={16} />
             {L.btn_cancel}
           </Button>

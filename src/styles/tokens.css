@@ -81,6 +81,7 @@
 
   /* 背景色 */
   --background: #f6f4f1;
+  --page-bg: linear-gradient(to bottom right, rgba(232, 229, 224, 0.5), #fafafa, rgba(201, 170, 124, 0.1));
   --card: #ffffff;
   --border: #d4c4b0;
   --popover: #ffffff;
@@ -152,6 +153,7 @@
   --gradient-primary-dark: #3a3f46;
 
   --background: #f4f5f7;
+  --page-bg: linear-gradient(to bottom right, rgba(229, 231, 234, 0.5), #fafafa, rgba(93, 102, 112, 0.08));
   --border: #c9ccd1;
   --popover-foreground: #2d3139;
   --accent: #e5e7ea;
@@ -212,6 +214,7 @@
   --gradient-primary-dark: #0f1620;
 
   --background: #ffffff;
+  --page-bg: linear-gradient(to bottom right, rgba(248, 250, 252, 0.6), #ffffff, rgba(27, 97, 201, 0.05));
   --border: #e0e2e6;
   --popover-foreground: #181d26;
   --accent: #f8fafc;
@@ -277,6 +280,11 @@
   --color-morandi-red: var(--morandi-red);
   --color-morandi-container: var(--morandi-container);
   --color-morandi-muted: var(--morandi-muted);
+
+  /* 漸層色系（漸層按鈕專用、3 階金色） */
+  --color-gradient-gold-light: var(--gradient-gold-light);
+  --color-gradient-gold-mid: var(--gradient-gold-mid);
+  --color-gradient-gold-dark: var(--gradient-gold-dark);
 
   /* 類別色 */
   --color-cat-purple: var(--cat-purple);

@@ -45,14 +45,15 @@ function TourOperationsAddButton({
       </span>
 
       {/* Add button */}
-      <button
+      <Button
+        variant="soft-gold"
+        size="sm"
         onClick={() => setIsDialogOpen(true)}
-        className="bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors px-3 py-1.5 rounded text-sm font-medium flex items-center transition-colors"
         title={TOUR_OPS_ADD.add_item_title}
       >
         <Plus size={14} className="mr-1" />
         {TOUR_OPS_ADD.add_field}
-      </button>
+      </Button>
 
       {/* Dialog */}
       <TourOperationsAddDialog
@@ -215,7 +216,7 @@ function TourOperationsAddDialog({
         </div>
 
         <div className="flex justify-end pt-4">
-          <Button variant="outline" onClick={onClose} className="gap-2">
+          <Button variant="soft-gold" onClick={onClose} className="gap-2">
             <X size={16} />
             {TOUR_OPS_ADD.cancel}
           </Button>

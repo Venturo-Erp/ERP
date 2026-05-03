@@ -69,15 +69,11 @@ export function PublishDialog({
           />
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} className="gap-1">
+          <Button variant="soft-gold" onClick={() => onOpenChange(false)} className="gap-1">
             <X size={16} />
             {COMP_EDITOR_LABELS.取消}
           </Button>
-          <Button
-            onClick={onConfirm}
-            disabled={saving}
-            className="bg-morandi-gold hover:bg-morandi-gold-hover"
-          >
+          <Button onClick={onConfirm} disabled={saving}>
             {saving ? COMP_EDITOR_LABELS.儲存中 : COMP_EDITOR_LABELS.確認另存}
           </Button>
         </DialogFooter>

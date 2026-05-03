@@ -33,7 +33,7 @@ export function VersionDropdown({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" className="h-7 px-2 text-[11px] gap-1">
+        <Button variant="soft-gold" size="sm" className="h-7 px-2 text-[11px] gap-1">
           <History size={12} />
           {currentVersionName}
           <ChevronDown size={10} />

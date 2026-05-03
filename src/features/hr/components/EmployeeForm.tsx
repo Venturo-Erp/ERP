@@ -11,6 +11,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { DatePicker } from '@/components/ui/date-picker'
 import { Label } from '@/components/ui/label'
 import {
   Camera,
@@ -300,14 +301,14 @@ export function EmployeeForm({
   const bottomButtons = (
     <>
       {mode !== 'self' && (
-        <Button type="button" variant="outline" onClick={onCancel}>
+        <Button type="button" variant="soft-gold" onClick={onCancel}>
           取消
         </Button>
       )}
       {mode === 'self' && (
         <Button
           type="button"
-          variant="outline"
+          variant="soft-gold"
           className="border-morandi-gold text-morandi-gold hover:bg-morandi-gold hover:text-white"
           onClick={() => {
             if (onPasswordChange) onPasswordChange()
@@ -535,11 +536,9 @@ export function EmployeeForm({
                     <Label className="text-xs font-semibold text-morandi-secondary uppercase flex items-center gap-1">
                       <Calendar size={12} /> 生日
                     </Label>
-                    <Input
-                      type="date"
+                    <DatePicker
                       value={formData.birth_date}
-                      onChange={e => setFormData({ ...formData, birth_date: e.target.value })}
-                      className="border-morandi-gold/30 focus:border-morandi-gold"
+                      onChange={v => setFormData({ ...formData, birth_date: v })}
                     />
                   </div>
                   <div className="space-y-1.5">
@@ -637,11 +636,9 @@ export function EmployeeForm({
                     <Label className="text-xs font-semibold text-morandi-secondary uppercase">
                       入職日期
                     </Label>
-                    <Input
-                      type="date"
+                    <DatePicker
                       value={formData.hire_date || ''}
-                      onChange={e => setFormData({ ...formData, hire_date: e.target.value })}
-                      className="border-morandi-gold/30 focus:border-morandi-gold bg-morandi-container/30"
+                      onChange={v => setFormData({ ...formData, hire_date: v })}
                     />
                   </div>
                   <div className="space-y-1.5">

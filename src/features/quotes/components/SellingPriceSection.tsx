@@ -264,7 +264,7 @@ export const SellingPriceSection: React.FC<SellingPriceSectionProps> = ({
         {!isReadOnly && (
           <Button
             onClick={handleAddTier}
-            variant="outline"
+            variant="soft-gold"
             className="h-9 text-sm gap-1.5 border-dashed"
             type="button"
           >

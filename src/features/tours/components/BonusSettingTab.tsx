@@ -132,7 +132,7 @@ export function BonusSettingTab({ tour }: BonusSettingTabProps) {
         <h3 className="text-lg font-semibold">{BONUS_TAB_LABELS.title}</h3>
         <div className="flex gap-2">
           {defaults && defaults.length > 0 && (!settings || settings.length === 0) && (
-            <Button variant="outline" size="sm" onClick={handleCopyDefaults}>
+            <Button variant="soft-gold" size="sm" onClick={handleCopyDefaults}>
               {BONUS_TAB_LABELS.copy_defaults}
             </Button>
           )}

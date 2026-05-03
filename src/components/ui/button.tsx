@@ -9,9 +9,10 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        // 主 CTA：飽和金漸層 + shadow、用於「儲存 / 確認 / 下單」等重要動作
+        // 主 CTA（拍板動作）：C 漸層、淺→深 + 大 shadow、用於「儲存 / 確認 / 下單」等重要動作
+        // 2026-05-03 規範化：取代 107 處手刻 bg-morandi-gold/15 + 126 處手刻 bg-morandi-gold
         default:
-          'bg-gradient-to-br from-morandi-gold to-morandi-gold-hover text-white hover:from-morandi-gold-hover hover:to-morandi-gold shadow-sm hover:shadow-md',
+          'bg-gradient-to-br from-gradient-gold-light to-gradient-gold-dark text-white hover:from-gradient-gold-mid hover:to-gradient-gold-dark shadow-md hover:shadow-lg',
         // 危險動作：維持原樣、避免誤傷刪除類按鈕視覺強度
         destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
         // Outline：加輕漸層底 + 金色邊、跟 default 搭配有層次
@@ -25,10 +26,10 @@ const buttonVariants = cva(
         // Morandi 色系常用組合（避免各檔案手寫 className）
         'morandi-gold':
           'text-morandi-gold border border-morandi-gold/50 hover:bg-morandi-gold/10 hover:border-morandi-gold',
-        // Soft gold：列表頁「新增 X」按鈕標準樣式（淺金平面、無 shadow、跟 status pill 視覺一致）
-        // 取代 89 處手刻 className（2026-04-26 commit 99c54bcc8）
+        // Soft gold（一般次操作）：取消 / 編輯 / 套用 / 一般文字按鈕
+        // 2026-05-03 規範化：8% bg + 20% border、避免太搶 default 的拍板動作主視覺、取代 258 處 outline
         'soft-gold':
-          'bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors',
+          'bg-morandi-gold/[0.08] text-morandi-primary border border-morandi-gold/20 hover:bg-morandi-gold/[0.14] hover:border-morandi-gold/35 transition-colors',
         'morandi-destructive':
           'text-morandi-red border border-morandi-red/30 hover:bg-morandi-red/10',
         'morandi-destructive-ghost':

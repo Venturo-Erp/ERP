@@ -392,7 +392,7 @@ export function CostTransferDialog({
             </span>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => onOpenChange(false)}>
+            <Button variant="soft-gold" onClick={() => onOpenChange(false)}>
               取消
             </Button>
             <Button variant="soft-gold"

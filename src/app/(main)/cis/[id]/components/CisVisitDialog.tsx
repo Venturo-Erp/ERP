@@ -329,7 +329,7 @@ export function CisVisitDialog({
                 {!form.audio_url && (
                   <Button
                     type="button"
-                    variant="outline"
+                    variant="soft-gold"
                     size="sm"
                     onClick={handleFilePick}
                     disabled={isBusy}
@@ -346,7 +346,7 @@ export function CisVisitDialog({
                   <>
                     <Button
                       type="button"
-                      variant="outline"
+                      variant="soft-gold"
                       size="sm"
                       onClick={handleTranscribe}
                       disabled={isBusy}
@@ -356,7 +356,7 @@ export function CisVisitDialog({
                     </Button>
                     <Button
                       type="button"
-                      variant="outline"
+                      variant="soft-gold"
                       size="sm"
                       onClick={handleRemoveAudio}
                       disabled={isBusy}
@@ -410,7 +410,7 @@ export function CisVisitDialog({
               </h3>
               <Button
                 type="button"
-                variant="outline"
+                variant="soft-gold"
                 size="sm"
                 onClick={handleAnalyze}
                 disabled={isBusy || !form.summary.trim()}
@@ -527,7 +527,7 @@ export function CisVisitDialog({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isBusy}>
+          <Button variant="soft-gold" onClick={() => onOpenChange(false)} disabled={isBusy}>
             {P.btn_cancel}
           </Button>
           <Button onClick={handleSubmit} disabled={isBusy}>

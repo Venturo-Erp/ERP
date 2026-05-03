@@ -511,7 +511,7 @@ export function TourDisplayItineraryTab({ tour }: TourDisplayItineraryTabProps) 
             <Monitor className="w-4 h-4" />
             建立網頁版行程
           </Button>
-          <Button variant="outline" onClick={() => handleCreate('print')} className="gap-2">
+          <Button variant="soft-gold" onClick={() => handleCreate('print')} className="gap-2">
             <Printer className="w-4 h-4" />
             建立紙本行程
           </Button>

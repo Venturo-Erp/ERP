@@ -20,14 +20,11 @@ interface PrintControlsProps {
 export const PrintControls: React.FC<PrintControlsProps> = ({ onClose, onPrint }) => {
   return (
     <div className="flex justify-end gap-2 p-4 print:hidden">
-      <Button onClick={onClose} variant="outline" className="gap-2">
+      <Button onClick={onClose} variant="soft-gold" className="gap-2">
         <X className="h-4 w-4" />
         {LABELS.CLOSE}
       </Button>
-      <Button
-        onClick={onPrint}
-        className="gap-2 bg-morandi-gold hover:bg-morandi-gold-hover text-white"
-      >
+      <Button onClick={onPrint} className="gap-2">
         <Printer className="h-4 w-4" />
         {LABELS.PRINT}
       </Button>

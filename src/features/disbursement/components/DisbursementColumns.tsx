@@ -253,7 +253,7 @@ export function useHistoryColumns({ onPrintPDF, getEmployeeName, payment_request
           const typedRow = row as HistoryTableRow
           return (
             <Button
-              variant="outline"
+              variant="soft-gold"
               size="sm"
               onClick={() => onPrintPDF(typedRow)}
               className="text-morandi-gold border-morandi-gold hover:bg-morandi-gold/10"

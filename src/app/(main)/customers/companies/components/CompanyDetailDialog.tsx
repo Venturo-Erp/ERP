@@ -288,7 +288,7 @@ export function CompanyDetailDialog({
             </div>
 
             <DialogFooter className="mt-4">
-              <Button variant="outline" onClick={() => onOpenChange(false)} className="gap-2">
+              <Button variant="soft-gold" onClick={() => onOpenChange(false)} className="gap-2">
                 <X size={16} />
                 {COMPANY_LABELS.DETAIL_CLOSE}
               </Button>

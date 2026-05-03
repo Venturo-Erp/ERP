@@ -261,7 +261,7 @@ export function CreateSupplierDialog({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting}>
+          <Button variant="soft-gold" onClick={() => onOpenChange(false)} disabled={submitting}>
             <X className="h-4 w-4 mr-1" />
             取消
           </Button>

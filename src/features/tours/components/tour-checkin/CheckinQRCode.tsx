@@ -208,15 +208,15 @@ export function CheckinQRCode({ tour }: CheckinQRCodeProps) {
 
           {/* 按鈕 */}
           <div className="flex flex-wrap gap-2">
-            <Button variant="outline" size="sm" onClick={handleCopyLink} className="gap-1">
+            <Button variant="soft-gold" size="sm" onClick={handleCopyLink} className="gap-1">
               <Copy size={14} />
               {CHECKIN_QR_CODE_LABELS.複製連結}
             </Button>
-            <Button variant="outline" size="sm" onClick={handleDownload} className="gap-1">
+            <Button variant="soft-gold" size="sm" onClick={handleDownload} className="gap-1">
               <Download size={14} />
               {CHECKIN_QR_CODE_LABELS.下載}
             </Button>
-            <Button variant="outline" size="sm" onClick={handlePrint} className="gap-1">
+            <Button variant="soft-gold" size="sm" onClick={handlePrint} className="gap-1">
               <Printer size={14} />
               {CHECKIN_QR_CODE_LABELS.列印}
             </Button>

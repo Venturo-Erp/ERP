@@ -364,7 +364,7 @@ export function ReceiptPrintDialog({ receipt, open, onOpenChange }: ReceiptPrint
             <DialogTitle className="text-lg">
               {receipt.status === 'refunded' ? '退款收據' : '收款收據'} — {receipt.receipt_number}
             </DialogTitle>
-            <Button variant="outline" size="sm" onClick={handlePrint} className="gap-2">
+            <Button variant="soft-gold" size="sm" onClick={handlePrint} className="gap-2">
               <Printer size={16} />
               列印
             </Button>

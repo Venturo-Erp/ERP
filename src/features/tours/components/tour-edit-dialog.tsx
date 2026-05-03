@@ -232,7 +232,7 @@ export function TourEditDialog({ isOpen, onClose, tour, onSuccess }: TourEditDia
 
           {/* 按鈕 */}
           <div className="flex justify-end space-x-2 pt-4 border-t">
-            <Button variant="outline" onClick={onClose} disabled={submitting} className="gap-1">
+            <Button variant="soft-gold" onClick={onClose} disabled={submitting} className="gap-1">
               <X size={16} />
               {COMP_TOURS_LABELS.取消}
             </Button>
@@ -244,7 +244,7 @@ export function TourEditDialog({ isOpen, onClose, tour, onSuccess }: TourEditDia
                 !formData.departure_date ||
                 !formData.return_date
               }
-              className="bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors"
+              variant="soft-gold"
             >
               {submitting ? COMP_TOURS_LABELS.儲存中 : COMP_TOURS_LABELS.儲存變更}
             </Button>

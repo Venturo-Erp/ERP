@@ -234,7 +234,7 @@ export function PrintItineraryForm({ data, onChange }: PrintItineraryFormProps) 
               ])
             }}
             size="sm"
-            className="h-7 text-xs bg-morandi-gold hover:bg-morandi-gold-hover"
+            className="h-7 text-xs"
           >
             <Plus size={14} className="mr-1" />
             {ITINERARY_LABELS.ADD_2985}
@@ -415,7 +415,7 @@ export function PrintItineraryForm({ data, onChange }: PrintItineraryFormProps) 
               ])
             }}
             size="sm"
-            className="h-7 text-xs bg-morandi-gold hover:bg-morandi-gold-hover"
+            className="h-7 text-xs"
           >
             <Plus size={14} className="mr-1" />
             {ITINERARY_LABELS.ADD}
@@ -485,7 +485,7 @@ export function PrintItineraryForm({ data, onChange }: PrintItineraryFormProps) 
               updateField('sights', [...data.sights, { name: '', nameEn: '', description: '' }])
             }}
             size="sm"
-            className="h-7 text-xs bg-morandi-gold hover:bg-morandi-gold-hover"
+            className="h-7 text-xs"
           >
             <Plus size={14} className="mr-1" />
             {ITINERARY_LABELS.ADD}

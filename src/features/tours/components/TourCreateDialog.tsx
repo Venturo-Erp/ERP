@@ -13,7 +13,7 @@ interface TourCreateDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   /** 建立成功 callback、給 todo dialog 等嵌套場景拿到新 tour 用 */
-  onCreated?: (tour: { id: string; code: string }) => void
+  onCreated?: (tour: { id: string; code: string; order?: { id: string; order_number: string } }) => void
   /** Dialog 巢狀層級（嵌進 level=1 dialog 時設 2） */
   level?: DialogLevel
   /** 預填 tour 名稱（從 todo title 帶入） */

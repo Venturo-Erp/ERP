@@ -186,7 +186,7 @@ export function AirportImageLibrary({
         <Button
           type="button"
           size="sm"
-          variant="outline"
+          variant="soft-gold"
           onClick={() => setShowAddDialog(true)}
           className="h-7 px-2 text-xs"
         >
@@ -314,7 +314,7 @@ export function AirportImageLibrary({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Button
                 type="button"
-                variant="outline"
+                variant="soft-gold"
                 onClick={() => {
                   setShowAddDialog(false)
                   setShowUnsplashDialog(true)
@@ -328,7 +328,7 @@ export function AirportImageLibrary({
               </Button>
               <Button
                 type="button"
-                variant="outline"
+                variant="soft-gold"
                 onClick={() => {
                   setShowAddDialog(false)
                   setShowPexelsDialog(true)
@@ -360,7 +360,7 @@ export function AirportImageLibrary({
                 <div className="flex gap-2">
                   <Button
                     type="button"
-                    variant="outline"
+                    variant="soft-gold"
                     onClick={() => {
                       setShowAddDialog(false)
                       setNewImageUrl('')

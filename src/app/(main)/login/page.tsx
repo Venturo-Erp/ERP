@@ -7,6 +7,7 @@ import { useSearchParams } from 'next/navigation'
 import { useAuthStore } from '@/stores/auth-store'
 import { AlertCircle, Eye, EyeOff } from 'lucide-react'
 import { logger } from '@/lib/utils/logger'
+import { supabase } from '@/lib/supabase/client'
 
 // localStorage keys
 const LAST_CODE_KEY = 'venturo-last-code'
@@ -42,6 +43,28 @@ export default function LoginPage() {
     if (lastPath && lastPath !== '/login') return lastPath
     return '/dashboard'
   }
+
+  // 複製分頁 / 多分頁 race rescue：middleware 因 refresh_token 競爭把使用者誤踢來時，
+  // client supabase 用 navigator.locks 等另一個 tab 完成 refresh、讀到 valid session 就自動跳回。
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      try {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession()
+        if (cancelled || !session) return
+        logger.log('🔄 Login page: detected valid session, auto-redirecting')
+        window.location.href = getRedirectPath()
+      } catch (e) {
+        logger.warn('Login session check failed:', e)
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()

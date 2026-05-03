@@ -3,6 +3,7 @@
 import React, { useState } from 'react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import { TimeInput } from '@/components/ui/time-input'
 import {
   GripVertical,
   ImageIcon,
@@ -285,18 +286,17 @@ export function SortableActivityItem({
                         <label className="text-xs text-morandi-primary whitespace-nowrap">
                           {COMP_EDITOR_LABELS.LABEL_3517}
                         </label>
-                        <input
-                          type="time"
+                        <TimeInput
                           value={
                             activity.startTime
                               ? `${activity.startTime.slice(0, 2)}:${activity.startTime.slice(2)}`
                               : ''
                           }
-                          onChange={e => {
-                            const value = e.target.value.replace(':', '')
+                          onChange={v => {
+                            const value = v.replace(':', '')
                             updateActivity(dayIndex, actIndex, 'startTime', value)
                           }}
-                          className="px-2 py-1 border rounded text-sm w-24"
+                          className="px-2 py-1 text-sm w-24"
                         />
                       </div>
                       <span className="text-morandi-secondary">~</span>
@@ -304,15 +304,14 @@ export function SortableActivityItem({
                         <label className="text-xs text-morandi-primary whitespace-nowrap">
                           {COMP_EDITOR_LABELS.LABEL_7820}
                         </label>
-                        <input
-                          type="time"
+                        <TimeInput
                           value={
                             activity.endTime
                               ? `${activity.endTime.slice(0, 2)}:${activity.endTime.slice(2)}`
                               : ''
                           }
-                          onChange={e => {
-                            const value = e.target.value.replace(':', '')
+                          onChange={v => {
+                            const value = v.replace(':', '')
                             updateActivity(dayIndex, actIndex, 'endTime', value)
                           }}
                           className="px-2 py-1 border rounded text-sm w-24"

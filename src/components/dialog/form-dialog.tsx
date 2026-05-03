@@ -145,7 +145,7 @@ export function FormDialog({
                   <>
                     <Button
                       type="button"
-                      variant="outline"
+                      variant="soft-gold"
                       onClick={handleCancel}
                       className="gap-2"
                     >

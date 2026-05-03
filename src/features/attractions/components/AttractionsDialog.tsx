@@ -358,7 +358,7 @@ export function AttractionsDialog({
       {attraction && !isVerified && (
         <Button
           type="button"
-          variant="outline"
+          variant="soft-gold"
           size="sm"
           onClick={handleMarkVerified}
           disabled={isVerifying}
@@ -377,7 +377,7 @@ export function AttractionsDialog({
       {showAiSuggest && attraction && (
         <Button
           type="button"
-          variant="outline"
+          variant="soft-gold"
           size="sm"
           onClick={handleAiSuggest}
           disabled={isAiLoading || !formData.name}
@@ -390,7 +390,7 @@ export function AttractionsDialog({
       {attraction && onDelete && can(CAPABILITIES.DATABASE_MANAGE_ATTRACTIONS) && (
         <Button
           type="button"
-          variant="outline"
+          variant="soft-gold"
           size="sm"
           onClick={handleDelete}
           disabled={isDeleting}

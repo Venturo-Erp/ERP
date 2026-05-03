@@ -20,7 +20,7 @@ export function PublishPreview({ shareUrl, copied, onCopy }: PublishPreviewProps
       <PopoverTrigger asChild>
         <Button
           size="sm"
-          variant="outline"
+          variant="soft-gold"
           className="h-8 px-3 border-morandi-green/30 bg-morandi-green/10 hover:bg-morandi-green/10 text-morandi-green"
         >
           <Link2 size={14} className="mr-1.5" />
@@ -34,10 +34,10 @@ export function PublishPreview({ shareUrl, copied, onCopy }: PublishPreviewProps
           </div>
           <div className="flex items-center gap-2">
             <Input value={shareUrl} readOnly className="text-xs h-8 bg-muted" />
-            <Button size="sm" variant="outline" className="h-8 px-2 flex-shrink-0" onClick={onCopy}>
+            <Button size="sm" variant="soft-gold" className="h-8 px-2 flex-shrink-0" onClick={onCopy}>
               {copied ? <Check size={14} /> : <Copy size={14} />}
             </Button>
-            <Button size="sm" variant="outline" className="h-8 px-2 flex-shrink-0" asChild>
+            <Button size="sm" variant="soft-gold" className="h-8 px-2 flex-shrink-0" asChild>
               <a href={shareUrl} target="_blank" rel="noopener noreferrer">
                 <ExternalLink size={14} />
               </a>

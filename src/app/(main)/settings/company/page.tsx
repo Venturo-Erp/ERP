@@ -657,7 +657,7 @@ export default function CompanySettingsPage() {
           <Button
             onClick={handleSave}
             disabled={saving}
-            className="bg-morandi-gold hover:bg-morandi-gold/90 text-white px-8"
+            className="px-8"
           >
             {saving ? (
               <>

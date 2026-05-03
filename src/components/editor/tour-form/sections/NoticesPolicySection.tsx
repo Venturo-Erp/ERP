@@ -133,7 +133,7 @@ export function NoticesPolicySection({ data, onChange }: NoticesPolicySectionPro
 
             <Button
               type="button"
-              variant="outline"
+              variant="soft-gold"
               onClick={addNotice}
               className="w-full border-dashed"
             >
@@ -207,7 +207,7 @@ export function NoticesPolicySection({ data, onChange }: NoticesPolicySectionPro
 
             <Button
               type="button"
-              variant="outline"
+              variant="soft-gold"
               onClick={addCancellationPolicy}
               className="w-full border-dashed"
             >

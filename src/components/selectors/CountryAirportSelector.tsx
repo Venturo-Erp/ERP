@@ -271,13 +271,6 @@ export function CountryAirportSelector({
         </div>
       </div>
 
-      {/* 顯示當前選擇的城市代碼（非台灣團）*/}
-      {airportCode && !isTaiwanCountry(displayCountryName) && (
-        <p className="text-xs text-morandi-secondary">
-          團號城市代碼：<span className="font-mono font-semibold">{airportCode}</span>
-        </p>
-      )}
-
       {/* 新增國家 Dialog */}
       <FormDialog
         open={createCountryDialogOpen}

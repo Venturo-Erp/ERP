@@ -213,7 +213,7 @@ export function MemberSurchargeCell({
                 </label>
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="soft-gold"
                   size="sm"
                   onClick={() => handleAddItem('add_on_items')}
                 >
@@ -260,7 +260,7 @@ export function MemberSurchargeCell({
                 </label>
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="soft-gold"
                   size="sm"
                   onClick={() => handleAddItem('other_charges')}
                 >
@@ -345,7 +345,7 @@ export function MemberSurchargeCell({
           </div>
 
           <div className="flex justify-end gap-2 pt-4">
-            <Button variant="outline" onClick={handleCloseDialog}>
+            <Button variant="soft-gold" onClick={handleCloseDialog}>
               {MEMBER_ROW_LABELS.CANCEL}
             </Button>
             <Button onClick={handleSave}>{MEMBER_ROW_LABELS.SAVE}</Button>

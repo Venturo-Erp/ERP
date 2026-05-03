@@ -205,7 +205,7 @@ export function ItinerarySyncDialog({ open, syncInfo, onSync, onClose }: Itinera
 
         {/* Actions */}
         <div className="flex justify-end gap-2 pt-4 border-t">
-          <Button variant="outline" onClick={handleIgnore}>
+          <Button variant="soft-gold" onClick={handleIgnore}>
             {COMP_TOURS_LABELS.LABEL_1982}
           </Button>
           <Button

@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
+import { DatePicker } from '@/components/ui/date-picker'
 import { Button } from '@/components/ui/button'
 import { Search } from 'lucide-react'
 import { supabase } from '@/lib/supabase/client'
@@ -160,12 +161,12 @@ export default function GeneralLedgerPage() {
 
             <div className="space-y-2">
               <Label>開始日期</Label>
-              <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} />
+              <DatePicker value={startDate} onChange={setStartDate} />
             </div>
 
             <div className="space-y-2">
               <Label>結束日期</Label>
-              <Input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} />
+              <DatePicker value={endDate} onChange={setEndDate} />
             </div>
 
             <div className="flex items-end">

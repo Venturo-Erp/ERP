@@ -100,7 +100,7 @@ export function ArchiveReasonDialog({
           </div>
         </div>
         <div className="flex justify-end gap-2 mt-4">
-          <Button variant="outline" onClick={handleClose} className="gap-2">
+          <Button variant="soft-gold" onClick={handleClose} className="gap-2">
             <X size={16} />
             {TOUR_ARCHIVE.cancel}
           </Button>

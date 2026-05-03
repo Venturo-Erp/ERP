@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { DatePicker } from '@/components/ui/date-picker'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Undo2, X } from 'lucide-react'
@@ -139,13 +140,7 @@ export function RefundReceiptDialog({
 
           <div className="space-y-2">
             <Label htmlFor="refund_date">退款日期 *</Label>
-            <Input
-              id="refund_date"
-              type="date"
-              value={refundDate}
-              onChange={e => setRefundDate(e.target.value)}
-              required
-            />
+            <DatePicker value={refundDate} onChange={setRefundDate} />
           </div>
 
           <div className="space-y-2">
@@ -166,7 +161,7 @@ export function RefundReceiptDialog({
           <div className="flex justify-end gap-2 pt-2">
             <Button
               type="button"
-              variant="outline"
+              variant="soft-gold"
               onClick={() => onOpenChange(false)}
               disabled={isSubmitting}
             >

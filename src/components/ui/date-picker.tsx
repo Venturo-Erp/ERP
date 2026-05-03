@@ -1,11 +1,8 @@
 'use client'
 
 import * as React from 'react'
-import { CalendarIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
-import { Calendar } from '@/components/ui/calendar'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { DateInput } from './date-input'
 
 interface DatePickerProps {
   value?: string | Date | null
@@ -14,184 +11,65 @@ interface DatePickerProps {
   disabled?: boolean
   className?: string
   buttonClassName?: string
-  /** 日期格式：'YYYY-MM-DD' (預設) 或 'YYYY/MM/DD' */
+  /** 日期格式：'YYYY-MM-DD' (預設) 或 'YYYY/MM/DD' — 影響 onChange 回傳格式 */
   format?: 'dash' | 'slash'
   /** 最小可選日期 */
   minDate?: Date
   /** 最大可選日期 */
   maxDate?: Date
-  /** 是否顯示清除按鈕 */
+  /** 是否顯示清除按鈕（DateInput 內建支援、保留 prop 介面相容性） */
   clearable?: boolean
-  /** 隱藏年份，只顯示 MM / DD */
+  /** 隱藏年份（已 deprecated、保留 prop 介面相容性） */
   hideYear?: boolean
 }
 
 /**
- * 統一的日期選擇器組件
- * 使用 Popover + Calendar 取代原生 input[type="date"]
+ * 統一的日期選擇器組件 — 2026-05-03 規範化
+ *
+ * 改為 DateInput 的薄包裝、提供 3 段直打版（YYYY/MM/DD）+ 月曆 popover。
+ * 取代原本的「按鈕 + popover」trigger、視覺跟 DateInput 一致。
+ *
+ * 對外 API 維持相容（value / onChange / disabled / className / minDate / maxDate）。
  */
+function toIsoString(val: string | Date | null | undefined): string {
+  if (!val) return ''
+  if (val instanceof Date) {
+    if (isNaN(val.getTime())) return ''
+    const y = val.getFullYear()
+    const m = String(val.getMonth() + 1).padStart(2, '0')
+    const d = String(val.getDate()).padStart(2, '0')
+    return `${y}-${m}-${d}`
+  }
+  return val.replace(/\//g, '-')
+}
+
 export function DatePicker({
   value,
   onChange,
-  placeholder = 'YYYY / MM / DD',
   disabled = false,
   className,
   buttonClassName,
   format = 'dash',
   minDate,
   maxDate,
-  clearable = false,
-  hideYear = false,
 }: DatePickerProps) {
-  const [open, setOpen] = React.useState(false)
-
-  // 將各種格式的值轉換為 Date 物件
-  // 🔧 修正：使用本地時區解析日期，避免 UTC 轉換導致的日期跳動問題
-  const parseValue = (val: string | Date | null | undefined): Date | undefined => {
-    if (!val) return undefined
-    if (val instanceof Date) return val
-    // 支援 YYYY-MM-DD 和 YYYY/MM/DD 格式
-    const normalized = val.replace(/\//g, '-')
-    // 拆解日期字串並使用本地時區創建 Date（避免 new Date('YYYY-MM-DD') 的 UTC 問題）
-    const parts = normalized.split('-')
-    if (parts.length !== 3) return undefined
-    const year = parseInt(parts[0], 10)
-    const month = parseInt(parts[1], 10) - 1 // 月份是 0-indexed
-    const day = parseInt(parts[2], 10)
-    if (isNaN(year) || isNaN(month) || isNaN(day)) return undefined
-    const date = new Date(year, month, day) // 使用本地時區
-    return isNaN(date.getTime()) ? undefined : date
-  }
-
-  // 格式化日期為字串
-  const formatDate = (date: Date): string => {
-    const year = date.getFullYear()
-    const month = String(date.getMonth() + 1).padStart(2, '0')
-    const day = String(date.getDate()).padStart(2, '0')
-    return format === 'slash' ? `${year}/${month}/${day}` : `${year}-${month}-${day}`
-  }
-
-  // 顯示用的日期格式（統一為 YYYY / MM / DD）
-  // 使用 parseValue 後的本地日期，確保顯示一致
-  const displayValue = (val: string | Date | null | undefined): string => {
-    const date = parseValue(val)
-    if (!date) return ''
-    // 使用本地時區的日期方法（與 parseValue 一致）
-    const year = date.getFullYear()
-    const month = String(date.getMonth() + 1).padStart(2, '0')
-    const day = String(date.getDate()).padStart(2, '0')
-    return hideYear ? `${month} / ${day}` : `${year} / ${month} / ${day}`
-  }
-
-  const selectedDate = parseValue(value)
-
-  const handleSelect = (date: Date | undefined) => {
-    if (date) {
-      onChange?.(formatDate(date))
-      setOpen(false)
+  const handleChange = (iso: string) => {
+    if (!onChange) return
+    if (format === 'slash') {
+      onChange(iso.replace(/-/g, '/'))
+    } else {
+      onChange(iso)
     }
   }
 
-  const handleClear = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    onChange?.('')
-  }
-
-  // 建立 disabled 配置
-  const disabledConfig = React.useMemo(() => {
-    if (!minDate && !maxDate) return undefined
-    return {
-      before: minDate,
-      after: maxDate,
-    }
-  }, [minDate, maxDate])
-
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          disabled={disabled}
-          className={cn(
-            'w-full h-10 justify-between text-left font-normal bg-card',
-            !value && 'text-muted-foreground',
-            disabled && 'bg-input-disabled-bg opacity-60',
-            buttonClassName,
-            className
-          )}
-        >
-          <span className="flex-1 truncate">{value ? displayValue(value) : placeholder}</span>
-          <div className="flex items-center gap-1 ml-2">
-            {clearable && value && (
-              <span
-                onClick={handleClear}
-                className="h-4 w-4 shrink-0 rounded-full hover:bg-muted flex items-center justify-center cursor-pointer"
-              >
-                ×
-              </span>
-            )}
-            <CalendarIcon className="h-4 w-4 shrink-0 opacity-50" />
-          </div>
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="start">
-        <Calendar
-          mode="single"
-          selected={selectedDate}
-          onSelect={handleSelect as (date: Date | { from: Date; to?: Date } | undefined) => void}
-          defaultMonth={selectedDate || new Date()}
-          disabled={disabledConfig}
-        />
-      </PopoverContent>
-    </Popover>
-  )
-}
-
-/**
- * 日期範圍選擇器
- */
-interface DateRangePickerProps {
-  startValue?: string | null
-  endValue?: string | null
-  onStartChange?: (date: string) => void
-  onEndChange?: (date: string) => void
-  startPlaceholder?: string
-  endPlaceholder?: string
-  disabled?: boolean
-  className?: string
-  format?: 'dash' | 'slash'
-}
-
-function DateRangePicker({
-  startValue,
-  endValue,
-  onStartChange,
-  onEndChange,
-  startPlaceholder = '開始日期',
-  endPlaceholder = '結束日期',
-  disabled = false,
-  className,
-  format = 'dash',
-}: DateRangePickerProps) {
-  return (
-    <div className={cn('flex items-center gap-2', className)}>
-      <DatePicker
-        value={startValue}
-        onChange={onStartChange}
-        placeholder={startPlaceholder}
-        disabled={disabled}
-        format={format}
-        className="flex-1"
-      />
-      <span className="text-muted-foreground">~</span>
-      <DatePicker
-        value={endValue}
-        onChange={onEndChange}
-        placeholder={endPlaceholder}
-        disabled={disabled}
-        format={format}
-        className="flex-1"
-      />
-    </div>
+    <DateInput
+      value={toIsoString(value)}
+      onChange={handleChange}
+      disabled={disabled}
+      className={cn(className, buttonClassName)}
+      min={toIsoString(minDate)}
+      max={toIsoString(maxDate)}
+    />
   )
 }

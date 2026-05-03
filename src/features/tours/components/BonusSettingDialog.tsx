@@ -161,7 +161,7 @@ export function BonusSettingDialog({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant="soft-gold" onClick={() => onOpenChange(false)}>
             {BONUS_TAB_LABELS.CANCEL}
           </Button>
           <Button onClick={handleSave}>{BONUS_TAB_LABELS.SAVE}</Button>

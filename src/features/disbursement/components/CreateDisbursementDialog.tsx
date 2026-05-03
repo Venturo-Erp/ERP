@@ -125,7 +125,7 @@ export function CreateDisbursementDialog({
         </div>
 
         <DialogFooter className="flex-shrink-0 mt-4">
-          <Button variant="outline" onClick={() => handleClose(false)} className="gap-1">
+          <Button variant="soft-gold" onClick={() => handleClose(false)} className="gap-1">
             <X size={16} />
             {DISBURSEMENT_LABELS.取消}
           </Button>

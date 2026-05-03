@@ -253,7 +253,7 @@ export const QuoteConfirmationSection: React.FC<QuoteConfirmationSectionProps> =
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
-              variant="outline"
+              variant="soft-gold"
               size="sm"
               className={cn(
                 'h-8 px-3 gap-1.5',
@@ -420,7 +420,7 @@ export const QuoteConfirmationSection: React.FC<QuoteConfirmationSectionProps> =
 
           <DialogFooter>
             <Button
-              variant="outline"
+              variant="soft-gold"
               className="gap-2"
               onClick={() => setShowStaffConfirmDialog(false)}
             >

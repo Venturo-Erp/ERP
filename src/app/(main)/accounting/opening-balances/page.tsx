@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { ContentPageLayout } from '@/components/layout/content-page-layout'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { DatePicker } from '@/components/ui/date-picker'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Save, Info } from 'lucide-react'
@@ -171,12 +172,7 @@ export default function OpeningBalancesPage() {
           <div className="flex items-end gap-4">
             <div className="space-y-2">
               <Label>期初日（會計啟用日）</Label>
-              <Input
-                type="date"
-                value={asOfDate}
-                onChange={e => setAsOfDate(e.target.value)}
-                className="w-48"
-              />
+              <DatePicker value={asOfDate} onChange={setAsOfDate} className="w-48" />
             </div>
             {voucher && (
               <div className="text-sm text-muted-foreground pb-2">

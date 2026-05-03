@@ -169,7 +169,7 @@ function TourUnlockDialog({ tour, open, onOpenChange, onUnlocked }: TourUnlockDi
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={handleClose} disabled={submitting} className="gap-1">
+          <Button variant="soft-gold" onClick={handleClose} disabled={submitting} className="gap-1">
             <X size={16} />
             {TOUR_UNLOCK.cancel}
           </Button>

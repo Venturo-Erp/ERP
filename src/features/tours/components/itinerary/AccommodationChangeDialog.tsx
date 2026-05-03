@@ -98,7 +98,7 @@ export function AccommodationChangeDialog({
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button variant="outline" onClick={onCancel}>
+          <Button variant="soft-gold" onClick={onCancel}>
             <X className="h-4 w-4 mr-1" />
             取消
           </Button>

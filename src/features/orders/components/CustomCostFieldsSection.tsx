@@ -92,7 +92,7 @@ export function CustomCostFieldsSection({
             />
 
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setShowAddDialog(false)}>
+              <Button variant="soft-gold" onClick={() => setShowAddDialog(false)}>
                 {COMP_ORDERS_LABELS.取消}
               </Button>
               <Button onClick={handleAdd} disabled={!newFieldName.trim()}>

@@ -147,7 +147,7 @@ export function AddOrderForm({ tourId, onSubmit, onCancel, value, onChange }: Ad
       {/* 按鈕（只在獨立模式顯示） */}
       {!isEmbedded && (
         <div className="flex justify-end space-x-2">
-          <Button type="button" variant="outline" onClick={onCancel}>
+          <Button type="button" variant="soft-gold" onClick={onCancel}>
             {COMP_ORDERS_LABELS.取消}
           </Button>
           <Button variant="soft-gold"

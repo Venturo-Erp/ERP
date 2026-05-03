@@ -451,7 +451,7 @@ export function ImportSuppliersDialog({ open, onOpenChange }: ImportSuppliersDia
               {/* 下載模板 */}
               <div className="flex justify-center">
                 <Button
-                  variant="outline"
+                  variant="soft-gold"
                   size="sm"
                   onClick={handleDownloadTemplate}
                   className="gap-2"
@@ -512,14 +512,14 @@ export function ImportSuppliersDialog({ open, onOpenChange }: ImportSuppliersDia
         <div className="flex justify-between gap-2 pt-4 border-t">
           <div>
             {step === 'preview' && (
-              <Button variant="outline" size="sm" onClick={resetState} className="gap-2">
+              <Button variant="soft-gold" size="sm" onClick={resetState} className="gap-2">
                 <ArrowLeft size={16} />
                 {L.btn_back}
               </Button>
             )}
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={handleClose}>
+            <Button variant="soft-gold" size="sm" onClick={handleClose}>
               {L.btn_cancel}
             </Button>
             {step === 'preview' && (

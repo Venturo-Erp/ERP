@@ -4,6 +4,7 @@ import { CONTRACT_FORM_LABELS } from '../constants/labels'
 
 import React, { useState } from 'react'
 import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
 import { ContractData } from './types'
 import { Users, ChevronDown, Check } from 'lucide-react'
 import { COMP_CONTRACTS_LABELS } from '../constants/labels'
@@ -188,13 +189,14 @@ export function ContractFormFields({
 
                   {/* 確認按鈕 */}
                   <div className="p-2 border-t border-border">
-                    <button
+                    <Button
                       type="button"
+                      size="xs"
                       onClick={() => setShowMemberDropdown(false)}
-                      className="w-full py-1.5 text-xs font-medium text-white bg-morandi-gold hover:bg-morandi-gold-hover rounded transition-colors"
+                      className="w-full"
                     >
                       {CONTRACT_FORM_LABELS.CONFIRM}
-                    </button>
+                    </Button>
                   </div>
                 </div>
               )}

@@ -6,6 +6,7 @@ import { ContentPageLayout } from '@/components/layout/content-page-layout'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { TimeInput } from '@/components/ui/time-input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { toast } from 'sonner'
@@ -232,19 +233,17 @@ export default function HRSettingsPage() {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label className="text-sm font-medium text-morandi-primary">上班時間</Label>
-              <Input
-                type="time"
+              <TimeInput
                 value={settings.work_start_time}
-                onChange={e => setSettings(s => ({ ...s, work_start_time: e.target.value }))}
+                onChange={v => setSettings(s => ({ ...s, work_start_time: v }))}
                 className="mt-1.5"
               />
             </div>
             <div>
               <Label className="text-sm font-medium text-morandi-primary">下班時間</Label>
-              <Input
-                type="time"
+              <TimeInput
                 value={settings.work_end_time}
-                onChange={e => setSettings(s => ({ ...s, work_end_time: e.target.value }))}
+                onChange={v => setSettings(s => ({ ...s, work_end_time: v }))}
                 className="mt-1.5"
               />
             </div>

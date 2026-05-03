@@ -108,9 +108,10 @@ async function createVoucherFromReceipt(workspaceId: string, receiptId: string) 
       `
       *,
       payment_method_ref:payment_methods!payment_method_id(
-        id, name,
+        id, name, fee_percent, fee_account_id,
         debit_account:chart_of_accounts!debit_account_id(id, code, name),
-        credit_account:chart_of_accounts!credit_account_id(id, code, name)
+        credit_account:chart_of_accounts!credit_account_id(id, code, name),
+        fee_account:chart_of_accounts!fee_account_id(id, code, name)
       )
     `
     )
@@ -147,9 +148,10 @@ async function createVoucherFromReceipt(workspaceId: string, receiptId: string) 
   }
 
   // 2. 取得科目
-  const methodRef = receipt.payment_method_ref as {
+  const methodRef = receipt.payment_method_ref as unknown as {
     debit_account: { id: string; code: string; name: string } | null
     credit_account: { id: string; code: string; name: string } | null
+    fee_account: { id: string; code: string; name: string } | null
   } | null
 
   if (!methodRef?.debit_account || !methodRef?.credit_account) {
@@ -158,15 +160,23 @@ async function createVoucherFromReceipt(workspaceId: string, receiptId: string) 
 
   const debitAccount = methodRef.debit_account
   const creditAccount = methodRef.credit_account
+  const feeAccount = methodRef.fee_account
 
-  // 實收金額（actual_amount）優先、fallback 到 receipt_amount
-  const amount = Number(receipt.actual_amount) > 0
+  // 金額拆解：
+  //   receipt_amount = 客戶該付的總額（貸方 = 應收帳款結清）
+  //   fees           = 銀行手續費（借方 = 手續費支出）
+  //   actual_amount  = 實收（借方 = 銀行存款進帳）= receipt_amount - fees
+  const receiptAmount = Number(receipt.receipt_amount) || 0
+  const fees = Number(receipt.fees) || 0
+  const actualAmount = Number(receipt.actual_amount) > 0
     ? Number(receipt.actual_amount)
-    : Number(receipt.receipt_amount) || 0
+    : receiptAmount - fees
 
-  if (amount <= 0) {
+  if (receiptAmount <= 0) {
     throw new Error('收款金額為 0、無法產生傳票')
   }
+
+  const hasFees = fees > 0 && !!feeAccount
 
   // 3. 產生傳票編號
   const voucherDate = receipt.receipt_date || new Date().toISOString().split('T')[0]
@@ -181,8 +191,8 @@ async function createVoucherFromReceipt(workspaceId: string, receiptId: string) 
       voucher_date: voucherDate,
       memo: `收款單 ${receipt.receipt_number || ''} - ${receipt.notes || ''}`.trim(),
       status: 'posted',
-      total_debit: amount,
-      total_credit: amount,
+      total_debit: receiptAmount,
+      total_credit: receiptAmount,
       source_type: 'receipt',
       source_id: receiptId,
     })
@@ -194,24 +204,54 @@ async function createVoucherFromReceipt(workspaceId: string, receiptId: string) 
   }
 
   // 5. 建立傳票分錄
-  const lines = [
-    {
-      voucher_id: voucher.id,
-      line_no: 1,
-      account_id: debitAccount.id,
-      description: `收款 - ${receipt.notes || ''}`,
-      debit_amount: amount,
-      credit_amount: 0,
-    },
-    {
-      voucher_id: voucher.id,
-      line_no: 2,
-      account_id: creditAccount.id,
-      description: `收款 - ${receipt.notes || ''}`,
-      debit_amount: 0,
-      credit_amount: amount,
-    },
-  ]
+  // 無手續費 → 兩行（借存款 / 貸應收）
+  // 有手續費 → 三行（借存款=實收 / 借手續費=fees / 貸應收=總額）
+  const noteDesc = `收款 - ${receipt.notes || ''}`.trim()
+  const lines = hasFees
+    ? [
+        {
+          voucher_id: voucher.id,
+          line_no: 1,
+          account_id: debitAccount.id,
+          description: noteDesc,
+          debit_amount: actualAmount,
+          credit_amount: 0,
+        },
+        {
+          voucher_id: voucher.id,
+          line_no: 2,
+          account_id: feeAccount!.id,
+          description: `${noteDesc} 手續費`,
+          debit_amount: fees,
+          credit_amount: 0,
+        },
+        {
+          voucher_id: voucher.id,
+          line_no: 3,
+          account_id: creditAccount.id,
+          description: noteDesc,
+          debit_amount: 0,
+          credit_amount: receiptAmount,
+        },
+      ]
+    : [
+        {
+          voucher_id: voucher.id,
+          line_no: 1,
+          account_id: debitAccount.id,
+          description: noteDesc,
+          debit_amount: receiptAmount,
+          credit_amount: 0,
+        },
+        {
+          voucher_id: voucher.id,
+          line_no: 2,
+          account_id: creditAccount.id,
+          description: noteDesc,
+          debit_amount: 0,
+          credit_amount: receiptAmount,
+        },
+      ]
 
   const { error: linesError } = await db.from('journal_lines').insert(lines)
 

@@ -326,7 +326,7 @@ export default function VisasPage() {
                   disabled={!buttonAvailability.submit}
                   className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
                     buttonAvailability.submit
-                      ? 'bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors'
+                      ? 'bg-morandi-gold/[0.08] text-morandi-primary border border-morandi-gold/20 hover:bg-morandi-gold/[0.14] hover:border-morandi-gold/35 transition-colors'
                       : 'bg-morandi-container text-morandi-secondary/50 cursor-not-allowed'
                   }`}
                   title={VISAS_LABELS.LABEL_6162}
@@ -387,7 +387,7 @@ export default function VisasPage() {
           ) : (
             <>
               <Button
-                variant="outline"
+                variant="soft-gold"
                 onClick={() => setIsInfoDialogOpen(true)}
                 className="flex items-center gap-2"
               >
@@ -397,7 +397,7 @@ export default function VisasPage() {
               {canManageVisas && (
                 <>
                   <Button
-                    variant="outline"
+                    variant="soft-gold"
                     onClick={() => setIsBatchPickupDialogOpen(true)}
                     className="flex items-center gap-2"
                   >

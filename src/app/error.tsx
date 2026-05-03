@@ -48,7 +48,7 @@ export default function Error({
             <RefreshCw className="h-4 w-4" />
             {L.RETRY}
           </Button>
-          <Button variant="outline" onClick={() => (window.location.href = '/')} className="gap-2">
+          <Button variant="soft-gold" onClick={() => (window.location.href = '/')} className="gap-2">
             <Home className="h-4 w-4" />
             {L.GO_HOME}
           </Button>

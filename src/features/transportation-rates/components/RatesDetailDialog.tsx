@@ -110,7 +110,7 @@ export const RatesDetailDialog: React.FC<RatesDetailDialogProps> = ({
               {countryName} - {TRANSPORTATION_RATES_LABELS.RATES_MANAGEMENT_SUFFIX}
             </DialogTitle>
             <Button
-              variant="outline"
+              variant="soft-gold"
               size="sm"
               onClick={() => setHideKKDAYColumns(!hideKKDAYColumns)}
               className="gap-2"

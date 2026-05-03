@@ -160,7 +160,7 @@ export function ResourceOverrideDialog({
 
             {/* 按鈕 */}
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => onOpenChange(false)}>
+              <Button variant="soft-gold" onClick={() => onOpenChange(false)}>
                 取消
               </Button>
               <Button onClick={handleSave} disabled={saving}>

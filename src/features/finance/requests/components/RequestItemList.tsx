@@ -242,7 +242,7 @@ export function EditableRequestItemList({
     {
       key: 'date',
       label: '日期',
-      width: '110px',
+      width: '130px',
       render: ({ row, onUpdate }) => (
         <DatePicker
           value={row.custom_request_date || ''}
@@ -447,7 +447,7 @@ export function EditableRequestItemList({
         disabled && onTransfer ? (
           <Button
             size="sm"
-            variant="outline"
+            variant="soft-gold"
             onClick={onTransfer}
             className="text-morandi-secondary hover:text-morandi-gold hover:bg-morandi-gold/10"
           >

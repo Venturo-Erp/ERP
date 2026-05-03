@@ -110,6 +110,10 @@ interface PaymentMethod {
   credit_account_id: string | null
   debit_account: { id: string; code: string; name: string } | null
   credit_account: { id: string; code: string; name: string } | null
+  fee_percent: number // 百分比手續費（如 2.00 = 2%）
+  fee_fixed: number // 保留欄位、目前 UI 不開放
+  fee_account_id: string | null // 手續費科目（如 6100 刷卡手續費費用）
+  fee_account: { id: string; code: string; name: string } | null
 }
 
 interface BankAccount {
@@ -381,6 +385,9 @@ export default function FinanceSettingsPage() {
           placeholder: method.placeholder,
           debit_account_id: method.debit_account_id,
           credit_account_id: method.credit_account_id,
+          fee_percent: method.fee_percent ?? 0,
+          fee_fixed: method.fee_fixed ?? 0,
+          fee_account_id: method.fee_account_id,
           sort_order: maxSort + 1,
           is_active: true,
           is_system: false, // 副本一律 user 自訂
@@ -1125,6 +1132,8 @@ function MethodDialog({
   const [placeholder, setPlaceholder] = useState('')
   const [debitAccountId, setDebitAccountId] = useState('')
   const [creditAccountId, setCreditAccountId] = useState('')
+  const [feePercent, setFeePercent] = useState('')
+  const [feeAccountId, setFeeAccountId] = useState('')
   const [sortOrder, setSortOrder] = useState(0)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -1135,6 +1144,8 @@ function MethodDialog({
       setPlaceholder(method?.placeholder || '')
       setDebitAccountId(method?.debit_account_id || '')
       setCreditAccountId(method?.credit_account_id || '')
+      setFeePercent(method?.fee_percent ? String(method.fee_percent) : '')
+      setFeeAccountId(method?.fee_account_id || '')
       // 新增時自動取下一個排序數字
       if (method) {
         setSortOrder(method.sort_order || 0)
@@ -1152,12 +1163,15 @@ function MethodDialog({
     }
     setIsSubmitting(true)
     try {
+      const feePercentNum = parseFloat(feePercent) || 0
       await onSave({
         name,
         description,
         placeholder: placeholder || null,
         debit_account_id: debitAccountId || null,
         credit_account_id: creditAccountId || null,
+        fee_percent: feePercentNum,
+        fee_account_id: feePercentNum > 0 ? feeAccountId || null : null,
         sort_order: sortOrder,
       })
     } finally {
@@ -1210,6 +1224,45 @@ function MethodDialog({
               </p>
             </div>
           )}
+          {type === 'receipt' && (
+            <div className="space-y-2">
+              <Label>手續費（選填）</Label>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="relative">
+                  <Input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={feePercent}
+                    onChange={e => setFeePercent(e.target.value)}
+                    placeholder="例：2"
+                    className="pr-8"
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-morandi-muted">
+                    %
+                  </span>
+                </div>
+                <select
+                  value={feeAccountId}
+                  onChange={e => setFeeAccountId(e.target.value)}
+                  disabled={!feePercent || parseFloat(feePercent) <= 0}
+                  className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm disabled:opacity-50"
+                >
+                  <option value="">手續費科目</option>
+                  {chartOfAccounts
+                    .filter(a => a.type === 'expense' || a.account_type === 'expense')
+                    .map(account => (
+                      <option key={account.id} value={account.id}>
+                        {account.code} {account.name}
+                      </option>
+                    ))}
+                </select>
+              </div>
+              <p className="text-xs text-morandi-muted">
+                💡 銀行抽成（如刷卡 2%）。收款核准時自動扣減實收、並產生「借手續費」傳票分錄。
+              </p>
+            </div>
+          )}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>借方科目（選填）</Label>
@@ -1247,7 +1300,7 @@ function MethodDialog({
           </p>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant="soft-gold" onClick={() => onOpenChange(false)}>
             取消
           </Button>
           <Button
@@ -1360,7 +1413,7 @@ function BankDialog({
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant="soft-gold" onClick={() => onOpenChange(false)}>
             取消
           </Button>
           <Button
@@ -1510,7 +1563,7 @@ function CategoryDialog({
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant="soft-gold" onClick={() => onOpenChange(false)}>
             取消
           </Button>
           <Button

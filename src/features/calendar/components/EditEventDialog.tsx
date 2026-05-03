@@ -208,7 +208,7 @@ export function EditEventDialog({
           </div>
 
           <div className="flex justify-end gap-3 pt-4">
-            <Button type="button" variant="outline" onClick={onClose} className="gap-2">
+            <Button type="button" variant="soft-gold" onClick={onClose} className="gap-2">
               <X size={16} />
               {CALENDAR_LABELS.CANCEL}
             </Button>

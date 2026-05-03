@@ -408,7 +408,7 @@ function TourConfirmationWizard({
           <div>
             {currentStep !== 'quote' && (
               <Button
-                variant="outline"
+                variant="soft-gold"
                 onClick={handleBack}
                 disabled={submitting}
                 className="gap-2"
@@ -420,7 +420,7 @@ function TourConfirmationWizard({
           </div>
           <div className="flex gap-2">
             <Button
-              variant="outline"
+              variant="soft-gold"
               onClick={() => onOpenChange(false)}
               disabled={submitting}
               className="gap-2"

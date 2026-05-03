@@ -206,7 +206,7 @@ const QuoteDialog: React.FC<QuoteDialogProps> = ({
 
           {/* 動作按鈕 */}
           <div className="flex justify-end space-x-2">
-            <Button type="button" variant="outline" onClick={onClose} className="gap-2">
+            <Button type="button" variant="soft-gold" onClick={onClose} className="gap-2">
               <X size={16} />
               {QUOTE_DIALOG_LABELS.CANCEL}
             </Button>

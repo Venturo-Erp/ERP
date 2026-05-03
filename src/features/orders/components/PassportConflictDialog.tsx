@@ -151,7 +151,7 @@ export function PassportConflictDialog({
         </div>
 
         <DialogFooter className="gap-2">
-          <Button variant="outline" onClick={handleSkip} disabled={isUpdating}>
+          <Button variant="soft-gold" onClick={handleSkip} disabled={isUpdating}>
             {L.skip}
           </Button>
           <Button onClick={handleUpdate} disabled={isUpdating}>

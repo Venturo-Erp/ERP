@@ -190,7 +190,7 @@ export function TourFormShell({
 
         {/* Bottom buttons */}
         <div className="flex justify-end space-x-2 pt-6 border-t border-border mt-6">
-          <Button variant="outline" onClick={onClose} disabled={submitting} className="gap-2">
+          <Button variant="soft-gold" onClick={onClose} disabled={submitting} className="gap-2">
             <X size={16} />
             {TOUR_FORM.cancel}
           </Button>

@@ -125,14 +125,14 @@ export const QuickQuoteDetail: React.FC<QuickQuoteDetailProps> = ({
       {viewModeToggle}
 
       {/* 列印按鈕（任何模式都顯示） */}
-      <Button onClick={() => setShowPrintPreview(true)} variant="outline" className="gap-2">
+      <Button onClick={() => setShowPrintPreview(true)} variant="soft-gold" className="gap-2">
         <Printer className="h-4 w-4" />
         {QUICK_QUOTE_DETAIL_LABELS.PRINT}
       </Button>
 
       {/* 非編輯模式 */}
       {!isEditing && (
-        <Button onClick={() => setIsEditing(true)} variant="outline" className="gap-2">
+        <Button onClick={() => setIsEditing(true)} variant="soft-gold" className="gap-2">
           <Edit2 size={16} />
           {QUICK_QUOTE_DETAIL_LABELS.EDIT}
         </Button>
@@ -144,7 +144,7 @@ export const QuickQuoteDetail: React.FC<QuickQuoteDetailProps> = ({
           {quote.tour_id && (
             <Button
               onClick={handleLoadFromTour}
-              variant="outline"
+              variant="soft-gold"
               className="gap-2"
               disabled={isLoadingItems}
             >
@@ -156,7 +156,7 @@ export const QuickQuoteDetail: React.FC<QuickQuoteDetailProps> = ({
               載入行程項目
             </Button>
           )}
-          <Button onClick={() => setIsEditing(false)} variant="outline" className="gap-2">
+          <Button onClick={() => setIsEditing(false)} variant="soft-gold" className="gap-2">
             <X size={16} />
             {QUICK_QUOTE_DETAIL_LABELS.CANCEL}
           </Button>

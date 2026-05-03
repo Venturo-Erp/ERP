@@ -224,7 +224,7 @@ export function ReceiptTransferDialog({
 
         {/* 底部 */}
         <div className="flex items-center justify-end gap-2 pt-2 border-t border-border">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant="soft-gold" onClick={() => onOpenChange(false)}>
             取消
           </Button>
           <Button

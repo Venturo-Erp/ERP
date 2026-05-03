@@ -56,7 +56,7 @@ function ItineraryPreview({
             </DialogTitle>
             <div className="flex items-center gap-2">
               <Button
-                variant="outline"
+                variant="soft-gold"
                 size="sm"
                 onClick={onEdit}
                 className="h-7 text-[11px] gap-1"
@@ -252,7 +252,7 @@ export function ItineraryPreviewContent({
           <span className="text-sm font-normal text-morandi-secondary">- {title}</span>
         </DialogTitle>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={onEdit} className="h-7 text-[11px] gap-1">
+          <Button variant="soft-gold" size="sm" onClick={onEdit} className="h-7 text-[11px] gap-1">
             <Edit2 size={12} />
             {BROCHURE_PREVIEW_DIALOG_LABELS.編輯}
           </Button>

@@ -251,7 +251,7 @@ export function CisPricingItemDialog({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting}>
+          <Button variant="soft-gold" onClick={() => onOpenChange(false)} disabled={submitting}>
             {P.btn_cancel}
           </Button>
           <Button onClick={handleSubmit} disabled={submitting || !form.name.trim()}>

@@ -134,7 +134,7 @@ export function ClockInWidget() {
                 'flex-1 rounded-xl transition-all duration-200 font-semibold',
                 hasClockedIn
                   ? 'bg-gradient-to-br from-morandi-green/10 to-morandi-green/20 border border-morandi-green/30 text-morandi-green'
-                  : 'bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors'
+                  : 'bg-morandi-gold/[0.08] text-morandi-primary border border-morandi-gold/20 hover:bg-morandi-gold/[0.14] hover:border-morandi-gold/35 transition-colors'
               )}
             >
               {hasClockedIn ? '已上班' : '上班'}

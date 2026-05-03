@@ -244,7 +244,7 @@ export function EditAccountDialog({
             <div className="flex gap-3">
               <Button
                 type="button"
-                variant="outline"
+                variant="soft-gold"
                 onClick={() => onOpenChange(false)}
                 disabled={isSubmitting}
               >

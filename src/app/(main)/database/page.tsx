@@ -146,7 +146,7 @@ export default function DatabasePage() {
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Button
-              variant="outline"
+              variant="soft-gold"
               className="h-auto p-4 text-left flex flex-col items-start"
               onClick={() => router.push('/database/attractions')}
             >
@@ -158,7 +158,7 @@ export default function DatabasePage() {
               </div>
             </Button>
             <Button
-              variant="outline"
+              variant="soft-gold"
               className="h-auto p-4 text-left flex flex-col items-start"
               onClick={() => router.push('/database/transportation-rates')}
             >
@@ -168,7 +168,7 @@ export default function DatabasePage() {
               </div>
             </Button>
             <Button
-              variant="outline"
+              variant="soft-gold"
               className="h-auto p-4 text-left flex flex-col items-start"
               onClick={() => router.push('/database/attractions')}
             >

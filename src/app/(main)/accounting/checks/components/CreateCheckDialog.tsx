@@ -6,6 +6,7 @@ import { useState } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { DatePicker } from '@/components/ui/date-picker'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { supabase } from '@/lib/supabase/client'
@@ -135,23 +136,17 @@ export function CreateCheckDialog({ open, onOpenChange, onSuccess }: CreateCheck
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="check_date">開票日期 *</Label>
-              <Input
-                id="check_date"
-                type="date"
+              <DatePicker
                 value={formData.check_date}
-                onChange={e => setFormData({ ...formData, check_date: e.target.value })}
-                required
+                onChange={v => setFormData({ ...formData, check_date: v })}
               />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="due_date">到期日 *</Label>
-              <Input
-                id="due_date"
-                type="date"
+              <DatePicker
                 value={formData.due_date}
-                onChange={e => setFormData({ ...formData, due_date: e.target.value })}
-                required
+                onChange={v => setFormData({ ...formData, due_date: v })}
               />
             </div>
           </div>
@@ -181,7 +176,7 @@ export function CreateCheckDialog({ open, onOpenChange, onSuccess }: CreateCheck
           <div className="flex justify-end gap-3 pt-4">
             <Button
               type="button"
-              variant="outline"
+              variant="soft-gold"
               onClick={() => onOpenChange(false)}
               disabled={isSubmitting}
             >

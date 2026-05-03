@@ -430,7 +430,7 @@ export function DisbursementDetailDialog({
                 {order.status === 'paid' && (
                   <div className="flex items-center gap-2">
                     <Button
-                      variant="outline"
+                      variant="soft-gold"
                       onClick={handlePrintPDF}
                       className="text-morandi-gold border-morandi-gold hover:bg-morandi-gold/10"
                     >

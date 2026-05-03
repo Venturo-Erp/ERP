@@ -231,7 +231,7 @@ export function PricingDetailsSection({ data, updateField, onChange }: PricingDe
               </div>
               <Button
                 type="button"
-                variant="outline"
+                variant="soft-gold"
                 size="sm"
                 onClick={addIncludedItem}
                 className="h-7 text-xs"
@@ -284,7 +284,7 @@ export function PricingDetailsSection({ data, updateField, onChange }: PricingDe
               </div>
               <Button
                 type="button"
-                variant="outline"
+                variant="soft-gold"
                 size="sm"
                 onClick={addExcludedItem}
                 className="h-7 text-xs"
@@ -337,7 +337,7 @@ export function PricingDetailsSection({ data, updateField, onChange }: PricingDe
               </div>
               <Button
                 type="button"
-                variant="outline"
+                variant="soft-gold"
                 size="sm"
                 onClick={addNote}
                 className="h-7 text-xs"

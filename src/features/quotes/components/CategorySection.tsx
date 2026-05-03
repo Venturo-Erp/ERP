@@ -637,7 +637,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                 {countries.map(country => (
                   <Button
                     key={country.name}
-                    variant="outline"
+                    variant="soft-gold"
                     className="h-auto py-4 text-base"
                     onClick={() => handleCountrySelect(country.name)}
                   >

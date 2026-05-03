@@ -265,7 +265,7 @@ export const LeaderAvailabilityDialog: React.FC<LeaderAvailabilityDialogProps> =
               </div>
 
               <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={handleCancelForm} className="gap-2">
+                <Button variant="soft-gold" onClick={handleCancelForm} className="gap-2">
                   <X size={16} />
                   {TOUR_LEADERS_LABELS.CANCEL}
                 </Button>
@@ -280,7 +280,7 @@ export const LeaderAvailabilityDialog: React.FC<LeaderAvailabilityDialogProps> =
             </div>
           ) : (
             <Button
-              variant="outline"
+              variant="soft-gold"
               onClick={handleOpenAdd}
               className="w-full gap-2 border-dashed"
             >
@@ -362,7 +362,7 @@ export const LeaderAvailabilityDialog: React.FC<LeaderAvailabilityDialogProps> =
 
         {/* Footer */}
         <div className="flex justify-end pt-4 border-t border-border">
-          <Button variant="outline" onClick={onClose} className="gap-2">
+          <Button variant="soft-gold" onClick={onClose} className="gap-2">
             <X size={16} />
             {TOUR_LEADERS_LABELS.CLOSE}
           </Button>

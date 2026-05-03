@@ -1,23 +1,18 @@
 'use client'
 
 import { logger } from '@/lib/utils/logger'
-import React from 'react'
+import React, { useState, useCallback } from 'react'
 import { FileText } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { Combobox } from '@/components/ui/combobox'
 import { useRequestForm } from '@/features/finance/requests/hooks/useRequestForm'
 import { useRequestOperations } from '@/features/finance/requests/hooks/useRequestOperations'
+import { usePaymentMethodsCached } from '@/data/hooks'
+
 import { EditableRequestItemList } from '@/features/finance/requests/components/RequestItemList'
 import { RequestDateInput } from '@/features/finance/requests/components/RequestDateInput'
+import { CreateSupplierDialog } from '@/features/finance/requests/components/CreateSupplierDialog'
 import { alert } from '@/lib/ui/alert-dialog'
 import { CurrencyCell } from '@/components/table-cells'
 import {
@@ -25,14 +20,22 @@ import {
   PLACEHOLDER_LABELS,
   MESSAGE_LABELS,
   CONTACT_LABELS,
-  createDisbursementButtonText,
 } from '@/features/todos/constants/labels'
+import {
+  ADD_REQUEST_DIALOG_LABELS,
+  ADD_RECEIPT_DIALOG_LABELS,
+  BATCH_RECEIPT_DIALOG_LABELS,
+} from '@/features/finance/constants/labels'
 
 interface QuickDisbursementProps {
   onSubmit?: () => void
+  /** 預設選中的團體 ID */
+  defaultTourId?: string
+  /** 預設選中的訂單 ID */
+  defaultOrderId?: string
 }
 
-export function QuickDisbursement({ onSubmit }: QuickDisbursementProps) {
+export function QuickDisbursement({ onSubmit, defaultTourId, defaultOrderId }: QuickDisbursementProps) {
   const {
     formData,
     setFormData,
@@ -49,9 +52,52 @@ export function QuickDisbursement({ onSubmit }: QuickDisbursementProps) {
   } = useRequestForm()
 
   const { createRequest } = useRequestOperations()
+  const { methods: paymentMethods } = usePaymentMethodsCached('payment')
+
+  // === 新增供應商對話框狀態（和 AddRequestDialog 同一套）===
+  const [createSupplierDialogOpen, setCreateSupplierDialogOpen] = useState(false)
+  const [pendingSupplierName, setPendingSupplierName] = useState('')
+  const [supplierCreateResolver, setSupplierCreateResolver] = useState<
+    ((supplierId: string | null) => void) | null
+  >(null)
+
+  // 快速新增供應商（和 AddRequestDialog 同一套邏輯）
+  const handleCreateSupplier = useCallback(
+    async (name: string): Promise<string | null> => {
+      return new Promise(resolve => {
+        setPendingSupplierName(name)
+        setSupplierCreateResolver(() => resolve)
+        setCreateSupplierDialogOpen(true)
+      })
+    },
+    []
+  )
+
+  // 如果待辦已關聯團號/訂單，自動帶入
+  React.useEffect(() => {
+    if (defaultTourId) {
+      setFormData(prev => ({ ...prev, tour_id: defaultTourId }))
+    }
+  }, [defaultTourId, setFormData])
+
+  React.useEffect(() => {
+    if (defaultOrderId) {
+      setFormData(prev => ({ ...prev, order_id: defaultOrderId }))
+    }
+  }, [defaultOrderId, setFormData])
 
   const selectedTour = (tours || []).find(t => t.id === formData.tour_id)
   const selectedOrder = (orders || []).find(o => o.id === formData.order_id)
+
+  const tourOptions = (tours || []).map(tour => ({
+    value: tour.id,
+    label: `${tour.code || ''} - ${tour.name || ''}`,
+  }))
+
+  const orderOptions = filteredOrders.map(order => ({
+    value: order.id,
+    label: `${order.order_number} - ${order.contact_person || CONTACT_LABELS.noContact}`,
+  }))
 
   const handleSubmit = async () => {
     if (!formData.tour_id || requestItems.length === 0 || !formData.request_date) {
@@ -84,94 +130,64 @@ export function QuickDisbursement({ onSubmit }: QuickDisbursementProps) {
 
   return (
     <div className="space-y-4">
-      {/* 團體和訂單選擇（並排） */}
-      <div className="grid grid-cols-2 gap-3">
-        {/* 選擇團體 */}
-        <div>
-          <Label className="text-sm font-medium text-morandi-primary">
-            {FORM_LABELS.groupRequired}
-          </Label>
+      {/* 團體 + 訂單 + 請款日期 同一行（和 AddRequestDialog 完全一致） */}
+      <div className="flex items-start gap-3">
+        <div className="relative z-[10020]">
           <Combobox
-            options={(tours || []).map(tour => ({
-              value: tour.id,
-              label: `${tour.code || ''} - ${tour.name || ''}`,
-            }))}
+            options={tourOptions}
             value={formData.tour_id}
-            onChange={value => {
-              // 找出該團體的訂單
-              const tourOrders = (orders || []).filter(o => o.tour_id === value)
-              // 如果只有一個訂單，自動帶入
-              const autoOrderId = tourOrders.length === 1 ? tourOrders[0].id : ''
-              setFormData(prev => ({
-                ...prev,
-                tour_id: value,
-                order_id: autoOrderId,
-              }))
-            }}
-            placeholder={PLACEHOLDER_LABELS.selectGroup}
-            className="mt-1"
+            onChange={value =>
+              setFormData(prev => ({ ...prev, tour_id: value, order_id: '' }))
+            }
+            placeholder={ADD_REQUEST_DIALOG_LABELS.搜尋團號或團名}
+            emptyMessage={ADD_RECEIPT_DIALOG_LABELS.找不到團體}
+            className="w-[280px]"
+            maxHeight="300px"
           />
         </div>
-
-        {/* 選擇訂單 */}
-        <div>
-          <Label className="text-sm font-medium text-morandi-primary">
-            {FORM_LABELS.orderOptional}
-          </Label>
-          <Select
-            disabled={!formData.tour_id || filteredOrders.length === 0}
+        <div className="relative z-[10019]">
+          <Combobox
+            options={orderOptions}
             value={formData.order_id}
-            onValueChange={value => setFormData(prev => ({ ...prev, order_id: value }))}
-          >
-            <SelectTrigger className="mt-1 h-9 border-morandi-container/30">
-              <SelectValue
-                placeholder={
-                  !formData.tour_id
-                    ? PLACEHOLDER_LABELS.selectGroupFirst
-                    : filteredOrders.length === 0
-                      ? PLACEHOLDER_LABELS.noOrdersInGroup
-                      : PLACEHOLDER_LABELS.selectOrder
-                }
-              />
-            </SelectTrigger>
-            <SelectContent>
-              {filteredOrders.map(order => (
-                <SelectItem key={order.id} value={order.id}>
-                  {order.order_number} - {order.contact_person || CONTACT_LABELS.noContact}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            onChange={value => setFormData(prev => ({ ...prev, order_id: value }))}
+            placeholder={
+              !formData.tour_id
+                ? ADD_REQUEST_DIALOG_LABELS.請先選擇旅遊團
+                : BATCH_RECEIPT_DIALOG_LABELS.搜尋訂單
+            }
+            disabled={!formData.tour_id}
+            className="w-[240px]"
+            maxHeight="300px"
+          />
+        </div>
+        <div className="relative z-[10018] w-[200px]">
+          <RequestDateInput
+            value={formData.request_date}
+            onChange={(date, isSpecialBilling) =>
+              setFormData(prev => ({
+                ...prev,
+                request_date: date,
+                is_special_billing: isSpecialBilling,
+              }))
+            }
+          />
         </div>
       </div>
 
-      {/* Request Date */}
-      <div className="pt-3 border-t border-morandi-container/20">
-        <RequestDateInput
-          value={formData.request_date}
-          onChange={(date, isSpecialBilling) => {
-            setFormData(prev => ({
-              ...prev,
-              request_date: date,
-              is_special_billing: isSpecialBilling,
-            }))
-          }}
-        />
-      </div>
-
-      {/* Item List */}
-      <div className="pt-3 border-t border-morandi-container/20">
-        <EditableRequestItemList
-          items={requestItems}
-          suppliers={suppliers}
-          updateItem={updateItem}
-          removeItem={removeItem}
-          addNewEmptyItem={addNewEmptyItem}
-        />
-      </div>
+      {/* Item List（和 AddRequestDialog 完全一致：含 onCreateSupplier + paymentMethods + tourId） */}
+      <EditableRequestItemList
+        items={requestItems}
+        suppliers={suppliers}
+        updateItem={updateItem}
+        removeItem={removeItem}
+        addNewEmptyItem={addNewEmptyItem}
+        onCreateSupplier={handleCreateSupplier}
+        tourId={formData.tour_id || null}
+        paymentMethods={paymentMethods}
+      />
 
       {/* Note */}
-      <div className="pt-3 border-t border-morandi-container/20">
+      <div>
         <label className="text-sm font-medium text-morandi-primary mb-2 block">
           {FORM_LABELS.remarks}
         </label>
@@ -185,17 +201,37 @@ export function QuickDisbursement({ onSubmit }: QuickDisbursementProps) {
       </div>
 
       {/* Submit Button */}
-      <div className="pt-4">
+      <div className="pt-2">
         <Button
           onClick={handleSubmit}
           disabled={!formData.tour_id || requestItems.length === 0 || !formData.request_date}
-          className="w-full text-white shadow-sm bg-morandi-gold hover:bg-morandi-gold-hover"
+          className="w-full"
         >
           <FileText size={16} className="mr-2" />
           建立請款單 ({requestItems.length} 項，
           <CurrencyCell amount={total_amount} className="inline text-white" />)
         </Button>
       </div>
+
+      {/* 新增供應商 Dialog（和 AddRequestDialog 同一套） */}
+      <CreateSupplierDialog
+        open={createSupplierDialogOpen}
+        onOpenChange={open => {
+          if (!open && supplierCreateResolver) {
+            supplierCreateResolver(null)
+            setSupplierCreateResolver(null)
+          }
+          setCreateSupplierDialogOpen(open)
+        }}
+        defaultName={pendingSupplierName}
+        onSuccess={supplierId => {
+          if (supplierCreateResolver) {
+            supplierCreateResolver(supplierId)
+            setSupplierCreateResolver(null)
+          }
+          setCreateSupplierDialogOpen(false)
+        }}
+      />
     </div>
   )
 }

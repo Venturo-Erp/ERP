@@ -159,7 +159,7 @@ export function AddMemberDialog({
                     <span className="text-muted-foreground ml-1">— {item.confirmMessage}</span>
                   </div>
                   <div className="flex gap-1 shrink-0">
-                    <Button size="sm" variant="outline" onClick={() => onRejectUpdate?.(i)}>
+                    <Button size="sm" variant="soft-gold" onClick={() => onRejectUpdate?.(i)}>
                       跳過
                     </Button>
                     <Button size="sm" onClick={() => onConfirmUpdate?.(i)}>
@@ -169,7 +169,7 @@ export function AddMemberDialog({
                 </div>
               ))}
               <div className="flex gap-2 pt-1">
-                <Button size="sm" variant="outline" onClick={onRejectAllUpdates}>
+                <Button size="sm" variant="soft-gold" onClick={onRejectAllUpdates}>
                   全部跳過
                 </Button>
                 <Button size="sm" onClick={onConfirmAllUpdates}>

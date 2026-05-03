@@ -141,7 +141,7 @@ export default function TreasuryPage() {
       {/* 快速連結 */}
       <div className="flex gap-2 flex-wrap">
         <Button
-          variant="outline"
+          variant="soft-gold"
           size="sm"
           onClick={() => router.push('/finance/payments')}
           className="gap-2"
@@ -150,7 +150,7 @@ export default function TreasuryPage() {
           收款管理
         </Button>
         <Button
-          variant="outline"
+          variant="soft-gold"
           size="sm"
           onClick={() => router.push('/finance/requests')}
           className="gap-2"
@@ -159,7 +159,7 @@ export default function TreasuryPage() {
           請款管理
         </Button>
         <Button
-          variant="outline"
+          variant="soft-gold"
           size="sm"
           onClick={() => router.push('/finance/treasury/disbursement')}
           className="gap-2"

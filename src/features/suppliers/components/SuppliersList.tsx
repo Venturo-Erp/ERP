@@ -156,7 +156,7 @@ export const SuppliersList: React.FC<SuppliersListProps> = ({
         return (
           <Button
             size="sm"
-            variant="outline"
+            variant="soft-gold"
             className="h-7 text-xs"
             onClick={e => {
               e.stopPropagation()
@@ -261,7 +261,7 @@ export const SuppliersList: React.FC<SuppliersListProps> = ({
 
               <div className="flex gap-2">
                 <Button
-                  variant="outline"
+                  variant="soft-gold"
                   className="flex-1"
                   onClick={() => setBindingSupplier(null)}
                 >

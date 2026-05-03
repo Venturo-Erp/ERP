@@ -402,7 +402,7 @@ export const TourCosts = React.memo(function TourCosts({
             </div>
 
             <div className="flex justify-end space-x-2">
-              <Button variant="outline" onClick={() => setIsAddDialogOpen(false)} className="gap-2">
+              <Button variant="soft-gold" onClick={() => setIsAddDialogOpen(false)} className="gap-2">
                 <X size={16} />
                 {COMP_TOURS_LABELS.取消}
               </Button>

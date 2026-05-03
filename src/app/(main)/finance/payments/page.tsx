@@ -181,20 +181,20 @@ export default function PaymentsPage() {
     }
   }
 
-  // 表格欄位
+  // 表格欄位（widths 帶 px 單位、tour_name 不設 width、由 table-fixed 自動吃剩餘空間、跟旅遊團列表一致）
   const columns: TableColumn<Receipt>[] = [
-    { key: 'receipt_number', label: FinanceLabels.receiptNumber, sortable: true, width: '155' },
+    { key: 'receipt_number', label: FinanceLabels.receiptNumber, sortable: true, width: '140px' },
     {
       key: 'receipt_date',
       label: FinanceLabels.receiptDate,
       sortable: true,
-      width: '85',
+      width: '90px',
       render: value => <DateCell date={String(value)} showIcon={false} />,
     },
     {
       key: 'receipt_account',
       label: FinanceLabels.orderNumber,
-      width: '120',
+      width: '90px',
       // 收款明細：未核准灰色、核准後黑色（跟其他資料一樣）
       render: (value, row) => {
         const info = String(value || '-')
@@ -202,13 +202,12 @@ export default function PaymentsPage() {
         return <span className={`text-sm ${cls}`}>{info}</span>
       },
     },
-    { key: 'tour_name', label: FinanceLabels.tourName, sortable: true },
+    { key: 'tour_name', label: FinanceLabels.tourName, sortable: true, width: '200px' },
     {
       key: 'receipt_amount',
       label: FinanceLabels.receiptAmount,
       sortable: true,
-      width: '130',
-      align: 'right',
+      width: '120px',
       render: value => (
         <div className="whitespace-nowrap">
           <CurrencyCell amount={Number(value)} />
@@ -219,9 +218,8 @@ export default function PaymentsPage() {
       key: 'actual_amount',
       label: FinanceLabels.actualAmount,
       sortable: true,
-      width: '130',
-      align: 'right',
-      // 實收金額：核准前顯示灰色短 dash、跟金額一樣 right-align
+      width: '120px',
+      // 實收金額：核准前顯示灰色短 dash
       render: (value, row) => {
         if (row.status !== 'confirmed') {
           return <span className="text-morandi-muted text-sm">-</span>
@@ -236,7 +234,7 @@ export default function PaymentsPage() {
     {
       key: 'payment_method_id',
       label: FinanceLabels.paymentMethod,
-      width: '120',
+      width: '80px',
       // SSOT：唯一真相是 payment_methods.name (FK join)
       // 抓不到顯示「-」、不再用 5 大類中文 fallback 污染
       render: (_, row) => (
@@ -246,13 +244,13 @@ export default function PaymentsPage() {
     {
       key: 'status',
       label: FinanceLabels.status,
-      width: '110',
+      width: '75px',
       render: value => <StatusCell type="receipt" status={String(value)} />,
     },
     {
       key: 'actions',
       label: FinanceLabels.actions,
-      width: '220',
+      width: '220px',
       render: (_, row) => (
         <div className="flex items-center gap-1 whitespace-nowrap">
           {/* 待確認狀態：顯示核准按鈕 */}
@@ -262,7 +260,7 @@ export default function PaymentsPage() {
               size="sm"
               onClick={async e => {
                 e.stopPropagation()
-                await handleConfirmReceipt(row.id, row.receipt_amount || 0)
+                await handleConfirmReceipt(row.id)
                 await invalidateReceipts()
               }}
               className="h-7 px-2 text-xs text-morandi-green hover:text-morandi-green hover:bg-morandi-green/10"

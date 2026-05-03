@@ -196,7 +196,7 @@ export const LocalPricingDialog: React.FC<LocalPricingDialogProps> = ({
             <tr>
               <td colSpan={4} className="pt-3">
                 <Button
-                  variant="outline"
+                  variant="soft-gold"
                   size="sm"
                   onClick={handleAddTier}
                   className="w-full gap-2"
@@ -227,7 +227,7 @@ export const LocalPricingDialog: React.FC<LocalPricingDialogProps> = ({
         )}
 
         <DialogFooter>
-          <Button variant="outline" onClick={handleClose}>
+          <Button variant="soft-gold" onClick={handleClose}>
             <X className="w-4 h-4 mr-2" />
             {LOCAL_PRICING_DIALOG_LABELS.取消}
           </Button>

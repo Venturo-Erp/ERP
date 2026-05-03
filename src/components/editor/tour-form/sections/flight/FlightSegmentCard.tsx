@@ -58,7 +58,7 @@ export function FlightSegmentCard({
           <Button
             type="button"
             size="sm"
-            variant="outline"
+            variant="soft-gold"
             onClick={onSearch}
             disabled={isLoading || !flightData.flightNumber}
             className="h-7 text-xs gap-1"
@@ -69,7 +69,7 @@ export function FlightSegmentCard({
           <Button
             type="button"
             size="sm"
-            variant="outline"
+            variant="soft-gold"
             onClick={onRouteSearch}
             className="h-7 text-xs gap-1 border-morandi-gold/50 text-morandi-gold hover:bg-morandi-gold/10"
           >

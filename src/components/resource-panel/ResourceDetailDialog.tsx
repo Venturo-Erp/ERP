@@ -599,7 +599,7 @@ export function ResourceDetailDialog({
                     <div className="flex gap-2">
                       {/* 驗證/取消驗證 */}
                       <Button
-                        variant="outline"
+                        variant="soft-gold"
                         size="sm"
                         onClick={async () => {
                           const newVerified = !fullData?.data_verified
@@ -631,7 +631,7 @@ export function ResourceDetailDialog({
                       </Button>
                       {/* 刪除 */}
                       <Button
-                        variant="outline"
+                        variant="soft-gold"
                         size="sm"
                         onClick={handleDelete}
                         disabled={deleting}
@@ -644,7 +644,7 @@ export function ResourceDetailDialog({
                     {/* 右側：取消 + 儲存 */}
                     <div className="flex gap-2">
                       <Button
-                        variant="outline"
+                        variant="soft-gold"
                         size="sm"
                         onClick={() => {
                           setIsEditing(false)
@@ -668,7 +668,7 @@ export function ResourceDetailDialog({
                       {/* 編輯本團按鈕 */}
                       {tourItineraryItemId && (
                         <Button
-                          variant="outline"
+                          variant="soft-gold"
                           size="sm"
                           onClick={() => setShowOverrideDialog(true)}
                         >
@@ -678,7 +678,7 @@ export function ResourceDetailDialog({
                       )}
                       {/* 編輯資料庫按鈕 */}
                       {canEditDatabase && (
-                        <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+                        <Button variant="soft-gold" size="sm" onClick={() => setIsEditing(true)}>
                           <Database size={14} className="mr-1" />
                           編輯資料庫
                         </Button>

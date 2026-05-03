@@ -119,7 +119,7 @@ function AccommodationForm({ todo, onUpdate, onClose }: FormProps) {
     paymentStatus: 'unpaid' as 'unpaid' | 'paid' | 'advanced',
     // 請款相關
     tourId: todo.tour_id || '',
-    orderId: '',
+    orderId: todo.related_items?.find(r => r.type === 'order')?.id || '',
     advancedBy: '',
   })
   const [isSubmitting, setIsSubmitting] = React.useState(false)
@@ -335,7 +335,7 @@ function RestaurantForm({ todo, onUpdate, onClose }: FormProps) {
   return (
     <div className="space-y-3">
       <p className="text-sm text-morandi-secondary">訂餐廳表單（待實作）</p>
-      <Button onClick={onClose} variant="outline" className="w-full">
+      <Button onClick={onClose} variant="soft-gold" className="w-full">
         關閉
       </Button>
     </div>
@@ -346,7 +346,7 @@ function TransportForm({ todo, onUpdate, onClose }: FormProps) {
   return (
     <div className="space-y-3">
       <p className="text-sm text-morandi-secondary">訂交通表單（待實作）</p>
-      <Button onClick={onClose} variant="outline" className="w-full">
+      <Button onClick={onClose} variant="soft-gold" className="w-full">
         關閉
       </Button>
     </div>
@@ -613,7 +613,7 @@ function TicketForm({ todo, onUpdate, onClose }: FormProps) {
     return (
       <div className="space-y-3">
         <p className="text-sm text-morandi-secondary">請先關聯團才能查看訂票資訊</p>
-        <Button onClick={onClose} variant="outline" className="w-full">
+        <Button onClick={onClose} variant="soft-gold" className="w-full">
           關閉
         </Button>
       </div>
@@ -774,7 +774,7 @@ function TicketForm({ todo, onUpdate, onClose }: FormProps) {
         >
           標記完成
         </Button>
-        <Button onClick={onClose} variant="outline">
+        <Button onClick={onClose} variant="soft-gold">
           關閉
         </Button>
       </div>
@@ -786,7 +786,7 @@ function ActivityForm({ todo, onUpdate, onClose }: FormProps) {
   return (
     <div className="space-y-3">
       <p className="text-sm text-morandi-secondary">訂活動表單（待實作）</p>
-      <Button onClick={onClose} variant="outline" className="w-full">
+      <Button onClick={onClose} variant="soft-gold" className="w-full">
         關閉
       </Button>
     </div>

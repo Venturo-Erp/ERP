@@ -4,20 +4,17 @@
  * 出納單管理主頁面
  *
  * 設計理念：
- * - 上下分區：團體請款（上）/ 公司請款（下）
- * - 公司請款再分子分類：薪資 / 成本轉移 / 退款 / 一般公司費用
+ * - 單一列表：全部出納單一覽、分類顯示在欄位內
  * - 點 pending 列 → 編輯 / 點 paid 列 → 詳情
+ * - 分類差異化在「預覽」（PrintDisbursementPreview）時才呈現
  */
 
 import { useCallback, useState, useMemo } from 'react'
-import { Plus } from 'lucide-react'
+import { Plus, Wallet } from 'lucide-react'
 import { ContentPageLayout } from '@/components/layout/content-page-layout'
-import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Input } from '@/components/ui/input'
 import { EnhancedTable, TableColumn } from '@/components/ui/enhanced-table'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import {
   usePaymentRequests,
   usePaymentRequestItems,
@@ -44,16 +41,6 @@ import { UnauthorizedPage } from '@/components/unauthorized-page'
 import { ModuleLoading } from '@/components/module-loading'
 import { recalculateExpenseStats } from '@/features/finance/payments/services/expense-core.service'
 
-type DisbursementType = 'payment_request' | 'payroll' | 'cost_transfer' | 'refund' | 'company_expense'
-
-const COMPANY_SUB_TABS: Array<{ value: 'all' | DisbursementType; label: string }> = [
-  { value: 'all', label: '全部' },
-  { value: 'payroll', label: '薪資' },
-  { value: 'cost_transfer', label: '成本轉移' },
-  { value: 'refund', label: '退款' },
-  { value: 'company_expense', label: '一般公司費用' },
-]
-
 const TYPE_BADGE: Record<string, { label: string; color: string }> = {
   payment_request: { label: '團體請款', color: 'bg-morandi-gold/30 text-morandi-primary' },
   payroll: { label: '薪資', color: 'bg-morandi-green/30 text-morandi-primary' },
@@ -77,9 +64,7 @@ export function DisbursementPage() {
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false)
   const [isPrintDialogOpen, setIsPrintDialogOpen] = useState(false)
   const [printOrder, setPrintOrder] = useState<DisbursementOrder | null>(null)
-  const [companyTab, setCompanyTab] = useState<'all' | DisbursementType>('all')
-  const [tourSearch, setTourSearch] = useState('')
-  const [companySearch, setCompanySearch] = useState('')
+  const [search, setSearch] = useState('')
 
   // 待出帳請款（建立模式用）
   const pendingRequests = useMemo(
@@ -96,34 +81,12 @@ export function DisbursementPage() {
     )
   }, [editingOrder, pendingRequests, payment_requests])
 
-  // 上下分區：團體請款（disbursement_type='payment_request' 或舊資料 null）
-  const tourList = useMemo(
-    () =>
-      disbursement_orders.filter(o => {
-        const t = (o as { disbursement_type?: string | null }).disbursement_type
-        const isTour = t === 'payment_request' || !t
-        if (!isTour) return false
-        if (!tourSearch) return true
-        const q = tourSearch.toLowerCase()
-        return (o.order_number || '').toLowerCase().includes(q)
-      }),
-    [disbursement_orders, tourSearch]
-  )
-
-  // 公司請款（payroll / cost_transfer / refund / company_expense）+ 子 tab filter
-  const companyList = useMemo(() => {
-    const list = disbursement_orders.filter(o => {
-      const t = (o as { disbursement_type?: string | null }).disbursement_type
-      return t === 'payroll' || t === 'cost_transfer' || t === 'refund' || t === 'company_expense'
-    })
-    const filtered =
-      companyTab === 'all'
-        ? list
-        : list.filter(o => (o as { disbursement_type?: string | null }).disbursement_type === companyTab)
-    if (!companySearch) return filtered
-    const q = companySearch.toLowerCase()
-    return filtered.filter(o => (o.order_number || '').toLowerCase().includes(q))
-  }, [disbursement_orders, companyTab, companySearch])
+  // 單一列表：全部出納單 + 搜尋過濾
+  const filteredList = useMemo(() => {
+    if (!search) return disbursement_orders
+    const q = search.toLowerCase()
+    return disbursement_orders.filter(o => (o.order_number || '').toLowerCase().includes(q))
+  }, [disbursement_orders, search])
 
   // 表格欄位（兩區共用）
   const columns: TableColumn<DisbursementOrder>[] = useMemo(
@@ -373,70 +336,26 @@ export function DisbursementPage() {
   return (
     <ContentPageLayout
       title="出納單管理"
-      headerActions={
-        canManage ? (
-          <Button onClick={handleAdd} className="gap-2">
-            <Plus size={16} />
-            新增出納單
-          </Button>
-        ) : undefined
+      icon={Wallet}
+      showSearch
+      searchTerm={search}
+      onSearchChange={setSearch}
+      searchPlaceholder="搜尋出納單號..."
+      primaryAction={
+        canManage
+          ? {
+              label: '新增出納單',
+              icon: Plus,
+              onClick: handleAdd,
+            }
+          : undefined
       }
     >
-      <div className="space-y-6">
-        {/* 上區：團體請款 */}
-        <Card className="p-4">
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <h3 className="text-base font-semibold">團體請款</h3>
-              <p className="text-xs text-muted-foreground">綁團出帳：機票 / 住宿 / 領隊費等</p>
-            </div>
-            <Input
-              placeholder="搜尋出納單號..."
-              value={tourSearch}
-              onChange={e => setTourSearch(e.target.value)}
-              className="w-64"
-            />
-          </div>
-          <EnhancedTable<DisbursementOrder>
-            data={tourList}
-            columns={columnsWithActions}
-            onRowClick={handleRowClick}
-          />
-        </Card>
-
-        {/* 下區：公司請款 */}
-        <Card className="p-4">
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <h3 className="text-base font-semibold">公司請款</h3>
-              <p className="text-xs text-muted-foreground">薪資 / 成本轉移 / 退款 / 一般公司費用</p>
-            </div>
-            <Input
-              placeholder="搜尋出納單號..."
-              value={companySearch}
-              onChange={e => setCompanySearch(e.target.value)}
-              className="w-64"
-            />
-          </div>
-
-          <Tabs value={companyTab} onValueChange={v => setCompanyTab(v as typeof companyTab)}>
-            <TabsList className="mb-3">
-              {COMPANY_SUB_TABS.map(t => (
-                <TabsTrigger key={t.value} value={t.value}>
-                  {t.label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-            <TabsContent value={companyTab}>
-              <EnhancedTable<DisbursementOrder>
-                data={companyList}
-                columns={columnsWithActions}
-                onRowClick={handleRowClick}
-              />
-            </TabsContent>
-          </Tabs>
-        </Card>
-      </div>
+      <EnhancedTable<DisbursementOrder>
+        data={filteredList}
+        columns={columnsWithActions}
+        onRowClick={handleRowClick}
+      />
 
       {/* Dialogs */}
       <CreateDisbursementDialog

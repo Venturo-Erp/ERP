@@ -19,7 +19,7 @@ export default function CisDetailError({
     <div className="flex flex-col items-center justify-center h-full gap-4 p-8 text-center">
       <h2 className="text-lg font-medium text-morandi-primary">客戶資料載入失敗</h2>
       <p className="text-sm text-morandi-secondary">{error.message}</p>
-      <Button onClick={reset} variant="outline">
+      <Button onClick={reset} variant="soft-gold">
         重試
       </Button>
     </div>

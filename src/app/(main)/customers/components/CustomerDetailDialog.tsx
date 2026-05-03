@@ -191,7 +191,7 @@ function CustomerDetailDialog({
         </div>
 
         <div className="flex justify-end gap-2 pt-4 border-t">
-          <Button variant="outline" onClick={() => onOpenChange(false)} className="gap-2">
+          <Button variant="soft-gold" onClick={() => onOpenChange(false)} className="gap-2">
             <X size={16} />
             {L.btn_close}
           </Button>

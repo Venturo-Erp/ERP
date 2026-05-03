@@ -240,10 +240,7 @@ function AlertDialogComponent() {
           </div>
         </DialogHeader>
         <DialogFooter>
-          <Button
-            onClick={() => alert.onClose?.()}
-            className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
-          >
+          <Button onClick={() => alert.onClose?.()}>
             {UI_LABELS.CONFIRM}
           </Button>
         </DialogFooter>
@@ -285,7 +282,7 @@ function ConfirmDialogComponent() {
         )}
         <DialogFooter className="gap-2">
           <Button
-            variant="outline"
+            variant="soft-gold"
             onClick={() => confirm.onCancel?.()}
             className="border-border hover:border-morandi-gold/20"
           >
@@ -293,17 +290,14 @@ function ConfirmDialogComponent() {
           </Button>
           {confirm.showThirdOption && (
             <Button
-              variant="outline"
+              variant="soft-gold"
               onClick={() => confirm.onThirdOption?.()}
               className="border-morandi-gold/30 hover:border-morandi-gold/50 text-morandi-secondary"
             >
               {confirm.thirdOptionText}
             </Button>
           )}
-          <Button
-            onClick={() => confirm.onConfirm?.()}
-            className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
-          >
+          <Button onClick={() => confirm.onConfirm?.()}>
             {confirm.confirmText}
           </Button>
         </DialogFooter>
@@ -343,7 +337,7 @@ function PromptDialogComponent() {
         </div>
         <DialogFooter className="gap-2">
           <Button
-            variant="outline"
+            variant="soft-gold"
             onClick={() => prompt.onCancel?.()}
             className="border-border hover:border-morandi-gold/20"
           >
@@ -352,7 +346,7 @@ function PromptDialogComponent() {
           <Button
             onClick={() => prompt.onConfirm?.(prompt.value)}
             disabled={!prompt.value.trim()}
-            className="bg-morandi-gold hover:bg-morandi-gold-hover text-white disabled:opacity-50"
+            className="disabled:opacity-50"
           >
             {prompt.confirmText}
           </Button>

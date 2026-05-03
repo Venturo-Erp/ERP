@@ -297,7 +297,7 @@ export function TourClosingTab({ tour }: TourClosingTabProps) {
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={handleGeneratePDF} disabled={pdfLoading}>
+          <Button variant="soft-gold" onClick={handleGeneratePDF} disabled={pdfLoading}>
             {pdfLoading ? (
               <Loader2 className="h-4 w-4 animate-spin mr-2" />
             ) : (
@@ -306,14 +306,9 @@ export function TourClosingTab({ tour }: TourClosingTabProps) {
             生成結案報告 PDF
           </Button>
           <Button
-            variant={isClosed ? 'outline' : 'default'}
+            variant={isClosed ? 'outline' : 'soft-gold'}
             onClick={handleToggleClosingStatus}
             disabled={statusUpdating}
-            className={
-              isClosed
-                ? ''
-                : 'bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors'
-            }
           >
             {statusUpdating ? (
               <Loader2 className="h-4 w-4 animate-spin mr-2" />

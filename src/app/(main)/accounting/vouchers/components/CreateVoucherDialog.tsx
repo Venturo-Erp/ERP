@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { DatePicker } from '@/components/ui/date-picker'
 import { Label } from '@/components/ui/label'
 import {
   Select,
@@ -271,11 +272,7 @@ export function CreateVoucherDialog({ open, onOpenChange, onSuccess }: CreateVou
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label>傳票日期 *</Label>
-              <Input
-                type="date"
-                value={voucherDate}
-                onChange={e => setVoucherDate(e.target.value)}
-              />
+              <DatePicker value={voucherDate} onChange={setVoucherDate} />
             </div>
             <div>
               <Label>說明</Label>
@@ -329,7 +326,7 @@ export function CreateVoucherDialog({ open, onOpenChange, onSuccess }: CreateVou
           <div>
             <div className="flex justify-between items-center mb-2">
               <Label>分錄明細</Label>
-              <Button type="button" variant="outline" size="sm" onClick={addLine}>
+              <Button type="button" variant="soft-gold" size="sm" onClick={addLine}>
                 <Plus size={14} className="mr-1" />
                 新增分錄
               </Button>
@@ -434,7 +431,7 @@ export function CreateVoucherDialog({ open, onOpenChange, onSuccess }: CreateVou
 
           {/* 操作按鈕 */}
           <div className="flex justify-end gap-2 pt-4">
-            <Button variant="outline" onClick={handleClose}>
+            <Button variant="soft-gold" onClick={handleClose}>
               <X className="h-4 w-4 mr-1" />
               取消
             </Button>

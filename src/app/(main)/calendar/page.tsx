@@ -183,7 +183,7 @@ export default function CalendarPage() {
 
             {/* 生日名單按鈕 */}
             <Button
-              variant="outline"
+              variant="soft-gold"
               size="sm"
               onClick={() => setBirthdayDialogOpen(true)}
               className="h-9 px-3 gap-1.5 bg-card border border-border shadow-sm hover:bg-morandi-container/50 hover:border-morandi-gold/50 transition-all rounded-lg text-morandi-secondary hover:text-morandi-gold"

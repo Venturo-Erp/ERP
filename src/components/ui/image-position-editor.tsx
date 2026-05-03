@@ -286,7 +286,7 @@ export function ImagePositionEditor({
             <div className="flex items-center justify-between pt-2">
               <Button
                 type="button"
-                variant="outline"
+                variant="soft-gold"
                 size="sm"
                 onClick={handleReset}
                 className="gap-1"
@@ -296,7 +296,7 @@ export function ImagePositionEditor({
               </Button>
 
               <div className="flex gap-2">
-                <Button type="button" variant="outline" onClick={onClose}>
+                <Button type="button" variant="soft-gold" onClick={onClose}>
                   {UI_LABELS.CANCEL}
                 </Button>
                 <Button variant="soft-gold"

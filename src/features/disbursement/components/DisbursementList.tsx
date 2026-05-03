@@ -58,10 +58,7 @@ function PendingList({
               {DISBURSEMENT_LABELS.SELECTED_MID}
               <CurrencyCell amount={selectedAmount} />
             </span>
-            <Button
-              onClick={onAddToDisbursement}
-              className="bg-morandi-gold hover:bg-morandi-gold-hover"
-            >
+            <Button onClick={onAddToDisbursement}>
               {DISBURSEMENT_LABELS.LABEL_3476}
             </Button>
           </div>
@@ -137,7 +134,7 @@ function CurrentOrderList({
             />
           </div>
           <Button
-            variant="outline"
+            variant="soft-gold"
             onClick={() => onPrintPDF(currentOrder)}
             className="text-morandi-gold border-morandi-gold hover:bg-morandi-gold/10"
           >
@@ -180,7 +177,7 @@ function EmptyCurrentOrder({ onNavigate }: EmptyCurrentOrderProps) {
         {DISBURSEMENT_LABELS.EMPTY_8471}
       </h3>
       <p className="text-morandi-secondary mb-4">{DISBURSEMENT_LABELS.LABEL_2549}</p>
-      <Button onClick={onNavigate} variant="outline" className="gap-2">
+      <Button onClick={onNavigate} variant="soft-gold" className="gap-2">
         {DISBURSEMENT_LABELS.SELECT_3950}
         <ArrowRight size={16} />
       </Button>

@@ -170,7 +170,7 @@ export default function SettingsPage() {
             </div>
             <DialogFooter>
               <Button
-                variant="outline"
+                variant="soft-gold"
                 onClick={() => {
                   setShowPasswordSection(false)
                   setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' })
@@ -214,7 +214,7 @@ export default function SettingsPage() {
                   }
                 }}
                 disabled={passwordUpdateLoading}
-                className="bg-morandi-gold/15 text-morandi-primary border border-morandi-gold/30 hover:bg-morandi-gold/25 hover:border-morandi-gold/50 transition-colors"
+                variant="soft-gold"
               >
                 {passwordUpdateLoading ? '處理中...' : '確認修改'}
               </Button>

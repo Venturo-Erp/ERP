@@ -1,35 +1,37 @@
 'use client'
+/**
+ * QuickReceipt — 待辦事項「收款確認」子任務的內嵌表單
+ *
+ * 對齊真實 AddReceiptDialog（共用同一套 hooks + components）：
+ *   - usePaymentForm        : form state + multi-row items
+ *   - useReceiptMutations   : createReceiptWithItems（同一條寫入路徑）
+ *   - usePaymentMethodsCached: SSOT 收款方式（含 fee_percent / fee_account）
+ *   - PaymentItemRow / InlineEditTable : 同一個 row 渲染（自動算手續費 + actual_amount）
+ *
+ * 跟真實 AddReceiptDialog 的差異：
+ *   - 沒有 dialog wrapper（inline 嵌在子任務展開區）
+ *   - 沒有 tab（只走「團體收款」flow、不需要公司收款）
+ *   - 沒有編輯 / 退款 / 收款轉移（待辦只負責「建立」一筆）
+ */
 
-import { getTodayString } from '@/lib/utils/format-date'
-
-import { logger } from '@/lib/utils/logger'
-import React, { useState, useMemo } from 'react'
-import { Receipt as ReceiptIcon } from 'lucide-react'
+import React, { useEffect, useState } from 'react'
+import { Save } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { DateInput } from '@/components/ui/date-input'
-import { useOrdersSlim, useToursSlim } from '@/data'
 import { Combobox } from '@/components/ui/combobox'
-import { usePaymentData } from '@/app/(main)/finance/payments/hooks/usePaymentData'
-import type { ReceiptItem } from '@/stores'
-import { alert } from '@/lib/ui/alert-dialog'
-import { ReceiptType, RECEIPT_TYPE_OPTIONS } from '@/types/receipt.types'
+import { useToast } from '@/components/ui/use-toast'
+import { logger } from '@/lib/utils/logger'
+import { useAuthStore } from '@/stores'
+import { usePaymentForm } from '@/features/finance/payments/hooks/usePaymentForm'
+import { useReceiptMutations } from '@/features/finance/payments/hooks/useReceiptMutations'
+import { usePaymentMethodsCached } from '@/data/hooks'
+import { PaymentItemRow } from '@/features/finance/payments/components/PaymentItemRow'
 import {
-  FORM_LABELS,
-  PLACEHOLDER_LABELS,
-  BUTTON_LABELS,
-  CONTACT_LABELS,
-  BANK_OPTIONS,
-  MESSAGE_LABELS,
-} from '@/features/todos/constants/labels'
+  InlineEditTable,
+  type InlineEditColumn,
+} from '@/components/ui/inline-edit-table'
+import { RequestDateInput } from '@/features/finance/requests/components/RequestDateInput'
+import { formatMoney } from '@/lib/utils/format-currency'
+import type { PaymentItem } from '@/features/finance/payments/types'
 
 interface QuickReceiptProps {
   onSubmit?: () => void
@@ -39,240 +41,193 @@ interface QuickReceiptProps {
   defaultOrderId?: string
 }
 
-// 收款方式選項（使用統一定義）
-const paymentMethods = RECEIPT_TYPE_OPTIONS
+const receiptColumns: InlineEditColumn<PaymentItem>[] = [
+  { key: 'method', label: '收款方式', width: '110px', render: () => null },
+  { key: 'date', label: '交易日期', width: '150px', render: () => null },
+  { key: 'detail', label: '收款項目', width: '180px', render: () => null },
+  { key: 'remarks', label: '備註', render: () => null },
+  { key: 'amount', label: '收款金額', width: '120px', align: 'right', render: () => null },
+  { key: 'actual', label: '實收金額', width: '120px', align: 'right', render: () => null },
+]
 
-export function QuickReceipt({ onSubmit, defaultTourId, defaultOrderId }: QuickReceiptProps) {
-  const { items: orders } = useOrdersSlim()
-  const { items: tours } = useToursSlim()
-  const { handleCreateReceipt } = usePaymentData()
+export function QuickReceipt({
+  onSubmit,
+  defaultTourId,
+  defaultOrderId,
+}: QuickReceiptProps) {
+  const { toast } = useToast()
+  const { user } = useAuthStore()
+  const {
+    tours,
+    formData,
+    setFormData,
+    paymentItems,
+    filteredOrders,
+    selectedOrder,
+    totalAmount,
+    addPaymentItem,
+    removePaymentItem,
+    updatePaymentItem,
+    resetForm,
+  } = usePaymentForm()
 
-  const [selectedTourId, setSelectedTourId] = useState<string>(defaultTourId || '')
-  const [selectedOrderId, setSelectedOrderId] = useState<string>(defaultOrderId || '')
+  const { createReceiptWithItems } = useReceiptMutations()
+  const { methods: paymentMethods } = usePaymentMethodsCached('receipt')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // 🔥 當 default 值變化時更新選中的值
-  React.useEffect(() => {
-    if (defaultTourId) setSelectedTourId(defaultTourId)
-  }, [defaultTourId])
+  // 預設值帶入（todo 卡片帶來的 tour / order）
+  useEffect(() => {
+    if (defaultTourId || defaultOrderId) {
+      setFormData(prev => ({
+        ...prev,
+        tour_id: defaultTourId || prev.tour_id,
+        order_id: defaultOrderId || prev.order_id,
+      }))
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [defaultTourId, defaultOrderId])
 
-  React.useEffect(() => {
-    if (defaultOrderId) setSelectedOrderId(defaultOrderId)
-  }, [defaultOrderId])
+  const tourOptions = (tours || []).map(t => ({
+    value: t.id,
+    label: `${t.code || ''} ${t.name || ''}`.trim() || t.id,
+  }))
+  const orderOptions = filteredOrders.map(o => ({
+    value: o.id,
+    label: `${o.code || ''} ${o.contact_person || ''}`.trim() || o.id,
+  }))
 
-  // 使用 ReceiptItem 格式
-  const [paymentItem, setPaymentItem] = useState<Partial<ReceiptItem>>({
-    id: '1',
-    receipt_type: ReceiptType.CASH,
-    amount: 0,
-    transaction_date: getTodayString(),
-  })
-
-  // 可用訂單（根據選中的團體過濾）
-  const availableOrders = useMemo(() => {
-    if (!selectedTourId) return []
-    return (orders || []).filter(order => order.tour_id === selectedTourId)
-  }, [orders, selectedTourId])
-
-  // 選中的訂單
-  const selectedOrder = useMemo(() => {
-    return (orders || []).find(order => order.id === selectedOrderId)
-  }, [orders, selectedOrderId])
-
-  // 更新收款項目
-  const updatePaymentItem = (updates: Partial<ReceiptItem>) => {
-    setPaymentItem(prev => ({ ...prev, ...updates }))
-  }
-
-  // 重置表單
-  const resetForm = () => {
-    setSelectedTourId('')
-    setSelectedOrderId('')
-    setPaymentItem({
-      id: '1',
-      receipt_type: ReceiptType.CASH,
-      amount: 0,
-      transaction_date: getTodayString(),
-    })
-  }
-
-  // 儲存
-  const handleSave = async () => {
-    if (!selectedOrderId) {
-      void alert(MESSAGE_LABELS.selectOrder, 'warning')
+  const handleSubmit = async () => {
+    if (
+      !formData.tour_id ||
+      !formData.order_id ||
+      paymentItems.length === 0 ||
+      !user?.workspace_id ||
+      !user?.id
+    ) {
       return
     }
-
-    if (!paymentItem.amount || paymentItem.amount === 0) {
-      void alert(MESSAGE_LABELS.amountRequired, 'warning')
-      return
-    }
-
+    setIsSubmitting(true)
     try {
-      await handleCreateReceipt({
-        selectedOrderId,
-        paymentItems: [paymentItem as ReceiptItem],
+      const tourInfo = tours.find(
+        t => t.id === (selectedOrder?.tour_id || formData.tour_id)
+      )
+      const result = await createReceiptWithItems({
+        formData,
+        paymentItems,
+        orderInfo: selectedOrder
+          ? {
+              tour_id: selectedOrder.tour_id,
+              customer_id: selectedOrder.customer_id,
+              order_number: selectedOrder.order_number,
+              tour_name: selectedOrder.tour_name,
+            }
+          : null,
+        tourInfo: tourInfo
+          ? { id: tourInfo.id, code: tourInfo.code, name: tourInfo.name }
+          : null,
+        userId: user.id,
+        workspaceId: user.workspace_id,
       })
-
-      await alert(MESSAGE_LABELS.receiptCreateSuccess, 'success')
-      onSubmit?.()
+      toast({
+        title: '收款單已建立',
+        description: `共 ${result.itemCount} 筆 / NT$ ${formatMoney(result.totalAmount)}`,
+      })
       resetForm()
+      onSubmit?.()
     } catch (error) {
-      logger.error('❌ Save Error:', error)
-      void alert(MESSAGE_LABELS.createFailed, 'error')
+      logger.error('[QuickReceipt] create error:', error)
+      toast({ title: '建立失敗', variant: 'destructive' })
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
   return (
     <div className="space-y-4">
-      {/* 團體和訂單（並排） */}
-      <div className="grid grid-cols-2 gap-3">
-        {/* 選擇團體 */}
-        <div>
-          <Label className="text-sm font-medium text-morandi-primary">{FORM_LABELS.group}</Label>
+      {/* 團 + 訂單 + 收款日期 */}
+      <div className="flex items-start gap-3">
+        <div className="w-[280px]">
           <Combobox
-            options={(tours || []).map(tour => ({
-              value: tour.id,
-              label: `${tour.code || ''} - ${tour.name || ''}`,
-            }))}
-            value={selectedTourId}
-            onChange={value => {
-              setSelectedTourId(value)
-              // 找出該團體的訂單，如果只有一個就自動帶入
-              const tourOrders = (orders || []).filter(o => o.tour_id === value)
-              if (tourOrders.length === 1) {
-                setSelectedOrderId(tourOrders[0].id)
-              } else {
-                setSelectedOrderId('')
-              }
-            }}
-            placeholder={PLACEHOLDER_LABELS.selectGroup}
-            className="mt-1"
+            options={tourOptions}
+            value={formData.tour_id}
+            onChange={value =>
+              setFormData(prev => ({ ...prev, tour_id: value, order_id: '' }))
+            }
+            placeholder="搜尋團號或團名"
+            maxHeight="300px"
           />
         </div>
-
-        {/* 選擇訂單 */}
-        <div>
-          <Label className="text-sm font-medium text-morandi-primary">{FORM_LABELS.order}</Label>
-          <Select
-            disabled={!selectedTourId || availableOrders.length === 0}
-            value={selectedOrderId}
-            onValueChange={setSelectedOrderId}
-          >
-            <SelectTrigger className="mt-1 h-9">
-              <SelectValue
-                placeholder={
-                  !selectedTourId
-                    ? PLACEHOLDER_LABELS.selectGroupFirst
-                    : availableOrders.length === 0
-                      ? PLACEHOLDER_LABELS.noOrdersInGroup
-                      : PLACEHOLDER_LABELS.selectOrder
-                }
-              />
-            </SelectTrigger>
-            <SelectContent>
-              {availableOrders.map(order => (
-                <SelectItem key={order.id} value={order.id}>
-                  {order.code} - {order.contact_person || CONTACT_LABELS.noContact}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      {/* 第一排：固定欄位（所有收款方式都有） */}
-      <div className="grid grid-cols-3 gap-3">
-        <div>
-          <Label className="text-sm font-medium text-morandi-primary">
-            {FORM_LABELS.paymentMethod}
-          </Label>
-          <Select
-            value={paymentItem.receipt_type?.toString()}
-            onValueChange={value => updatePaymentItem({ receipt_type: Number(value) })}
-          >
-            <SelectTrigger className="mt-1 h-10 border-morandi-container/30">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {paymentMethods.map(method => (
-                <SelectItem key={method.value} value={method.value.toString()}>
-                  {method.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div>
-          <Label className="text-sm font-medium text-morandi-primary">{FORM_LABELS.amount}</Label>
-          <Input
-            type="number"
-            placeholder={PLACEHOLDER_LABELS.enterAmount}
-            value={paymentItem.amount || ''}
-            onChange={e => updatePaymentItem({ amount: Number(e.target.value) })}
-            className="mt-1 border-morandi-container/30"
+        <div className="w-[240px]">
+          <Combobox
+            options={orderOptions}
+            value={formData.order_id}
+            onChange={value => setFormData(prev => ({ ...prev, order_id: value }))}
+            placeholder={!formData.tour_id ? '請先選擇旅遊團' : '搜尋訂單'}
+            disabled={!formData.tour_id}
+            maxHeight="300px"
           />
         </div>
-
-        <div>
-          <Label className="text-sm font-medium text-morandi-primary">
-            {FORM_LABELS.transactionDate}
-          </Label>
-          <DateInput
-            value={paymentItem.transaction_date || ''}
-            onChange={value => updatePaymentItem({ transaction_date: value })}
-            className="mt-1"
+        <div className="w-[200px]">
+          <RequestDateInput
+            value={formData.receipt_date}
+            onChange={date => setFormData(prev => ({ ...prev, receipt_date: date }))}
           />
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <Label className="text-sm font-medium text-morandi-primary">
-            {FORM_LABELS.payerName}
-          </Label>
-          <Input
-            placeholder={PLACEHOLDER_LABELS.enterPayerName}
-            value={paymentItem.receipt_account || ''}
-            onChange={e => updatePaymentItem({ receipt_account: e.target.value })}
-            className="mt-1 border-morandi-container/30"
+      {/* 收款項目（多筆 row、含手續費自動算） */}
+      <InlineEditTable<PaymentItem>
+        title="收款項目"
+        rows={paymentItems}
+        columns={receiptColumns}
+        onAdd={addPaymentItem}
+        addLabel="新增項目"
+        rowRender={(item, index) => (
+          <PaymentItemRow
+            key={item.id}
+            item={item}
+            index={index}
+            onUpdate={updatePaymentItem}
+            onRemove={removePaymentItem}
+            canRemove={paymentItems.length > 1}
+            isNewRow={index === paymentItems.length - 1}
+            paymentMethods={paymentMethods}
+            orderInfo={
+              selectedOrder
+                ? {
+                    order_number: selectedOrder.order_number || undefined,
+                    tour_name: selectedOrder.tour_name || undefined,
+                    contact_person: selectedOrder.contact_person || undefined,
+                  }
+                : undefined
+            }
           />
-        </div>
+        )}
+      />
 
-        <div>
-          <Label className="text-sm font-medium text-morandi-primary">{FORM_LABELS.remarks}</Label>
-          <Input
-            placeholder={PLACEHOLDER_LABELS.optional}
-            value={paymentItem.notes || ''}
-            onChange={e => updatePaymentItem({ notes: e.target.value })}
-            className="mt-1 border-morandi-container/30"
-          />
+      {/* 總金額 + 提交 */}
+      <div className="flex justify-between items-center pt-3 border-t border-border">
+        <div className="text-sm">
+          <span className="text-morandi-secondary">總金額：</span>
+          <span className="text-base font-semibold text-morandi-gold">
+            NT$ {formatMoney(totalAmount)}
+          </span>
         </div>
+        <Button
+          onClick={handleSubmit}
+          disabled={
+            isSubmitting ||
+            !formData.tour_id ||
+            !formData.order_id ||
+            paymentItems.length === 0
+          }
+          variant="soft-gold"
+          className="gap-2"
+        >
+          <Save size={16} />
+          {isSubmitting ? '建立中...' : '建立收款單'}
+        </Button>
       </div>
-
-      {/* 收款方式不再有額外專屬欄位（form 已砍）*/}
-      {paymentItem.receipt_type === ReceiptType.CREDIT_CARD && (
-        <div className="pt-3 border-t">
-          <Label className="text-sm font-medium text-morandi-primary">{FORM_LABELS.fees}</Label>
-          <Input
-            type="number"
-            placeholder={PLACEHOLDER_LABELS.optionalWithFees}
-            value={paymentItem.fees || ''}
-            onChange={e => updatePaymentItem({ fees: Number(e.target.value) })}
-            className="mt-1 border-morandi-container/30"
-          />
-        </div>
-      )}
-
-      {/* 提交按鈕 */}
-      <Button variant="soft-gold"
-        onClick={handleSave}
-        disabled={!selectedOrderId || !paymentItem.amount || paymentItem.amount === 0}
- className="w-full"
-      >
-        <ReceiptIcon size={16} className="mr-2" />
-        {BUTTON_LABELS.create}
-      </Button>
     </div>
   )
 }

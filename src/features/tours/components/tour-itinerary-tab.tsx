@@ -1126,7 +1126,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
             {TOUR_ITINERARY_TAB_LABELS.簡易行程表預覽}
           </h3>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => setViewMode('edit')}>
+            <Button variant="soft-gold" size="sm" onClick={() => setViewMode('edit')}>
               <Edit2 className="w-4 h-4 mr-1" />
               {TOUR_ITINERARY_TAB_LABELS.編輯}
             </Button>
@@ -1375,7 +1375,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                     </div>
                     <div className="flex items-end gap-2">
                       <Button
-                        variant="outline"
+                        variant="soft-gold"
                         size="sm"
                         onClick={() => setViewMode('preview')}
                         className="h-8 px-2 text-xs gap-1"
@@ -1536,7 +1536,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                                   <Button
                                     type="button"
                                     size="sm"
-                                    variant="outline"
+                                    variant="soft-gold"
                                     onClick={() =>
                                       setOutboundFlights(prev => [
                                         ...prev,
@@ -1730,7 +1730,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                                   <Button
                                     type="button"
                                     size="sm"
-                                    variant="outline"
+                                    variant="soft-gold"
                                     onClick={() =>
                                       setReturnFlights(prev => [
                                         ...prev,

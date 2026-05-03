@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Eye, RotateCcw, Plus, Filter } from 'lucide-react'
 import { Input } from '@/components/ui/input'
+import { DatePicker } from '@/components/ui/date-picker'
 import { Label } from '@/components/ui/label'
 import {
   Select,
@@ -222,18 +223,14 @@ export default function VouchersPage() {
         searchable={false}
         headerActions={
           <div className="flex gap-2 items-center flex-wrap">
-            <Input
-              type="date"
-              placeholder="開始日期"
+            <DatePicker
               value={filters.startDate}
-              onChange={e => setFilters({ ...filters, startDate: e.target.value })}
+              onChange={v => setFilters({ ...filters, startDate: v })}
               className="w-40"
             />
-            <Input
-              type="date"
-              placeholder="結束日期"
+            <DatePicker
               value={filters.endDate}
-              onChange={e => setFilters({ ...filters, endDate: e.target.value })}
+              onChange={v => setFilters({ ...filters, endDate: v })}
               className="w-40"
             />
             <Select
@@ -252,7 +249,7 @@ export default function VouchersPage() {
               </SelectContent>
             </Select>
             <Button
-              variant="outline"
+              variant="soft-gold"
               size="sm"
               onClick={() => setFilters({ startDate: '', endDate: '', status: 'all' })}
             >
