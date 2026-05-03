@@ -232,9 +232,15 @@ export function useReceiptMutations() {
       const paymentMethod = codeToPaymentMethod(methodCode)
 
       // 更新收款單主表
+      // receipt_date / payment_date：優先 formData.receipt_date（dialog header）
+      // fallback 到 row 內 transaction_date（兼容兩處編輯日期的 UI）
+      const receiptDate =
+        formData.receipt_date || firstItem?.transaction_date || undefined
       await onUpdate(receipt.id, {
         tour_id: formData.tour_id || null,
         order_id: formData.order_id || null,
+        receipt_date: receiptDate,
+        payment_date: receiptDate,
         receipt_amount: totalAmount,
         actual_amount: totalActual,
         payment_method: paymentMethod,

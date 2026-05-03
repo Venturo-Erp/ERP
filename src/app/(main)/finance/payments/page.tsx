@@ -247,76 +247,71 @@ export default function PaymentsPage() {
       width: '75px',
       render: value => <StatusCell type="receipt" status={String(value)} />,
     },
-    {
-      key: 'actions',
-      label: FinanceLabels.actions,
-      width: '220px',
-      render: (_, row) => (
-        <div className="flex items-center gap-1 whitespace-nowrap">
-          {/* 待確認狀態：顯示核准按鈕 */}
-          {row.status === 'pending' && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={async e => {
-                e.stopPropagation()
-                await handleConfirmReceipt(row.id)
-                await invalidateReceipts()
-              }}
-              className="h-7 px-2 text-xs text-morandi-green hover:text-morandi-green hover:bg-morandi-green/10"
-            >
-              <CheckSquare size={14} className="mr-1" />
-              核准
-            </Button>
-          )}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={e => {
-              e.stopPropagation()
-              loadReceiptForEdit(row)
-            }}
-            className="h-7 px-2 text-xs text-morandi-secondary hover:text-morandi-primary"
-          >
-            <Edit2 size={14} className="mr-1" />
-            {row.status === 'confirmed' ? FinanceLabels.view : FinanceLabels.edit}
-          </Button>
-          {/* 退款按鈕：已確認且未退款才顯示 */}
-          {row.status === 'confirmed' && !row.refunded_at && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={e => {
-                e.stopPropagation()
-                setRefundingReceipt(row)
-                setIsRefundDialogOpen(true)
-              }}
-              className="h-7 px-2 text-xs text-morandi-red hover:text-morandi-red hover:bg-morandi-red/10"
-            >
-              <Undo2 size={14} className="mr-1" />
-              退款
-            </Button>
-          )}
-          {/* 列印收據按鈕：已確認 / 已退款都能印 */}
-          {(row.status === 'confirmed' || row.status === 'refunded') && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={e => {
-                e.stopPropagation()
-                setPrintingReceipt(row)
-                setIsPrintDialogOpen(true)
-              }}
-              className="h-7 px-2 text-xs text-morandi-secondary hover:text-morandi-primary"
-            >
-              <Printer size={14} className="mr-1" />
-              收據
-            </Button>
-          )}
-        </div>
-      ),
-    },
   ]
+
+  // 操作 column 從 columns 拔出來、走 ListPageLayout 的 renderActions prop
+  // EnhancedTable 對 actions prop 路徑加 sticky right、不論視窗多窄都看得到
+  const renderRowActions = (row: Receipt) => (
+    <div className="flex items-center gap-1 whitespace-nowrap">
+      {row.status === 'pending' && (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={async e => {
+            e.stopPropagation()
+            await handleConfirmReceipt(row.id)
+            await invalidateReceipts()
+          }}
+          className="h-7 px-2 text-xs text-morandi-green hover:text-morandi-green hover:bg-morandi-green/10"
+        >
+          <CheckSquare size={14} className="mr-1" />
+          核准
+        </Button>
+      )}
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={e => {
+          e.stopPropagation()
+          loadReceiptForEdit(row)
+        }}
+        className="h-7 px-2 text-xs text-morandi-secondary hover:text-morandi-primary"
+      >
+        <Edit2 size={14} className="mr-1" />
+        {row.status === 'confirmed' ? FinanceLabels.view : FinanceLabels.edit}
+      </Button>
+      {row.status === 'confirmed' && !row.refunded_at && (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={e => {
+            e.stopPropagation()
+            setRefundingReceipt(row)
+            setIsRefundDialogOpen(true)
+          }}
+          className="h-7 px-2 text-xs text-morandi-red hover:text-morandi-red hover:bg-morandi-red/10"
+        >
+          <Undo2 size={14} className="mr-1" />
+          退款
+        </Button>
+      )}
+      {(row.status === 'confirmed' || row.status === 'refunded') && (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={e => {
+            e.stopPropagation()
+            setPrintingReceipt(row)
+            setIsPrintDialogOpen(true)
+          }}
+          className="h-7 px-2 text-xs text-morandi-secondary hover:text-morandi-primary"
+        >
+          <Printer size={14} className="mr-1" />
+          收據
+        </Button>
+      )}
+    </div>
+  )
 
   if (permLoading) return null  // ModuleGuard 已在外層顯示 loading
   if (!canTour && !canCompany) return <UnauthorizedPage />
@@ -328,6 +323,8 @@ export default function PaymentsPage() {
         data={filteredByTab}
         loading={loading}
         columns={columns}
+        renderActions={renderRowActions}
+        actionsWidth="220px"
         searchFields={['receipt_number', 'tour_name']}
         searchPlaceholder={FinanceLabels.searchReceiptPlaceholder}
         onRowClick={handleRowClick}
