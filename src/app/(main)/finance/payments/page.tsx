@@ -234,7 +234,7 @@ export default function PaymentsPage() {
     {
       key: 'payment_method_id',
       label: FinanceLabels.paymentMethod,
-      width: '80px',
+      width: '50px',
       // SSOT：唯一真相是 payment_methods.name (FK join)
       // 抓不到顯示「-」、不再用 5 大類中文 fallback 污染
       render: (_, row) => (
@@ -244,7 +244,7 @@ export default function PaymentsPage() {
     {
       key: 'status',
       label: FinanceLabels.status,
-      width: '75px',
+      width: '50px',
       render: value => <StatusCell type="receipt" status={String(value)} />,
     },
     {
