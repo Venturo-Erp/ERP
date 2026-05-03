@@ -30,7 +30,11 @@ export default function TenantsPage() {
   const [editingWorkspace, setEditingWorkspace] = useState<WorkspaceRow | null>(null)
   // 用 SWR 快取租戶列表（繞過 RLS，server 端檢查 tenants 權限）
   // API 現在會回傳 employee_count / admin_name / admin_id（已排除機器人）
-  const { data: allWorkspaces = [], mutate: refreshWorkspaces } = useSWR<WorkspaceRow[]>(
+  const {
+    data: allWorkspaces = [],
+    mutate: refreshWorkspaces,
+    isLoading: isWorkspacesLoading,
+  } = useSWR<WorkspaceRow[]>(
     'all-workspaces',
     async () => {
       const res = await fetch('/api/workspaces')
@@ -152,6 +156,7 @@ export default function TenantsPage() {
         icon={Building2}
         data={data}
         columns={columns}
+        loading={isWorkspacesLoading}
         searchFields={['name', 'code'] as (keyof WorkspaceRow)[]}
         searchPlaceholder={LABELS.SEARCH_PLACEHOLDER}
         renderActions={renderActions}
