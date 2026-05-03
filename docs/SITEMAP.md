@@ -126,12 +126,16 @@ related: CONCEPTS.md
 
 ---
 
-## 已知缺口（CONCEPTS 規劃、src/app/ 還沒看到）
+## 平臺端規劃決議（2026-05-03 William 拍板）
 
-- AI Agent 工廠（兩段式機器人、LangGraph + MCP）—— 規格在 brain、code 未落地
-- 計費 / 訂閱頁 —— 三層定價未實作
-- 系統監控頁（Sentry 已接、無獨立頁）
-- 跨租戶報表 —— Venturo 自己的營運分析
+原 CONCEPTS 規劃的 4 大平臺支柱、決定**全部不做**：
+
+- ~~AI Agent 工廠~~ — 移除
+- ~~計費 / 訂閱~~ — 線下處理、code 不做
+- ~~系統監控~~ — 不需要
+- ~~跨租戶報表~~ — 不需要
+
+平臺端只留 [[routes/tenants|/tenants]] 租戶管理。
 
 ---
 

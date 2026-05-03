@@ -38,10 +38,12 @@ related: SITEMAP.md
 ### 主要分支
 
 - [[platform/tenant-management|租戶管理]] ⭐ SSOT — 控制每個租戶能用什麼功能（`workspace_features`）
-- [[platform/billing|計費 / 訂閱]] — 三層定價（Starter / Pro / Enterprise）
-- [[platform/ai-agent|AI Agent 工廠]] — 兩段式機器人（內部 Query Agent / 外部 Service Agent）、LangGraph + MCP
-- [[platform/monitoring|系統監控]] — Logs、Sentry、錯誤追蹤
-- [[platform/cross-tenant-reports|跨租戶報表]] — Venturo 自己的營運分析
+
+> 2026-05-03 William 拍板：以下原規劃全部移除、不做：
+> - ~~計費 / 訂閱~~（線下處理、code 不做）
+> - ~~AI Agent 工廠~~（移除）
+> - ~~系統監控~~（不需要）
+> - ~~跨租戶報表~~（不需要）
 
 ### 影響範圍
 
