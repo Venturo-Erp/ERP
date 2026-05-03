@@ -216,7 +216,7 @@ export function SimpleDateInput({
             </button>
           </PopoverTrigger>
           <PopoverContent
-            className="w-auto p-0"
+            className="w-auto border-0 bg-transparent p-0 shadow-none"
             align="start"
             side="bottom"
             sideOffset={4}

@@ -158,7 +158,7 @@ export function CoverInfoForm({
                   {data.departureDate || COMP_EDITOR_LABELS.選擇日期}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
+              <PopoverContent className="w-auto border-0 bg-transparent p-0 shadow-none" align="start">
                 <Calendar
                   mode="single"
                   selected={

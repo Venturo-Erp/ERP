@@ -150,12 +150,9 @@ export const TableHeader = React.memo(function TableHeader({
           </th>
         ))}
 
-        {/* Actions column — sticky right、不論視窗多窄都看得到操作 */}
+        {/* Actions column */}
         {actions && (
-          <th
-            className="text-left py-2.5 px-4 text-xs sticky right-0 z-10 bg-morandi-gold-header shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.06)]"
-            style={{ width: actionsWidth }}
-          >
+          <th className="text-left py-2.5 px-4 text-xs relative" style={{ width: actionsWidth }}>
             {actionsHeader || (
               <span className="text-xs font-medium text-morandi-primary">
                 {ENHANCED_TABLE_LABELS.ACTIONS}

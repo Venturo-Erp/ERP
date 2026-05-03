@@ -192,9 +192,9 @@ export const TableBody = React.memo(function TableBody({
                 </td>
               ))}
 
-              {/* Actions column — sticky right、視窗窄時操作永遠浮在右側可見 */}
+              {/* Actions column - 固定 50% 寬度 */}
               {actions && (
-                <td className="py-3 px-4 sticky right-0 bg-card group-hover:bg-morandi-container/20 shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.06)]">
+                <td className="py-3 px-4" style={{ width: '50%' }}>
                   <div onClick={(e: React.MouseEvent) => e.stopPropagation()}>
                     {actions(row, actualRowIndex)}
                   </div>

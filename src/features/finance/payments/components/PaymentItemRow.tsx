@@ -124,7 +124,9 @@ export function PaymentItemRow({
     const updates: Partial<PaymentItem> = {
       payment_method_id: method?.id,
       payment_method_code: code,
-      receipt_type: codeToReceiptType(code) as unknown as ReceiptType,
+      // receipt_type 存 m.name 字串（跟 SelectItem value 對齊、UI 才會 highlight 已選）
+      // mutation 寫入 DB 時會用 resolveMethodCode + codeToReceiptType 算 number
+      receipt_type: value as unknown as ReceiptType,
     }
 
     // 自動算手續費 + 實收（切換到刷卡就自動扣、切回現金/匯款就還原）
