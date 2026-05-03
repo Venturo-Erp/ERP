@@ -105,7 +105,7 @@ export function DashboardClient() {
   }, [isAuthenticated, _hasHydrated, router])
 
   if (isLoading || widgetsLoading) {
-    return <ModuleLoading fullscreen />
+    return null  // ModuleGuard 已在外層顯示 loading、避免 cascade
   }
 
   return (

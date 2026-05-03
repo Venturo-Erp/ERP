@@ -367,7 +367,7 @@ export function DisbursementPage() {
     [columns, canManage, payment_requests, user]
   )
 
-  if (permLoading) return <ModuleLoading fullscreen />
+  if (permLoading) return null  // ModuleGuard 已在外層顯示 loading
   if (!can(CAPABILITIES.FINANCE_READ_DISBURSEMENT)) return <UnauthorizedPage />
 
   return (
