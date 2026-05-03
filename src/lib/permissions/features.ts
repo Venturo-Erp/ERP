@@ -182,6 +182,13 @@ export const FEATURES: FeatureDefinition[] = [
     category: 'enterprise',
     routes: ['/tenants'],
   },
+  {
+    code: 'cis',
+    name: '漫途 CIS 工作流',
+    description: '客戶識別系統規劃（漫途整合行銷專屬）— 客戶 + 拜訪紀錄 + 衍生項目價目',
+    category: 'enterprise',
+    routes: ['/cis', '/cis/pricing'],
+  },
 ]
 
 // 根據功能代碼取得定義

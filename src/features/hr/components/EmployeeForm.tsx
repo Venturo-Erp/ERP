@@ -114,7 +114,14 @@ export function EmployeeForm({
     emergency_contact_phone: employee?.personal_info?.emergency_contact?.phone || '',
     emergency_contact_address: employee?.personal_info?.emergency_contact?.address || '',
     role_id: ((employee as unknown as Record<string, unknown>)?.role_id as string) || '',
-    base_salary: employee?.salary_info?.base_salary || 0,
+    base_salary:
+      Number(employee?.monthly_salary) || employee?.salary_info?.base_salary || 0,
+    attendance_bonus: employee?.salary_info?.attendance_bonus || 0,
+    other_allowances: employee?.salary_info?.other_allowances || 0,
+    insured_salary:
+      employee?.salary_info?.insured_salary ?? null,
+    pension_voluntary_rate: employee?.salary_info?.pension_voluntary_rate || 0,
+    pay_day: (employee?.salary_info?.pay_day as number | 'last') || 10,
   })
 
   // 2026-04-18 移除：載入 workspace_roles + employee_job_roles 的 useEffect（已改用 useWorkspaceRoles SWR hook）
@@ -149,7 +156,13 @@ export function EmployeeForm({
         emergency_contact_phone: employee.personal_info?.emergency_contact?.phone || '',
         emergency_contact_address: employee.personal_info?.emergency_contact?.address || '',
         role_id: ((employee as unknown as Record<string, unknown>).role_id as string) || '',
-        base_salary: employee.salary_info?.base_salary || 0,
+        base_salary:
+          Number(employee.monthly_salary) || employee.salary_info?.base_salary || 0,
+        attendance_bonus: employee.salary_info?.attendance_bonus || 0,
+        other_allowances: employee.salary_info?.other_allowances || 0,
+        insured_salary: employee.salary_info?.insured_salary ?? null,
+        pension_voluntary_rate: employee.salary_info?.pension_voluntary_rate || 0,
+        pay_day: (employee.salary_info?.pay_day as number | 'last') || 10,
       })
       setAvatarPreview(employee.avatar_url || null)
     }
@@ -216,9 +229,17 @@ export function EmployeeForm({
           position: formData.position,
           hire_date: formData.hire_date,
         },
+        // 2026-05-04：薪資寫到 top-level monthly_salary（payroll-engine 讀這個）+ salary_info（明細）
+        monthly_salary: formData.base_salary,
         salary_info: {
           base_salary: formData.base_salary,
           allowances: employee?.salary_info?.allowances || [],
+          attendance_bonus: formData.attendance_bonus,
+          other_allowances: formData.other_allowances,
+          insured_salary: formData.insured_salary,
+          pension_voluntary_rate: formData.pension_voluntary_rate,
+          pay_day: formData.pay_day,
+          salary_history: employee?.salary_info?.salary_history || [],
         },
         status: 'active' as const,
         // default_password 由 API 處理，不直接存 DB
@@ -624,10 +645,19 @@ export function EmployeeForm({
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold text-morandi-secondary uppercase">
+                    <Label className="text-xs font-semibold text-morandi-primary uppercase">
                       發薪日
                     </Label>
-                    <select className="w-full px-3 py-2 border border-morandi-gold/30 rounded-lg focus:border-morandi-gold focus:outline-none bg-card text-morandi-primary">
+                    <select
+                      value={String(formData.pay_day)}
+                      onChange={e =>
+                        setFormData({
+                          ...formData,
+                          pay_day: e.target.value === 'last' ? 'last' : Number(e.target.value),
+                        })
+                      }
+                      className="w-full px-3 py-2 border border-morandi-gold/30 rounded-lg focus:border-morandi-gold focus:outline-none bg-card text-morandi-primary"
+                    >
                       <option value="5">每月 5 日</option>
                       <option value="10">每月 10 日</option>
                       <option value="15">每月 15 日</option>
@@ -636,8 +666,8 @@ export function EmployeeForm({
                     </select>
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold text-morandi-secondary uppercase">
-                      目前底薪
+                    <Label className="text-xs font-semibold text-morandi-primary uppercase">
+                      月薪（本薪）
                     </Label>
                     <div className="flex items-center gap-2">
                       <span className="text-morandi-secondary">NT$</span>
@@ -651,6 +681,105 @@ export function EmployeeForm({
                         placeholder="0"
                       />
                     </div>
+                  </div>
+                </div>
+
+                {/* 2026-05-04 加：算薪需要的完整薪資組成 */}
+                <div className="grid grid-cols-2 gap-4 pt-2">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-semibold text-morandi-primary uppercase">
+                      全勤獎金（每月固定額）
+                    </Label>
+                    <div className="flex items-center gap-2">
+                      <span className="text-morandi-secondary">NT$</span>
+                      <Input
+                        type="number"
+                        value={formData.attendance_bonus}
+                        onChange={e =>
+                          setFormData({ ...formData, attendance_bonus: Number(e.target.value) })
+                        }
+                        className="border-morandi-gold/30 focus:border-morandi-gold"
+                        placeholder="0"
+                      />
+                    </div>
+                    <p className="text-[10px] text-morandi-muted">
+                      2026 新制：請假按比例扣（不再是請一天扣全月）
+                    </p>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-semibold text-morandi-primary uppercase">
+                      其他津貼合計
+                    </Label>
+                    <div className="flex items-center gap-2">
+                      <span className="text-morandi-secondary">NT$</span>
+                      <Input
+                        type="number"
+                        value={formData.other_allowances}
+                        onChange={e =>
+                          setFormData({ ...formData, other_allowances: Number(e.target.value) })
+                        }
+                        className="border-morandi-gold/30 focus:border-morandi-gold"
+                        placeholder="0"
+                      />
+                    </div>
+                    <p className="text-[10px] text-morandi-muted">
+                      伙食 + 交通 + 職務加給合計（簡化版）
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-semibold text-morandi-primary uppercase">
+                      勞健保投保薪資
+                    </Label>
+                    <div className="flex items-center gap-2">
+                      <span className="text-morandi-secondary">NT$</span>
+                      <Input
+                        type="number"
+                        value={formData.insured_salary ?? ''}
+                        onChange={e =>
+                          setFormData({
+                            ...formData,
+                            insured_salary: e.target.value === '' ? null : Number(e.target.value),
+                          })
+                        }
+                        className="border-morandi-gold/30 focus:border-morandi-gold"
+                        placeholder="留空 = 用月薪"
+                      />
+                    </div>
+                    <p className="text-[10px] text-morandi-muted">
+                      勞保 11 級（29,500 - 45,800）/ 健保 58 級
+                    </p>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-semibold text-morandi-primary uppercase">
+                      勞退自願提繳率
+                    </Label>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        max="0.06"
+                        value={formData.pension_voluntary_rate}
+                        onChange={e => {
+                          const v = Number(e.target.value)
+                          setFormData({
+                            ...formData,
+                            pension_voluntary_rate: Math.min(Math.max(v, 0), 0.06),
+                          })
+                        }}
+                        className="border-morandi-gold/30 focus:border-morandi-gold"
+                        placeholder="0"
+                      />
+                      <span className="text-morandi-secondary">
+                        ({(formData.pension_voluntary_rate * 100).toFixed(1)}%)
+                      </span>
+                    </div>
+                    <p className="text-[10px] text-morandi-muted">
+                      員工自願提繳、上限 6%（雇主固定提 6% 不計於此）
+                    </p>
                   </div>
                 </div>
 

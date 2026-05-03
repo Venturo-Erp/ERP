@@ -49,6 +49,14 @@ export const CAPABILITIES = {
 
   // ========== 平台 admin（取代散落 isAdmin flag） ==========
   PLATFORM_IS_ADMIN: 'platform.is_admin',
+
+  // ========== CIS 工作流（漫途整合行銷專屬） ==========
+  CIS_READ_CLIENTS: 'cis.clients.read',
+  CIS_MANAGE_CLIENTS: 'cis.clients.write',
+  CIS_READ_VISITS: 'cis.visits.read',
+  CIS_MANAGE_VISITS: 'cis.visits.write',
+  CIS_READ_PRICING: 'cis.pricing.read',
+  CIS_MANAGE_PRICING: 'cis.pricing.write',
 } as const
 
 export type Capability = typeof CAPABILITIES[keyof typeof CAPABILITIES]

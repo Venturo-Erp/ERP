@@ -289,6 +289,11 @@ const menuItems: MenuItem[] = [
     requiredPermission: 'hr',
     children: [
       { href: '/hr', label: '員工管理', icon: Users, requiredPermission: 'hr' },
+      { href: '/hr/attendance', label: '出勤管理', icon: Clock, requiredPermission: 'hr' },
+      { href: '/hr/leave', label: '請假管理', icon: Calendar, requiredPermission: 'hr' },
+      { href: '/hr/overtime', label: '加班審核', icon: Clock, requiredPermission: 'hr' },
+      { href: '/hr/missed-clock', label: '補打卡審核', icon: ClipboardList, requiredPermission: 'hr' },
+      { href: '/hr/payroll', label: '薪資管理', icon: Wallet, requiredPermission: 'hr' },
       { href: '/hr/roles', label: '員工職務', icon: UserSquare, requiredPermission: 'hr' },
       { href: '/hr/settings', label: '人資設定', icon: Settings, requiredPermission: 'hr' },
     ],
@@ -298,6 +303,16 @@ const menuItems: MenuItem[] = [
     label: COMP_LAYOUT_LABELS.租戶管理,
     icon: UsersFour,
     requiredPermission: 'tenants',
+  },
+  {
+    href: '/cis',
+    label: '漫途 CIS',
+    icon: PhPalette,
+    requiredPermission: 'cis',
+    children: [
+      { href: '/cis', label: '客戶管理', icon: AddressBookTabs, requiredPermission: 'cis' },
+      { href: '/cis/pricing', label: '衍生項目價目', icon: TipJar, requiredPermission: 'cis' },
+    ],
   },
   // 資源調度 - 威廉專屬
   // {

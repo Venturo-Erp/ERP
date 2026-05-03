@@ -202,6 +202,23 @@ export default function HRPage() {
           return <DateCell date={employee.job_info.hire_date} />
         },
       },
+      {
+        key: 'monthly_salary',
+        label: '月薪',
+        sortable: true,
+        width: '110px',
+        render: (_value, employee: EmployeeFull) => {
+          const salary =
+            Number(employee.monthly_salary) || employee.salary_info?.base_salary || 0
+          if (!salary)
+            return <span className="text-morandi-muted text-sm">{LABELS.NOT_SET}</span>
+          return (
+            <span className="font-mono text-sm text-morandi-primary tabular-nums">
+              NT$ {salary.toLocaleString()}
+            </span>
+          )
+        },
+      },
     ],
     [rolesData]
   )

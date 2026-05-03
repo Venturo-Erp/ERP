@@ -465,3 +465,43 @@ export {
 
 // Tour Itinerary Days — 已合併進 tour_itinerary_items（category='day_meta' anchor row）
 // 見 migration 20260502120000_merge_tour_itinerary_days_into_items.sql
+
+// ============================================
+// CIS 工作流（漫途整合行銷專屬）
+// ============================================
+
+// CIS Clients
+export {
+  useCisClients,
+  useCisClientsSlim,
+  useCisClient,
+  useCisClientsPaginated,
+  useCisClientDictionary,
+  createCisClient,
+  updateCisClient,
+  deleteCisClient,
+  invalidateCisClients,
+} from './cis-clients'
+
+// CIS Visits
+export {
+  useCisVisits,
+  useCisVisit,
+  useCisVisitsPaginated,
+  createCisVisit,
+  updateCisVisit,
+  deleteCisVisit,
+  invalidateCisVisits,
+} from './cis-visits'
+
+// CIS Pricing Items
+export {
+  useCisPricingItems,
+  useCisPricingItemsSlim,
+  useCisPricingItem,
+  useCisPricingItemsPaginated,
+  createCisPricingItem,
+  updateCisPricingItem,
+  deleteCisPricingItem,
+  invalidateCisPricingItems,
+} from './cis-pricing-items'

@@ -165,6 +165,12 @@ export const MODULES: ModuleDefinition[] = [
         name: '出勤設定',
         description: '上下班時間、打卡方式、GPS 位置、LINE 打卡機器人',
       },
+      { code: 'attendance', name: '出勤管理', description: '打卡紀錄、月報、異常處理' },
+      { code: 'leave', name: '請假管理', description: '請假審核、假別設定、餘額管理' },
+      { code: 'overtime', name: '加班審核', description: '加班申請審核' },
+      { code: 'missed-clock', name: '補打卡審核', description: '補打卡申請審核' },
+      { code: 'payroll', name: '薪資管理', description: '月薪計算、payslip、記帳士匯出' },
+      { code: 'reports', name: '出勤月報', description: '出勤統計、勞檢緊急套件' },
     ],
   },
   {
@@ -185,6 +191,16 @@ export const MODULES: ModuleDefinition[] = [
     tabs: [
       { code: 'personal', name: '個人設定', description: '密碼、頭像、個人資料' },
       { code: 'company', name: '公司設定', description: '公司名稱、Logo、聯絡方式' },
+    ],
+  },
+  {
+    code: 'cis',
+    name: '漫途 CIS 工作流',
+    description: '客戶識別系統規劃（漫途整合行銷專屬）',
+    tabs: [
+      { code: 'clients', name: '客戶管理', description: '旅行社客戶清單' },
+      { code: 'visits', name: '拜訪紀錄', description: '五階段引導對話 + 品牌資料卡' },
+      { code: 'pricing', name: '衍生項目價目', description: 'CIS 衍生項目價目表' },
     ],
   },
 ]

@@ -34,6 +34,17 @@ export interface SalaryInfo {
   base_salary: number
   allowances: { type: string; amount: number }[]
   salary_history: { effective_date: string; base_salary: number; reason: string }[]
+  // === 2026-05-04 加（薪資 bug 修補、payroll-engine 用）===
+  /** 全勤獎金（每月固定額、2026 新制按比例扣） */
+  attendance_bonus?: number
+  /** 其他津貼總額（伙食 / 交通 / 職務加給合計） */
+  other_allowances?: number
+  /** 投保薪資（null = 用 monthly_salary） */
+  insured_salary?: number | null
+  /** 員工自願勞退提繳率 0-0.06（最高 6%） */
+  pension_voluntary_rate?: number
+  /** 發薪日 (1-31、'last'='月底') */
+  pay_day?: number | 'last'
 }
 
 export interface EmployeeAttendance {
@@ -105,6 +116,8 @@ export interface EmployeeFull {
   must_change_password?: boolean
   failed_login_attempts?: number
   last_failed_login?: string
+  /** 月薪（top-level 欄位、payroll-engine 讀這個） */
+  monthly_salary?: number
   created_at: string
   updated_at: string
 }
