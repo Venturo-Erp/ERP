@@ -93,7 +93,7 @@ export function ModuleGuard({ children }: ModuleGuardProps) {
   ])
 
   if (featuresLoading || capLoading || !checked) {
-    return <ModuleLoading fullscreen />
+    return <ModuleLoading />
   }
 
   return <>{children}</>

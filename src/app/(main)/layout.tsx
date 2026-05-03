@@ -9,9 +9,9 @@ import { defaultLocale } from '@/lib/i18n'
 export default function MainRouteGroupLayout({ children }: { children: React.ReactNode }) {
   return (
     <I18nProviderClient locale={defaultLocale}>
-      <ModuleGuard>
-        <MainLayout>{children}</MainLayout>
-      </ModuleGuard>
+      <MainLayout>
+        <ModuleGuard>{children}</ModuleGuard>
+      </MainLayout>
     </I18nProviderClient>
   )
 }
