@@ -9,6 +9,8 @@ interface ExpenseTypeSelectorProps {
   onChange: (value: CompanyExpenseType | '') => void
   disabled?: boolean
   className?: string
+  /** 隱藏「費用類型」label（DialogHeader 同一排時用、避免高低不平）*/
+  hideLabel?: boolean
 }
 
 // 費用類型選項
@@ -22,19 +24,22 @@ export function ExpenseTypeSelector({
   onChange,
   disabled = false,
   className,
+  hideLabel = false,
 }: ExpenseTypeSelectorProps) {
   return (
     <div className={className}>
-      <label className="text-sm font-medium text-morandi-primary">
-        {EXPENSE_TYPE_SELECTOR_LABELS.LABEL_6005}
-      </label>
+      {!hideLabel && (
+        <label className="text-sm font-medium text-morandi-primary">
+          {EXPENSE_TYPE_SELECTOR_LABELS.LABEL_6005}
+        </label>
+      )}
       <Combobox
         options={expenseTypeOptions}
         value={value}
         onChange={v => onChange(v as CompanyExpenseType | '')}
         placeholder={EXPENSE_TYPE_SELECTOR_LABELS.選擇費用類型}
         disabled={disabled}
-        className="mt-1"
+        className={hideLabel ? undefined : 'mt-1'}
       />
     </div>
   )

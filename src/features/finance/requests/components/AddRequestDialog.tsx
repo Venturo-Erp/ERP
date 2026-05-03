@@ -1109,6 +1109,7 @@ export function AddRequestDialog({
                       <ExpenseTypeSelector
                         value={formData.expense_type as CompanyExpenseType | ''}
                         onChange={value => setFormData(prev => ({ ...prev, expense_type: value }))}
+                        hideLabel
                       />
                     </div>
                     <div className="relative z-[10019] w-[220px]">
