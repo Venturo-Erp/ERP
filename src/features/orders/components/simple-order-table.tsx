@@ -259,7 +259,7 @@ export const SimpleOrderTable = React.memo(function SimpleOrderTable({
                 onQuickReceipt(order)
               } else {
                 router.push(
-                  `/finance/payments?tour_code=${order.code}&order_id=${order.id}&order_number=${order.order_number}&contact_person=${order.contact_person}&amount=${order.remaining_amount}`
+                  `/finance/payments?tour_id=${order.tour_id || ''}&order_id=${order.id}&order_number=${order.order_number}&contact_person=${order.contact_person}&amount=${order.remaining_amount}`
                 )
               }
             }}
