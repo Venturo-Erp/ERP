@@ -1101,6 +1101,52 @@ export function AddRequestDialog({
                     </div>
                   </>
                 )}
+
+                {/* 公司請款：費用類型 + 付款方式 + 日期 同一行（跟團體請款對齊） */}
+                {activeTab === 'company' && (
+                  <>
+                    <div className="relative z-[10020] w-[260px]">
+                      <ExpenseTypeSelector
+                        value={formData.expense_type as CompanyExpenseType | ''}
+                        onChange={value => setFormData(prev => ({ ...prev, expense_type: value }))}
+                      />
+                    </div>
+                    <div className="relative z-[10019] w-[220px]">
+                      <Select
+                        value={formData.payment_method_id || ''}
+                        onValueChange={value =>
+                          setFormData(prev => ({
+                            ...prev,
+                            payment_method_id: value || undefined,
+                          }))
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="付款方式（選填）" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {paymentMethods.map(method => (
+                            <SelectItem key={method.id} value={method.id}>
+                              {method.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="relative z-[10018] w-[200px]">
+                      <RequestDateInput
+                        value={formData.request_date}
+                        onChange={(date, isSpecialBilling) =>
+                          setFormData(prev => ({
+                            ...prev,
+                            request_date: date,
+                            is_special_billing: isSpecialBilling,
+                          }))
+                        }
+                      />
+                    </div>
+                  </>
+                )}
               </div>
 
               {/* 右邊：標題 */}
@@ -1370,44 +1416,7 @@ export function AddRequestDialog({
                 value="company"
                 className="flex-1 overflow-y-auto pt-4 border-t border-morandi-container/30 space-y-6"
               >
-                {/* 上方三格：費用類型 / 付款方式 / 日期（William 拍板對齊團體請款） */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <ExpenseTypeSelector
-                    value={formData.expense_type as CompanyExpenseType | ''}
-                    onChange={value => setFormData(prev => ({ ...prev, expense_type: value }))}
-                  />
-                  <div>
-                    <label className="text-sm font-medium text-morandi-primary">付款方式</label>
-                    <Select
-                      value={formData.payment_method_id || ''}
-                      onValueChange={value =>
-                        setFormData(prev => ({ ...prev, payment_method_id: value || undefined }))
-                      }
-                    >
-                      <SelectTrigger className="mt-1">
-                        <SelectValue placeholder="選擇付款方式（選填）" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {paymentMethods.map(method => (
-                          <SelectItem key={method.id} value={method.id}>
-                            {method.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <RequestDateInput
-                    value={formData.request_date}
-                    onChange={(date, isSpecialBilling) =>
-                      setFormData(prev => ({
-                        ...prev,
-                        request_date: date,
-                        is_special_billing: isSpecialBilling,
-                      }))
-                    }
-                  />
-                </div>
-
+                {/* 費用類型 / 付款方式 / 日期 已移到 DialogHeader 同一行（跟團體請款對齊）*/}
                 <EditableRequestItemList
                   items={requestItems}
                   suppliers={suppliers}
