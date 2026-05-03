@@ -11,7 +11,7 @@ import { ModuleLoading } from '@/components/module-loading'
  */
 export default function AccountingLayout({ children }: { children: React.ReactNode }) {
   const { canReadAnyInModule, loading } = useMyCapabilities()
-  if (loading) return <ModuleLoading fullscreen />
+  if (loading) return <ModuleLoading />
   if (!canReadAnyInModule('accounting')) return <UnauthorizedPage />
   return <>{children}</>
 }

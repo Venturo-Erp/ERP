@@ -319,7 +319,7 @@ export default function PaymentsPage() {
     },
   ]
 
-  if (permLoading) return <ModuleLoading fullscreen />
+  if (permLoading) return <ModuleLoading />
   if (!canTour && !canCompany) return <UnauthorizedPage />
 
   return (

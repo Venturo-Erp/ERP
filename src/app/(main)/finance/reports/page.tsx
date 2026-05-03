@@ -94,7 +94,7 @@ export default function ReportsPage() {
     []
   )
 
-  if (permLoading) return <ModuleLoading fullscreen />
+  if (permLoading) return <ModuleLoading />
   if (!can(CAPABILITIES.FINANCE_READ_REPORTS)) return <UnauthorizedPage />
 
   return (

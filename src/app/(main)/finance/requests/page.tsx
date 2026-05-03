@@ -131,7 +131,7 @@ export default function RequestsPage() {
     setSelectedRequest(request)
   }
 
-  if (permLoading) return <ModuleLoading fullscreen />
+  if (permLoading) return <ModuleLoading />
   // 沒有任何 capability → 整頁擋
   if (!canTour && !canCompany && !canSalary) return <UnauthorizedPage />
 

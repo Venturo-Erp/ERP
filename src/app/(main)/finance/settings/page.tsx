@@ -612,7 +612,7 @@ export default function FinanceSettingsPage() {
     return { label: config.label, icon: Plus, onClick: config.onClick }
   }
 
-  if (permLoading) return <ModuleLoading fullscreen />
+  if (permLoading) return <ModuleLoading />
   if (!can(CAPABILITIES.FINANCE_READ_SETTINGS)) return <UnauthorizedPage />
 
   return (

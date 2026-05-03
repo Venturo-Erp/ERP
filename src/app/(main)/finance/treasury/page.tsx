@@ -133,7 +133,7 @@ export default function TreasuryPage() {
 
   const monthLabel = format(new Date(), 'yyyy年M月', { locale: zhTW })
 
-  if (permLoading) return <ModuleLoading fullscreen />
+  if (permLoading) return <ModuleLoading />
   if (!can(CAPABILITIES.FINANCE_READ_TREASURY)) return <UnauthorizedPage />
 
   return (

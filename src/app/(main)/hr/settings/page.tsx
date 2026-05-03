@@ -202,7 +202,7 @@ export default function HRSettingsPage() {
     }
   }
 
-  if (permLoading) return <ModuleLoading fullscreen />
+  if (permLoading) return <ModuleLoading />
   if (!can(CAPABILITIES.HR_READ_SETTINGS)) return <UnauthorizedPage />
 
   if (loading) {
