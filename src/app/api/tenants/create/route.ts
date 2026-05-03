@@ -399,7 +399,6 @@ export async function POST(request: NextRequest) {
       'settings',
       'customers',
       'itinerary',
-      'channel',
     ]
     // 付費功能（預設關閉）
     const premiumFeatures = [
