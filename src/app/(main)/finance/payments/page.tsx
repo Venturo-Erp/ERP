@@ -319,7 +319,7 @@ export default function PaymentsPage() {
     },
   ]
 
-  if (permLoading) return <ModuleLoading />
+  if (permLoading) return null  // ModuleGuard 已在外層顯示 loading
   if (!canTour && !canCompany) return <UnauthorizedPage />
 
   return (

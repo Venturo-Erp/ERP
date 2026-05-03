@@ -133,7 +133,7 @@ export default function TreasuryPage() {
 
   const monthLabel = format(new Date(), 'yyyy年M月', { locale: zhTW })
 
-  if (permLoading) return <ModuleLoading />
+  if (permLoading) return null  // ModuleGuard 已在外層顯示 loading
   if (!can(CAPABILITIES.FINANCE_READ_TREASURY)) return <UnauthorizedPage />
 
   return (

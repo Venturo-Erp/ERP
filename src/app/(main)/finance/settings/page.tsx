@@ -612,7 +612,7 @@ export default function FinanceSettingsPage() {
     return { label: config.label, icon: Plus, onClick: config.onClick }
   }
 
-  if (permLoading) return <ModuleLoading />
+  if (permLoading) return null  // ModuleGuard 已在外層顯示 loading
   if (!can(CAPABILITIES.FINANCE_READ_SETTINGS)) return <UnauthorizedPage />
 
   return (

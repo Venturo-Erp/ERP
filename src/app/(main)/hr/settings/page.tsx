@@ -202,7 +202,7 @@ export default function HRSettingsPage() {
     }
   }
 
-  if (permLoading) return <ModuleLoading />
+  if (permLoading) return null  // ModuleGuard 已在外層顯示 loading
   if (!can(CAPABILITIES.HR_READ_SETTINGS)) return <UnauthorizedPage />
 
   if (loading) {

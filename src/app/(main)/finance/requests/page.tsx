@@ -131,7 +131,7 @@ export default function RequestsPage() {
     setSelectedRequest(request)
   }
 
-  if (permLoading) return <ModuleLoading />
+  if (permLoading) return null  // ModuleGuard 已在外層顯示 loading
   // 沒有任何 capability → 整頁擋
   if (!canTour && !canCompany && !canSalary) return <UnauthorizedPage />
 

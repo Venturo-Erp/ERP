@@ -94,7 +94,7 @@ export default function ReportsPage() {
     []
   )
 
-  if (permLoading) return <ModuleLoading />
+  if (permLoading) return null  // ModuleGuard 已在外層顯示 loading
   if (!can(CAPABILITIES.FINANCE_READ_REPORTS)) return <UnauthorizedPage />
 
   return (

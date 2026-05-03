@@ -12,7 +12,7 @@ import { ModuleLoading } from '@/components/module-loading'
  */
 export default function DatabaseLayout({ children }: { children: React.ReactNode }) {
   const { canReadAnyInModule, loading } = useMyCapabilities()
-  if (loading) return <ModuleLoading />
+  if (loading) return null  // ModuleGuard 已在外層顯示 loading、避免 cascade
   if (!canReadAnyInModule('database')) return <UnauthorizedPage />
   return <>{children}</>
 }
