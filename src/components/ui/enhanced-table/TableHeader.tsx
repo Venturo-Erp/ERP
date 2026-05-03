@@ -102,7 +102,8 @@ export const TableHeader = React.memo(function TableHeader({
                   : 'text-left'
             )}
             style={{
-              minWidth: column.minWidth || column.width || undefined,
+              width: column.width || undefined,
+              minWidth: column.minWidth || undefined,
               maxWidth: column.maxWidth,
             }}
           >

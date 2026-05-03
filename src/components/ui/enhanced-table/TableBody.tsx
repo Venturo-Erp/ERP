@@ -180,7 +180,8 @@ export const TableBody = React.memo(function TableBody({
                     column.className
                   )}
                   style={{
-                    minWidth: column.minWidth || column.width || undefined,
+                    width: column.width || undefined,
+                    minWidth: column.minWidth || undefined,
                     maxWidth: column.maxWidth,
                   }}
                 >
