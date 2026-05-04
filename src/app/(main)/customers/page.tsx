@@ -17,12 +17,8 @@ import {
   Trash2,
   Users,
   FileSpreadsheet,
-  MessageCircle,
-  Copy,
 } from 'lucide-react'
-import { QRCodeSVG } from 'qrcode.react'
 import { toast } from 'sonner'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { formatPassportExpiryWithStatus } from '@/lib/utils/passport-expiry'
 import { DateCell } from '@/components/table-cells'
 
@@ -70,7 +66,6 @@ export default function CustomersPage() {
   const [customerDialogMode, setCustomerDialogMode] = useState<'view' | 'edit'>('view')
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false)
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
-  const [lineBindingCustomer, setLineBindingCustomer] = useState<Customer | null>(null)
 
   // 處理點擊行
   const handleRowClick = useCallback(async (customer: Customer) => {
@@ -386,21 +381,6 @@ export default function CustomersPage() {
                     <AlertTriangle size={14} />
                   </button>
                 )}
-                {/* LINE 綁定按鈕 */}
-                <button
-                  className={`p-1 rounded transition-colors ${
-                    customer.line_user_id
-                      ? 'text-brand-line hover:bg-brand-line/10'
-                      : 'text-morandi-secondary hover:text-brand-line hover:bg-brand-line/10'
-                  }`}
-                  title={customer.line_user_id ? '已綁定 LINE' : '綁定 LINE'}
-                  onClick={e => {
-                    e.stopPropagation()
-                    setLineBindingCustomer(customer)
-                  }}
-                >
-                  <MessageCircle size={14} />
-                </button>
                 <button
                   className="p-1 text-morandi-secondary hover:text-morandi-gold hover:bg-morandi-gold/10 rounded transition-colors"
                   title={L.title_edit}
@@ -457,74 +437,6 @@ export default function CustomersPage() {
 
       {/* 批次匯入對話框 */}
       <ImportCustomersDialog open={isImportDialogOpen} onOpenChange={setIsImportDialogOpen} />
-
-      {/* LINE 綁定 Dialog */}
-      <Dialog open={!!lineBindingCustomer} onOpenChange={() => setLineBindingCustomer(null)}>
-        <DialogContent level={1} className="max-w-sm">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <span className="text-brand-line">📱</span> LINE 綁定
-            </DialogTitle>
-          </DialogHeader>
-          {lineBindingCustomer && (
-            <div className="flex flex-col items-center gap-4 py-4">
-              {lineBindingCustomer.line_user_id ? (
-                // 已綁定
-                <div className="text-center">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-brand-line/10 flex items-center justify-center">
-                    <MessageCircle className="w-8 h-8 text-brand-line" />
-                  </div>
-                  <p className="font-medium text-morandi-primary">{lineBindingCustomer.name}</p>
-                  <p className="text-sm text-brand-line mt-1">✓ 已綁定 LINE</p>
-                  <p className="text-xs text-morandi-secondary mt-2">
-                    綁定時間：
-                    {lineBindingCustomer.line_linked_at
-                      ? new Date(lineBindingCustomer.line_linked_at).toLocaleDateString('zh-TW')
-                      : '未知'}
-                  </p>
-                </div>
-              ) : (
-                // 未綁定，顯示 QR Code
-                <>
-                  <div className="bg-card p-4 rounded-lg shadow-sm">
-                    <QRCodeSVG
-                      value={`https://line.me/R/oaMessage/${process.env.NEXT_PUBLIC_LINE_BOT_ID || '@745gftqd'}?綁定 ${lineBindingCustomer.code}`}
-                      size={180}
-                      level="M"
-                    />
-                  </div>
-                  <div className="text-center">
-                    <p className="font-medium text-morandi-primary">{lineBindingCustomer.name}</p>
-                    <p className="text-sm text-morandi-secondary mt-1">
-                      客戶編號：{lineBindingCustomer.code}
-                    </p>
-                    <p className="text-xs text-morandi-muted mt-2">請客戶掃描 QR Code 完成綁定</p>
-                  </div>
-                  <div className="flex gap-2 w-full">
-                    <Button
-                      variant="soft-gold"
-                      className="flex-1"
-                      onClick={() => {
-                        const url = `https://line.me/R/oaMessage/${process.env.NEXT_PUBLIC_LINE_BOT_ID || '@745gftqd'}?綁定 ${lineBindingCustomer.code}`
-                        navigator.clipboard.writeText(url)
-                        toast.success('連結已複製')
-                      }}
-                    >
-                      <Copy className="w-4 h-4 mr-1" />
-                      複製連結
-                    </Button>
-                  </div>
-                  <p className="text-xs text-morandi-muted text-center">
-                    掃碼後會打開 LINE 對話
-                    <br />
-                    自動傳送綁定指令完成綁定
-                  </p>
-                </>
-              )}
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
     </ContentPageLayout>
   )
 }

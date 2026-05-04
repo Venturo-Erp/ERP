@@ -52,8 +52,6 @@ export interface Customer extends BaseEntity {
   linked_at?: string | null // Online 帳號連動時間
   linked_method?: string | null // 連動方式
   online_user_id?: string | null // Online 用戶 ID
-  line_user_id?: string | null // LINE 用戶 ID
-  line_linked_at?: string | null // LINE 帳號連結時間
 }
 
 // ============================================

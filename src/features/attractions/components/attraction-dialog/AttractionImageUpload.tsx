@@ -4,8 +4,6 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Upload, X, Loader2, Pencil } from 'lucide-react'
 import { ImagePosition } from '../../hooks/useAttractionForm'
-import { useAuthStore } from '@/stores/auth-store'
-import { isFeatureAvailable } from '@/lib/feature-restrictions'
 import { ImageEditor, type ImageEditorSettings } from '@/components/ui/image-editor'
 import { logger } from '@/lib/utils/logger'
 import { ATTRACTION_IMAGE_UPLOAD_LABELS } from '../../constants/labels'
@@ -16,7 +14,6 @@ interface ImagePositionAdjusterProps {
   onPositionChange: (pos: ImagePosition) => void
   onRemove: () => void
   onReplace?: (newUrl: string) => void
-  showAiEdit?: boolean
 }
 
 function ImagePositionAdjuster({
@@ -25,7 +22,6 @@ function ImagePositionAdjuster({
   onPositionChange,
   onRemove,
   onReplace,
-  showAiEdit = false,
 }: ImagePositionAdjusterProps) {
   const [isEditorOpen, setIsEditorOpen] = useState(false)
 
@@ -72,13 +68,6 @@ function ImagePositionAdjuster({
       handleSave(settings)
     } catch (error) {
       logger.error('上傳裁切圖片失敗:', error)
-    }
-  }
-
-  // AI 替換圖片
-  const handleAiReplace = (newUrl: string) => {
-    if (onReplace) {
-      onReplace(newUrl)
     }
   }
 
@@ -146,10 +135,8 @@ function ImagePositionAdjuster({
         imageSrc={url}
         aspectRatio={4 / 3}
         initialSettings={getInitialSettings()}
-        showAi={showAiEdit}
         onSave={handleSave}
         onCropAndSave={onReplace ? handleCropAndSave : undefined}
-        onAiReplace={onReplace ? handleAiReplace : undefined}
       />
     </div>
   )
@@ -188,9 +175,6 @@ export function AttractionImageUpload({
   onDrop,
   onReplaceImage,
 }: AttractionImageUploadProps) {
-  const { user } = useAuthStore()
-  const showAiEdit = isFeatureAvailable('ai_suggest', user?.workspace_code)
-
   return (
     <div>
       <label className="text-sm font-medium">{ATTRACTION_IMAGE_UPLOAD_LABELS.景點圖片}</label>
@@ -256,7 +240,6 @@ export function AttractionImageUpload({
                 onPositionChange={pos => onPositionChange(url, pos)}
                 onRemove={() => onRemoveImage(index)}
                 onReplace={onReplaceImage ? newUrl => onReplaceImage(index, newUrl) : undefined}
-                showAiEdit={showAiEdit}
               />
             ))}
           </div>

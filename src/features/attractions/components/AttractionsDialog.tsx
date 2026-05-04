@@ -10,11 +10,9 @@ import { useAttractionForm } from '../hooks/useAttractionForm'
 import { StatusBadge } from '@/components/ui/status-badge'
 import { AttractionForm } from './attraction-dialog/AttractionForm'
 import { AttractionImageUpload } from './attraction-dialog/AttractionImageUpload'
-import { useAuthStore } from '@/stores/auth-store'
-import { isFeatureAvailable } from '@/lib/feature-restrictions'
 import { useCapabilities, CAPABILITIES } from '@/lib/permissions'
 import { Button } from '@/components/ui/button'
-import { Sparkles, Loader2, CheckCircle2, Trash2 } from 'lucide-react'
+import { Loader2, CheckCircle2, Trash2 } from 'lucide-react'
 import { ATTRACTIONS_DIALOG_LABELS } from '../constants/labels'
 import { updateAttraction } from '@/data'
 import { toast } from 'sonner'
@@ -72,13 +70,8 @@ export function AttractionsDialog({
     fetchAndUploadImage,
   } = useAttractionForm({ attraction, initialFormData, open })
 
-  const { user } = useAuthStore()
-  const [isAiLoading, setIsAiLoading] = useState(false)
   const [isVerifying, setIsVerifying] = useState(false)
   const [isVerified, setIsVerified] = useState(attraction?.data_verified ?? false)
-
-  // 檢查是否顯示 AI 補充按鈕（僅 TP/TC）
-  const showAiSuggest = isFeatureAvailable('ai_suggest', user?.workspace_code)
 
   // 標記已驗證
   const handleMarkVerified = async () => {
@@ -114,76 +107,6 @@ export function AttractionsDialog({
       toast.error('刪除失敗，請稍後再試')
     } finally {
       setIsDeleting(false)
-    }
-  }
-
-  // AI 補充景點資料
-  const handleAiSuggest = async () => {
-    if (!formData.name) {
-      void alert(ATTRACTIONS_DIALOG_LABELS.請先填寫景點名稱, 'warning')
-      return
-    }
-
-    setIsAiLoading(true)
-    try {
-      // 取得國家和城市名稱
-      const country = countries.find(c => c.id === formData.country_id)
-      const city = cities.find(c => c.id === formData.city_id)
-
-      const response = await fetch('/api/ai/suggest-attraction', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: formData.name,
-          city: city?.name,
-          country: country?.name,
-          category: formData.category,
-          existingData: {
-            latitude: formData.latitude,
-            longitude: formData.longitude,
-            duration_minutes: formData.duration_minutes,
-            ticket_price: formData.ticket_price,
-            opening_hours: formData.opening_hours,
-            description: formData.description,
-          },
-        }),
-      })
-
-      const result = await response.json()
-
-      if (!result.success) {
-        throw new Error(result.error || ATTRACTIONS_DIALOG_LABELS.AI_補充失敗)
-      }
-
-      const suggestion = result.data.suggestion
-
-      // 填入 AI 建議的資料（只填入空白的欄位）
-      setFormData(prev => ({
-        ...prev,
-        latitude: prev.latitude || suggestion.latitude,
-        longitude: prev.longitude || suggestion.longitude,
-        duration_minutes: prev.duration_minutes || suggestion.duration_minutes || 60,
-        ticket_price: prev.ticket_price || suggestion.ticket_price,
-        opening_hours: prev.opening_hours || suggestion.opening_hours,
-        description: prev.description || suggestion.description,
-        address: prev.address || suggestion.address,
-        website: prev.website || suggestion.website,
-        phone: prev.phone || suggestion.phone,
-        tags: prev.tags || suggestion.tags?.join(', ') || '',
-      }))
-
-      void alert(
-        `${ATTRACTIONS_DIALOG_LABELS.已補充_PREFIX}${result.data.missingFields?.length || 0}${ATTRACTIONS_DIALOG_LABELS.已補充_SUFFIX}`,
-        'success'
-      )
-    } catch (error) {
-      logger.error('AI 補充失敗:', error)
-      void alert(
-        error instanceof Error ? error.message : ATTRACTIONS_DIALOG_LABELS.AI_補充失敗,
-        'error'
-      )
-    } finally {
-      setIsAiLoading(false)
     }
   }
 
@@ -342,7 +265,7 @@ export function AttractionsDialog({
       ? getCitiesByCountry(formData.country_id)
       : []
 
-  // 自訂標題（包含 AI 補充按鈕 + 標記已驗證按鈕）
+  // 自訂標題（含標記已驗證按鈕）
   const dialogTitle = (
     <div className="flex items-center gap-3">
       <span>
@@ -374,19 +297,6 @@ export function AttractionsDialog({
       )}
       {/* 已驗證標示 */}
       {attraction && isVerified && <StatusBadge tone="success" label="已驗證" />}
-      {showAiSuggest && attraction && (
-        <Button
-          type="button"
-          variant="soft-gold"
-          size="sm"
-          onClick={handleAiSuggest}
-          disabled={isAiLoading || !formData.name}
-          className="h-7 text-xs gap-1.5 text-morandi-gold border-morandi-gold/50 hover:bg-morandi-gold/10"
-        >
-          {isAiLoading ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
-          {ATTRACTIONS_DIALOG_LABELS.AI_補充}
-        </Button>
-      )}
       {attraction && onDelete && can(CAPABILITIES.DATABASE_MANAGE_ATTRACTIONS) && (
         <Button
           type="button"

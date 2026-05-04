@@ -191,7 +191,6 @@ export function PassportSection({
           aspectRatio={3 / 2} // 護照比例
           onSave={handleEditorSave}
           onCropAndSave={handleEditorCropAndSave}
-          showAi={false} // 護照不需要 AI 美化
         />
       )}
     </>

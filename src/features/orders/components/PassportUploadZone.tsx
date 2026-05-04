@@ -99,7 +99,6 @@ export function PassportUploadZone({
           imageSrc={processedFiles[enhancingIndex].preview}
           onSave={handleEditorSave}
           onCropAndSave={handleEditorCropAndSave}
-          showAi={false}
         />
       )}
       <div className="space-y-3">

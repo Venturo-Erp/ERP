@@ -4,7 +4,7 @@
  * 功能：建立新行程表 / 查看已關聯行程表
  */
 
-import { FileText, Loader2, Save, AlertCircle, Eye, Wand2, FilePlus, Clock } from 'lucide-react'
+import { FileText, Loader2, Save, AlertCircle, Eye, FilePlus, Clock } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 import { Button } from '@/components/ui/button'
@@ -16,7 +16,6 @@ import { FlightSection } from './FlightSection'
 import { DailyScheduleEditor } from './DailyScheduleEditor'
 import { TimelineEditor } from './TimelineEditor'
 import { ItineraryPreviewContent } from './ItineraryPreview'
-import { AiGenerateDialog } from './AiGenerateDialog'
 import { VersionDropdown } from './VersionDropdown'
 import { PACKAGE_ITINERARY_DIALOG_LABELS } from './labels'
 
@@ -183,19 +182,8 @@ export function PackageItineraryDialog({
 
                   {/* 底部按鈕 */}
                   <div className="flex justify-between items-center pt-4 border-t border-border">
-                    {/* 左側：AI 排行程 + 版本選擇器 */}
+                    {/* 左側：版本選擇器 */}
                     <div className="flex items-center gap-2">
-                      {hook.showAiGenerate && (
-                        <Button
-                          variant="soft-gold"
-                          size="sm"
-                          onClick={hook.openAiDialog}
-                          className="h-7 px-2 text-[11px] gap-1 text-morandi-gold border-morandi-gold/50 hover:bg-morandi-gold/10"
-                        >
-                          <Wand2 size={12} />
-                          AI 排行程
-                        </Button>
-                      )}
                       {hook.isEditMode && (
                         <VersionDropdown
                           existingItinerary={hook.existingItinerary}
@@ -304,23 +292,6 @@ export function PackageItineraryDialog({
           )}
         </DialogContent>
       </Dialog>
-
-      {/* AI 排行程對話框 */}
-      <AiGenerateDialog
-        isOpen={hook.aiDialogOpen}
-        onClose={() => hook.setAiDialogOpen(false)}
-        destination={ctx.destination || ctx.country_id || ''}
-        numDays={hook.dailySchedule.length}
-        accommodationStatus={hook.getAccommodationStatus()}
-        arrivalTime={hook.aiArrivalTime}
-        departureTime={hook.aiDepartureTime}
-        theme={hook.aiTheme}
-        isGenerating={hook.aiGenerating}
-        onArrivalTimeChange={hook.setAiArrivalTime}
-        onDepartureTimeChange={hook.setAiDepartureTime}
-        onThemeChange={hook.setAiTheme}
-        onGenerate={hook.handleAiGenerate}
-      />
     </>
   )
 }

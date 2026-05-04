@@ -19,7 +19,6 @@ import { alert } from '@/lib/ui/alert-dialog'
 import { stripHtml } from '@/lib/utils/string-utils'
 // syncItineraryToQuote 已移除 — 報價單直接讀核心表
 import { useSyncItineraryToCore } from '@/features/tours/hooks/useTourItineraryItems'
-import { isFeatureAvailable } from '@/lib/feature-restrictions'
 import { toast } from 'sonner'
 import type {
   ItineraryEditorContext,
@@ -112,14 +111,6 @@ export function usePackageItinerary({
 
   // 檢視模式：edit = 編輯模式, preview = 簡易行程表預覽
   const [viewMode, setViewMode] = useState<'edit' | 'preview'>('edit')
-
-  // AI 排行程狀態
-  const [aiDialogOpen, setAiDialogOpen] = useState(false)
-  const [aiGenerating, setAiGenerating] = useState(false)
-  const [aiArrivalTime, setAiArrivalTime] = useState('11:00')
-  const [aiDepartureTime, setAiDepartureTime] = useState('14:00')
-  const [aiTheme, setAiTheme] = useState<string>('classic')
-  const showAiGenerate = isFeatureAvailable('ai_suggest', currentUser?.workspace_code)
 
   // 追蹤 refs
   const hasInitializedDailyScheduleRef = useRef(false)
@@ -552,123 +543,6 @@ export function usePackageItinerary({
     isDomestic,
   ])
 
-  // 打開 AI 對話框
-  const openAiDialog = useCallback(() => {
-    if (formData.outboundFlight?.arrivalTime) {
-      setAiArrivalTime(formData.outboundFlight.arrivalTime)
-    }
-    if (formData.returnFlight?.departureTime) {
-      setAiDepartureTime(formData.returnFlight.departureTime)
-    }
-    setAiDialogOpen(true)
-  }, [formData.outboundFlight?.arrivalTime, formData.returnFlight?.departureTime])
-
-  // AI 生成
-  const handleAiGenerate = useCallback(async () => {
-    const destinationName = ctx.destination || ''
-    const airportCode = ctx.airport_code || ''
-    const countryId = ctx.country_id || ''
-
-    if (!destinationName && !airportCode && !countryId) {
-      toast.error('請先設定目的地')
-      return
-    }
-    if (!ctx.start_date) {
-      toast.error('請先設定出發日期')
-      return
-    }
-
-    const status = getAccommodationStatus()
-
-    setAiGenerating(true)
-    try {
-      const numDays = dailySchedule.length
-
-      logger.log('[AI Generate] Request:', {
-        destination: destinationName,
-        airportCode,
-        countryId,
-        numDays,
-        departureDate: ctx.start_date,
-        theme: aiTheme,
-      })
-
-      const response = await fetch('/api/itineraries/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          destination: destinationName,
-          cityId: airportCode,
-          countryId: countryId,
-          numDays,
-          departureDate: ctx.start_date,
-          arrivalTime: aiArrivalTime,
-          departureTime: aiDepartureTime,
-          theme: aiTheme,
-          accommodations: status.isComplete ? status.accommodations : undefined,
-        }),
-      })
-
-      const result = await response.json()
-
-      logger.log('[AI Generate] API Response:', result)
-
-      if (!response.ok) {
-        throw new Error(result.error || '生成失敗')
-      }
-
-      if (result.success && result.data?.dailyItinerary) {
-        interface GeneratedDay {
-          title: string
-          meals: { breakfast?: string; lunch?: string; dinner?: string }
-          activities?: Array<{ id?: string; title: string; startTime?: string; endTime?: string }>
-        }
-        const newSchedule = dailySchedule.map((existingDay, index) => {
-          const aiDay = result.data.dailyItinerary[index] as GeneratedDay | undefined
-          if (!aiDay) return existingDay
-
-          return {
-            ...existingDay,
-            route: aiDay.title || existingDay.route,
-            meals: {
-              breakfast: aiDay.meals?.breakfast || existingDay.meals.breakfast,
-              lunch: aiDay.meals?.lunch || existingDay.meals.lunch,
-              dinner: aiDay.meals?.dinner || existingDay.meals.dinner,
-            },
-            hotelBreakfast: aiDay.meals?.breakfast === '飯店早餐',
-            activities:
-              aiDay.activities?.map((act, actIdx) => ({
-                id: act.id || `ai-${index}-${actIdx}-${Date.now()}`,
-                title: act.title,
-                startTime: act.startTime || '',
-                endTime: act.endTime || '',
-              })) || existingDay.activities,
-          }
-        })
-
-        setDailySchedule(newSchedule)
-        toast.success(`成功生成 ${newSchedule.length} 天行程！`)
-        setAiDialogOpen(false)
-      } else {
-        throw new Error('生成失敗')
-      }
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : '生成失敗，請稍後再試')
-    } finally {
-      setAiGenerating(false)
-    }
-  }, [
-    ctx.destination,
-    ctx.start_date,
-    ctx.airport_code,
-    ctx.country_id,
-    aiArrivalTime,
-    aiDepartureTime,
-    aiTheme,
-    dailySchedule,
-    getAccommodationStatus,
-  ])
-
   // 提交表單
   const handleSubmit = useCallback(async () => {
     try {
@@ -958,19 +832,6 @@ export function usePackageItinerary({
     removeActivity,
     updateActivity,
 
-    // AI 相關
-    showAiGenerate,
-    aiDialogOpen,
-    setAiDialogOpen,
-    aiGenerating,
-    aiArrivalTime,
-    setAiArrivalTime,
-    aiDepartureTime,
-    setAiDepartureTime,
-    aiTheme,
-    setAiTheme,
-    openAiDialog,
-    handleAiGenerate,
     getAccommodationStatus,
 
     // 預覽

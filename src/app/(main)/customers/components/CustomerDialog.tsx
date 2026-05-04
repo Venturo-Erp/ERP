@@ -75,7 +75,6 @@ function CustomerDialogImageEditor({
       aspectRatio={3 / 2}
       onSave={onSave}
       onCropAndSave={onCropAndSave}
-      showAi={false}
     />
   )
 }
