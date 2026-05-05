@@ -1,10 +1,13 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { mutate as globalMutate } from 'swr'
 import { EmployeeFull } from './types'
 import { logger } from '@/lib/utils/logger'
 import type { UserRole } from '@/lib/rbac-config'
 import type { Database } from '@/lib/supabase/types'
 import { ensureAuthSync, resetAuthSyncState } from '@/lib/auth/auth-sync'
+
+const LAYOUT_CONTEXT_SWR_KEY = '/api/auth/layout-context'
 
 type EmployeeRow = Database['public']['Tables']['employees']['Row']
 
@@ -135,12 +138,14 @@ export const useAuthStore = create<AuthState>()(
             return { success: false, message: errMsg || '帳號或密碼錯誤' }
           }
 
-          const { employee, workspace, authEmail, mustChangePassword } =
+          const { employee, workspace, authEmail, mustChangePassword, capabilities, features } =
             validateResult.data as {
               employee: EmployeeRow
               workspace: { id: string; code: string; name: string | null; type: string | null }
               authEmail: string
               mustChangePassword: boolean
+              capabilities: string[]
+              features: string[]
             }
 
           // 2. 用 auth email 在 client 建立 Supabase session
@@ -154,7 +159,40 @@ export const useAuthStore = create<AuthState>()(
             return { success: false, message: '帳號或密碼錯誤' }
           }
 
-          // 3. 確保 Auth 同步（處理 RLS 所需的 user_id）
+          // 3. 預寫 SWR cache、讓 useLayoutContext 不用再打 /api/auth/layout-context
+          await globalMutate(
+            LAYOUT_CONTEXT_SWR_KEY,
+            {
+              ok: true,
+              user: { id: employee.user_id ?? '', email: authEmail },
+              employee: {
+                id: employee.id,
+                employee_number: employee.employee_number,
+                display_name: employee.display_name,
+                english_name: employee.english_name,
+                role_id: employee.role_id ?? null,
+                workspace_id: employee.workspace_id ?? null,
+                status: employee.status,
+              },
+              workspace: {
+                id: workspace.id,
+                code: workspace.code,
+                name: workspace.name ?? '',
+                type: workspace.type,
+                is_active: true,
+                premium_enabled: false,
+                default_billing_day_of_week: null,
+              },
+              role_id: employee.role_id ?? null,
+              workspace_id: employee.workspace_id ?? null,
+              capabilities: capabilities ?? [],
+              features: features ?? [],
+              premium_enabled: false,
+            },
+            false,
+          )
+
+          // 4. 確保 Auth 同步（處理 RLS 所需的 user_id）
           await ensureAuthSync({
             employeeId: employee.id,
             workspaceId: employee.workspace_id ?? undefined,

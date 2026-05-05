@@ -20,6 +20,7 @@
 import useSWR, { mutate as globalMutate } from 'swr'
 import { useMemo } from 'react'
 import { useAuthStore } from '@/stores'
+import { supabase } from '@/lib/supabase/client'
 
 const SWR_KEY = '/api/auth/layout-context'
 
@@ -68,14 +69,15 @@ async function fetcher(url: string): Promise<LayoutContextPayload> {
   let res = await fetch(url, { credentials: 'include' })
 
   // 401 = 可能是複製分頁 / 快速 navigation 撞到 Supabase token refresh race。
-  // 等 client 端 supabase（有 navigator.locks）完成 refresh 寫回 cookies、再試一次。
-  // 兩段 retry：300ms 後一次、再不行 1000ms 後最後一次。
+  // 最多一次 retry（300ms），retry 前先檢查 session 是否存在。
   if (res.status === 401) {
+    const { data } = await supabase.auth.getSession()
+    if (!data.session) {
+      // session 根本不存在、不用等 refresh、直接失敗
+      return EMPTY_PAYLOAD
+    }
+    // session 存在、等 supabase refresh 寫回 cookies 後再試一次
     await new Promise(r => setTimeout(r, 300))
-    res = await fetch(url, { credentials: 'include' })
-  }
-  if (res.status === 401) {
-    await new Promise(r => setTimeout(r, 1000))
     res = await fetch(url, { credentials: 'include' })
   }
 

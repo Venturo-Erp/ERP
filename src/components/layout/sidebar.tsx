@@ -101,9 +101,6 @@ const menuItems: MenuItem[] = [
     icon: CalendarDots,
     requiredPermission: 'calendar',
   },
-  // 內部聊天頻道已於 2026-05-02 整套刪除（William 拍板）
-  // 郵件系統暫時隱藏（目前使用 Google Workspace）
-  // { href: '/mail', label: '郵件', icon: Mail, requiredPermission: 'workspace' },
   {
     href: '/todos',
     label: COMP_LAYOUT_LABELS.待辦事項,
@@ -185,8 +182,6 @@ const menuItems: MenuItem[] = [
         icon: Calendar,
         requiredPermission: 'accounting',
       },
-      // 期初餘額 2026-05-05 William 拍板：整合進「科目管理」變第二分頁、不再獨立 sidebar 入口
-      // 路由 /accounting/opening-balances 仍保留、未來會被 /accounting/accounts 內 tab 取代
       {
         href: '/accounting/checks',
         label: COMP_LAYOUT_LABELS.票據管理,
@@ -207,9 +202,6 @@ const menuItems: MenuItem[] = [
     icon: ReadCvLogo,
     requiredPermission: 'visas',
   },
-  // 合約管理和確認單管理已整合到團的操作中，不需要獨立入口
-  // { href: '/contracts', label: '合約管理', icon: FileSignature, requiredPermission: 'contracts' },
-  // { href: '/confirmations', label: '確認單管理', icon: CircleDot, requiredPermission: 'confirmations' },
   {
     href: '/database',
     label: COMP_LAYOUT_LABELS.資料管理,
@@ -230,33 +222,12 @@ const menuItems: MenuItem[] = [
         requiredPermission: 'database',
       },
 
-      // 運價表 - 暫時移除，之後整合
-      // {
-      //   href: '/database/transportation-rates',
-      //   label: COMP_LAYOUT_LABELS.車資管理,
-      //   icon: Bus,
-      //   requiredPermission: 'database',
-      // },
       {
         href: '/database/suppliers',
         label: COMP_LAYOUT_LABELS.供應商管理,
         icon: Building2,
         requiredPermission: 'database',
       },
-      // 領隊資料 - 移到 HR 分頁
-      // {
-      //   href: '/database/tour-leaders',
-      //   label: COMP_LAYOUT_LABELS.領隊資料,
-      //   icon: Users,
-      //   requiredPermission: 'database',
-      // },
-      // 公司資源 - 已整合到設定
-      // {
-      //   href: '/database/company-assets',
-      //   label: COMP_LAYOUT_LABELS.公司資源管理,
-      //   icon: ImageIcon,
-      //   requiredPermission: 'database',
-      // },
       {
         href: '/database/archive-management',
         label: COMP_LAYOUT_LABELS.封存管理,
@@ -265,19 +236,6 @@ const menuItems: MenuItem[] = [
       },
     ],
   },
-  // Local 管理 - 威廉專屬，已移除
-  // {
-  //   href: '/local',
-  //   label: COMP_LAYOUT_LABELS.Local,
-  //   icon: Truck,
-  //   children: [
-  //     { href: '/local', label: COMP_LAYOUT_LABELS.Local, icon: Inbox },
-  //     { href: '/local/requests', label: COMP_LAYOUT_LABELS.委託收件匣, icon: ClipboardList },
-  //     { href: '/local/cases', label: COMP_LAYOUT_LABELS.案件列表, icon: FolderOpen },
-  //   ],
-  // },
-  // 人資 2026-05-05 重組：只留「員工管理」單一入口、頁內 tab 切換員工列表 / 職務管理
-  // 出勤 / 請假 / 加班 / 補打卡 / 薪資 / 人資設定 已移至 _deprecated/2026-05-05-cleanup/
   {
     href: '/hr',
     label: COMP_LAYOUT_LABELS.人資管理,
@@ -301,9 +259,6 @@ const menuItems: MenuItem[] = [
     ],
   },
 ]
-
-// 2026-05-05 Local/DMC 選單砍除（William 拍板：保留路由以外都清乾淨）
-// 之前是給「地接社」租戶類型用的選單變體、但目前只有 travel_agency 一種類型、永遠不會渲染
 
 const personalToolItems: MenuItem[] = []
 

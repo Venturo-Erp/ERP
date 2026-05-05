@@ -482,6 +482,7 @@ export async function POST(request: NextRequest) {
     logger.log(`Tenant created successfully: ${newWorkspaceCode}`)
 
     // 返回登入資訊（ERP 用員工編號+密碼登入，不需要 email）
+    // 密碼僅顯示一次、server log / audit log 均不儲存原始值
     return successResponse({
       workspace: {
         id: workspace.id,
@@ -495,7 +496,8 @@ export async function POST(request: NextRequest) {
       login: {
         workspaceCode: newWorkspaceCode,
         employeeNumber: adminEmployeeNumber,
-        password: adminPassword, // 僅用於顯示給系統主管，不要儲存
+        password: adminPassword,
+        password_one_time_only: true,
       },
     })
   } catch (error) {

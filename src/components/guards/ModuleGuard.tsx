@@ -92,6 +92,16 @@ export function ModuleGuard({ children }: ModuleGuardProps) {
     isAdmin,
   ])
 
+  // 公開路由 & 永遠放行：不等待 capabilities、直接渲染（Sidebar 也不被卡）
+  const isAlwaysAllowed =
+    PUBLIC_ROUTES.some(r => pathname.startsWith(r)) ||
+    ALWAYS_ALLOWED_EXACT.has(pathname) ||
+    ALWAYS_ALLOWED_PREFIXES.some(r => pathname.startsWith(r))
+
+  if (isAlwaysAllowed) {
+    return <>{children}</>
+  }
+
   if (featuresLoading || capLoading || !checked) {
     return <ModuleLoading />
   }
