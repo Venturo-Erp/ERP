@@ -209,14 +209,14 @@ export default function CisPricingPage() {
               <div className="flex items-center gap-1">
                 <button
                   className="p-1 text-morandi-secondary hover:text-morandi-gold hover:bg-morandi-gold/10 rounded transition-colors"
-                  title="編輯"
+                  title={L.edit}
                   onClick={() => openEdit(item)}
                 >
                   <Edit size={14} />
                 </button>
                 <button
                   className="p-1 text-morandi-secondary hover:text-status-danger hover:bg-status-danger-bg rounded transition-colors"
-                  title="刪除"
+                  title={L.delete}
                   onClick={() => handleDelete(item)}
                 >
                   <Trash2 size={14} />

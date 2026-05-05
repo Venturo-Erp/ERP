@@ -1,5 +1,7 @@
 'use client'
 
+import './settings-glass.css'
+
 import { useAuthStore } from '@/stores/auth-store'
 import { useMyCapabilities } from '@/lib/permissions/useMyCapabilities'
 import { ContentPageLayout } from '@/components/layout/content-page-layout'
@@ -18,6 +20,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog'
 import { LABELS } from '../constants/labels'
+import { COMMON_MESSAGES } from '@/constants/messages'
 
 export const dynamic = 'force-dynamic'
 export const fetchCache = 'force-no-store'
@@ -53,7 +56,7 @@ export default function SettingsPage() {
 
   return (
     <ContentPageLayout
-      title="設定"
+      title={LABELS.SETTINGS}
       contentClassName="flex-1 overflow-visible min-h-0 flex flex-col"
       headerActions={
         <div className="flex items-center gap-4">
@@ -83,25 +86,6 @@ export default function SettingsPage() {
             onPasswordChange={() => setShowPasswordSection(true)}
           />
         </div>
-        <style>{`
-          .settings-glass .bg-card {
-            background: rgba(255,255,255,0.25) !important;
-            backdrop-filter: blur(24px) !important;
-            -webkit-backdrop-filter: blur(24px) !important;
-            border: 1px solid rgba(255,255,255,0.4) !important;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.08), 0 0 0 1px rgba(255,255,255,0.2) inset !important;
-          }
-          .settings-glass .bg-gradient-to-b {
-            background: rgba(255,255,255,0.12) !important;
-            backdrop-filter: blur(24px) !important;
-            -webkit-backdrop-filter: blur(24px) !important;
-          }
-          .settings-glass select,
-          .settings-glass input:not([type="checkbox"]):not([type="file"]) {
-            background-color: #ffffff !important;
-            border-color: rgba(0,0,0,0.1) !important;
-          }
-        `}</style>
 
         {/* 修改密碼 Dialog */}
         <Dialog open={showPasswordSection} onOpenChange={setShowPasswordSection}>
@@ -109,13 +93,13 @@ export default function SettingsPage() {
             <DialogHeader>
               <DialogTitle className="text-morandi-primary flex items-center gap-2">
                 <Lock className="w-5 h-5 text-morandi-gold" />
-                修改密碼
+                {LABELS.CHANGE_PASSWORD}
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div>
                 <label className="text-sm font-medium text-morandi-primary mb-2 block">
-                  目前密碼
+                  {LABELS.CURRENT_PASSWORD}
                 </label>
                 <input
                   type={showPassword ? 'text' : 'password'}
@@ -124,12 +108,12 @@ export default function SettingsPage() {
                     setPasswordData(prev => ({ ...prev, currentPassword: e.target.value }))
                   }
                   className="w-full px-3 py-2 border border-morandi-container/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-morandi-gold/50"
-                  placeholder="輸入目前密碼"
+                  placeholder={LABELS.CURRENT_PASSWORD_PLACEHOLDER}
                 />
               </div>
               <div>
                 <label className="text-sm font-medium text-morandi-primary mb-2 block">
-                  新密碼
+                  {LABELS.NEW_PASSWORD}
                 </label>
                 <input
                   type={showPassword ? 'text' : 'password'}
@@ -138,12 +122,12 @@ export default function SettingsPage() {
                     setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))
                   }
                   className="w-full px-3 py-2 border border-morandi-container/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-morandi-gold/50"
-                  placeholder="輸入新密碼（至少 6 位）"
+                  placeholder={LABELS.NEW_PASSWORD_PLACEHOLDER}
                 />
               </div>
               <div>
                 <label className="text-sm font-medium text-morandi-primary mb-2 block">
-                  確認新密碼
+                  {LABELS.CONFIRM_NEW_PASSWORD}
                 </label>
                 <input
                   type={showPassword ? 'text' : 'password'}
@@ -152,7 +136,7 @@ export default function SettingsPage() {
                     setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))
                   }
                   className="w-full px-3 py-2 border border-morandi-container/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-morandi-gold/50"
-                  placeholder="再次輸入新密碼"
+                  placeholder={LABELS.CONFIRM_PASSWORD_PLACEHOLDER}
                 />
               </div>
               <div className="flex items-center gap-2">
@@ -164,7 +148,7 @@ export default function SettingsPage() {
                   className="rounded border-morandi-container/30 accent-[var(--morandi-gold)]"
                 />
                 <label htmlFor="showPassword" className="text-sm text-morandi-secondary">
-                  顯示密碼
+                  {LABELS.SHOW_PASSWORD}
                 </label>
               </div>
             </div>
@@ -181,11 +165,11 @@ export default function SettingsPage() {
               <Button
                 onClick={async () => {
                   if (passwordData.newPassword !== passwordData.confirmPassword) {
-                    alert('新密碼與確認密碼不符')
+                    alert(LABELS.PASSWORDS_NOT_MATCH)
                     return
                   }
                   if (passwordData.newPassword.length < 6) {
-                    alert('新密碼至少需要 6 位')
+                    alert(COMMON_MESSAGES.PASSWORD_TOO_SHORT(6))
                     return
                   }
                   setPasswordUpdateLoading(true)
@@ -201,14 +185,14 @@ export default function SettingsPage() {
                     })
                     const data = await res.json()
                     if (data.success) {
-                      alert('密碼修改成功')
+                      alert(LABELS.PASSWORD_UPDATE_SUCCESS)
                       setShowPasswordSection(false)
                       setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' })
                     } else {
-                      alert(data.error || '密碼修改失敗')
+                      alert(data.error || LABELS.PASSWORD_UPDATE_ERROR)
                     }
                   } catch (error) {
-                    alert('密碼修改失敗')
+                    alert(LABELS.PASSWORD_UPDATE_ERROR)
                   } finally {
                     setPasswordUpdateLoading(false)
                   }
@@ -216,7 +200,7 @@ export default function SettingsPage() {
                 disabled={passwordUpdateLoading}
                 variant="soft-gold"
               >
-                {passwordUpdateLoading ? '處理中...' : '確認修改'}
+                {passwordUpdateLoading ? COMMON_MESSAGES.PROCESSING : LABELS.CONFIRM_CHANGE}
               </Button>
             </DialogFooter>
           </DialogContent>

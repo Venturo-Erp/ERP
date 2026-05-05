@@ -422,7 +422,7 @@ export function DayRow({
                 }
               }}
               className="px-1 py-0.5 text-[10px] hover:bg-morandi-gold/20 rounded text-muted-foreground"
-              title="插入箭頭"
+              title={COMP_TOURS_LABELS.INSERT_ARROW}
             >
               →
             </button>
@@ -442,7 +442,7 @@ export function DayRow({
                 }
               }}
               className="px-1 py-0.5 text-[10px] hover:bg-morandi-gold/20 rounded text-muted-foreground"
-              title="插入飛機"
+              title={COMP_TOURS_LABELS.INSERT_PLANE}
             >
               ✈
             </button>
@@ -453,7 +453,7 @@ export function DayRow({
                 updateDaySchedule(idx, 'note', hasNote ? undefined : '')
               }}
               className={`px-1 py-0.5 text-[10px] font-medium rounded ${day.note !== undefined ? 'bg-morandi-gold/20 text-morandi-gold' : 'hover:bg-morandi-gold/20 text-muted-foreground'}`}
-              title="備註"
+              title={COMP_TOURS_LABELS.NOTE}
             >
               PS
             </button>

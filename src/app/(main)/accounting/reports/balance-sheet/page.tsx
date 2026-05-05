@@ -11,6 +11,8 @@ import { Search } from 'lucide-react'
 import { supabase } from '@/lib/supabase/client'
 import { useAuthStore } from '@/stores/auth-store'
 import { logger } from '@/lib/utils/logger'
+import { BALANCE_SHEET_LABELS, ACCOUNTING_PAGE_LABELS } from '@/constants/labels'
+import { COMMON_MESSAGES } from '@/constants/messages'
 
 interface AccountBalance {
   code: string
@@ -41,7 +43,7 @@ export default function BalanceSheetPage() {
 
   const loadBalanceSheet = async () => {
     if (!asOfDate || !user?.workspace_id) {
-      alert('請選擇日期')
+      alert(COMMON_MESSAGES.PLEASE_SELECT_DATE)
       return
     }
 
@@ -192,14 +194,14 @@ export default function BalanceSheetPage() {
       })
     } catch (error) {
       logger.error('載入資產負債表失敗:', error)
-      alert('載入失敗')
+      alert(COMMON_MESSAGES.LOAD_FAILED)
     } finally {
       setIsLoading(false)
     }
   }
 
   return (
-    <ContentPageLayout title="資產負債表">
+    <ContentPageLayout title={BALANCE_SHEET_LABELS.資產負債表}>
       <div className="p-6 space-y-4">
         {/* 查詢條件 */}
         <Card className="p-4">
@@ -212,7 +214,7 @@ export default function BalanceSheetPage() {
             <div className="flex items-end">
               <Button onClick={loadBalanceSheet} disabled={isLoading} className="w-full gap-2">
                 <Search size={16} />
-                {isLoading ? '查詢中...' : '查詢'}
+                {isLoading ? ACCOUNTING_PAGE_LABELS.SEARCHING : ACCOUNTING_PAGE_LABELS.SEARCH}
               </Button>
             </div>
           </div>
@@ -225,12 +227,12 @@ export default function BalanceSheetPage() {
             <Card className="p-6">
               <div className="space-y-4">
                 <div className="text-center border-b border-border pb-4">
-                  <h2 className="text-xl font-bold">資產</h2>
+                  <h2 className="text-xl font-bold">{BALANCE_SHEET_LABELS.資產.replace(' {amount}', '')}</h2>
                   <p className="text-sm text-muted-foreground mt-1">截至 {asOfDate}</p>
                 </div>
 
                 <div>
-                  <div className="font-semibold mb-2 text-status-info">流動資產</div>
+                  <div className="font-semibold mb-2 text-status-info">{BALANCE_SHEET_LABELS.流動資產}</div>
                   {data.assets.map(item => (
                     <div key={item.code} className="flex justify-between py-1 pl-4">
                       <span className="text-sm">
@@ -240,12 +242,12 @@ export default function BalanceSheetPage() {
                     </div>
                   ))}
                   {data.assets.length === 0 && (
-                    <div className="text-sm text-muted-foreground pl-4">無資產記錄</div>
+                    <div className="text-sm text-muted-foreground pl-4">無{BALANCE_SHEET_LABELS.資產.replace(' {amount}', '')}記錄</div>
                   )}
                 </div>
 
                 <div className="flex justify-between py-3 border-t-2 font-bold text-lg text-status-info">
-                  <span>資產總計</span>
+                  <span>{BALANCE_SHEET_LABELS.資產.replace(' {amount}', '')}總計</span>
                   <span className="font-mono">${data.totalAssets.toLocaleString()}</span>
                 </div>
               </div>
@@ -271,7 +273,7 @@ export default function BalanceSheetPage() {
                     </div>
                   ))}
                   {data.liabilities.length === 0 && (
-                    <div className="text-sm text-muted-foreground pl-4">無負債記錄</div>
+                    <div className="text-sm text-muted-foreground pl-4">無{BALANCE_SHEET_LABELS.負債.replace(' {amount}', '')}記錄</div>
                   )}
                   <div className="flex justify-between py-2 border-t border-border mt-2 font-semibold">
                     <span>負債合計</span>
@@ -302,7 +304,7 @@ export default function BalanceSheetPage() {
                     </div>
                   )}
                   {data.equity.length === 0 && data.netIncome === 0 && (
-                    <div className="text-sm text-muted-foreground pl-4">無權益記錄</div>
+                    <div className="text-sm text-muted-foreground pl-4">無{BALANCE_SHEET_LABELS.權益.replace(' {amount}', '')}記錄</div>
                   )}
                   <div className="flex justify-between py-2 border-t border-border mt-2 font-semibold">
                     <span>權益合計</span>

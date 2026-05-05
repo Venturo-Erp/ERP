@@ -3,34 +3,18 @@ import { ERROR_PAGE_LABELS } from './constants/labels'
 
 export default function NotFound() {
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '1.5rem',
-      }}
-    >
-      <div style={{ maxWidth: '28rem', width: '100%', textAlign: 'center' }}>
-        <h1 style={{ fontSize: '4rem', fontWeight: 'bold', marginBottom: '1rem' }}>404</h1>
-        <h2 style={{ fontSize: '1.5rem', fontWeight: '600', marginBottom: '0.5rem' }}>
+    <div className="min-h-screen flex items-center justify-center p-6">
+      <div className="max-w-md w-full text-center">
+        <h1 className="text-7xl font-bold mb-4">404</h1>
+        <h2 className="text-2xl font-semibold mb-2">
           {ERROR_PAGE_LABELS.NOT_FOUND_9250}
         </h2>
-        <p style={{ color: 'var(--morandi-secondary)', marginBottom: '2rem' }}>
+        <p className="text-morandi-secondary mb-8">
           {ERROR_PAGE_LABELS.LABEL_9421}
         </p>
         <Link
           href="/dashboard"
-          style={{
-            display: 'inline-block',
-            padding: '0.5rem 1.5rem',
-            backgroundColor: '#3b82f6',
-            color: 'white',
-            borderRadius: '0.375rem',
-            textDecoration: 'none',
-            fontWeight: '500',
-          }}
+          className="inline-block px-6 py-2 bg-blue-500 text-white rounded-md font-medium hover:bg-blue-600 transition-colors"
         >
           {ERROR_PAGE_LABELS.GO_HOME}
         </Link>

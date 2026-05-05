@@ -88,14 +88,14 @@ export function VisitTimeline({ visits, onEdit, onDelete }: Props) {
                   <button
                     onClick={() => onEdit(v)}
                     className="p-1 text-morandi-secondary hover:text-morandi-gold hover:bg-morandi-gold/10 rounded transition-colors"
-                    title="編輯"
+                    title={L.edit}
                   >
                     <Edit size={14} />
                   </button>
                   <button
                     onClick={() => onDelete(v)}
                     className="p-1 text-morandi-secondary hover:text-status-danger hover:bg-status-danger-bg rounded transition-colors"
-                    title="刪除"
+                    title={L.delete}
                   >
                     <Trash2 size={14} />
                   </button>

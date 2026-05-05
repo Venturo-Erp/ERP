@@ -107,19 +107,11 @@ export default function LoginPage() {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-background via-card to-morandi-container">
       <div
-        className="w-full max-w-[380px] mx-4"
-        style={{
-          background: 'linear-gradient(0deg, rgb(255, 255, 255) 0%, rgb(250, 247, 243) 100%)',
-          borderRadius: '40px',
-          padding: '32px 40px',
-          border: '5px solid rgb(255, 255, 255)',
-          boxShadow: 'rgba(180, 160, 120, 0.45) 0px 30px 30px -20px',
-        }}
+        className="w-full max-w-[380px] mx-4 bg-gradient-to-t from-white to-[#faf7f3] rounded-[40px] px-10 py-8 border-[5px] border-white shadow-[rgba(180,160,120,0.45)_0px_30px_30px_-20px]"
       >
         {/* 標題 */}
         <h1
-          className="text-center font-black text-[28px] tracking-tight"
-          style={{ color: 'var(--morandi-gold)' }}
+          className="text-center font-black text-[28px] tracking-tight text-[var(--morandi-gold)]"
         >
           {LABELS.TITLE}
         </h1>

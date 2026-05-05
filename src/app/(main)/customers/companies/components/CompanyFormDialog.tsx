@@ -176,7 +176,7 @@ export function CompanyFormDialog({
                 id="tax_id"
                 value={formData.tax_id || ''}
                 onChange={e => setFormData({ ...formData, tax_id: e.target.value || null })}
-                placeholder="12345678"
+                placeholder={COMPANY_LABELS.PLACEHOLDER_TAX_ID}
                 maxLength={8}
               />
             </div>
@@ -207,7 +207,7 @@ export function CompanyFormDialog({
                 id="phone"
                 value={formData.phone || ''}
                 onChange={e => setFormData({ ...formData, phone: e.target.value || null })}
-                placeholder="02-1234-5678"
+                placeholder={COMPANY_LABELS.PLACEHOLDER_PHONE}
               />
             </div>
 
@@ -218,7 +218,7 @@ export function CompanyFormDialog({
                 type="email"
                 value={formData.email || ''}
                 onChange={e => setFormData({ ...formData, email: e.target.value || null })}
-                placeholder="contact@company.com"
+                placeholder={COMPANY_LABELS.PLACEHOLDER_EMAIL}
               />
             </div>
 
@@ -228,7 +228,7 @@ export function CompanyFormDialog({
                 id="website"
                 value={formData.website || ''}
                 onChange={e => setFormData({ ...formData, website: e.target.value || null })}
-                placeholder="https://www.company.com"
+                placeholder={COMPANY_LABELS.PLACEHOLDER_WEBSITE}
               />
             </div>
           </div>
@@ -295,7 +295,7 @@ export function CompanyFormDialog({
                 onChange={e =>
                   setFormData({ ...formData, credit_limit: parseFloat(e.target.value) || 0 })
                 }
-                placeholder="0"
+                placeholder={COMPANY_LABELS.PLACEHOLDER_CREDIT_LIMIT}
                 min="0"
               />
             </div>
@@ -338,7 +338,7 @@ export function CompanyFormDialog({
                 type="email"
                 value={formData.invoice_email || ''}
                 onChange={e => setFormData({ ...formData, invoice_email: e.target.value || null })}
-                placeholder="invoice@company.com"
+                placeholder={COMPANY_LABELS.PLACEHOLDER_INVOICE_EMAIL}
               />
             </div>
           </div>

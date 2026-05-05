@@ -65,6 +65,9 @@ export const FinanceLabels = {
   createReceiptFailedTitle: '建立收款單失敗',
 }
 export const FINANCE_PAGE_LABELS = {
+  FINANCE_REPORTS: '財務報表',
+  TREASURY_OVERVIEW: '金庫總覽',
+  FINANCE_SETTINGS: '財務設定',
   LOADING_DATA: '正在載入財務資料...',
   TOTAL_INCOME: '總收入',
   TOTAL_EXPENSE: '總支出',
@@ -84,6 +87,21 @@ export const FINANCE_PAGE_LABELS = {
   TYPE_INCOME: '收入',
   TYPE_EXPENSE: '支出',
   TYPE_TRANSFER: '轉帳',
+
+  // Validation / Messages
+  COPY_SUCCESS_EDIT_NAME: '複製成功，請編輯名稱',
+  SYSTEM_DEFAULT_CANNOT_DELETE: '系統預設類別無法刪除',
+  PLEASE_FILL_NAME: '請填寫名稱',
+  PLEASE_FILL_CODE_AND_NAME: '請填寫代碼和名稱',
+  PLEASE_FILL_CATEGORY_NAME: '請填寫類別名稱',
+
+  // Stats
+  UNCLOSED_TOURS_COUNT: '未結團數',
+  TOTAL_INCOME_LABEL: '總收入',
+  TOTAL_COST_LABEL: '總成本',
+  NET_PROFIT_LABEL: '淨利潤',
+  DISBURSEMENT_COUNT: '出納單數',
+  TOTAL_DISBURSEMENT_AMOUNT: '出帳總金額',
 
   // Module cards
   MODULE_FINANCE_TITLE: '財務管理',

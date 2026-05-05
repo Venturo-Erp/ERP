@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/card'
 import { EnhancedTable, TableColumn } from '@/components/ui/enhanced-table'
 import { CurrencyCell, DateCell } from '@/components/table-cells'
 import { AlertCircle, Calendar, TrendingUp, TrendingDown, Loader2 } from 'lucide-react'
+import { FINANCE_PAGE_LABELS } from '@/app/(main)/finance/constants/labels'
 import {
   useUnclosedTours,
   UnclosedTourData,
@@ -144,13 +145,13 @@ export function UnclosedToursTab() {
       <ContentContainer>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard
-            title="未結團數"
+            title={FINANCE_PAGE_LABELS.UNCLOSED_TOURS_COUNT}
             value={stats.count}
             icon={Calendar}
             iconColor="text-morandi-red"
           />
           <StatCard
-            title="總收入"
+            title={FINANCE_PAGE_LABELS.TOTAL_INCOME_LABEL}
             value={stats.totalRevenue}
             icon={TrendingUp}
             iconColor="text-morandi-green"
@@ -158,7 +159,7 @@ export function UnclosedToursTab() {
             variant="income"
           />
           <StatCard
-            title="總成本"
+            title={FINANCE_PAGE_LABELS.TOTAL_COST_LABEL}
             value={stats.totalCost}
             icon={TrendingDown}
             iconColor="text-morandi-red"
@@ -166,7 +167,7 @@ export function UnclosedToursTab() {
             variant="expense"
           />
           <StatCard
-            title="淨利潤"
+            title={FINANCE_PAGE_LABELS.NET_PROFIT_LABEL}
             value={stats.netProfit}
             icon={TrendingUp}
             iconColor={stats.netProfit >= 0 ? 'text-morandi-green' : 'text-morandi-red'}

@@ -14,6 +14,7 @@ import { useCapabilities, CAPABILITIES } from '@/lib/permissions'
 import { UnauthorizedPage } from '@/components/unauthorized-page'
 import { ModuleLoading } from '@/components/module-loading'
 import { ContentPageLayout } from '@/components/layout/content-page-layout'
+import { FINANCE_PAGE_LABELS } from '../constants/labels'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -137,7 +138,7 @@ export default function TreasuryPage() {
   if (!can(CAPABILITIES.FINANCE_READ_TREASURY)) return <UnauthorizedPage />
 
   return (
-    <ContentPageLayout title="金庫總覽" icon={Landmark} className="space-y-6">
+    <ContentPageLayout title={FINANCE_PAGE_LABELS.TREASURY_OVERVIEW} icon={Landmark} className="space-y-6">
       {/* 快速連結 */}
       <div className="flex gap-2 flex-wrap">
         <Button

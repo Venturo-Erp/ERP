@@ -86,6 +86,9 @@ export const COMMON_LABELS = {
   unknownEmployee: '未知員工',
   unknownUser: '未知使用者',
   notSet: '未設定',
+  deleteSubtask: '刪除子任務',
+  remove: '移除',
+  removeShare: '移除共享',
 }
 
 // 按鈕文字

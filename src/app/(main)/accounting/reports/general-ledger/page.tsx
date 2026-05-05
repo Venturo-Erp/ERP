@@ -18,6 +18,8 @@ import { Search } from 'lucide-react'
 import { supabase } from '@/lib/supabase/client'
 import { useAuthStore } from '@/stores/auth-store'
 import { logger } from '@/lib/utils/logger'
+import { ACCOUNTING_PAGE_LABELS } from '@/constants/labels'
+import { COMMON_MESSAGES } from '@/constants/messages'
 
 interface Account {
   id: string
@@ -86,7 +88,7 @@ export default function GeneralLedgerPage() {
 
   const loadLedger = async () => {
     if (!selectedAccountId || !startDate || !endDate) {
-      alert('請選擇科目和日期範圍')
+      alert(ACCOUNTING_PAGE_LABELS.PLEASE_SELECT_ACCOUNT_AND_DATE)
       return
     }
 
@@ -138,16 +140,16 @@ export default function GeneralLedgerPage() {
   const selectedAccount = accounts.find(a => a.id === selectedAccountId)
 
   return (
-    <ContentPageLayout title="總帳">
+    <ContentPageLayout title={ACCOUNTING_PAGE_LABELS.GENERAL_LEDGER}>
       <div className="p-6 space-y-4">
         {/* 查詢條件 */}
         <Card className="p-4">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="space-y-2">
-              <Label>科目</Label>
+              <Label>{ACCOUNTING_PAGE_LABELS.SUBJECT}</Label>
               <Select value={selectedAccountId} onValueChange={setSelectedAccountId}>
                 <SelectTrigger>
-                  <SelectValue placeholder="選擇科目" />
+                  <SelectValue placeholder={ACCOUNTING_PAGE_LABELS.SELECT_ACCOUNT} />
                 </SelectTrigger>
                 <SelectContent>
                   {accounts.map(account => (
@@ -160,19 +162,19 @@ export default function GeneralLedgerPage() {
             </div>
 
             <div className="space-y-2">
-              <Label>開始日期</Label>
+              <Label>{ACCOUNTING_PAGE_LABELS.START_DATE}</Label>
               <DatePicker value={startDate} onChange={setStartDate} />
             </div>
 
             <div className="space-y-2">
-              <Label>結束日期</Label>
+              <Label>{ACCOUNTING_PAGE_LABELS.END_DATE}</Label>
               <DatePicker value={endDate} onChange={setEndDate} />
             </div>
 
             <div className="flex items-end">
               <Button onClick={loadLedger} disabled={isLoading} className="w-full gap-2">
                 <Search size={16} />
-                {isLoading ? '查詢中...' : '查詢'}
+                {isLoading ? ACCOUNTING_PAGE_LABELS.SEARCHING : ACCOUNTING_PAGE_LABELS.SEARCH}
               </Button>
             </div>
           </div>

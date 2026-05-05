@@ -57,6 +57,9 @@ export const LABELS = {
   DELETE_CONFIRM_LABEL: '確認刪除',
   DELETE_FAILED: '刪除員工失敗，請稍後再試',
 
+  // Role management
+  ROLE_MANAGEMENT: '職務管理',
+
   // Breadcrumb
   BREADCRUMB_HOME: '首頁',
   BREADCRUMB_HR: '人資管理',

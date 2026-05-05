@@ -595,6 +595,18 @@ export const COMP_TOURS_LABELS = {
   TABLE_NUMBER: (n: number) => `${n} 桌`,
   CAPACITY_SHORT: (n: number) => `${n}人`,
   VEHICLE_COUNT_SHORT: (n: number) => `共 ${n} 輛車`,
+
+  // Contract actions
+  MARK_PAPER_SIGN: '標記為紙本簽署',
+  COPY_CONTRACT_LINK: '複製簽約連結',
+  OPEN_CONTRACT_PAGE: '開啟簽約頁面',
+  REGENERATE_CONTRACT: '重新產生合約',
+  CANCEL_CONTRACT: '取消合約',
+
+  // Itinerary actions
+  INSERT_ARROW: '插入箭頭',
+  INSERT_PLANE: '插入飛機',
+  NOTE: '備註',
 }
 
 // CheckinSettings 模組的 UI 標籤

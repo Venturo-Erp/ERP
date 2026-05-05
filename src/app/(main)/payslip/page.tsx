@@ -5,6 +5,7 @@ import useSWR from 'swr'
 import { ResponsiveHeader } from '@/components/layout/responsive-header'
 import { Wallet, Loader2, ChevronDown, ChevronRight, AlertTriangle } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { PAYSLIP_LABELS } from './constants/labels'
 
 interface MyPayslip {
   id: string
@@ -45,9 +46,9 @@ export default function MyPayslipPage() {
   return (
     <div className="space-y-4">
       <ResponsiveHeader
-        title="我的薪資"
+        title={PAYSLIP_LABELS.MY_PAYSLIP}
         icon={Wallet}
-        breadcrumb={[{ label: '我的薪資', href: '/payslip' }]}
+        breadcrumb={[{ label: PAYSLIP_LABELS.MY_PAYSLIP, href: '/payslip' }]}
       />
 
       {isLoading ? (
@@ -56,7 +57,7 @@ export default function MyPayslipPage() {
         </div>
       ) : !data || data.length === 0 ? (
         <div className="rounded-xl border border-border/60 bg-card/50 p-12 text-center text-sm text-morandi-muted">
-          目前還沒有薪資單。會計確定當月薪資批次後、你會在這裡看到。
+          {PAYSLIP_LABELS.NO_PAYSLIP_YET}
         </div>
       ) : (
         <div className="space-y-2">
@@ -76,12 +77,12 @@ export default function MyPayslipPage() {
                         {p.period_year}-{String(p.period_month).padStart(2, '0')}
                       </div>
                       <div className="text-[11px] text-morandi-muted">
-                        {isFinalized ? '✓ 已確定' : '⚠ 草稿（會計尚未確定）'}
+                        {isFinalized ? PAYSLIP_LABELS.FINALIZED : PAYSLIP_LABELS.DRAFT}
                       </div>
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="text-xs text-morandi-secondary">實領</div>
+                    <div className="text-xs text-morandi-secondary">{PAYSLIP_LABELS.NET_AMOUNT}</div>
                     <div className="text-xl font-bold text-morandi-green tabular-nums">
                       NT$ {p.net_amount.toLocaleString()}
                     </div>

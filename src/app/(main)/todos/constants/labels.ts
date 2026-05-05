@@ -36,12 +36,24 @@ export const LABELS = {
   DELETE_IRREVERSIBLE: '此操作無法復原',
   CONFIRM_DELETE: '確認刪除',
   DELETE_FAILED: '刪除失敗，請稍後再試',
+
+  // Card / Column actions
+  ADD_CARD: '新增卡片',
+  RENAME: '重命名',
+  DELETE_COLUMN: '刪除欄位',
+  DELETE_SUBTASK: '刪除子任務',
+  REMOVE: '移除',
+  REMOVE_SHARE: '移除共享',
   ADD_FAILED: '新增失敗，請稍後再試',
+  PLEASE_LOGIN_FIRST: '請先登入',
   MARK_COMPLETE: '標記完成',
   UNMARK_COMPLETE: '取消完成',
   NOT_SET: '未設定',
   LOADING_EMPLOYEES: '載入員工資料中...',
   ENTER_TITLE: '請填寫任務標題',
+  PRIORITY: '優先度',
+  ASSIGNEE: '負責人',
+  COLUMN_NAME: '欄位名稱',
 
   // 表格欄位
   COL_TITLE: '任務標題',

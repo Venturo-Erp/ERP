@@ -70,6 +70,7 @@ import {
   TODO_DIALOG_LABELS,
   COMMON_LABELS,
   PRESET_BUSINESS_SUBTASKS,
+  BUTTON_LABELS,
 } from '@/features/todos/constants/labels'
 
 const STATUS_OPTIONS = [
@@ -547,7 +548,7 @@ export function TodoExpandedView({ todo, onUpdate, onClose, onDelete }: TodoExpa
                               <button
                                 onClick={() => handleDeleteSubtask(sub.id)}
                                 className="text-morandi-muted hover:text-morandi-red p-1 rounded transition-colors"
-                                title="刪除子任務"
+                                title={COMMON_LABELS.deleteSubtask}
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
                               </button>
@@ -624,7 +625,7 @@ export function TodoExpandedView({ todo, onUpdate, onClose, onDelete }: TodoExpa
                       <button
                         onClick={handleAddSubtask}
                         className="absolute right-1.5 top-1/2 -translate-y-1/2 p-1 rounded text-morandi-gold hover:bg-morandi-gold/10 transition-colors"
-                        title="新增"
+                        title={BUTTON_LABELS.add}
                       >
                         <Plus className="w-4 h-4" />
                       </button>
@@ -718,7 +719,7 @@ export function TodoExpandedView({ todo, onUpdate, onClose, onDelete }: TodoExpa
                         <button
                           onClick={() => removeTag(tag)}
                           className="hover:bg-morandi-red/20 rounded"
-                          title="移除"
+                          title={COMMON_LABELS.remove}
                         >
                           <X size={10} />
                         </button>
@@ -836,7 +837,7 @@ export function TodoExpandedView({ todo, onUpdate, onClose, onDelete }: TodoExpa
                                 })
                               }}
                               className="hover:bg-morandi-red/20 rounded"
-                              title="移除共享"
+                              title={COMMON_LABELS.removeShare}
                             >
                               <X size={10} />
                             </button>

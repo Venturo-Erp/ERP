@@ -74,6 +74,7 @@ export const COMP_LAYOUT_LABELS = {
   公司資訊: '公司資訊',
   租戶管理: '租戶管理',
   首頁: '首頁',
+  LOGOUT: '登出',
 
   LABEL_9472: '更多',
   LABEL_2572: '自訂底部導航欄',

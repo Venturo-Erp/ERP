@@ -26,6 +26,8 @@ export const CIS_PAGE_LABELS = {
 
   title_view: '查看客戶',
   title_edit: '編輯客戶',
+  title_brand_card: '品牌資料卡（多次拜訪累積）',
+  customer_load_failed: '客戶資料載入失敗',
   title_delete: '刪除客戶',
   confirm_delete: (name: string) =>
     `確定要刪除客戶「${name}」嗎？\n（含所有拜訪紀錄、無法復原）`,
@@ -105,6 +107,8 @@ export const CIS_VISIT_LABELS = {
 
   confirm_delete: '確定要刪除這筆拜訪紀錄嗎？',
   confirm_delete_title: '刪除拜訪紀錄',
+  edit: '編輯',
+  delete: '刪除',
 }
 
 export const CIS_AUDIO_LABELS = {
@@ -155,9 +159,17 @@ export const CIS_PRICING_LABELS = {
   label_is_active: '是否啟用',
   label_notes: '內部備註',
   placeholder_keywords: '譬如：logo, 識別, 標誌, 品牌',
+  placeholder_code: 'IDN-001',
+  placeholder_unit: '式 / 套 / 批',
+  placeholder_name: '例：Logo 優化',
+  placeholder_description: '這個項目的內容說明',
+  placeholder_price_low: '15000',
+  placeholder_price_high: '35000',
 
   toast_create_success: '已新增項目',
   toast_update_success: '已更新項目',
+  edit: '編輯',
+  delete: '刪除',
   confirm_delete: (name: string) => `確定要刪除「${name}」嗎？`,
 }
 

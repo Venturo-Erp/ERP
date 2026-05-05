@@ -25,6 +25,7 @@ import {
   QUICK_ACTION_LABELS,
   LOADING_LABELS,
   SHARE_LABELS,
+  COMMON_LABELS,
 } from '@/features/todos/constants/labels'
 
 const QuickReceipt = lazy(() =>
@@ -102,7 +103,7 @@ export function QuickActionInstanceCard({
         <button
           onClick={onRemove}
           className="p-1 rounded hover:bg-morandi-red/10 text-morandi-secondary hover:text-morandi-red"
-          title="移除"
+          title={COMMON_LABELS.remove}
         >
           <X size={14} />
         </button>

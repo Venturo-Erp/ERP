@@ -239,7 +239,7 @@ export function CustomerDialog({
                 <button
                   onClick={() => setIsEditorOpen(true)}
                   className="absolute bottom-3 right-3 p-2 bg-card/90 hover:bg-card rounded-full shadow-md transition-all opacity-80 hover:opacity-100"
-                  title="編輯照片"
+                  title={L.title_edit_photo}
                 >
                   <Pencil size={16} className="text-morandi-primary" />
                 </button>

@@ -6,6 +6,7 @@ import { useCapabilities, CAPABILITIES } from '@/lib/permissions'
 import { UnauthorizedPage } from '@/components/unauthorized-page'
 import { ModuleLoading } from '@/components/module-loading'
 import { ContentPageLayout } from '@/components/layout/content-page-layout'
+import { FINANCE_PAGE_LABELS } from '../constants/labels'
 import { Tabs, TabsContent } from '@/components/ui/tabs'
 import {
   BarChart3,
@@ -99,7 +100,7 @@ export default function ReportsPage() {
 
   return (
     <ContentPageLayout
-      title="財務報表"
+      title={FINANCE_PAGE_LABELS.FINANCE_REPORTS}
       icon={BarChart3}
       tabs={tabs}
       activeTab={activeTab}

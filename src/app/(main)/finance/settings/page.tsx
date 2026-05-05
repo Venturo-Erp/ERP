@@ -5,6 +5,8 @@ import { UnauthorizedPage } from '@/components/unauthorized-page'
 import { ModuleLoading } from '@/components/module-loading'
 import { useCapabilities, CAPABILITIES } from '@/lib/permissions'
 import { ContentPageLayout } from '@/components/layout/content-page-layout'
+import { FINANCE_PAGE_LABELS } from '../constants/labels'
+import { COMMON_MESSAGES } from '@/constants/messages'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -340,7 +342,7 @@ export default function FinanceSettingsPage() {
       )
     } catch (error) {
       logger.error('排序更新失敗:', error)
-      await alert('排序更新失敗', 'error')
+      await alert(COMMON_MESSAGES.UPDATE_FAILED, 'error')
       await loadData() // 失敗 → reload 還原
     }
   }
@@ -362,9 +364,9 @@ export default function FinanceSettingsPage() {
       await loadData()
       setIsMethodDialogOpen(false)
       setEditingMethod(null)
-      await alert('儲存成功', 'success')
+      await alert(COMMON_MESSAGES.SAVE_SUCCESS, 'success')
     } catch (error) {
-      await alert('儲存失敗', 'error')
+      await alert(COMMON_MESSAGES.SAVE_FAILED, 'error')
     }
   }
 
@@ -395,9 +397,9 @@ export default function FinanceSettingsPage() {
       })
       if (!res.ok) throw new Error('複製失敗')
       await loadData()
-      await alert('複製成功，請編輯名稱', 'success')
+      await alert(FINANCE_PAGE_LABELS.COPY_SUCCESS_EDIT_NAME, 'success')
     } catch (error) {
-      await alert('複製失敗', 'error')
+      await alert(COMMON_MESSAGES.OPERATION_FAILED, 'error')
     }
   }
 
@@ -439,13 +441,13 @@ export default function FinanceSettingsPage() {
       })
       if (!res.ok) {
         const body = await res.json().catch(() => ({}))
-        await alert(body.error || '刪除失敗', 'error')
+        await alert(body.error || COMMON_MESSAGES.DELETE_FAILED, 'error')
         return
       }
       await loadData()
-      await alert('刪除成功', 'success')
+      await alert(COMMON_MESSAGES.DELETE_SUCCESS, 'success')
     } catch (error) {
-      await alert('刪除失敗', 'error')
+      await alert(COMMON_MESSAGES.DELETE_FAILED, 'error')
     }
   }
 
@@ -465,9 +467,9 @@ export default function FinanceSettingsPage() {
       await loadData()
       setIsBankDialogOpen(false)
       setEditingBank(null)
-      await alert('儲存成功', 'success')
+      await alert(COMMON_MESSAGES.SAVE_SUCCESS, 'success')
     } catch (error) {
-      await alert('儲存失敗', 'error')
+      await alert(COMMON_MESSAGES.SAVE_FAILED, 'error')
     }
   }
 
@@ -525,7 +527,7 @@ export default function FinanceSettingsPage() {
   // 刪除請款類別
   const handleDeleteCategory = async (category: ExpenseCategory) => {
     if (category.is_system) {
-      await alert('系統預設類別無法刪除', 'warning')
+      await alert(FINANCE_PAGE_LABELS.SYSTEM_DEFAULT_CANNOT_DELETE, 'warning')
       return
     }
 
@@ -624,7 +626,7 @@ export default function FinanceSettingsPage() {
 
   return (
     <ContentPageLayout
-      title="財務設定"
+      title={FINANCE_PAGE_LABELS.FINANCE_SETTINGS}
       icon={Settings}
       tabs={tabs}
       activeTab={activeSection}
@@ -1158,7 +1160,7 @@ function MethodDialog({
 
   const handleSubmit = async () => {
     if (!name) {
-      await alert('請填寫名稱', 'warning')
+      await alert(FINANCE_PAGE_LABELS.PLEASE_FILL_NAME, 'warning')
       return
     }
     setIsSubmitting(true)
@@ -1347,7 +1349,7 @@ function BankDialog({
 
   const handleSubmit = async () => {
     if (!code || !name) {
-      await alert('請填寫代碼和名稱', 'warning')
+      await alert(FINANCE_PAGE_LABELS.PLEASE_FILL_CODE_AND_NAME, 'warning')
       return
     }
     setIsSubmitting(true)
@@ -1478,7 +1480,7 @@ function CategoryDialog({
 
   const handleSubmit = async () => {
     if (!name) {
-      await alert('請填寫類別名稱', 'warning')
+      await alert(FINANCE_PAGE_LABELS.PLEASE_FILL_CATEGORY_NAME, 'warning')
       return
     }
     setIsSubmitting(true)

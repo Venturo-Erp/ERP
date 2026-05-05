@@ -35,6 +35,7 @@ import { DatePicker } from '@/components/ui/date-picker'
 import { TimeInput } from '@/components/ui/time-input'
 import { Label } from '@/components/ui/label'
 import { formatDate } from '@/lib/utils/format-date'
+import { COMP_TOURS_LABELS } from '@/features/tours/constants/labels'
 import {
   Select,
   SelectContent,
@@ -211,13 +212,35 @@ export function TourContractTab({ tour }: TourContractTabProps) {
       setSignerPhone(firstMember.phone || '')
       setSignerIdNumber(firstMember.id_number || '')
     }
+    // 多人時預設第一個選中的團員當代表人、避免使用者沒選 representativeId
+    if (selectedMemberIds.length > 1 && firstMember) {
+      setRepresentativeId(firstMember.id)
+    }
     setCreateDialogOpen(true)
   }
 
   // 產生合約
   const handleCreateContract = async () => {
-    if (!signerName.trim()) {
-      toast({ title: '請輸入簽約人姓名', variant: 'destructive' })
+    // 計算「實際送 API 的簽約人姓名」、驗證關卡跟它對齊（避免 multi-member 情境驗證錯欄位）
+    const isMulti = selectedMemberIds.length > 1
+    const representative = isMulti
+      ? allMembers.find(m => m.id === representativeId)
+      : undefined
+    const finalSignerName = (
+      isMulti && signerType === 'individual'
+        ? representative?.name || ''
+        : signerName.trim()
+    ).trim()
+
+    if (!finalSignerName) {
+      toast({
+        title: isMulti && signerType === 'individual'
+          ? '請選擇代表人（或先讓代表團員填好姓名）'
+          : signerType === 'company'
+            ? '請輸入公司名稱'
+            : '請輸入簽約人姓名',
+        variant: 'destructive',
+      })
       return
     }
 
@@ -232,10 +255,7 @@ export function TourContractTab({ tour }: TourContractTabProps) {
           workspaceId: tour.workspace_id,
           memberIds: selectedMemberIds,
           signerType,
-          signerName:
-            selectedMemberIds.length > 1 && signerType === 'individual'
-              ? allMembers.find(m => m.id === representativeId)?.name || ''
-              : signerName.trim(),
+          signerName: finalSignerName,
           signerPhone: signerPhone.trim(),
           signerAddress: signerAddress.trim() || undefined,
           signerIdNumber: signerIdNumber.trim() || undefined,
@@ -482,7 +502,7 @@ export function TourContractTab({ tour }: TourContractTabProps) {
                         variant="ghost"
                         size="sm"
                         onClick={() => openPaperSignDialog(contract)}
-                        title="標記為紙本簽署"
+                        title={COMP_TOURS_LABELS.MARK_PAPER_SIGN}
                       >
                         <FileText className="w-4 h-4" />
                       </Button>
@@ -491,7 +511,7 @@ export function TourContractTab({ tour }: TourContractTabProps) {
                       variant="ghost"
                       size="sm"
                       onClick={() => copyLink(contract)}
-                      title="複製簽約連結"
+                      title={COMP_TOURS_LABELS.COPY_CONTRACT_LINK}
                     >
                       <Copy className="w-4 h-4" />
                     </Button>
@@ -501,7 +521,7 @@ export function TourContractTab({ tour }: TourContractTabProps) {
                       onClick={() =>
                         window.open(`/public/contract/sign/${contract.code}`, '_blank')
                       }
-                      title="開啟簽約頁面"
+                      title={COMP_TOURS_LABELS.OPEN_CONTRACT_PAGE}
                     >
                       <ExternalLink className="w-4 h-4" />
                     </Button>
@@ -509,7 +529,7 @@ export function TourContractTab({ tour }: TourContractTabProps) {
                       variant="ghost"
                       size="sm"
                       onClick={() => handleRecreateContract(contract)}
-                      title="重新產生合約"
+                      title={COMP_TOURS_LABELS.REGENERATE_CONTRACT}
                     >
                       <RefreshCw className="w-4 h-4" />
                     </Button>
@@ -518,7 +538,7 @@ export function TourContractTab({ tour }: TourContractTabProps) {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleCancelContract(contract)}
-                        title="取消合約"
+                        title={COMP_TOURS_LABELS.CANCEL_CONTRACT}
                         className="text-morandi-red hover:text-morandi-red hover:bg-morandi-red/10"
                       >
                         <X className="w-4 h-4" />

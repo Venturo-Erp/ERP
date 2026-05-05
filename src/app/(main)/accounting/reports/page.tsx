@@ -4,6 +4,7 @@ import { Card } from '@/components/ui/card'
 import { BookOpen, BarChart3, TrendingUp, DollarSign } from 'lucide-react'
 import Link from 'next/link'
 import { ContentPageLayout } from '@/components/layout/content-page-layout'
+import { ACCOUNTING_PAGE_LABELS } from '@/constants/labels'
 
 const reports = [
   {
@@ -42,7 +43,7 @@ const reports = [
 
 export default function ReportsPage() {
   return (
-    <ContentPageLayout title="會計報表">
+    <ContentPageLayout title={ACCOUNTING_PAGE_LABELS.ACCOUNTING_REPORTS}>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-6">
         {reports.map(report => (
           <Link key={report.href} href={report.href}>

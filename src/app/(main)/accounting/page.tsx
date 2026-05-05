@@ -8,12 +8,13 @@ import { ContentPageLayout } from '@/components/layout/content-page-layout'
 import { supabase } from '@/lib/supabase/client'
 import { useAuthStore } from '@/stores/auth-store'
 import { logger } from '@/lib/utils/logger'
+import { ACCOUNTING_PAGE_LABELS } from '@/constants/labels'
 
 const quickLinks = [
   {
     href: '/accounting/vouchers',
     icon: FileText,
-    title: '傳票管理',
+    title: ACCOUNTING_PAGE_LABELS.VOUCHER_MANAGEMENT,
     description: '查看和管理會計傳票',
     color: 'text-status-info',
     bg: 'bg-status-info/10',
@@ -21,7 +22,7 @@ const quickLinks = [
   {
     href: '/accounting/accounts',
     icon: BookOpen,
-    title: '科目管理',
+    title: ACCOUNTING_PAGE_LABELS.ACCOUNT_MANAGEMENT,
     description: '管理會計科目表',
     color: 'text-morandi-green',
     bg: 'bg-morandi-green/10',
@@ -29,7 +30,7 @@ const quickLinks = [
   {
     href: '/accounting/reports',
     icon: BarChart3,
-    title: '會計報表',
+    title: ACCOUNTING_PAGE_LABELS.ACCOUNTING_REPORTS,
     description: '總帳、試算表、損益表',
     color: 'text-morandi-secondary',
     bg: 'bg-morandi-container',
@@ -37,7 +38,7 @@ const quickLinks = [
   {
     href: '/accounting/checks',
     icon: TrendingUp,
-    title: '票據管理',
+    title: ACCOUNTING_PAGE_LABELS.CHECK_MANAGEMENT,
     description: '管理支票和票據',
     color: 'text-status-warning',
     bg: 'bg-status-warning/10',
@@ -45,7 +46,7 @@ const quickLinks = [
   {
     href: '/accounting/period-closing',
     icon: Calendar,
-    title: '期末結轉',
+    title: ACCOUNTING_PAGE_LABELS.PERIOD_CLOSING_TITLE,
     description: '月結、季結、年結（含保留盈餘）',
     color: 'text-morandi-red',
     bg: 'bg-morandi-red/10',
@@ -53,7 +54,7 @@ const quickLinks = [
   {
     href: '/accounting/opening-balances',
     icon: FileEdit,
-    title: '期初餘額',
+    title: ACCOUNTING_PAGE_LABELS.OPENING_BALANCES,
     description: '啟用會計時設定資產 / 負債 / 權益期初',
     color: 'text-morandi-gold',
     bg: 'bg-morandi-gold/10',
@@ -118,7 +119,7 @@ export default function AccountingPage() {
   }, [user?.workspace_id])
 
   return (
-    <ContentPageLayout title="會計系統">
+    <ContentPageLayout title={ACCOUNTING_PAGE_LABELS.ACCOUNTING_SYSTEM}>
       {gap && gap.totalMissing > 0 && (
         <Card className="p-4 mb-4 bg-status-warning-bg border-status-warning/40">
           <div className="flex items-start gap-3">

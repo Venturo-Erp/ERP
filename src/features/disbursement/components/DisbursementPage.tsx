@@ -339,7 +339,7 @@ export function DisbursementPage() {
 
   return (
     <ContentPageLayout
-      title="出納單管理"
+      title={DISBURSEMENT_LABELS.出納單管理}
       icon={Wallet}
       showSearch
       searchTerm={search}

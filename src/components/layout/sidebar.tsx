@@ -569,7 +569,7 @@ export function Sidebar() {
                 <button
                   type="button"
                   onClick={handleLogout}
-                  title="登出"
+                  title={COMP_LAYOUT_LABELS?.LOGOUT || '登出'}
                   className="px-3 py-2 text-morandi-secondary hover:text-morandi-red transition-colors"
                 >
                   <LogOut size={16} />

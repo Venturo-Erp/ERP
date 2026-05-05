@@ -168,7 +168,7 @@ export default function CisClientDetailPage({ params }: PageProps) {
         <ClientHeaderCard client={client} />
 
         {/* 品牌資料卡聚合 */}
-        <Card title="品牌資料卡（多次拜訪累積）">
+        <Card title={L.title_brand_card}>
           <BrandCardSummary visits={visits} />
         </Card>
 

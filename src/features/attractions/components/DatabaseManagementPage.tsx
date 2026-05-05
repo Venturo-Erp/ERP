@@ -143,7 +143,7 @@ export default function DatabaseManagementPage() {
 
   return (
     <ContentPageLayout
-      title="旅遊資料庫"
+      title={DATABASE_MANAGEMENT_PAGE_LABELS.旅遊資料庫}
       icon={MapPin}
       breadcrumb={[
         { label: DATABASE_MANAGEMENT_PAGE_LABELS.資料庫管理, href: '/database' },

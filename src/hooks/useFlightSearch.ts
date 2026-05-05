@@ -4,6 +4,7 @@ import { getTodayString, formatDate } from '@/lib/utils/format-date'
 import { useState, useCallback } from 'react'
 import { searchFlightAction, type FlightData } from '@/lib/actions/flight-actions'
 import { alertError, alert } from '@/lib/ui/alert-dialog'
+import { COMMON_MESSAGES } from '@/constants/messages'
 import { FlightInfo, FlightSegmentInfo } from '@/types/flight.types'
 
 interface UseFlightSearchProps {
@@ -86,7 +87,7 @@ export function useFlightSearch({
         }
       }
     } catch {
-      await alertError('查詢航班時發生錯誤')
+      await alertError(COMMON_MESSAGES.OPERATION_FAILED)
     } finally {
       setLoadingOutboundFlight(false)
     }

@@ -14,6 +14,7 @@ import { EditAccountDialog } from './components/EditAccountDialog'
 import { ACCOUNTS_TABS } from './components/accounts-tabs'
 import { toast } from 'sonner'
 import { logger } from '@/lib/utils/logger'
+import { ACCOUNTING_PAGE_LABELS } from '@/constants/labels'
 
 interface Account {
   id: string
@@ -284,7 +285,7 @@ export default function AccountsPage() {
             variant="ghost"
             onClick={() => handleAddChild(row)}
             className="gap-1 px-2"
-            title="新增子科目"
+            title={ACCOUNTING_PAGE_LABELS.ADD_CHILD_ACCOUNT}
           >
             <Plus size={14} />
           </Button>
@@ -304,7 +305,7 @@ export default function AccountsPage() {
   return (
     <>
       <ListPageLayout
-        title={`會計科目管理（共 ${accounts.length} 個科目）`}
+        title={`${ACCOUNTING_PAGE_LABELS.ACCOUNT_CHART_MANAGEMENT}（共 ${accounts.length} 個科目）`}
         statusTabs={ACCOUNTS_TABS}
         activeStatusTab="/accounting/accounts"
         onStatusTabChange={href => router.push(href)}

@@ -123,6 +123,10 @@ export const LABELS = {
   UPDATE_SUCCESS: '更新成功',
   PASSWORD_UPDATE_ERROR: '密碼更新失敗，請稍後再試',
 
+  // Personal Settings Page (previously hard-coded)
+  SHOW_PASSWORD: '顯示密碼',
+  CONFIRM_CHANGE: '確認修改',
+
   // Menu Settings
   MENU_SETTINGS: '選單設定',
   MENU_SETTINGS_DESC: '自訂側邊欄顯示的功能選單。隱藏不常用的功能，讓工作區更整潔。',

@@ -651,7 +651,7 @@ export const SellingPriceSection: React.FC<SellingPriceSectionProps> = ({
                       <button
                         onClick={() => toggleItem(item)}
                         className="ml-auto text-xs text-morandi-secondary hover:text-morandi-red"
-                        title="移到費用不含"
+                        title={COST_ITEM_ROW_LABELS.MOVE_TO_EXCLUDED}
                       >
                         移除
                       </button>
@@ -673,7 +673,7 @@ export const SellingPriceSection: React.FC<SellingPriceSectionProps> = ({
                       <button
                         onClick={() => toggleItem(item)}
                         className="ml-auto text-xs text-morandi-secondary hover:text-morandi-green"
-                        title="移到費用包含"
+                        title={COST_ITEM_ROW_LABELS.MOVE_TO_INCLUDED}
                       >
                         包含
                       </button>

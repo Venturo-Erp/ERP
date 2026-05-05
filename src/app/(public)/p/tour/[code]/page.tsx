@@ -14,6 +14,7 @@
 import { useState, useEffect, use } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
+import { PUBLIC_PAGE_LABELS } from '../../../constants/labels'
 import {
   MapPin,
   Calendar,
@@ -242,7 +243,7 @@ export default function PublicTourPage({ params }: { params: Promise<{ code: str
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-morandi-primary mb-4">找不到行程</h1>
+          <h1 className="text-4xl font-bold text-morandi-primary mb-4">{PUBLIC_PAGE_LABELS.TOUR_NOT_FOUND}</h1>
           <p className="text-morandi-secondary mb-8">此行程不存在或已被移除</p>
           <Link href="/">
             <Button>返回首頁</Button>
@@ -441,8 +442,8 @@ export default function PublicTourPage({ params }: { params: Promise<{ code: str
           ) : (
             <section className="text-center py-16">
               <MapPin className="w-12 h-12 mx-auto text-morandi-muted mb-4" />
-              <h2 className="text-xl font-bold text-morandi-muted mb-2">行程規劃中</h2>
-              <p className="text-morandi-muted">詳細行程將於近期更新</p>
+              <h2 className="text-xl font-bold text-morandi-muted mb-2">{PUBLIC_PAGE_LABELS.TOUR_PLANNING}</h2>
+              <p className="text-morandi-muted">{PUBLIC_PAGE_LABELS.TOUR_PLANNING_DESC}</p>
             </section>
           )}
         </div>

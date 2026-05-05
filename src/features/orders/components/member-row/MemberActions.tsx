@@ -82,10 +82,10 @@ export function MemberActions({
               setVisaOpen(true)
             }}
             className="inline-flex items-center gap-1 text-morandi-secondary hover:text-morandi-gold hover:bg-morandi-gold/10 transition-colors px-1.5 py-1 rounded text-xs"
-            title="快速辦簽證"
+            title={COMP_ORDERS_LABELS.快速辦簽證}
           >
             <Plane size={14} />
-            <span>辦簽證</span>
+            <span>{COMP_ORDERS_LABELS.辦簽證}</span>
           </button>
         )}
         {/* 編輯按鈕 */}

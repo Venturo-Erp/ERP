@@ -21,6 +21,8 @@ import { useAuthStore } from '@/stores/auth-store'
 import { CreateVoucherDialog } from './components/CreateVoucherDialog'
 import { VoucherDetailDialog } from './components/VoucherDetailDialog'
 import { logger } from '@/lib/utils/logger'
+import { ACCOUNTING_PAGE_LABELS } from '@/constants/labels'
+import { COMMON_MESSAGES } from '@/constants/messages'
 
 interface JournalVoucher {
   id: string
@@ -109,7 +111,7 @@ export default function VouchersPage() {
   const columns: TableColumn<JournalVoucher>[] = [
     {
       key: 'voucher_no',
-      label: '傳票編號',
+      label: ACCOUNTING_PAGE_LABELS.VOUCHER_NO,
       width: '140px',
       render: (_: unknown, row: JournalVoucher) => (
         <span className="font-mono text-sm">{row.voucher_no}</span>
@@ -117,19 +119,19 @@ export default function VouchersPage() {
     },
     {
       key: 'voucher_date',
-      label: '日期',
+      label: ACCOUNTING_PAGE_LABELS.DATE,
       width: '120px',
     },
     {
       key: 'memo',
-      label: '說明',
+      label: ACCOUNTING_PAGE_LABELS.DESCRIPTION,
       render: (_: unknown, row: JournalVoucher) => (
         <span className="text-sm text-muted-foreground line-clamp-1">{row.memo || '-'}</span>
       ),
     },
     {
       key: 'total_debit',
-      label: '借方',
+      label: ACCOUNTING_PAGE_LABELS.DEBIT,
       width: '120px',
       align: 'right',
       render: (_: unknown, row: JournalVoucher) => (
@@ -138,7 +140,7 @@ export default function VouchersPage() {
     },
     {
       key: 'total_credit',
-      label: '貸方',
+      label: ACCOUNTING_PAGE_LABELS.CREDIT,
       width: '120px',
       align: 'right',
       render: (_: unknown, row: JournalVoucher) => (
@@ -147,7 +149,7 @@ export default function VouchersPage() {
     },
     {
       key: 'status',
-      label: '狀態',
+      label: ACCOUNTING_PAGE_LABELS.STATUS,
       width: '100px',
       render: (_: unknown, row: JournalVoucher) => {
         if (!row.status) return <StatusBadge tone="neutral" label="-" />
@@ -157,11 +159,11 @@ export default function VouchersPage() {
     },
     {
       key: 'actions',
-      label: '操作',
+      label: ACCOUNTING_PAGE_LABELS.ACTIONS,
       width: '140px',
       render: (_: unknown, row: JournalVoucher) => (
         <div className="flex gap-1">
-          <Button size="sm" variant="ghost" onClick={() => handleViewDetail(row)} title="查看">
+          <Button size="sm" variant="ghost" onClick={() => handleViewDetail(row)} title={ACCOUNTING_PAGE_LABELS.VIEW}>
             <Eye size={14} />
           </Button>
           {row.status === 'posted' && (
@@ -170,7 +172,7 @@ export default function VouchersPage() {
               variant="ghost"
               onClick={() => handleReverse(row)}
               className="text-destructive hover:text-destructive"
-              title="反沖"
+              title={ACCOUNTING_PAGE_LABELS.REVERSE}
             >
               <RotateCcw size={14} />
             </Button>
@@ -197,14 +199,14 @@ export default function VouchersPage() {
       })
       const json = await res.json()
       if (!res.ok) {
-        alert(`反沖失敗：${json.error || '未知錯誤'}`)
+        alert(`反沖失敗：${json.error || COMMON_MESSAGES.UNKNOWN_ERROR}`)
         return
       }
-      alert(`反沖成功、反沖傳票編號：${json.voucher_no}`)
+      alert(`${COMMON_MESSAGES.OPERATION_SUCCESS}、反沖傳票編號：${json.voucher_no}`)
       loadVouchers()
     } catch (error) {
       logger.error('反沖傳票失敗:', error)
-      alert('反沖失敗、請稍後再試')
+      alert(COMMON_MESSAGES.OPERATION_FAILED + '、請稍後再試')
     }
   }
 
@@ -219,7 +221,7 @@ export default function VouchersPage() {
   return (
     <>
       <ListPageLayout
-        title="傳票管理"
+        title={ACCOUNTING_PAGE_LABELS.VOUCHER_MANAGEMENT}
         data={vouchers}
         columns={columns}
         loading={isLoading}
@@ -244,7 +246,7 @@ export default function VouchersPage() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">全部</SelectItem>
+                <SelectItem value="all">{ACCOUNTING_PAGE_LABELS.ALL}</SelectItem>
                 <SelectItem value="draft">草稿</SelectItem>
                 <SelectItem value="posted">已過帳</SelectItem>
                 <SelectItem value="reversed">已反沖</SelectItem>

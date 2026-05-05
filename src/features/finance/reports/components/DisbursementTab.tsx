@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/card'
 import { EnhancedTable, TableColumn } from '@/components/ui/enhanced-table'
 import { CurrencyCell, DateCell, StatusCell } from '@/components/table-cells'
 import { FileDown, Receipt, Wallet } from 'lucide-react'
+import { FINANCE_PAGE_LABELS } from '@/app/(main)/finance/constants/labels'
 import { usePaymentRequests, useDisbursementOrders } from '@/data'
 import { PaymentRequest, DisbursementOrder } from '@/stores/types'
 import { EXPENSE_TYPE_CONFIG, CompanyExpenseType } from '@/stores/types/finance.types'
@@ -200,13 +201,13 @@ export function DisbursementTab({ dateRange }: DisbursementTabProps) {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <StatCard
-            title="出納單數"
+            title={FINANCE_PAGE_LABELS.DISBURSEMENT_COUNT}
             value={stats.disbursementOrderCount}
             icon={Wallet}
             iconColor="text-morandi-green"
           />
           <StatCard
-            title="出帳總金額"
+            title={FINANCE_PAGE_LABELS.TOTAL_DISBURSEMENT_AMOUNT}
             value={stats.totalDisbursementAmount}
             icon={FileDown}
             iconColor="text-morandi-green"

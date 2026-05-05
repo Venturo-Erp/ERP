@@ -732,10 +732,10 @@ const COMP_WORKSPACE_LABELS = {
 
 // === accounting 模組標籤 ===
 
-const ACCOUNTING_PAGE_LABELS = {
+export const ACCOUNTING_PAGE_LABELS = {
   ACCOUNTING_MANAGEMENT: '記帳管理',
   HOME: '首頁',
-  ACCOUNT_MANAGEMENT: '帳戶管理',
+  ACCOUNT_MANAGEMENT: '科目管理',
   NEW_TRANSACTION: '新增記帳',
   MONTHLY_EXPENSE: '本月支出',
   MONTHLY_INCOME: '本月收入',
@@ -768,9 +768,43 @@ const ACCOUNTING_PAGE_LABELS = {
   CATEGORY_OR_ACCOUNT_NOT_FOUND: '找不到選擇的分類或帳戶',
   ACCOUNTING_SUCCESS: '記帳成功',
   ACCOUNTING_FAILED: '記帳失敗，請稍後再試',
+
+  // Page titles
+  ACCOUNTING_SYSTEM: '會計系統',
+  VOUCHER_MANAGEMENT: '傳票管理',
+  GENERAL_LEDGER: '總帳',
+  ACCOUNT_CHART_MANAGEMENT: '會計科目管理',
+  ADD_CHILD_ACCOUNT: '新增子科目',
+  ACCOUNTING_REPORTS: '會計報表',
+  CHECK_MANAGEMENT: '票據管理',
+  PERIOD_CLOSING_TITLE: '期末結轉',
+  OPENING_BALANCES: '期初餘額',
+
+  // Common actions
+  SEARCH: '查詢',
+  SEARCHING: '查詢中...',
+
+  // Fields
+  SUBJECT: '科目',
+  START_DATE: '開始日期',
+  END_DATE: '結束日期',
+  DEADLINE: '截止日期',
+  VOUCHER_NO: '傳票號碼',
+  DATE: '日期',
+  DESCRIPTION: '說明',
+  DEBIT: '借方',
+  CREDIT: '貸方',
+  STATUS: '狀態',
+  ACTIONS: '操作',
+  VIEW: '查看',
+  REVERSE: '反沖',
+  ALL: '全部',
+
+  // Validation
+  PLEASE_SELECT_ACCOUNT_AND_DATE: '請選擇科目和日期範圍',
 }
 
-const PERIOD_CLOSING_LABELS = {
+export const PERIOD_CLOSING_LABELS = {
   月結: '月結',
   季結: '季結',
   年結: '年結',
@@ -783,7 +817,7 @@ const PERIOD_CLOSING_LABELS = {
   執行結轉: '執行結轉',
 }
 
-const BALANCE_SHEET_LABELS = {
+export const BALANCE_SHEET_LABELS = {
   資產: '資產 {amount}',
   負債: '負債 {amount}',
   權益: '權益 {amount}',
@@ -796,7 +830,7 @@ const BALANCE_SHEET_LABELS = {
   股東權益: '股東權益',
 }
 
-const INCOME_STATEMENT_LABELS = {
+export const INCOME_STATEMENT_LABELS = {
   損益表: '損益表',
   營業收入: '營業收入',
   營業成本: '營業成本',
@@ -807,7 +841,7 @@ const INCOME_STATEMENT_LABELS = {
   本期淨利: '本期淨利',
 }
 
-const CASH_FLOW_LABELS = {
+export const CASH_FLOW_LABELS = {
   現金流量表: '現金流量表',
   營業活動: '營業活動',
   投資活動: '投資活動',
@@ -816,7 +850,7 @@ const CASH_FLOW_LABELS = {
   期末現金: '期末現金',
 }
 
-const TRIAL_BALANCE_LABELS = {
+export const TRIAL_BALANCE_LABELS = {
   試算表: '試算表',
   科目代號: '科目代號',
   科目名稱: '科目名稱',

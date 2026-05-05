@@ -68,4 +68,10 @@ export const COMPANY_LABELS = {
   // CompanyFormDialog
   FORM_NOTES_LABEL: '備註',
   FORM_NOTES_PLACEHOLDER: '其他備註資訊...',
+  PLACEHOLDER_TAX_ID: '12345678',
+  PLACEHOLDER_PHONE: '02-1234-5678',
+  PLACEHOLDER_EMAIL: 'contact@company.com',
+  PLACEHOLDER_WEBSITE: 'https://www.company.com',
+  PLACEHOLDER_CREDIT_LIMIT: '0',
+  PLACEHOLDER_INVOICE_EMAIL: 'invoice@company.com',
 }

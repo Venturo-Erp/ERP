@@ -224,7 +224,7 @@ export default function TodosPage() {
       // 直接從 store 取最新 user，避免 hydration timing 或 closure stale
       const currentUser = useAuthStore.getState().user
       if (!currentUser?.id) {
-        await alertError('請先登入')
+        await alertError(LABELS.PLEASE_LOGIN_FIRST)
         return
       }
 
@@ -444,7 +444,7 @@ export default function TodosPage() {
         await removeTodo(todo.id)
       } catch (err) {
         logger.error('刪除失敗:', err)
-        await alertError('刪除失敗')
+        await alertError(LABELS.DELETE_FAILED || '刪除失敗')
       }
     },
     [removeTodo]
@@ -483,7 +483,7 @@ export default function TodosPage() {
             }
           >
             <SelectTrigger className="h-9 w-[120px] text-xs">
-              <SelectValue placeholder="優先度" />
+              <SelectValue placeholder={LABELS.PRIORITY} />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">全部優先度</SelectItem>
@@ -496,7 +496,7 @@ export default function TodosPage() {
           </Select>
           <Select value={memberFilter} onValueChange={setMemberFilter}>
             <SelectTrigger className="h-9 w-[120px] text-xs">
-              <SelectValue placeholder="負責人" />
+              <SelectValue placeholder={LABELS.ASSIGNEE} />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">全部負責人</SelectItem>
@@ -604,7 +604,7 @@ export default function TodosPage() {
                                       setQuickAddValue('')
                                     }}
                                     className="p-1 rounded hover:bg-morandi-container/50 text-morandi-secondary hover:text-morandi-primary transition-colors"
-                                    title="新增卡片"
+                                    title={LABELS.ADD_CARD}
                                   >
                                     <Plus size={16} />
                                   </button>
@@ -617,7 +617,7 @@ export default function TodosPage() {
                                           setEditingColumnName(column.name)
                                         }}
                                         className="p-1 rounded hover:bg-morandi-container/50 text-morandi-secondary hover:text-morandi-primary transition-colors"
-                                        title="重命名"
+                                        title={LABELS.RENAME}
                                       >
                                         <Pencil size={13} />
                                       </button>
@@ -627,7 +627,7 @@ export default function TodosPage() {
                                           handleDeleteColumn(column)
                                         }}
                                         className="p-1 rounded hover:bg-morandi-red/10 text-morandi-secondary hover:text-morandi-red transition-colors"
-                                        title="刪除欄位"
+                                        title={LABELS.DELETE_COLUMN}
                                       >
                                         <Trash2 size={13} />
                                       </button>
@@ -641,7 +641,7 @@ export default function TodosPage() {
                                 <div className="mx-2 mt-2 bg-card rounded-lg border border-border shadow-sm p-3">
                                   <Input
                                     autoFocus
-                                    placeholder="輸入任務標題..."
+                                    placeholder={LABELS.LABEL_3467}
                                     value={quickAddValue}
                                     onChange={e => setQuickAddValue(e.target.value)}
                                     onKeyDown={e => {
@@ -720,7 +720,7 @@ export default function TodosPage() {
                         <div className="bg-morandi-container/30 rounded-lg p-3">
                           <Input
                             autoFocus
-                            placeholder="欄位名稱..."
+                            placeholder={LABELS.COLUMN_NAME}
                             value={newColumnName}
                             onChange={e => setNewColumnName(e.target.value)}
                             onKeyDown={e => {
@@ -1065,7 +1065,7 @@ const TodoCardMemo = React.memo(
                     e.stopPropagation()
                     onDelete(todo)
                   }}
-                  title="刪除"
+                  title={LABELS.DELETE}
                   className="p-1 rounded bg-card/80 border border-border hover:bg-morandi-red/10 hover:border-morandi-red hover:text-morandi-red text-morandi-secondary transition-colors"
                 >
                   <Trash2 size={12} />

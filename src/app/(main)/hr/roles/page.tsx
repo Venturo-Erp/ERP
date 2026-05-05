@@ -7,6 +7,7 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import { ContentPageLayout } from '@/components/layout/content-page-layout'
+import { LABELS } from '../constants/labels'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -421,11 +422,11 @@ export default function RolesPage() {
   if (!can(CAPABILITIES.HR_MANAGE_ROLES)) {
     return (
       <ContentPageLayout
-        title="職務管理"
+        title={LABELS.ROLE_MANAGEMENT}
         icon={Shield}
         breadcrumb={[
-          { label: '人資管理', href: '/hr' },
-          { label: '職務管理', href: '/hr/roles' },
+          { label: LABELS.BREADCRUMB_HR, href: '/hr' },
+          { label: LABELS.ROLE_MANAGEMENT, href: '/hr/roles' },
         ]}
       >
         <div className="max-w-4xl mx-auto p-6">
@@ -440,13 +441,13 @@ export default function RolesPage() {
 
   return (
     <ContentPageLayout
-      title="職務管理"
+      title={LABELS.ROLE_MANAGEMENT}
       icon={Shield}
       tabs={HR_ADMIN_TABS.employee}
       activeTab="/hr/roles"
       onTabChange={href => router.push(href)}
       breadcrumb={[
-        { label: '人資管理', href: '/hr' },
+        { label: LABELS.BREADCRUMB_HR, href: '/hr' },
         { label: '職務管理', href: '/hr/roles' },
       ]}
       primaryAction={{

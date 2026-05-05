@@ -12,6 +12,7 @@ import { Save, Info } from 'lucide-react'
 import { logger } from '@/lib/utils/logger'
 import { toast } from 'sonner'
 import { ACCOUNTS_TABS } from '../accounts/components/accounts-tabs'
+import { ACCOUNTING_PAGE_LABELS } from '@/constants/labels'
 
 interface OpeningAccount {
   id: string
@@ -156,7 +157,7 @@ export default function OpeningBalancesPage() {
 
   return (
     <ContentPageLayout
-      title="期初餘額"
+      title={ACCOUNTING_PAGE_LABELS.OPENING_BALANCES}
       tabs={ACCOUNTS_TABS}
       activeTab="/accounting/opening-balances"
       onTabChange={href => router.push(href)}

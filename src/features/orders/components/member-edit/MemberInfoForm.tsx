@@ -67,7 +67,7 @@ export function MemberInfoForm({ formData, onChange }: MemberInfoFormProps) {
             type="text"
             value={formData.passport_name_print || ''}
             onChange={e => onChange({ ...formData, passport_name_print: e.target.value })}
-            placeholder="HSU ZHENG-YI"
+            placeholder={MEMBER_EDIT_LABELS.PLACEHOLDER_PASSPORT_NAME}
             className={inputClass}
           />
         </div>
@@ -81,7 +81,7 @@ export function MemberInfoForm({ formData, onChange }: MemberInfoFormProps) {
             type="text"
             value={formData.birth_date || ''}
             onChange={e => onChange({ ...formData, birth_date: e.target.value })}
-            placeholder="YYYY-MM-DD"
+            placeholder={MEMBER_EDIT_LABELS.PLACEHOLDER_BIRTH_DATE}
             className={inputClass}
           />
         </div>
@@ -113,7 +113,7 @@ export function MemberInfoForm({ formData, onChange }: MemberInfoFormProps) {
             type="text"
             value={formData.passport_expiry || ''}
             onChange={e => onChange({ ...formData, passport_expiry: e.target.value })}
-            placeholder="YYYY-MM-DD"
+            placeholder={MEMBER_EDIT_LABELS.PLACEHOLDER_PASSPORT_EXPIRY}
             className={inputClass}
           />
         </div>

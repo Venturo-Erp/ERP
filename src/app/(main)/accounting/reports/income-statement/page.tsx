@@ -11,6 +11,8 @@ import { Search } from 'lucide-react'
 import { supabase } from '@/lib/supabase/client'
 import { useAuthStore } from '@/stores/auth-store'
 import { logger } from '@/lib/utils/logger'
+import { INCOME_STATEMENT_LABELS, ACCOUNTING_PAGE_LABELS } from '@/constants/labels'
+import { COMMON_MESSAGES } from '@/constants/messages'
 
 interface AccountBalance {
   code: string
@@ -47,7 +49,7 @@ export default function IncomeStatementPage() {
 
   const loadIncomeStatement = async () => {
     if (!startDate || !endDate || !user?.workspace_id) {
-      alert('請選擇日期範圍')
+      alert(COMMON_MESSAGES.PLEASE_SELECT_DATE_RANGE)
       return
     }
 
@@ -139,14 +141,14 @@ export default function IncomeStatementPage() {
       })
     } catch (error) {
       logger.error('載入損益表失敗:', error)
-      alert('載入失敗')
+      alert(COMMON_MESSAGES.LOAD_FAILED)
     } finally {
       setIsLoading(false)
     }
   }
 
   return (
-    <ContentPageLayout title="損益表">
+    <ContentPageLayout title={INCOME_STATEMENT_LABELS.損益表}>
       <div className="p-6 space-y-4">
         {/* 查詢條件 */}
         <Card className="p-4">
@@ -164,7 +166,7 @@ export default function IncomeStatementPage() {
             <div className="flex items-end">
               <Button onClick={loadIncomeStatement} disabled={isLoading} className="w-full gap-2">
                 <Search size={16} />
-                {isLoading ? '查詢中...' : '查詢'}
+                {isLoading ? ACCOUNTING_PAGE_LABELS.SEARCHING : ACCOUNTING_PAGE_LABELS.SEARCH}
               </Button>
             </div>
           </div>
@@ -176,7 +178,7 @@ export default function IncomeStatementPage() {
             <div className="space-y-6">
               {/* 標題 */}
               <div className="text-center border-b border-border pb-4">
-                <h2 className="text-xl font-bold">損益表</h2>
+                <h2 className="text-xl font-bold">{INCOME_STATEMENT_LABELS.損益表}</h2>
                 <p className="text-sm text-muted-foreground mt-1">
                   {startDate} ~ {endDate}
                 </p>
@@ -184,7 +186,7 @@ export default function IncomeStatementPage() {
 
               {/* 收入 */}
               <div>
-                <div className="font-semibold mb-2 text-morandi-green">營業收入</div>
+                <div className="font-semibold mb-2 text-morandi-green">{INCOME_STATEMENT_LABELS.營業收入}</div>
                 {data.revenue.map(item => (
                   <div key={item.code} className="flex justify-between py-1 pl-4">
                     <span className="text-sm">
@@ -197,7 +199,7 @@ export default function IncomeStatementPage() {
                   <div className="text-sm text-muted-foreground pl-4">無收入記錄</div>
                 )}
                 <div className="flex justify-between py-2 border-t border-border mt-2 font-semibold">
-                  <span>收入合計</span>
+                  <span>{INCOME_STATEMENT_LABELS.營業收入.replace('營業', '')}合計</span>
                   <span className="font-mono">${data.totalRevenue.toLocaleString()}</span>
                 </div>
               </div>

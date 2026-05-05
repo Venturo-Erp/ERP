@@ -144,7 +144,7 @@ export function CisPricingItemDialog({
               <Input
                 value={form.code}
                 onChange={e => update('code', e.target.value)}
-                placeholder="IDN-001"
+                placeholder={L.placeholder_code}
                 disabled={submitting}
               />
             </Field>
@@ -166,7 +166,7 @@ export function CisPricingItemDialog({
               <Input
                 value={form.unit}
                 onChange={e => update('unit', e.target.value)}
-                placeholder="式 / 套 / 批"
+                placeholder={L.placeholder_unit}
                 disabled={submitting}
               />
             </Field>
@@ -176,7 +176,7 @@ export function CisPricingItemDialog({
             <Input
               value={form.name}
               onChange={e => update('name', e.target.value)}
-              placeholder="例：Logo 優化"
+              placeholder={L.placeholder_name}
               disabled={submitting}
               autoFocus
             />
@@ -186,7 +186,7 @@ export function CisPricingItemDialog({
             <Textarea
               value={form.description}
               onChange={e => update('description', e.target.value)}
-              placeholder="這個項目的內容說明"
+              placeholder={L.placeholder_description}
               disabled={submitting}
               rows={2}
             />
@@ -198,7 +198,7 @@ export function CisPricingItemDialog({
                 type="number"
                 value={form.price_low}
                 onChange={e => update('price_low', e.target.value)}
-                placeholder="15000"
+                placeholder={L.placeholder_price_low}
                 disabled={submitting}
               />
             </Field>
@@ -207,7 +207,7 @@ export function CisPricingItemDialog({
                 type="number"
                 value={form.price_high}
                 onChange={e => update('price_high', e.target.value)}
-                placeholder="35000"
+                placeholder={L.placeholder_price_high}
                 disabled={submitting}
               />
             </Field>

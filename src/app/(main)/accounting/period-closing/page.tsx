@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { ContentPageLayout } from '@/components/layout/content-page-layout'
+import { PERIOD_CLOSING_LABELS } from '@/constants/labels'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -154,7 +155,7 @@ export default function PeriodClosingPage() {
   const { start, end } = getPeriodDates()
 
   return (
-    <ContentPageLayout title="期末結轉">
+    <ContentPageLayout title={PERIOD_CLOSING_LABELS.期末結轉}>
       <div className="p-6 space-y-6">
         {/* 執行結轉 */}
         <Card className="p-6">

@@ -10,6 +10,8 @@ import { supabase } from '@/lib/supabase/client'
 import { useAuthStore } from '@/stores/auth-store'
 import { CreateCheckDialog } from './components/CreateCheckDialog'
 import { logger } from '@/lib/utils/logger'
+import { ACCOUNTING_PAGE_LABELS } from '@/constants/labels'
+import { COMMON_MESSAGES } from '@/constants/messages'
 
 interface Check {
   id: string
@@ -158,7 +160,7 @@ export default function ChecksPage() {
       loadChecks()
     } catch (error) {
       logger.error('更新票據狀態失敗:', error)
-      alert('操作失敗')
+      alert(COMMON_MESSAGES.OPERATION_FAILED)
     }
   }
 
@@ -212,7 +214,7 @@ export default function ChecksPage() {
 
         <div className="flex-1">
           <ListPageLayout
-            title="票據管理"
+            title={ACCOUNTING_PAGE_LABELS.CHECK_MANAGEMENT}
             data={checks}
             columns={columns}
             loading={isLoading}

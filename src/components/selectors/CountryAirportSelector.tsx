@@ -260,7 +260,7 @@ export function CountryAirportSelector({
             value={airportCode}
             onChange={handleAirportChange}
             options={availableAirports}
-            placeholder={!displayCountryName ? '請先選擇國家' : '搜尋城市或機場...'}
+            placeholder={!displayCountryName ? SELECTORS_LABELS.PLEASE_SELECT_COUNTRY_FIRST : SELECTORS_LABELS.SEARCH_CITY_AIRPORT}
             emptyMessage={loading ? '載入中...' : '找不到符合的機場'}
             showSearchIcon
             showClearButton
@@ -287,7 +287,7 @@ export function CountryAirportSelector({
           <Input
             value={newCountryName}
             onChange={e => setNewCountryName(e.target.value)}
-            placeholder="例如：日本"
+            placeholder={SELECTORS_LABELS.EXAMPLE_COUNTRY}
           />
         </div>
         <div>
@@ -295,7 +295,7 @@ export function CountryAirportSelector({
           <Input
             value={newCountryNameEn}
             onChange={e => setNewCountryNameEn(e.target.value)}
-            placeholder="例如：Japan"
+            placeholder={SELECTORS_LABELS.EXAMPLE_COUNTRY_EN}
           />
         </div>
         <div>
@@ -312,7 +312,7 @@ export function CountryAirportSelector({
                   .slice(0, 2)
               )
             }
-            placeholder="例如：JP"
+            placeholder={SELECTORS_LABELS.EXAMPLE_COUNTRY_CODE}
             maxLength={2}
           />
           <p className="text-xs text-morandi-secondary mt-1">

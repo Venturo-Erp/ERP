@@ -9,6 +9,7 @@ export const ACCOMMODATION_ITEM_ROW_LABELS = {
   刪除: '刪除',
 
   LABEL_1440: '續住 (',
+  HIDE_FROM_QUOTE: '在報價單和需求單隱藏此項目',
 }
 
 export const CATEGORY_SECTION_LABELS = {
@@ -43,6 +44,8 @@ export const COST_ITEM_ROW_LABELS = {
   設為自理: '設為自理',
 
   LABEL_2796: '自理',
+  MOVE_TO_EXCLUDED: '移到費用不含',
+  MOVE_TO_INCLUDED: '移到費用包含',
 }
 
 export const IMPORT_ACTIVITIES_DIALOG_LABELS = {
@@ -583,6 +586,11 @@ export const QUOTE_COMPONENT_LABELS = {
 
   // PrintableQuickQuote
   QUOTATION: '報價單',
+
+  // Tooltip / Actions
+  HIDE_FROM_QUOTE: '在報價單和需求單隱藏此項目',
+  MOVE_TO_EXCLUDED: '移到費用不含',
+  MOVE_TO_INCLUDED: '移到費用包含',
 }
 
 // quote.service.ts

@@ -97,11 +97,7 @@ export function PreviewPanel({
 
                   {/* 螢幕 */}
                   <div
-                    className="bg-card rounded-[37px] overflow-hidden relative"
-                    style={{
-                      width: '390px',
-                      height: '844px',
-                    }}
+                    className="bg-card rounded-[37px] overflow-hidden relative w-[390px] h-[844px]"
                   >
                     {/* 內容區域 */}
                     <div className="w-full h-full overflow-y-auto">{children(viewMode)}</div>
@@ -116,11 +112,7 @@ export function PreviewPanel({
             ) : (
               // 電腦版
               <div
-                className="bg-card shadow-lg rounded-lg overflow-hidden border border-border"
-                style={{
-                  width: '1200px',
-                  height: '800px',
-                }}
+                className="bg-card shadow-lg rounded-lg overflow-hidden border border-border w-[1200px] h-[800px]"
               >
                 <div className="w-full h-full overflow-y-auto">{children(viewMode)}</div>
               </div>

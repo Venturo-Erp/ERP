@@ -12,6 +12,8 @@ import { supabase } from '@/lib/supabase/client'
 import { useAuthStore } from '@/stores/auth-store'
 import { Badge } from '@/components/ui/badge'
 import { logger } from '@/lib/utils/logger'
+import { TRIAL_BALANCE_LABELS, ACCOUNTING_PAGE_LABELS } from '@/constants/labels'
+import { COMMON_MESSAGES } from '@/constants/messages'
 
 interface AccountBalance {
   account_id: string
@@ -46,7 +48,7 @@ export default function TrialBalancePage() {
 
   const loadTrialBalance = async () => {
     if (!endDate || !user?.workspace_id) {
-      alert('請選擇日期')
+      alert(COMMON_MESSAGES.PLEASE_SELECT_DATE)
       return
     }
 
@@ -120,7 +122,7 @@ export default function TrialBalancePage() {
       setTotals({ debit: totalDebit, credit: totalCredit })
     } catch (error) {
       logger.error('載入試算表失敗:', error)
-      alert('載入失敗')
+      alert(COMMON_MESSAGES.LOAD_FAILED)
     } finally {
       setIsLoading(false)
     }
@@ -140,7 +142,7 @@ export default function TrialBalancePage() {
   )
 
   return (
-    <ContentPageLayout title="試算表">
+    <ContentPageLayout title={TRIAL_BALANCE_LABELS.試算表}>
       <div className="p-6 space-y-4">
         {/* 查詢條件 */}
         <Card className="p-4">
@@ -153,7 +155,7 @@ export default function TrialBalancePage() {
             <div className="flex items-end">
               <Button onClick={loadTrialBalance} disabled={isLoading} className="w-full gap-2">
                 <Search size={16} />
-                {isLoading ? '查詢中...' : '查詢'}
+                {isLoading ? ACCOUNTING_PAGE_LABELS.SEARCHING : ACCOUNTING_PAGE_LABELS.SEARCH}
               </Button>
             </div>
           </div>
@@ -165,11 +167,11 @@ export default function TrialBalancePage() {
             <table className="w-full">
               <thead className="bg-morandi-container border-b">
                 <tr>
-                  <th className="px-4 py-3 text-left text-sm font-semibold">科目代號</th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold">科目名稱</th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold">{TRIAL_BALANCE_LABELS.科目代號}</th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold">{TRIAL_BALANCE_LABELS.科目名稱}</th>
                   <th className="px-4 py-3 text-center text-sm font-semibold">類型</th>
-                  <th className="px-4 py-3 text-right text-sm font-semibold">借方總額</th>
-                  <th className="px-4 py-3 text-right text-sm font-semibold">貸方總額</th>
+                  <th className="px-4 py-3 text-right text-sm font-semibold">{TRIAL_BALANCE_LABELS.借方發生數.replace('發生數', '總額')}</th>
+                  <th className="px-4 py-3 text-right text-sm font-semibold">{TRIAL_BALANCE_LABELS.貸方發生數.replace('發生數', '總額')}</th>
                   <th className="px-4 py-3 text-right text-sm font-semibold">餘額</th>
                 </tr>
               </thead>
@@ -177,7 +179,7 @@ export default function TrialBalancePage() {
                 {balances.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
-                      {isLoading ? '載入中...' : '請選擇日期並查詢'}
+                      {isLoading ? COMMON_MESSAGES.LOADING : '請選擇日期並查詢'}
                     </td>
                   </tr>
                 ) : (

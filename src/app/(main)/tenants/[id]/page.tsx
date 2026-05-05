@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge'
 import { Switch } from '@/components/ui/switch'
 import { useToast } from '@/components/ui/use-toast'
 import { alert as showAlert } from '@/lib/ui/alert-dialog'
+import { COMMON_MESSAGES } from '@/constants/messages'
 import { supabase } from '@/lib/supabase/client'
 import { Building2, Save, Sparkles, Users, Settings2 } from 'lucide-react'
 import { ModuleLoading } from '@/components/module-loading'
@@ -217,7 +218,7 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
 
   if (loading) {
     return (
-      <ContentPageLayout title="載入中..." icon={Building2}>
+      <ContentPageLayout title={COMMON_MESSAGES.LOADING} icon={Building2}>
         <ModuleLoading />
       </ContentPageLayout>
     )
@@ -241,12 +242,7 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
       <div className="space-y-6">
         {/* 租戶資訊卡片 */}
         <div
-          className="rounded-[24px] p-6"
-          style={{
-            background: 'linear-gradient(0deg, rgb(255, 255, 255) 0%, rgb(250, 247, 243) 100%)',
-            border: '3px solid white',
-            boxShadow: 'rgba(180, 160, 120, 0.15) 0px 12px 24px -8px',
-          }}
+          className="rounded-[24px] p-6 bg-gradient-to-t from-white to-[#faf7f3] border-[3px] border-white shadow-[rgba(180,160,120,0.15)_0px_12px_24px_-8px]"
         >
           <div className="grid grid-cols-4 gap-6">
             <div>
@@ -280,12 +276,7 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
 
         {/* 系統主管卡片 */}
         <div
-          className="rounded-[24px] p-6"
-          style={{
-            background: 'linear-gradient(0deg, rgb(255, 255, 255) 0%, rgb(250, 247, 243) 100%)',
-            border: '3px solid white',
-            boxShadow: 'rgba(180, 160, 120, 0.15) 0px 12px 24px -8px',
-          }}
+          className="rounded-[24px] p-6 bg-gradient-to-t from-white to-[#faf7f3] border-[3px] border-white shadow-[rgba(180,160,120,0.15)_0px_12px_24px_-8px]"
         >
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
@@ -350,12 +341,7 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
 
         {/* 基本功能卡片 */}
         <div
-          className="rounded-[24px] overflow-hidden"
-          style={{
-            background: 'linear-gradient(0deg, rgb(255, 255, 255) 0%, rgb(250, 247, 243) 100%)',
-            border: '3px solid white',
-            boxShadow: 'rgba(180, 160, 120, 0.15) 0px 12px 24px -8px',
-          }}
+          className="rounded-[24px] overflow-hidden bg-gradient-to-t from-white to-[#faf7f3] border-[3px] border-white shadow-[rgba(180,160,120,0.15)_0px_12px_24px_-8px]"
         >
           <div className="px-6 py-4 border-b border-morandi-gold/20">
             <div className="flex items-center gap-2">
@@ -374,12 +360,7 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
                 return (
                   <div
                     key={feature.code}
-                    className="flex items-center justify-between px-4 py-3 rounded-[16px] transition-all hover:shadow-sm"
-                    style={{
-                      background:
-                        'linear-gradient(0deg, rgb(250, 247, 240) 0%, rgb(245, 240, 232) 100%)',
-                      boxShadow: 'rgba(180, 160, 120, 0.3) 0px 8px 20px -4px',
-                    }}
+                    className="flex items-center justify-between px-4 py-3 rounded-[16px] transition-all hover:shadow-sm bg-gradient-to-t from-[#faf7f0] to-[#f5f0e8] shadow-[rgba(180,160,120,0.3)_0px_8px_20px_-4px]"
                   >
                     <span className="text-sm font-medium text-morandi-primary">{feature.name}</span>
                     <div className="flex items-center gap-2">
@@ -407,12 +388,7 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
 
         {/* 付費加購卡片 */}
         <div
-          className="rounded-[24px] overflow-hidden"
-          style={{
-            background: 'linear-gradient(0deg, rgb(255, 255, 255) 0%, rgb(250, 247, 243) 100%)',
-            border: '3px solid white',
-            boxShadow: 'rgba(180, 160, 120, 0.15) 0px 12px 24px -8px',
-          }}
+          className="rounded-[24px] overflow-hidden bg-gradient-to-t from-white to-[#faf7f3] border-[3px] border-white shadow-[rgba(180,160,120,0.15)_0px_12px_24px_-8px]"
         >
           <div className="px-6 py-4 border-b border-morandi-gold/20">
             <div className="flex items-center gap-2">
@@ -430,12 +406,7 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
                 return (
                   <div
                     key={addon.code}
-                    className="flex items-center justify-between gap-3 px-4 py-3 rounded-[16px] transition-all hover:shadow-sm"
-                    style={{
-                      background:
-                        'linear-gradient(0deg, rgb(250, 247, 240) 0%, rgb(245, 240, 232) 100%)',
-                      boxShadow: 'rgba(180, 160, 120, 0.3) 0px 8px 20px -4px',
-                    }}
+                    className="flex items-center justify-between gap-3 px-4 py-3 rounded-[16px] transition-all hover:shadow-sm bg-gradient-to-t from-[#faf7f0] to-[#f5f0e8] shadow-[rgba(180,160,120,0.3)_0px_8px_20px_-4px]"
                   >
                     <div className="flex flex-col min-w-0 flex-1">
                       <span className="text-sm font-medium text-morandi-primary truncate">
@@ -487,12 +458,7 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
                 return (
                   <div
                     key={tab.code}
-                    className="flex items-center justify-between px-4 py-3 rounded-[16px] transition-all hover:shadow-sm"
-                    style={{
-                      background:
-                        'linear-gradient(0deg, rgb(250, 247, 240) 0%, rgb(245, 240, 232) 100%)',
-                      boxShadow: 'rgba(180, 160, 120, 0.3) 0px 8px 20px -4px',
-                    }}
+                    className="flex items-center justify-between px-4 py-3 rounded-[16px] transition-all hover:shadow-sm bg-gradient-to-t from-[#faf7f0] to-[#f5f0e8] shadow-[rgba(180,160,120,0.3)_0px_8px_20px_-4px]"
                   >
                     <div className="flex items-center gap-2 min-w-0">
                       <span className="text-sm font-medium text-morandi-primary truncate">
