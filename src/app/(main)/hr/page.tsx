@@ -55,9 +55,10 @@ export default function HRPage() {
     loadRoles()
   }, [])
 
-  // 員工列表：只顯示在職的真人（不含 bot、不含已離職）
+  // 員工列表：只顯示在職員工（不含已離職）
+  // 2026-05-05 William 拍板：機器人不該是員工、employee_type 砍除、不再過濾 bot
   const filteredEmployees = useMemo(
-    () => users.filter(emp => emp.employee_type !== 'bot' && emp.status !== 'terminated'),
+    () => users.filter(emp => emp.status !== 'terminated'),
     [users]
   )
 

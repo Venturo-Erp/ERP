@@ -101,7 +101,6 @@ export interface EmployeeFull {
   status: 'active' | 'probation' | 'leave' | 'terminated'
   terminated_at?: string | null
   terminated_by?: string | null
-  employee_type?: 'human' | 'bot'
   avatar?: string
   avatar_url?: string | null
   role_id?: string | null

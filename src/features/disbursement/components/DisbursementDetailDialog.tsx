@@ -7,7 +7,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import { StatusBadge, type StatusTone } from '@/components/ui/status-badge'
 import { Check, FileText } from 'lucide-react'
 import { supabase } from '@/lib/supabase/client'
 import {
@@ -28,7 +28,7 @@ import { DateCell, CurrencyCell } from '@/components/table-cells'
 import { DisbursementPrintDialog } from './DisbursementPrintDialog'
 import { confirm, alert } from '@/lib/ui/alert-dialog'
 import { logger } from '@/lib/utils/logger'
-import { DISBURSEMENT_STATUS } from '../constants'
+import { DISBURSEMENT_STATUS, DISBURSEMENT_STATUS_LABELS, DISBURSEMENT_STATUS_TONES } from '../constants'
 import { DISBURSEMENT_LABELS } from '../constants/labels'
 import { recalculateExpenseStats } from '@/features/finance/payments/services/expense-core.service'
 import { generateDisbursementPDF } from '@/lib/pdf/disbursement-pdf'
@@ -237,7 +237,18 @@ export function DisbursementDetailDialog({
                     />
                   </div>
                 </div>
-                <Badge className={cn('text-white', status.color)}>{status.label}</Badge>
+                <StatusBadge
+                  tone={
+                    (DISBURSEMENT_STATUS_TONES[
+                      order.status as keyof typeof DISBURSEMENT_STATUS_TONES
+                    ] || 'pending') as StatusTone
+                  }
+                  label={
+                    DISBURSEMENT_STATUS_LABELS[
+                      order.status as keyof typeof DISBURSEMENT_STATUS_LABELS
+                    ] || status.label
+                  }
+                />
               </div>
             </DialogHeader>
 

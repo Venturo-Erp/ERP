@@ -813,7 +813,7 @@ export function TodoExpandedView({ todo, onUpdate, onClose, onDelete }: TodoExpa
                 />
               </button>
               {showShareForm && canEdit && (() => {
-                const otherEmployees = employees.filter(emp => emp.id !== currentUserId && !emp.is_bot)
+                const otherEmployees = employees.filter(emp => emp.id !== currentUserId)
                 const currentVisibility = todo.visibility || []
                 const sharedWith = otherEmployees.filter(emp => currentVisibility.includes(emp.id))
                 const availableToShare = otherEmployees.filter(emp => !currentVisibility.includes(emp.id))

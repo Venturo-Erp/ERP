@@ -32,5 +32,5 @@
     "out/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
-  "exclude": ["node_modules", "**/*.deprecated.ts", "Corner", "scripts/**/*", "src/_deprecated/**"]
+  "exclude": ["node_modules", "**/*.deprecated.ts", "Corner", "scripts/**/*"]
 }

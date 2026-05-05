@@ -56,14 +56,14 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     .eq('is_admin', true)
   const adminRoleIds = new Set((adminRoles || []).map(r => r.id))
 
-  // 查真人員工（排除機器人）
+  // 查所有員工
+  // 2026-05-05 William 拍板：機器人不該是員工、is_bot 砍除、不再過濾
   const { data: employees } = await supabase
     .from('employees')
     .select(
-      'id, employee_number, chinese_name, display_name, english_name, role_id, is_bot, created_at'
+      'id, employee_number, chinese_name, display_name, english_name, role_id, created_at'
     )
     .eq('workspace_id', workspaceId)
-    .or('is_bot.is.null,is_bot.eq.false')
     .order('created_at', { ascending: true })
 
   const realEmployees = (employees || []) as Array<{
@@ -73,7 +73,6 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     display_name: string | null
     english_name: string | null
     role_id: string | null
-    is_bot: boolean | null
     created_at: string
   }>
 

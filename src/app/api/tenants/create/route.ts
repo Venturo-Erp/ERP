@@ -4,9 +4,7 @@
  * 功能：
  * 1. 建立 workspace
  * 2. 建立第一個系統主管 (employee + auth + profile)
- * 3. 建立公告頻道
- * 4. Seed 基礎資料 (countries, cities)
- * 5. 建立 workspace bot
+ * 3. Seed 基礎資料 (countries, cities)
  *
  * 權限：需要「租戶管理」功能權限（workspace_features + role_tab_permissions）
  */
@@ -401,11 +399,10 @@ export async function POST(request: NextRequest) {
       'itinerary',
     ]
     // 付費功能（預設關閉）
+    // bot_line / bot_telegram 已於 2026-05-05 砍除（William 拍板：機器人不該是員工、通知概念重做）
     const premiumFeatures = [
       'accounting',
       'office',
-      'bot_line',
-      'bot_telegram',
       'fleet',
       'local',
       'supplier_portal',
@@ -484,17 +481,7 @@ export async function POST(request: NextRequest) {
       logger.warn('Failed to seed base data:', seedError)
     }
 
-    // 10. 建立 workspace bot
-    try {
-      const botResponse = await fetch(`${request.nextUrl.origin}/api/debug/setup-workspace-bots`, {
-        method: 'POST',
-      })
-      if (botResponse.ok) {
-        logger.log('Workspace bot created')
-      }
-    } catch (botError) {
-      logger.warn('Failed to create bot:', botError)
-    }
+    // 10. workspace bot 創建已於 2026-05-05 砍除（William 拍板：機器人不該是員工、通知概念重做）
 
     logger.log(`Tenant created successfully: ${newWorkspaceCode}`)
 

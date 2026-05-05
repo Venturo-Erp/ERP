@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { ContentPageLayout } from '@/components/layout/content-page-layout'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -10,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Save, Info } from 'lucide-react'
 import { logger } from '@/lib/utils/logger'
 import { toast } from 'sonner'
+import { ACCOUNTS_TABS } from '../accounts/components/accounts-tabs'
 
 interface OpeningAccount {
   id: string
@@ -33,6 +35,7 @@ const TYPE_LABEL: Record<OpeningAccount['account_type'], string> = {
 }
 
 export default function OpeningBalancesPage() {
+  const router = useRouter()
   const [accounts, setAccounts] = useState<OpeningAccount[]>([])
   const [voucher, setVoucher] = useState<ExistingVoucher | null>(null)
   const [asOfDate, setAsOfDate] = useState(new Date().toISOString().split('T')[0])
@@ -152,7 +155,12 @@ export default function OpeningBalancesPage() {
   )
 
   return (
-    <ContentPageLayout title="期初餘額">
+    <ContentPageLayout
+      title="期初餘額"
+      tabs={ACCOUNTS_TABS}
+      activeTab="/accounting/opening-balances"
+      onTabChange={href => router.push(href)}
+    >
       <div className="space-y-4">
         {/* 說明 */}
         <Card className="p-4 bg-status-info/5 border-status-info/30">

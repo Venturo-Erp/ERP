@@ -16,7 +16,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { RequestDateInput } from './RequestDateInput'
 import { ExpenseTypeSelector } from './ExpenseTypeSelector'
 import { CurrencyCell } from '@/components/table-cells'
 import { InlineEditTable, type InlineEditColumn } from '@/components/ui/inline-edit-table'
@@ -867,20 +866,28 @@ export function AddRequestDialog({
           void alert('請至少新增一個請款項目（含費用類型 + 金額）', 'warning')
           return
         }
-        if (!formData.request_date) {
-          void alert('請選擇日期', 'warning')
-          return
+        // header 沒日期欄了、各品項依自己的 custom_request_date 分組、不同日各自建一張
+        const groups = new Map<string, RequestItem[]>()
+        for (const it of validItems) {
+          const d = it.custom_request_date || getTodayString()
+          if (!groups.has(d)) groups.set(d, [])
+          groups.get(d)!.push(it)
         }
         // 從第一個有效 row 推 expense_type（業務上整單同 expense_type）
         const inferredExpenseType = validItems[0].category as unknown as CompanyExpenseType
-        await createRequest(
-          { ...formData, expense_type: inferredExpenseType },
-          requestItems,
-          '',
-          '',
-          undefined,
-          currentUser?.display_name || currentUser?.chinese_name || ''
-        )
+        for (const [groupDate, groupItems] of groups) {
+          await createRequest(
+            { ...formData, expense_type: inferredExpenseType, request_date: groupDate },
+            groupItems,
+            '',
+            '',
+            undefined,
+            currentUser?.display_name || currentUser?.chinese_name || ''
+          )
+        }
+        if (groups.size > 1) {
+          await alert(`已依日期自動拆分為 ${groups.size} 張請款單`, 'success')
+        }
         handleCancel()
         onSuccess?.()
       } else {
@@ -1003,7 +1010,7 @@ export function AddRequestDialog({
                   )}
                 </TabsList>
 
-                {/* 團體請款：團號 + 訂單 + 請款日期 同一行（跟收款 dialog 對齊） */}
+                {/* 團體請款：團號 + 訂單（日期由 row 內各品項獨立日期欄處理） */}
                 {activeTab === 'tour' && (
                   <>
                     <div className="flex flex-col gap-1 relative z-[10020]">
@@ -1037,38 +1044,10 @@ export function AddRequestDialog({
                         maxHeight="300px"
                       />
                     </div>
-                    <div className="flex flex-col gap-1 relative z-[10018] w-[240px]">
-                      <Label className="text-xs text-morandi-muted">請款日期</Label>
-                      <RequestDateInput
-                        value={formData.request_date}
-                        onChange={(date, isSpecialBilling) =>
-                          setFormData(prev => ({
-                            ...prev,
-                            request_date: date,
-                            is_special_billing: isSpecialBilling,
-                          }))
-                        }
-                      />
-                    </div>
                   </>
                 )}
 
-                {/* 公司請款：只留日期、付款方式 + 費用類型由 row 內 column 處理 */}
-                {activeTab === 'company' && (
-                  <div className="flex flex-col gap-1 relative z-[10018] w-[240px]">
-                    <Label className="text-xs text-morandi-muted">請款日期</Label>
-                    <RequestDateInput
-                      value={formData.request_date}
-                      onChange={(date, isSpecialBilling) =>
-                        setFormData(prev => ({
-                          ...prev,
-                          request_date: date,
-                          is_special_billing: isSpecialBilling,
-                        }))
-                      }
-                    />
-                  </div>
-                )}
+                {/* 公司請款：日期改成各品項獨立、header 不再顯示日期 */}
 
                 {/* 批量請款：只留日期、其他欄位 row 內統一控制 */}
                 {activeTab === 'batch' && (
@@ -1417,9 +1396,7 @@ export function AddRequestDialog({
                         tourAllocations.filter(a => a.tour_id && a.allocated_amount > 0).length === 0 ||
                         !batchCategory
                       : activeTab === 'company'
-                        ? !formData.expense_type ||
-                          !formData.request_date ||
-                          requestItems.length === 0
+                        ? requestItems.length === 0
                         : !formData.tour_id ||
                           (importFromRequests
                             ? selectedRequestCount === 0

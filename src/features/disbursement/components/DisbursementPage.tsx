@@ -13,7 +13,7 @@ import { useCallback, useState, useMemo } from 'react'
 import { Plus, Wallet } from 'lucide-react'
 import { ContentPageLayout } from '@/components/layout/content-page-layout'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import { StatusBadge, type StatusTone } from '@/components/ui/status-badge'
 import { EnhancedTable, TableColumn } from '@/components/ui/enhanced-table'
 import {
   usePaymentRequests,
@@ -33,7 +33,7 @@ import { DisbursementDetailDialog } from './DisbursementDetailDialog'
 import { DisbursementPrintDialog } from './DisbursementPrintDialog'
 import { confirm, alert } from '@/lib/ui/alert-dialog'
 import { logger } from '@/lib/utils/logger'
-import { DISBURSEMENT_STATUS } from '../constants'
+import { DISBURSEMENT_STATUS, DISBURSEMENT_STATUS_LABELS, DISBURSEMENT_STATUS_TONES } from '../constants'
 import { DISBURSEMENT_LABELS } from '../constants/labels'
 import { useAuthStore } from '@/stores/auth-store'
 import { useCapabilities, CAPABILITIES } from '@/lib/permissions'
@@ -148,9 +148,13 @@ export function DisbursementPage() {
         sortable: true,
         width: '80px',
         render: (value: unknown) => {
-          const status =
-            DISBURSEMENT_STATUS[value as keyof typeof DISBURSEMENT_STATUS] || DISBURSEMENT_STATUS.pending
-          return <Badge className={cn('text-white', status.color)}>{status.label}</Badge>
+          const k = value as keyof typeof DISBURSEMENT_STATUS_TONES
+          const tone = (DISBURSEMENT_STATUS_TONES[k] || 'pending') as StatusTone
+          const label =
+            DISBURSEMENT_STATUS_LABELS[k] ||
+            DISBURSEMENT_STATUS[value as keyof typeof DISBURSEMENT_STATUS]?.label ||
+            String(value || '')
+          return <StatusBadge tone={tone} label={label} />
         },
       },
     ],
@@ -259,9 +263,20 @@ export function DisbursementPage() {
     if (!open) setEditingOrder(null)
   }, [])
 
-  // 操作按鈕渲染
+  // 操作按鈕渲染（順序：預覽 → 編輯 → 出帳 → 刪除）
   const renderActions = (row: DisbursementOrder) => (
     <div className="flex items-center gap-1">
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={e => {
+          e.stopPropagation()
+          handlePreview(row)
+        }}
+        className="h-7 px-2 text-xs"
+      >
+        預覽
+      </Button>
       {row.status === 'pending' && canManage && (
         <Button
           variant="ghost"
@@ -276,17 +291,6 @@ export function DisbursementPage() {
           編輯
         </Button>
       )}
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={e => {
-          e.stopPropagation()
-          handlePreview(row)
-        }}
-        className="h-7 px-2 text-xs"
-      >
-        預覽
-      </Button>
       {row.status === 'pending' && canManage && (
         <Button
           variant="ghost"

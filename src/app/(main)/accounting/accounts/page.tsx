@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { ListPageLayout } from '@/components/layout/list-page-layout'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -10,6 +11,7 @@ import { supabase } from '@/lib/supabase/client'
 import { useAuthStore } from '@/stores/auth-store'
 import { CreateAccountDialog } from './components/CreateAccountDialog'
 import { EditAccountDialog } from './components/EditAccountDialog'
+import { ACCOUNTS_TABS } from './components/accounts-tabs'
 import { toast } from 'sonner'
 import { logger } from '@/lib/utils/logger'
 
@@ -44,6 +46,7 @@ const typeConfig = {
 }
 
 export default function AccountsPage() {
+  const router = useRouter()
   const { user } = useAuthStore()
   const [accounts, setAccounts] = useState<Account[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -302,6 +305,9 @@ export default function AccountsPage() {
     <>
       <ListPageLayout
         title={`會計科目管理（共 ${accounts.length} 個科目）`}
+        statusTabs={ACCOUNTS_TABS}
+        activeStatusTab="/accounting/accounts"
+        onStatusTabChange={href => router.push(href)}
         data={visibleAccounts}
         columns={columns}
         loading={isLoading}

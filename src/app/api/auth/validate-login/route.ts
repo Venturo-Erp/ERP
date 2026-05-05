@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     const { data: employee, error: empError } = await supabase
       .from('employees')
       .select(
-        'id, employee_number, display_name, english_name, avatar_url, status, user_id, workspace_id, role_id, job_info, created_at, updated_at, login_failed_count, login_locked_until, is_bot, must_change_password'
+        'id, employee_number, display_name, english_name, avatar_url, status, user_id, workspace_id, role_id, job_info, created_at, updated_at, login_failed_count, login_locked_until, must_change_password'
       )
       .eq('workspace_id', workspace.id)
       .ilike('employee_number', username)
@@ -58,11 +58,6 @@ export async function POST(request: NextRequest) {
     // 3. 檢查帳號狀態
     if (employee.status === 'terminated') {
       return ApiError.unauthorized('此帳號已停用')
-    }
-
-    // 3.1 Bot 帳號不允許登入（只供系統內部使用）
-    if ((employee as Record<string, unknown>).is_bot === true) {
-      return ApiError.unauthorized('此帳號不支援登入')
     }
 
     // 3.5 檢查帳號鎖定狀態（5 次失敗鎖定 15 分鐘）

@@ -7,10 +7,10 @@
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { DatePicker } from '@/components/ui/date-picker'
-import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Search, X, Calendar } from 'lucide-react'
 import { PaymentRequest } from '@/stores/types'
+import { StatusBadge, type StatusTone } from '@/components/ui/status-badge'
 import { cn } from '@/lib/utils'
 import { statusLabels } from '@/features/finance/requests/types'
 import { DISBURSEMENT_LABELS } from '../../constants/labels'
@@ -44,19 +44,18 @@ export function DisbursementItemList({
   onClearFilters,
   onViewRequest,
 }: DisbursementItemListProps) {
-  // 取得狀態顯示
+  // 取得狀態顯示（統一用 StatusBadge soft pill）
   const getStatusBadge = (status: string) => {
-    const colors: Record<string, string> = {
-      pending: 'bg-morandi-gold',
-      approved: 'bg-status-info',
-      confirmed: 'bg-morandi-green',
-      processing: 'bg-status-warning',
+    const tones: Record<string, StatusTone> = {
+      pending: 'pending',
+      approved: 'info',
+      confirmed: 'info',
+      processing: 'warning',
+      billed: 'success',
+      paid: 'success',
     }
-    return (
-      <Badge className={cn('text-white text-xs', colors[status] || 'bg-morandi-muted')}>
-        {(statusLabels as Record<string, string>)[status] || status}
-      </Badge>
-    )
+    const label = (statusLabels as Record<string, string>)[status] || status
+    return <StatusBadge tone={tones[status] || 'neutral'} label={label} />
   }
 
   return (

@@ -12,12 +12,12 @@ const employeeEntity = createEntityHook<Employee>('employees', {
   list: {
     // roles 欄位已從 schema drop（HR 改用 role_capabilities + employee_roles 表）、不再 select
     select:
-      'id,employee_number,display_name,chinese_name,english_name,email,avatar_url,birth_date,id_number,employee_type,status,is_bot,monthly_salary,user_id,must_change_password,last_login_at,workspace_id,created_at,updated_at,updated_by',
+      'id,employee_number,display_name,chinese_name,english_name,email,avatar_url,birth_date,id_number,status,monthly_salary,user_id,must_change_password,last_login_at,workspace_id,created_at,updated_at,updated_by',
     orderBy: { column: 'employee_number', ascending: true },
   },
   slim: {
     select:
-      'id,employee_number,display_name,chinese_name,english_name,email,status,workspace_id,employee_type,avatar_url,is_bot',
+      'id,employee_number,display_name,chinese_name,english_name,email,status,workspace_id,avatar_url',
   },
   detail: { select: '*' },
   cache: CACHE_PRESETS.low,

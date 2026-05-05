@@ -24,7 +24,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { Badge } from '@/components/ui/badge'
+import { StatusBadge, type StatusTone } from '@/components/ui/status-badge'
 import { Calendar, Plus, Pencil, Trash2, X, Save, AlertCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { logger } from '@/lib/utils/logger'
@@ -309,6 +309,14 @@ export const LeaderAvailabilityDialog: React.FC<LeaderAvailabilityDialogProps> =
                 {leaderAvailability.map(item => {
                   const statusConfig =
                     LEADER_AVAILABILITY_STATUS_CONFIG[item.status as LeaderAvailabilityStatus]
+                  const tone: StatusTone =
+                    item.status === 'available'
+                      ? 'success'
+                      : item.status === 'tentative'
+                        ? 'warning'
+                        : item.status === 'blocked'
+                          ? 'danger'
+                          : 'neutral'
                   const startDate = parseLocalDate(item.available_start_date)
                   const endDate = parseLocalDate(item.available_end_date)
 
@@ -318,9 +326,7 @@ export const LeaderAvailabilityDialog: React.FC<LeaderAvailabilityDialogProps> =
                       className="flex items-center justify-between p-3 bg-card rounded-lg border border-border hover:border-morandi-gold/50 transition-colors"
                     >
                       <div className="flex items-center gap-3">
-                        <Badge className={cn('text-xs', statusConfig?.color)}>
-                          {statusConfig?.label || item.status}
-                        </Badge>
+                        <StatusBadge tone={tone} label={statusConfig?.label || item.status || ''} />
                         <div>
                           <div className="font-medium text-morandi-primary">
                             {startDate ? formatDate(startDate) : item.available_start_date}

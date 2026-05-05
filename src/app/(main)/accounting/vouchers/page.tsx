@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { ListPageLayout } from '@/components/layout/list-page-layout'
-import { Badge } from '@/components/ui/badge'
+import { StatusBadge, type StatusTone } from '@/components/ui/status-badge'
 import { Button } from '@/components/ui/button'
 import { Eye, RotateCcw, Plus, Filter } from 'lucide-react'
 import { Input } from '@/components/ui/input'
@@ -33,11 +33,14 @@ interface JournalVoucher {
   created_at: string | null
 }
 
-const statusConfig = {
-  draft: { label: '草稿', variant: 'secondary' as const },
-  posted: { label: '已過帳', variant: 'default' as const },
-  reversed: { label: '已反沖', variant: 'destructive' as const },
-  locked: { label: '已鎖定', variant: 'outline' as const },
+const statusConfig: Record<
+  NonNullable<JournalVoucher['status']>,
+  { label: string; tone: StatusTone }
+> = {
+  draft: { label: '草稿', tone: 'pending' },
+  posted: { label: '已過帳', tone: 'success' },
+  reversed: { label: '已反沖', tone: 'danger' },
+  locked: { label: '已鎖定', tone: 'neutral' },
 }
 
 export default function VouchersPage() {
@@ -147,9 +150,9 @@ export default function VouchersPage() {
       label: '狀態',
       width: '100px',
       render: (_: unknown, row: JournalVoucher) => {
-        if (!row.status) return <Badge variant="outline">-</Badge>
+        if (!row.status) return <StatusBadge tone="neutral" label="-" />
         const config = statusConfig[row.status]
-        return <Badge variant={config.variant}>{config.label}</Badge>
+        return <StatusBadge tone={config.tone} label={config.label} />
       },
     },
     {

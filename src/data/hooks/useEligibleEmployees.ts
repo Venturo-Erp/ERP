@@ -30,7 +30,6 @@ interface EligibleEmployee {
   avatar_url: string | null
   status: string | null
   role_id: string | null
-  employee_type: string | null
 }
 
 export function useEligibleEmployees(moduleCode: string, tabCode: string) {
@@ -54,11 +53,12 @@ export function useEligibleEmployees(moduleCode: string, tabCode: string) {
     const roleIds = Array.from(new Set((caps ?? []).map(p => p.role_id).filter(Boolean)))
     if (roleIds.length === 0) return []
 
-    // Step 2: 找該 workspace 內、role_id 在清單中、在職且非 bot 的員工
+    // Step 2: 找該 workspace 內、role_id 在清單中、在職的員工
+    // 2026-05-05 William 拍板：機器人不該是員工、employee_type/is_bot 全砍、不再過濾
     const { data: employees, error: empErr } = await supabase
       .from('employees')
       .select(
-        'id, employee_number, chinese_name, english_name, display_name, avatar_url, status, role_id, employee_type'
+        'id, employee_number, chinese_name, english_name, display_name, avatar_url, status, role_id'
       )
       .eq('workspace_id', workspaceId)
       .eq('status', 'active')
@@ -66,13 +66,7 @@ export function useEligibleEmployees(moduleCode: string, tabCode: string) {
 
     if (empErr) throw empErr
 
-    // Client-side filter: 排 bot + 排 hardcoded BOT001
-    const filtered = (employees ?? []).filter(
-      e =>
-        e.employee_type !== 'bot' &&
-        e.employee_number !== 'BOT001' &&
-        e.id !== '00000000-0000-0000-0000-000000000001'
-    )
+    const filtered = employees ?? []
 
     // 按 employee_number 排序（相容原邏輯）
     filtered.sort((a, b) =>
