@@ -129,10 +129,10 @@ describe('formatMonthShort', () => {
 
 describe('formatDateTime', () => {
   it('formats date and time', () => {
-    expect(formatDateTime(new Date(2024, 0, 15, 14, 30))).toBe('2024/1/15 14:30')
+    expect(formatDateTime(new Date(2024, 0, 15, 14, 30))).toBe('2024-01-15 14:30')
   })
   it('pads hours and minutes', () => {
-    expect(formatDateTime(new Date(2024, 0, 1, 8, 5))).toBe('2024/1/1 08:05')
+    expect(formatDateTime(new Date(2024, 0, 1, 8, 5))).toBe('2024-01-01 08:05')
   })
   it('returns empty for null', () => {
     expect(formatDateTime(null)).toBe('')
@@ -372,6 +372,7 @@ describe('formatDateShort', () => {
     expect(formatDateShort(new Date(2024, 0, 15))).toBe('JAN 15')
   })
   it('formats MM/DD string', () => {
+    // formatDateShort 仍接受舊格式輸入以維持相容
     expect(formatDateShort('1/15')).toBe('JAN 15')
   })
   it('formats 12/25 string', () => {
