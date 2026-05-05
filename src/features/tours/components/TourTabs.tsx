@@ -15,7 +15,7 @@ import { Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Tour } from '@/stores/types'
 import { COMP_TOURS_LABELS } from '../constants/labels'
-import { useVisibleModuleTabs } from '@/lib/permissions/hooks'
+import { useVisibleModuleTabs, useWorkspaceFeatures } from '@/lib/permissions/hooks'
 
 // Loading placeholder
 const TabLoading = () => (
@@ -76,8 +76,9 @@ const TourDisplayItineraryTab = dynamic(
   { loading: () => <TabLoading /> }
 )
 
-const TourClosingTab = dynamic(
-  () => import('@/features/tours/components/tour-closing-tab').then(m => m.TourClosingTab),
+const TourClosingSections = dynamic(
+  () =>
+    import('@/features/tours/components/TourClosingSections').then(m => m.TourClosingSections),
   { loading: () => <TabLoading /> }
 )
 
@@ -99,10 +100,22 @@ export const TOUR_TABS = [
   { value: 'quote', label: COMP_TOURS_LABELS.報價 },
   { value: 'contract', label: '合約' },
   { value: 'checkin', label: COMP_TOURS_LABELS.報到 },
-  { value: 'closing', label: COMP_TOURS_LABELS.結案 },
+  // 「結案」獨立分頁已併進「總覽」、由 workspace feature `tours.closing` 控制可見性
+  // 詳見 TourTabContent 的 'overview' case
 ] as const
 
 type TourTabValue = (typeof TOUR_TABS)[number]['value']
+
+// ============================================================================
+// ConditionalClosingSections - 依 workspace feature `tours.closing` 決定是否渲染
+// ============================================================================
+
+function ConditionalClosingSections({ tour }: { tour: Tour }) {
+  const { isTabEnabled, loading } = useWorkspaceFeatures()
+  if (loading) return null
+  if (!isTabEnabled('tours', 'closing')) return null
+  return <TourClosingSections tour={tour} />
+}
 
 // ============================================================================
 // TourTabContent - 只渲染內容（不含頁籤列）
@@ -170,10 +183,19 @@ export function TourTabContent({
           <TourOverview tour={tour} />
           <TourReceipts tour={tour} />
           <TourCosts tour={tour} showSummary={false} />
+          <ConditionalClosingSections tour={tour} />
         </div>
       )
     case 'closing':
-      return <TourClosingTab tour={tour} />
+      // 舊 URL `?tab=closing` 相容：自動 fallback 到總覽（內含結案區塊）
+      return (
+        <div className="space-y-6">
+          <TourOverview tour={tour} />
+          <TourReceipts tour={tour} />
+          <TourCosts tour={tour} showSummary={false} />
+          <ConditionalClosingSections tour={tour} />
+        </div>
+      )
     case 'contract':
       return <TourContractTab tour={tour} />
     default:

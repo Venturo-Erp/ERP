@@ -22,6 +22,7 @@ import type { RealtimePostgresChangesPayload } from '@supabase/supabase-js'
 import { deleteMember } from '@/data'
 import { COMP_ORDERS_LABELS } from '../constants/labels'
 import { recalculateParticipants } from '@/features/tours/services/tour-stats.service'
+import { recalculateOrderAmount } from '@/features/orders/services/order-stats.service'
 import { MEMBER_DATA_LABELS } from '../constants/labels'
 
 // 快取已同步的顧客 ID，避免重複同步
@@ -342,6 +343,16 @@ export function useOrderMembersData({
       setMembers([...members, ...(data || [])])
       setIsAddDialogOpen(false)
       setMemberCountToAdd(1)
+
+      // 重算：團人數 + 訂單金額（人加進去、訂單 total_amount 要增）
+      if (tourId) {
+        recalculateParticipants(tourId).catch(err => {
+          logger.error('重算團人數失敗:', err)
+        })
+      }
+      recalculateOrderAmount(targetOrderId).catch(err => {
+        logger.error('重算訂單金額失敗:', err)
+      })
     } catch (error) {
       logger.error(COMP_ORDERS_LABELS.新增成員失敗, error)
       await alert(COMP_ORDERS_LABELS.新增失敗, 'error')
@@ -396,13 +407,19 @@ export function useOrderMembersData({
     if (!confirmed) return
 
     try {
+      const orderIdOfDeleted = memberToDelete?.order_id
       await deleteMember(memberId)
       setMembers(members.filter(m => m.id !== memberId))
 
-      // 重算團人數
+      // 重算：團人數 + 訂單金額（少了一個人、訂單 total_amount 要減）
       if (tourId) {
         recalculateParticipants(tourId).catch(err => {
           logger.error('重算團人數失敗:', err)
+        })
+      }
+      if (orderIdOfDeleted) {
+        recalculateOrderAmount(orderIdOfDeleted).catch(err => {
+          logger.error('重算訂單金額失敗:', err)
         })
       }
     } catch (error) {

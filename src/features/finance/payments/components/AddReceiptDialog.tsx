@@ -394,13 +394,13 @@ export function AddReceiptDialog({
   const handleDelete = async () => {
     if (!editingReceipt) return
 
-    // 如果沒有傳入 onDelete，使用預設的 supabase delete
+    // 如果沒有傳入 onDelete、走 entity wrapper（內建 transferred_pair_id cascade、
+    // 避免直接 supabase.delete 留下對手孤兒、UI 配對失效）
     const deleteFunc =
       onDelete ||
       (async (receiptId: string) => {
-        const { supabase } = await import('@/lib/supabase/client')
-        const { error } = await supabase.from('receipts').delete().eq('id', receiptId)
-        if (error) throw error
+        const { deleteReceipt } = await import('@/data')
+        await deleteReceipt(receiptId)
       })
 
     const confirmed = await confirm(
@@ -730,9 +730,15 @@ export function AddReceiptDialog({
             id: editingReceipt.id,
             receipt_number: editingReceipt.receipt_number,
             tour_id: editingReceipt.tour_id ?? null,
+            order_id:
+              (editingReceipt as unknown as { order_id?: string | null }).order_id ?? null,
             tour_code: '',
             tour_name: editingReceipt.tour_name || '',
             receipt_amount: editingReceipt.receipt_amount || 0,
+            actual_amount:
+              (editingReceipt as unknown as { actual_amount?: number | null }).actual_amount ??
+              null,
+            fees: (editingReceipt as unknown as { fees?: number | null }).fees ?? null,
             payment_method_id: editingReceipt.payment_method_id,
             payment_method: editingReceipt.payment_method,
             receipt_type: editingReceipt.receipt_type as unknown as number,

@@ -108,17 +108,18 @@ export function DisbursementDetailDialog({
     if (!confirmed) return
 
     try {
-      // 更新出納單狀態
+      // 1. 更新出納單狀態（先樂觀寫入、傳票失敗會 revert）
       await updateDisbursementOrderApi(order.id, {
         status: 'paid',
         confirmed_by: user?.id || null,
         confirmed_at: new Date().toISOString(),
       })
 
-      // 出納確認付款 → 自動產生會計傳票（沖應付 / 銀行支出）
+      // 2. 自動產生會計傳票（沖應付 / 銀行支出）
+      // 傳票失敗 = 會計帳會不平、必須擋下、把出納單狀態 revert 回 pending
       try {
         if (user?.workspace_id) {
-          await fetch('/api/accounting/vouchers/auto-create', {
+          const voucherRes = await fetch('/api/accounting/vouchers/auto-create', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -127,12 +128,23 @@ export function DisbursementDetailDialog({
               workspace_id: user.workspace_id,
             }),
           })
+          if (!voucherRes.ok) {
+            const errText = await voucherRes.text().catch(() => '')
+            throw new Error(`產生會計傳票失敗：${errText || voucherRes.status}`)
+          }
         }
-      } catch (err) {
-        logger.error('產生出納傳票失敗:', err)
+      } catch (voucherErr) {
+        // revert 出納單狀態、避免留下「已出帳但無傳票」的不平帳資料
+        logger.error('產生出納傳票失敗、revert 狀態:', voucherErr)
+        await updateDisbursementOrderApi(order.id, {
+          status: 'pending',
+          confirmed_by: null,
+          confirmed_at: null,
+        })
+        throw voucherErr
       }
 
-      // 更新所有請款單狀態為 billed（從 FK 反查）
+      // 3. 更新所有請款單狀態為 billed（從 FK 反查）
       const requestIds = includedRequests.map(r => r.id)
       const tour_ids_to_recalculate = new Set<string>()
       for (const requestId of requestIds) {
@@ -145,12 +157,13 @@ export function DisbursementDetailDialog({
         }
       }
 
-      // 重算相關團的成本
+      // 4. 重算相關團的成本
       for (const tour_id of tour_ids_to_recalculate) {
         await recalculateExpenseStats(tour_id)
       }
 
-      // 自動存檔 PDF
+      // 5. 自動存檔 PDF（best-effort、失敗不 revert 但要告訴使用者）
+      let pdfFailed = false
       try {
         const allItems = await supabase
           .from('payment_request_items')
@@ -173,23 +186,29 @@ export function DisbursementDetailDialog({
         const { error: uploadErr } = await supabase.storage
           .from('documents')
           .upload(filename, blob, { contentType: 'application/pdf', upsert: true })
-        if (!uploadErr) {
-          const { data: urlData } = supabase.storage.from('documents').getPublicUrl(filename)
-          if (urlData?.publicUrl) {
-            await updateDisbursementOrderApi(order.id, {
-              pdf_url: urlData.publicUrl,
-            } as Partial<DisbursementOrder>)
-          }
+        if (uploadErr) throw uploadErr
+        const { data: urlData } = supabase.storage.from('documents').getPublicUrl(filename)
+        if (urlData?.publicUrl) {
+          await updateDisbursementOrderApi(order.id, {
+            pdf_url: urlData.publicUrl,
+          } as Partial<DisbursementOrder>)
         }
       } catch (pdfErr) {
-        logger.error('Auto-save PDF failed (non-blocking):', pdfErr)
+        pdfFailed = true
+        logger.error('PDF 存檔失敗:', pdfErr)
       }
 
-      await alert(DISBURSEMENT_LABELS.出納單已標記為已出帳, 'success')
+      await alert(
+        pdfFailed
+          ? `${DISBURSEMENT_LABELS.出納單已標記為已出帳}（但 PDF 存檔失敗、可從列印按鈕重試）`
+          : DISBURSEMENT_LABELS.出納單已標記為已出帳,
+        pdfFailed ? 'warning' : 'success'
+      )
       onOpenChange(false)
     } catch (error) {
       logger.error(DISBURSEMENT_LABELS.更新出納單失敗_2, error)
-      await alert(DISBURSEMENT_LABELS.更新出納單失敗, 'error')
+      const msg = error instanceof Error ? error.message : DISBURSEMENT_LABELS.更新出納單失敗
+      await alert(msg, 'error')
     }
   }
 

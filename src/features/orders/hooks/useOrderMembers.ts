@@ -11,7 +11,10 @@ import { logger } from '@/lib/utils/logger'
 import { confirm } from '@/lib/ui/alert-dialog'
 import type { OrderMember, CustomCostField } from '../types/order-member.types'
 import { COMP_ORDERS_LABELS } from '../constants/labels'
-import { recalculateParticipants } from '@/features/tours/services/tour-stats.service'
+import {
+  recalculateParticipants,
+  recalculateTourRevenue,
+} from '@/features/tours/services/tour-stats.service'
 import { recalculateOrderAmount } from '@/features/orders/services/order-stats.service'
 
 interface UseOrderMembersParams {
@@ -281,12 +284,19 @@ function useOrderMembers({
         )
         invalidate_cache_pattern('entity:order_members')
 
-        // 如果修改了金額欄位，重算訂單金額
+        // 如果修改了金額欄位、重算訂單金額 + 團 revenue
         if (field === 'total_payable' || field === 'selling_price') {
           const member = members.find(m => m.id === memberId)
           if (member?.order_id) {
             recalculateOrderAmount(member.order_id).catch(err => {
               logger.error('重算訂單金額失敗:', err)
+            })
+          }
+          // member 有 denorm tour_id（migration 加的）、直接拿來重算團統計
+          const memberTourId = (member as unknown as { tour_id?: string | null })?.tour_id
+          if (memberTourId) {
+            recalculateTourRevenue(memberTourId).catch(err => {
+              logger.error('重算團收入失敗:', err)
             })
           }
         }

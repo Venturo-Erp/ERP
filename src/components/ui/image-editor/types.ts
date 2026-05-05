@@ -2,19 +2,6 @@
  * ImageEditor 類型定義
  */
 
-import React from 'react'
-import {
-  Sparkles,
-  Trees,
-  Camera,
-  Utensils,
-  Building,
-  Sun,
-  Cloud,
-  Leaf,
-  Snowflake,
-} from 'lucide-react'
-
 /**
  * 圖片色彩調整設定（Lightroom 風格）
  * 所有數值範圍為 -100 到 100，0 為預設值
@@ -67,35 +54,3 @@ export const DEFAULT_SETTINGS: ImageEditorSettings = {
   adjustments: { ...DEFAULT_ADJUSTMENTS },
 }
 
-// AI 編輯動作
-export type AiEditAction =
-  | 'clean_scene'
-  | 'landscape_pro'
-  | 'travel_magazine'
-  | 'food_delicious'
-  | 'architecture_dramatic'
-  | 'golden_hour'
-  | 'blue_hour'
-  | 'season_spring'
-  | 'season_summer'
-  | 'season_autumn'
-  | 'season_winter'
-
-interface AiAction {
-  action: AiEditAction
-  label: string
-  icon: React.ElementType
-}
-
-export const AI_ACTIONS: AiAction[] = [
-  { action: 'clean_scene', label: '淨空場景', icon: Sparkles },
-  { action: 'landscape_pro', label: '風景大師', icon: Trees },
-  { action: 'travel_magazine', label: '旅遊雜誌', icon: Camera },
-  { action: 'food_delicious', label: '美食攝影', icon: Utensils },
-  { action: 'architecture_dramatic', label: '建築攝影', icon: Building },
-  { action: 'golden_hour', label: '黃金時刻', icon: Sun },
-  { action: 'blue_hour', label: '藍調時刻', icon: Cloud },
-  { action: 'season_spring', label: '春季櫻花', icon: Leaf },
-  { action: 'season_autumn', label: '秋楓紅葉', icon: Leaf },
-  { action: 'season_winter', label: '冬季雪景', icon: Snowflake },
-]

@@ -55,9 +55,23 @@ class DisbursementOrderService extends BaseService<DisbursementOrder> {
         await invalidateDisbursementOrders()
       },
       delete: async (id: string) => {
+        // 1. 先把綁到此出納單的請款單「釋放」回 pending、並解除 FK
+        //    沒做這步、刪了出納單會留下 status='confirmed' 但沒對應出納單的孤兒 PR、
+        //    再也撈不回 pending pool、選不到
+        const { error: releaseErr } = await supabase
+          .from('payment_requests')
+          .update({
+            disbursement_order_id: null,
+            status: 'pending',
+          } as never)
+          .eq('disbursement_order_id', id)
+        if (releaseErr) throw new Error(releaseErr.message)
+
+        // 2. 再砍出納單本身
         const { error } = await supabase.from('disbursement_orders').delete().eq('id', id)
         if (error) throw new Error(error.message)
         await invalidateDisbursementOrders()
+        await invalidatePaymentRequests()
       },
     }
   }
@@ -176,6 +190,8 @@ class DisbursementOrderService extends BaseService<DisbursementOrder> {
   }
 
   /**
+   * @deprecated 2026-05-04 — 沒人呼叫、UI 走 DisbursementDetailDialog.handleConfirmPaid 直接 update status='paid'
+   * 此 method 設 status='confirmed'、跟實際 UI 流程不一致、語意混淆。保留是因為紅線 0 不刪。
    * 確認出納單（含 rollback 保護）
    * 如果請款單狀態更新失敗，會回滾出納單狀態
    */

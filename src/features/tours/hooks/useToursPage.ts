@@ -76,8 +76,8 @@ export function useToursPage(): UseToursPageReturn {
 
   // ✅ Use server-side paginated hook
   const { tours, totalCount, loading, actions } = useToursPaginated({
-    page: currentPage,
-    pageSize: 20,
+    page: 1,
+    pageSize: 1000,
     status: activeStatusTab,
     search: searchQuery,
     sortBy,

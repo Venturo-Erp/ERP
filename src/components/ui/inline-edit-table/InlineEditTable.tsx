@@ -45,6 +45,8 @@ interface InlineEditTableProps<T> {
   className?: string
   /** 視覺樣式：default=金色 header（適合 dialog 主表格）；minimal=灰字 label（適合 inline 設定） */
   variant?: 'default' | 'minimal'
+  /** 每列額外 className（如要把特定列底色標出來、跟其他列做視覺區隔） */
+  rowClassName?: (row: T, index: number) => string | undefined
 }
 
 const alignClass: Record<NonNullable<InlineEditColumn<unknown>['align']>, string> = {
@@ -70,6 +72,7 @@ export function InlineEditTable<T>({
   rowRender,
   className,
   variant = 'default',
+  rowClassName,
 }: InlineEditTableProps<T>) {
   const showActionColumn = !!onRemove && !rowRender
   const totalCols = columns.length + (showActionColumn ? 1 : 0)
@@ -148,7 +151,8 @@ export function InlineEditTable<T>({
                   <React.Fragment key={index}>
                     <tr
                       className={cn(
-                        isMinimal ? '' : 'bg-card border-b border-border/50 last:border-b-0'
+                        isMinimal ? '' : 'bg-card border-b border-border/50 last:border-b-0',
+                        rowClassName?.(row, index)
                       )}
                     >
                       {columns.map(col => (

@@ -82,7 +82,9 @@ export async function POST(
     // 查收款單
     const { data: receipt, error: recErr } = await supabase
       .from('receipts')
-      .select('id, receipt_number, status, actual_amount, receipt_amount, refunded_at, workspace_id, notes')
+      .select(
+        'id, receipt_number, status, actual_amount, receipt_amount, refunded_at, workspace_id, notes, order_id, tour_id'
+      )
       .eq('id', receiptId)
       .single()
 
@@ -244,6 +246,16 @@ export async function POST(
       .eq('id', receiptId)
 
     if (updErr) throw updErr
+
+    // 重算訂單 paid_amount + 團 total_revenue（refund 邏輯：refunded 狀態用 actual−refund_amount 算淨額）
+    try {
+      const { recalculateReceiptStats } = await import(
+        '@/features/finance/payments/services/receipt-core.service'
+      )
+      await recalculateReceiptStats(receipt.order_id, receipt.tour_id)
+    } catch (recalcErr) {
+      logger.error('退款後重算統計失敗（不阻擋退款結果）:', recalcErr)
+    }
 
     return NextResponse.json({
       success: true,

@@ -11,7 +11,6 @@ import {
   Check,
   Crop,
   Loader2,
-  Wand2,
   Move,
   Sun,
 } from 'lucide-react'
@@ -21,19 +20,12 @@ import { logger } from '@/lib/utils/logger'
 
 // 拆分模組
 import { AdjustmentSlider } from './AdjustmentSlider'
-import {
-  applyAdjustmentsToImage,
-  applyTransformToImage,
-  cropImage,
-  uploadBase64ToStorage,
-} from './image-utils'
+import { applyAdjustmentsToImage, applyTransformToImage, cropImage } from './image-utils'
 import {
   type ImageAdjustments,
   type ImageEditorSettings,
-  type AiEditAction,
   DEFAULT_ADJUSTMENTS,
   DEFAULT_SETTINGS,
-  AI_ACTIONS,
 } from './types'
 
 // Re-export types
@@ -54,10 +46,6 @@ interface ImageEditorProps {
   onSave: (settings: ImageEditorSettings) => void
   /** 裁切並存檔（輸出最終圖片） */
   onCropAndSave?: (blob: Blob, settings: ImageEditorSettings) => void
-  /** 是否顯示 AI 功能 */
-  showAi?: boolean
-  /** AI 編輯後替換圖片 */
-  onAiReplace?: (newImageUrl: string) => void
 }
 
 // ============ Component ============
@@ -70,8 +58,6 @@ export function ImageEditor({
   initialSettings,
   onSave,
   onCropAndSave,
-  showAi = true,
-  onAiReplace,
 }: ImageEditorProps) {
   // 沒傳 aspectRatio 時使用自由模式（不裁切）
   const freeMode = aspectRatioProp === undefined
@@ -95,10 +81,8 @@ export function ImageEditor({
   // UI 狀態
   const [isDragging, setIsDragging] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
-  const [aiProcessing, setAiProcessing] = useState<AiEditAction | null>(null)
   const [transformedSrc, setTransformedSrc] = useState(imageSrc)
   const [previewSrc, setPreviewSrc] = useState(imageSrc)
-  const [aiPreviewUrl, setAiPreviewUrl] = useState<string | null>(null)
 
   // Refs
   const previewRef = useRef<HTMLDivElement>(null)
@@ -264,52 +248,11 @@ export function ImageEditor({
     }))
   }, [])
 
-  // ============ AI 美化 ============
-  const handleAiEdit = useCallback(
-    async (action: AiEditAction) => {
-      if (!onAiReplace) return
-
-      setAiProcessing(action)
-      try {
-        const response = await fetch('/api/ai/edit-image', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ imageUrl: imageSrc, action }),
-        })
-
-        const result = await response.json()
-        if (!result.success) {
-          throw new Error(result.error || '編輯失敗')
-        }
-
-        // 上傳 base64 到 Storage，但先預覽不直接替換
-        const uploadResult = await uploadBase64ToStorage(result.data.image)
-        if (uploadResult.success && uploadResult.url) {
-          // 更新預覽圖，讓用戶確認後按「存檔」才真正套用
-          setAiPreviewUrl(uploadResult.url)
-          void alert(`${result.data.actionLabel} 完成，按「存檔」套用`, 'success')
-        } else {
-          throw new Error('上傳失敗')
-        }
-      } catch (error) {
-        logger.error('AI 編輯失敗:', error)
-        void alert(error instanceof Error ? error.message : '編輯失敗', 'error')
-      } finally {
-        setAiProcessing(null)
-      }
-    },
-    [imageSrc, onAiReplace]
-  )
-
   // ============ 存檔 ============
   const handleSave = useCallback(() => {
-    // 如果有 AI 美化過的預覽圖，存檔時套用替換
-    if (aiPreviewUrl && onAiReplace) {
-      onAiReplace(aiPreviewUrl)
-    }
     onSave(settings)
     onClose()
-  }, [settings, onSave, onClose, aiPreviewUrl, onAiReplace])
+  }, [settings, onSave, onClose])
 
   // ============ 裁切並存檔 ============
   const handleCropAndSave = useCallback(async () => {
@@ -371,7 +314,7 @@ export function ImageEditor({
               onMouseDown={handleMouseDown}
             >
               <img
-                src={aiPreviewUrl || previewSrc}
+                src={previewSrc}
                 alt={tCommon('preview')}
                 className={cn(
                   'w-full h-full pointer-events-none',
@@ -515,38 +458,6 @@ export function ImageEditor({
                 </Button>
               )}
 
-              {/* AI 美化 */}
-              {showAi && onAiReplace && (
-                <div className="space-y-3 pt-2 border-t border-border">
-                  <h4 className="text-xs uppercase tracking-wider text-morandi-muted font-semibold flex items-center gap-2">
-                    <Wand2 size={12} />
-                    {t('aiEnhance')}
-                  </h4>
-                  <div className="grid grid-cols-2 gap-2">
-                    {AI_ACTIONS.map(({ action, label, icon: Icon }) => (
-                      <button
-                        key={action}
-                        type="button"
-                        onClick={() => handleAiEdit(action)}
-                        disabled={aiProcessing !== null}
-                        className={cn(
-                          'flex items-center gap-1.5 px-2 py-1.5 rounded text-xs transition-colors',
-                          'bg-morandi-container hover:bg-morandi-gold/10 hover:text-morandi-gold',
-                          'disabled:opacity-50 disabled:cursor-not-allowed',
-                          aiProcessing === action && 'bg-morandi-gold/20 text-morandi-gold'
-                        )}
-                      >
-                        {aiProcessing === action ? (
-                          <Loader2 size={12} className="animate-spin" />
-                        ) : (
-                          <Icon size={12} />
-                        )}
-                        <span className="truncate">{label}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </div>

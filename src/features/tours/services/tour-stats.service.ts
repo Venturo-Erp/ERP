@@ -80,3 +80,63 @@ export async function recalculateParticipants(tour_id: string): Promise<void> {
     throw error
   }
 }
+
+/**
+ * 重算旅遊團的 total_revenue（從所有訂單 paid_amount 加總）
+ *
+ * @description 跟 receipt-core.service.recalculateTourFinancials 不同：
+ * 那個是看「已收款 receipts」、這個是看「訂單記帳的 paid_amount」。
+ * 兩個值理論上應該一致、但可能因 receipt 對帳延遲短暫不一致、
+ * 提供這支讓「member 異動」/「order 異動」也能 trigger tour 統計刷新。
+ *
+ * 任何 order_members 異動 / order paid_amount 變動後都該呼叫。
+ */
+export async function recalculateTourRevenue(tour_id: string): Promise<void> {
+  try {
+    // 加總該團所有訂單的 paid_amount
+    const { data: orders, error } = await supabase
+      .from('orders')
+      .select('paid_amount, total_amount')
+      .eq('tour_id', tour_id)
+
+    if (error) {
+      logger.error('查詢團訂單失敗:', error)
+      throw error
+    }
+
+    const totalRevenue = (orders || []).reduce(
+      (sum, o) => sum + (Number(o.paid_amount) || 0),
+      0
+    )
+
+    // 取現有 total_cost 算 profit
+    const { data: tour } = await supabase
+      .from('tours')
+      .select('total_cost')
+      .eq('id', tour_id)
+      .single()
+    const totalCost = Number(tour?.total_cost) || 0
+
+    const { error: updateError } = await supabase
+      .from('tours')
+      .update({
+        total_revenue: totalRevenue,
+        profit: totalRevenue - totalCost,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', tour_id)
+
+    if (updateError) {
+      logger.error('更新團收入失敗:', updateError)
+      throw updateError
+    }
+
+    await mutate('tours')
+    await mutate(`tour-${tour_id}`)
+
+    logger.log('團收入已重算:', { tour_id, total_revenue: totalRevenue })
+  } catch (error) {
+    logger.error('recalculateTourRevenue 失敗:', error)
+    // 不向上拋、不阻擋主流程
+  }
+}

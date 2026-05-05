@@ -147,8 +147,25 @@ export function useToursPaginated(params: UseToursPaginatedParams): UseToursPagi
         throw new Error(queryError.message)
       }
 
+      // 待結案優先排序：return_date 已過但 status 還沒 closed 的排最前
+      const todayMs = Date.now()
+      const sorted = [...(tours || [])].sort((a, b) => {
+        const aPending =
+          a.return_date && new Date(a.return_date).getTime() < todayMs && a.status !== 'closed'
+            ? 0
+            : 1
+        const bPending =
+          b.return_date && new Date(b.return_date).getTime() < todayMs && b.status !== 'closed'
+            ? 0
+            : 1
+        if (aPending !== bPending) return aPending - bPending
+        const ad = a.departure_date ? new Date(a.departure_date).getTime() : 0
+        const bd = b.departure_date ? new Date(b.departure_date).getTime() : 0
+        return sortOrder === 'asc' ? ad - bd : bd - ad
+      })
+
       return {
-        tours: (tours || []) as Tour[],
+        tours: sorted as Tour[],
         count: count || 0,
       }
     },

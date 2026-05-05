@@ -22,9 +22,6 @@ import { IntlProvider } from '@/components/providers/IntlProvider'
 import { Toaster } from 'sonner'
 import { LAYOUT_LABELS } from './constants/labels'
 
-export const dynamic = 'force-dynamic'
-export const dynamicParams = true
-
 export const metadata: Metadata = {
   title: LAYOUT_LABELS.TITLE,
   description: LAYOUT_LABELS.DESCRIPTION,

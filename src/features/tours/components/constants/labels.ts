@@ -48,7 +48,7 @@ export const TOURS_LABELS = {
   LABEL_9671: '請款單號',
   LABEL_1552: '供應商',
   LABEL_4310: '無支出紀錄',
-  SETTINGS_6822: '無獎金設定',
+  SETTINGS_6822: '無獎金明細',
   TYPE: '類型',
   LABEL_2076: '員工',
   LABEL_8378: '獎金請款明細',

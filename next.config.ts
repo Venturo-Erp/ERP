@@ -42,7 +42,7 @@ const nextConfig: NextConfig = {
         {
           key: 'Content-Security-Policy',
           value:
-            "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://va.vercel-scripts.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.taishinbank.com.tw https://tspg.taishinbank.com.tw https://*.sentry.io https://va.vercel-scripts.com https://api.open-meteo.com;",
+            "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://va.vercel-scripts.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.taishinbank.com.tw https://tspg.taishinbank.com.tw https://*.sentry.io https://va.vercel-scripts.com https://api.open-meteo.com; frame-src 'self' blob:; object-src 'self' blob:;",
         },
       ],
     },
@@ -57,22 +57,20 @@ const nextConfig: NextConfig = {
     serverActions: {
       bodySizeLimit: '2mb',
     },
-    // 優化常用套件的 tree-shaking
+    // 優化常用套件的 tree-shaking（只列實際安裝的、跟 package.json 對齊）
     optimizePackageImports: [
       'lucide-react',
       '@radix-ui/react-dialog',
-      '@radix-ui/react-dropdown-menu',
       '@radix-ui/react-select',
+      '@radix-ui/react-slider',
+      '@radix-ui/react-visually-hidden',
       '@radix-ui/react-tabs',
-      '@radix-ui/react-tooltip',
       '@radix-ui/react-popover',
       '@radix-ui/react-checkbox',
       '@radix-ui/react-switch',
-      '@radix-ui/react-label',
       '@radix-ui/react-scroll-area',
       '@radix-ui/react-slot',
       'date-fns',
-      'recharts',
       '@supabase/supabase-js',
       'framer-motion',
     ],

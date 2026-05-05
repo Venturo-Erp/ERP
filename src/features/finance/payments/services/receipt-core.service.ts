@@ -30,7 +30,10 @@ async function afterReceiptChange(
 
 /**
  * 重算訂單的已收金額和付款狀態
- * 只計算 status='confirmed' 且未被刪除的收款
+ * - 已確認 (confirmed)：actual_amount 全額計入
+ * - 已退款 (refunded)：actual_amount − refund_amount（部分退款留剩餘、全退留 0）
+ *
+ * 2026-05-04 補：原本只算 'confirmed'、退款後整筆從統計消失、部分退款也整筆扣
  */
 async function recalculateOrderPayment(orderId: string): Promise<void> {
   // 取得訂單總金額
@@ -47,12 +50,12 @@ async function recalculateOrderPayment(orderId: string): Promise<void> {
 
   const orderTotalAmount = orderData?.total_amount || 0
 
-  // 計算該訂單所有已確認收款的實收總金額（只取未軟刪的）
+  // 抓 confirmed + refunded 兩種狀態、用 actual_amount − refund_amount 算淨額
   const { data: confirmedReceipts, error: receiptsError } = await supabase
     .from('receipts')
-    .select('actual_amount')
+    .select('actual_amount, status, refund_amount')
     .eq('order_id', orderId)
-    .eq('status', 'confirmed')
+    .in('status', ['confirmed', 'refunded'])
     .eq('is_active', true)
 
   if (receiptsError) {
@@ -60,7 +63,13 @@ async function recalculateOrderPayment(orderId: string): Promise<void> {
     throw receiptsError
   }
 
-  const totalPaid = (confirmedReceipts || []).reduce((sum, r) => sum + (r.actual_amount || 0), 0)
+  const totalPaid = (confirmedReceipts || []).reduce((sum, r) => {
+    const actual = Number(r.actual_amount) || 0
+    if (r.status === 'refunded') {
+      return sum + Math.max(0, actual - (Number(r.refund_amount) || 0))
+    }
+    return sum + actual
+  }, 0)
 
   // 計算付款狀態
   let paymentStatus: 'unpaid' | 'partial' | 'paid' = 'unpaid'
@@ -110,11 +119,11 @@ async function recalculateTourFinancials(tourId: string): Promise<void> {
 
   const orderIds = (tourOrdersData || []).map(o => o.id)
 
-  // 查詢所有已確認且未刪除的收款
+  // 抓 confirmed + refunded 兩種狀態、用 actual_amount − refund_amount 算淨額
   let receiptsQuery = supabase
     .from('receipts')
-    .select('actual_amount')
-    .eq('status', 'confirmed')
+    .select('actual_amount, status, refund_amount')
+    .in('status', ['confirmed', 'refunded'])
     .eq('is_active', true)
 
   if (orderIds.length > 0) {
@@ -130,7 +139,13 @@ async function recalculateTourFinancials(tourId: string): Promise<void> {
     throw receiptsQueryError
   }
 
-  const totalRevenue = (receiptsData || []).reduce((sum, r) => sum + (r.actual_amount || 0), 0)
+  const totalRevenue = (receiptsData || []).reduce((sum, r) => {
+    const actual = Number(r.actual_amount) || 0
+    if (r.status === 'refunded') {
+      return sum + Math.max(0, actual - (Number(r.refund_amount) || 0))
+    }
+    return sum + actual
+  }, 0)
 
   // 取得當前成本
   const { data: currentTour, error: tourCostError } = await supabase

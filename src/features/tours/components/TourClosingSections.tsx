@@ -1,39 +1,22 @@
 'use client'
 
 /**
- * TourClosingTab - 結案頁籤
- * 顯示團的收支明細、利潤計算
+ * TourClosingSections — 結案專屬區塊（嵌進總覽分頁）
+ *
+ * 設計：
+ * - 把舊 `tour-closing-tab.tsx` 裡 closing-only 的部分（利潤計算表 + 獎金明細 + 結案狀況）
+ *   抽出來、獨立成可嵌入「總覽」分頁的 sections
+ * - 上層在 TourTabs 用 workspace feature 開關（`tours.closing`）決定要不要 mount
+ *   → 沒開的 workspace 不會 fetch 這些資料、不會看到這 3 段
+ * - 「總覽」原本的 TourOverview / TourReceipts / TourCosts 不重複、留在外面
  */
 
-import { useMemo, useState, useCallback, useEffect } from 'react'
-import { TourOverview } from './tour-overview'
-import { TourCosts } from './tour-costs'
-import { TourReceipts } from './tour-receipts'
-import {
-  FileDown,
-  FileText,
-  Loader2,
-  Lock,
-  Unlock,
-  TrendingUp,
-  HandCoins,
-  DollarSign,
-  ArrowRight,
-  MapPin,
-  Calendar,
-  Users,
-  Settings2,
-} from 'lucide-react'
+import { useMemo, useState, useCallback } from 'react'
+import { mutate as globalMutate } from 'swr'
+import { Loader2, Unlock, FileDown, Settings2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { logger } from '@/lib/utils/logger'
-import { AddReceiptDialog } from '@/features/finance/payments/components/AddReceiptDialog'
-import { AddRequestDialog } from '@/features/finance/requests/components/AddRequestDialog'
-import type { Receipt } from '@/types/receipt.types'
-import type { PaymentRequest } from '@/types/finance.types'
-import { formatCurrency } from '@/lib/utils/format-currency'
-import { generateTourClosingPDF } from '@/lib/pdf/tour-closing-pdf'
-import type { TourClosingPDFData } from '@/lib/pdf/tour-closing-pdf'
 import type { Tour } from '@/stores/types'
 import { ProfitTab } from './ProfitTab'
 import { BonusSettingsDialog } from './BonusSettingsDialog'
@@ -45,52 +28,40 @@ import {
   useEmployeeDictionary,
   useMembers,
   useOrdersSlim,
-  useSuppliersSlim,
   updateTour,
 } from '@/data'
 import { calculateFullProfit } from '../services/profit-calculation.service'
-import { useAuthStore } from '@/stores'
+import { generateBonusPaymentRequest } from '../services/bonus-payment.service'
+import { invalidatePaymentRequests, invalidateTourBonusSettings } from '@/data'
 import { supabase } from '@/lib/supabase/client'
-import { usePaymentMethodsCached } from '@/data/hooks'
+import { useAuthStore } from '@/stores'
 import { TOUR_STATUS } from '@/lib/constants/status-maps'
+import { BonusSettingType } from '@/types/bonus.types'
+import type { PrintTourClosingPreviewProps } from './PrintTourClosingPreview'
 
-interface TourClosingTabProps {
+interface TourClosingSectionsProps {
   tour: Tour
 }
 
-export function TourClosingTab({ tour }: TourClosingTabProps) {
-  const [selectedReceipt, setSelectedReceipt] = useState<Receipt | null>(null)
-  const [receiptDialogOpen, setReceiptDialogOpen] = useState(false)
-  const [selectedRequest, setSelectedRequest] = useState<PaymentRequest | null>(null)
-  const [requestDialogOpen, setRequestDialogOpen] = useState(false)
+export function TourClosingSections({ tour }: TourClosingSectionsProps) {
   const [bonusDialogOpen, setBonusDialogOpen] = useState(false)
   const [reportDialogOpen, setReportDialogOpen] = useState(false)
+  const [statusUpdating, setStatusUpdating] = useState(false)
 
-  // 資料取得
   const { items: allReceipts } = useReceipts()
   const { items: allPaymentRequests } = usePaymentRequests()
   const { items: allBonusSettings } = useTourBonusSettings()
   const { items: allMembers } = useMembers()
   const { items: allOrders } = useOrdersSlim()
-  const { items: allSuppliers } = useSuppliersSlim()
   const { get: getEmployee } = useEmployeeDictionary()
   const { user } = useAuthStore()
 
-  // 供應商 ID → 最新名稱 lookup
-  const supplierMap = useMemo(() => {
-    const map: Record<string, string> = {}
-    for (const s of allSuppliers ?? []) map[s.id] = s.name
-    return map
-  }, [allSuppliers])
-
   const orders = useMemo(
-    () => allOrders?.filter(o => o.tour_id === tour.id) ?? [],
+    () => (allOrders ?? []).filter(o => o.tour_id === tour.id),
     [allOrders, tour.id]
   )
-
   const orderIds = useMemo(() => new Set(orders.map(o => o.id)), [orders])
 
-  // 收款明細（全部顯示，狀態依核帳結果）
   const receipts = useMemo(
     () =>
       (allReceipts ?? [])
@@ -101,7 +72,6 @@ export function TourClosingTab({ tour }: TourClosingTabProps) {
     [allReceipts, tour.id, orderIds]
   )
 
-  // 請款明細
   const paymentRequests = useMemo(
     () =>
       (allPaymentRequests ?? [])
@@ -137,37 +107,10 @@ export function TourClosingTab({ tour }: TourClosingTabProps) {
     return dict
   }, [bonusSettings, getEmployee])
 
-  // 計算總額
-  const confirmedIncome = useMemo(
-    () =>
-      receipts
-        .filter(r => r.status === 'confirmed')
-        .reduce((sum, r) => sum + (Number(r.actual_amount) || Number(r.receipt_amount) || 0), 0),
-    [receipts]
-  )
-  const estimatedIncome = useMemo(
-    () =>
-      receipts.reduce(
-        (sum, r) => sum + (Number(r.actual_amount) || Number(r.receipt_amount) || 0),
-        0
-      ),
-    [receipts]
-  )
-
-  const totalExpense = useMemo(
-    () => paymentRequests.reduce((sum, pr) => sum + (Number(pr.amount) || 0), 0),
-    [paymentRequests]
-  )
-
-  const confirmedProfit = confirmedIncome - totalExpense
-  const estimatedProfit = estimatedIncome - totalExpense
-
-  // 結案狀態（真相來源 = tour.status）
   const isClosed = tour.status === TOUR_STATUS.CLOSED
   const statusInfo = isClosed
     ? { label: '已結團', color: 'bg-morandi-green/20 text-morandi-green' }
     : { label: '進行中', color: 'bg-morandi-gold/20 text-morandi-gold' }
-  const [statusUpdating, setStatusUpdating] = useState(false)
 
   const handleToggleClosingStatus = useCallback(async () => {
     const nextStatus = isClosed ? TOUR_STATUS.RETURNED : TOUR_STATUS.CLOSED
@@ -179,6 +122,9 @@ export function TourClosingTab({ tour }: TourClosingTabProps) {
           ? { closing_date: new Date().toISOString() }
           : { closing_date: null }),
       })
+      // updateTour 只動「tours 列表」SWR cache、團詳情頁用另一條 key (`tour-${id}`)
+      // 不手動 invalidate 這條、畫面會看不到狀態更新（重新開啟按鈕「沒反應」的 root cause）
+      await globalMutate(`tour-${tour.id}`)
       toast.success(nextStatus === TOUR_STATUS.CLOSED ? '已標記為結團' : '已重新開啟團')
     } catch (err) {
       logger.error('更新結案狀態失敗', err)
@@ -188,8 +134,8 @@ export function TourClosingTab({ tour }: TourClosingTabProps) {
     }
   }, [isClosed, tour.id])
 
-  // PDF 資料（給結案報告 dialog 用）— 開啟 dialog 時即時組好餵進去
-  const pdfData: TourClosingPDFData = useMemo(() => {
+  // 結案報告資料（給 ClosingReportDialog 用）
+  const reportData: PrintTourClosingPreviewProps = useMemo(() => {
     const adaptedReceipts = receipts.map(r => ({
       ...r,
       receipt_number: r.receipt_number ?? '',
@@ -212,12 +158,6 @@ export function TourClosingTab({ tour }: TourClosingTabProps) {
 
     return {
       tour,
-      orders: orders.map(o => ({
-        code: o.code,
-        contact_person: o.contact_person,
-        member_count: o.member_count,
-        total_amount: o.total_amount,
-      })),
       receipts: receipts.map(r => ({
         receipt_number: r.receipt_number,
         receipt_date: r.receipt_date,
@@ -229,70 +169,80 @@ export function TourClosingTab({ tour }: TourClosingTabProps) {
       profitResult,
       preparedBy: user?.name ?? undefined,
     }
-  }, [receipts, paymentRequests, bonusSettings, memberCount, employeeDict, tour, orders, user])
+  }, [receipts, paymentRequests, bonusSettings, memberCount, employeeDict, tour, user])
 
-  // 由 ClosingReportDialog 的「列印並結團」按鈕呼叫
   const handleConfirmCloseFromReport = useCallback(async () => {
     try {
+      // === Step 1: 自動生成所有「獎金類」請款單（OP / 業務 / 團隊）===
+      // 行政費 + 營收稅已經在 calc service 內按順序扣完了、得到 net_profit
+      // 這邊只把 amount > 0 且還沒生過請款單的獎金 setting 一次跑完
+      const today = new Date().toISOString().slice(0, 10)
+      const tourCode = tour.code || ''
+      const tourName = tour.name || ''
+      const profitResult = reportData.profitResult
+
+      const bonusesToIssue = [
+        ...profitResult.employee_bonuses,
+        ...profitResult.team_bonuses,
+      ].filter(b => b.amount > 0 && !b.setting.payment_request_id)
+
+      if (bonusesToIssue.length > 0) {
+        // 預先撈這個 workspace 的所有 SAL- code、當 code generator 的初始 buffer
+        // 之後每筆生成 service 內部會 append 進 buffer、避免序號重複
+        const { data: existingBNS } = await supabase
+          .from('payment_requests')
+          .select('code')
+          .eq('workspace_id', tour.workspace_id ?? '')
+          .like('code', 'BNS-%')
+        const codeBuffer: { code?: string }[] = (existingBNS ?? []) as { code?: string }[]
+
+        // 順序生（不可 Promise.all、不然多筆同 batch 會搶到相同序號）
+        for (const b of bonusesToIssue) {
+          await generateBonusPaymentRequest({
+            setting: b.setting,
+            amount: b.amount,
+            disbursementDate: today,
+            payeeName:
+              b.employee_name ||
+              (b.setting.type === BonusSettingType.TEAM_BONUS ? '團隊獎金' : '獎金'),
+            tourCode,
+            tourName,
+            codeBuffer,
+          })
+        }
+      }
+
+      // === Step 2: 鎖定團（標記結團 + 寫 closing_date）===
       await updateTour(tour.id, {
         status: TOUR_STATUS.CLOSED,
         closing_date: new Date().toISOString(),
       })
-      toast.success('已列印並標記為結團')
+
+      // === Step 3: invalidate 所有相關 cache、UI 即時更新 ===
+      await Promise.all([
+        globalMutate(`tour-${tour.id}`),
+        invalidateTourBonusSettings(),
+        invalidatePaymentRequests(),
+      ])
+
+      const issuedMsg =
+        bonusesToIssue.length > 0
+          ? `、已生成 ${bonusesToIssue.length} 張獎金請款單`
+          : ''
+      toast.success(`已列印並標記為結團${issuedMsg}`)
     } catch (err) {
       logger.error('結團失敗', err)
-      toast.error('結團失敗')
+      toast.error('結團失敗、請再試一次')
       throw err
     }
-  }, [tour.id])
-
-  // 格式化日期
-  const formatDate = (dateStr: string | null | undefined) => {
-    if (!dateStr) return '-'
-    const d = new Date(dateStr)
-    return d.toLocaleDateString('zh-TW', { month: '2-digit', day: '2-digit' })
-  }
-
-  const formatDateTime = (dateStr: string | null | undefined) => {
-    if (!dateStr) return '-'
-    const d = new Date(dateStr)
-    return d.toLocaleDateString('zh-TW', {
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-    })
-  }
-
-  // 收款方式對照（SWR 快取）
-  const { methods: allPaymentMethods } = usePaymentMethodsCached()
-  const paymentMethodMap = useMemo(() => {
-    const map: Record<string, string> = {}
-    for (const pm of allPaymentMethods) map[pm.id] = pm.name
-    return map
-  }, [allPaymentMethods])
-
-  const PAYMENT_METHOD_LABELS: Record<string, string> = {
-    transfer: '匯款',
-    cash: '現金',
-    card: '刷卡',
-    check: '支票',
-    linkpay: 'LinkPay',
-  }
+  }, [tour.id, tour.code, tour.name, reportData])
 
   return (
-    <div className="space-y-6">
-      {/* 總覽卡片 — 直接使用 TourOverview */}
-      <TourOverview tour={tour} />
-
-      {/* 收款總覽 + 請款總覽 — 使用共用組件 */}
-      <TourReceipts tour={tour} />
-      <TourCosts tour={tour} showSummary={false} />
-
-      {/* 利潤總覽 + 獎金明細 */}
+    <>
+      {/* 利潤計算表 + 獎金明細 */}
       <ProfitTab tour={tour} />
 
-      {/* 結案狀態 + 操作 */}
+      {/* 結案狀況 */}
       <div className="flex items-center justify-between bg-card border border-border rounded-lg px-4 py-3">
         <div className="flex items-center gap-3">
           <span className="text-sm font-medium text-morandi-primary">結案狀態</span>
@@ -328,35 +278,19 @@ export function TourClosingTab({ tour }: TourClosingTabProps) {
         </div>
       </div>
 
-      {/* 獎金設定 Dialog（從結案狀態列的「編輯獎金設定」按鈕觸發） */}
       <BonusSettingsDialog
         open={bonusDialogOpen}
         onOpenChange={setBonusDialogOpen}
         tour={tour}
       />
 
-      {/* 結案報告 Dialog（in-app preview + 列印並結團） */}
       <ClosingReportDialog
         open={reportDialogOpen}
         onOpenChange={setReportDialogOpen}
-        data={pdfData}
+        data={reportData}
         onConfirmClose={handleConfirmCloseFromReport}
         alreadyClosed={isClosed}
       />
-
-      {/* 收款單 Dialog */}
-      <AddReceiptDialog
-        open={receiptDialogOpen}
-        onOpenChange={setReceiptDialogOpen}
-        editingReceipt={selectedReceipt}
-      />
-
-      {/* 請款單 Dialog */}
-      <AddRequestDialog
-        open={requestDialogOpen}
-        onOpenChange={setRequestDialogOpen}
-        editingRequest={selectedRequest}
-      />
-    </div>
+    </>
   )
 }

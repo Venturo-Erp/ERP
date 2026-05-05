@@ -7,6 +7,8 @@
 import { createEntityHook } from '../core/createEntityHook'
 import { CACHE_PRESETS } from '../core/types'
 import type { DisbursementOrder } from '@/stores/types'
+import { supabase } from '@/lib/supabase/client'
+import { invalidatePaymentRequests } from './payment-requests'
 
 const disbursementOrderEntity = createEntityHook<DisbursementOrder>('disbursement_orders', {
   list: {
@@ -29,5 +31,24 @@ const useDisbursementOrderDictionary = disbursementOrderEntity.useDictionary
 
 const createDisbursementOrder = disbursementOrderEntity.create
 export const updateDisbursementOrder = disbursementOrderEntity.update
-export const deleteDisbursementOrder = disbursementOrderEntity.delete
+
+/**
+ * 刪除出納單時、自動把綁進來的 payment_requests 釋放回 pending
+ * 沒這層保護、刪了單會留下 status='confirmed' 但沒對應出納單的孤兒 PR、
+ * 再也撈不回 pending pool、無法重新加入新出納單
+ */
+export const deleteDisbursementOrder = async (id: string) => {
+  const { error: releaseErr } = await supabase
+    .from('payment_requests')
+    .update({
+      disbursement_order_id: null,
+      status: 'pending',
+    } as never)
+    .eq('disbursement_order_id', id)
+  if (releaseErr) throw new Error(releaseErr.message)
+
+  await disbursementOrderEntity.delete(id)
+  await invalidatePaymentRequests()
+}
+
 export const invalidateDisbursementOrders = disbursementOrderEntity.invalidate

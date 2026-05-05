@@ -29,9 +29,6 @@ const EXACT_PUBLIC_PATHS = new Set<string>([
   // === 客戶簽單確認（透過分享連結）===
   '/api/contracts/sign',
   '/api/quotes/confirmation/customer',
-  // === LINE LIFF customer 登入前查詢 ===
-  '/api/customers/by-line',
-  '/api/customers/match',
 ])
 
 const PREFIX_PUBLIC_PATHS: readonly string[] = [
@@ -42,11 +39,7 @@ const PREFIX_PUBLIC_PATHS: readonly string[] = [
   '/view/',
   '/p/',
   '/game/',
-  // === LINE customer OAuth 家族 (/api/auth/line, /callback, /me) ===
-  '/api/auth/line',
   // === Server-to-server webhook ===
-  '/api/line/webhook',
-  '/api/meta/webhook',
   '/api/linkpay/callback',
   '/api/linkpay/webhook',
   // === Cron (Vercel internal) ===

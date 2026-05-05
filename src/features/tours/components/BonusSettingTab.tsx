@@ -1,29 +1,19 @@
 'use client'
 
-import { useState, useCallback, useMemo } from 'react'
-import { logger } from '@/lib/utils/logger'
-import { Plus, Pencil, Trash2 } from 'lucide-react'
+import { useState, useMemo } from 'react'
+import { Settings2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { useAuthStore } from '@/stores/auth-store'
 import { BonusSettingType, BonusCalculationType } from '@/types/bonus.types'
 import type { TourBonusSetting } from '@/types/bonus.types'
 import type { Tour } from '@/stores/types'
-import {
-  useTourBonusSettings,
-  createTourBonusSetting,
-  updateTourBonusSetting,
-  deleteTourBonusSetting,
-  invalidateTourBonusSettings,
-  useWorkspaceBonusDefaults,
-} from '@/data'
-import { useEmployeeDictionary } from '@/data'
+import { useTourBonusSettings, useEmployeeDictionary } from '@/data'
 import {
   BONUS_TYPE_LABELS,
   BONUS_CALCULATION_LABELS,
   BONUS_TYPE_BADGE_VARIANTS,
   BONUS_TAB_LABELS,
 } from '../constants/bonus-labels'
-import { BonusSettingDialog } from './BonusSettingDialog'
+import { BonusSettingsDialog } from './BonusSettingsDialog'
 import { TOURS_LABELS } from './constants/labels'
 
 interface BonusSettingTabProps {
@@ -31,82 +21,15 @@ interface BonusSettingTabProps {
 }
 
 export function BonusSettingTab({ tour }: BonusSettingTabProps) {
-  const workspace_id = useAuthStore(s => s.user?.workspace_id) ?? ''
   const { items: allSettings, loading } = useTourBonusSettings()
-  const { items: defaults } = useWorkspaceBonusDefaults()
 
   const settings = useMemo(
-    () => allSettings?.filter(s => s.tour_id === tour.id) ?? [],
+    () => (allSettings ?? []).filter(s => s.tour_id === tour.id),
     [allSettings, tour.id]
   )
   const { get: getEmployee } = useEmployeeDictionary()
 
   const [dialogOpen, setDialogOpen] = useState(false)
-  const [editing, setEditing] = useState<TourBonusSetting | null>(null)
-
-  const handleAdd = useCallback(() => {
-    setEditing(null)
-    setDialogOpen(true)
-  }, [])
-
-  const handleEdit = useCallback((setting: TourBonusSetting) => {
-    setEditing(setting)
-    setDialogOpen(true)
-  }, [])
-
-  const handleDelete = useCallback(async (id: string) => {
-    if (!confirm(BONUS_TAB_LABELS.confirm_delete)) return
-    try {
-      await deleteTourBonusSetting(id)
-      await invalidateTourBonusSettings()
-    } catch (err) {
-      logger.error('Failed to delete bonus setting:', err)
-    }
-  }, [])
-
-  const handleSave = useCallback(
-    async (data: {
-      type: BonusSettingType
-      bonus: number
-      bonus_type: BonusCalculationType
-      employee_id: string | null
-    }) => {
-      try {
-        if (editing) {
-          await updateTourBonusSetting(editing.id, data)
-        } else {
-          await createTourBonusSetting({
-            ...data,
-            workspace_id,
-            tour_id: tour.id,
-          })
-        }
-        await invalidateTourBonusSettings()
-      } catch (err) {
-        logger.error('Failed to save bonus setting:', err)
-      }
-    },
-    [editing, workspace_id, tour.id]
-  )
-
-  const handleCopyDefaults = useCallback(async () => {
-    if (!defaults || defaults.length === 0) return
-    try {
-      for (const d of defaults) {
-        await createTourBonusSetting({
-          workspace_id,
-          tour_id: tour.id,
-          type: d.type,
-          bonus: d.bonus,
-          bonus_type: d.bonus_type,
-          employee_id: d.employee_id,
-        })
-      }
-      await invalidateTourBonusSettings()
-    } catch (err) {
-      logger.error('Failed to copy defaults:', err)
-    }
-  }, [defaults, workspace_id, tour.id])
 
   const getEmployeeName = (employeeId: string | null): string => {
     if (!employeeId) return BONUS_TAB_LABELS.no_employee
@@ -130,17 +53,10 @@ export function BonusSettingTab({ tour }: BonusSettingTabProps) {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold">{BONUS_TAB_LABELS.title}</h3>
-        <div className="flex gap-2">
-          {defaults && defaults.length > 0 && (!settings || settings.length === 0) && (
-            <Button variant="soft-gold" size="sm" onClick={handleCopyDefaults}>
-              {BONUS_TAB_LABELS.copy_defaults}
-            </Button>
-          )}
-          <Button size="sm" onClick={handleAdd}>
-            <Plus className="h-4 w-4 mr-1" />
-            {BONUS_TAB_LABELS.add}
-          </Button>
-        </div>
+        <Button size="sm" onClick={() => setDialogOpen(true)}>
+          <Settings2 className="h-4 w-4 mr-1" />
+          編輯獎金設定
+        </Button>
       </div>
 
       {loading ? (
@@ -159,7 +75,7 @@ export function BonusSettingTab({ tour }: BonusSettingTabProps) {
                 <th className="text-left px-4 py-2 font-medium">{BONUS_TAB_LABELS.type}</th>
                 <th className="text-left px-4 py-2 font-medium">{BONUS_TAB_LABELS.bonus_value}</th>
                 <th className="text-left px-4 py-2 font-medium">{BONUS_TAB_LABELS.employee}</th>
-                <th className="text-right px-4 py-2 font-medium w-24" />
+                <th className="text-left px-4 py-2 font-medium">項目說明</th>
               </tr>
             </thead>
             <tbody>
@@ -176,24 +92,7 @@ export function BonusSettingTab({ tour }: BonusSettingTabProps) {
                   <td className="px-4 py-2 text-muted-foreground">
                     {getEmployeeName(s.employee_id)}
                   </td>
-                  <td className="px-4 py-2 text-right">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7"
-                      onClick={() => handleEdit(s)}
-                    >
-                      <Pencil className="h-3.5 w-3.5" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7 text-destructive"
-                      onClick={() => handleDelete(s.id)}
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
-                  </td>
+                  <td className="px-4 py-2 text-muted-foreground">{s.description ?? '—'}</td>
                 </tr>
               ))}
             </tbody>
@@ -201,12 +100,7 @@ export function BonusSettingTab({ tour }: BonusSettingTabProps) {
         </div>
       )}
 
-      <BonusSettingDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-        onSave={handleSave}
-        initial={editing}
-      />
+      <BonusSettingsDialog open={dialogOpen} onOpenChange={setDialogOpen} tour={tour} />
     </div>
   )
 }

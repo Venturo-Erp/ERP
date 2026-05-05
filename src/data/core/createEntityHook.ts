@@ -279,39 +279,40 @@ export function createEntityHook<T extends BaseEntity>(
       async () => {
         const selectFields = config.list?.select || '*'
 
-        let query = supabase
-          .from(tableName as never /* dynamic table name requires runtime assertion */)
-          .select(selectFields)
-
-        // 套用 workspace 過濾
-        const workspaceFilter = getWorkspaceFilter()
-        if (workspaceFilter) {
-          query = query.or(workspaceFilter)
+        // Supabase PostgREST hard caps at 1000 rows per request.
+        // Auto-paginate with .range() to fetch all rows.
+        const PAGE = 1000
+        const all: unknown[] = []
+        let from = 0
+        while (true) {
+          let q = supabase
+            .from(tableName as never /* dynamic table name requires runtime assertion */)
+            .select(selectFields)
+          const wf = getWorkspaceFilter()
+          if (wf) q = q.or(wf)
+          if (config.list?.orderBy) {
+            q = q.order(config.list.orderBy.column, {
+              ascending: config.list.orderBy.ascending,
+            })
+          }
+          if (config.list?.defaultFilter) {
+            Object.entries(config.list.defaultFilter).forEach(([key, value]) => {
+              if (value !== undefined && value !== null) q = q.eq(key, value)
+            })
+          }
+          q = q.range(from, from + PAGE - 1)
+          const { data: page, error } = await q
+          if (error) {
+            logger.error(`[${tableName}] List fetch error:`, error.message)
+            throw error
+          }
+          const rows = page || []
+          all.push(...rows)
+          if (rows.length < PAGE) break
+          from += PAGE
+          if (from > 100000) break // safety cap
         }
-
-        if (config.list?.orderBy) {
-          query = query.order(config.list.orderBy.column, {
-            ascending: config.list.orderBy.ascending,
-          })
-        }
-
-        if (config.list?.defaultFilter) {
-          Object.entries(config.list.defaultFilter).forEach(([key, value]) => {
-            if (value !== undefined && value !== null) {
-              query = query.eq(key, value)
-            }
-          })
-        }
-
-        const { data, error } = await query
-
-        if (error) {
-          logger.error(`[${tableName}] List fetch error:`, error.message)
-          throw error
-        }
-
-        // Supabase returns Database row types; cast to app-level T (safe: T mirrors DB schema)
-        return (data || []) as unknown as T[]
+        return all as unknown as T[]
       },
       {
         ...swrConfig,
@@ -348,26 +349,28 @@ export function createEntityHook<T extends BaseEntity>(
       swrKey,
       async () => {
         const selectFields = config.slim?.select || 'id'
-
-        let query = supabase
-          .from(tableName as never /* dynamic table name requires runtime assertion */)
-          .select(selectFields)
-
-        // 套用 workspace 過濾
-        const workspaceFilter = getWorkspaceFilter()
-        if (workspaceFilter) {
-          query = query.or(workspaceFilter)
+        const PAGE = 1000
+        const all: unknown[] = []
+        let from = 0
+        while (true) {
+          let q = supabase
+            .from(tableName as never /* dynamic table name requires runtime assertion */)
+            .select(selectFields)
+          const wf = getWorkspaceFilter()
+          if (wf) q = q.or(wf)
+          q = q.range(from, from + PAGE - 1)
+          const { data: page, error } = await q
+          if (error) {
+            logger.error(`[${tableName}] Slim fetch error:`, error.message)
+            throw error
+          }
+          const rows = page || []
+          all.push(...rows)
+          if (rows.length < PAGE) break
+          from += PAGE
+          if (from > 100000) break
         }
-
-        const { data, error } = await query
-
-        if (error) {
-          logger.error(`[${tableName}] Slim fetch error:`, error.message)
-          throw error
-        }
-
-        // ⚠️ 強制轉型為 T[]，實際上只有 slim.select 的欄位有值
-        return (data || []) as unknown as T[]
+        return all as unknown as T[]
       },
       {
         ...swrConfig,
