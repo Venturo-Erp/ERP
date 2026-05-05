@@ -332,19 +332,7 @@ export {
 // 領隊管理
 // ============================================
 
-// Tour Leaders
-export {
-  
-  useTourLeaders,
-  
-  
-  
-  
-  createTourLeader,
-  updateTourLeader,
-  deleteTourLeader,
-  
-} from './tour-leaders'
+// Tour Leaders entity 已於 2026-05-05 砍除（William 拍板：領隊資料整套清乾淨）
 
 // ============================================
 // 行事曆與加購

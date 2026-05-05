@@ -110,7 +110,6 @@ const WORKSPACE_SCOPED_TABLES = [
 
   // === 其他 ===
   'airport_images',
-  'leader_availability',
 
   // === 跨公司系統（用 responder_workspace_id）===
   'request_responses',

@@ -29,8 +29,7 @@ export function tableToModule(tableName: string): string | null {
     t === 'itineraries' ||
     t === 'quotes' ||
     t === 'cost_templates' ||
-    t === 'contracts' ||
-    t === 'leader_availability'
+    t === 'contracts'
   )
     return 'tours'
 
@@ -77,8 +76,7 @@ export function tableToModule(tableName: string): string | null {
     t === 'airport_images' ||
     t === 'image_library' ||
     t === 'transportation_rates' ||
-    t === 'premium_experiences' ||
-    t === 'tour_leaders'
+    t === 'premium_experiences'
   )
     return 'database'
 

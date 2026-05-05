@@ -96,7 +96,6 @@ const WORKSPACE_SCOPED_TABLES = [
   'pnr_ai_queries',
   // === 其他 ===
   'airport_images',
-  'leader_availability',
   'request_responses',
   'request_response_items',
   // === 資料庫（景點/飯店等，需要 workspace 隔離寫入）===

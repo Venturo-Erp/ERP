@@ -9,7 +9,7 @@ import { CoverInfoSection } from './tour-form/sections/CoverInfoSection'
 // CountriesSection 已移除 - 景點選擇器現在可以直接選所有國家
 import { FlightInfoSection } from './tour-form/sections/FlightInfoSection'
 import { FeaturesSection } from './tour-form/sections/FeaturesSection'
-import { LeaderMeetingSection } from './tour-form/sections/LeaderMeetingSection'
+// LeaderMeetingSection 已於 2026-05-05 砍除（William 拍板：領隊資料整套清乾淨）
 import { HotelSection } from './tour-form/sections/HotelSection'
 import { DailyItinerarySection } from './tour-form/sections/DailyItinerarySection'
 import { PricingDetailsSection } from './tour-form/sections/PricingDetailsSection'
@@ -361,15 +361,6 @@ export function TourForm({ data, onChange, quoteTierPricings, hasLinkedQuote }: 
           updateRecommendation={handlers.updateRecommendation}
           removeRecommendation={handlers.removeRecommendation}
           isAccommodationLockedByQuote={hasLinkedQuote}
-        />
-      </div>
-
-      {/* 領隊與集合資訊 */}
-      <div id="section-leader" className="mt-6 pt-6 px-3 border-t border-morandi-container/30">
-        <LeaderMeetingSection
-          data={data}
-          updateNestedField={handlers.updateNestedField}
-          updateField={handlers.updateField}
         />
       </div>
 

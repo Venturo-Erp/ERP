@@ -399,14 +399,10 @@ export async function POST(request: NextRequest) {
       'itinerary',
     ]
     // 付費功能（預設關閉）
-    // bot_line / bot_telegram 已於 2026-05-05 砍除（William 拍板：機器人不該是員工、通知概念重做）
+    // 2026-05-05 William 拍板大砍：bot_line / bot_telegram / fleet / local / supplier_portal / esims 都不做、清掉
     const premiumFeatures = [
       'accounting',
       'office',
-      'fleet',
-      'local',
-      'supplier_portal',
-      'esims',
     ]
     const defaultFeatures = [
       ...freeFeatures.map(code => ({ feature_code: code, enabled: true })),

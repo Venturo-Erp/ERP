@@ -83,7 +83,6 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/stores/auth-store'
-import { isFeatureAvailable, RestrictedFeature } from '@/lib/feature-restrictions'
 import { COMP_LAYOUT_LABELS } from './constants/labels'
 
 interface MenuItem {
@@ -92,7 +91,6 @@ interface MenuItem {
   icon: React.ElementType
   children?: MenuItem[]
   requiredPermission?: string
-  restrictedFeature?: RestrictedFeature // 受限功能（非 TP/TC 不可見）
 }
 
 const menuItems: MenuItem[] = [
@@ -302,42 +300,10 @@ const menuItems: MenuItem[] = [
       { href: '/cis/pricing', label: '衍生項目價目', icon: TipJar, requiredPermission: 'cis' },
     ],
   },
-  // 資源調度 - 威廉專屬
-  // {
-  //   href: '/scheduling',
-  //   label: COMP_LAYOUT_LABELS.資源調度,
-  //   icon: Calendar,
-  //   requiredPermission: 'hr',
-  // },
-  // 車隊管理 - 只有車行使用（在租戶選單中配置）
-  // {
-  //   href: '/database/fleet',
-  //   label: COMP_LAYOUT_LABELS.車隊管理,
-  //   icon: Bus,
-  //   requiredPermission: 'hr',
-  // },
-  // { href: '/esims', label: COMP_LAYOUT_LABELS.網卡管理, icon: Wifi, requiredPermission: 'hr', restrictedFeature: 'esim' },
 ]
 
-// ===== 按租戶類型的選單配置 =====
-
-// Local/DMC 選單（地接社）
-const localMenuItems: MenuItem[] = [
-  { href: '/dashboard', label: COMP_LAYOUT_LABELS.首頁, icon: House },
-  { href: '/tours', label: COMP_LAYOUT_LABELS.旅遊團, icon: MapPinArea }, // 包含「收到的委託」分頁
-  {
-    href: '/finance',
-    label: COMP_LAYOUT_LABELS.財務系統,
-    icon: CurrencyCircleDollar,
-    children: [
-      { href: '/finance/payments', label: COMP_LAYOUT_LABELS.收款管理, icon: PhWallet },
-      { href: '/finance/requests', label: COMP_LAYOUT_LABELS.請款管理, icon: HandCoins },
-      { href: '/finance/settings', label: '財務設定', icon: Wrench },
-    ],
-  },
-  { href: '/hr', label: COMP_LAYOUT_LABELS.人資管理, icon: UserSquare },
-  { href: '/settings', label: COMP_LAYOUT_LABELS.設定, icon: Wrench },
-]
+// 2026-05-05 Local/DMC 選單砍除（William 拍板：保留路由以外都清乾淨）
+// 之前是給「地接社」租戶類型用的選單變體、但目前只有 travel_agency 一種類型、永遠不會渲染
 
 const personalToolItems: MenuItem[] = []
 
@@ -413,8 +379,6 @@ export function Sidebar() {
   // 權限過濾：純靠 capability + workspace_features
   // （個人偏好 menu 過濾已於 2026-05-02 砍除、William 拍板「以前砍掉的、要清乾淨」）
   const visibleMenuItems = useMemo(() => {
-    const workspaceCode = user?.workspace_code
-
     const filterMenuByPermissions = (items: MenuItem[]): MenuItem[] => {
       if (!user) return items.filter(item => !item.requiredPermission)
 
@@ -427,13 +391,7 @@ export function Sidebar() {
             }
           }
 
-          // 檢查功能限制（非 TP/TC 不可見）
-          if (
-            item.restrictedFeature &&
-            !isFeatureAvailable(item.restrictedFeature, workspaceCode)
-          ) {
-            return null
-          }
+          // 2026-05-05 RestrictedFeature 整套砍除（William 拍板：保留路由以外都清乾淨）
           if (item.children) {
             const visibleChildren = filterMenuByPermissions(item.children)
             if (visibleChildren.length > 0) {
