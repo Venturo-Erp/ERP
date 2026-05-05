@@ -1,7 +1,5 @@
 'use client'
 
-import './settings-glass.css'
-
 import { COMPANY_NAME, COMPANY_NAME_EN } from '@/lib/tenant'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
