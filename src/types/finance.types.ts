@@ -10,6 +10,7 @@ export type PaymentRequestCategory = 'tour' | 'company'
 // 公司費用類型
 export type CompanyExpenseType =
   | 'SAL' // 薪資
+  | 'BNS' // 獎金（從結團衍生、跟薪資分開）
   | 'ENT' // 公關費用
   | 'TRV' // 差旅費用
   | 'OFC' // 辦公費用
@@ -23,6 +24,7 @@ export type CompanyExpenseType =
 // 費用類型配置
 export const EXPENSE_TYPE_CONFIG: Record<CompanyExpenseType, { name: string; prefix: string }> = {
   SAL: { name: '薪資', prefix: 'SAL' },
+  BNS: { name: '獎金', prefix: 'BNS' },
   ENT: { name: '公關費用', prefix: 'ENT' },
   TRV: { name: '差旅費用', prefix: 'TRV' },
   OFC: { name: '辦公費用', prefix: 'OFC' },
@@ -122,7 +124,9 @@ export interface DisbursementOrder {
   order_number: string | null // CD-2024001
   disbursement_date: string | null // 出帳日期 (預設本週四)
   amount: number // 總金額 (自動加總)
-  status: string | null // pending, confirmed, paid, cancelled
+  // 實際 UI 流程：pending → paid（按「確認出帳」按鈕、跳過 confirmed）
+  // 'confirmed' 是 service.confirmOrder dead code 用的、目前 UI 無人呼叫
+  status: string | null // pending | paid (UI 用的) / confirmed (dead) / cancelled (未實作)
   notes?: string | null // 出納備註
   code?: string | null // 出納單代碼
   created_by?: string | null // 建立者ID

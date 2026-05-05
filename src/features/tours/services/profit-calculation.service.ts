@@ -55,16 +55,28 @@ function calculateExpenseTotal(
   }, 0)
 }
 
-/** 計算行政費用 */
-function calculateAdministrativeCost(memberCount: number, costPerPerson: number): number {
-  return memberCount * costPerPerson
-}
-
-/** 取得每人行政費用（從設定中取最大值，預設 10） */
-function getAdminCostPerPerson(settings: TourBonusSetting[]): number {
+/** 計算行政費用
+ *
+ * 規則：
+ * - 沒設定 → 套老預設值 10 元/人 × 人數
+ * - 有設定 → 全部視為「總額」直接加總（手填寫模式、不再乘人數）
+ *
+ * 回傳 perPerson：>0 代表走老的「每人 N 元」模式（顯示「N 元/人 × M 人」標籤）；
+ *                 =0 代表走手填寫模式（顯示「行政費用」標籤、不附明細）
+ */
+function getAdministrativeCost(
+  settings: TourBonusSetting[],
+  memberCount: number
+): { total: number; perPerson: number } {
   const adminSettings = settings.filter(s => s.type === BonusSettingType.ADMINISTRATIVE_EXPENSES)
-  if (adminSettings.length === 0) return DEFAULT_ADMIN_COST_PER_PERSON
-  return Math.max(...adminSettings.map(s => Number(s.bonus)), DEFAULT_ADMIN_COST_PER_PERSON)
+  if (adminSettings.length === 0) {
+    return {
+      total: memberCount * DEFAULT_ADMIN_COST_PER_PERSON,
+      perPerson: DEFAULT_ADMIN_COST_PER_PERSON,
+    }
+  }
+  const total = adminSettings.reduce((sum, s) => sum + Number(s.bonus), 0)
+  return { total, perPerson: 0 }
 }
 
 /** 計算營收（未扣稅） */
@@ -76,18 +88,29 @@ function calculateProfitBeforeTax(
   return receiptTotal - expenseTotal - adminCost
 }
 
-/** 取得稅率（從 PROFIT_TAX 設定中取） */
-function getTaxRate(settings: TourBonusSetting[]): number {
-  const taxSetting = settings.find(
-    s => s.type === BonusSettingType.PROFIT_TAX && s.bonus_type === BonusCalculationType.PERCENT
-  )
-  return taxSetting ? Number(taxSetting.bonus) : 0
-}
-
-/** 計算營收稅額 */
-function calculateProfitTax(profitBeforeTax: number, taxRate: number): number {
-  if (profitBeforeTax <= 0) return 0
-  return Math.round((profitBeforeTax * taxRate) / 100)
+/** 計算營收稅額
+ *
+ * 規則：
+ * - PERCENT：營收 × bonus%
+ * - FIXED_AMOUNT：直接 = bonus（手填寫總額）
+ *
+ * 回傳 rate：>0 代表 PERCENT 模式（顯示「N%」標籤）；=0 代表 FIXED_AMOUNT 或無設定
+ */
+function getProfitTax(
+  settings: TourBonusSetting[],
+  profitBeforeTax: number
+): { tax: number; rate: number } {
+  const taxSetting = settings.find(s => s.type === BonusSettingType.PROFIT_TAX)
+  if (!taxSetting) return { tax: 0, rate: 0 }
+  const val = Number(taxSetting.bonus) || 0
+  if (taxSetting.bonus_type === BonusCalculationType.FIXED_AMOUNT) {
+    return { tax: val, rate: 0 }
+  }
+  if (taxSetting.bonus_type === BonusCalculationType.PERCENT) {
+    if (profitBeforeTax <= 0) return { tax: 0, rate: val }
+    return { tax: Math.round((profitBeforeTax * val) / 100), rate: val }
+  }
+  return { tax: 0, rate: 0 }
 }
 
 /** 計算淨利 */
@@ -169,15 +192,17 @@ export function calculateFullProfit(params: {
 
   const receipt_total = calculateReceiptTotal(receipts)
   const expense_total = calculateExpenseTotal(expenses)
-  const admin_cost_per_person = getAdminCostPerPerson(settings)
-  const administrative_cost = calculateAdministrativeCost(memberCount, admin_cost_per_person)
+  const adminResult = getAdministrativeCost(settings, memberCount)
+  const admin_cost_per_person = adminResult.perPerson
+  const administrative_cost = adminResult.total
   const profit_before_tax = calculateProfitBeforeTax(
     receipt_total,
     expense_total,
     administrative_cost
   )
-  const tax_rate = getTaxRate(settings)
-  const profit_tax = calculateProfitTax(profit_before_tax, tax_rate)
+  const taxResult = getProfitTax(settings, profit_before_tax)
+  const tax_rate = taxResult.rate
+  const profit_tax = taxResult.tax
   const net_profit = calculateNetProfit(profit_before_tax, profit_tax)
 
   const { team_bonuses, employee_bonuses } = calculateAllBonuses(net_profit, settings, employeeDict)
@@ -211,13 +236,17 @@ export function generateProfitTableData(result: ProfitCalculationResult): {
   left: ProfitTableRow[]
   right: ProfitTableRow[]
 } {
+  const adminLabel =
+    result.admin_cost_per_person > 0
+      ? `行政費用（${result.admin_cost_per_person}元/人×${result.member_count}人）`
+      : '行政費用'
+  const taxLabel =
+    result.tax_rate > 0 ? `營收稅額（${result.tax_rate}%）` : '營收稅額'
+
   const left: ProfitTableRow[] = [
     { label: '收款總額（進項）', amount: result.receipt_total },
-    {
-      label: `行政費用（${result.admin_cost_per_person}元/人×${result.member_count}人）`,
-      amount: result.administrative_cost,
-    },
-    { label: `營收稅額（${result.tax_rate}%）`, amount: result.profit_tax },
+    { label: adminLabel, amount: result.administrative_cost },
+    { label: taxLabel, amount: result.profit_tax },
   ]
 
   const right: ProfitTableRow[] = [

@@ -19,6 +19,7 @@ import { formatDate } from '@/lib/utils'
 import { DISBURSEMENT_LABELS } from '../constants/labels'
 import { useAuthStore } from '@/stores/auth-store'
 import { useWorkspaceSettings, getLogoStyle } from '@/hooks/useWorkspaceSettings'
+import { logger } from '@/lib/utils/logger'
 
 // Morandi 色系
 const COLORS = {
@@ -261,7 +262,8 @@ export const PrintDisbursementPreview = forwardRef<HTMLDivElement, PrintDisburse
       amount: number
       items: Array<{ description: string; supplier: string; subtotal: number }>
     }
-    const transferPairs = useMemo<TransferPairRow[]>(() => {
+    // orphan pair = pair_id 存在但 src/dst 找不到對手（pair 一邊被刪 / 狀態異常）
+    const [transferPairs, orphanPairIds] = useMemo<[TransferPairRow[], string[]]>(() => {
       // 1. group requests by pair_id
       const pairGroups = new Map<string, PaymentRequest[]>()
       for (const req of paymentRequests) {
@@ -275,10 +277,20 @@ export const PrintDisbursementPreview = forwardRef<HTMLDivElement, PrintDisburse
 
       // 2. 每對取 src（amount<0）跟 dst（amount>0）、構造 row
       const rows: TransferPairRow[] = []
+      const orphans: string[] = []
       for (const [pairId, reqs] of pairGroups) {
         const src = reqs.find(r => (r.amount || 0) < 0)
         const dst = reqs.find(r => (r.amount || 0) > 0)
-        if (!src || !dst) continue
+        if (!src || !dst) {
+          orphans.push(pairId)
+          logger.warn(
+            `[PrintDisbursementPreview] 孤兒轉移 pair ${pairId}：${
+              !src ? '缺 src（amount<0）' : '缺 dst（amount>0）'
+            }、共 ${reqs.length} 張 PR、UI 跳過顯示`,
+            reqs.map(r => ({ id: r.id, code: r.code, amount: r.amount }))
+          )
+          continue
+        }
         // 正向 items（給 UI 顯示 description、supplier）
         const dstItems = paymentRequestItems
           .filter(i => i.request_id === dst.id)
@@ -297,7 +309,7 @@ export const PrintDisbursementPreview = forwardRef<HTMLDivElement, PrintDisburse
           items: dstItems,
         })
       }
-      return rows
+      return [rows, orphans]
     }, [paymentRequests, paymentRequestItems])
 
     // 分別分組
@@ -864,6 +876,25 @@ export const PrintDisbursementPreview = forwardRef<HTMLDivElement, PrintDisburse
         {tourGroups.length === 0 && companyGroups.length === 0 && (
           <div style={{ textAlign: 'center', padding: '40px', color: COLORS.lightGray }}>
             {PRINT_LABELS.LABEL_9162}
+          </div>
+        )}
+
+        {/* 孤兒 pair 警告：pair_id 存在但對手 PR 缺失（被誤刪 / 狀態異常） */}
+        {orphanPairIds.length > 0 && (
+          <div
+            style={{
+              marginBottom: '12px',
+              padding: '8px 12px',
+              border: `1px solid ${COLORS.red}`,
+              borderRadius: '4px',
+              backgroundColor: '#FEF2F2',
+              fontSize: '11px',
+              color: COLORS.red,
+            }}
+          >
+            ⚠ 偵測到 {orphanPairIds.length} 組異常的成本轉移配對（找不到對手方）、未列入下方明細。
+            請確認 PR 是否被誤刪或狀態異常（pair_id：
+            {orphanPairIds.map(id => id.slice(0, 8)).join('、')}）。
           </div>
         )}
 

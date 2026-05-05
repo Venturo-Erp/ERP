@@ -24,7 +24,8 @@ export default function TourDetailPage() {
   const params = useParams()
   const router = useRouter()
   const searchParams = useSearchParams()
-  const code = params.code as string
+  const rawCode = params.code as string
+  const code = rawCode ? decodeURIComponent(rawCode) : ''
 
   const { user } = useAuthStore()
 

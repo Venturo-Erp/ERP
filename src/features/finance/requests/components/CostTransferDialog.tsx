@@ -172,6 +172,10 @@ export function CostTransferDialog({
           subtotal: -(i.subtotal || 0),
           payment_method_id: i.payment_method_id || null,
           sort_order: idx + 1,
+          // 審計欄：誰、什麼時候、從哪個團轉出來
+          transferred_at: new Date().toISOString(),
+          transferred_by: user?.id || null,
+          transferred_from_tour_id: sourceRequest.tourId,
         }
       })
       const { error: srcItemsErr } = await supabase
@@ -247,6 +251,10 @@ export function CostTransferDialog({
           subtotal: i.subtotal || 0,
           payment_method_id: i.payment_method_id || null,
           sort_order: idx + 1,
+          // 審計欄：誰、什麼時候、從哪個團轉進來
+          transferred_at: new Date().toISOString(),
+          transferred_by: user?.id || null,
+          transferred_from_tour_id: sourceRequest.tourId,
         }
       })
       const { error: dstItemsErr } = await supabase

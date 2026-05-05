@@ -37,6 +37,11 @@ export interface TourBonusSetting {
   bonus: number
   bonus_type: BonusCalculationType
   employee_id: string | null
+  description: string | null
+  /** 已生成的請款單 ID（OP / 業務 / 團隊獎金生成「公司請款」後寫回） */
+  payment_request_id: string | null
+  /** 此筆獎金的出帳日期（使用者選） */
+  disbursement_date: string | null
   created_at: string
   updated_at: string
 }
@@ -49,6 +54,7 @@ export interface WorkspaceBonusDefault {
   bonus: number
   bonus_type: BonusCalculationType
   employee_id: string | null
+  description: string | null
   created_at: string
   updated_at: string
 }

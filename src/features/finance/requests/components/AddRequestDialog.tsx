@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo, useCallback, useRef } from 'react'
-import { Plus, X, AlertCircle, Trash2, Save, Layers, Undo2 } from 'lucide-react'
+import { Plus, X, AlertCircle, Trash2, Save, Layers } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, type DialogLevel } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
@@ -592,46 +592,6 @@ export function AddRequestDialog({
     } catch (error) {
       logger.error('刪除請款單失敗:', error)
       await alert(REQUEST_DETAIL_DIALOG_LABELS.刪除請款單失敗, 'error')
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
-
-  // === Edit mode: 解除確認（confirmed → pending、可重編） ===
-  const handleUnconfirm = async () => {
-    if (!currentRequest || isSubmitting) return
-
-    // 已被列入出納單 → 擋下、要先撤出納單才能反悔（資料一致性）
-    const linked = (currentRequest as unknown as { disbursement_order_id?: string | null })
-      .disbursement_order_id
-    if (linked) {
-      await alert(
-        '這張請款單已被列入某張出納單。請先把它從那張出納單拿出來、再來解除確認。',
-        'warning'
-      )
-      return
-    }
-
-    const confirmed = await confirm(
-      `確定要解除確認請款單 ${currentRequest.code}？解除後可重新編輯金額/供應商等欄位、再重新確認。`,
-      { title: '解除確認', type: 'warning' }
-    )
-    if (!confirmed) return
-
-    setIsSubmitting(true)
-    try {
-      const { error } = await supabase
-        .from('payment_requests')
-        .update({ status: 'pending' })
-        .eq('id', currentRequest.id)
-      if (error) throw error
-
-      await invalidatePaymentRequests()
-      await alert(`請款單 ${currentRequest.code} 已解除確認、可重新編輯`, 'success')
-      onOpenChange(false)
-    } catch (error) {
-      logger.error('解除確認失敗:', error)
-      await alert('解除確認失敗、請稍後再試', 'error')
     } finally {
       setIsSubmitting(false)
     }
@@ -1369,15 +1329,19 @@ export function AddRequestDialog({
                 className="flex-1 overflow-y-auto pt-4 border-t border-morandi-container/30 space-y-6"
               >
                 {/* 日期已移到 DialogHeader、付款方式 + 類別（=費用類型）在 row 內 */}
+                {/* 編輯模式用 localItems（DB 載出來）、新增模式才用 requestItems（starter row）
+                    Bug 修正 2026-05-04：原本寫死 requestItems、編輯公司請款看不到既有 items */}
                 <EditableRequestItemList
-                  items={requestItems}
+                  items={isEditMode ? localItems : requestItems}
                   suppliers={suppliers}
-                  updateItem={updateItem}
-                  removeItem={removeItem}
-                  addNewEmptyItem={addNewEmptyItem}
+                  updateItem={isEditMode ? handleEditUpdateItem : updateItem}
+                  removeItem={isEditMode ? handleEditRemoveItem : removeItem}
+                  addNewEmptyItem={isEditMode ? handleEditAddItem : addNewEmptyItem}
                   onCreateSupplier={handleCreateSupplier}
                   tourId={formData.tour_id || null}
+                  disabled={isEditMode && !canEdit}
                   paymentMethods={paymentMethods}
+                  hideDateColumn={isEditMode}
                   expenseTypeMode
                 />
               </TabsContent>
@@ -1434,18 +1398,10 @@ export function AddRequestDialog({
                       {isSubmitting ? '儲存中...' : '儲存'}
                     </Button>
                   </>
-                ) : currentRequest?.status === 'confirmed' ? (
-                  <Button
-                    variant="soft-gold"
-                    size="sm"
-                    onClick={handleUnconfirm}
-                    disabled={isSubmitting}
-                    className="gap-2 text-morandi-secondary border-morandi-secondary hover:bg-morandi-container/30"
-                  >
-                    <Undo2 size={16} />
-                    {isSubmitting ? '處理中...' : '解除確認'}
-                  </Button>
-                ) : null
+                ) : null /* 「解除確認」按鈕 2026-05-04 移除：
+                          它原本是 orphan PR 的補救措施、root cause（刪出納單沒 release）已修。
+                          要把已確認 PR 改回 pending、走「編輯該出納單 → uncheck → 存檔」、
+                          維持 PR-出納單 binding 的一致性、不破壞 SSOT。 */
               ) : (
                 <Button
                   onClick={handleSubmit}

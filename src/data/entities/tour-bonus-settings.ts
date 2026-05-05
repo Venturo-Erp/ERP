@@ -6,11 +6,13 @@ import type { TourBonusSetting } from '@/types/bonus.types'
 
 const tourBonusSettingEntity = createEntityHook<TourBonusSetting>('tour_bonus_settings', {
   list: {
-    select: 'id,workspace_id,tour_id,type,bonus,bonus_type,employee_id,created_at,updated_at',
+    select:
+      'id,workspace_id,tour_id,type,bonus,bonus_type,employee_id,description,payment_request_id,disbursement_date,created_at,updated_at',
     orderBy: { column: 'type', ascending: true },
   },
   slim: {
-    select: 'id,tour_id,type,bonus,bonus_type,employee_id',
+    select:
+      'id,tour_id,type,bonus,bonus_type,employee_id,description,payment_request_id,disbursement_date',
   },
   detail: { select: '*' },
   cache: CACHE_PRESETS.low,

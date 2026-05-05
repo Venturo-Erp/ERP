@@ -34,11 +34,12 @@ import { mutate } from 'swr'
 export async function recalculateExpenseStats(tour_id: string): Promise<void> {
   try {
     // 1. 查該團所有有效請款單
+    // 'paid' 也算進去（DB enum 有、未來流程可能用、不算就會漏成本）
     const { data: requests_data, error: requestsError } = await supabase
       .from('payment_requests')
       .select('id')
       .eq('tour_id', tour_id)
-      .in('status', ['pending', 'confirmed', 'billed'])
+      .in('status', ['pending', 'confirmed', 'billed', 'paid'])
 
     if (requestsError) {
       logger.error('查詢有效請款單失敗:', requestsError)

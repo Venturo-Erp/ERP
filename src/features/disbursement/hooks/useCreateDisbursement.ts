@@ -346,8 +346,38 @@ export function useCreateDisbursement({
 
       const tour_ids_to_recalculate = new Set<string>()
 
+      // 把 added/removed 集合擴展、自動帶上「轉移 pair 對手」
+      // 不然單邊變動 → 對手孤兒（一張 confirmed / 一張 pending、財務不平衡）
+      const expandWithPairs = async (ids: string[]): Promise<string[]> => {
+        if (ids.length === 0) return ids
+        const { data: pairRows } = await supabase
+          .from('payment_requests')
+          .select('id, transferred_pair_id')
+          .in('id', ids)
+        const pairIdsToInclude = new Set<string>()
+        for (const r of pairRows ?? []) {
+          const row = r as { transferred_pair_id?: string | null }
+          if (row.transferred_pair_id) pairIdsToInclude.add(row.transferred_pair_id)
+        }
+        if (pairIdsToInclude.size === 0) return ids
+
+        // 用 pair_id 去抓所有對手 PR
+        const { data: partners } = await supabase
+          .from('payment_requests')
+          .select('id')
+          .in('transferred_pair_id', [...pairIdsToInclude])
+        const merged = new Set(ids)
+        for (const p of partners ?? []) {
+          merged.add((p as { id: string }).id)
+        }
+        return [...merged]
+      }
+
+      const addedAll = await expandWithPairs(addedIds)
+      const removedAll = await expandWithPairs(removedIds)
+
       // 新增的請款單：綁到此出納單 + status=confirmed
-      for (const id of addedIds) {
+      for (const id of addedAll) {
         await supabase
           .from('payment_requests')
           .update({ disbursement_order_id: editingOrder.id, status: 'confirmed' })
@@ -374,8 +404,8 @@ export function useCreateDisbursement({
         }
       }
 
-      // 移除的請款單：解除綁定（FK = null）+ status=pending
-      for (const id of removedIds) {
+      // 移除的請款單：解除綁定（FK = null）+ status=pending（連 pair 對手一起釋放）
+      for (const id of removedAll) {
         await supabase
           .from('payment_requests')
           .update({ disbursement_order_id: null, status: 'pending' })

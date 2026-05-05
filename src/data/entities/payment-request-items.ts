@@ -38,7 +38,7 @@ const usePaymentRequestItem = paymentRequestItemEntity.useDetail
 const usePaymentRequestItemsPaginated = paymentRequestItemEntity.usePaginated
 const usePaymentRequestItemDictionary = paymentRequestItemEntity.useDictionary
 
-const createPaymentRequestItem = paymentRequestItemEntity.create
+export const createPaymentRequestItem = paymentRequestItemEntity.create
 const updatePaymentRequestItem = paymentRequestItemEntity.update
 const deletePaymentRequestItem = paymentRequestItemEntity.delete
 export const invalidatePaymentRequestItems = paymentRequestItemEntity.invalidate

@@ -20,9 +20,12 @@ interface ReceiptTransferDialogProps {
     id: string
     receipt_number: string
     tour_id: string | null
+    order_id?: string | null
     tour_code: string
     tour_name: string
     receipt_amount: number
+    actual_amount?: number | null
+    fees?: number | null
     payment_method_id: string | null
     payment_method: string
     receipt_type: number
@@ -90,6 +93,8 @@ export function ReceiptTransferDialog({
       if (dstNoErr || !dstReceiptNo) throw dstNoErr || new Error('生成目標端收款單號失敗')
 
       // 2. 建 src receipt（來源團、負金額）
+      // fees 也帶過去（負）、之前漏複製、刷卡收款轉團後手續費歸零、淨額算錯
+      const srcFees = sourceReceipt.fees ? -Number(sourceReceipt.fees) : 0
       const srcPayload = {
         receipt_number: srcReceiptNo,
         workspace_id: user.workspace_id,
@@ -102,6 +107,7 @@ export function ReceiptTransferDialog({
         receipt_type: sourceReceipt.receipt_type,
         receipt_amount: -amount,
         actual_amount: 0,
+        fees: srcFees,
         status: 'pending',
         transferred_pair_id: pairId,
         notes: `收款轉移至 ${targetTour.code || ''}`,
@@ -112,11 +118,21 @@ export function ReceiptTransferDialog({
       const { data: srcReceipt, error: srcErr } = await supabase
         .from('receipts')
         .insert(srcPayload as never)
-        .select('id')
+        .select('id, transferred_pair_id')
         .single()
       if (srcErr || !srcReceipt) throw srcErr || new Error('建來源端收款單失敗')
 
+      // 防守：DB 沒寫進 transferred_pair_id（schema 變動 / RLS 等）→ 立即 rollback
+      if (!(srcReceipt as { transferred_pair_id?: string | null }).transferred_pair_id) {
+        await supabase
+          .from('receipts')
+          .delete()
+          .eq('id', (srcReceipt as { id: string }).id)
+        throw new Error('來源端收款單 transferred_pair_id 寫入失敗、轉移已取消')
+      }
+
       // 3. 建 dst receipt（目標團、正金額）
+      const dstFees = sourceReceipt.fees ? Number(sourceReceipt.fees) : 0
       const dstPayload = {
         receipt_number: dstReceiptNo,
         workspace_id: user.workspace_id,
@@ -129,6 +145,7 @@ export function ReceiptTransferDialog({
         receipt_type: sourceReceipt.receipt_type,
         receipt_amount: amount,
         actual_amount: 0,
+        fees: dstFees,
         status: 'pending',
         transferred_pair_id: pairId,
         notes: `從 ${sourceReceipt.tour_code} 轉入`,
@@ -136,19 +153,47 @@ export function ReceiptTransferDialog({
         updated_by: user.id,
         is_active: true,
       }
-      const { error: dstErr } = await supabase
+      const { data: dstReceipt, error: dstErr } = await supabase
         .from('receipts')
         .insert(dstPayload as never)
-      if (dstErr) {
+        .select('id, transferred_pair_id')
+        .single()
+      if (dstErr || !dstReceipt) {
         // rollback src
         await supabase
           .from('receipts')
           .delete()
           .eq('id', (srcReceipt as { id: string }).id)
-        throw dstErr
+        throw dstErr || new Error('建目標端收款單失敗')
       }
 
-      // 4. 成功
+      // 防守：dst 沒寫進 pair_id → rollback 兩邊
+      if (!(dstReceipt as { transferred_pair_id?: string | null }).transferred_pair_id) {
+        await supabase
+          .from('receipts')
+          .delete()
+          .in('id', [
+            (srcReceipt as { id: string }).id,
+            (dstReceipt as { id: string }).id,
+          ])
+        throw new Error('目標端收款單 transferred_pair_id 寫入失敗、轉移已取消')
+      }
+
+      // 4. 重算來源 / 目標團的收款統計（pending 狀態 actual_amount=0、不影響數字、
+      //    但 invalidate cache 讓 UI 立即抓到新建的兩張）
+      try {
+        const { recalculateReceiptStats } = await import(
+          '@/features/finance/payments/services/receipt-core.service'
+        )
+        await Promise.all([
+          recalculateReceiptStats(sourceReceipt.order_id ?? null, sourceReceipt.tour_id),
+          recalculateReceiptStats(null, targetTour.id),
+        ])
+      } catch (recalcErr) {
+        logger.error('轉移後重算統計失敗（不阻擋成功訊息）:', recalcErr)
+      }
+
+      // 5. 成功
       await invalidateReceipts()
       toast({
         title: '收款轉移成功',
