@@ -146,12 +146,12 @@ export function formatReceiptNumber(
       const parsed = parseReceiptNumber(receiptNumber)
       if (!parsed) return receiptNumber
       if (parsed.isNewFormat && parsed.tourCode) {
-        // 從團號提取日期 CNX250128A → 2025/01/28
+        // 從團號提取日期 CNX250128A → 2025-01-28
         const dateStr = parsed.tourCode.slice(3, 9) // 250128
-        return `20${dateStr.slice(0, 2)}/${dateStr.slice(2, 4)}/${dateStr.slice(4, 6)}`
+        return `20${dateStr.slice(0, 2)}-${dateStr.slice(2, 4)}-${dateStr.slice(4, 6)}`
       }
       if (parsed.year && parsed.month && parsed.day) {
-        return `${parsed.year}/${parsed.month.toString().padStart(2, '0')}/${parsed.day.toString().padStart(2, '0')}`
+        return `${parsed.year}-${parsed.month.toString().padStart(2, '0')}-${parsed.day.toString().padStart(2, '0')}`
       }
       return receiptNumber
     }

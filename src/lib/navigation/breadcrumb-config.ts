@@ -55,9 +55,6 @@ export const BREADCRUMB_CONFIG: Record<string, BreadcrumbConfig> = {
   '/database': { label: '資料庫', parent: '/' },
   '/database/attractions': { label: '景點資料庫', parent: '/database' },
   '/database/suppliers': { label: '供應商', parent: '/database' },
-  '/database/tour-leaders': { label: '領隊資料庫', parent: '/database' },
-  '/database/transportation-rates': { label: '交通費率', parent: '/database' },
-  '/database/company-assets': { label: '公司資產', parent: '/database' },
   '/database/archive-management': { label: '檔案管理', parent: '/database' },
 
   // ========== 其他功能 ==========

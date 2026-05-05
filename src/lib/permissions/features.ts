@@ -76,10 +76,6 @@ export const FEATURES: FeatureDefinition[] = [
       '/database/attractions',
       '/database/suppliers',
       '/database/archive-management',
-      '/database/fleet',
-      '/database/tour-leaders',
-      '/database/transportation-rates',
-      '/database/company-assets',
     ],
   },
   {

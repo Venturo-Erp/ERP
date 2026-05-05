@@ -19,15 +19,6 @@ const databaseModules = [
     count: 0,
   },
   {
-    id: 'transportation-rates',
-    title: DATABASE_LABELS.MODULE_TRANSPORT,
-    description: DATABASE_LABELS.MODULE_TRANSPORT_DESC,
-    icon: Bus,
-    href: '/database/transportation-rates',
-    color: 'bg-status-success',
-    count: 0,
-  },
-  {
     id: 'suppliers',
     title: DATABASE_LABELS.MODULE_SUPPLIERS,
     description: DATABASE_LABELS.MODULE_SUPPLIERS_DESC,
@@ -35,15 +26,6 @@ const databaseModules = [
     href: '/database/suppliers',
     color: 'bg-status-info',
     count: 12,
-  },
-  {
-    id: 'company-assets',
-    title: DATABASE_LABELS.MODULE_ASSETS,
-    description: DATABASE_LABELS.MODULE_ASSETS_DESC,
-    icon: ImageIcon,
-    href: '/database/company-assets',
-    color: 'bg-morandi-gold',
-    count: 0,
   },
   {
     id: 'archive-management',
@@ -155,16 +137,6 @@ export default function DatabasePage() {
               </div>
               <div className="text-sm text-morandi-secondary mt-1">
                 {DATABASE_LABELS.MANAGE_REGIONS_DESC}
-              </div>
-            </Button>
-            <Button
-              variant="soft-gold"
-              className="h-auto p-4 text-left flex flex-col items-start"
-              onClick={() => router.push('/database/transportation-rates')}
-            >
-              <div className="font-medium text-morandi-primary">{DATABASE_LABELS.ADD_RATES}</div>
-              <div className="text-sm text-morandi-secondary mt-1">
-                {DATABASE_LABELS.ADD_RATES_DESC}
               </div>
             </Button>
             <Button

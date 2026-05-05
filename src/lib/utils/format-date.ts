@@ -26,27 +26,21 @@ export function formatDate(date: string | Date | null | undefined): string {
 }
 
 /**
- * 格式化日期為台灣格式 (YYYY/M/D)
+ * 格式化日期為公司統一格式 (YYYY-MM-DD)
+ * 2026-05-05 規範：全公司日期顯示一律 YYYY-MM-DD、月日補零
+ * 函式名稱保留 formatDateTW 以維持既有 import、行為等同 formatDate
  * @param date - ISO 字串或 Date 物件
- * @returns 2024/1/15 格式的日期字串
+ * @returns 2024-01-15 格式的日期字串
  */
 export function formatDateTW(date: string | Date | null | undefined): string {
-  if (!date) return ''
-
-  try {
-    const d = typeof date === 'string' ? new Date(date) : date
-    if (isNaN(d.getTime())) return ''
-
-    return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`
-  } catch {
-    return ''
-  }
+  return formatDate(date)
 }
 
 /**
- * 格式化日期為簡短格式 (M/D)
+ * 格式化日期為簡短格式 (MM-DD)
+ * 2026-05-05 規範：補零、用 - 連接、跟全站 YYYY-MM-DD 一致
  * @param date - ISO 字串或 Date 物件
- * @returns 1/15 格式的日期字串
+ * @returns 01-15 格式的日期字串
  */
 export function formatDateCompact(date: string | Date | null | undefined): string {
   if (!date) return ''
@@ -55,36 +49,21 @@ export function formatDateCompact(date: string | Date | null | undefined): strin
     const d = typeof date === 'string' ? new Date(date) : date
     if (isNaN(d.getTime())) return ''
 
-    return `${d.getMonth() + 1}/${d.getDate()}`
-  } catch {
-    return ''
-  }
-}
-
-/**
- * 格式化日期為簡短格式，含補零 (MM/DD)
- * @param date - ISO 字串或 Date 物件
- * @returns 01/15 格式的日期字串
- */
-export function formatDateCompactPadded(date: string | Date | null | undefined): string {
-  if (!date) return ''
-
-  try {
-    const d = typeof date === 'string' ? new Date(date) : date
-    if (isNaN(d.getTime())) return ''
-
     const month = String(d.getMonth() + 1).padStart(2, '0')
     const day = String(d.getDate()).padStart(2, '0')
-    return `${month}/${day}`
+    return `${month}-${day}`
   } catch {
     return ''
   }
 }
 
 /**
- * 格式化日期為顯示格式 (同 formatDateTW)
- * @param date - ISO 字串或 Date 物件
- * @returns 2024/1/15 格式的日期字串
+ * @deprecated 用 formatDateCompact 取代、行為一致（MM-DD）
+ */
+export const formatDateCompactPadded = formatDateCompact
+
+/**
+ * 格式化日期為顯示格式 (同 formatDate / formatDateTW，YYYY-MM-DD)
  */
 export const formatDateDisplay = formatDateTW
 
@@ -123,7 +102,7 @@ export function formatMonthShort(date: string | Date | null | undefined): string
 /**
  * 格式化日期時間為顯示格式
  * @param date - ISO 字串或 Date 物件
- * @returns 2024/1/15 14:30 格式
+ * @returns 2024-01-15 14:30 格式
  */
 export function formatDateTime(date: string | Date | null | undefined): string {
   if (!date) return ''

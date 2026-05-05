@@ -460,7 +460,6 @@ export function AddVisaDialog({
                 <SelectContent>
                   <SelectItem value="pending">{L.status_pending}</SelectItem>
                   <SelectItem value="submitted">{L.status_submitted}</SelectItem>
-                  <SelectItem value="collected">{L.status_collected}</SelectItem>
                   <SelectItem value="returned">{L.status_returned}</SelectItem>
                   <SelectItem value="rejected">{L.status_rejected}</SelectItem>
                 </SelectContent>

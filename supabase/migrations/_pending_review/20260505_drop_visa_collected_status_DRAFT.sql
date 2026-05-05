@@ -1,0 +1,25 @@
+-- ============================================================================
+-- 2026-05-05 William 拍板：簽證「已取件」tab 砍除
+-- ============================================================================
+-- visas.status 是 TEXT、無 CHECK constraint、不需要 ALTER 結構
+-- 但歷史 'collected' 狀態 row 在 UI 上會無法被看到（因為 tab 不在了）
+--
+-- 三個選項、由 William 拍板要哪個：
+--
+-- 選項 A：全部留 'collected' 狀態的 row、放著等下次處理
+--   → 不跑此 migration
+--
+-- 選項 B：把 collected 推進到 returned（視為已歸還、流程往後一步）
+--   → 跑下面的 UPDATE
+--
+-- 選項 C：把 collected 退回 submitted（視為仍在代辦商、流程退一步）
+--   → 改 UPDATE 的 'returned' → 'submitted'
+-- ============================================================================
+
+-- 選項 B 的 SQL（需要 William 確認才跑）：
+-- BEGIN;
+-- UPDATE public.visas
+-- SET status = 'returned',
+--     updated_at = NOW()
+-- WHERE status = 'collected';
+-- COMMIT;

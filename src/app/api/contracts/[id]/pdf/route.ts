@@ -232,10 +232,20 @@ ${contract.content || '（無內容）'}
 
 function formatDate(date: string | null | undefined): string {
   if (!date) return '-'
-  return new Date(date).toLocaleDateString('zh-TW')
+  const d = new Date(date)
+  if (isNaN(d.getTime())) return '-'
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
 }
 
 function formatDateTime(date: string | null | undefined): string {
   if (!date) return '-'
-  return new Date(date).toLocaleString('zh-TW')
+  const d = new Date(date)
+  if (isNaN(d.getTime())) return '-'
+  const datePart = formatDate(date)
+  const hh = String(d.getHours()).padStart(2, '0')
+  const mm = String(d.getMinutes()).padStart(2, '0')
+  return `${datePart} ${hh}:${mm}`
 }

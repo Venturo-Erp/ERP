@@ -42,14 +42,14 @@ function calculateMeetingTime(
     // 減去3小時
     departure.setHours(departure.getHours() - 3)
 
-    // 格式化輸出: YYYY/MM/DD HH:MM
+    // 格式化輸出: YYYY-MM-DD HH:MM
     const year = departure.getFullYear()
     const month = String(departure.getMonth() + 1).padStart(2, '0')
     const day = String(departure.getDate()).padStart(2, '0')
     const hour = String(departure.getHours()).padStart(2, '0')
     const minute = String(departure.getMinutes()).padStart(2, '0')
 
-    return `${year}/${month}/${day} ${hour}:${minute}`
+    return `${year}-${month}-${day} ${hour}:${minute}`
   } catch {
     return ''
   }

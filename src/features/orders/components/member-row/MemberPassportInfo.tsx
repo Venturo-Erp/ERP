@@ -7,6 +7,7 @@
 import React from 'react'
 import { cn } from '@/lib/utils'
 import { formatPassportExpiryWithStatus } from '@/lib/utils/passport-expiry'
+import { formatDate } from '@/lib/utils/format-date'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import type { OrderMember } from '../../types/order-member.types'
 import type { ColumnVisibility } from '../OrderMembersExpandable'
@@ -125,7 +126,7 @@ export function MemberPassportInfo({
                   if (!departureDate) return ''
                   const d = new Date(departureDate)
                   d.setMonth(d.getMonth() + 6)
-                  return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`
+                  return formatDate(d)
                 }
                 // 詳細說明
                 const detailLabel =

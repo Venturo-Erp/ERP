@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { SignaturePad } from '@/components/ui/signature-pad'
 import { printHtml, MORANDI_COLORS } from '@/lib/print'
 import { getPreviewDailyData } from '@/features/tours/components/itinerary-editor/format-itinerary'
+import { formatDate } from '@/lib/utils/format-date'
 import DOMPurify from 'dompurify'
 
 interface ContractMember {
@@ -385,7 +386,7 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
                   <td style="padding: 6px 8px;">${i + 1}</td>
                   <td style="padding: 6px 8px; font-weight: 500;">${m.chinese_name || '-'}</td>
                   <td style="padding: 6px 8px;">${m.id_number || '-'}</td>
-                  <td style="padding: 6px 8px;">${m.birth_date ? new Date(m.birth_date).toLocaleDateString('zh-TW') : '-'}</td>
+                  <td style="padding: 6px 8px;">${m.birth_date ? formatDate(m.birth_date) : '-'}</td>
                 </tr>
               `
                 )
@@ -661,9 +662,7 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
                               {member.id_number || '-'}
                             </td>
                             <td className="py-2 px-3 text-morandi-primary">
-                              {member.birth_date
-                                ? new Date(member.birth_date).toLocaleDateString('zh-TW')
-                                : '-'}
+                              {member.birth_date ? formatDate(member.birth_date) : '-'}
                             </td>
                           </tr>
                         ))}
@@ -835,7 +834,7 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
                 <div className="flex items-center gap-2 text-morandi-green font-medium">
                   <Check className="w-5 h-5" />
                   {isSigned
-                    ? `已於 ${new Date(contract.signed_at!).toLocaleDateString('zh-TW')} 簽署完成`
+                    ? `已於 ${formatDate(contract.signed_at!)} 簽署完成`
                     : '簽署完成，請確認合約內容'}
                 </div>
                 <Button size="lg" variant="soft-gold" onClick={handlePrint}>

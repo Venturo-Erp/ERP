@@ -187,12 +187,8 @@ const menuItems: MenuItem[] = [
         icon: Calendar,
         requiredPermission: 'accounting',
       },
-      {
-        href: '/accounting/opening-balances',
-        label: '期初餘額',
-        icon: FileEdit,
-        requiredPermission: 'accounting',
-      },
+      // 期初餘額 2026-05-05 William 拍板：整合進「科目管理」變第二分頁、不再獨立 sidebar 入口
+      // 路由 /accounting/opening-balances 仍保留、未來會被 /accounting/accounts 內 tab 取代
       {
         href: '/accounting/checks',
         label: COMP_LAYOUT_LABELS.票據管理,
@@ -282,21 +278,13 @@ const menuItems: MenuItem[] = [
   //     { href: '/local/cases', label: COMP_LAYOUT_LABELS.案件列表, icon: FolderOpen },
   //   ],
   // },
+  // 人資 2026-05-05 重組：只留「員工管理」單一入口、頁內 tab 切換員工列表 / 職務管理
+  // 出勤 / 請假 / 加班 / 補打卡 / 薪資 / 人資設定 已移至 _deprecated/2026-05-05-cleanup/
   {
     href: '/hr',
     label: COMP_LAYOUT_LABELS.人資管理,
     icon: UserSquare,
     requiredPermission: 'hr',
-    children: [
-      { href: '/hr', label: '員工管理', icon: Users, requiredPermission: 'hr' },
-      { href: '/hr/attendance', label: '出勤管理', icon: Clock, requiredPermission: 'hr' },
-      { href: '/hr/leave', label: '請假管理', icon: Calendar, requiredPermission: 'hr' },
-      { href: '/hr/overtime', label: '加班審核', icon: Clock, requiredPermission: 'hr' },
-      { href: '/hr/missed-clock', label: '補打卡審核', icon: ClipboardList, requiredPermission: 'hr' },
-      { href: '/hr/payroll', label: '薪資管理', icon: Wallet, requiredPermission: 'hr' },
-      { href: '/hr/roles', label: '員工職務', icon: UserSquare, requiredPermission: 'hr' },
-      { href: '/hr/settings', label: '人資設定', icon: Settings, requiredPermission: 'hr' },
-    ],
   },
   {
     href: '/tenants',

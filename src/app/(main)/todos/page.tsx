@@ -43,6 +43,7 @@ import { Todo } from '@/stores/types'
 import { ConfirmDialog } from '@/components/dialog/confirm-dialog'
 import { useConfirmDialog } from '@/hooks/useConfirmDialog'
 import { DatePicker } from '@/components/ui/date-picker'
+import { formatDateCompact } from '@/lib/utils/format-date'
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd'
 
 export const dynamic = 'force-dynamic'
@@ -394,7 +395,7 @@ export default function TodosPage() {
     const date = new Date(deadline)
     const now = new Date()
     const diffDays = Math.ceil((date.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
-    const formatted = date.toLocaleDateString('zh-TW', { month: 'short', day: 'numeric' })
+    const formatted = formatDateCompact(date)
 
     if (diffDays < 0)
       return { text: `逾期 ${Math.abs(diffDays)} 天`, color: 'text-morandi-red bg-morandi-red/10' }
@@ -1002,7 +1003,7 @@ function getDeadlineBadge(deadline?: string) {
   const date = new Date(deadline)
   const now = new Date()
   const diffDays = Math.ceil((date.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
-  const formatted = date.toLocaleDateString('zh-TW', { month: 'short', day: 'numeric' })
+  const formatted = formatDateCompact(date)
   if (diffDays < 0)
     return { text: `逾期 ${Math.abs(diffDays)} 天`, color: 'text-morandi-red bg-morandi-red/10' }
   if (diffDays === 0) return { text: '今天', color: 'text-morandi-gold bg-morandi-gold/10' }

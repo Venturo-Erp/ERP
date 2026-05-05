@@ -163,7 +163,7 @@ export function CoverInfoForm({
                   }
                   onSelect={date => {
                     if (date && date instanceof Date) {
-                      const formatted = `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')}`
+                      const formatted = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
                       updateField('departureDate', formatted)
                     }
                   }}

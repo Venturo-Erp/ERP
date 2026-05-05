@@ -35,6 +35,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { supabase } from '@/lib/supabase/client'
 import { ModuleLoading } from '@/components/module-loading'
+import { formatDate } from '@/lib/utils/format-date'
 
 interface TourData {
   id: string
@@ -494,7 +495,7 @@ export default function PublicTourPage({ params }: { params: Promise<{ code: str
                   <div className="flex items-center gap-3 text-sm text-morandi-primary">
                     <Calendar className="w-4 h-4 text-morandi-green" />
                     <span>
-                      出發日期：{new Date(tour.departure_date).toLocaleDateString('zh-TW')}
+                      出發日期：{formatDate(tour.departure_date)}
                     </span>
                   </div>
                 )}

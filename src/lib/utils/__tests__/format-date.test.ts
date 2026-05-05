@@ -45,25 +45,25 @@ describe('format-date', () => {
     })
   })
 
-  // formatDateTW
+  // formatDateTW (公司統一格式 YYYY-MM-DD)
   describe('formatDateTW', () => {
-    it('formats to YYYY/M/D', () => {
-      expect(formatDateTW(new Date(2024, 0, 5))).toBe('2024/1/5')
+    it('formats to YYYY-MM-DD', () => {
+      expect(formatDateTW(new Date(2024, 0, 5))).toBe('2024-01-05')
     })
 
     it('returns empty for null', () => {
       expect(formatDateTW(null)).toBe('')
     })
 
-    it('handles string input', () => {
-      expect(formatDateTW(new Date(2024, 11, 25))).toBe('2024/12/25')
+    it('pads month and day', () => {
+      expect(formatDateTW(new Date(2024, 11, 25))).toBe('2024-12-25')
     })
   })
 
-  // formatDateCompact
+  // formatDateCompact (MM-DD)
   describe('formatDateCompact', () => {
-    it('formats to M/D', () => {
-      expect(formatDateCompact(new Date(2024, 0, 5))).toBe('1/5')
+    it('formats to MM-DD with padding', () => {
+      expect(formatDateCompact(new Date(2024, 0, 5))).toBe('01-05')
     })
 
     it('returns empty for null', () => {
@@ -71,10 +71,10 @@ describe('format-date', () => {
     })
   })
 
-  // formatDateCompactPadded
+  // formatDateCompactPadded（已 deprecated、行為等同 formatDateCompact）
   describe('formatDateCompactPadded', () => {
-    it('formats to MM/DD with padding', () => {
-      expect(formatDateCompactPadded(new Date(2024, 0, 5))).toBe('01/05')
+    it('formats to MM-DD with padding', () => {
+      expect(formatDateCompactPadded(new Date(2024, 0, 5))).toBe('01-05')
     })
 
     it('returns empty for undefined', () => {

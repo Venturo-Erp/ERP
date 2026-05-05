@@ -5,6 +5,7 @@
 
 import type { DailyScheduleItem, PreviewDayData } from './types'
 import type { FlightInfo } from '@/types/flight.types'
+import { formatDate } from '@/lib/utils/format-date'
 
 // ============================================
 // 每日行程格式化
@@ -233,7 +234,7 @@ export function generatePrintHtml({
         </tbody>
       </table>
       <div class="footer">
-        本行程表由 ${companyName} 提供 | 列印日期：${new Date().toLocaleDateString('zh-TW')}
+        本行程表由 ${companyName} 提供 | 列印日期：${formatDate(new Date())}
       </div>
     </body>
     </html>

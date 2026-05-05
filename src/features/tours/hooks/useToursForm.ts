@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import { useTourPageState } from './useTourPageState'
 import { useEmployeesSlim } from '@/data'
 import { TOUR_STATUS } from '@/lib/constants/status-maps'
+import { getTodayString } from '@/lib/utils/format-date'
 
 interface UseToursFormReturn {
   handleOpenCreateDialog: (fromQuoteId?: string) => Promise<void>
@@ -33,7 +34,7 @@ export function useToursForm({ state, openDialog }: UseToursFormParams): UseTour
         countryName: '', // 🔧 核心表架構
         countryCode: '', // 🔧 核心表架構
         cityCode: '',
-        departure_date: '',
+        departure_date: getTodayString(),
         return_date: '',
         price: 0,
         status: TOUR_STATUS.UPCOMING,
@@ -56,7 +57,7 @@ export function useToursForm({ state, openDialog }: UseToursFormParams): UseTour
       name: '',
       countryCode: '',
       cityCode: '',
-      departure_date: '',
+      departure_date: getTodayString(),
       return_date: '',
       price: 0,
       status: '待出發',

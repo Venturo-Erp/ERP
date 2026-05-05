@@ -423,7 +423,6 @@ export default function VisasPage() {
         { value: 'all', label: '全部', icon: FileText },
         { value: 'pending', label: '待送件', icon: Clock },
         { value: 'submitted', label: '已送件', icon: AlertCircle },
-        { value: 'collected', label: '已取件', icon: CheckCircle },
         { value: 'rejected', label: '退件', icon: XCircle },
         { value: 'returned', label: '已歸還', icon: RotateCcw },
       ]}

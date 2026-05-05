@@ -34,6 +34,7 @@ import { Input } from '@/components/ui/input'
 import { DatePicker } from '@/components/ui/date-picker'
 import { TimeInput } from '@/components/ui/time-input'
 import { Label } from '@/components/ui/label'
+import { formatDate } from '@/lib/utils/format-date'
 import {
   Select,
   SelectContent,
@@ -473,7 +474,7 @@ export function TourContractTab({ tour }: TourContractTabProps) {
                   <div className="flex items-center gap-2">
                     {contract.signed_at && (
                       <span className="text-xs text-morandi-green">
-                        ✓ 簽於 {new Date(contract.signed_at).toLocaleDateString('zh-TW')}
+                        ✓ 簽於 {formatDate(contract.signed_at)}
                       </span>
                     )}
                     {contract.status !== 'signed' && (

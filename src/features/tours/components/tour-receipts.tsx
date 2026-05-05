@@ -43,7 +43,10 @@ const STATUS_MAP: Record<string, { label: string; tone: StatusTone }> = {
 function formatDate(dateStr: string | null | undefined) {
   if (!dateStr) return '-'
   const d = new Date(dateStr)
-  return d.toLocaleDateString('zh-TW', { month: '2-digit', day: '2-digit' })
+  if (isNaN(d.getTime())) return '-'
+  const month = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${month}-${day}`
 }
 
 export const TourReceipts = React.memo(function TourReceipts({

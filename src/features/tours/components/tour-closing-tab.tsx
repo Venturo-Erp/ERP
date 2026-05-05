@@ -246,22 +246,25 @@ export function TourClosingTab({ tour }: TourClosingTabProps) {
     }
   }, [tour.id])
 
-  // 格式化日期
+  // 格式化日期（MM-DD）
   const formatDate = (dateStr: string | null | undefined) => {
     if (!dateStr) return '-'
     const d = new Date(dateStr)
-    return d.toLocaleDateString('zh-TW', { month: '2-digit', day: '2-digit' })
+    if (isNaN(d.getTime())) return '-'
+    const month = String(d.getMonth() + 1).padStart(2, '0')
+    const day = String(d.getDate()).padStart(2, '0')
+    return `${month}-${day}`
   }
 
   const formatDateTime = (dateStr: string | null | undefined) => {
     if (!dateStr) return '-'
     const d = new Date(dateStr)
-    return d.toLocaleDateString('zh-TW', {
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-    })
+    if (isNaN(d.getTime())) return '-'
+    const month = String(d.getMonth() + 1).padStart(2, '0')
+    const day = String(d.getDate()).padStart(2, '0')
+    const hh = String(d.getHours()).padStart(2, '0')
+    const mm = String(d.getMinutes()).padStart(2, '0')
+    return `${month}-${day} ${hh}:${mm}`
   }
 
   // 收款方式對照（SWR 快取）

@@ -43,11 +43,6 @@ const OrderMembersExpandable = dynamic(
   { loading: () => <TabLoading /> }
 )
 
-const TourCheckin = dynamic(
-  () => import('@/features/tours/components/tour-checkin').then(m => m.TourCheckin),
-  { loading: () => <TabLoading /> }
-)
-
 const TourCosts = dynamic(
   () => import('@/features/tours/components/tour-costs').then(m => m.TourCosts),
   { loading: () => <TabLoading /> }
@@ -99,7 +94,6 @@ export const TOUR_TABS = [
   { value: 'display-itinerary', label: '展示行程' },
   { value: 'quote', label: COMP_TOURS_LABELS.報價 },
   { value: 'contract', label: '合約' },
-  { value: 'checkin', label: COMP_TOURS_LABELS.報到 },
   // 「結案」獨立分頁已併進「總覽」、由 workspace feature `tours.closing` 控制可見性
   // 詳見 TourTabContent 的 'overview' case
 ] as const
@@ -169,8 +163,6 @@ export function TourTabContent({
       )
     case 'orders':
       return <TourOrders tour={tour} />
-    case 'checkin':
-      return <TourCheckin tour={tour} />
     case 'quote':
       return <TourQuoteTabV2 tour={tour} />
     case 'itinerary':

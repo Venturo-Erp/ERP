@@ -46,14 +46,14 @@ describe('format-date', () => {
     expect(formatDate('')).toBe('')
   })
 
-  it('should format TW date', () => {
+  it('should format TW date as YYYY-MM-DD', () => {
     const result = formatDateTW(new Date(2025, 0, 28))
-    expect(result).toBe('2025/1/28')
+    expect(result).toBe('2025-01-28')
   })
 
-  it('should format compact date', () => {
+  it('should format compact date as MM-DD', () => {
     const result = formatDateCompact(new Date(2025, 0, 5))
-    expect(result).toBe('1/5')
+    expect(result).toBe('01-05')
   })
 
   it('should check same day', () => {

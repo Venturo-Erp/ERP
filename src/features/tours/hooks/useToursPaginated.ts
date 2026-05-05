@@ -111,13 +111,12 @@ export function useToursPaginated(params: UseToursPaginatedParams): UseToursPagi
           .not('code', 'like', 'ESIM%')
           .in('status', [TOUR_STATUS.UPCOMING, TOUR_STATUS.ONGOING])
       } else if (status === TOUR_STATUS.CLOSED) {
-        // 已結團：回程日已過
+        // 已結團：只看 status='closed'（William 2026-05-05 拍板）
         query = query
-          .lt('return_date', todayStr)
           .neq('archived', true)
           .not('code', 'like', 'VISA%')
           .not('code', 'like', 'ESIM%')
-          .in('status', [TOUR_STATUS.RETURNED, TOUR_STATUS.CLOSED])
+          .eq('status', TOUR_STATUS.CLOSED)
       } else {
         // 'all' 或其他 tab：排除封存、工具團、提案/模板
         query = query

@@ -69,7 +69,6 @@ export const MODULES: ModuleDefinition[] = [
       },
       { code: 'quote', name: '報價', description: '報價計算、成本' },
       { code: 'contract', name: '合約', description: '旅遊合約、電子簽約', category: 'premium' },
-      { code: 'checkin', name: '報到', description: '團員報到狀態' },
       { code: 'closing', name: '結案', description: '結團報表、損益確認' },
       // ===== 下拉資格（勾寫入 = 出現在該下拉、admin 可個別取消）=====
       {

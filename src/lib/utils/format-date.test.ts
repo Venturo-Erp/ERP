@@ -48,8 +48,8 @@ describe('formatDate', () => {
 })
 
 describe('formatDateTW', () => {
-  it('formats to YYYY/M/D', () => {
-    expect(formatDateTW(new Date(2024, 0, 15))).toBe('2024/1/15')
+  it('formats to YYYY-MM-DD', () => {
+    expect(formatDateTW(new Date(2024, 0, 15))).toBe('2024-01-15')
   })
   it('returns empty for null', () => {
     expect(formatDateTW(null)).toBe('')
@@ -58,7 +58,7 @@ describe('formatDateTW', () => {
     expect(formatDateTW('bad')).toBe('')
   })
   it('handles string input', () => {
-    expect(formatDateTW('2024-12-25')).toMatch(/2024\/12\/25/)
+    expect(formatDateTW('2024-12-25')).toMatch(/2024-12-25/)
   })
 })
 
@@ -70,8 +70,8 @@ describe('formatDateDisplay', () => {
 })
 
 describe('formatDateCompact', () => {
-  it('formats to M/D', () => {
-    expect(formatDateCompact(new Date(2024, 0, 5))).toBe('1/5')
+  it('formats to MM-DD with padding', () => {
+    expect(formatDateCompact(new Date(2024, 0, 5))).toBe('01-05')
   })
   it('returns empty for null', () => {
     expect(formatDateCompact(null)).toBe('')
@@ -82,11 +82,11 @@ describe('formatDateCompact', () => {
 })
 
 describe('formatDateCompactPadded', () => {
-  it('formats to MM/DD', () => {
-    expect(formatDateCompactPadded(new Date(2024, 0, 5))).toBe('01/05')
+  it('formats to MM-DD', () => {
+    expect(formatDateCompactPadded(new Date(2024, 0, 5))).toBe('01-05')
   })
   it('formats double digit', () => {
-    expect(formatDateCompactPadded(new Date(2024, 11, 25))).toBe('12/25')
+    expect(formatDateCompactPadded(new Date(2024, 11, 25))).toBe('12-25')
   })
   it('returns empty for null', () => {
     expect(formatDateCompactPadded(null)).toBe('')

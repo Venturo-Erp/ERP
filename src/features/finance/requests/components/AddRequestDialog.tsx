@@ -987,8 +987,8 @@ export function AddRequestDialog({
           >
             {/* Header: Tab + 選擇器 + 標題 同一行（統一收款單風格） */}
             <DialogHeader className="flex-row items-center justify-between pb-4">
-              {/* 左邊：Tab + 選擇器 */}
-              <div className="flex items-center gap-4">
+              {/* 左邊：Tab + 選擇器（每欄加 label、items-end 對齊底邊） */}
+              <div className="flex items-end gap-4">
                 <TabsList className="w-fit h-10">
                   <TabsTrigger value="tour" disabled={isEditMode}>
                     {ADD_REQUEST_FORM_LABELS.LABEL_7551}
@@ -1006,7 +1006,8 @@ export function AddRequestDialog({
                 {/* 團體請款：團號 + 訂單 + 請款日期 同一行（跟收款 dialog 對齊） */}
                 {activeTab === 'tour' && (
                   <>
-                    <div className="relative z-[10020]">
+                    <div className="flex flex-col gap-1 relative z-[10020]">
+                      <Label className="text-xs text-morandi-muted">團號</Label>
                       <Combobox
                         options={tourOptions}
                         value={formData.tour_id}
@@ -1015,12 +1016,13 @@ export function AddRequestDialog({
                         }
                         placeholder={ADD_REQUEST_DIALOG_LABELS.搜尋團號或團名}
                         emptyMessage={ADD_RECEIPT_DIALOG_LABELS.找不到團體}
-                        className="w-[350px]"
+                        className="w-[300px]"
                         maxHeight="300px"
                         disabled={isEditMode}
                       />
                     </div>
-                    <div className="relative z-[10019]">
+                    <div className="flex flex-col gap-1 relative z-[10019]">
+                      <Label className="text-xs text-morandi-muted">訂單</Label>
                       <Combobox
                         options={orderOptions}
                         value={formData.order_id}
@@ -1031,11 +1033,12 @@ export function AddRequestDialog({
                             : BATCH_RECEIPT_DIALOG_LABELS.搜尋訂單
                         }
                         disabled={!formData.tour_id}
-                        className="w-[300px]"
+                        className="w-[240px]"
                         maxHeight="300px"
                       />
                     </div>
-                    <div className="relative z-[10018] w-[200px]">
+                    <div className="flex flex-col gap-1 relative z-[10018] w-[240px]">
+                      <Label className="text-xs text-morandi-muted">請款日期</Label>
                       <RequestDateInput
                         value={formData.request_date}
                         onChange={(date, isSpecialBilling) =>
@@ -1052,7 +1055,8 @@ export function AddRequestDialog({
 
                 {/* 公司請款：只留日期、付款方式 + 費用類型由 row 內 column 處理 */}
                 {activeTab === 'company' && (
-                  <div className="relative z-[10018] w-[200px]">
+                  <div className="flex flex-col gap-1 relative z-[10018] w-[240px]">
+                    <Label className="text-xs text-morandi-muted">請款日期</Label>
                     <RequestDateInput
                       value={formData.request_date}
                       onChange={(date, isSpecialBilling) =>
@@ -1068,7 +1072,8 @@ export function AddRequestDialog({
 
                 {/* 批量請款：只留日期、其他欄位 row 內統一控制 */}
                 {activeTab === 'batch' && (
-                  <div className="relative z-[10018] w-[200px]">
+                  <div className="flex flex-col gap-1 relative z-[10018] w-[240px]">
+                    <Label className="text-xs text-morandi-muted">請款日期</Label>
                     <DatePicker
                       value={batchDate}
                       onChange={date => setBatchDate(date)}

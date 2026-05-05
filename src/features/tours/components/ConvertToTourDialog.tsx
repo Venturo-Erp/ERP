@@ -44,7 +44,7 @@ export function ConvertToTourDialog({
   tour,
   onConvert,
 }: ConvertToTourDialogProps) {
-  const [departureDate, setDepartureDate] = useState('')
+  const [departureDate, setDepartureDate] = useState(getTodayString())
   const [returnDate, setReturnDate] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [newOrder, setNewOrder] = useState<Partial<OrderFormData>>({
@@ -91,7 +91,7 @@ export function ConvertToTourDialog({
   }
 
   const handleClose = () => {
-    setDepartureDate('')
+    setDepartureDate(getTodayString())
     setReturnDate('')
     setNewOrder({
       contact_person: '',
@@ -136,7 +136,6 @@ export function ConvertToTourDialog({
                     setReturnDate(date)
                   }
                 }}
-                min={getTodayString()}
                 className="mt-1"
                 required
               />
@@ -149,7 +148,7 @@ export function ConvertToTourDialog({
               <SimpleDateInput
                 value={returnDate}
                 onChange={setReturnDate}
-                min={departureDate || getTodayString()}
+                min={departureDate}
                 defaultMonth={departureDate}
                 className="mt-1"
                 required

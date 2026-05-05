@@ -16,6 +16,7 @@ import { PrintItineraryPreview } from '@/features/itinerary/components/PrintItin
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useItineraries, updateTour, useCountries, useTourItineraryItems } from '@/data'
+import { formatDate, formatDateCompact } from '@/lib/utils/format-date'
 import type {
   FlightInfo,
   Feature,
@@ -79,7 +80,7 @@ function buildDefaultFromTour(tour: Tour, countryName = ''): TourFormData {
     subtitle: '精緻旅遊',
     // 注意：tours.description 是內部備註，不該被展示行程當對客描述用
     description: '',
-    departureDate: departureDate.toLocaleDateString('zh-TW'),
+    departureDate: formatDate(departureDate),
     tourCode: tour.code || '',
     coverImage: '',
     // SSOT：country/city 的真相是 tours.country_id / airport_code，永遠以 tour 為準
@@ -90,10 +91,7 @@ function buildDefaultFromTour(tour: Tour, countryName = ''): TourFormData {
       flightNumber: '',
       departureAirport: 'TPE',
       departureTime: '',
-      departureDate: departureDate.toLocaleDateString('zh-TW', {
-        month: '2-digit',
-        day: '2-digit',
-      }),
+      departureDate: formatDateCompact(departureDate),
       arrivalAirport: airportCode,
       arrivalTime: '',
       duration: '',
@@ -103,10 +101,7 @@ function buildDefaultFromTour(tour: Tour, countryName = ''): TourFormData {
       flightNumber: '',
       departureAirport: airportCode,
       departureTime: '',
-      departureDate: returnDate.toLocaleDateString('zh-TW', {
-        month: '2-digit',
-        day: '2-digit',
-      }),
+      departureDate: formatDateCompact(returnDate),
       arrivalAirport: 'TPE',
       arrivalTime: '',
       duration: '',

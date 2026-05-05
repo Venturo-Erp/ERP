@@ -242,7 +242,7 @@ export function EditableRequestItemList({
     {
       key: 'date',
       label: '日期',
-      width: '130px',
+      width: '220px',
       render: ({ row, onUpdate }) => (
         <DatePicker
           value={row.custom_request_date || ''}
