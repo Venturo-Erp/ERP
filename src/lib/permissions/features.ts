@@ -146,7 +146,7 @@ export const FEATURES: FeatureDefinition[] = [
     name: '顧客管理',
     description: '客戶資料、公司客戶、客戶群組',
     category: 'premium',
-    routes: ['/customers', '/customers/companies', '/customer-groups'],
+    routes: ['/customers', '/customers/companies'],
   },
   // 報價單功能已整合到旅遊團管理中，不再獨立
   // {
