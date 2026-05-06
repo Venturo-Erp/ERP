@@ -1,18 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdminClient } from '@/lib/supabase/admin'
-import { getServerAuth } from '@/lib/auth/server-auth'
+import { requireCapability } from '@/lib/auth/require-capability'
 import { logger } from '@/lib/utils/logger'
 
 /**
  * POST /api/employees/create
  * 建立新員工（包含 Supabase Auth 帳號）
+ *
+ * 2026-05-06：補上 capability 守門（之前只檢查登入、任何登入帳號可建員工）
  */
 export async function POST(request: NextRequest) {
   try {
-    const auth = await getServerAuth()
-    if (!auth.success) {
-      return NextResponse.json({ message: '請先登入' }, { status: 401 })
-    }
+    const guard = await requireCapability('hr.employees.write')
+    if (!guard.ok) return guard.response
+    const auth = { data: { employeeId: guard.employeeId, workspaceId: guard.workspaceId } }
 
     const body = await request.json()
     const { password, ...employeeData } = body

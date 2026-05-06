@@ -18,6 +18,16 @@ export async function GET(req: NextRequest) {
     const url = new URL(req.url)
     const targetId = url.searchParams.get('employee_id') ?? auth.data.employeeId
 
+    // 2026-05-06：查別人薪資必須有 hr.payroll.read capability
+    // 之前漏洞：任意員工可帶 ?employee_id=xxx 查同事薪資
+    if (targetId !== auth.data.employeeId) {
+      const { hasCapabilityByCode } = await import('@/app/api/lib/check-capability')
+      const allowed = await hasCapabilityByCode(auth.data.employeeId, 'hr.payroll.read')
+      if (!allowed) {
+        return NextResponse.json({ error: '無權限查詢他人薪資' }, { status: 403 })
+      }
+    }
+
     const supabase = getSupabaseAdminClient()
     const { data, error } = await supabase
       .from('payslips')

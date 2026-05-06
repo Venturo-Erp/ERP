@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createApiClient } from '@/lib/supabase/api-client'
+import { requireCapability } from '@/lib/auth/require-capability'
 
 import type { TabPermission } from '@/lib/permissions'
 
@@ -83,6 +84,10 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ roleId: string }> }
 ) {
+  // 2026-05-06：補上 capability 守門
+  const guard = await requireCapability('hr.roles.write')
+  if (!guard.ok) return guard.response
+
   const { roleId } = await params
   const supabase = await createApiClient()
   const body = await request.json()

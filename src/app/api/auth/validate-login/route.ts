@@ -198,8 +198,9 @@ export async function POST(request: NextRequest) {
       },
     })
     response.cookies.set('venturo-workspace-id', workspace.id, {
-      httpOnly: false, // client 需要讀取（debug）、不放敏感資料
-      sameSite: 'lax',
+      httpOnly: true, // 2026-05-06: 改 true、確認 client 端無人讀（只 get-layout-context server side 讀）
+      sameSite: 'lax', // strict 會在外部 link 點進來時丟失、保留 lax
+      secure: process.env.NODE_ENV === 'production',
       path: '/',
       maxAge: 60 * 60 * 24 * 7, // 7 天
     })

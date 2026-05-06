@@ -1,14 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createApiClient } from '@/lib/supabase/api-client'
+import { requireCapability } from '@/lib/auth/require-capability'
 
 /**
  * DELETE /api/roles/[roleId]
  * 刪除角色（系統主管角色擋下）
+ *
+ * 2026-05-06：補上 capability 守門（之前只靠 RLS 兜底）
  */
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ roleId: string }> }
 ) {
+  const guard = await requireCapability('hr.roles.write')
+  if (!guard.ok) return guard.response
+
   const { roleId } = await params
   const supabase = await createApiClient()
 
