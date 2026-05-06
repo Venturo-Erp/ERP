@@ -31,7 +31,7 @@ import { logger } from '@/lib/utils/logger'
 import { DISBURSEMENT_STATUS, DISBURSEMENT_STATUS_LABELS, DISBURSEMENT_STATUS_TONES } from '../constants'
 import { DISBURSEMENT_LABELS } from '../constants/labels'
 import { recalculateExpenseStats } from '@/features/finance/payments/services/expense-core.service'
-import { generateDisbursementPDF } from '@/lib/pdf/disbursement-pdf'
+// jsPDF + jspdf-autotable 大型 library（~150KB）→ 動態 import、只在點「確認出帳」才載入
 
 interface DisbursementDetailDialogProps {
   order: DisbursementOrder | null
@@ -171,6 +171,7 @@ export function DisbursementDetailDialog({
             'id, request_id, description, quantity, unitprice, subtotal, category, tour_id, supplier_name, sort_order, item_number, notes, workspace_id'
           )
           .in('request_id', requestIds)
+        const { generateDisbursementPDF } = await import('@/lib/pdf/disbursement-pdf')
         const blob = await generateDisbursementPDF({
           order: {
             ...order,

@@ -26,7 +26,7 @@ import {
 import { toast } from 'sonner'
 import { logger } from '@/lib/utils/logger'
 import { formatCurrency } from '@/lib/utils/format-currency'
-import { generateTourClosingPDF } from '@/lib/pdf/tour-closing-pdf'
+// jsPDF 大型 library（~150KB）→ 動態 import、只在點「列印 / 產 PDF」才載入
 import { calculateFullProfit } from '@/features/tours/services/profit-calculation.service'
 import { supabase } from '@/lib/supabase/client'
 import { TOURS_LABELS } from './constants/labels'
@@ -185,6 +185,7 @@ export function TourClosingDialog({ open, onOpenChange, tour, onSuccess }: TourC
         memberCount,
       })
 
+      const { generateTourClosingPDF } = await import('@/lib/pdf/tour-closing-pdf')
       await generateTourClosingPDF({
         tour,
         orders: tourOrders,
