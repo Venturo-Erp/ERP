@@ -312,8 +312,6 @@ const OTHER_SETTINGS_LABELS = {
   TITLE: '其他設定',
   LANGUAGE_SETTING: '語言設定',
   LANGUAGE_VALUE: '繁體中文（預設）',
-  NOTIFICATION_SETTING: '通知設定',
-  NOTIFICATION_VALUE: '系統通知：開啟',
   BACKUP_SETTING: '資料備份',
   BACKUP_VALUE: '自動備份：每日凌晨 2:00',
 }

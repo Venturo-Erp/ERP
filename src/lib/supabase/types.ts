@@ -1275,94 +1275,6 @@ export type Database = {
           },
         ]
       }
-      company_announcements: {
-        Row: {
-          content: string | null
-          created_at: string
-          created_by: string | null
-          expire_date: string | null
-          id: string
-          is_active: boolean
-          is_pinned: boolean | null
-          priority: number | null
-          publish_date: string | null
-          read_by: string[] | null
-          status: string | null
-          title: string
-          type: string | null
-          updated_at: string
-          updated_by: string | null
-          visibility: string | null
-          visible_to_employees: string[] | null
-          visible_to_roles: string[] | null
-          workspace_id: string
-        }
-        Insert: {
-          content?: string | null
-          created_at?: string
-          created_by?: string | null
-          expire_date?: string | null
-          id?: string
-          is_active?: boolean
-          is_pinned?: boolean | null
-          priority?: number | null
-          publish_date?: string | null
-          read_by?: string[] | null
-          status?: string | null
-          title: string
-          type?: string | null
-          updated_at?: string
-          updated_by?: string | null
-          visibility?: string | null
-          visible_to_employees?: string[] | null
-          visible_to_roles?: string[] | null
-          workspace_id: string
-        }
-        Update: {
-          content?: string | null
-          created_at?: string
-          created_by?: string | null
-          expire_date?: string | null
-          id?: string
-          is_active?: boolean
-          is_pinned?: boolean | null
-          priority?: number | null
-          publish_date?: string | null
-          read_by?: string[] | null
-          status?: string | null
-          title?: string
-          type?: string | null
-          updated_at?: string
-          updated_by?: string | null
-          visibility?: string | null
-          visible_to_employees?: string[] | null
-          visible_to_roles?: string[] | null
-          workspace_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "company_announcements_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "company_announcements_updated_by_fkey"
-            columns: ["updated_by"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "company_announcements_workspace_id_fkey"
-            columns: ["workspace_id"]
-            isOneToOne: false
-            referencedRelation: "workspaces"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       company_contacts: {
         Row: {
           company_id: string | null
@@ -2098,7 +2010,6 @@ export type Database = {
           hidden_menu_items: string[] | null
           id: string
           id_number: string | null
-          is_bot: boolean | null
           job_info: Json | null
           job_title: string | null
           login_failed_count: number
@@ -2137,7 +2048,6 @@ export type Database = {
           hidden_menu_items?: string[] | null
           id?: string
           id_number?: string | null
-          is_bot?: boolean | null
           job_info?: Json | null
           job_title?: string | null
           login_failed_count?: number
@@ -2176,7 +2086,6 @@ export type Database = {
           hidden_menu_items?: string[] | null
           id?: string
           id_number?: string | null
-          is_bot?: boolean | null
           job_info?: Json | null
           job_title?: string | null
           login_failed_count?: number
@@ -3610,82 +3519,6 @@ export type Database = {
           },
           {
             foreignKeyName: "notes_workspace_id_fkey"
-            columns: ["workspace_id"]
-            isOneToOne: false
-            referencedRelation: "workspaces"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      notifications: {
-        Row: {
-          action_data: Json | null
-          action_url: string | null
-          channels_sent: Json | null
-          created_at: string
-          id: string
-          is_read: boolean
-          message: string | null
-          module: string
-          read_at: string | null
-          recipient_id: string
-          sender_id: string | null
-          title: string
-          type: string
-          updated_at: string
-          workspace_id: string
-        }
-        Insert: {
-          action_data?: Json | null
-          action_url?: string | null
-          channels_sent?: Json | null
-          created_at?: string
-          id?: string
-          is_read?: boolean
-          message?: string | null
-          module?: string
-          read_at?: string | null
-          recipient_id: string
-          sender_id?: string | null
-          title: string
-          type?: string
-          updated_at?: string
-          workspace_id: string
-        }
-        Update: {
-          action_data?: Json | null
-          action_url?: string | null
-          channels_sent?: Json | null
-          created_at?: string
-          id?: string
-          is_read?: boolean
-          message?: string | null
-          module?: string
-          read_at?: string | null
-          recipient_id?: string
-          sender_id?: string | null
-          title?: string
-          type?: string
-          updated_at?: string
-          workspace_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "notifications_recipient_id_fkey"
-            columns: ["recipient_id"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "notifications_sender_id_fkey"
-            columns: ["sender_id"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "notifications_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"

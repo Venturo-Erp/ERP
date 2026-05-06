@@ -25,7 +25,6 @@ export const TABLES = {
   // 企業客戶系統
   COMPANIES: 'companies',
   COMPANY_CONTACTS: 'company_contacts',
-  COMPANY_ANNOUNCEMENTS: 'company_announcements',
   // 地區管理系統（三層架構）
   COUNTRIES: 'countries',
   REGIONS: 'regions',
