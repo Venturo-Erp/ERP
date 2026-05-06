@@ -29,7 +29,8 @@ let syncPromise: Promise<boolean> | null = null
 async function syncEmployeeToSupabase(
   employeeId: string,
   userId: string,
-  workspaceId: string
+  workspaceId: string,
+  accessToken?: string
 ): Promise<boolean> {
   try {
     const response = await fetch('/api/auth/sync-employee', {
@@ -39,6 +40,7 @@ async function syncEmployeeToSupabase(
         employee_id: employeeId,
         user_id: userId,
         workspace_id: workspaceId,
+        access_token: accessToken,
       }),
     })
 
@@ -165,7 +167,8 @@ export async function ensureAuthSync(options?: SyncOptions): Promise<boolean> {
         return await syncEmployeeToSupabase(
           employeeId,
           userId,
-          workspaceId
+          workspaceId,
+          session.access_token
         )
       }
 
@@ -184,7 +187,8 @@ export async function ensureAuthSync(options?: SyncOptions): Promise<boolean> {
       return await syncEmployeeToSupabase(
         employeeId,
         userId,
-        workspaceId
+        workspaceId,
+        session.access_token
       )
     } catch (error) {
       logger.error('❌ ensureAuthSync 錯誤:', error)

@@ -21,17 +21,34 @@ export async function POST(request: NextRequest) {
   try {
     const validation = await validateBody(request, syncEmployeeSchema)
     if (!validation.success) return validation.error
-    const { employee_id, user_id, workspace_id } = validation.data
+    const { employee_id, user_id, workspace_id, access_token } = validation.data
 
-    // 驗證請求者身份：從 cookie session 讀取（不再透過 body 傳 access_token）
+    // 驗證請求者身份
+    // 方法1: 使用 access_token 驗證（登入後 session cookie 可能還沒設好）
+    // 方法2: 使用 session cookie 驗證（已登入的情況）
     const supabaseAdmin = getSupabaseAdminClient()
-    const supabase = await createSupabaseServerClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
 
-    if (!user || user.id !== user_id) {
-      return errorResponse('Unauthorized: user mismatch', 401, ErrorCode.UNAUTHORIZED)
+    if (access_token) {
+      // 用 admin client 驗證 token 對應的用戶
+      const {
+        data: { user },
+        error,
+      } = await supabaseAdmin.auth.getUser(access_token)
+      if (error || !user || user.id !== user_id) {
+        logger.error('Token 驗證失敗:', error?.message || 'user mismatch')
+        return errorResponse('Unauthorized: invalid token', 401, ErrorCode.UNAUTHORIZED)
+      }
+      logger.log('Token 驗證成功:', user.id)
+    } else {
+      // 備用：用 cookie session 驗證
+      const supabase = await createSupabaseServerClient()
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+
+      if (!user || user.id !== user_id) {
+        return errorResponse('Unauthorized: user mismatch', 401, ErrorCode.UNAUTHORIZED)
+      }
     }
 
     // P003-B（2026-04-22）：跨租戶綁帳號守門。

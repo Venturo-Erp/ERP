@@ -72,6 +72,7 @@ export const syncEmployeeSchema = z.object({
   employee_id: z.string().min(1, '缺少員工 ID'),
   user_id: z.string().min(1, '缺少 User ID'),
   workspace_id: z.string().optional(),
+  access_token: z.string().optional(),
 })
 
 export const resetEmployeePasswordSchema = z.object({
