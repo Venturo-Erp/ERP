@@ -83,13 +83,14 @@ export async function POST(request: NextRequest) {
       return ApiError.unauthorized('帳號認證資料異常、請聯絡系統主管')
     }
 
-    // 5. 用 Supabase Auth 驗證密碼
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email: authEmail,
-      password,
+    // 5. 用 RPC 純驗證密碼、不產 session（client 端 signInWithPassword 是唯一產 session 的地方）
+    // 解雙重登入：之前 API 跑 signInWithPassword + client 又跑一次、cookie 被 set 兩次、浪費
+    const { data: passwordValid, error: rpcError } = await supabase.rpc('verify_auth_password', {
+      p_user_id: employee.user_id,
+      p_password: password,
     })
 
-    if (signInError) {
+    if (rpcError || !passwordValid) {
       // 登入失敗：累加失敗計數
       const currentFailCount =
         ((employee as Record<string, unknown>).login_failed_count as number) || 0

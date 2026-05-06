@@ -78,125 +78,6 @@ export type Database = {
           },
         ]
       }
-      ai_memories: {
-        Row: {
-          category: string
-          content: string
-          context: string | null
-          created_at: string | null
-          created_by: string | null
-          emotion: string | null
-          id: string
-          importance: number | null
-          related_feature: string | null
-          source: string | null
-          source_date: string | null
-          tags: string[] | null
-          title: string | null
-          updated_at: string | null
-          workspace_id: string | null
-        }
-        Insert: {
-          category: string
-          content: string
-          context?: string | null
-          created_at?: string | null
-          created_by?: string | null
-          emotion?: string | null
-          id?: string
-          importance?: number | null
-          related_feature?: string | null
-          source?: string | null
-          source_date?: string | null
-          tags?: string[] | null
-          title?: string | null
-          updated_at?: string | null
-          workspace_id?: string | null
-        }
-        Update: {
-          category?: string
-          content?: string
-          context?: string | null
-          created_at?: string | null
-          created_by?: string | null
-          emotion?: string | null
-          id?: string
-          importance?: number | null
-          related_feature?: string | null
-          source?: string | null
-          source_date?: string | null
-          tags?: string[] | null
-          title?: string | null
-          updated_at?: string | null
-          workspace_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "ai_memories_workspace_id_fkey"
-            columns: ["workspace_id"]
-            isOneToOne: false
-            referencedRelation: "workspaces"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      ai_settings: {
-        Row: {
-          created_at: string | null
-          data_sources: Json | null
-          description: string | null
-          id: string
-          response_mode: string | null
-          setting_category: string
-          setting_key: string
-          setting_value: string | null
-          updated_at: string | null
-          updated_by: string | null
-          workspace_id: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          data_sources?: Json | null
-          description?: string | null
-          id?: string
-          response_mode?: string | null
-          setting_category: string
-          setting_key: string
-          setting_value?: string | null
-          updated_at?: string | null
-          updated_by?: string | null
-          workspace_id?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          data_sources?: Json | null
-          description?: string | null
-          id?: string
-          response_mode?: string | null
-          setting_category?: string
-          setting_key?: string
-          setting_value?: string | null
-          updated_at?: string | null
-          updated_by?: string | null
-          workspace_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "ai_settings_updated_by_fkey"
-            columns: ["updated_by"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "ai_settings_workspace_id_fkey"
-            columns: ["workspace_id"]
-            isOneToOne: false
-            referencedRelation: "workspaces"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       airport_images: {
         Row: {
           airport_code: string
@@ -3193,50 +3074,6 @@ export type Database = {
           },
         ]
       }
-      knowledge_base: {
-        Row: {
-          answer: string | null
-          category: string
-          created_at: string | null
-          id: string
-          is_active: boolean | null
-          keywords: string[] | null
-          question: string | null
-          updated_at: string | null
-          workspace_id: string | null
-        }
-        Insert: {
-          answer?: string | null
-          category?: string
-          created_at?: string | null
-          id?: string
-          is_active?: boolean | null
-          keywords?: string[] | null
-          question?: string | null
-          updated_at?: string | null
-          workspace_id?: string | null
-        }
-        Update: {
-          answer?: string | null
-          category?: string
-          created_at?: string | null
-          id?: string
-          is_active?: boolean | null
-          keywords?: string[] | null
-          question?: string | null
-          updated_at?: string | null
-          workspace_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "knowledge_base_workspace_id_fkey"
-            columns: ["workspace_id"]
-            isOneToOne: false
-            referencedRelation: "workspaces"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       leader_availability: {
         Row: {
           available_end_date: string
@@ -3906,6 +3743,7 @@ export type Database = {
           ticket_number: string | null
           ticketing_deadline: string | null
           total_payable: number | null
+          tour_id: string | null
           transport_cost: number | null
           updated_at: string | null
           updated_by: string | null
@@ -3960,6 +3798,7 @@ export type Database = {
           ticket_number?: string | null
           ticketing_deadline?: string | null
           total_payable?: number | null
+          tour_id?: string | null
           transport_cost?: number | null
           updated_at?: string | null
           updated_by?: string | null
@@ -4014,6 +3853,7 @@ export type Database = {
           ticket_number?: string | null
           ticketing_deadline?: string | null
           total_payable?: number | null
+          tour_id?: string | null
           transport_cost?: number | null
           updated_at?: string | null
           updated_by?: string | null
@@ -4039,6 +3879,13 @@ export type Database = {
             columns: ["roommate_id"]
             isOneToOne: false
             referencedRelation: "order_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_members_tour_id_fkey"
+            columns: ["tour_id"]
+            isOneToOne: false
+            referencedRelation: "tours"
             referencedColumns: ["id"]
           },
           {
@@ -7191,36 +7038,58 @@ export type Database = {
           bonus: number
           bonus_type: number
           created_at: string
+          created_by: string | null
+          description: string | null
+          disbursement_date: string | null
           employee_id: string | null
           id: string
+          payment_request_id: string | null
           tour_id: string
           type: number
           updated_at: string
+          updated_by: string | null
           workspace_id: string
         }
         Insert: {
           bonus?: number
           bonus_type: number
           created_at?: string
+          created_by?: string | null
+          description?: string | null
+          disbursement_date?: string | null
           employee_id?: string | null
           id?: string
+          payment_request_id?: string | null
           tour_id: string
           type: number
           updated_at?: string
+          updated_by?: string | null
           workspace_id: string
         }
         Update: {
           bonus?: number
           bonus_type?: number
           created_at?: string
+          created_by?: string | null
+          description?: string | null
+          disbursement_date?: string | null
           employee_id?: string | null
           id?: string
+          payment_request_id?: string | null
           tour_id?: string
           type?: number
           updated_at?: string
+          updated_by?: string | null
           workspace_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "tour_bonus_settings_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "tour_bonus_settings_employee_id_fkey"
             columns: ["employee_id"]
@@ -7229,10 +7098,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "tour_bonus_settings_payment_request_id_fkey"
+            columns: ["payment_request_id"]
+            isOneToOne: false
+            referencedRelation: "payment_requests"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "tour_bonus_settings_tour_id_fkey"
             columns: ["tour_id"]
             isOneToOne: false
             referencedRelation: "tours"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tour_bonus_settings_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
             referencedColumns: ["id"]
           },
           {
@@ -8680,36 +8563,59 @@ export type Database = {
           bonus: number
           bonus_type: number
           created_at: string
+          created_by: string | null
+          description: string | null
           employee_id: string | null
           id: string
           type: number
           updated_at: string
+          updated_by: string | null
           workspace_id: string
         }
         Insert: {
           bonus?: number
           bonus_type: number
           created_at?: string
+          created_by?: string | null
+          description?: string | null
           employee_id?: string | null
           id?: string
           type: number
           updated_at?: string
+          updated_by?: string | null
           workspace_id: string
         }
         Update: {
           bonus?: number
           bonus_type?: number
           created_at?: string
+          created_by?: string | null
+          description?: string | null
           employee_id?: string | null
           id?: string
           type?: number
           updated_at?: string
+          updated_by?: string | null
           workspace_id?: string
         }
         Relationships: [
           {
+            foreignKeyName: "workspace_bonus_defaults_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "workspace_bonus_defaults_employee_id_fkey"
             columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workspace_bonus_defaults_updated_by_fkey"
+            columns: ["updated_by"]
             isOneToOne: false
             referencedRelation: "employees"
             referencedColumns: ["id"]
@@ -9370,6 +9276,10 @@ export type Database = {
         Returns: undefined
       }
       update_city_stats: { Args: { p_city_id: string }; Returns: undefined }
+      verify_auth_password: {
+        Args: { p_password: string; p_user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       accounting_event_status: "posted" | "reversed"
