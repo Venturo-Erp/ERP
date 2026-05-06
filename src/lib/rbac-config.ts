@@ -11,10 +11,8 @@
 /** @deprecated 僅用於向後相容的型別，新系統用 workspace_roles 表 */
 export type UserRole =
   | 'admin'
-  | 'tour_leader'
   | 'sales'
   | 'accountant'
   | 'assistant'
-  | 'controller'
   | 'staff'
   | 'bot'

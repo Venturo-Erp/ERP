@@ -441,9 +441,8 @@ export interface Tour extends BaseEntity {
   closing_date?: string | null // 結團日期
   closed_by?: string | null // 結團操作人員 ID
 
-  // 團服務類型與團控
+  // 團服務類型
   tour_service_type?: TourServiceType | null // 團服務類型
-  controller_id?: string | null // 團控人員 ID（負責開團的人）
 
   // 報到功能欄位
   enable_checkin?: boolean | null // 是否開啟報到功能

@@ -113,17 +113,6 @@ export function TourMobileCard({ tour: tourProp, onClick, getStatusColor }: Tour
         ) : null}
       </div>
 
-      {/* 領隊資訊（如果有） */}
-      {'tour_leader_name' in tour && Boolean(tour.tour_leader_name) ? (
-        <div className="mt-3 pt-3 border-t border-border">
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-morandi-secondary">{TOUR_MOBILE_CARD.leader_label}</span>
-            <span className="text-morandi-primary font-medium">
-              {String(tour.tour_leader_name)}
-            </span>
-          </div>
-        </div>
-      ) : null}
     </div>
   )
 }

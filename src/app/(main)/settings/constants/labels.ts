@@ -153,7 +153,7 @@ export const LABELS = {
   AUTH_LOGIN: '登入驗證',
   FUNCTION_PERMISSIONS: '功能權限控制（查看人資設定）',
   DATA_ISOLATION: '資料隔離（前端 filter）',
-  ROLE_LABELS: '角色標籤（admin, tour_leader 等）',
+  ROLE_LABELS: '角色標籤（admin, sales 等）',
   REFERENCE_DOC: '參考文檔：',
   RLS_SPEC_DOC: 'CLAUDE.md - RLS 規範',
 

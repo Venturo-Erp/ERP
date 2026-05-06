@@ -38,7 +38,6 @@ export const TABLES = {
   RECEIPTS: 'receipts',
   LINKPAY_LOGS: 'linkpay_logs',
   VENDOR_COSTS: 'vendor_costs',
-  TOUR_LEADERS: 'tour_leaders',
   // 會計系統
   JOURNAL_VOUCHERS: 'journal_vouchers',
   JOURNAL_LINES: 'journal_lines',

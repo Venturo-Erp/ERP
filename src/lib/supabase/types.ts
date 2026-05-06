@@ -3019,13 +3019,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "leader_availability_leader_id_fkey"
-            columns: ["leader_id"]
-            isOneToOne: false
-            referencedRelation: "tour_leaders"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "leader_availability_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
@@ -7481,81 +7474,6 @@ export type Database = {
           },
         ]
       }
-      tour_leaders: {
-        Row: {
-          address: string | null
-          code: string | null
-          created_at: string | null
-          display_order: number | null
-          domestic_phone: string | null
-          email: string | null
-          english_name: string | null
-          id: string
-          languages: string[] | null
-          license_number: string | null
-          name: string
-          national_id: string | null
-          notes: string | null
-          overseas_phone: string | null
-          passport_expiry: string | null
-          passport_number: string | null
-          phone: string | null
-          photo: string | null
-          specialties: string[] | null
-          status: string | null
-          updated_at: string | null
-          workspace_id: string
-        }
-        Insert: {
-          address?: string | null
-          code?: string | null
-          created_at?: string | null
-          display_order?: number | null
-          domestic_phone?: string | null
-          email?: string | null
-          english_name?: string | null
-          id?: string
-          languages?: string[] | null
-          license_number?: string | null
-          name: string
-          national_id?: string | null
-          notes?: string | null
-          overseas_phone?: string | null
-          passport_expiry?: string | null
-          passport_number?: string | null
-          phone?: string | null
-          photo?: string | null
-          specialties?: string[] | null
-          status?: string | null
-          updated_at?: string | null
-          workspace_id?: string
-        }
-        Update: {
-          address?: string | null
-          code?: string | null
-          created_at?: string | null
-          display_order?: number | null
-          domestic_phone?: string | null
-          email?: string | null
-          english_name?: string | null
-          id?: string
-          languages?: string[] | null
-          license_number?: string | null
-          name?: string
-          national_id?: string | null
-          notes?: string | null
-          overseas_phone?: string | null
-          passport_expiry?: string | null
-          passport_number?: string | null
-          phone?: string | null
-          photo?: string | null
-          specialties?: string[] | null
-          status?: string | null
-          updated_at?: string | null
-          workspace_id?: string
-        }
-        Relationships: []
-      }
       tour_meal_settings: {
         Row: {
           created_at: string | null
@@ -7741,7 +7659,6 @@ export type Database = {
           contract_notes: string | null
           contract_status: string
           contract_template: string | null
-          controller_id: string | null
           country_code: string | null
           country_id: string | null
           created_at: string
@@ -7782,7 +7699,6 @@ export type Database = {
           status: string
           total_cost: number
           total_revenue: number
-          tour_leader_id: string | null
           tour_service_type: string
           updated_at: string
           updated_by: string | null
@@ -7804,7 +7720,6 @@ export type Database = {
           contract_notes?: string | null
           contract_status?: string
           contract_template?: string | null
-          controller_id?: string | null
           country_code?: string | null
           country_id?: string | null
           created_at?: string
@@ -7845,7 +7760,6 @@ export type Database = {
           status?: string
           total_cost?: number
           total_revenue?: number
-          tour_leader_id?: string | null
           tour_service_type?: string
           updated_at?: string
           updated_by?: string | null
@@ -7867,7 +7781,6 @@ export type Database = {
           contract_notes?: string | null
           contract_status?: string
           contract_template?: string | null
-          controller_id?: string | null
           country_code?: string | null
           country_id?: string | null
           created_at?: string
@@ -7908,7 +7821,6 @@ export type Database = {
           status?: string
           total_cost?: number
           total_revenue?: number
-          tour_leader_id?: string | null
           tour_service_type?: string
           updated_at?: string
           updated_by?: string | null
@@ -7918,13 +7830,6 @@ export type Database = {
           {
             foreignKeyName: "tours_closed_by_fkey"
             columns: ["closed_by"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "tours_controller_id_fkey"
-            columns: ["controller_id"]
             isOneToOne: false
             referencedRelation: "employees"
             referencedColumns: ["id"]
@@ -7969,13 +7874,6 @@ export type Database = {
             columns: ["locked_by"]
             isOneToOne: false
             referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "tours_tour_leader_id_fkey"
-            columns: ["tour_leader_id"]
-            isOneToOne: false
-            referencedRelation: "order_members"
             referencedColumns: ["id"]
           },
           {

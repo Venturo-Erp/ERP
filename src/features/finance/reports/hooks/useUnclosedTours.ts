@@ -65,7 +65,7 @@ export function useUnclosedTours(): UseUnclosedToursResult {
       const { data: tours, error: queryError } = await supabase
         .from('tours')
         .select(
-          'id, code, name, status, departure_date, return_date, total_revenue, total_cost, profit, current_participants, controller_id, workspace_id'
+          'id, code, name, status, departure_date, return_date, total_revenue, total_cost, profit, current_participants, workspace_id'
         )
         // return_date must exist and be before cutoff
         .not('return_date', 'is', null)

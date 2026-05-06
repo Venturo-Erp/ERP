@@ -8,7 +8,6 @@
  * 常用場景：
  *   業務下拉     : useEligibleEmployees('tours', 'as_sales')
  *   助理下拉     : useEligibleEmployees('tours', 'as_assistant')
- *   團控下拉     : useEligibleEmployees('tours', 'as_tour_controller')
  *   代墊款下拉   : useEligibleEmployees('finance', 'advance_payment')
  *
  * 邏輯：

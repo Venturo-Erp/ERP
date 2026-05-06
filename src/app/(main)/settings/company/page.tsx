@@ -29,7 +29,7 @@ import { logger } from '@/lib/utils/logger'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { COMPANY_LABELS } from '../constants/labels'
-import { TourControllerSection, TourAttributesSection } from './tour-features-section'
+import { TourAttributesSection } from './tour-features-section'
 import { ModuleLoading } from '@/components/module-loading'
 
 export const dynamic = 'force-dynamic'
@@ -657,9 +657,6 @@ export default function CompanySettingsPage() {
             )}
           </Button>
         </div>
-
-        {/* 團控功能設定（僅有 tour_controller 功能的租戶顯示） */}
-        <TourControllerSection workspaceId={workspaceId} />
 
         {/* 旅行屬性功能設定（僅有 tour_attributes 功能的租戶顯示） */}
         <TourAttributesSection workspaceId={workspaceId} />

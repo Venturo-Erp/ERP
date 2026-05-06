@@ -53,7 +53,6 @@ export const TOUR_MOBILE_CARD = {
   no_name: '無團名',
   person_unit: '人',
   per_person: '/ 人',
-  leader_label: '領隊',
 } as const
 
 // ============================================================
@@ -163,15 +162,6 @@ export const TOUR_ORDER_SECTION = {
   hint: '提示：如果填寫了聯絡人，將會同時建立一筆訂單。如果留空，則只建立旅遊團。',
 } as const
 
-// ============================================================
-// TourSettings
-// ============================================================
-const TOUR_SETTINGS = {
-  controller_label: '團控人員',
-  controller_optional: '(選填)',
-  controller_placeholder: '選擇團控人員...',
-  controller_empty: '找不到團控人員',
-} as const
 
 // ============================================================
 // TourOverviewTab

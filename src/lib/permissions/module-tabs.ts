@@ -83,12 +83,6 @@ export const MODULES: ModuleDefinition[] = [
         description: '勾寫入 → 出現在訂單「助理」下拉',
         isEligibility: true,
       },
-      {
-        code: 'as_tour_controller',
-        name: '可當團控',
-        description: '勾寫入 → 出現在建團「團控」下拉',
-        isEligibility: true,
-      },
     ],
   },
   {
