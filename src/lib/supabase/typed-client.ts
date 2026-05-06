@@ -52,7 +52,7 @@ export function asTableName(name: string): SupabaseTableName {
  * const { data } = await typedFrom('tours').select('*')
  *
  * // 等同於（但更類型安全）
- * const { data } = await supabase.from('tours').select('id, code, name, location, departure_date, return_date, status, current_participants, max_participants, workspace_id, archived, contract_archived_date, tour_type, outbound_flight, return_flight, is_active, confirmed_requirements, locked_itinerary_id, itinerary_id, quote_id, locked_quote_id, tour_leader_id, controller_id, country_id, price, selling_price_per_person, total_cost, total_revenue, profit, contract_status, description, days_count, created_at, created_by, updated_at, updated_by')
+ * const { data } = await supabase.from('tours').select('id, code, name, location, departure_date, return_date, status, current_participants, max_participants, workspace_id, archived, contract_archived_date, tour_type, outbound_flight, return_flight, is_active, confirmed_requirements, locked_itinerary_id, itinerary_id, quote_id, locked_quote_id, country_id, price, selling_price_per_person, total_cost, total_revenue, profit, contract_status, description, days_count, created_at, created_by, updated_at, updated_by')
  */
 export function typedFrom<T extends SupabaseTableName>(tableName: T) {
   return supabase.from(tableName)
@@ -89,7 +89,7 @@ export function dynamicFrom(tableName: string) {
  * 使用 unknown 作為中間類型，比直接 as any 更安全
  *
  * @example
- * const { data } = await supabase.from('tours').select('id, code, name, location, departure_date, return_date, status, current_participants, max_participants, workspace_id, archived, contract_archived_date, tour_type, outbound_flight, return_flight, is_active, confirmed_requirements, locked_itinerary_id, itinerary_id, quote_id, locked_quote_id, tour_leader_id, controller_id, country_id, price, selling_price_per_person, total_cost, total_revenue, profit, contract_status, description, days_count, created_at, created_by, updated_at, updated_by')
+ * const { data } = await supabase.from('tours').select('id, code, name, location, departure_date, return_date, status, current_participants, max_participants, workspace_id, archived, contract_archived_date, tour_type, outbound_flight, return_flight, is_active, confirmed_requirements, locked_itinerary_id, itinerary_id, quote_id, locked_quote_id, country_id, price, selling_price_per_person, total_cost, total_revenue, profit, contract_status, description, days_count, created_at, created_by, updated_at, updated_by')
  * const tours = castData<Tour[]>(data)
  */
 export function castData<T>(data: unknown): T {
@@ -101,7 +101,7 @@ export function castData<T>(data: unknown): T {
  * 將單筆 Supabase 資料轉換為指定類型
  *
  * @example
- * const { data } = await supabase.from('tours').select('id, code, name, location, departure_date, return_date, status, current_participants, max_participants, workspace_id, archived, contract_archived_date, tour_type, outbound_flight, return_flight, is_active, confirmed_requirements, locked_itinerary_id, itinerary_id, quote_id, locked_quote_id, tour_leader_id, controller_id, country_id, price, selling_price_per_person, total_cost, total_revenue, profit, contract_status, description, days_count, created_at, created_by, updated_at, updated_by').single()
+ * const { data } = await supabase.from('tours').select('id, code, name, location, departure_date, return_date, status, current_participants, max_participants, workspace_id, archived, contract_archived_date, tour_type, outbound_flight, return_flight, is_active, confirmed_requirements, locked_itinerary_id, itinerary_id, quote_id, locked_quote_id, country_id, price, selling_price_per_person, total_cost, total_revenue, profit, contract_status, description, days_count, created_at, created_by, updated_at, updated_by').single()
  * const tour = castRow<Tour>(data)
  */
 export function castRow<T>(data: unknown): T | null {
@@ -113,7 +113,7 @@ export function castRow<T>(data: unknown): T | null {
  * 將資料陣列轉換為指定類型
  *
  * @example
- * const { data } = await supabase.from('tours').select('id, code, name, location, departure_date, return_date, status, current_participants, max_participants, workspace_id, archived, contract_archived_date, tour_type, outbound_flight, return_flight, is_active, confirmed_requirements, locked_itinerary_id, itinerary_id, quote_id, locked_quote_id, tour_leader_id, controller_id, country_id, price, selling_price_per_person, total_cost, total_revenue, profit, contract_status, description, days_count, created_at, created_by, updated_at, updated_by')
+ * const { data } = await supabase.from('tours').select('id, code, name, location, departure_date, return_date, status, current_participants, max_participants, workspace_id, archived, contract_archived_date, tour_type, outbound_flight, return_flight, is_active, confirmed_requirements, locked_itinerary_id, itinerary_id, quote_id, locked_quote_id, country_id, price, selling_price_per_person, total_cost, total_revenue, profit, contract_status, description, days_count, created_at, created_by, updated_at, updated_by')
  * const tours = castRows<Tour>(data)
  */
 export function castRows<T>(data: unknown): T[] {

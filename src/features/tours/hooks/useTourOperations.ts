@@ -196,7 +196,6 @@ export function useTourOperations(params: UseTourOperationsParams) {
           profit: 0,
           current_participants: 0,
           enable_checkin: isProposalOrTemplate ? false : newTour.enable_checkin || false,
-          controller_id: isProposalOrTemplate ? undefined : newTour.controller_id || undefined,
           // SSOT：航班屬於旅遊團「行程編輯」分頁，開團時不寫入 outbound_flight / return_flight
           workspace_id: workspaceId,
           tour_service_type: newTour.tour_service_type || 'tour_group',

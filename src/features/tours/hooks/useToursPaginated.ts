@@ -84,7 +84,7 @@ export function useToursPaginated(params: UseToursPaginatedParams): UseToursPagi
       let query = supabase
         .from('tours')
         .select(
-          'id, code, name, location, country_id, airport_code, status, departure_date, return_date, price, selling_price_per_person, max_participants, current_participants, total_revenue, total_cost, profit, archived, is_active, itinerary_id, controller_id, workspace_id, created_at, days_count',
+          'id, code, name, location, country_id, airport_code, status, departure_date, return_date, price, selling_price_per_person, max_participants, current_participants, total_revenue, total_cost, profit, archived, is_active, itinerary_id, workspace_id, created_at, days_count',
           { count: 'exact' }
         )
         .eq('is_active', true) // 過濾已刪除的團
@@ -364,7 +364,7 @@ function useTourDetailsPaginated(tourId: string | null) {
       const { data, error: queryError } = await supabase
         .from('tours')
         .select(
-          'id, code, name, location, departure_date, return_date, status, current_participants, max_participants, workspace_id, archived, contract_archived_date, outbound_flight, return_flight, is_active, confirmed_requirements, locked_itinerary_id, itinerary_id, locked_quote_id, controller_id, country_id, price, selling_price_per_person, total_cost, total_revenue, profit, contract_status, description, days_count, created_at, created_by, updated_at, updated_by'
+          'id, code, name, location, departure_date, return_date, status, current_participants, max_participants, workspace_id, archived, contract_archived_date, outbound_flight, return_flight, is_active, confirmed_requirements, locked_itinerary_id, itinerary_id, locked_quote_id, country_id, price, selling_price_per_person, total_cost, total_revenue, profit, contract_status, description, days_count, created_at, created_by, updated_at, updated_by'
         )
         .eq('id', tourId)
         .single()

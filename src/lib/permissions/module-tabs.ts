@@ -41,12 +41,6 @@ export const MODULES: ModuleDefinition[] = [
     tabs: [],
   },
   {
-    code: 'workspace',
-    name: '頻道',
-    description: '團隊頻道',
-    tabs: [],
-  },
-  {
     code: 'todos',
     name: '待辦事項',
     description: '任務管理',
@@ -81,12 +75,6 @@ export const MODULES: ModuleDefinition[] = [
         code: 'as_assistant',
         name: '可當助理',
         description: '勾寫入 → 出現在訂單「助理」下拉',
-        isEligibility: true,
-      },
-      {
-        code: 'as_tour_controller',
-        name: '可當團控',
-        description: '勾寫入 → 出現在建團「團控」下拉',
         isEligibility: true,
       },
     ],

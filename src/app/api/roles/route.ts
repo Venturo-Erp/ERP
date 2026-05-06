@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createApiClient, getCurrentWorkspaceId } from '@/lib/supabase/api-client'
+import { requireCapability } from '@/lib/auth/require-capability'
 
 /**
  * GET /api/roles
@@ -33,6 +34,10 @@ export async function GET() {
  * 建立新角色
  */
 export async function POST(request: NextRequest) {
+  // 2026-05-06：補上 capability 守門
+  const guard = await requireCapability('hr.roles.write')
+  if (!guard.ok) return guard.response
+
   const supabase = await createApiClient()
   const workspaceId = await getCurrentWorkspaceId()
 

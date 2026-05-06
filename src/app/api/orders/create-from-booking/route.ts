@@ -79,8 +79,6 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 4. 發送通知給業務（可選）
-
     return NextResponse.json({
       success: true,
       order_id: order.id,

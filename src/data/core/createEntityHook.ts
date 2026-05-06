@@ -78,12 +78,8 @@ const WORKSPACE_SCOPED_TABLES = [
   // === 企業客戶（B2B）===
   'companies',
   'company_contacts',
-  'company_announcements',
   // === 金流串接 log ===
   'linkpay_logs',
-  // === 溝通頻道 ===
-  'channels',
-  'messages',
   // === PNR 系統 ===
   'pnrs',
   'pnr_records',

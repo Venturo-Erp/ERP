@@ -25,15 +25,11 @@ interface RolePermission {
  *   / enabledFeatures）不變、所有 caller 自動受惠。
  */
 // 付費功能代碼（需要付費大開關開啟才能用）
+// 已移除 fleet / local / supplier_portal / esims / workspace（頻道概念）— 功能已砍
 const PREMIUM_FEATURE_CODES = [
-  'workspace',
   'customers',
   'itinerary',
   'office',
-  'fleet',
-  'local',
-  'supplier_portal',
-  'esims',
   'accounting',
   'tenants',
 ]

@@ -29,7 +29,7 @@ export default function TenantsPage() {
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [editingWorkspace, setEditingWorkspace] = useState<WorkspaceRow | null>(null)
   // 用 SWR 快取租戶列表（繞過 RLS，server 端檢查 tenants 權限）
-  // API 現在會回傳 employee_count / admin_name / admin_id（已排除機器人）
+  // API 會回傳 employee_count / admin_name / admin_id
   const {
     data: allWorkspaces = [],
     mutate: refreshWorkspaces,

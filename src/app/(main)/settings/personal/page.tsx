@@ -1,7 +1,5 @@
 'use client'
 
-import './settings-glass.css'
-
 import { useAuthStore } from '@/stores/auth-store'
 import { useMyCapabilities } from '@/lib/permissions/useMyCapabilities'
 import { ContentPageLayout } from '@/components/layout/content-page-layout'

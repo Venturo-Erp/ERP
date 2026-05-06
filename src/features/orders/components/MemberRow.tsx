@@ -32,7 +32,6 @@ interface MemberRowProps {
   member: OrderMember
   index: number
   isEditMode: boolean
-  showIdentityColumn: boolean
   showPnrColumn: boolean
   showRoomColumn: boolean
   showVehicleColumn: boolean
@@ -70,7 +69,6 @@ interface MemberRowProps {
     memberBirthDate?: string | null
   ) => void
   onRemoveMemberFromRoom?: (memberId: string, hotelName: string) => void // 移除單一成員（不影響室友）
-  onSetAsLeader?: (memberId: string) => void
   /** 快速辦簽證用 */
   tourInfo?: { id: string; code: string; name?: string }
   getOrderInfo?: (memberId: string) =>
@@ -87,7 +85,6 @@ export function MemberRow({
   member,
   index,
   isEditMode,
-  showIdentityColumn,
   showPnrColumn,
   showRoomColumn,
   showVehicleColumn,
@@ -120,7 +117,6 @@ export function MemberRow({
   roomOptionsByHotel = {},
   onRoomAssign,
   onRemoveMemberFromRoom,
-  onSetAsLeader,
   tourInfo,
   getOrderInfo,
 }: MemberRowProps) {
@@ -202,7 +198,6 @@ export function MemberRow({
         member={member}
         index={index}
         isEditMode={isEditMode}
-        showIdentityColumn={showIdentityColumn}
         showOrderCode={showOrderCode}
         columnVisibility={cv}
         onUpdateField={onUpdateField}
@@ -478,7 +473,6 @@ export function MemberRow({
         member={member}
         onEdit={onEdit}
         onDelete={onDelete}
-        onSetAsLeader={onSetAsLeader}
         tourInfo={tourInfo}
         orderInfo={getOrderInfo?.(member.id)}
       />

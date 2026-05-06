@@ -83,13 +83,14 @@ export async function POST(request: NextRequest) {
       return ApiError.unauthorized('帳號認證資料異常、請聯絡系統主管')
     }
 
-    // 5. 用 Supabase Auth 驗證密碼
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email: authEmail,
-      password,
+    // 5. 用 RPC 純驗證密碼、不產 session（client 端 signInWithPassword 是唯一產 session 的地方）
+    // 解雙重登入：之前 API 跑 signInWithPassword + client 又跑一次、cookie 被 set 兩次、浪費
+    const { data: passwordValid, error: rpcError } = await supabase.rpc('verify_auth_password', {
+      p_user_id: employee.user_id,
+      p_password: password,
     })
 
-    if (signInError) {
+    if (rpcError || !passwordValid) {
       // 登入失敗：累加失敗計數
       const currentFailCount =
         ((employee as Record<string, unknown>).login_failed_count as number) || 0
@@ -123,8 +124,58 @@ export async function POST(request: NextRequest) {
     // 6. 回傳員工資料 + auth email（SELECT 已不含 password_hash）
     const employeeData = employee
 
-    // 7. 權限不再由 validate-login 計算 (2026-05-01)。
-    //    前端用 useMyCapabilities() 直接 query role_capabilities、SSOT 在 DB。
+    // 7. 同時查 capabilities + features、讓 client 不用再打 /api/auth/layout-context
+    // fail-soft：query 失敗時回空陣列、不擋登入（client 會 fallback 到 layout-context API）
+    let capabilities: string[] = []
+    let features: string[] = []
+    try {
+      const [featuresRes, capsRes] = await Promise.all([
+        supabase
+          .from('workspace_features')
+          .select('feature_code, enabled')
+          .eq('workspace_id', employee.workspace_id!),
+        employee.role_id
+          ? supabase
+              .from('role_capabilities')
+              .select('capability_code, enabled')
+              .eq('role_id', employee.role_id)
+              .eq('enabled', true)
+          : Promise.resolve({
+              data: [] as { capability_code: string; enabled: boolean }[] | null,
+              error: null,
+            }),
+      ])
+
+      if (featuresRes.error) {
+        logger.error('Workspace features query error:', {
+          error: featuresRes.error,
+          workspace_id: employee.workspace_id,
+        })
+      } else {
+        features = (featuresRes.data ?? [])
+          .filter((f): f is { feature_code: string; enabled: boolean } => !!f.enabled)
+          .map((f) => f.feature_code)
+      }
+
+      if ('error' in capsRes && capsRes.error) {
+        logger.error('Role capabilities query error:', {
+          error: capsRes.error,
+          role_id: employee.role_id,
+        })
+      } else {
+        capabilities = (capsRes.data ?? [])
+          .filter((c) => c.enabled)
+          .map((c) => c.capability_code)
+      }
+    } catch (capsErr) {
+      logger.error('Capabilities/features fetch failed (non-fatal):', {
+        error: capsErr instanceof Error ? { message: capsErr.message, stack: capsErr.stack } : capsErr,
+        workspace_id: employee.workspace_id,
+        role_id: employee.role_id,
+      })
+      // 繼續、capabilities/features 保持空、client fallback 到 layout-context API
+    }
+
     const mustChangePassword =
       (employee as Record<string, unknown>).must_change_password === true
 
@@ -142,17 +193,24 @@ export async function POST(request: NextRequest) {
         },
         authEmail,
         mustChangePassword,
+        capabilities,
+        features,
       },
     })
     response.cookies.set('venturo-workspace-id', workspace.id, {
-      httpOnly: false, // client 需要讀取（debug）、不放敏感資料
-      sameSite: 'lax',
+      httpOnly: true, // 2026-05-06: 改 true、確認 client 端無人讀（只 get-layout-context server side 讀）
+      sameSite: 'lax', // strict 會在外部 link 點進來時丟失、保留 lax
+      secure: process.env.NODE_ENV === 'production',
       path: '/',
       maxAge: 60 * 60 * 24 * 7, // 7 天
     })
     return response
   } catch (error) {
-    logger.error('Validate login error:', error)
+    logger.error('Validate login error:', {
+      error: error instanceof Error
+        ? { message: error.message, stack: error.stack, name: error.name }
+        : error,
+    })
     captureException(error, { module: 'auth.validate-login' })
     return ApiError.internal('系統錯誤')
   }

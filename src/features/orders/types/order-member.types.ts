@@ -146,7 +146,6 @@ interface MemberRowProps {
   member: OrderMember
   index: number
   isEditMode: boolean
-  showIdentityColumn: boolean
   showPnrColumn: boolean
   departureDate: string | null
   roomAssignment?: string

@@ -332,14 +332,6 @@ export default function CustomersPage() {
           <Button
             variant="header-outline"
             size="sm"
-            onClick={() => router.push('/customer-groups')}
-          >
-            <Users size={16} />
-            <span className="hidden sm:inline">{L.btn_groups}</span>
-          </Button>
-          <Button
-            variant="header-outline"
-            size="sm"
             onClick={() => setIsImportDialogOpen(true)}
           >
             <FileSpreadsheet size={16} />

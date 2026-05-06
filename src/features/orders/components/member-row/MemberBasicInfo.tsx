@@ -15,7 +15,6 @@ interface MemberBasicInfoProps {
   member: OrderMember
   index: number
   isEditMode: boolean
-  showIdentityColumn: boolean
   showOrderCode: boolean
   columnVisibility?: ColumnVisibility
   onUpdateField: (memberId: string, field: keyof OrderMember, value: string | number | null) => void
@@ -30,7 +29,6 @@ export function MemberBasicInfo({
   member,
   index,
   isEditMode,
-  showIdentityColumn,
   showOrderCode,
   columnVisibility,
   onUpdateField,
@@ -183,11 +181,6 @@ export function MemberBasicInfo({
               >
                 {member.chinese_name || '-'}
               </span>
-              {member.identity === COMP_ORDERS_LABELS.領隊_2 && (
-                <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-morandi-gold/20 text-morandi-gold text-xs rounded-full font-medium border border-morandi-gold/30">
-                  👑 領隊
-                </span>
-              )}
             </div>
           )}
           {member.passport_image_url && (
@@ -209,38 +202,6 @@ export function MemberBasicInfo({
           <span className="text-xs text-status-info font-medium">
             {member.order_code ? member.order_code.slice(-3) : '-'}
           </span>
-        </td>
-      )}
-
-      {/* 身份（領隊勾選） */}
-      {showIdentityColumn && (
-        <td
-          className={cn(
-            'border border-morandi-gold/20 px-2 py-1 text-center',
-            isEditMode ? 'bg-card' : 'bg-muted'
-          )}
-        >
-          {isEditMode ? (
-            <input
-              type="checkbox"
-              checked={member.identity === COMP_ORDERS_LABELS.領隊_2}
-              onChange={e =>
-                onUpdateField(
-                  member.id,
-                  'identity',
-                  e.target.checked ? COMP_ORDERS_LABELS.領隊_2 : COMP_ORDERS_LABELS.大人
-                )
-              }
-              data-member={member.id}
-              data-field="identity"
-              className="w-4 h-4 cursor-pointer accent-morandi-primary"
-              title={COMP_ORDERS_LABELS.勾選設為領隊}
-            />
-          ) : (
-            <span className="text-xs text-morandi-primary">
-              {member.identity === COMP_ORDERS_LABELS.領隊_2 ? COMP_ORDERS_LABELS.領隊 : '-'}
-            </span>
-          )}
         </td>
       )}
 

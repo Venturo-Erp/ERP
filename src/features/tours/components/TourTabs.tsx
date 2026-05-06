@@ -91,7 +91,10 @@ export const TOUR_TABS = [
   { value: 'orders', label: COMP_TOURS_LABELS.訂單 },
   { value: 'members', label: COMP_TOURS_LABELS.團員 },
   { value: 'itinerary', label: COMP_TOURS_LABELS.行程 },
-  { value: 'display-itinerary', label: '展示行程' },
+  // 2026-05-06 凍結：「展示行程」（客戶看的漂亮版）UI 待大改、暫時 hide
+  // 檔案保留 src/features/tours/components/tour-display-itinerary-tab.tsx 不刪
+  // dynamic import 保留（不佔 bundle）、之後重新設計時直接還原這列
+  // { value: 'display-itinerary', label: '展示行程' },
   { value: 'quote', label: COMP_TOURS_LABELS.報價 },
   { value: 'contract', label: '合約' },
   // 「結案」獨立分頁已併進「總覽」、由 workspace feature `tours.closing` 控制可見性

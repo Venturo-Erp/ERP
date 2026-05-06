@@ -72,8 +72,6 @@ export const LABELS = {
   WORKSPACE_CODE_REQUIRED_MSG: '請填寫公司代碼',
   ANNOUNCEMENT: '公告',
   ANNOUNCEMENT_CHANNEL_DESC: '此頻道用於發布全工作空間的重要公告。',
-  BOT_CREATION_FAILED: '建立機器人失敗（不影響 workspace 建立）',
-  WORKSPACE_CREATED_SUCCESS: '工作空間、公告頻道和機器人已建立',
   CREATION_FAILED: '建立失敗',
 
   // Empty State
@@ -155,7 +153,7 @@ export const LABELS = {
   AUTH_LOGIN: '登入驗證',
   FUNCTION_PERMISSIONS: '功能權限控制（查看人資設定）',
   DATA_ISOLATION: '資料隔離（前端 filter）',
-  ROLE_LABELS: '角色標籤（admin, tour_leader 等）',
+  ROLE_LABELS: '角色標籤（admin, sales 等）',
   REFERENCE_DOC: '參考文檔：',
   RLS_SPEC_DOC: 'CLAUDE.md - RLS 規範',
 
@@ -314,8 +312,6 @@ const OTHER_SETTINGS_LABELS = {
   TITLE: '其他設定',
   LANGUAGE_SETTING: '語言設定',
   LANGUAGE_VALUE: '繁體中文（預設）',
-  NOTIFICATION_SETTING: '通知設定',
-  NOTIFICATION_VALUE: '系統通知：開啟',
   BACKUP_SETTING: '資料備份',
   BACKUP_VALUE: '自動備份：每日凌晨 2:00',
 }

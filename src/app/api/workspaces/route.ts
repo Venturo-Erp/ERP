@@ -48,7 +48,6 @@ export async function GET() {
   const adminRoleIds = new Set((adminRoles || []).map(r => r.id))
 
   // 批次查詢所有員工 — 用來計算每個 workspace 的員工數 + 找代表
-  // 2026-05-05 William 拍板：機器人不該是員工、is_bot 砍除、不再過濾
   const { data: allEmployees } = await supabase
     .from('employees')
     .select('id, workspace_id, chinese_name, display_name, english_name, role_id')

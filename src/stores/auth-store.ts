@@ -1,10 +1,13 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { mutate as globalMutate } from 'swr'
 import { EmployeeFull } from './types'
 import { logger } from '@/lib/utils/logger'
 import type { UserRole } from '@/lib/rbac-config'
 import type { Database } from '@/lib/supabase/types'
 import { ensureAuthSync, resetAuthSyncState } from '@/lib/auth/auth-sync'
+
+const LAYOUT_CONTEXT_SWR_KEY = '/api/auth/layout-context'
 
 type EmployeeRow = Database['public']['Tables']['employees']['Row']
 
@@ -58,9 +61,14 @@ interface AuthState {
   isAuthenticated: boolean
   sidebarCollapsed: boolean
   _hasHydrated: boolean
+  // Persist 進 localStorage、解 hydration race（_hasHydrated 同時 capabilities 已就位）
+  // sidebar 不用等第二次 API 也能秒出完整選單
+  capabilities: string[]
+  features: string[]
 
   // Methods
   setUser: (user: EmployeeFull | null) => void
+  setAuthContext: (ctx: { capabilities: string[]; features: string[] }) => void
   logout: () => void
   validateLogin: (
     username: string,
@@ -80,9 +88,15 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
       sidebarCollapsed: true,
       _hasHydrated: false,
+      capabilities: [],
+      features: [],
 
       setUser: (user) => {
         set({ user, isAuthenticated: !!user })
+      },
+
+      setAuthContext: ({ capabilities, features }) => {
+        set({ capabilities, features })
       },
 
       logout: async () => {
@@ -108,6 +122,8 @@ export const useAuthStore = create<AuthState>()(
         set({
           user: null,
           isAuthenticated: false,
+          capabilities: [],
+          features: [],
         })
       },
 
@@ -135,12 +151,14 @@ export const useAuthStore = create<AuthState>()(
             return { success: false, message: errMsg || '帳號或密碼錯誤' }
           }
 
-          const { employee, workspace, authEmail, mustChangePassword } =
+          const { employee, workspace, authEmail, mustChangePassword, capabilities, features } =
             validateResult.data as {
               employee: EmployeeRow
               workspace: { id: string; code: string; name: string | null; type: string | null }
               authEmail: string
               mustChangePassword: boolean
+              capabilities: string[]
+              features: string[]
             }
 
           // 2. 用 auth email 在 client 建立 Supabase session
@@ -154,7 +172,44 @@ export const useAuthStore = create<AuthState>()(
             return { success: false, message: '帳號或密碼錯誤' }
           }
 
-          // 3. 確保 Auth 同步（處理 RLS 所需的 user_id）
+          // 3. 寫 capabilities/features 進 zustand（自動 persist localStorage、跨 refresh 保留）
+          // 解 hydration race：sidebar 第一個 render 就能透過 useLayoutContext 從 zustand 拿 fallback
+          set({ capabilities: capabilities ?? [], features: features ?? [] })
+
+          // 同時預寫 SWR cache、讓 useLayoutContext 不用再打 /api/auth/layout-context
+          await globalMutate(
+            LAYOUT_CONTEXT_SWR_KEY,
+            {
+              ok: true,
+              user: { id: employee.user_id ?? '', email: authEmail },
+              employee: {
+                id: employee.id,
+                employee_number: employee.employee_number,
+                display_name: employee.display_name,
+                english_name: employee.english_name,
+                role_id: employee.role_id ?? null,
+                workspace_id: employee.workspace_id ?? null,
+                status: employee.status,
+              },
+              workspace: {
+                id: workspace.id,
+                code: workspace.code,
+                name: workspace.name ?? '',
+                type: workspace.type,
+                is_active: true,
+                premium_enabled: false,
+                default_billing_day_of_week: null,
+              },
+              role_id: employee.role_id ?? null,
+              workspace_id: employee.workspace_id ?? null,
+              capabilities: capabilities ?? [],
+              features: features ?? [],
+              premium_enabled: false,
+            },
+            false,
+          )
+
+          // 4. 確保 Auth 同步（處理 RLS 所需的 user_id）
           await ensureAuthSync({
             employeeId: employee.id,
             workspaceId: employee.workspace_id ?? undefined,
@@ -235,6 +290,8 @@ export const useAuthStore = create<AuthState>()(
         user: state.user,
         isAuthenticated: state.isAuthenticated,
         sidebarCollapsed: state.sidebarCollapsed,
+        capabilities: state.capabilities,
+        features: state.features,
       }),
       onRehydrateStorage: () => state => {
         if (state) {

@@ -31,7 +31,6 @@ export interface NewTourData {
   max_participants: number
   description?: string
   enable_checkin?: boolean
-  controller_id?: string
   role_assignments?: Record<string, string>
 }
 

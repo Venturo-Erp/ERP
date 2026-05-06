@@ -135,18 +135,11 @@ export const FEATURES: FeatureDefinition[] = [
   },
   // ===== 進階功能（付費） =====
   {
-    code: 'workspace',
-    name: '頻道',
-    description: '團隊頻道、協作空間',
-    category: 'premium',
-    routes: ['/channel'],
-  },
-  {
     code: 'customers',
     name: '顧客管理',
     description: '客戶資料、公司客戶、客戶群組',
     category: 'premium',
-    routes: ['/customers', '/customers/companies', '/customer-groups'],
+    routes: ['/customers', '/customers/companies'],
   },
   // 報價單功能已整合到旅遊團管理中，不再獨立
   // {
@@ -157,13 +150,6 @@ export const FEATURES: FeatureDefinition[] = [
   //   routes: ['/quotes', '/quotes/[id]', '/quotes/quick/[id]'],
   // },
   // ===== 企業功能 =====
-  {
-    code: 'tour_controller',
-    name: '團控功能',
-    description: '指派團控人員，團控為必填欄位',
-    category: 'premium',
-    routes: ['/tours'],
-  },
   {
     code: 'tour_attributes',
     name: '旅行屬性功能',

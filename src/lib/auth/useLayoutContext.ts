@@ -20,6 +20,7 @@
 import useSWR, { mutate as globalMutate } from 'swr'
 import { useMemo } from 'react'
 import { useAuthStore } from '@/stores'
+import { supabase } from '@/lib/supabase/client'
 
 const SWR_KEY = '/api/auth/layout-context'
 
@@ -68,14 +69,15 @@ async function fetcher(url: string): Promise<LayoutContextPayload> {
   let res = await fetch(url, { credentials: 'include' })
 
   // 401 = 可能是複製分頁 / 快速 navigation 撞到 Supabase token refresh race。
-  // 等 client 端 supabase（有 navigator.locks）完成 refresh 寫回 cookies、再試一次。
-  // 兩段 retry：300ms 後一次、再不行 1000ms 後最後一次。
+  // 最多一次 retry（300ms），retry 前先檢查 session 是否存在。
   if (res.status === 401) {
+    const { data } = await supabase.auth.getSession()
+    if (!data.session) {
+      // session 根本不存在、不用等 refresh、直接失敗
+      return EMPTY_PAYLOAD
+    }
+    // session 存在、等 supabase refresh 寫回 cookies 後再試一次
     await new Promise(r => setTimeout(r, 300))
-    res = await fetch(url, { credentials: 'include' })
-  }
-  if (res.status === 401) {
-    await new Promise(r => setTimeout(r, 1000))
     res = await fetch(url, { credentials: 'include' })
   }
 
@@ -93,10 +95,22 @@ export interface UseLayoutContextResult {
 }
 
 export function useLayoutContext(): UseLayoutContextResult {
-  const { isAuthenticated, _hasHydrated } = useAuthStore()
+  const { isAuthenticated, _hasHydrated, capabilities: storedCaps, features: storedFeatures } =
+    useAuthStore()
 
   // 未登入 / 還沒 hydrate 不發 request
   const shouldFetch = _hasHydrated && isAuthenticated
+
+  // 從 zustand persist 拿 fallback、解 hydration race
+  // 即使 SWR cache miss / 還沒 fetch、sidebar 也能立刻拿到 capabilities/features
+  const fallback = useMemo<LayoutContextPayload>(
+    () => ({
+      ...EMPTY_PAYLOAD,
+      capabilities: storedCaps ?? [],
+      features: storedFeatures ?? [],
+    }),
+    [storedCaps, storedFeatures],
+  )
 
   const { data, isLoading } = useSWR<LayoutContextPayload>(
     shouldFetch ? SWR_KEY : null,
@@ -106,21 +120,26 @@ export function useLayoutContext(): UseLayoutContextResult {
       revalidateIfStale: false,
       dedupingInterval: 5 * 60 * 1000,
       refreshInterval: 0,
+      fallbackData: fallback,
     },
   )
 
-  const payload = data ?? EMPTY_PAYLOAD
+  const payload = data ?? fallback
 
   const capabilitiesSet = useMemo(() => new Set(payload.capabilities), [payload.capabilities])
   const featuresSet = useMemo(() => new Set(payload.features), [payload.features])
+
+  // hydrate 完且有持久化的 capabilities → 視為「不再 loading」、sidebar 可以渲染完整
+  // 否則維持原邏輯：未 hydrate 或 SWR fetching 算 loading（避免 ModuleGuard 誤判 redirect）
+  const hasFallbackCaps = (storedCaps?.length ?? 0) > 0
+  const loading =
+    !_hasHydrated || (shouldFetch && isLoading && !hasFallbackCaps)
 
   return {
     payload,
     capabilitiesSet,
     featuresSet,
-    // hydrate 中也算 loading：reload/複製分頁時 zustand 還沒從 localStorage 載入、
-    // 此時 capabilities=[] 不代表沒權限、ModuleGuard 不能誤判 redirect /unauthorized
-    loading: !_hasHydrated || (shouldFetch && isLoading),
+    loading,
     refresh: async () => {
       await globalMutate(SWR_KEY)
     },

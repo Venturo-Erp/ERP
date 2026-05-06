@@ -4,107 +4,11 @@ import { useState, useEffect } from 'react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
-import { Switch } from '@/components/ui/switch'
 import { Checkbox } from '@/components/ui/checkbox'
-import { useWorkspaceFeatures } from '@/lib/permissions'
 import { supabase } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { Save, AlertCircle } from 'lucide-react'
 import { logger } from '@/lib/utils/logger'
-
-// ============================================
-// 團控功能設定區塊
-// ============================================
-export function TourControllerSection({ workspaceId }: { workspaceId: string }) {
-  const { isFeatureEnabled } = useWorkspaceFeatures()
-  const hasTourController = isFeatureEnabled('tour_controller')
-  const [enabled, setEnabled] = useState(hasTourController)
-  const [required, setRequired] = useState(true) // 團控必填（預設為 true）
-  const [saving, setSaving] = useState(false)
-
-  // 儲存團控功能設定
-  const handleSave = async () => {
-    setSaving(true)
-    try {
-      // TODO: 儲存到 workspace_feature_settings 表
-      // await saveTourControllerSettings(workspaceId, enabled, required)
-
-      if (enabled) {
-        toast.success('團控功能已啟用')
-      } else {
-        toast.success('團控功能已停用')
-      }
-    } catch (error) {
-      logger.error('儲存團控設定失敗:', error)
-      toast.error('儲存失敗')
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  if (!hasTourController) return null
-
-  return (
-    <Card className="p-6 space-y-4">
-      <div className="space-y-2">
-        <h3 className="text-lg font-semibold text-morandi-primary">團控功能設定</h3>
-        <p className="text-sm text-morandi-secondary">啟用後，開團時必須指派團控人員</p>
-      </div>
-
-      <div className="space-y-4">
-        {/* 啟用開關 */}
-        <div className="flex items-center justify-between">
-          <div className="space-y-0.5">
-            <Label htmlFor="tour-controller-enabled">啟用團控功能</Label>
-            <p className="text-sm text-morandi-secondary">開啟後，開團時會顯示團控選擇欄位</p>
-          </div>
-          <Switch id="tour-controller-enabled" checked={enabled} onCheckedChange={setEnabled} />
-        </div>
-
-        {/* 必填設定 */}
-        {enabled && (
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label htmlFor="tour-controller-required">團控為必填欄位</Label>
-              <p className="text-sm text-morandi-secondary">開啟後，開團時必須選擇團控人員</p>
-            </div>
-            <Switch
-              id="tour-controller-required"
-              checked={required}
-              onCheckedChange={setRequired}
-            />
-          </div>
-        )}
-
-        {/* 注意事項 */}
-        {enabled && required && (
-          <div className="flex items-start gap-2 p-3 bg-morandi-gold/10 border border-morandi-gold/20 rounded-md">
-            <AlertCircle className="h-4 w-4 text-morandi-gold mt-0.5" />
-            <p className="text-sm text-morandi-secondary">團控為必填欄位，開團時必須選擇團控人員</p>
-          </div>
-        )}
-      </div>
-
-      {/* 儲存按鈕 */}
-      <Button
-        onClick={handleSave}
-        disabled={saving}
-      >
-        {saving ? (
-          <span className="flex items-center">
-            <span className="animate-spin h-4 w-4 mr-2 border-2 border-white border-t-transparent rounded-full" />
-            儲存中...
-          </span>
-        ) : (
-          <span className="flex items-center">
-            <Save className="h-4 w-4 mr-2" />
-            儲存設定
-          </span>
-        )}
-      </Button>
-    </Card>
-  )
-}
 
 // ============================================
 // 旅行屬性功能設定區塊

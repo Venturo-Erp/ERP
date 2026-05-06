@@ -17,9 +17,6 @@ import { useVisibleModuleTabs } from '@/lib/permissions/hooks'
 import { CODE_LABELS } from './constants/labels'
 import { TOUR_DETAIL_PAGE_LABELS } from '@/features/tours/constants/labels'
 
-// 2026-04-23: TourRequestFormDialog（需求單對話框）已砍除（tour_requests 整族廢）
-// 之後重做客製化詢價時恢復
-
 export default function TourDetailPage() {
   const params = useParams()
   const router = useRouter()
@@ -48,15 +45,6 @@ export default function TourDetailPage() {
     params.set('tab', activeTab)
     router.replace(`/tours/${code}?${params.toString()}`, { scroll: false })
   }, [activeTab, code, router])
-
-  // 需求單 Dialog 狀態
-  const [showRequestDialog, setShowRequestDialog] = useState(false)
-  const [requestData, setRequestData] = useState<{
-    category: string
-    supplierName: string
-    items: { serviceDate: string | null; title: string; quantity: number; note?: string }[]
-    startDate: string | null
-  } | null>(null)
 
   // 載入團詳情
   const { tour, loading, actions } = useTourDetails(tourId || '')
@@ -131,18 +119,7 @@ export default function TourDetailPage() {
         activeTab={activeTab}
         workspaceId={user?.workspace_id}
         forceShowPnr={forceShowPnr}
-        onOpenRequestDialog={data => {
-          setRequestData({
-            category: data.category,
-            supplierName: data.supplierName,
-            items: data.items,
-            startDate: data.startDate,
-          })
-          setShowRequestDialog(true)
-        }}
       />
-
-      {/* 需求單對話框已砍除（2026-04-23、tour_requests 整族廢）*/}
     </ContentPageLayout>
   )
 }
