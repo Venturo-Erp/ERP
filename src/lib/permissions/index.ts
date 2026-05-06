@@ -56,8 +56,6 @@ const ROUTE_TO_MODULE: Record<string, string> = {
   '/data-management': 'database',
   '/settings': 'settings',
   '/calendar': 'calendar',
-  '/workspace': 'workspace',
-  '/channel': 'workspace', // 頻道 = workspace 模組
   '/todos': 'todos',
   '/dashboard': 'dashboard',
   '/itinerary': 'itinerary',

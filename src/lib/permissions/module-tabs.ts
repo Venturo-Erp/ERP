@@ -41,12 +41,6 @@ export const MODULES: ModuleDefinition[] = [
     tabs: [],
   },
   {
-    code: 'workspace',
-    name: '頻道',
-    description: '團隊頻道',
-    tabs: [],
-  },
-  {
     code: 'todos',
     name: '待辦事項',
     description: '任務管理',

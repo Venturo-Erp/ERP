@@ -622,69 +622,7 @@ export function OrderMembersExpandable({
     }
   }, [membersData])
 
-  // Handlers
-  const handleSetAsLeader = useCallback(
-    async (memberId: string) => {
-      const currentMember = membersData.members.find(m => m.id === memberId)
-      if (!currentMember) return
-
-      const isAlreadyLeader = currentMember.identity === COMP_ORDERS_LABELS.領隊_2
-
-      try {
-        if (isAlreadyLeader) {
-          // 取消領隊：改回成人
-          await updateMember(memberId, {
-            identity: COMP_ORDERS_LABELS.大人,
-          } as Parameters<typeof updateMember>[1])
-
-          membersData.setMembers(
-            membersData.members.map(m =>
-              m.id === memberId ? { ...m, identity: COMP_ORDERS_LABELS.大人 } : m
-            )
-          )
-        } else {
-          // 1. 先將所有團員的身份設為成人（取消之前的領隊）
-          const resetPromises = membersData.members
-            .filter(m => m.identity === COMP_ORDERS_LABELS.領隊_2)
-            .map(m =>
-              updateMember(m.id, {
-                identity: COMP_ORDERS_LABELS.大人,
-              } as Parameters<typeof updateMember>[1])
-            )
-
-          await Promise.all(resetPromises)
-
-          // 2. 設定新領隊（不動排序）
-          await updateMember(memberId, {
-            identity: COMP_ORDERS_LABELS.領隊_2,
-          } as Parameters<typeof updateMember>[1])
-
-          // 3. 更新本地狀態
-          membersData.setMembers(
-            membersData.members.map(m =>
-              m.id === memberId
-                ? { ...m, identity: COMP_ORDERS_LABELS.領隊_2 }
-                : m.identity === COMP_ORDERS_LABELS.領隊_2
-                  ? { ...m, identity: COMP_ORDERS_LABELS.大人 }
-                  : m
-            )
-          )
-        }
-
-        toast.success(
-          `已將 ${currentMember.chinese_name || currentMember.passport_name || '成員'} 設為領隊`
-        )
-        logger.info(`已將 ${currentMember.chinese_name} 設為領隊並排到第一位`)
-
-        // 重新載入資料以確保順序正確
-        setTimeout(() => membersData.loadMembers(), 100)
-      } catch (error) {
-        logger.error(COMP_ORDERS_LABELS.設定領隊失敗, error)
-        toast.error(COMP_ORDERS_LABELS.設定領隊失敗)
-      }
-    },
-    [membersData]
-  )
+  // 2026-05-06：handleSetAsLeader / 領隊概念整段拔（William 拍板）
 
   const handleUpdateField = useCallback(
     async (memberId: string, field: keyof OrderMember, value: string | number | null) => {
@@ -711,29 +649,7 @@ export function OrderMembersExpandable({
         }
       }
 
-      // 領隊自動排第一：當設為領隊時，把該成員的 sort_order 改成 0
-      if (field === 'identity' && value === COMP_ORDERS_LABELS.領隊_2) {
-        const currentMember = membersData.members.find(m => m.id === memberId)
-        if (currentMember) {
-          // 更新本地狀態：領隊排第一，其他人順序不變
-          membersData.setMembers(
-            membersData.members.map(m =>
-              m.id === memberId ? { ...m, identity: COMP_ORDERS_LABELS.領隊_2, sort_order: 0 } : m
-            )
-          )
-          // 更新資料庫
-          try {
-            await updateMember(memberId, {
-              identity: COMP_ORDERS_LABELS.領隊_2,
-              sort_order: 0,
-            } as Parameters<typeof updateMember>[1])
-            logger.info(`已將 ${currentMember.chinese_name} 設為領隊並排到第一位`)
-          } catch (error) {
-            logger.error(COMP_ORDERS_LABELS.設定領隊失敗, error)
-          }
-          return
-        }
-      }
+      // 2026-05-06：領隊概念整段拔（William 拍板）
 
       // 一般欄位更新
       membersData.setMembers(
@@ -1354,7 +1270,6 @@ export function OrderMembersExpandable({
                           membersData.members[memberIndex]
                         )
                       }}
-                      onSetAsLeader={handleSetAsLeader}
                     />
                   ))}
                 </tbody>

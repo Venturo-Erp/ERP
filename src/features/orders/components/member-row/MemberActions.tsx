@@ -1,11 +1,11 @@
 'use client'
 /**
  * MemberActions - 成員操作按鈕
- * 包含：警告、編輯、刪除、設為領隊、辦簽證按鈕
+ * 包含：警告、編輯、刪除、辦簽證按鈕
  */
 
 import React, { useState } from 'react'
-import { AlertTriangle, Pencil, Trash2, Crown, Plane } from 'lucide-react'
+import { AlertTriangle, Pencil, Trash2, Plane } from 'lucide-react'
 import type { OrderMember } from '../../types/order-member.types'
 import { COMP_ORDERS_LABELS } from '../../constants/labels'
 import { QuickVisaDialog } from '@/features/visas/components/QuickVisaDialog'
@@ -15,7 +15,6 @@ interface MemberActionsProps {
   member: OrderMember
   onEdit: (member: OrderMember, mode: 'verify' | 'edit') => void
   onDelete: (memberId: string) => void
-  onSetAsLeader?: (memberId: string) => void
   /** 快速辦簽證需要的團與訂單資訊 */
   tourInfo?: { id: string; code: string; name?: string }
   orderInfo?: {
@@ -30,11 +29,9 @@ export function MemberActions({
   member,
   onEdit,
   onDelete,
-  onSetAsLeader,
   tourInfo,
   orderInfo,
 }: MemberActionsProps) {
-  const isLeader = member.identity === COMP_ORDERS_LABELS.領隊_2
   const [visaOpen, setVisaOpen] = useState(false)
   const { isFeatureEnabled } = useWorkspaceFeatures()
   const canOpenVisa = !!tourInfo && !!orderInfo && isFeatureEnabled('visas')
@@ -54,24 +51,6 @@ export function MemberActions({
           >
             <AlertTriangle size={14} />
             <span>待驗證</span>
-          </button>
-        )}
-        {/* 設為/取消領隊按鈕 */}
-        {onSetAsLeader && (
-          <button
-            onClick={e => {
-              e.stopPropagation()
-              onSetAsLeader(member.id)
-            }}
-            className={`inline-flex items-center gap-1 transition-colors px-1.5 py-1 rounded text-xs ${
-              isLeader
-                ? 'text-morandi-gold bg-morandi-gold/10 hover:bg-morandi-gold/20'
-                : 'text-morandi-secondary hover:text-morandi-gold hover:bg-morandi-gold/10'
-            }`}
-            title={isLeader ? '取消領隊' : COMP_ORDERS_LABELS.勾選設為領隊}
-          >
-            <Crown size={14} />
-            <span>{isLeader ? '取消領隊' : '設為領隊'}</span>
           </button>
         )}
         {/* 辦簽證按鈕 */}

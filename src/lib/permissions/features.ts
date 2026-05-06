@@ -135,13 +135,6 @@ export const FEATURES: FeatureDefinition[] = [
   },
   // ===== 進階功能（付費） =====
   {
-    code: 'workspace',
-    name: '頻道',
-    description: '團隊頻道、協作空間',
-    category: 'premium',
-    routes: ['/channel'],
-  },
-  {
     code: 'customers',
     name: '顧客管理',
     description: '客戶資料、公司客戶、客戶群組',
