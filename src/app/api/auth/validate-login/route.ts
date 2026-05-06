@@ -123,29 +123,8 @@ export async function POST(request: NextRequest) {
     // 6. 回傳員工資料 + auth email（SELECT 已不含 password_hash）
     const employeeData = employee
 
-    // 7. 同時查 capabilities + features、讓 client 不用再打 /api/auth/layout-context
-    const [featuresRes, capsRes] = await Promise.all([
-      supabase
-        .from('workspace_features')
-        .select('feature_code, enabled')
-        .eq('workspace_id', employee.workspace_id!),
-      employee.role_id
-        ? supabase
-            .from('role_capabilities')
-            .select('capability_code, enabled')
-            .eq('role_id', employee.role_id)
-            .eq('enabled', true)
-        : Promise.resolve({ data: [] as { capability_code: string; enabled: boolean }[] | null }),
-    ])
-
-    const features = (featuresRes.data ?? [])
-      .filter((f): f is { feature_code: string; enabled: boolean } => !!f.enabled)
-      .map((f) => f.feature_code)
-
-    const capabilities = (capsRes.data ?? [])
-      .filter((c) => c.enabled)
-      .map((c) => c.capability_code)
-
+    // 7. 權限不再由 validate-login 計算 (2026-05-01)。
+    //    前端用 useMyCapabilities() 直接 query role_capabilities、SSOT 在 DB。
     const mustChangePassword =
       (employee as Record<string, unknown>).must_change_password === true
 
@@ -163,8 +142,6 @@ export async function POST(request: NextRequest) {
         },
         authEmail,
         mustChangePassword,
-        capabilities,
-        features,
       },
     })
     response.cookies.set('venturo-workspace-id', workspace.id, {
