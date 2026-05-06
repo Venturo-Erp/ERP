@@ -477,8 +477,6 @@ export async function POST(request: NextRequest) {
       logger.warn('Failed to seed base data:', seedError)
     }
 
-    // 10. workspace bot 創建已於 2026-05-05 砍除（William 拍板：機器人不該是員工、通知概念重做）
-
     logger.log(`Tenant created successfully: ${newWorkspaceCode}`)
 
     // 返回登入資訊（ERP 用員工編號+密碼登入，不需要 email）

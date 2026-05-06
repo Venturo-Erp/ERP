@@ -57,7 +57,6 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   const adminRoleIds = new Set((adminRoles || []).map(r => r.id))
 
   // 查所有員工
-  // 2026-05-05 William 拍板：機器人不該是員工、is_bot 砍除、不再過濾
   const { data: employees } = await supabase
     .from('employees')
     .select(

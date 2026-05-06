@@ -473,8 +473,6 @@ const TEMPLATE_DATA_PANEL_LABELS = {
 
 // DialogsContainer 專用標籤
 export const DIALOGS_CONTAINER_LABELS = {
-  選擇查詢區間_機器人會回傳未開票旅客清單: '選擇查詢區間，機器人會回傳未開票旅客清單',
-  點擊後機器人會在聊天室回覆查詢結果: '點擊後機器人會在聊天室回覆查詢結果',
   頻道設定: '頻道設定',
   管理頻道的設定: '管理 #{channelName} 的設定',
   頻道名稱: '頻道名稱',
@@ -517,8 +515,6 @@ const COMP_WORKSPACE_LABELS = {
   _1_個月: '1 個月',
   _3_個月: '3 個月',
   _6_個月: '6 個月',
-  VENTURO_機器人: 'VENTURO 機器人',
-  VENTURO_機器人會在這裡通知你重要的系統訊息: 'VENTURO 機器人會在這裡通知你重要的系統訊息',
   MessageItem_下載檔案失敗: '[MessageItem] 下載檔案失敗:',
   Workspace_Realtime_訊息更新: '[Workspace] Realtime 訊息更新:',
   yyyy年MM月dd日_EEEE: 'yyyy年MM月dd日 (EEEE)',
@@ -631,7 +627,6 @@ const COMP_WORKSPACE_LABELS = {
   未知用戶: '未知用戶',
   查詢失敗: '查詢失敗',
   查詢失敗_請稍後再試: '查詢失敗，請稍後再試',
-  機器人助手: '機器人助手',
   此成員: '此成員',
   此網站不允許下載圖片_請改用右鍵另存圖片後上傳: '此網站不允許下載圖片，請改用右鍵另存圖片後上傳',
   沒有待處理的代辦事項: '沒有待處理的代辦事項',

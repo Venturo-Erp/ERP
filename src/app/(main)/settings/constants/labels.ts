@@ -72,8 +72,6 @@ export const LABELS = {
   WORKSPACE_CODE_REQUIRED_MSG: '請填寫公司代碼',
   ANNOUNCEMENT: '公告',
   ANNOUNCEMENT_CHANNEL_DESC: '此頻道用於發布全工作空間的重要公告。',
-  BOT_CREATION_FAILED: '建立機器人失敗（不影響 workspace 建立）',
-  WORKSPACE_CREATED_SUCCESS: '工作空間、公告頻道和機器人已建立',
   CREATION_FAILED: '建立失敗',
 
   // Empty State

@@ -7,7 +7,6 @@ export const LABELS = {
   // Tabs
   TAB_ACTIVE: '在職',
   TAB_TERMINATED: '離職',
-  TAB_BOT: '機器人',
 
   // Status labels
   STATUS_ACTIVE: '在職',

@@ -54,7 +54,6 @@ export function useEligibleEmployees(moduleCode: string, tabCode: string) {
     if (roleIds.length === 0) return []
 
     // Step 2: 找該 workspace 內、role_id 在清單中、在職的員工
-    // 2026-05-05 William 拍板：機器人不該是員工、employee_type/is_bot 全砍、不再過濾
     const { data: employees, error: empErr } = await supabase
       .from('employees')
       .select(

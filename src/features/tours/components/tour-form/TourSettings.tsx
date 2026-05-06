@@ -43,7 +43,6 @@ export function TourSettings({ newTour, setNewTour }: TourSettingsProps) {
   }, [])
 
   // 所有在職員工（離職員工 status 會切到非 'active'，無需另外擋）
-  // 2026-05-05 William 拍板：機器人不該是員工、employee_type 砍除
   const activeEmployees = useMemo(() => {
     return employees.filter(emp => emp.status === 'active')
   }, [employees])
