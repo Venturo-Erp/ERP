@@ -12,7 +12,6 @@ import { MEMBER_TABLE_HEADER_LABELS as L } from '../constants/labels'
 interface MemberTableHeaderProps {
   mode: 'order' | 'tour'
   orderCount: number
-  showIdentityColumn: boolean
   showPnrColumn: boolean
   showRoomColumn: boolean
   showVehicleColumn: boolean
@@ -127,7 +126,6 @@ function ResizableTh({
 export function MemberTableHeader({
   mode,
   orderCount,
-  showIdentityColumn,
   showPnrColumn,
   showRoomColumn,
   showVehicleColumn,
@@ -199,18 +197,6 @@ export function MemberTableHeader({
             className={thBaseClass}
           >
             {L.order_code}
-          </ResizableTh>
-        )}
-
-        {/* 可選：身份 */}
-        {showIdentityColumn && (
-          <ResizableTh
-            columnId="identity"
-            width={getWidth('identity')}
-            onResize={onColumnResize}
-            className={thBaseClass}
-          >
-            {L.identity}
           </ResizableTh>
         )}
 

@@ -15,7 +15,6 @@ interface MemberBasicInfoProps {
   member: OrderMember
   index: number
   isEditMode: boolean
-  showIdentityColumn: boolean
   showOrderCode: boolean
   columnVisibility?: ColumnVisibility
   onUpdateField: (memberId: string, field: keyof OrderMember, value: string | number | null) => void
@@ -30,7 +29,6 @@ export function MemberBasicInfo({
   member,
   index,
   isEditMode,
-  showIdentityColumn,
   showOrderCode,
   columnVisibility,
   onUpdateField,
@@ -205,11 +203,6 @@ export function MemberBasicInfo({
             {member.order_code ? member.order_code.slice(-3) : '-'}
           </span>
         </td>
-      )}
-
-      {/* 2026-05-06 領隊概念整個拔、column 不再顯示（prop 留作未來他用、目前永遠 false） */}
-      {false && showIdentityColumn && (
-        <td className="border border-morandi-gold/20 px-2 py-1 text-center"></td>
       )}
 
       {/* 護照拼音 */}

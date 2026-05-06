@@ -327,10 +327,6 @@ export function OrderMembersExpandable({
   }
 
   // UI State
-  const [showIdentityColumn, setShowIdentityColumn] = useState(() => {
-    if (typeof window === 'undefined') return false
-    return localStorage.getItem('memberListShowIdentity') === 'true'
-  })
   const [isAllEditMode, setIsAllEditMode] = useState(false)
 
   // 關閉編輯模式時，自動將未關聯顧客的成員存為顧客
@@ -477,11 +473,6 @@ export function OrderMembersExpandable({
   }, [columnVisibility])
 
   // 儲存身份欄位顯示設定（跳過初次渲染）
-  useEffect(() => {
-    if (isInitialMount.current) return
-    localStorage.setItem('memberListShowIdentity', String(showIdentityColumn))
-  }, [showIdentityColumn])
-
   // 標記初始化完成
   useEffect(() => {
     isInitialMount.current = false
@@ -726,28 +717,16 @@ export function OrderMembersExpandable({
     [membersData]
   )
 
-  const editableFields = showIdentityColumn
-    ? [
-        'identity',
-        'chinese_name',
-        'passport_name',
-        'birth_date',
-        'gender',
-        'id_number',
-        'passport_number',
-        'passport_expiry',
-        'special_meal',
-      ]
-    : [
-        'chinese_name',
-        'passport_name',
-        'birth_date',
-        'gender',
-        'id_number',
-        'passport_number',
-        'passport_expiry',
-        'special_meal',
-      ]
+  const editableFields = [
+    'chinese_name',
+    'passport_name',
+    'birth_date',
+    'gender',
+    'id_number',
+    'passport_number',
+    'passport_expiry',
+    'special_meal',
+  ]
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent, memberIndex: number, fieldName: string) => {
@@ -1151,7 +1130,6 @@ export function OrderMembersExpandable({
               <MemberTableHeader
                 mode={mode}
                 orderCount={membersData.orderCount}
-                showIdentityColumn={showIdentityColumn}
                 showPnrColumn={columnVisibility.pnr}
                 showRoomColumn={roomVehicle.showRoomColumn && columnVisibility.room}
                 showVehicleColumn={roomVehicle.showVehicleColumn && columnVisibility.vehicle}
@@ -1197,7 +1175,6 @@ export function OrderMembersExpandable({
                       member={member}
                       index={index}
                       isEditMode={isAllEditMode}
-                      showIdentityColumn={showIdentityColumn}
                       showPnrColumn={columnVisibility.pnr}
                       showRoomColumn={roomVehicle.showRoomColumn && columnVisibility.room}
                       showVehicleColumn={roomVehicle.showVehicleColumn && columnVisibility.vehicle}

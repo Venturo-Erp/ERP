@@ -32,7 +32,6 @@ interface MemberRowProps {
   member: OrderMember
   index: number
   isEditMode: boolean
-  showIdentityColumn: boolean
   showPnrColumn: boolean
   showRoomColumn: boolean
   showVehicleColumn: boolean
@@ -86,7 +85,6 @@ export function MemberRow({
   member,
   index,
   isEditMode,
-  showIdentityColumn,
   showPnrColumn,
   showRoomColumn,
   showVehicleColumn,
@@ -200,7 +198,6 @@ export function MemberRow({
         member={member}
         index={index}
         isEditMode={isEditMode}
-        showIdentityColumn={showIdentityColumn}
         showOrderCode={showOrderCode}
         columnVisibility={cv}
         onUpdateField={onUpdateField}
