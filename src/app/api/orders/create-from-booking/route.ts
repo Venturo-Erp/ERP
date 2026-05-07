@@ -1,96 +1,29 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-import { logger } from '@/lib/utils/logger'
+import { NextResponse } from 'next/server'
 
 /**
  * POST /api/orders/create-from-booking
- * 從公開行程報名建立訂單
+ *
+ * 2026-05-06 已停用（William 拍板）：
+ * - 原設計：從公開行程報名建立訂單
+ * - 實際：前端從未實作 `/p/tour/[code]/register` 報名頁、無 caller
+ * - 安全洞：之前是公開端點、用 service-role bypass workspace 隔離
+ * - 額外問題：INSERT 物件缺 orders.code（required）、永遠跑不起來、是 dead code
+ *
+ * 未來真要做公開報名、應該重新設計：
+ *   - 用公開連結 token（類似 contracts/sign 的 UUID + 過期）
+ *   - 或 OTP 驗證
+ *   - 表單欄位對齊 orders 表 schema（code / contact_person / total_amount 等）
+ *
+ * 保留檔案 / 410 Gone response、避免：
+ *   - 任何老 client 還在打這個 URL（記得明確錯誤）
+ *   - 紅線 #0「不准刪 src/ 既有檔案」
  */
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json()
-    const {
-      tour_id,
-      contact_person,
-      contact_phone,
-      contact_email,
-      member_count,
-      sales_person_id,
-      travelers,
-    } = body
-
-    if (!tour_id || !contact_person || !contact_phone) {
-      return NextResponse.json({ error: '缺少必要欄位' }, { status: 400 })
-    }
-
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    )
-
-    // 1. 取得旅遊團資訊
-    const { data: tour, error: tourError } = await supabase
-      .from('tours')
-      .select('workspace_id, code')
-      .eq('id', tour_id)
-      .single()
-
-    if (tourError || !tour) {
-      return NextResponse.json({ error: '找不到旅遊團' }, { status: 404 })
-    }
-
-    // 2. 建立訂單
-    const { data: order, error: orderError } = await supabase
-      .from('orders')
-      .insert({
-        tour_id,
-        workspace_id: tour.workspace_id,
-        contact_person,
-        contact_phone,
-        contact_email,
-        member_count: member_count || 1,
-        sales_person: sales_person_id,
-        total_amount: 0, // 之後業務會填入
-        status: 'pending',
-      })
-      .select()
-      .single()
-
-    if (orderError || !order) {
-      logger.error('建立訂單失敗:', orderError)
-      return NextResponse.json({ error: '建立訂單失敗' }, { status: 500 })
-    }
-
-    // 3. 建立團員資料
-    if (travelers && Array.isArray(travelers) && travelers.length > 0) {
-      const members = travelers.map((t: Record<string, unknown>) => ({
-        order_id: order.id,
-        workspace_id: tour.workspace_id,
-        chinese_name: t.chineseName as string,
-        pinyin_name: t.pinyinName as string,
-        date_of_birth: (t.dateOfBirth as string) || null,
-      }))
-
-      const { error: membersError } = await supabase.from('order_members').insert(members)
-
-      if (membersError) {
-        logger.error('建立團員失敗:', membersError)
-        // 不中斷，繼續
-      }
-    }
-
-    return NextResponse.json({
-      success: true,
-      order_id: order.id,
-      order_number: order.order_number,
-    })
-  } catch (error) {
-    logger.error('API 錯誤:', error)
-    return NextResponse.json(
-      {
-        error: error instanceof Error ? error.message : '未知錯誤',
-      },
-      { status: 500 }
-    )
-  }
+export async function POST() {
+  return NextResponse.json(
+    {
+      error: '此 endpoint 已停用、未來公開報名要重新設計',
+      code: 'ENDPOINT_DEPRECATED',
+    },
+    { status: 410 }
+  )
 }
