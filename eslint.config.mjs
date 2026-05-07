@@ -74,7 +74,11 @@ export default tseslint.config(
 
       // 暫時保留原設定中被放寬的規則，以避免一次性出現大量新錯誤
       'prefer-const': 'off',
-      '@typescript-eslint/no-unused-vars': 'off',
+      // 2026-05-06 Phase 2: no-unused-vars 'off' → 'warn'（後續 PR 逐步清）
+      '@typescript-eslint/no-unused-vars': [
+        'warn',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+      ],
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-non-null-assertion': 'off',
       // 允許 @ts-nocheck 和 @ts-ignore（部分舊檔案需要，待 DB migration 後移除）

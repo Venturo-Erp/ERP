@@ -60,6 +60,7 @@ const nextConfig: NextConfig = {
     // 優化常用套件的 tree-shaking（只列實際安裝的、跟 package.json 對齊）
     optimizePackageImports: [
       'lucide-react',
+      '@phosphor-icons/react',
       '@radix-ui/react-dialog',
       '@radix-ui/react-select',
       '@radix-ui/react-slider',
@@ -68,8 +69,11 @@ const nextConfig: NextConfig = {
       '@radix-ui/react-popover',
       '@radix-ui/react-checkbox',
       '@radix-ui/react-switch',
-      '@radix-ui/react-scroll-area',
       '@radix-ui/react-slot',
+      '@dnd-kit/core',
+      '@dnd-kit/sortable',
+      '@hello-pangea/dnd',
+      'browser-image-compression',
       'date-fns',
       '@supabase/supabase-js',
       'framer-motion',

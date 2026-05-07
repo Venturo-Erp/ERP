@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
+import { requireCapability } from '@/lib/auth/require-capability'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { z } from 'zod'
 import { logger } from '@/lib/utils/logger'
@@ -43,6 +44,11 @@ export async function POST(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    // 2026-05-06：補上 capability 守門（之前只驗 workspace、跨租戶 OK 但同 workspace 員工
+    // 都能退款、不符 CLAUDE.md「API + RLS 雙保險」）
+    const guard = await requireCapability('finance.payments.write')
+    if (!guard.ok) return guard.response
+
     const { id: receiptId } = await context.params
     const supabase = await createSupabaseServerClient()
 
